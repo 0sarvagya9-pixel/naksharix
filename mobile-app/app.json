@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Naksharix",
+    "slug": "naksharix",
+    "scheme": "naksharix",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#12091F"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.naksharix.app",
+      "versionCode": 6,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#12091F"
+      },
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "POST_NOTIFICATIONS"
+      ],
+      "blockedPermissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.naksharix.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "appName": "Naksharix",
+      "apiUrl": "https://naksharix.com",
+      "privacyPolicyUrl": "https://naksharix.com/privacy",
+      "eas": {
+        "projectId": "0cadd797-361c-44a4-8b19-8cd15c9f3f44"
+      }
+    }
+  }
+}

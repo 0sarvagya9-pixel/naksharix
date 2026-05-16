@@ -1,0 +1,44 @@
+"use client";
+
+import { useState } from "react";
+import { FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { secureFetch } from "@/lib/security/csrf";
+
+export function PaidReportCheckout({ reportId }: { reportId: string }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function checkout() {
+    setLoading(true);
+    setError(null);
+    const response = await secureFetch("/api/reports/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reportId })
+    });
+    const json = await response.json();
+    setLoading(false);
+    if (!response.ok) {
+      setError(toPaymentMessage(json.error));
+      return;
+    }
+    window.location.href = json.url;
+  }
+
+  return (
+    <div className="space-y-2">
+      <Button className="w-full" onClick={checkout} disabled={loading}>
+        <FileText className="h-4 w-4" />
+        {loading ? "Preparing..." : "Buy Report"}
+      </Button>
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+    </div>
+  );
+}
+
+function toPaymentMessage(error?: string) {
+  if (!error || /stripe|configured|price|server|unexpected|payments coming soon/i.test(error)) return "Payments coming soon";
+  if (/unauthenticated/i.test(error)) return "Please sign in to continue with payment.";
+  return error;
+}

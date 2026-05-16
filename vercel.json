@@ -1,0 +1,42 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "prisma generate && next build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "regions": [
+    "bom1"
+  ],
+  "env": {
+    "NEXT_PUBLIC_APP_NAME": "Naksharix",
+    "NEXT_PUBLIC_APP_URL": "https://naksharix.com"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(self), geolocation=(self)"
+        }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/panchang",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+    "cli":  {
+                "version":  "\u003e= 16.0.0",
+                "appVersionSource":  "local"
+            },
+    "build":  {
+                  "development":  {
+                                      "developmentClient":  true,
+                                      "distribution":  "internal",
+                                      "android":  {
+                                                      "buildType":  "apk",
+                                                      "image":  "sdk-54"
+                                                  },
+                                      "env":  {
+                                                  "EXPO_PUBLIC_API_URL":  "https://naksharix.com"
+                                              }
+                                  },
+                  "preview":  {
+                                  "distribution":  "internal",
+                                  "android":  {
+                                                  "buildType":  "apk",
+                                                  "image":  "sdk-54"
+                                              },
+                                  "env":  {
+                                              "EXPO_PUBLIC_API_URL":  "https://naksharix.com"
+                                          }
+                              },
+                  "production":  {
+                                     "distribution":  "store",
+                                     "autoIncrement":  true,
+                                     "android":  {
+                                                     "buildType":  "app-bundle",
+                                                     "image":  "sdk-54"
+                                                 },
+                                     "env":  {
+                                                 "EXPO_PUBLIC_API_URL":  "https://naksharix.com",
+                                                 "EXPO_PUBLIC_PRIVACY_POLICY_URL":  "https://naksharix.com/privacy"
+                                             }
+                                 }
+              },
+    "submit":  {
+                   "production":  {
+                                      "android":  {
+                                                      "track":  "internal"
+                                                  }
+                                  }
+               }
+}

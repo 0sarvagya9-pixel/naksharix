@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="r" cx="30%" cy="20%" r="60%">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#12091f"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#fff7d6"/>
+      <stop offset="0.5" stop-color="#f5be58"/>
+      <stop offset="1" stop-color="#c69cff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#r)"/>
+  <circle cx="900" cy="180" r="240" fill="#f5be58" opacity="0.12"/>
+  <circle cx="960" cy="250" r="160" fill="none" stroke="#f5be58" stroke-opacity="0.35" stroke-width="2"/>
+  <path d="M940 96c-63 31-91 102-59 164 27 53 91 81 150 58-45 57-136 69-201 27-69-45-87-140-42-209 35-53 96-71 152-40Z" fill="#fff7d6" opacity="0.9"/>
+  <text x="92" y="244" fill="url(#gold)" font-family="Georgia, serif" font-size="88" font-weight="700" letter-spacing="3">Naksharix</text>
+  <text x="98" y="318" fill="#fff7d6" font-family="Arial, sans-serif" font-size="34" font-weight="700">Unlock Your Cosmic Destiny</text>
+  <text x="100" y="390" fill="#d8c7ff" font-family="Arial, sans-serif" font-size="28">Astrology • Horoscope • Kundli • Numerology • Tarot Reading • Panchang</text>
+</svg>
