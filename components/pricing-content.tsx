@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 import { Section } from "@/components/section";
@@ -9,6 +12,8 @@ import { subscriptionPlans, type SubscriptionPlanId } from "@/lib/subscription-p
 
 export function PricingContent() {
   const { tr } = useLanguage();
+  const [role, setRole] = useState<string | null>(null);
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
   const plans = [
     { id: "FREE", name: tr("free"), price: "INR 0", features: [tr("dailyHoroscope"), tr("basicNumerology"), tr("limitedAiChat")] },
     ...subscriptionPlans.map((plan) => ({
@@ -20,6 +25,21 @@ export function PricingContent() {
         : [tr("yearlyAiReport"), tr("consultationCredits"), tr("prioritySupport"), tr("advancedRemedies")]
     }))
   ];
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((json) => {
+        if (mounted) setRole(json?.data?.user?.role ?? null);
+      })
+      .catch(() => {
+        if (mounted) setRole(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <Section>
@@ -44,6 +64,13 @@ export function PricingContent() {
               <div className="mt-6">
                 {id === "FREE" ? (
                   <p className="text-sm text-muted-foreground">{tr("includedEveryAccount")}</p>
+                ) : isAdmin ? (
+                  <div className="space-y-2">
+                    <Button asChild className="w-full">
+                      <Link href="/dashboard">{id === "PREMIUM" ? tr("openPremiumAsAdmin") : tr("openVipAsAdmin")}</Link>
+                    </Button>
+                    <p className="text-sm text-muted-foreground">{tr("unlimitedAdminCredits")}</p>
+                  </div>
                 ) : (
                   <RazorpayCheckoutButton payload={{ purpose: "SUBSCRIPTION", plan: id as SubscriptionPlanId }} label={`${tr("subscribeTo")} ${name}`} />
                 )}

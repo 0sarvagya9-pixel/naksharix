@@ -242,6 +242,9 @@ const en: Record<string, string> = {
   limitedAiChat: "Limited AI chat",
   includedEveryAccount: "Included for every account.",
   subscribeTo: "Subscribe to",
+  openPremiumAsAdmin: "Open Premium as Admin",
+  openVipAsAdmin: "Open VIP as Admin",
+  unlimitedAdminCredits: "Unlimited admin credits",
 
   blogTitle: "Naksharix Astrology Blog",
   readArticle: "Read article",
@@ -335,6 +338,9 @@ const en: Record<string, string> = {
   createProAccount: "Create professional account",
   password: "Password",
   email: "Email",
+  adminLogin: "Admin Login",
+  loginAsAdmin: "Login as Admin",
+  invalidAdminCredentials: "Invalid admin credentials",
   pleaseWait: "Please wait...",
   continueWithGoogle: "Continue with Google",
   or: "or",
@@ -593,6 +599,9 @@ const hi: Record<string, string> = {
   limitedAiChat: "सीमित AI चैट",
   includedEveryAccount: "हर अकाउंट में शामिल।",
   subscribeTo: "सदस्यता लें",
+  openPremiumAsAdmin: "एडमिन के रूप में प्रीमियम खोलें",
+  openVipAsAdmin: "एडमिन के रूप में वीआईपी खोलें",
+  unlimitedAdminCredits: "असीमित एडमिन क्रेडिट",
   blogTitle: "Naksharix ज्योतिष ब्लॉग",
   readArticle: "लेख पढ़ें",
   reportsTitle: "स्पष्टता के लिए ज्योतिष रिपोर्ट",
@@ -681,6 +690,9 @@ const hi: Record<string, string> = {
   createProAccount: "प्रोफेशनल अकाउंट बनाएं",
   password: "पासवर्ड",
   email: "ईमेल",
+  adminLogin: "एडमिन लॉगिन",
+  loginAsAdmin: "एडमिन के रूप में लॉगिन करें",
+  invalidAdminCredentials: "एडमिन जानकारी गलत है",
   pleaseWait: "कृपया प्रतीक्षा करें...",
   continueWithGoogle: "Google से जारी रखें",
   or: "या",
@@ -843,6 +855,14 @@ const hinglish: Record<string, string> = {
   monthlyPrice1499: "₹1499/month",
   personalizedHoroscope: "Personalized rashifal",
   paymentsComingSoon: "Payments jald start honge",
+  openPremiumAsAdmin: "Premium Admin ke roop me open karein",
+  openVipAsAdmin: "VIP Admin ke roop me open karein",
+  unlimitedAdminCredits: "Unlimited admin credits",
+  adminLogin: "Admin Login",
+  email: "Email",
+  password: "Password",
+  loginAsAdmin: "Admin ke roop me login karein",
+  invalidAdminCredentials: "Admin credentials galat hain",
   aboutEyebrow: "About Naksharix",
   aboutTitle: "Astrology jo understandable, interactive aur grounded feel ho",
   clarityOverFear: "Fear nahi, clarity",
@@ -896,6 +916,8 @@ export function normalizeLocale(value: string | null | undefined): Locale {
 export function t(locale: Locale, key: TranslationKey) {
   return dictionary[locale][key] ?? dictionary.en[key] ?? key;
 }
+
+
 
 
 

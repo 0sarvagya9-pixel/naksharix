@@ -14,6 +14,8 @@ const envSchema = z.object({
   REDIS_URL: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
+  ADMIN_EMAIL: z.string().email().optional(),
+  ADMIN_PASSWORD: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
@@ -55,4 +57,5 @@ export function validateProductionEnv() {
   if (!env.NEXT_PUBLIC_APP_URL.startsWith("https://")) issues.push("NEXT_PUBLIC_APP_URL must use HTTPS in production");
   if (issues.length) throw new Error(`Invalid production environment:\n${issues.join("\n")}`);
 }
+
 
