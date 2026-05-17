@@ -15,6 +15,21 @@ type AdminAnalytics = {
   appointments: number;
   posts: number;
 };
+type ReportRequestRow = {
+  id: string;
+  createdAt: string;
+  fullName: string;
+  deliveryEmail: string;
+  planType: string;
+  paymentStatus: string;
+  status: string;
+  dateOfBirth: string;
+  timeOfBirth?: string | null;
+  birthPlace?: string | null;
+  phone?: string | null;
+  concern?: string | null;
+  user?: { email?: string | null; name?: string | null } | null;
+};
 const adminMetricKeys: (keyof AdminAnalytics)[] = ["users", "revenue", "appointments", "posts"];
 const operations = [
   { title: "User Management", copy: "Review roles, subscriptions, account status, and support history.", icon: Users },
@@ -32,9 +47,11 @@ const operations = [
 
 export default function AdminPage() {
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
+  const [reportRequests, setReportRequests] = useState<ReportRequestRow[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/analytics").then((r) => r.json()).then((json) => setAnalytics(json.data)).catch(() => setAnalytics(null));
+    fetch("/api/admin/report-requests").then((r) => r.json()).then((json) => setReportRequests(json.data?.reportRequests ?? [])).catch(() => setReportRequests([]));
   }, []);
 
   return (
@@ -65,6 +82,48 @@ export default function AdminPage() {
           </Card>
         ))}
       </div>
+      <Card className="mt-6 overflow-hidden">
+        <CardHeader><CardTitle>Report Requests</CardTitle></CardHeader>
+        <CardContent className="overflow-x-auto">
+          <table className="w-full min-w-[980px] text-left text-sm">
+            <thead className="text-xs uppercase tracking-[0.18em] text-amber-200">
+              <tr className="border-b border-amber-200/15">
+                <th className="py-3 pr-4">Created</th>
+                <th className="py-3 pr-4">User</th>
+                <th className="py-3 pr-4">Email</th>
+                <th className="py-3 pr-4">Plan</th>
+                <th className="py-3 pr-4">Payment</th>
+                <th className="py-3 pr-4">Status</th>
+                <th className="py-3 pr-4">DOB</th>
+                <th className="py-3 pr-4">Time</th>
+                <th className="py-3 pr-4">Place</th>
+                <th className="py-3 pr-4">Phone</th>
+                <th className="py-3 pr-4">Concern</th>
+                <th className="py-3 pr-4">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reportRequests.map((request) => (
+                <tr key={request.id} className="border-b border-amber-200/10 text-muted-foreground">
+                  <td className="py-3 pr-4">{new Date(request.createdAt).toLocaleString()}</td>
+                  <td className="py-3 pr-4 text-foreground">{request.fullName}</td>
+                  <td className="py-3 pr-4">{request.deliveryEmail || request.user?.email}</td>
+                  <td className="py-3 pr-4">{request.planType}</td>
+                  <td className="py-3 pr-4">{request.paymentStatus}</td>
+                  <td className="py-3 pr-4">{request.status}</td>
+                  <td className="py-3 pr-4">{request.dateOfBirth}</td>
+                  <td className="py-3 pr-4">{request.timeOfBirth ?? "-"}</td>
+                  <td className="py-3 pr-4">{request.birthPlace ?? "-"}</td>
+                  <td className="py-3 pr-4">{request.phone ?? "-"}</td>
+                  <td className="max-w-[16rem] truncate py-3 pr-4">{request.concern ?? "-"}</td>
+                  <td className="py-3 pr-4"><Link className="text-amber-200 hover:underline" href={`/admin/report-requests/${request.id}`}>View details</Link></td>
+                </tr>
+              ))}
+              {!reportRequests.length ? <tr><td colSpan={12} className="py-6 text-center text-muted-foreground">No report requests yet.</td></tr> : null}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
       <Card className="mt-6">
         <CardHeader><CardTitle>Revenue and growth</CardTitle></CardHeader>
         <CardContent className="h-80">
@@ -85,4 +144,5 @@ export default function AdminPage() {
     </Section>
   );
 }
+
 

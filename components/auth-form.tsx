@@ -126,7 +126,7 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: Mode; googleEn
         </div>
         {error ? <p className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">{error}</p> : null}
         <Button className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? tr("pleaseWait") : mode === "signup" ? roleIntent === "USER" ? tr("createUserAccount") : tr("createProAccount") : roleIntent === "USER" ? tr("signInAsUser") : tr("signInAsPro")}
+          {form.formState.isSubmitting ? tr("pleaseWait") : mode === "signup" ? roleIntent === "USER" ? tr("createUserAccount") : tr("createProAccount") : tr("login")}
         </Button>
       </form>
     </div>
@@ -158,6 +158,7 @@ function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (ro
     </div>
   );
 }
+
 
 
 

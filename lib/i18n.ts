@@ -259,6 +259,28 @@ const en: Record<string, string> = {
   openPremiumAsAdmin: "Open Premium as Admin",
   openVipAsAdmin: "Open VIP as Admin",
   unlimitedAdminCredits: "Unlimited admin credits",
+  reportRequestReceived: "Report request received",
+  yourPaymentSuccessful: "Your payment is successful.",
+  reportSentWithin24Hours: "Your detailed report will be prepared and sent to your registered email within 24 hours.",
+  reportWillBeSentTo: "Report will be sent to",
+  needHelpCare: "If you need help, contact care@naksharix.com.",
+  reportRequestDetails: "Report request details",
+  fullName: "Full name",
+  mainQuestionConcern: "Main question / concern",
+  preferredLanguage: "Preferred language",
+  reportTypePlan: "Report type / plan type",
+  reportDeliveryEmailNotice: "Your report will be sent to",
+  submitReportRequest: "Submit report request",
+  submittingReportRequest: "Submitting report request...",
+  paymentRequired: "Payment required. Please complete checkout first.",
+  myReportRequests: "My Report Requests",
+  reportRequests: "Report Requests",
+  deliveryEmail: "Delivery email",
+  reportStatus: "Report status",
+  paymentStatus: "Payment status",
+  adminBypass: "Admin bypass",
+  reportRequestNotFound: "Report request not found",
+  viewReportRequest: "View details",
 
   blogTitle: "Naksharix Astrology Blog",
   readArticle: "Read article",
@@ -630,6 +652,28 @@ const hi: Record<string, string> = {
   openPremiumAsAdmin: "एडमिन के रूप में प्रीमियम खोलें",
   openVipAsAdmin: "एडमिन के रूप में वीआईपी खोलें",
   unlimitedAdminCredits: "असीमित एडमिन क्रेडिट",
+  reportRequestReceived: "रिपोर्ट अनुरोध प्राप्त हुआ",
+  yourPaymentSuccessful: "आपका भुगतान सफल है।",
+  reportSentWithin24Hours: "आपकी विस्तृत रिपोर्ट तैयार करके 24 घंटे के अंदर आपके रजिस्टर्ड ईमेल पर भेज दी जाएगी।",
+  reportWillBeSentTo: "रिपोर्ट इस ईमेल पर भेजी जाएगी",
+  needHelpCare: "सहायता के लिए care@naksharix.com पर संपर्क करें।",
+  reportRequestDetails: "रिपोर्ट अनुरोध विवरण",
+  fullName: "पूरा नाम",
+  mainQuestionConcern: "मुख्य प्रश्न / चिंता",
+  preferredLanguage: "पसंदीदा भाषा",
+  reportTypePlan: "रिपोर्ट प्रकार / प्लान",
+  reportDeliveryEmailNotice: "आपकी रिपोर्ट इस ईमेल पर भेजी जाएगी",
+  submitReportRequest: "रिपोर्ट अनुरोध सबमिट करें",
+  submittingReportRequest: "रिपोर्ट अनुरोध सबमिट हो रहा है...",
+  paymentRequired: "भुगतान आवश्यक है। कृपया पहले checkout पूरा करें।",
+  myReportRequests: "मेरे रिपोर्ट अनुरोध",
+  reportRequests: "रिपोर्ट अनुरोध",
+  deliveryEmail: "डिलीवरी ईमेल",
+  reportStatus: "रिपोर्ट स्थिति",
+  paymentStatus: "भुगतान स्थिति",
+  adminBypass: "एडमिन बायपास",
+  reportRequestNotFound: "रिपोर्ट अनुरोध नहीं मिला",
+  viewReportRequest: "विवरण देखें",
   blogTitle: "Naksharix ज्योतिष ब्लॉग",
   readArticle: "लेख पढ़ें",
   reportsTitle: "स्पष्टता के लिए ज्योतिष रिपोर्ट",
@@ -905,7 +949,28 @@ const hinglish: Record<string, string> = {
   password: "Password",
   loginAsAdmin: "Admin ke roop me login karein",
   invalidAdminCredentials: "Admin credentials galat hain",
-  aboutEyebrow: "About Naksharix",
+  reportRequestReceived: "Report request receive ho gaya",
+  yourPaymentSuccessful: "Aapka payment successful hai.",
+  reportSentWithin24Hours: "Aapki detailed report 24 hours ke andar registered email par send ki jayegi.",
+  reportWillBeSentTo: "Report is email par send hogi",
+  needHelpCare: "Help ke liye care@naksharix.com par contact karein.",
+  reportRequestDetails: "Report request details",
+  fullName: "Full name",
+  mainQuestionConcern: "Main question / concern",
+  preferredLanguage: "Preferred language",
+  reportTypePlan: "Report type / plan type",
+  reportDeliveryEmailNotice: "Aapki report is email par send hogi",
+  submitReportRequest: "Report request submit karein",
+  submittingReportRequest: "Report request submit ho rahi hai...",
+  paymentRequired: "Payment required hai. Kripya checkout complete karein.",
+  myReportRequests: "My Report Requests",
+  reportRequests: "Report Requests",
+  deliveryEmail: "Delivery email",
+  reportStatus: "Report status",
+  paymentStatus: "Payment status",
+  adminBypass: "Admin bypass",
+  reportRequestNotFound: "Report request nahi mila",
+  viewReportRequest: "Details dekhein",  aboutEyebrow: "About Naksharix",
   aboutTitle: "Astrology jo understandable, interactive aur grounded feel ho",
   clarityOverFear: "Fear nahi, clarity",
   traditionPlusTechnology: "Tradition plus technology",
@@ -958,6 +1023,15 @@ export function normalizeLocale(value: string | null | undefined): Locale {
 export function t(locale: Locale, key: TranslationKey) {
   return dictionary[locale][key] ?? dictionary.en[key] ?? key;
 }
+
+
+
+
+
+
+
+
+
 
 
 

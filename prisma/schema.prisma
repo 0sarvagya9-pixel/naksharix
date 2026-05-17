@@ -73,6 +73,25 @@ enum PaymentPurpose {
   WALLET_TOPUP
 }
 
+enum ReportPlanType {
+  PREMIUM
+  VIP
+}
+
+enum ReportPaymentStatus {
+  PAID
+  ADMIN_BYPASS
+  PENDING
+  FAILED
+}
+
+enum ReportRequestStatus {
+  RECEIVED
+  IN_PROGRESS
+  SENT
+  CANCELLED
+}
+
 enum AppointmentStatus {
   REQUESTED
   CONFIRMED
@@ -139,6 +158,7 @@ model User {
   payments                     Payment[]
   invoices                     Invoice[]
   purchasedReports             PurchasedReport[]
+  reportRequests               ReportRequest[]
   comments                     Comment[]
   blogPosts                    BlogPost[]
   notifications                Notification[]
@@ -357,6 +377,7 @@ model Payment {
   subscription      Subscription?    @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
   invoice           Invoice?
   purchasedReport   PurchasedReport?
+  reportRequest     ReportRequest?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -394,6 +415,35 @@ model PurchasedReport {
   @@index([userId, createdAt])
 }
 
+model ReportRequest {
+  id            String              @id @default(cuid())
+  userId        String?
+  user          User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  paymentId     String?             @unique
+  payment       Payment?            @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  planType      ReportPlanType
+  paymentStatus ReportPaymentStatus @default(PENDING)
+  status        ReportRequestStatus @default(RECEIVED)
+  deliveryEmail String
+  fullName      String
+  gender        String?
+  dateOfBirth   String
+  timeOfBirth   String?
+  birthPlace    String?
+  latitude      Float?
+  longitude     Float?
+  timezone      Float?
+  phone         String?
+  concern       String?
+  language      String              @default("en")
+  adminBypass   Boolean             @default(false)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([planType, status])
+  @@index([paymentStatus])
+}
 model Coupon {
   id             String    @id @default(cuid())
   code           String    @unique
@@ -710,3 +760,4 @@ model Affiliate {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
+

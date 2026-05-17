@@ -100,8 +100,8 @@ export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay" }:
 }
 
 function getAdminBypassTarget(payload: CheckoutPayload) {
-  if (payload.purpose === "SUBSCRIPTION") return `/payment/success?plan=${payload.plan.toLowerCase()}&mode=admin`;
-  return "/payment/success?plan=premium&mode=admin";
+  if (payload.purpose === "SUBSCRIPTION") return `/report-request/new?plan=${payload.plan.toLowerCase()}&mode=admin`;
+  return "/report-request/new?plan=premium&mode=admin";
 }
 
 function toPaymentMessage(error: string | undefined, fallback: string, signIn: string) {
@@ -123,6 +123,8 @@ function loadRazorpayScript() {
     document.body.appendChild(script);
   });
 }
+
+
 
 
 

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AdminLoginForm } from "@/components/admin-login-form";
 import { AuthForm } from "@/components/auth-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
@@ -24,7 +23,6 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} />
-          <AdminLoginForm />
           <p className="mt-4 text-sm text-muted-foreground">
             New here? <Link href="/signup" className="text-primary">Create an account</Link>
           </p>
@@ -33,4 +31,5 @@ export default function LoginPage() {
     </Section>
   );
 }
+
 

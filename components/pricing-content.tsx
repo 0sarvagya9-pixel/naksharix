@@ -68,7 +68,7 @@ export function PricingContent() {
                 ) : isAdmin ? (
                   <div className="space-y-2">
                     <Button asChild className="w-full">
-                      <Link href={`/payment/success?plan=${id === "PREMIUM" ? "premium" : "vip"}&mode=admin`}>{id === "PREMIUM" ? tr("openPremiumAsAdmin") : tr("openVipAsAdmin")}</Link>
+                      <Link href={`/report-request/new?plan=${id === "PREMIUM" ? "premium" : "vip"}&mode=admin`}>{id === "PREMIUM" ? tr("openPremiumAsAdmin") : tr("openVipAsAdmin")}</Link>
                     </Button>
                     <p className="text-sm text-muted-foreground">{tr("unlimitedAdminCredits")}</p>
                   </div>
@@ -83,5 +83,6 @@ export function PricingContent() {
     </Section>
   );
 }
+
 
 

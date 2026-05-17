@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { Section } from "@/components/section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/roles";
+import { prisma } from "@/lib/db";
 
 export default async function ProfilePage() {
   const user = await requireRole(["USER", "ASTROLOGER", "CONSULTANT", "ADMIN", "SUPER_ADMIN"]);
+  const reportRequests = await prisma.reportRequest.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 10 });
   return (
     <Section>
       <Card className="glass">
@@ -15,6 +18,26 @@ export default async function ProfilePage() {
           <p><span className="text-foreground">Email:</span> {user.email}</p>
           <p><span className="text-foreground">Role:</span> {user.role}</p>
           <p><span className="text-foreground">Status:</span> Active</p>
+        </CardContent>
+      </Card>
+
+      <Card className="glass mt-6">
+        <CardHeader>
+          <CardTitle className="font-cinzel">My Orders / My Report Requests</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {reportRequests.map((request) => (
+            <div key={request.id} className="flex flex-col gap-2 rounded-lg border border-amber-200/15 bg-white/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold text-foreground">{request.planType} Report</p>
+                <p className="text-muted-foreground">{request.createdAt.toLocaleString()} | {request.paymentStatus} | {request.status}</p>
+                <p className="text-muted-foreground">Delivery: {request.deliveryEmail}</p>
+                <p className="text-xs text-amber-100">Report will be sent within 24 hours.</p>
+              </div>
+              <Link className="text-amber-200 hover:underline" href={`/report-request/success?id=${request.id}`}>View</Link>
+            </div>
+          ))}
+          {!reportRequests.length ? <p className="text-muted-foreground">No report requests yet.</p> : null}
         </CardContent>
       </Card>
     </Section>
