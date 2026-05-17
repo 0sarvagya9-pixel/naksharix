@@ -8,12 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 import { Section } from "@/components/section";
 import { useLanguage } from "@/components/language-provider";
+import { isAdmin as canOpenAdminPricing } from "@/lib/auth/permissions";
 import { subscriptionPlans, type SubscriptionPlanId } from "@/lib/subscription-plans";
 
 export function PricingContent() {
   const { tr } = useLanguage();
   const [role, setRole] = useState<string | null>(null);
-  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
+  const isAdmin = canOpenAdminPricing({ role });
   const plans = [
     { id: "FREE", name: tr("free"), price: "INR 0", features: [tr("dailyHoroscope"), tr("basicNumerology"), tr("limitedAiChat")] },
     ...subscriptionPlans.map((plan) => ({
@@ -67,7 +68,7 @@ export function PricingContent() {
                 ) : isAdmin ? (
                   <div className="space-y-2">
                     <Button asChild className="w-full">
-                      <Link href="/dashboard">{id === "PREMIUM" ? tr("openPremiumAsAdmin") : tr("openVipAsAdmin")}</Link>
+                      <Link href={`/payment/success?plan=${id === "PREMIUM" ? "premium" : "vip"}&mode=admin`}>{id === "PREMIUM" ? tr("openPremiumAsAdmin") : tr("openVipAsAdmin")}</Link>
                     </Button>
                     <p className="text-sm text-muted-foreground">{tr("unlimitedAdminCredits")}</p>
                   </div>
@@ -82,3 +83,5 @@ export function PricingContent() {
     </Section>
   );
 }
+
+

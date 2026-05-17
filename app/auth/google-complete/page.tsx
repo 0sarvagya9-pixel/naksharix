@@ -52,6 +52,7 @@ export default async function GoogleCompletePage({ searchParams }: { searchParam
   }
 
   if (user.role === "ASTROLOGER" || user.role === "CONSULTANT") redirect("/astrologer/dashboard");
-  if (user.role === "ADMIN" || user.role === "SUPER_ADMIN" || user.role === "MODERATOR") redirect("/admin");
   redirect("/dashboard");
 }
+
+

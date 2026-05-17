@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { BookOpen, ChevronDown, FileText, LogOut, UserRound } from "lucide-react";
+import { BookOpen, ChevronDown, FileText, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/language-provider";
+import { isAdmin as canOpenAdminPanel } from "@/lib/auth/permissions";
 import { cn } from "@/lib/utils";
 
 type SessionUser = {
@@ -88,6 +90,7 @@ export function AuthProfileMenu() {
 
   const image = user.image ?? user.avatarUrl;
   const initials = getInitials(user.name ?? user.email ?? "N");
+  const showAdminPanel = canOpenAdminPanel(user);
 
   return (
     <div ref={menuRef} className="relative hidden sm:block">
@@ -116,6 +119,7 @@ export function AuthProfileMenu() {
           <ProfileLink href="/profile" icon={UserRound} label={tr("myProfile")} onClick={() => setOpen(false)} />
           <ProfileLink href="/my-readings" icon={BookOpen} label={tr("myReadings")} onClick={() => setOpen(false)} />
           <ProfileLink href="/saved-reports" icon={FileText} label={tr("savedReports")} onClick={() => setOpen(false)} />
+          {showAdminPanel ? <ProfileLink href="/admin" icon={ShieldCheck} label={tr("adminPanel")} onClick={() => setOpen(false)} /> : null}
           <button
             type="button"
             role="menuitem"
@@ -131,7 +135,7 @@ export function AuthProfileMenu() {
   );
 }
 
-function ProfileLink({ href, icon: Icon, label, onClick }: { href: string; icon: typeof UserRound; label: string; onClick: () => void }) {
+function ProfileLink({ href, icon: Icon, label, onClick }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string; onClick: () => void }) {
   return (
     <Link
       role="menuitem"
@@ -153,3 +157,5 @@ function getInitials(value: string) {
     .map((part) => part[0]?.toUpperCase())
     .join("") || "N";
 }
+
+

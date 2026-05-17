@@ -19,7 +19,6 @@ type RoleIntent = "USER" | "ASTROLOGER";
 
 function landingPath(role?: AuthRole) {
   if (role === "ASTROLOGER" || role === "CONSULTANT") return "/astrologer/dashboard";
-  if (role === "ADMIN" || role === "SUPER_ADMIN" || role === "MODERATOR") return "/admin";
   return "/dashboard";
 }
 
@@ -159,6 +158,8 @@ function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (ro
     </div>
   );
 }
+
+
 
 
 

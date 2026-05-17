@@ -7,6 +7,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
   if (user.role === "ASTROLOGER" || user.role === "CONSULTANT") redirect("/astrologer/dashboard");
-  if (user.role === "ADMIN" || user.role === "SUPER_ADMIN" || user.role === "MODERATOR") redirect("/admin");
   return children;
 }
+
+

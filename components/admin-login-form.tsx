@@ -26,14 +26,14 @@ export function AdminLoginForm() {
       email,
       password,
       redirect: false,
-      callbackUrl: "/admin"
+      callbackUrl: "/dashboard"
     });
     setLoading(false);
     if (!result || result.error) {
       setError(tr("invalidAdminCredentials"));
       return;
     }
-    router.push("/admin");
+    router.push("/dashboard");
     router.refresh();
   }
 
@@ -65,4 +65,5 @@ export function AdminLoginForm() {
     </form>
   );
 }
+
 

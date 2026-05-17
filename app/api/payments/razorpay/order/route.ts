@@ -3,6 +3,7 @@ import { PaymentPurpose } from "@prisma/client";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
+import { canBypassPayment } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { getPaidReport } from "@/lib/paid-reports";
@@ -20,8 +21,9 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthenticated", 401);
-    if (!razorpay) return fail("Payments coming soon", 503);
     const body = await validateJson(request, schema);
+    if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
+    if (!razorpay) return fail("Payments coming soon", 503);
 
     const item = resolveCheckoutItem(body);
     if (!item) return fail("Invalid checkout item", 422);
@@ -68,5 +70,9 @@ function resolveCheckoutItem(body: z.infer<typeof schema>) {
   if (!report || report.purpose !== body.purpose) return null;
   return { name: report.name, amount: report.amount, metadata: { reportId: report.id, reportName: report.name } };
 }
+
+
+
+
 
 

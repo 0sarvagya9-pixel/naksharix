@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { secureFetch } from "@/lib/security/csrf";
 import { useLanguage } from "@/components/language-provider";
+import { canBypassPayment } from "@/lib/auth/permissions";
 
 type CheckoutPayload =
   | { purpose: "SUBSCRIPTION"; plan: "PREMIUM" | "VIP" }
@@ -27,12 +29,22 @@ declare global {
 
 export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay" }: { payload: CheckoutPayload; label?: string }) {
   const { tr } = useLanguage();
+  const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function startCheckout() {
     setLoading(true);
     setStatus(tr("creatingSecureOrder"));
+    const userResponse = await fetch("/api/auth/me", { cache: "no-store" }).catch(() => null);
+    const userJson = userResponse?.ok ? await userResponse.json().catch(() => null) : null;
+    if (canBypassPayment(userJson?.data?.user)) {
+      setLoading(false);
+      setStatus(tr("adminTestingModePaymentBypassed"));
+      router.push(getAdminBypassTarget(payload));
+      return;
+    }
+
     const scriptLoaded = await loadRazorpayScript();
     if (!scriptLoaded || !window.Razorpay) {
       setLoading(false);
@@ -87,6 +99,11 @@ export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay" }:
   );
 }
 
+function getAdminBypassTarget(payload: CheckoutPayload) {
+  if (payload.purpose === "SUBSCRIPTION") return `/payment/success?plan=${payload.plan.toLowerCase()}&mode=admin`;
+  return "/payment/success?plan=premium&mode=admin";
+}
+
 function toPaymentMessage(error: string | undefined, fallback: string, signIn: string) {
   if (!error || /razorpay|configured|key|server|unexpected/i.test(error)) return fallback;
   if (/unauthenticated/i.test(error)) return signIn;
@@ -106,5 +123,7 @@ function loadRazorpayScript() {
     document.body.appendChild(script);
   });
 }
+
+
 
 
