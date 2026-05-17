@@ -1,4 +1,4 @@
-﻿import { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { completeAstrologyPrompt } from "@/lib/ai/gemini";
@@ -8,6 +8,8 @@ import { buildKundliReport, normalizeBirthInput } from "@/lib/astrology/normaliz
 import { cacheGetOrSet } from "@/lib/cache";
 import { cacheTtl, createBirthHash, kundliCacheKey } from "@/lib/report-hash";
 import { readLanguageFromRequest, translatedApiMessage } from "@/lib/server-language";
+import { getCurrentUser } from "@/lib/auth/jwt";
+import { prisma } from "@/lib/db";
 import { normalizeBirthDate, normalizeBirthTime } from "@/lib/astrology/own-engine/time";
 import type { BirthChartData } from "@/lib/astrology/types";
 
@@ -37,13 +39,36 @@ export async function POST(request: NextRequest) {
     const birthHash = createBirthHash(input);
     const cacheKey = kundliCacheKey(birthHash, language);
     const cached = await cacheGetOrSet(cacheKey, cacheTtl.longTerm, async () => {
-    const provider = getAstrologyProvider();
-    const chart = await provider.getBirthChart(input) as BirthChartData;
-    const prompt = buildKundliPrompt(chart, language);
-    const aiSummary = await completeAstrologyPrompt(prompt.system, prompt.user, kundliFallback(language));
+      const provider = getAstrologyProvider();
+      const chart = await provider.getBirthChart(input) as BirthChartData;
+      const prompt = buildKundliPrompt(chart, language);
+      const aiSummary = await completeAstrologyPrompt(prompt.system, prompt.user, kundliFallback(language));
       return { ...buildKundliReport(input, chart, aiSummary), reportHash: birthHash, language };
     });
-    return ok({ report: cached.value, cacheStatus: cached.cacheStatus, meta: { provider: providerName } });
+
+    const user = await getCurrentUser();
+    const report = { ...cached.value, saved: false };
+    if (user) {
+      const savedReport = await prisma.kundliReport.create({
+        data: {
+          userId: user.id,
+          name: input.name,
+          gender: input.gender,
+          dateOfBirth: toBirthDate(input.dateOfBirth),
+          timeOfBirth: input.timeOfBirth,
+          birthPlace: input.birthPlace,
+          latitude: input.latitude,
+          longitude: input.longitude,
+          timezone: input.timezone,
+          language,
+          reportJson: cached.value
+        }
+      });
+      report.reportId = savedReport.id;
+      report.saved = true;
+    }
+
+    return ok({ report, cacheStatus: cached.cacheStatus, meta: { provider: providerName, saved: report.saved } });
   } catch (error) {
     if (error instanceof AstrologyProviderUnavailableError) return fail(translatedApiMessage(readLanguageFromRequest(request), "serviceUnavailable"), 503);
     return handleApiError(error);
@@ -72,4 +97,13 @@ function kundliFallback(language: "en" | "hi" | "hinglish") {
   }
   return "Calculated chart sections are ready. AI interpretation is temporarily limited, so review the planet positions, dasha, dosha, and remedies below with a qualified astrologer for deeper context.";
 }
+
+
+function toBirthDate(value: string | Date) {
+  if (value instanceof Date) return value;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) return new Date();
+  return date;
+}
+
 

@@ -78,6 +78,9 @@ const en: Record<string, string> = {
   status: "Status",
   previewReport: "Preview report",
   savedToDashboard: "Saved to dashboard",
+  loginToSaveReport: "Login to save this report",
+  viewReport: "View report",
+  noSavedReports: "No saved Kundli reports yet. Generate a Kundli while logged in to save it here.",
   kundliInterpretation: "AI Summary",
   planetPositions: "Planet Positions",
   panchangSnapshot: "Panchang Snapshot",
@@ -428,6 +431,9 @@ const hi: Record<string, string> = {
   status: "स्थिति",
   previewReport: "पूर्वावलोकन रिपोर्ट",
   savedToDashboard: "डैशबोर्ड में सेव",
+  loginToSaveReport: "इस रिपोर्ट को सेव करने के लिए लॉगिन करें",
+  viewReport: "रिपोर्ट देखें",
+  noSavedReports: "अभी कोई सेव कुंडली रिपोर्ट नहीं है। लॉगिन करके कुंडली बनाएं ताकि वह यहां सेव हो सके।",
   kundliInterpretation: "AI सारांश",
   planetPositions: "ग्रह स्थिति",
   panchangSnapshot: "पंचांग विवरण",
@@ -747,6 +753,9 @@ const hinglish: Record<string, string> = {
   native: "Jatak",
   previewReport: "Preview report",
   savedToDashboard: "Dashboard me saved",
+  loginToSaveReport: "Is report ko save karne ke liye login karein",
+  viewReport: "Report dekhein",
+  noSavedReports: "Abhi koi saved Kundli report nahi hai. Login karke Kundli generate karein taaki yahan save ho sake.",
   kundliInterpretation: "AI Summary",
   planetPositions: "Grah Position",
   panchangSnapshot: "Panchang Details",
@@ -878,5 +887,6 @@ export function normalizeLocale(value: string | null | undefined): Locale {
 export function t(locale: Locale, key: TranslationKey) {
   return dictionary[locale][key] ?? dictionary.en[key] ?? key;
 }
+
 
 

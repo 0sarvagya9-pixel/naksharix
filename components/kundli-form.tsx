@@ -314,11 +314,13 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
             <Button variant="outline" className="w-full sm:w-auto" onClick={downloadPdf} disabled={pdfLoading}><Download className="h-4 w-4" /> {pdfLoading ? tr("preparingPdf") : tr("downloadFreePdf")}</Button>
             <Button variant="ghost" className="w-full sm:w-auto" onClick={() => window.print()}>{tr("printReport")}</Button>
             <Button variant="secondary" className="w-full sm:w-auto" onClick={onRegenerate}>{tr("generateAgain")}</Button>
+            {result.saved && result.reportId ? <Button variant="outline" asChild className="w-full sm:w-auto"><Link href={`/kundli/report/${result.reportId}`}>{tr("viewReport")}</Link></Button> : null}
             <Button asChild className="w-full sm:w-auto"><Link href="/reports/kundli-pro">{tr("unlockPremiumReport")}</Link></Button>
             <Button variant="outline" asChild className="w-full sm:w-auto"><Link href="/astrologers">{tr("talkToAstrologer")}</Link></Button>
           </div>
         </div>
         {pdfError ? <p className="mt-4 rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-sm text-destructive">{pdfError}</p> : null}
+        {!result.saved ? <div className="mt-4 rounded-lg border border-amber-200/25 bg-amber-200/10 p-4 text-sm text-amber-50"><p>{tr("loginToSaveReport")}</p><Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button></div> : null}
       </section>
       {result.language && result.language !== selectedLanguage ? (
         <div className="rounded-lg border border-amber-200/25 bg-amber-200/10 p-4 text-sm text-amber-50">
@@ -331,7 +333,7 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
       <div className="grid gap-3 sm:grid-cols-3">
         <SummaryCard label={tr("native")} value={result.profile?.name ?? tr("generatedKundliReport")} />
         <SummaryCard label={tr("birthPlace")} value={result.birthDetails?.birthPlace ?? tr("place")} />
-        <SummaryCard label={tr("status")} value={result.saved ? tr("savedToDashboard") : tr("previewReport")} />
+        <SummaryCard label={tr("status")} value={result.saved ? tr("savedToDashboard") : tr("loginToSaveReport")} />
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <InfoPanel title={tr("birthDetails")}><p>{result.birthDetails?.dateOfBirth} | {result.birthDetails?.timeOfBirth} | {result.birthDetails?.timezone}</p></InfoPanel>
@@ -434,3 +436,5 @@ function toFriendlyError(message: string | undefined, fallback: string) {
   if (!message || /server|unexpected|database|prisma|validation/i.test(message)) return fallback;
   return message;
 }
+
+

@@ -1,23 +1,35 @@
-import Link from "next/link";
-import { FileText, Sparkles } from "lucide-react";
+import { cookies } from "next/headers";
+import { FileText } from "lucide-react";
 import { Section } from "@/components/section";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { SavedKundliReportList } from "@/components/saved-kundli-report-list";
 import { requireRole } from "@/lib/auth/roles";
+import { prisma } from "@/lib/db";
+import { normalizeLocale, t } from "@/lib/i18n";
+
+export const dynamic = "force-dynamic";
 
 export default async function SavedReportsPage() {
-  await requireRole(["USER", "ASTROLOGER", "CONSULTANT", "ADMIN", "SUPER_ADMIN"]);
+  const user = await requireRole(["USER", "ASTROLOGER", "CONSULTANT", "ADMIN", "SUPER_ADMIN"]);
+  const locale = await getServerLocale();
+  const reports = await prisma.kundliReport.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    take: 48
+  });
+
   return (
     <Section>
-      <Card className="glass">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-cinzel"><FileText className="h-5 w-5 text-amber-200" /> Saved Reports</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm text-muted-foreground">
-          <p>No saved reports yet. Generate a kundli or premium report and save it to keep your cosmic archive organized.</p>
-          <Button asChild><Link href="/reports"><Sparkles className="h-4 w-4" /> Explore Reports</Link></Button>
-        </CardContent>
-      </Card>
+      <div className="mb-8">
+        <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-amber-200"><FileText className="h-4 w-4" />{t(locale, "savedReports")}</p>
+        <h1 className="mt-3 font-cinzel text-4xl font-black">{t(locale, "savedReports")}</h1>
+        <p className="mt-3 max-w-2xl text-muted-foreground">{t(locale, "noSavedReports")}</p>
+      </div>
+      <SavedKundliReportList reports={reports} emptyText={t(locale, "noSavedReports")} />
     </Section>
   );
+}
+
+async function getServerLocale() {
+  const cookieStore = await cookies();
+  return normalizeLocale(cookieStore.get("naksharix-language")?.value);
 }
