@@ -49,8 +49,8 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
           <p className="max-w-xs text-sm font-semibold text-amber-100">{chartUnavailable(data.chartType, data.language)}</p>
         </div>
       ) : (
-        <div className="relative mx-auto aspect-square max-w-[32rem] rounded-xl border border-[#3d2c19]/30 bg-[#fff4d8] p-2 shadow-[inset_0_0_0_1px_rgba(100,61,21,0.16),inset_0_18px_60px_rgba(118,72,21,0.09)]">
-          <svg viewBox="0 0 400 400" className="h-full w-full touch-manipulation select-none" aria-label={`${title} North Indian chart`}>
+        <div className="relative mx-auto aspect-[10/7] max-w-[38rem] rounded-xl border border-[#3d2c19]/30 bg-[#fff4d8] p-2 shadow-[inset_0_0_0_1px_rgba(100,61,21,0.16),inset_0_18px_60px_rgba(118,72,21,0.09)]">
+          <svg viewBox="0 0 600 420" className="h-full w-full touch-manipulation select-none" aria-label={`${title} North Indian chart`}>
             <defs>
               <filter id={`chartActive-${data.chartType}`} x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="2.4" result="blur" />
@@ -64,8 +64,8 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
               </pattern>
             </defs>
 
-            <rect x="18" y="18" width="364" height="364" rx="8" fill="#fff7e6" stroke="#3f2a14" strokeWidth="2.1" />
-            <rect x="18" y="18" width="364" height="364" rx="8" fill={`url(#paperDots-${data.chartType})`} opacity="0.55" />
+            <rect x="96" y="6" width="408" height="408" rx="4" fill="#fff7e6" stroke="#3f2a14" strokeWidth="2.2" />
+            <rect x="96" y="6" width="408" height="408" rx="4" fill={`url(#paperDots-${data.chartType})`} opacity="0.42" />
 
             {cells.map((cell) => {
               const active = activeCell?.house === cell.house;
@@ -76,9 +76,9 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                   tabIndex={0}
                   role="button"
                   aria-label={`${labels.house} ${cell.house}, ${labels.sign} ${cell.signLabel}`}
-                  fill={active ? "rgba(245,190,88,0.22)" : "rgba(255,255,255,0.001)"}
-                  stroke={active ? "#9a5b16" : "transparent"}
-                  strokeWidth={active ? 1.6 : 0}
+                  fill={active ? "rgba(245,190,88,0.24)" : "rgba(255,247,230,0.82)"}
+                  stroke={active ? "#9a5b16" : "#2b1c10"}
+                  strokeWidth={active ? 2.1 : 1.45}
                   className="cursor-pointer outline-none transition duration-200 focus:stroke-[#9a5b16]"
                   filter={active ? `url(#chartActive-${data.chartType})` : undefined}
                   onPointerMove={(event) => showTooltip(cell, event)}
@@ -93,16 +93,8 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
               );
             })}
 
-            <g stroke="#2b1c10" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" fill="none">
-              <path d="M18 18 H382 V382 H18 Z" />
-              <path d="M200 18 L382 200 L200 382 L18 200 Z" />
-              <path d="M18 18 L382 382 M382 18 L18 382" />
-              <path d="M18 200 H382 M200 18 V382" opacity="0.72" />
-              <path d="M108 120 L200 212 L292 120 M108 280 L200 188 L292 280" opacity="0.62" />
-            </g>
-
             {cells.map((cell) => {
-              const visiblePlanets = cell.planetLabels.slice(0, 4);
+              const visiblePlanets = cell.planetLabels.slice(0, cell.maxLines);
               const overflowCount = Math.max(0, cell.planetLabels.length - visiblePlanets.length);
               const rows = visiblePlanets.length + (overflowCount ? 1 : 0);
               const startY = cell.planetY - ((Math.max(rows, 1) - 1) * cell.planetLineHeight) / 2;
@@ -112,7 +104,7 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                     x={cell.signX}
                     y={cell.signY}
                     textAnchor="middle"
-                    className="fill-[#6b4a21] font-cinzel text-[9px] font-black sm:text-[10px]"
+                    className="fill-[#6b4a21] font-cinzel text-[10px] font-black sm:text-[12px]"
                     paintOrder="stroke"
                     stroke="#fff4d8"
                     strokeWidth="2"
@@ -126,7 +118,7 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                       y={startY + index * cell.planetLineHeight}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      className="fill-[#7c2d12] text-[12px] font-black sm:text-[13px]"
+                      className="fill-[#7c2d12] text-[12px] font-black sm:text-[14px]"
                       paintOrder="stroke"
                       stroke="#fff4d8"
                       strokeWidth="2.4"
@@ -140,7 +132,7 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                       y={startY + visiblePlanets.length * cell.planetLineHeight}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      className="fill-[#6b4a21] text-[10px] font-black"
+                      className="fill-[#6b4a21] text-[10px] font-black sm:text-[12px]"
                       paintOrder="stroke"
                       stroke="#fff4d8"
                       strokeWidth="2"
@@ -185,4 +177,7 @@ function translatedAscendant(sign: string, language: ChartLanguage) {
   const temporary = normalizeNorthIndianChart({ chartType: "D1", ascendantSign: sign, language, houses: [] })[0];
   return temporary?.signLabel || sign;
 }
+
+
+
 
