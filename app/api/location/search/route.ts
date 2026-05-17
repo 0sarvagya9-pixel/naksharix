@@ -21,11 +21,13 @@ type NominatimPlace = {
 };
 
 const fallbackPlaces = [
-  { displayName: "Delhi, India", city: "Delhi", state: "Delhi", country: "India", latitude: 28.6139, longitude: 77.209, timezone: "Asia/Kolkata" },
-  { displayName: "Mumbai, Maharashtra, India", city: "Mumbai", state: "Maharashtra", country: "India", latitude: 19.076, longitude: 72.8777, timezone: "Asia/Kolkata" },
-  { displayName: "Jaipur, Rajasthan, India", city: "Jaipur", state: "Rajasthan", country: "India", latitude: 26.9124, longitude: 75.7873, timezone: "Asia/Kolkata" },
-  { displayName: "London, United Kingdom", city: "London", state: "England", country: "United Kingdom", latitude: 51.5072, longitude: -0.1276, timezone: "Europe/London" },
-  { displayName: "New York, United States", city: "New York", state: "New York", country: "United States", latitude: 40.7128, longitude: -74.006, timezone: "America/New_York" }
+  { displayName: "Delhi, India", city: "Delhi", state: "Delhi", country: "India", latitude: 28.6139, longitude: 77.209, timezone: "Asia/Kolkata", timezoneOffset: 5.5 },
+  { displayName: "Mumbai, Maharashtra, India", city: "Mumbai", state: "Maharashtra", country: "India", latitude: 19.076, longitude: 72.8777, timezone: "Asia/Kolkata", timezoneOffset: 5.5 },
+  { displayName: "Jaipur, Rajasthan, India", city: "Jaipur", state: "Rajasthan", country: "India", latitude: 26.9124, longitude: 75.7873, timezone: "Asia/Kolkata", timezoneOffset: 5.5 },
+  { displayName: "Tikamgarh, Madhya Pradesh, India", city: "Tikamgarh", state: "Madhya Pradesh", country: "India", latitude: 24.75, longitude: 79.0, timezone: "Asia/Kolkata", timezoneOffset: 5.5 },
+  { displayName: "Gadarwara, Madhya Pradesh, India", city: "Gadarwara", state: "Madhya Pradesh", country: "India", latitude: 22.9235, longitude: 78.7849, timezone: "Asia/Kolkata", timezoneOffset: 5.5 },
+  { displayName: "London, United Kingdom", city: "London", state: "England", country: "United Kingdom", latitude: 51.5072, longitude: -0.1276, timezone: "Europe/London", timezoneOffset: 0 },
+  { displayName: "New York, United States", city: "New York", state: "New York", country: "United States", latitude: 40.7128, longitude: -74.006, timezone: "America/New_York", timezoneOffset: -5 }
 ];
 
 export async function GET(request: NextRequest) {
@@ -82,7 +84,8 @@ function normalizePlace(place: NominatimPlace) {
     country,
     latitude,
     longitude,
-    timezone: inferTimezone(address.country_code, longitude)
+    timezone: inferTimezone(address.country_code, longitude),
+    timezoneOffset: inferTimezoneOffset(address.country_code, longitude)
   };
 }
 
@@ -112,4 +115,18 @@ function inferTimezone(countryCode: string | undefined, longitude: number) {
 
 function round(value: number) {
   return Number(value.toFixed(6));
+}
+
+
+function inferTimezoneOffset(countryCode: string | undefined, longitude: number) {
+  const code = countryCode?.toLowerCase();
+  if (code === "in") return 5.5;
+  if (code === "gb") return 0;
+  if (code === "us") {
+    if (longitude <= -115) return -8;
+    if (longitude <= -100) return -7;
+    if (longitude <= -85) return -6;
+    return -5;
+  }
+  return Math.max(-12, Math.min(14, Math.round(longitude / 15)));
 }

@@ -101,23 +101,56 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
               <path d="M108 120 L200 212 L292 120 M108 280 L200 188 L292 280" opacity="0.62" />
             </g>
 
-            {cells.map((cell) => (
-              <g key={`${data.chartType}-${cell.house}`} className="pointer-events-none">
-                <text x={cell.labelX} y={cell.labelY - 24} textAnchor="middle" className="fill-[#6b4a21] font-cinzel text-[10px] font-black">
-                  {cell.signShortLabel}
-                </text>
-                {cell.planetLabels.slice(0, 3).map((planet, index) => (
-                  <text key={`${cell.house}-${planet}-${index}`} x={cell.labelX} y={cell.labelY - 4 + index * 15} textAnchor="middle" className="fill-[#7c2d12] text-[13px] font-black">
-                    {planet}
+            {cells.map((cell) => {
+              const visiblePlanets = cell.planetLabels.slice(0, 4);
+              const overflowCount = Math.max(0, cell.planetLabels.length - visiblePlanets.length);
+              const rows = visiblePlanets.length + (overflowCount ? 1 : 0);
+              const startY = cell.planetY - ((Math.max(rows, 1) - 1) * cell.planetLineHeight) / 2;
+              return (
+                <g key={`${data.chartType}-${cell.house}`} className="pointer-events-none">
+                  <text
+                    x={cell.signX}
+                    y={cell.signY}
+                    textAnchor="middle"
+                    className="fill-[#6b4a21] font-cinzel text-[9px] font-black sm:text-[10px]"
+                    paintOrder="stroke"
+                    stroke="#fff4d8"
+                    strokeWidth="2"
+                  >
+                    {cell.signShortLabel}
                   </text>
-                ))}
-                {cell.planetLabels.length > 3 ? (
-                  <text x={cell.labelX} y={cell.labelY + 45} textAnchor="middle" className="fill-[#6b4a21] text-[10px] font-semibold">
-                    +{cell.planetLabels.length - 3}
-                  </text>
-                ) : null}
-              </g>
-            ))}
+                  {visiblePlanets.map((planet, index) => (
+                    <text
+                      key={`${cell.house}-${planet}-${index}`}
+                      x={cell.planetX}
+                      y={startY + index * cell.planetLineHeight}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-[#7c2d12] text-[12px] font-black sm:text-[13px]"
+                      paintOrder="stroke"
+                      stroke="#fff4d8"
+                      strokeWidth="2.4"
+                    >
+                      {planet}
+                    </text>
+                  ))}
+                  {overflowCount ? (
+                    <text
+                      x={cell.planetX}
+                      y={startY + visiblePlanets.length * cell.planetLineHeight}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-[#6b4a21] text-[10px] font-black"
+                      paintOrder="stroke"
+                      stroke="#fff4d8"
+                      strokeWidth="2"
+                    >
+                      +{overflowCount}
+                    </text>
+                  ) : null}
+                </g>
+              );
+            })}
           </svg>
         </div>
       )}
@@ -152,3 +185,4 @@ function translatedAscendant(sign: string, language: ChartLanguage) {
   const temporary = normalizeNorthIndianChart({ chartType: "D1", ascendantSign: sign, language, houses: [] })[0];
   return temporary?.signLabel || sign;
 }
+

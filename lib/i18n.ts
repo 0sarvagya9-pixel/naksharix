@@ -59,6 +59,9 @@ const en: Record<string, string> = {
   tryAgain: "Try again",
   notAvailable: "Not available",
   selectValidBirthLocation: "Please select a valid birth location",
+  selectLocationFromSuggestions: "Please select a birth location from suggestions.",
+  locationConvertedInternally: "Birth place is converted to coordinates internally. No manual latitude or longitude needed.",
+  matchGenerationFailed: "We could not generate the match right now. Please review both birth details and try again.",
   searchLocationPlaceholder: "Type birth city or place...",
   searchingLocations: "Searching locations...",
   noLocationsFound: "No locations found",
@@ -413,6 +416,9 @@ const hi: Record<string, string> = {
   tryAgain: "फिर प्रयास करें",
   notAvailable: "उपलब्ध नहीं",
   selectValidBirthLocation: "कृपया एक मान्य जन्म स्थान चुनें",
+  selectLocationFromSuggestions: "कृपया सुझावों में से जन्म स्थान चुनें।",
+  locationConvertedInternally: "जन्म स्थान को अंदर ही निर्देशांक में बदला जाता है। अक्षांश या देशांतर अलग से भरने की ज़रूरत नहीं है।",
+  matchGenerationFailed: "मिलान रिपोर्ट अभी नहीं बन सकी। कृपया दोनों जन्म विवरण जांचकर फिर प्रयास करें।",
   searchLocationPlaceholder: "जन्म शहर या स्थान लिखें...",
   searchingLocations: "स्थान खोजे जा रहे हैं...",
   noLocationsFound: "कोई स्थान नहीं मिला",
@@ -788,6 +794,9 @@ const hinglish: Record<string, string> = {
   searchingLocations: "Locations search ho rahe hain...",
   noLocationsFound: "Koi location nahi mili",
   selectValidBirthLocation: "Kripya valid birth location select karein",
+  selectLocationFromSuggestions: "Kripya suggestions me se birth location select karein.",
+  locationConvertedInternally: "Birth place internally coordinates me convert hota hai. Latitude/longitude manually bharne ki zaroorat nahi.",
+  matchGenerationFailed: "Match abhi generate nahi ho saka. Dono birth details check karke fir try karein.",
   brideDetails: "Bride Details",
   groomDetails: "Groom Details",
   generateMatch: "Premium Compatibility Report Generate Karein",
@@ -887,6 +896,7 @@ export function normalizeLocale(value: string | null | undefined): Locale {
 export function t(locale: Locale, key: TranslationKey) {
   return dictionary[locale][key] ?? dictionary.en[key] ?? key;
 }
+
 
 
 

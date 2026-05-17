@@ -15,6 +15,7 @@ export type ResolvedLocation = {
   latitude: number;
   longitude: number;
   timezone?: string;
+  timezoneOffset?: number;
 };
 
 type LocationAutocompleteProps = {
@@ -123,7 +124,7 @@ export function LocationAutocomplete({
   }
 
   return (
-    <div ref={wrapperRef} className="relative space-y-2">
+    <div ref={wrapperRef} className={cn("relative space-y-2 overflow-visible", open && "z-[9999]")}>
       {label ? (
         <Label htmlFor={inputId}>
           {label}
@@ -157,7 +158,7 @@ export function LocationAutocomplete({
         <div
           id={listId}
           role="listbox"
-          className="absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-amber-200/20 bg-background/95 p-1 shadow-[0_18px_60px_rgba(5,2,14,0.68),0_0_32px_rgba(126,72,255,0.18)] backdrop-blur-xl"
+          className="absolute left-0 right-0 top-full z-[9999] mt-1 max-h-72 overflow-y-auto rounded-lg border border-amber-200/25 bg-[#12091f]/98 p-1 shadow-[0_22px_70px_rgba(5,2,14,0.78),0_0_34px_rgba(126,72,255,0.22)] backdrop-blur-xl"
         >
           {loading ? <p className="px-3 py-2 text-sm text-muted-foreground">{tr("searchingLocations")}</p> : null}
           {!loading && suggestions.length === 0 ? <p className="px-3 py-2 text-sm text-muted-foreground">{tr("noLocationsFound")}</p> : null}
@@ -189,3 +190,6 @@ export function LocationAutocomplete({
     </div>
   );
 }
+
+
+

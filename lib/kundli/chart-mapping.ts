@@ -26,6 +26,11 @@ export type ChartCell = ChartHouse & {
   points: string;
   labelX: number;
   labelY: number;
+  signX: number;
+  signY: number;
+  planetX: number;
+  planetY: number;
+  planetLineHeight: number;
   signLabel: string;
   signShortLabel: string;
   signLordLabel?: string;
@@ -150,24 +155,24 @@ const planetFullLabels: Record<ChartLanguage, Record<string, string>> = {
 };
 
 const planetShortLabels: Record<ChartLanguage, Record<string, string>> = {
-  en: { Sun: "Su", Moon: "Mo", Mars: "Ma", Mercury: "Me", Jupiter: "Ju", Venus: "Ve", Saturn: "Sa", Rahu: "Ra", Ketu: "Ke", Ascendant: "Asc" },
+  en: { Sun: "Su", Moon: "Mo", Mars: "Ma", Mercury: "Me", Jupiter: "Ju", Venus: "Ve", Saturn: "Sa", Rahu: "Ra", Ketu: "Ke", Ascendant: "As" },
   hi: { Sun: "सू", Moon: "चं", Mars: "मं", Mercury: "बु", Jupiter: "गु", Venus: "शु", Saturn: "श", Rahu: "रा", Ketu: "के", Ascendant: "ल" },
-  hinglish: { Sun: "Su", Moon: "Mo", Mars: "Ma", Mercury: "Me", Jupiter: "Ju", Venus: "Ve", Saturn: "Sa", Rahu: "Ra", Ketu: "Ke", Ascendant: "Asc" }
+  hinglish: { Sun: "Su", Moon: "Ch", Mars: "Ma", Mercury: "Bu", Jupiter: "Gu", Venus: "Sh", Saturn: "Sa", Rahu: "Ra", Ketu: "Ke", Ascendant: "As" }
 };
 
-const northIndianLayout: Record<number, { points: string; labelX: number; labelY: number }> = {
-  1: { points: "200,28 292,120 200,212 108,120", labelX: 200, labelY: 118 },
-  2: { points: "32,28 200,28 108,120 32,120", labelX: 94, labelY: 68 },
-  3: { points: "32,120 108,120 200,212 108,212", labelX: 112, labelY: 166 },
-  4: { points: "32,120 108,212 32,372 32,252", labelX: 62, labelY: 246 },
-  5: { points: "32,372 108,212 200,372", labelX: 116, labelY: 320 },
-  6: { points: "108,212 200,212 292,304 200,372", labelX: 190, labelY: 294 },
-  7: { points: "200,372 292,304 368,372", labelX: 286, labelY: 334 },
-  8: { points: "292,304 368,120 368,372", labelX: 336, labelY: 246 },
-  9: { points: "200,212 292,120 368,120 292,304", labelX: 294, labelY: 184 },
-  10: { points: "292,120 200,28 368,28 368,120", labelX: 308, labelY: 68 },
-  11: { points: "108,120 200,212 108,212 32,120", labelX: 110, labelY: 188 },
-  12: { points: "292,120 368,120 292,304 200,212", labelX: 290, labelY: 206 }
+const northIndianLayout: Record<number, { points: string; labelX: number; labelY: number; signX: number; signY: number; planetX: number; planetY: number; planetLineHeight: number }> = {
+  1: { points: "200,28 292,120 200,212 108,120", labelX: 200, labelY: 118, signX: 200, signY: 56, planetX: 200, planetY: 126, planetLineHeight: 14 },
+  2: { points: "32,28 200,28 108,120 32,120", labelX: 94, labelY: 68, signX: 56, signY: 48, planetX: 96, planetY: 78, planetLineHeight: 13 },
+  3: { points: "32,120 108,120 200,212 108,212", labelX: 112, labelY: 166, signX: 74, signY: 138, planetX: 122, planetY: 170, planetLineHeight: 13 },
+  4: { points: "32,120 108,212 32,372 32,252", labelX: 62, labelY: 246, signX: 46, signY: 174, planetX: 62, planetY: 260, planetLineHeight: 13 },
+  5: { points: "32,372 108,212 200,372", labelX: 116, labelY: 320, signX: 88, signY: 350, planetX: 122, planetY: 320, planetLineHeight: 13 },
+  6: { points: "108,212 200,212 292,304 200,372", labelX: 190, labelY: 294, signX: 166, signY: 238, planetX: 200, planetY: 306, planetLineHeight: 14 },
+  7: { points: "200,372 292,304 368,372", labelX: 286, labelY: 334, signX: 262, signY: 356, planetX: 290, planetY: 334, planetLineHeight: 13 },
+  8: { points: "292,304 368,120 368,372", labelX: 336, labelY: 246, signX: 354, signY: 174, planetX: 338, planetY: 260, planetLineHeight: 13 },
+  9: { points: "200,212 292,120 368,120 292,304", labelX: 294, labelY: 184, signX: 326, signY: 138, planetX: 292, planetY: 190, planetLineHeight: 13 },
+  10: { points: "292,120 200,28 368,28 368,120", labelX: 308, labelY: 68, signX: 344, signY: 48, planetX: 306, planetY: 78, planetLineHeight: 13 },
+  11: { points: "108,120 200,212 108,212 32,120", labelX: 110, labelY: 188, signX: 118, signY: 132, planetX: 112, planetY: 194, planetLineHeight: 13 },
+  12: { points: "292,120 368,120 292,304 200,212", labelX: 290, labelY: 206, signX: 282, signY: 132, planetX: 288, planetY: 210, planetLineHeight: 13 }
 };
 
 export function normalizeNorthIndianChart(input: NorthIndianChartData): ChartCell[] {
@@ -187,6 +192,11 @@ export function normalizeNorthIndianChart(input: NorthIndianChartData): ChartCel
       points: layout.points,
       labelX: layout.labelX,
       labelY: layout.labelY,
+      signX: layout.signX,
+      signY: layout.signY,
+      planetX: layout.planetX,
+      planetY: layout.planetY,
+      planetLineHeight: layout.planetLineHeight,
       signLabel: translateSign(sign, input.language),
       signShortLabel: String(signNumbers[sign] ?? houseNumber),
       planetLabels: planets.map((planet) => abbreviatePlanet(planet.planet, input.language)),
@@ -223,3 +233,6 @@ function signFromAscendant(ascendantSign: string, house: number) {
   const ascendantIndex = Math.max(0, signOrder.indexOf(ascendantSign));
   return signOrder[(ascendantIndex + house - 1) % signOrder.length];
 }
+
+
+

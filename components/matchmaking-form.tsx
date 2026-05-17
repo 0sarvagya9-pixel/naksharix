@@ -15,6 +15,10 @@ import { LocationAutocomplete, type ResolvedLocation } from "@/components/locati
 type PersonKey = "bride" | "groom";
 type VisiblePerson = { name: string; gender: string; birthDate: string; birthTime: string; birthPlace: string };
 type MatchResult = {
+  brideProfile?: { name?: string; gender?: string; birthPlace?: string };
+  groomProfile?: { name?: string; gender?: string; birthPlace?: string };
+  brideChart?: { avakhada?: { ascendant?: string; moonSign?: string; nakshatra?: string } };
+  groomChart?: { avakhada?: { ascendant?: string; moonSign?: string; nakshatra?: string } };
   compatibilityScore?: number;
   guna?: number;
   maxGuna?: number;
@@ -66,7 +70,7 @@ export function MatchmakingForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const validationErrors = validateMatchFields(people, locations, requiredMessage, tr("selectValidBirthLocation"));
+    const validationErrors = validateMatchFields(people, locations, requiredMessage, tr("selectLocationFromSuggestions"));
     setFieldErrors(validationErrors);
     if (Object.keys(validationErrors).length) {
       scrollToFirstError(validationErrors);
@@ -90,12 +94,12 @@ export function MatchmakingForm() {
       });
       const json = await response.json();
       if (!response.ok) {
-        setError(toFriendlyError(json.error));
+        setError(toFriendlyError(json.error, tr("matchGenerationFailed")));
         return;
       }
       setResult(json.data.report);
     } catch {
-      setError("We could not generate the match right now. Please review the details and try again.");
+      setError(tr("matchGenerationFailed"));
     } finally {
       setLoading(false);
     }
@@ -109,7 +113,7 @@ export function MatchmakingForm() {
       </div>
       {error ? <p className="rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">Birth place is converted to coordinates internally. No manual latitude or longitude needed.</p>
+        <p className="text-sm text-muted-foreground">{tr("locationConvertedInternally")}</p>
         <Button type="submit" size="lg" className="h-12 w-full sm:w-auto" disabled={loading}>
           <HeartHandshake className="h-4 w-4" />
           {loading ? tr("preparingReading") : tr("generateMatch")}
@@ -124,11 +128,11 @@ function PersonPanel({ title, personKey, value, onChange, onResolvedLocation, er
   const { tr } = useLanguage();
   const err = (field: keyof VisiblePerson) => errors[`${personKey}.${field}`];
   return (
-    <Card className="glass overflow-hidden">
+    <Card className="glass overflow-visible">
       <CardHeader className="border-b border-amber-200/10 bg-white/5">
         <CardTitle className="font-cinzel text-2xl">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 p-4 sm:grid-cols-2 sm:p-6">
+      <CardContent className="grid gap-4 overflow-visible p-4 sm:grid-cols-2 sm:p-6">
         <Field label={tr("name")} error={err("name")}><Input data-field={`${personKey}.name`} className={errorClass(Boolean(err("name")))} value={value.name} onChange={(event) => onChange({ name: event.target.value })} /></Field>
         <Field label={tr("gender")}>
           <select value={value.gender} onChange={(event) => onChange({ gender: event.target.value })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
@@ -156,9 +160,9 @@ function PersonPanel({ title, personKey, value, onChange, onResolvedLocation, er
 }
 
 function MatchResultView({ result }: { result: MatchResult }) {
-  const { tr } = useLanguage();
+  const { tr, apiLocale } = useLanguage();
   return (
-    <Card className="glass overflow-hidden">
+    <Card className="glass overflow-visible">
       <CardHeader className="border-b border-amber-200/10 bg-white/5">
         <CardTitle className="font-cinzel text-2xl">{tr("premiumCompatibilityReport")}</CardTitle>
       </CardHeader>
@@ -170,19 +174,24 @@ function MatchResultView({ result }: { result: MatchResult }) {
           <ScoreCard icon={<CalendarHeart />} label={tr("matchPercent")} value={`${result.gunaMilan?.percentage ?? result.matchPercentage ?? 0}%`} />
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
+          <InsightCard title={tr("brideDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.brideProfile, result.brideChart, tr("notAvailable"), chartSummaryLabels(apiLocale))} />
+          <InsightCard title={tr("groomDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.groomProfile, result.groomChart, tr("notAvailable"), chartSummaryLabels(apiLocale))} />
           <InsightCard title={tr("emotionalCompatibility")} icon={<HeartHandshake className="h-4 w-4" />} text={result.aiSummary ?? result.emotionalCompatibility ?? result.relationshipAnalysis} />
-          <InsightCard title={tr("careerFinanceCompatibility")} icon={<WalletCards className="h-4 w-4" />} text={`Financial compatibility: ${result.compatibility?.financial ?? 0}%. Mental compatibility: ${result.compatibility?.mental ?? 0}%.`} />
+          <InsightCard title={tr("careerFinanceCompatibility")} icon={<WalletCards className="h-4 w-4" />} text={compatibilityLine(apiLocale, result.compatibility?.financial ?? 0, result.compatibility?.mental ?? 0)} />
           <InsightCard title={tr("marriageRecommendation")} icon={<CalendarHeart className="h-4 w-4" />} text={result.gunaMilan?.verdict ?? result.marriageRecommendation ?? result.marriagePrediction} />
           <InsightCard title={tr("remedies")} icon={<Sparkles className="h-4 w-4" />} text={result.doshaAnalysis?.remedies?.join(" ") ?? result.remedies} />
         </div>
         <section>
-          <h3 className="mb-3 font-semibold">Ashtakoot / Guna Milan Factors</h3>
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="font-semibold">{tr("gunaMilan")}</h3>
+            <span className="rounded-full border border-amber-200/20 bg-amber-200/10 px-3 py-1 text-xs text-amber-100">{tr("pdfComingSoon")}</span>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {(result.gunaMilan?.ashtakoot ?? result.factors ?? []).map((factor) => (
               <div key={factor.name} className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4">
                 <p className="font-semibold">{factor.name}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{factor.score ?? 0} / {getFactorMax(factor)}</p>
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">{factor.meaning ?? "Compatibility factor considered in matching."}</p>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">{factor.meaning ?? tr("notAvailable")}</p>
               </div>
             ))}
           </div>
@@ -212,14 +221,37 @@ function ScoreCard({ icon, label, value }: { icon: React.ReactElement; label: st
 }
 
 function InsightCard({ title, icon, text }: { title: string; icon: React.ReactNode; text?: string }) {
-  return <div className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4"><h3 className="flex items-center gap-2 font-semibold text-amber-200">{icon}{title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{text ?? "This area looks promising with patience, transparency, and shared planning."}</p></div>;
+  const { tr } = useLanguage();
+  return <div className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4"><h3 className="flex items-center gap-2 font-semibold text-amber-200">{icon}{title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{text ?? tr("notAvailable")}</p></div>;
 }
 
 function getFactorMax(factor: { max?: number; maxScore?: number }) {
   return factor.maxScore ?? factor.max ?? 0;
 }
 
-function toFriendlyError(message?: string) {
-  if (!message || /server|unexpected|database|prisma|validation/i.test(message)) return "Please review both birth details and try again.";
+function toFriendlyError(message: string | undefined, fallback: string) {
+  if (!message || /server|unexpected|database|prisma|validation/i.test(message)) return fallback;
   return message;
 }
+
+
+function chartSummary(profile: MatchResult["brideProfile"], chart: MatchResult["brideChart"], fallback: string, labels: { lagna: string; rashi: string; nakshatra: string }) {
+  const avakhada = chart?.avakhada;
+  return `${profile?.name ?? fallback} | ${labels.lagna}: ${avakhada?.ascendant ?? fallback} | ${labels.rashi}: ${avakhada?.moonSign ?? fallback} | ${labels.nakshatra}: ${avakhada?.nakshatra ?? fallback}`;
+}
+
+function chartSummaryLabels(language: "en" | "hi" | "hinglish") {
+  if (language === "hi") return { lagna: "लग्न", rashi: "राशि", nakshatra: "नक्षत्र" };
+  if (language === "hinglish") return { lagna: "Lagna", rashi: "Rashi", nakshatra: "Nakshatra" };
+  return { lagna: "Lagna", rashi: "Rashi", nakshatra: "Nakshatra" };
+}
+
+function compatibilityLine(language: "en" | "hi" | "hinglish", financial: number, mental: number) {
+  if (language === "hi") return `वित्तीय अनुकूलता: ${financial}%. मानसिक अनुकूलता: ${mental}%.`;
+  if (language === "hinglish") return `Financial compatibility: ${financial}%. Mental compatibility: ${mental}%.`;
+  return `Financial compatibility: ${financial}%. Mental compatibility: ${mental}%.`;
+}
+
+
+
+
