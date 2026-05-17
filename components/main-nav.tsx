@@ -149,7 +149,7 @@ export function MainNav() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-amber-200/15 bg-background/78 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full border-b border-amber-200/20 bg-[#090016]/86 shadow-[0_12px_45px_rgba(3,0,12,0.42),0_0_28px_rgba(155,92,255,0.08)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-screen-2xl items-center justify-between gap-4 px-4">
         <div className="flex-shrink-0 2xl:mr-6 2xl:min-w-[220px]">
           <BrandLogo />
@@ -296,7 +296,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
                 ))}
               </div>
             </div>
-            <div className="border-t border-amber-200/15 bg-background/40 p-4">
+            <div className="border-t border-amber-200/15 bg-[#12051f]/78 p-4">
               <Button className="w-full" asChild onClick={onClose}>
                 <Link href="/signup"><Sparkles className="h-4 w-4" />{tr("startReading")}</Link>
               </Button>
@@ -365,5 +365,6 @@ function normalizePath(path: string) {
   const clean = path.split("?")[0]?.replace(/\/+$/, "") || "/";
   return clean === "" ? "/" : clean;
 }
+
 
 

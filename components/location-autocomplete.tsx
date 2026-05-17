@@ -147,7 +147,7 @@ export function LocationAutocomplete({
           aria-autocomplete="list"
           aria-invalid={Boolean(error)}
           className={cn(
-            "h-10 w-full rounded-md border border-input bg-background px-9 text-sm outline-none ring-offset-background transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "h-10 w-full rounded-md border border-amber-200/20 bg-[#12051f]/80 px-9 text-sm text-[#FFF7E8] outline-none ring-offset-background transition placeholder:text-[#BFAFD9]/75 focus-visible:border-[#FFD36A]/70 focus-visible:ring-2 focus-visible:ring-[#A855F7]/35 focus-visible:ring-offset-2",
             error && "border-destructive focus-visible:ring-destructive"
           )}
         />
@@ -158,7 +158,7 @@ export function LocationAutocomplete({
         <div
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 top-full z-[9999] mt-1 max-h-72 overflow-y-auto rounded-lg border border-amber-200/25 bg-[#12091f]/98 p-1 shadow-[0_22px_70px_rgba(5,2,14,0.78),0_0_34px_rgba(126,72,255,0.22)] backdrop-blur-xl"
+          className="absolute left-0 right-0 top-full z-[9999] mt-1 max-h-72 overflow-y-auto rounded-lg border border-amber-200/25 bg-[#12051f]/98 p-1 shadow-[0_22px_70px_rgba(5,2,14,0.78),0_0_34px_rgba(126,72,255,0.22)] backdrop-blur-xl"
         >
           {loading ? <p className="px-3 py-2 text-sm text-muted-foreground">{tr("searchingLocations")}</p> : null}
           {!loading && suggestions.length === 0 ? <p className="px-3 py-2 text-sm text-muted-foreground">{tr("noLocationsFound")}</p> : null}
@@ -190,6 +190,7 @@ export function LocationAutocomplete({
     </div>
   );
 }
+
 
 
 

@@ -89,7 +89,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
           <Input value={fullName} onChange={(event) => { setFullName(event.target.value); setErrors((e) => ({ ...e, fullName: undefined })); }} className={cn(errors.fullName && "border-destructive")} />
         </Field>
         <Field label={tr("gender")}>
-          <select value={gender} onChange={(event) => setGender(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+          <select value={gender} onChange={(event) => setGender(event.target.value)} className="cosmic-select">
             <option value="">{tr("genderPreferNotToSay")}</option>
             <option value="Male">{tr("genderMale")}</option>
             <option value="Female">{tr("genderFemale")}</option>
@@ -116,7 +116,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
           <Input value={phone} onChange={(event) => setPhone(event.target.value)} />
         </Field>
         <Field label={tr("preferredLanguage")}>
-          <select value={language} onChange={(event) => setLanguage(event.target.value as typeof apiLocale)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+          <select value={language} onChange={(event) => setLanguage(event.target.value as typeof apiLocale)} className="cosmic-select">
             <option value="en">English</option>
             <option value="hi">हिंदी</option>
             <option value="hinglish">Hinglish</option>
@@ -127,7 +127,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
         </Field>
         <div className="space-y-2 md:col-span-2">
           <Label>{tr("mainQuestionConcern")}</Label>
-          <textarea value={concern} onChange={(event) => setConcern(event.target.value)} rows={4} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          <textarea value={concern} onChange={(event) => setConcern(event.target.value)} rows={4} className="cosmic-textarea" />
         </div>
       </div>
       {adminBypass ? <p className="text-sm text-amber-100">{tr("adminTestingModePaymentBypassed")}</p> : null}
@@ -148,4 +148,5 @@ function Field({ label, error, children }: { label: string; error?: string; chil
     </div>
   );
 }
+
 

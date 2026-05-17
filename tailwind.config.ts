@@ -1,4 +1,4 @@
-﻿import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {
@@ -68,5 +68,6 @@ const config: Config = {
 };
 
 export default config;
+
 
 

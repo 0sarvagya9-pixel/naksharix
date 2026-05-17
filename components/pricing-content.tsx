@@ -48,10 +48,10 @@ export function PricingContent() {
       <p className="mt-4 max-w-3xl text-muted-foreground">{tr("pricingSubtitle")}</p>
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         {plans.map(({ id, name, price, features }) => (
-          <Card key={`${id}-${name}`} className={name === "Premium" ? "border-primary" : ""}>
+          <Card key={`${id}-${name}`} className={id === "VIP" ? "relative overflow-hidden border-amber-200/45 bg-[radial-gradient(circle_at_top,rgba(245,197,66,0.16),transparent_16rem),linear-gradient(145deg,rgba(40,20,63,0.96),rgba(18,5,31,0.9))] shadow-[0_24px_80px_rgba(245,197,66,0.12)]" : id === "PREMIUM" ? "relative overflow-hidden border-purple-300/40 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_16rem),linear-gradient(145deg,rgba(32,16,55,0.94),rgba(18,5,31,0.9))]" : "bg-card/75"}>
             <CardHeader>
               <CardTitle>{name}</CardTitle>
-              <p className="text-3xl font-black">{price}</p>
+              <p className="cosmic-gold-text text-3xl font-black">{price}</p>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 text-sm text-muted-foreground">
@@ -83,6 +83,7 @@ export function PricingContent() {
     </Section>
   );
 }
+
 
 
 
