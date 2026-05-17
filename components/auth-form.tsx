@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { BriefcaseBusiness, Chrome, UserRound } from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -92,11 +92,14 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: Mode; googleEn
       ) : null}
       {googleEnabled ? (
         <>
-          <Button className="w-full" variant="outline" asChild>
-            <Link href={`/api/auth/google?next=${roleIntent === "ASTROLOGER" ? "/astrologer/dashboard" : "/dashboard"}`}>
-              <Chrome className="h-4 w-4" />
-              {tr("continueWithGoogle")}
-            </Link>
+          <Button
+            className="w-full"
+            variant="outline"
+            type="button"
+            onClick={() => signIn("google", { callbackUrl: `/auth/google-complete?role=${roleIntent === "ASTROLOGER" ? professionalRole : "USER"}` })}
+          >
+            <Chrome className="h-4 w-4" />
+            {tr("continueWithGoogle")}
           </Button>
           <div className="flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">
             <span className="h-px flex-1 bg-border" />
@@ -156,3 +159,10 @@ function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (ro
     </div>
   );
 }
+
+
+
+
+
+
+

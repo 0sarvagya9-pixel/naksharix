@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
+import { auth } from "@/auth";
 import { authCookieName, signAuthToken, verifyAuthToken, type AuthUser } from "@/lib/auth/token";
 import { prisma } from "@/lib/db";
 
@@ -10,13 +11,24 @@ export async function getCurrentUser() {
   const cookieStore = await cookies();
   const token = cookieStore.get(authCookieName)?.value;
   const user = await verifyAuthToken(token);
-  if (!user || !token) return null;
+
+  if (!user || !token) {
+    const session = await auth();
+    if (!session?.user?.id || !session.user.email) return null;
+    return {
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.name ?? "Naksharix User",
+      role: session.user.role
+    };
+  }
+
   const tokenHash = createHash("sha256").update(token).digest("hex");
   const session = await prisma.session.findUnique({
     where: { tokenHash },
     select: { revokedAt: true, expiresAt: true }
   });
-  if (!session || session.revokedAt || session.expiresAt < new Date()) return null;
+  if (!session || session.revokedAt || !session.expiresAt || session.expiresAt < new Date()) return null;
   return user;
 }
 

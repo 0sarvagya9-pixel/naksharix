@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthProfileMenu } from "@/components/auth-profile-menu";
 import { useLanguage } from "@/components/language-provider";
 import type { TranslationKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -209,13 +210,9 @@ export function MainNav() {
         <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
           <LanguageSwitcher />
           <ThemeToggle />
-          <Button variant="ghost" size="icon" asChild className="hidden sm:inline-flex">
-            <Link href="/dashboard" aria-label="Dashboard">
-              <UserRound className="h-5 w-5" />
-            </Link>
-          </Button>
+          <AuthProfileMenu />
           <Button asChild className="hidden flex-shrink-0 whitespace-nowrap px-4 2xl:inline-flex">
-            <Link href="/auth/signup">
+            <Link href="/signup">
               <Sparkles className="h-4 w-4" />
               <span>{tr("startShort")}</span>
             </Link>
@@ -301,7 +298,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
             </div>
             <div className="border-t border-amber-200/15 bg-background/40 p-4">
               <Button className="w-full" asChild onClick={onClose}>
-                <Link href="/auth/signup"><Sparkles className="h-4 w-4" />{tr("startReading")}</Link>
+                <Link href="/signup"><Sparkles className="h-4 w-4" />{tr("startReading")}</Link>
               </Button>
             </div>
           </motion.aside>
@@ -368,3 +365,5 @@ function normalizePath(path: string) {
   const clean = path.split("?")[0]?.replace(/\/+$/, "") || "/";
   return clean === "" ? "/" : clean;
 }
+
+

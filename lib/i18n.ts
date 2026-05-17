@@ -339,6 +339,8 @@ const en: Record<string, string> = {
   myProfile: "My Profile",
   myReadings: "My Readings",
   savedReports: "Saved Reports",
+  login: "Login",
+  logout: "Logout",
   dailyHoroscopeGroup: "Daily Horoscope",
   birthChartKundli: "Birth Chart (Kundli)",
   kundliGenerator: "Kundli Generator",
@@ -676,6 +678,8 @@ const hi: Record<string, string> = {
   myProfile: "मेरी प्रोफ़ाइल",
   myReadings: "मेरी रीडिंग",
   savedReports: "सेव रिपोर्ट",
+  login: "लॉगिन",
+  logout: "लॉगआउट",
   dailyHoroscopeGroup: "दैनिक राशिफल",
   birthChartKundli: "जन्म कुंडली",
   kundliGenerator: "कुंडली जनरेटर",
@@ -848,6 +852,11 @@ const hinglish: Record<string, string> = {
   loginAsUser: "User ke roop me continue karein",
   loginAsPro: "Astrologer / Consultant ke roop me continue karein",
   myProfileReadings: "My Profile & Readings",
+  myProfile: "My Profile",
+  myReadings: "My Readings",
+  savedReports: "Saved Reports",
+  login: "Login",
+  logout: "Logout",
   dailyHoroscopeGroup: "Daily Rashifal",
   birthChartKundli: "Birth Chart (Kundli)",
   kundliGenerator: "Kundli Generator",
@@ -869,3 +878,5 @@ export function normalizeLocale(value: string | null | undefined): Locale {
 export function t(locale: Locale, key: TranslationKey) {
   return dictionary[locale][key] ?? dictionary.en[key] ?? key;
 }
+
+
