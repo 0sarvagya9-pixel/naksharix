@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { PaymentPurpose, PaymentStatus, Prisma, SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
+import { razorpay } from "@/lib/payments/razorpay";
 import { subscriptionPlans } from "@/lib/subscription-plans";
 
 export function getSubscriptionPlan(id: string) {
@@ -16,6 +17,26 @@ export function verifyRazorpayPaymentSignature(orderId: string, paymentId: strin
   return safeEqual(expected, signature);
 }
 
+export async function verifyRazorpayCapturedPayment(orderId: string, paymentId: string, expectedAmount: number, expectedCurrency = "INR") {
+  if (!razorpay) return { ok: false, reason: "Razorpay is not configured" };
+  try {
+    const payment = await razorpay.payments.fetch(paymentId) as {
+      id?: string;
+      order_id?: string;
+      status?: string;
+      amount?: number;
+      currency?: string;
+    };
+    if (payment.id !== paymentId) return { ok: false, reason: "Payment id mismatch" };
+    if (payment.order_id !== orderId) return { ok: false, reason: "Order id mismatch" };
+    if (payment.status !== "captured") return { ok: false, reason: "Payment is not captured" };
+    if (Number(payment.amount) !== Math.round(expectedAmount * 100)) return { ok: false, reason: "Amount mismatch" };
+    if ((payment.currency ?? "").toUpperCase() !== expectedCurrency.toUpperCase()) return { ok: false, reason: "Currency mismatch" };
+    return { ok: true, reason: "verified" };
+  } catch {
+    return { ok: false, reason: "Unable to verify payment with Razorpay" };
+  }
+}
 export function verifyRazorpayWebhookSignature(payload: string, signature: string | null) {
   if (!env.RAZORPAY_WEBHOOK_SECRET || !signature) return false;
   const expected = createHmac("sha256", env.RAZORPAY_WEBHOOK_SECRET).update(payload).digest("hex");
@@ -109,4 +130,7 @@ function reportTitle(purpose: PaymentPurpose) {
 function buildInvoiceHtml(number: string, amount: number, currency: string, purpose: PaymentPurpose) {
   return `<h1>Naksharix Invoice ${number}</h1><p>Purpose: ${purpose}</p><p>Amount: ${currency} ${amount.toFixed(2)}</p><p>GST estimate: ${currency} ${(amount * 0.18).toFixed(2)}</p>`;
 }
+
+
+
 

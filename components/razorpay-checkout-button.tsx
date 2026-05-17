@@ -25,20 +25,12 @@ declare global {
   }
 }
 
-const publicRazorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-
 export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay" }: { payload: CheckoutPayload; label?: string }) {
   const { tr } = useLanguage();
-  const [status, setStatus] = useState<string | null>(publicRazorpayKey ? null : tr("paymentsComingSoon"));
+  const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const paymentsReady = Boolean(publicRazorpayKey);
 
   async function startCheckout() {
-    if (!paymentsReady) {
-      setStatus(tr("paymentsComingSoon"));
-      return;
-    }
-
     setLoading(true);
     setStatus(tr("creatingSecureOrder"));
     const scriptLoaded = await loadRazorpayScript();
@@ -86,9 +78,9 @@ export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay" }:
 
   return (
     <div className="space-y-2">
-      <Button className="w-full" onClick={startCheckout} disabled={loading || !paymentsReady}>
+      <Button className="w-full" onClick={startCheckout} disabled={loading}>
         <CreditCard className="h-4 w-4" />
-        {loading ? tr("processing") : paymentsReady ? label : tr("paymentsComingSoon")}
+        {loading ? tr("processing") : label}
       </Button>
       {status ? <p className="text-sm text-muted-foreground">{status}</p> : null}
     </div>
@@ -114,3 +106,5 @@ function loadRazorpayScript() {
     document.body.appendChild(script);
   });
 }
+
+
