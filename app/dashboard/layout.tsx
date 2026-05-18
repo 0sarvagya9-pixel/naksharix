@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
-  if (user.role === "ASTROLOGER" || user.role === "CONSULTANT") redirect("/astrologer/dashboard");
+  if (user.effectiveRole === "ASTROLOGER" || user.effectiveRole === "CONSULTANT") redirect("/astrologer/dashboard");
   return children;
 }
 

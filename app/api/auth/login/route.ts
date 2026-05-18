@@ -8,6 +8,7 @@ import { setAuthCookie } from "@/lib/auth/jwt";
 import { rateLimit } from "@/lib/rate-limit";
 import { createSession } from "@/lib/auth/session";
 import { env } from "@/lib/env";
+import type { EffectiveRole } from "@/lib/auth/token";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,11 +17,21 @@ export async function POST(request: NextRequest) {
     if (!limited.allowed) return fail("Too many login attempts. Please try again soon.", 429);
 
     const body = await validateJson(request, loginSchema);
+    const loginMode = body.loginMode as EffectiveRole;
     const adminUser = await authorizeAdmin(body.email, body.password);
     if (adminUser) {
-      const token = await createSession({ id: adminUser.id, email: adminUser.email, name: adminUser.name, role: adminUser.role }, request);
+      const effectiveRole = loginMode === "ADMIN" ? "ADMIN" : loginMode;
+      const token = await createSession({
+        id: adminUser.id,
+        email: adminUser.email,
+        name: adminUser.name,
+        role: adminUser.role,
+        effectiveRole,
+        isAdminLogin: true,
+        canBypassPayment: true
+      }, request);
       await setAuthCookie(token);
-      return ok({ user: { id: adminUser.id, email: adminUser.email, name: adminUser.name, role: adminUser.role } });
+      return ok({ user: { id: adminUser.id, email: adminUser.email, name: adminUser.name, role: adminUser.role, effectiveRole, isAdminLogin: true, canBypassPayment: true } });
     }
 
     const user = await prisma.user.findUnique({ where: { email: body.email } });
@@ -28,15 +39,17 @@ export async function POST(request: NextRequest) {
     const valid = await verifyPassword(body.password, user.passwordHash);
     if (!valid) return fail("Invalid email or password", 401);
     const isAstroAccount = user.role === "ASTROLOGER" || user.role === "CONSULTANT";
+    if (loginMode === "ASTROLOGER" && !isAstroAccount) return fail("This email is not registered as an astrologer/consultant account.", 403);
     if (body.roleIntent === "ASTROLOGER" && !isAstroAccount && user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
       return fail("This email is registered as a user account. Continue as User or apply as an astrologer/consultant.", 403);
     }
-    if (body.roleIntent === "USER" && isAstroAccount) {
+    if (body.roleIntent === "USER" && isAstroAccount && loginMode === "USER") {
       return fail("This email is registered as an astrologer/consultant account. Continue as Astrologer / Consultant.", 403);
     }
-    const token = await createSession({ id: user.id, email: user.email, name: user.name, role: user.role }, request);
+    const effectiveRole: EffectiveRole = (loginMode === "ASTROLOGER" || body.roleIntent === "ASTROLOGER") && user.role === "ASTROLOGER" ? "ASTROLOGER" : (loginMode === "ASTROLOGER" || body.roleIntent === "ASTROLOGER" || loginMode === "CONSULTANT") && user.role === "CONSULTANT" ? "CONSULTANT" : "USER";
+    const token = await createSession({ id: user.id, email: user.email, name: user.name, role: user.role, effectiveRole, isAdminLogin: false, canBypassPayment: false }, request);
     await setAuthCookie(token);
-    return ok({ user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+    return ok({ user: { id: user.id, email: user.email, name: user.name, role: user.role, effectiveRole, isAdminLogin: false, canBypassPayment: false } });
   } catch (error) {
     return handleApiError(error);
   }
@@ -60,5 +73,3 @@ function constantTimeEqual(value: string, expected: string) {
   const right = Buffer.from(expected);
   return left.length === right.length && timingSafeEqual(left, right);
 }
-
-

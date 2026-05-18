@@ -2,7 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import { auth } from "@/auth";
-import { authCookieName, signAuthToken, verifyAuthToken, type AuthUser } from "@/lib/auth/token";
+import { authCookieName, signAuthToken, toEffectiveRole, verifyAuthToken, type AuthUser } from "@/lib/auth/token";
 import { prisma } from "@/lib/db";
 
 export { authCookieName, signAuthToken, verifyAuthToken, type AuthUser };
@@ -20,7 +20,15 @@ export async function getCurrentUser() {
       select: { id: true, email: true, name: true, role: true }
     });
     if (!dbUser) return null;
-    return { id: dbUser.id, email: dbUser.email, name: dbUser.name ?? "Naksharix User", role: dbUser.role };
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name ?? "Naksharix User",
+      role: dbUser.role,
+      effectiveRole: session.user.effectiveRole ?? toEffectiveRole(dbUser.role),
+      isAdminLogin: Boolean(session.user.isAdminLogin),
+      canBypassPayment: Boolean(session.user.isAdminLogin)
+    };
   }
 
   const tokenHash = createHash("sha256").update(token).digest("hex");
@@ -35,7 +43,15 @@ export async function getCurrentUser() {
     select: { id: true, email: true, name: true, role: true }
   });
   if (!dbUser) return null;
-  return { id: dbUser.id, email: dbUser.email, name: dbUser.name ?? "Naksharix User", role: dbUser.role };
+  return {
+    id: dbUser.id,
+    email: dbUser.email,
+    name: dbUser.name ?? "Naksharix User",
+    role: dbUser.role,
+    effectiveRole: tokenUser.effectiveRole ?? toEffectiveRole(dbUser.role),
+    isAdminLogin: Boolean(tokenUser.isAdminLogin),
+    canBypassPayment: Boolean(tokenUser.isAdminLogin)
+  };
 }
 
 export async function setAuthCookie(token: string) {

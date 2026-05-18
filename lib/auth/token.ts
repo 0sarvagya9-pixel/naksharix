@@ -13,15 +13,26 @@ const secret = getSecret();
 
 export { authCookieName };
 
+export type NaksharixRole = "USER" | "ASTROLOGER" | "CONSULTANT" | "MODERATOR" | "ADMIN" | "SUPER_ADMIN";
+export type EffectiveRole = "USER" | "ASTROLOGER" | "CONSULTANT" | "ADMIN";
+
 export type AuthUser = {
   id: string;
   email: string;
   name: string;
-  role: "USER" | "ASTROLOGER" | "CONSULTANT" | "MODERATOR" | "ADMIN" | "SUPER_ADMIN";
+  role: NaksharixRole;
+  effectiveRole?: EffectiveRole;
+  isAdminLogin?: boolean;
+  canBypassPayment?: boolean;
 };
 
 export async function signAuthToken(user: AuthUser) {
-  return new SignJWT(user)
+  return new SignJWT({
+    ...user,
+    effectiveRole: user.effectiveRole ?? toEffectiveRole(user.role),
+    isAdminLogin: Boolean(user.isAdminLogin),
+    canBypassPayment: Boolean(user.isAdminLogin)
+  })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
@@ -36,4 +47,9 @@ export async function verifyAuthToken(token?: string): Promise<AuthUser | null> 
   } catch {
     return null;
   }
+}
+
+export function toEffectiveRole(role: string): EffectiveRole {
+  if (role === "ASTROLOGER" || role === "CONSULTANT" || role === "ADMIN") return role;
+  return "USER";
 }

@@ -26,7 +26,8 @@ const schema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    if (!user || !["ASTROLOGER", "CONSULTANT"].includes(user.role)) return fail("Unauthorized", 403);
+    const effectiveRole = user?.effectiveRole;
+    if (!user || !["ASTROLOGER", "CONSULTANT"].includes(effectiveRole ?? "")) return fail("Unauthorized", 403);
     const body = await validateJson(request, schema);
     const data = {
       displayName: body.displayName,
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
       rejectedAt: null,
       rejectionReason: null
     };
-    const profile = user.role === "CONSULTANT"
+    const profile = effectiveRole === "CONSULTANT"
       ? await prisma.consultantProfile.upsert({ where: { userId: user.id }, create: { userId: user.id, ...data }, update: data })
       : await prisma.astrologerProfile.upsert({ where: { userId: user.id }, create: { userId: user.id, ...data }, update: data });
     return ok({ profile });

@@ -20,7 +20,7 @@ export const metadata: Metadata = seo({
 
 export default async function AstrologerDashboardPage() {
   const user = await requireAstroRole();
-  const isConsultant = user.role === "CONSULTANT";
+  const isConsultant = user.effectiveRole === "CONSULTANT";
   const [profile, consultantProfile] = await Promise.all([
     prisma.astrologerProfile.findUnique({
       where: { userId: user.id },

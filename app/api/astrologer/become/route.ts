@@ -11,8 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthorized", 401);
-    if (["ADMIN", "SUPER_ADMIN"].includes(user.role)) return fail("Admin users do not need astrologer onboarding", 400);
-
+        if (user.role !== "USER" || user.isAdminLogin) return fail("This action is available for user accounts only", 403);
     const body = await validateJson(request, schema);
     const nextRole = body.role;
     const updatedUser = await prisma.user.update({
@@ -39,11 +38,14 @@ export async function POST(request: NextRequest) {
       id: updatedUser.id,
       email: updatedUser.email,
       name: updatedUser.name,
-      role: updatedUser.role
+      role: updatedUser.role,
+      effectiveRole: nextRole,
+      isAdminLogin: Boolean(user.isAdminLogin),
+      canBypassPayment: Boolean(user.isAdminLogin)
     }, request);
     await setAuthCookie(token);
 
-    return ok({ redirectTo: "/astrologer/profile", role: updatedUser.role });
+    return ok({ redirectTo: "/astrologer/profile", role: updatedUser.role, effectiveRole: nextRole, isAdminLogin: Boolean(user.isAdminLogin), canBypassPayment: Boolean(user.isAdminLogin) });
   } catch (error) {
     return handleApiError(error);
   }

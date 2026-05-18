@@ -14,27 +14,32 @@ import { secureFetch } from "@/lib/security/csrf";
 import { useLanguage } from "@/components/language-provider";
 
 type Mode = "login" | "signup";
-type AuthRole = "USER" | "ASTROLOGER" | "CONSULTANT" | "MODERATOR" | "ADMIN" | "SUPER_ADMIN";
 type RoleIntent = "USER" | "ASTROLOGER";
+type LoginMode = "USER" | "ASTROLOGER" | "CONSULTANT" | "ADMIN";
 
-function landingPath(role?: AuthRole) {
-  if (role === "ASTROLOGER" || role === "CONSULTANT") return "/astrologer/dashboard";
+function landingPath(effectiveRole?: LoginMode) {
+  if (effectiveRole === "ASTROLOGER" || effectiveRole === "CONSULTANT") return "/astrologer/dashboard";
+  if (effectiveRole === "ADMIN") return "/admin";
   return "/dashboard";
 }
 
-export function AuthForm({ mode, googleEnabled = false }: { mode: Mode; googleEnabled?: boolean }) {
+export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", showRoleCards = true }: { mode: Mode; googleEnabled?: boolean; loginMode?: LoginMode; showRoleCards?: boolean }) {
   const router = useRouter();
   const { tr, apiLocale } = useLanguage();
   const [error, setError] = useState<string | null>(null);
-  const [roleIntent, setRoleIntent] = useState<RoleIntent>("USER");
+  const [roleIntent, setRoleIntent] = useState<RoleIntent>(loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER");
   const [professionalRole, setProfessionalRole] = useState<"ASTROLOGER" | "CONSULTANT">("ASTROLOGER");
   const schema = mode === "signup" ? signupSchema : loginSchema;
   const form = useForm<Record<string, string>>({
     resolver: zodResolver(schema as never) as unknown as Resolver<Record<string, string>>,
-    defaultValues: mode === "signup" ? { role: "USER", locale: apiLocale } : { roleIntent: "USER" }
+    defaultValues: mode === "signup" ? { role: "USER", locale: apiLocale } : { roleIntent: loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER", loginMode }
   });
 
   useEffect(() => {
+    if (!showRoleCards) {
+      chooseRole(loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER");
+      return;
+    }
     const saved = window.localStorage.getItem("naksharix-role-intent");
     if (saved === "USER" || saved === "ASTROLOGER") chooseRole(saved);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,7 +61,7 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: Mode; googleEn
     setError(null);
     const payload = mode === "signup"
       ? { ...values, role: roleIntent === "USER" ? "USER" : professionalRole }
-      : { ...values, roleIntent };
+      : { ...values, roleIntent, loginMode };
     const response = await secureFetch(`/api/auth/${mode}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -68,12 +73,12 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: Mode; googleEn
       return;
     }
     window.localStorage.setItem("naksharix-role-intent", roleIntent);
-    router.push(landingPath(result.data?.user?.role));
+    router.push(landingPath(result.data?.user?.effectiveRole));
   }
 
   return (
     <div className="space-y-5">
-      <RoleCards selected={roleIntent} onSelect={chooseRole} />
+      {showRoleCards ? <RoleCards selected={roleIntent} onSelect={chooseRole} /> : null}
       {mode === "signup" && roleIntent === "ASTROLOGER" ? (
         <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
           <Label htmlFor="professionalRole">{tr("professionalType")}</Label>
@@ -115,6 +120,7 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: Mode; googleEn
           </div>
         ) : null}
         <input type="hidden" {...form.register(mode === "signup" ? "role" : "roleIntent")} />
+        {mode === "login" ? <input type="hidden" {...form.register("loginMode")} value={loginMode} readOnly /> : null}
         {mode === "signup" ? <input type="hidden" {...form.register("locale")} value={apiLocale} readOnly /> : null}
         <div className="space-y-2">
           <Label htmlFor="email">{tr("email")}</Label>

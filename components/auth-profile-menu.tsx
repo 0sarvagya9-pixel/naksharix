@@ -16,6 +16,9 @@ type SessionUser = {
   name?: string | null;
   email?: string | null;
   role?: string | null;
+  effectiveRole?: string | null;
+  isAdminLogin?: boolean | null;
+  canBypassPayment?: boolean | null;
   image?: string | null;
   avatarUrl?: string | null;
 };
@@ -90,7 +93,7 @@ export function AuthProfileMenu() {
 
   const image = user.image ?? user.avatarUrl;
   const initials = getInitials(user.name ?? user.email ?? "N");
-  const showAdminPanel = canOpenAdminPanel(user);
+  const showAdminPanel = canOpenAdminPanel(user) || Boolean(user.isAdminLogin);
 
   return (
     <div ref={menuRef} className="relative hidden sm:block">

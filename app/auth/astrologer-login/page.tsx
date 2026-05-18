@@ -22,7 +22,7 @@ export default function AstrologerLoginPage() {
           <CardTitle className="font-cinzel">Astrologer / Consultant Login</CardTitle>
         </CardHeader>
         <CardContent>
-          <AuthForm mode="login" googleEnabled={googleEnabled} />
+          <AuthForm mode="login" googleEnabled={googleEnabled} loginMode="ASTROLOGER" showRoleCards={false} />
           <p className="mt-4 text-sm naksh-muted-text">
             New guide on Naksharix? <Link href="/astrologer/onboarding" className="text-[#B56CFF]">Start onboarding</Link>
           </p>

@@ -11,7 +11,8 @@ export const signupSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(120),
-  roleIntent: z.enum(["USER", "ASTROLOGER"]).default("USER")
+  roleIntent: z.enum(["USER", "ASTROLOGER"]).default("USER"),
+  loginMode: z.enum(["USER", "ASTROLOGER", "CONSULTANT", "ADMIN"]).default("USER")
 });
 
 export const otpSchema = z.object({

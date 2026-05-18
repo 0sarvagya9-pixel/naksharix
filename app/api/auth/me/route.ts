@@ -11,5 +11,5 @@ export async function GET() {
     select: { id: true, email: true, name: true, role: true, image: true, avatarUrl: true, locale: true }
   });
 
-  return ok({ user: user ?? authUser });
+  return ok({ user: user ? { ...user, effectiveRole: authUser.effectiveRole, isAdminLogin: authUser.isAdminLogin, canBypassPayment: authUser.canBypassPayment } : authUser });
 }

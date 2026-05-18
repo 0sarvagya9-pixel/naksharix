@@ -54,7 +54,7 @@ if (adminCredentialsEnabled) {
           create: { email: adminEmail, name: "Naksharix Admin", role: Role.ADMIN, emailVerified: new Date() }
         });
 
-        return { id: user.id, email: user.email, name: user.name, image: user.image, role: user.role };
+        return { id: user.id, email: user.email, name: user.name, image: user.image, role: user.role, effectiveRole: "ADMIN" as const, isAdminLogin: true, canBypassPayment: true };
       }
     })
   );
@@ -72,12 +72,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.effectiveRole = user.effectiveRole ?? (user.role === "ADMIN" || user.role === "SUPER_ADMIN" ? "ADMIN" : user.role === "ASTROLOGER" || user.role === "CONSULTANT" ? user.role : "USER");
+        token.isAdminLogin = Boolean(user.isAdminLogin);
+        token.canBypassPayment = Boolean(user.isAdminLogin);
       }
       if (token.email) {
         const dbUser = await prisma.user.findUnique({ where: { email: token.email }, select: { id: true, role: true } });
         if (dbUser) {
           token.id = dbUser.id;
           token.role = dbUser.role;
+          token.effectiveRole = token.isAdminLogin ? token.effectiveRole ?? "USER" : (dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN" ? "ADMIN" : dbUser.role === "ASTROLOGER" || dbUser.role === "CONSULTANT" ? dbUser.role : "USER");
+          token.canBypassPayment = Boolean(token.isAdminLogin);
         }
       }
       return token;
@@ -86,6 +91,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = String(token.id ?? "");
         session.user.role = (token.role as typeof session.user.role | undefined) ?? "USER";
+        session.user.effectiveRole = (token.effectiveRole as typeof session.user.effectiveRole | undefined) ?? "USER";
+        session.user.isAdminLogin = Boolean(token.isAdminLogin);
+        session.user.canBypassPayment = Boolean(token.isAdminLogin);
         session.user.name = session.user.name ?? "Naksharix User";
       }
       return session;
