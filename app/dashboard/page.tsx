@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
 import { Bell, Bot, CalendarClock, Clock, CreditCard, FileText, Gem, HeartPulse, MoonStar, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { AstroTool } from "@/components/astro-tool";
@@ -47,7 +49,57 @@ const dashas = [
 ];
 const remedies = ["10 minutes morning silence", "Offer gratitude before major decisions", "Keep communication direct but gentle"];
 
+type DashboardUser = { role?: string | null; effectiveRole?: string | null };
+
 export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<DashboardUser | null>(null);
+  const [checkingRole, setCheckingRole] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((json) => {
+        if (mounted) setUser(json?.data?.user ?? null);
+      })
+      .catch(() => {
+        if (mounted) setUser(null);
+      })
+      .finally(() => {
+        if (mounted) setCheckingRole(false);
+      });
+    return () => { mounted = false; };
+  }, []);
+
+  const role = user?.effectiveRole || user?.role || "USER";
+  const accountRole = user?.role || "USER";
+  const showBecomeAstrologer = !checkingRole && accountRole === "USER" && role === "USER";
+
+  useEffect(() => {
+    if (checkingRole) return;
+    if (role === "ASTROLOGER") router.replace("/astrologer/dashboard");
+  }, [checkingRole, role, router]);
+
+  if (checkingRole || role === "ASTROLOGER") {
+    return <Section className="star-field"><p className="text-sm naksh-muted-text">Loading dashboard...</p></Section>;
+  }
+
+  if (role === "CONSULTANT") {
+    return (
+      <Section className="star-field">
+        <Card className="glass">
+          <CardContent className="p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Consultant Dashboard</p>
+            <h1 className="mt-3 font-cinzel text-3xl font-black">Consultant Portal</h1>
+            <p className="mt-3 naksh-muted-text">Your consultant dashboard is being prepared. You can manage your profile from the professional portal.</p>
+            <Button className="mt-5" asChild><Link href="/astrologer/profile">Edit Profile</Link></Button>
+          </CardContent>
+        </Card>
+      </Section>
+    );
+  }
+
   return (
     <Section className="star-field">
       <div className="relative overflow-hidden rounded-lg border border-[#F5C542]/25 bg-[linear-gradient(135deg,rgba(72,36,128,0.78),rgba(18,9,31,0.94)_58%,rgba(166,119,42,0.48))] p-6 sm:p-8">
@@ -73,7 +125,7 @@ export default function DashboardPage() {
               <Button variant="secondary" asChild>
                 <Link href="/dashboard/consultations">Consultation History</Link>
               </Button>
-              <BecomeAstrologerButton />
+              {showBecomeAstrologer ? <BecomeAstrologerButton /> : null}
             </div>
           </div>
           <div className="grid h-20 w-20 place-items-center rounded-lg border border-[#F5C542]/30 bg-[#F5C542]/10">
