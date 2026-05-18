@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
         canBypassPayment: true
       }, request);
       await setAuthCookie(token);
+      if (process.env.NODE_ENV === "development") {
+        console.info("[Naksharix login success]", { selectedMode: body.roleIntent, loginMode, role: adminUser.role, effectiveRole });
+      }
       return ok({ user: { id: adminUser.id, email: adminUser.email, name: adminUser.name, role: adminUser.role, effectiveRole, isAdminLogin: true, canBypassPayment: true } });
     }
 
@@ -43,12 +46,12 @@ export async function POST(request: NextRequest) {
     if (body.roleIntent === "ASTROLOGER" && !isAstroAccount && user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
       return fail("This email is registered as a user account. Continue as User or apply as an astrologer/consultant.", 403);
     }
-    if (body.roleIntent === "USER" && isAstroAccount && loginMode === "USER") {
-      return fail("This email is registered as an astrologer/consultant account. Continue as Astrologer / Consultant.", 403);
-    }
-    const effectiveRole: EffectiveRole = (loginMode === "ASTROLOGER" || body.roleIntent === "ASTROLOGER") && user.role === "ASTROLOGER" ? "ASTROLOGER" : (loginMode === "ASTROLOGER" || body.roleIntent === "ASTROLOGER" || loginMode === "CONSULTANT") && user.role === "CONSULTANT" ? "CONSULTANT" : "USER";
+    const effectiveRole: EffectiveRole = user.role === "ASTROLOGER" ? "ASTROLOGER" : user.role === "CONSULTANT" ? "CONSULTANT" : "USER";
     const token = await createSession({ id: user.id, email: user.email, name: user.name, role: user.role, effectiveRole, isAdminLogin: false, canBypassPayment: false }, request);
     await setAuthCookie(token);
+    if (process.env.NODE_ENV === "development") {
+      console.info("[Naksharix login success]", { selectedMode: body.roleIntent, loginMode, role: user.role, effectiveRole });
+    }
     return ok({ user: { id: user.id, email: user.email, name: user.name, role: user.role, effectiveRole, isAdminLogin: false, canBypassPayment: false } });
   } catch (error) {
     return handleApiError(error);

@@ -49,19 +49,27 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     setRoleIntent(next);
     window.localStorage.setItem("naksharix-role-intent", next);
     if (mode === "login") form.setValue("roleIntent", next);
+    if (mode === "login") form.setValue("loginMode", next === "ASTROLOGER" ? professionalRole : "USER");
     if (mode === "signup") form.setValue("role", next === "USER" ? "USER" : professionalRole);
   }
 
   function chooseProfessionalRole(next: "ASTROLOGER" | "CONSULTANT") {
     setProfessionalRole(next);
+    if (mode === "login" && roleIntent === "ASTROLOGER") form.setValue("loginMode", next);
     if (mode === "signup" && roleIntent === "ASTROLOGER") form.setValue("role", next);
   }
 
   async function onSubmit(values: Record<string, string>) {
     setError(null);
+    const selectedLoginMode: LoginMode = mode === "login"
+      ? roleIntent === "ASTROLOGER" ? professionalRole : "USER"
+      : loginMode;
     const payload = mode === "signup"
       ? { ...values, role: roleIntent === "USER" ? "USER" : professionalRole }
-      : { ...values, roleIntent, loginMode };
+      : { ...values, roleIntent, loginMode: selectedLoginMode };
+    if (process.env.NODE_ENV === "development") {
+      console.info("[Naksharix login]", { selectedMode: roleIntent, loginMode: selectedLoginMode });
+    }
     const response = await secureFetch(`/api/auth/${mode}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -73,7 +81,18 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       return;
     }
     window.localStorage.setItem("naksharix-role-intent", roleIntent);
+    if (mode === "login") window.localStorage.setItem("naksharix-login-mode", selectedLoginMode);
     router.push(landingPath(result.data?.user?.effectiveRole));
+  }
+
+  function handleGoogleSignIn() {
+    const selectedLoginMode: LoginMode = roleIntent === "ASTROLOGER" ? professionalRole : "USER";
+    window.localStorage.setItem("naksharix-role-intent", roleIntent);
+    window.localStorage.setItem("naksharix-login-mode", selectedLoginMode);
+    if (process.env.NODE_ENV === "development") {
+      console.info("[Naksharix Google login]", { selectedMode: roleIntent, loginMode: selectedLoginMode });
+    }
+    signIn("google", { callbackUrl: `/auth/google-complete?role=${selectedLoginMode}` });
   }
 
   return (
@@ -100,7 +119,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
             className="w-full"
             variant="outline"
             type="button"
-            onClick={() => signIn("google", { callbackUrl: `/auth/google-complete?role=${roleIntent === "ASTROLOGER" ? professionalRole : "USER"}` })}
+            onClick={handleGoogleSignIn}
           >
             <Chrome className="h-4 w-4" />
             {tr("continueWithGoogle")}
@@ -120,7 +139,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
           </div>
         ) : null}
         <input type="hidden" {...form.register(mode === "signup" ? "role" : "roleIntent")} />
-        {mode === "login" ? <input type="hidden" {...form.register("loginMode")} value={loginMode} readOnly /> : null}
+        {mode === "login" ? <input type="hidden" {...form.register("loginMode")} value={roleIntent === "ASTROLOGER" ? professionalRole : "USER"} readOnly /> : null}
         {mode === "signup" ? <input type="hidden" {...form.register("locale")} value={apiLocale} readOnly /> : null}
         <div className="space-y-2">
           <Label htmlFor="email">{tr("email")}</Label>

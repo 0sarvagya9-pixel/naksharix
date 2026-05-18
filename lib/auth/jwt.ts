@@ -25,7 +25,7 @@ export async function getCurrentUser() {
       email: dbUser.email,
       name: dbUser.name ?? "Naksharix User",
       role: dbUser.role,
-      effectiveRole: session.user.effectiveRole ?? toEffectiveRole(dbUser.role),
+      effectiveRole: session.user.isAdminLogin ? session.user.effectiveRole ?? "USER" : toEffectiveRole(dbUser.role),
       isAdminLogin: Boolean(session.user.isAdminLogin),
       canBypassPayment: Boolean(session.user.isAdminLogin)
     };
@@ -48,7 +48,7 @@ export async function getCurrentUser() {
     email: dbUser.email,
     name: dbUser.name ?? "Naksharix User",
     role: dbUser.role,
-    effectiveRole: tokenUser.effectiveRole ?? toEffectiveRole(dbUser.role),
+    effectiveRole: tokenUser.isAdminLogin ? tokenUser.effectiveRole ?? "USER" : toEffectiveRole(dbUser.role),
     isAdminLogin: Boolean(tokenUser.isAdminLogin),
     canBypassPayment: Boolean(tokenUser.isAdminLogin)
   };

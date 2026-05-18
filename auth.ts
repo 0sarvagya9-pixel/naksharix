@@ -39,11 +39,14 @@ if (adminCredentialsEnabled) {
       name: "Admin Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
+        loginMode: { label: "Login Mode", type: "text" }
       },
       async authorize(credentials) {
         const email = typeof credentials?.email === "string" ? credentials.email.trim().toLowerCase() : "";
         const password = typeof credentials?.password === "string" ? credentials.password : "";
+        const rawLoginMode = typeof credentials?.loginMode === "string" ? credentials.loginMode : "USER";
+        const effectiveRole = rawLoginMode === "ASTROLOGER" || rawLoginMode === "CONSULTANT" || rawLoginMode === "ADMIN" ? rawLoginMode : "USER";
         const adminEmail = env.ADMIN_EMAIL?.trim().toLowerCase();
         const adminPassword = env.ADMIN_PASSWORD ?? "";
         if (!adminEmail || !adminPassword || email !== adminEmail || !constantTimeEqual(password, adminPassword)) return null;
@@ -54,7 +57,7 @@ if (adminCredentialsEnabled) {
           create: { email: adminEmail, name: "Naksharix Admin", role: Role.ADMIN, emailVerified: new Date() }
         });
 
-        return { id: user.id, email: user.email, name: user.name, image: user.image, role: user.role, effectiveRole: "ADMIN" as const, isAdminLogin: true, canBypassPayment: true };
+        return { id: user.id, email: user.email, name: user.name, image: user.image, role: user.role, effectiveRole, isAdminLogin: true, canBypassPayment: true };
       }
     })
   );
