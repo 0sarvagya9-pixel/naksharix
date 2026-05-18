@@ -129,6 +129,7 @@ const sidebarGroups: SidebarGroup[] = [
 export function MainNav() {
   const { tr } = useLanguage();
   const pathname = usePathname();
+  const isAstrologerPortal = pathname.startsWith("/astrologer");
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const moreActive = moreLinks.some((item) => isActiveRoute(pathname, item.href, item.activePaths));
@@ -147,6 +148,8 @@ export function MainNav() {
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  if (isAstrologerPortal) return null;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#F5C542]/20 bg-[#090016]/92 shadow-[0_12px_45px_rgba(3,0,12,0.42),0_0_28px_rgba(155,92,255,0.08)] backdrop-blur-xl">

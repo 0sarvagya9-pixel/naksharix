@@ -53,8 +53,8 @@ export default async function AstrologerDashboardPage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">{isConsultant ? "Consultant Dashboard" : "Astrologer Dashboard"}</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black">{isConsultant ? "Consultant Dashboard" : "Astrologer Dashboard"}</h1>
-            <p className="mt-3 max-w-3xl naksh-muted-text">Manage your profile, bookings, availability, consultations, earnings, and reviews.</p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black">Welcome, {activeProfile?.displayName ?? user.name}</h1>
+            <p className="mt-3 max-w-3xl naksh-muted-text">Manage your consultations, availability, earnings, and client requests from one place.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild><Link href="/astrologer/profile">Edit Astrologer Profile</Link></Button>

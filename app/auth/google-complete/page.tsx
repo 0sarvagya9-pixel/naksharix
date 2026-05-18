@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/jwt";
 
+
 type SearchParams = Promise<{ role?: string }>;
 
 export default async function GoogleCompletePage({ searchParams }: { searchParams: SearchParams }) {
@@ -51,8 +52,7 @@ export default async function GoogleCompletePage({ searchParams }: { searchParam
     });
   }
 
+
   if (user.role === "ASTROLOGER" || user.role === "CONSULTANT") redirect("/astrologer/dashboard");
   redirect("/dashboard");
 }
-
-

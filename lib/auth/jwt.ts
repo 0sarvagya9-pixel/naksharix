@@ -10,17 +10,17 @@ export { authCookieName, signAuthToken, verifyAuthToken, type AuthUser };
 export async function getCurrentUser() {
   const cookieStore = await cookies();
   const token = cookieStore.get(authCookieName)?.value;
-  const user = await verifyAuthToken(token);
+  const tokenUser = await verifyAuthToken(token);
 
-  if (!user || !token) {
+  if (!tokenUser || !token) {
     const session = await auth();
-    if (!session?.user?.id || !session.user.email) return null;
-    return {
-      id: session.user.id,
-      email: session.user.email,
-      name: session.user.name ?? "Naksharix User",
-      role: session.user.role
-    };
+    if (!session?.user?.id && !session?.user?.email) return null;
+    const dbUser = await prisma.user.findFirst({
+      where: session.user.id ? { id: session.user.id } : { email: session.user.email! },
+      select: { id: true, email: true, name: true, role: true }
+    });
+    if (!dbUser) return null;
+    return { id: dbUser.id, email: dbUser.email, name: dbUser.name ?? "Naksharix User", role: dbUser.role };
   }
 
   const tokenHash = createHash("sha256").update(token).digest("hex");
@@ -29,7 +29,13 @@ export async function getCurrentUser() {
     select: { revokedAt: true, expiresAt: true }
   });
   if (!session || session.revokedAt || !session.expiresAt || session.expiresAt < new Date()) return null;
-  return user;
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: tokenUser.id },
+    select: { id: true, email: true, name: true, role: true }
+  });
+  if (!dbUser) return null;
+  return { id: dbUser.id, email: dbUser.email, name: dbUser.name ?? "Naksharix User", role: dbUser.role };
 }
 
 export async function setAuthCookie(token: string) {
