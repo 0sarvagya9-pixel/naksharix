@@ -1,16 +1,31 @@
-import { AstrologerPortalPlaceholder } from "@/components/astrologer-portal-placeholder";
+import { AstrologerBookingsList } from "@/components/astrologer-bookings-list";
+import { Section } from "@/components/section";
+import { requireAstroRole } from "@/lib/auth/roles";
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default function Page() {
+export default async function Page() {
+  const user = await requireAstroRole();
+  const profile = await prisma.astrologerProfile.findUnique({
+    where: { userId: user.id },
+    include: {
+      bookings: {
+        where: { status: { in: ["REQUESTED", "PAYMENT_PENDING"] } },
+        include: { user: { select: { id: true, name: true, email: true } } },
+        orderBy: { createdAt: "desc" }
+      }
+    }
+  });
+
   return (
-    <AstrologerPortalPlaceholder
-      eyebrow="Requests"
-      title="Pending Requests"
-      description="Accept, reject, or reschedule client consultation requests when bookings are available."
-      emptyText="No pending requests."
-      actionHref="/astrologer/dashboard"
-      actionLabel="Back to dashboard"
-    />
+    <Section>
+      <AstrologerBookingsList
+        title="Pending Requests"
+        emptyText="No pending requests."
+        bookings={profile?.bookings ?? []}
+        showActions
+      />
+    </Section>
   );
 }

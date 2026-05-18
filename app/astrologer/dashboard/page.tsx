@@ -37,14 +37,18 @@ export default async function AstrologerDashboardPage() {
   const bookings = profile?.bookings ?? [];
   const now = new Date();
   const todayKey = now.toDateString();
-  const todayBookings = bookings.filter((booking) => booking.scheduledAt.toDateString() === todayKey).length;
-  const upcomingBookings = bookings.filter((booking) => booking.scheduledAt >= now && booking.status !== "CANCELED").length;
+  const acceptedBookings = bookings.filter((booking) => booking.status === "CONFIRMED");
+  const todayBookings = acceptedBookings.filter((booking) => booking.scheduledAt.toDateString() === todayKey).length;
+  const upcomingBookings = acceptedBookings.filter((booking) => booking.scheduledAt >= now).length;
   const pendingBookings = bookings.filter((booking) => booking.status === "REQUESTED" || booking.status === "PAYMENT_PENDING").length;
   const completedBookings = bookings.filter((booking) => booking.status === "COMPLETED").length;
-  const totalEarnings = (profile?.payouts ?? []).reduce((sum, payout) => sum + Number(payout.amount), 0);
+  const totalEarnings = bookings
+    .filter((booking) => booking.status === "COMPLETED" && (booking.paymentStatus === "PAID" || booking.paymentStatus === "ADMIN_BYPASS" || booking.paymentStatus === "FREE"))
+    .reduce((sum, booking) => sum + Number(booking.amount), 0);
   const pendingPayout = (profile?.payouts ?? []).filter((payout) => payout.status === "PENDING").reduce((sum, payout) => sum + Number(payout.amount), 0);
   const completedPayout = (profile?.payouts ?? []).filter((payout) => payout.status === "PAID" || payout.status === "COMPLETED").reduce((sum, payout) => sum + Number(payout.amount), 0);
-  const completion = profileCompletion(activeProfile, (profile?.slots.length ?? 0) > 0);
+  const hasActiveSlots = (profile?.slots ?? []).some((slot) => slot.isActive && !slot.isHoliday);
+  const completion = profileCompletion(activeProfile, hasActiveSlots);
   const status = activeProfile?.status ?? "DRAFT";
 
   return (
@@ -76,7 +80,7 @@ export default async function AstrologerDashboardPage() {
           <Metric icon={IndianRupee} label="Total Earnings" value={`INR ${totalEarnings.toLocaleString("en-IN")}`} note="Lifetime earnings" />
           <Metric icon={WalletCards} label="Pending Payout" value={`INR ${pendingPayout.toLocaleString("en-IN")}`} note="Awaiting payout" />
           <Metric icon={Star} label="Rating" value={(activeProfile?.rating ?? 0).toFixed(1)} note={`${activeProfile?.reviewCount ?? 0} reviews`} />
-          <Metric icon={UserRound} label="Availability Status" value={activeProfile?.availabilityStatus ?? "OFFLINE"} note="Chat, call, video controls" />
+          <Metric icon={UserRound} label="Availability Status" value={hasActiveSlots ? "AVAILABLE" : "NOT AVAILABLE"} note="Chat, call, video controls" />
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -85,7 +89,7 @@ export default async function AstrologerDashboardPage() {
             <CardContent className="space-y-4">
               <div className="h-3 overflow-hidden rounded-full bg-[#12051f]/70"><div className="h-full rounded-full bg-gradient-to-r from-[#9B5CFF] to-[#FFD36A]" style={{ width: `${completion}%` }} /></div>
               <div className="grid gap-2 text-sm naksh-muted-text sm:grid-cols-2">
-                {completionItems(activeProfile, (profile?.slots.length ?? 0) > 0).map((item) => <p key={item.label} className={item.done ? "text-[#FFD36A]" : "naksh-muted-text"}>{item.done ? "✓" : "○"} {item.label}</p>)}
+                {completionItems(activeProfile, hasActiveSlots).map((item) => <p key={item.label} className={item.done ? "text-[#FFD36A]" : "naksh-muted-text"}>{item.done ? "✓" : "○"} {item.label}</p>)}
               </div>
             </CardContent>
           </Card>
@@ -112,7 +116,7 @@ export default async function AstrologerDashboardPage() {
           <Card className="glass">
             <CardHeader><CardTitle className="font-cinzel">Availability Status</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm naksh-muted-text">
-              <p>Current status: <span className="text-[#FFD36A]">{activeProfile?.availabilityStatus ?? "OFFLINE"}</span></p>
+              <p>Current status: <span className="text-[#FFD36A]">{hasActiveSlots ? "Available" : "Not available"}</span></p>
               <p>Chat: {activeProfile?.availableForChat ? "Available" : "Off"}</p>
               <p>Call: {activeProfile?.availableForCall ? "Available" : "Off"}</p>
               <p>Video: {activeProfile?.availableForVideo ? "Available" : "Off"}</p>

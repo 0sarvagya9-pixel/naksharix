@@ -62,6 +62,8 @@ enum PaymentStatus {
   PAID
   FAILED
   REFUNDED
+  ADMIN_BYPASS
+  FREE
 }
 
 enum PaymentPurpose {
@@ -689,6 +691,8 @@ model AvailabilitySlot {
   startTime           String
   endTime             String
   isHoliday           Boolean           @default(false)
+  isActive          Boolean           @default(true)
+  consultationType  String            @default("CHAT")
   status              ConsultantStatus  @default(ONLINE)
   astrologerProfile   AstrologerProfile @relation(fields: [astrologerProfileId], references: [id], onDelete: Cascade)
   createdAt           DateTime          @default(now())

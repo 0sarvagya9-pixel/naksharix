@@ -93,7 +93,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
               <p className="text-sm">{tr("languages")}: {astrologer.languages.join(", ")}</p>
               <div className="flex flex-wrap gap-2">
                 <Button asChild><Link href={`/astrologers/${astrologer.id}`}>{tr("viewProfile")}</Link></Button>
-                <Button variant="outline" asChild><Link href={`/consultation?astrologer=${astrologer.id}`}>{tr("bookConsultation")}</Link></Button>
+                <Button variant="outline" asChild><Link href={`/consultation/book/${astrologer.id}`}>{tr("bookConsultation")}</Link></Button>
               </div>
             </CardContent>
           </Card>

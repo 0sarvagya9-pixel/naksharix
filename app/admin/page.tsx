@@ -42,6 +42,22 @@ type ReportRequestRow = {
   concern?: string | null;
   user?: { email?: string | null; name?: string | null } | null;
 };
+type ConsultationBookingRow = {
+  id: string;
+  createdAt: string;
+  mode: string;
+  status: string;
+  paymentStatus: string;
+  amount: string | number;
+  scheduledAt: string;
+  question: string;
+  metadata?: Record<string, unknown> | null;
+  user?: { email?: string | null; name?: string | null } | null;
+  astrologerProfile?: {
+    displayName?: string | null;
+    user?: { email?: string | null; name?: string | null } | null;
+  } | null;
+};
 const adminMetricKeys: (keyof AdminAnalytics)[] = ["users", "revenue", "appointments", "posts"];
 const operations = [
   { title: "User Management", copy: "Review roles, subscriptions, account status, and support history.", icon: Users },
@@ -61,11 +77,13 @@ export default function AdminPage() {
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [reportRequests, setReportRequests] = useState<ReportRequestRow[]>([]);
   const [astrologerApprovals, setAstrologerApprovals] = useState<AstrologerApprovalRow[]>([]);
+  const [bookings, setBookings] = useState<ConsultationBookingRow[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/analytics").then((r) => r.json()).then((json) => setAnalytics(json.data)).catch(() => setAnalytics(null));
     fetch("/api/admin/report-requests").then((r) => r.json()).then((json) => setReportRequests(json.data?.reportRequests ?? [])).catch(() => setReportRequests([]));
     fetch("/api/admin/astrologers").then((r) => r.json()).then((json) => setAstrologerApprovals(json.data?.profiles ?? [])).catch(() => setAstrologerApprovals([]));
+    fetch("/api/admin/bookings").then((r) => r.json()).then((json) => setBookings(json.data?.bookings ?? [])).catch(() => setBookings([]));
   }, []);
 
   return (
@@ -128,6 +146,51 @@ export default function AdminPage() {
                 </tr>
               ))}
               {!astrologerApprovals.length ? <tr><td colSpan={9} className="py-6 text-center naksh-muted-text">No astrologer profiles submitted yet.</td></tr> : null}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
+      <Card className="mt-6 overflow-hidden">
+        <CardHeader><CardTitle>Booking Requests</CardTitle></CardHeader>
+        <CardContent className="overflow-x-auto">
+          <table className="w-full min-w-[1080px] text-left text-sm">
+            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD36A]">
+              <tr className="border-b border-[#F5C542]/20">
+                <th className="py-3 pr-4">Created</th>
+                <th className="py-3 pr-4">Customer</th>
+                <th className="py-3 pr-4">Customer Email</th>
+                <th className="py-3 pr-4">Astrologer</th>
+                <th className="py-3 pr-4">Astrologer Email</th>
+                <th className="py-3 pr-4">Type</th>
+                <th className="py-3 pr-4">Booking Time</th>
+                <th className="py-3 pr-4">Status</th>
+                <th className="py-3 pr-4">Payment</th>
+                <th className="py-3 pr-4">Amount</th>
+                <th className="py-3 pr-4">Question</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((booking) => {
+                const metadata = booking.metadata ?? {};
+                const customerName = String(metadata.customerName ?? booking.user?.name ?? "-");
+                const customerEmail = String(metadata.customerEmail ?? booking.user?.email ?? "-");
+                return (
+                  <tr key={booking.id} className="border-b border-[#F5C542]/15 naksh-muted-text">
+                    <td className="py-3 pr-4">{new Date(booking.createdAt).toLocaleString()}</td>
+                    <td className="py-3 pr-4 text-[#FFF7E8]">{customerName}</td>
+                    <td className="py-3 pr-4">{customerEmail}</td>
+                    <td className="py-3 pr-4">{booking.astrologerProfile?.displayName ?? booking.astrologerProfile?.user?.name ?? "-"}</td>
+                    <td className="py-3 pr-4">{booking.astrologerProfile?.user?.email ?? "-"}</td>
+                    <td className="py-3 pr-4">{booking.mode}</td>
+                    <td className="py-3 pr-4">{new Date(booking.scheduledAt).toLocaleString()}</td>
+                    <td className="py-3 pr-4">{booking.status}</td>
+                    <td className="py-3 pr-4">{booking.paymentStatus}</td>
+                    <td className="py-3 pr-4">INR {Number(booking.amount ?? 0).toLocaleString("en-IN")}</td>
+                    <td className="max-w-[18rem] truncate py-3 pr-4">{booking.question}</td>
+                  </tr>
+                );
+              })}
+              {!bookings.length ? <tr><td colSpan={11} className="py-6 text-center naksh-muted-text">No booking requests yet.</td></tr> : null}
             </tbody>
           </table>
         </CardContent>
