@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Save, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ type ProfileDefaults = {
 };
 
 export function AstrologerProfileForm({ defaults }: { defaults?: ProfileDefaults }) {
+  const router = useRouter();
   const { requiredMessage } = useLanguage();
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<string | null>(null);
@@ -69,7 +71,13 @@ export function AstrologerProfileForm({ defaults }: { defaults?: ProfileDefaults
       body: JSON.stringify(Object.fromEntries(formData.entries()))
     });
     const json = await response.json();
-    setStatus(response.ok ? "Profile saved and sent for admin review." : json.error ?? "Unable to save profile right now.");
+    if (response.ok) {
+      setStatus("Profile saved and sent for admin review. Opening astrologer dashboard...");
+      router.push("/astrologer/dashboard");
+      router.refresh();
+      return;
+    }
+    setStatus(json.error ?? "Unable to save profile right now.");
   }
 
   function clear(field: string) {

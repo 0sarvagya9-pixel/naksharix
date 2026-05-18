@@ -61,15 +61,22 @@ export default async function AstrologerDashboardPage() {
             <Button variant="outline" asChild><Link href="/astrologer/availability">Set Availability</Link></Button>
             <Button variant="outline" asChild><Link href="#bookings">View Bookings</Link></Button>
             <Button variant="outline" asChild><Link href="/astrologer/earnings">View Earnings</Link></Button>
+            <Button variant="outline" asChild><Link href="#bookings">Start Consultation</Link></Button>
+            <Button variant="outline" asChild><Link href="#reviews">View Reviews</Link></Button>
+            <Button variant="outline" asChild><Link href="/astrologer/earnings">Payout Request</Link></Button>
           </div>
         </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Metric icon={UserRound} label="Profile Status" value={statusLabel(status)} note={`${completion}% complete`} />
           <Metric icon={CalendarClock} label="Today’s Bookings" value={todayBookings.toString()} note={`${upcomingBookings} upcoming`} />
+          <Metric icon={CalendarClock} label="Upcoming Bookings" value={upcomingBookings.toString()} note="Scheduled consultations" />
           <Metric icon={MessageCircle} label="Pending Requests" value={pendingBookings.toString()} note={`${completedBookings} completed`} />
-          <Metric icon={IndianRupee} label="Total Earnings" value={`INR ${totalEarnings.toLocaleString("en-IN")}`} note={`Pending INR ${pendingPayout.toLocaleString("en-IN")}`} />
+          <Metric icon={MessageCircle} label="Completed Consultations" value={completedBookings.toString()} note="Finished sessions" />
+          <Metric icon={IndianRupee} label="Total Earnings" value={`INR ${totalEarnings.toLocaleString("en-IN")}`} note="Lifetime earnings" />
+          <Metric icon={WalletCards} label="Pending Payout" value={`INR ${pendingPayout.toLocaleString("en-IN")}`} note="Awaiting payout" />
           <Metric icon={Star} label="Rating" value={(activeProfile?.rating ?? 0).toFixed(1)} note={`${activeProfile?.reviewCount ?? 0} reviews`} />
+          <Metric icon={UserRound} label="Availability Status" value={activeProfile?.availabilityStatus ?? "OFFLINE"} note="Chat, call, video controls" />
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -111,7 +118,7 @@ export default async function AstrologerDashboardPage() {
               <p>Video: {activeProfile?.availableForVideo ? "Available" : "Off"}</p>
             </CardContent>
           </Card>
-          <Card className="glass">
+          <Card id="reviews" className="glass">
             <CardHeader><CardTitle className="font-cinzel">Reviews</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm naksh-muted-text">
               {(profile?.reviews ?? []).map((review) => <p key={review.id} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3">{review.rating}/5 - {review.body ?? "No written review"}</p>)}
