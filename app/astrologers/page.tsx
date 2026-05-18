@@ -23,10 +23,19 @@ export default async function AstrologersPage() {
     specialty: profile.specialization,
     languages: profile.languages,
     experienceYears: profile.experienceYears,
-    rating: profile.rating || 4.8,
+    rating: profile.rating || 0,
+    reviewCount: profile.reviewCount,
     pricePerMinute: Number(profile.consultationPrice),
+    pricePerSession: profile.pricePerSession ? Number(profile.pricePerSession) : null,
     bio: profile.bio,
-    status: profile.availabilityStatus
+    introLine: profile.introLine,
+    photoUrl: profile.photoUrl,
+    city: profile.city,
+    country: profile.country,
+    status: profile.availabilityStatus,
+    availableForChat: profile.availableForChat,
+    availableForCall: profile.availableForCall,
+    availableForVideo: profile.availableForVideo
   }))).catch(() => []);
 
   return <AstrologersPageContent profiles={profiles} />;

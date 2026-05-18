@@ -137,11 +137,58 @@ body {
 }
 
 @layer components {
+  .naksh-page-bg {
+    @apply bg-[#090016] text-[#FFF7E8];
+    background:
+      radial-gradient(circle at 10% 8%, rgba(155, 92, 255, 0.32), transparent 30rem),
+      radial-gradient(circle at 85% 0%, rgba(245, 197, 66, 0.16), transparent 28rem),
+      radial-gradient(circle at 55% 78%, rgba(168, 85, 247, 0.16), transparent 36rem),
+      linear-gradient(135deg, #090016 0%, #12051f 48%, #1a0b2e 100%);
+  }
+
+  .naksh-card {
+    @apply rounded-xl border border-[#F5C542]/25 bg-[#160926]/90 text-[#F8F1FF] shadow-[0_22px_70px_rgba(3,0,12,0.42),inset_0_1px_0_rgba(255,211,106,0.07)] backdrop-blur-xl;
+    background:
+      linear-gradient(145deg, rgba(32, 16, 55, 0.92), rgba(22, 9, 38, 0.88)),
+      radial-gradient(circle at top left, rgba(168, 85, 247, 0.16), transparent 18rem);
+  }
+
+  .naksh-card-soft {
+    @apply rounded-lg border border-[#A855F7]/25 bg-[#201037]/70 text-[#F8F1FF] shadow-[0_14px_46px_rgba(3,0,12,0.28)] backdrop-blur-md;
+  }
+
+  .naksh-button-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-[#B56CFF]/35 bg-gradient-to-r from-[#9B5CFF] via-[#A855F7] to-[#B56CFF] px-4 py-2 font-semibold text-[#FFF7E8] shadow-[0_12px_34px_rgba(155,92,255,0.30),inset_0_1px_0_rgba(255,255,255,0.18)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_46px_rgba(155,92,255,0.42)] disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  .naksh-button-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-[#F5C542]/35 bg-[#160926]/75 px-4 py-2 font-semibold text-[#FFD36A] shadow-[inset_0_1px_0_rgba(255,211,106,0.08)] transition hover:border-[#FFD36A]/60 hover:bg-[#201037] hover:text-[#FFF7E8] disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  .naksh-gold-text {
+    @apply text-[#FFD36A];
+  }
+
+  .naksh-muted-text {
+    @apply text-[#CDBFE8];
+  }
+
+  .naksh-border {
+    @apply border border-[#F5C542]/25;
+  }
+
+  .naksh-input {
+    @apply w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/80 px-3 py-2 text-sm text-[#FFF7E8] outline-none placeholder:text-[#BFAFD9]/75 transition focus:border-[#FFD36A]/70 focus:ring-2 focus:ring-[#A855F7]/35 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .naksh-glow {
+    @apply shadow-[0_0_34px_rgba(155,92,255,0.18),0_0_18px_rgba(245,197,66,0.08)];
+  }
   .cosmic-select {
-    @apply h-10 w-full rounded-md border border-amber-200/20 bg-[#12051f]/80 px-3 text-sm text-[#FFF7E8] outline-none transition focus:border-[#FFD36A]/70 focus:ring-2 focus:ring-[#A855F7]/35;
+    @apply h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/80 px-3 py-2 text-sm text-[#FFF7E8] outline-none placeholder:text-[#BFAFD9]/75 transition focus:border-[#FFD36A]/70 focus:ring-2 focus:ring-[#A855F7]/35 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .cosmic-textarea {
-    @apply w-full rounded-md border border-amber-200/20 bg-[#12051f]/80 px-3 py-2 text-sm text-[#FFF7E8] outline-none placeholder:text-[#BFAFD9]/75 focus:border-[#FFD36A]/70 focus:ring-2 focus:ring-[#A855F7]/35;
+    @apply min-h-24 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/80 px-3 py-2 text-sm text-[#FFF7E8] outline-none placeholder:text-[#BFAFD9]/75 transition focus:border-[#FFD36A]/70 focus:ring-2 focus:ring-[#A855F7]/35 disabled:cursor-not-allowed disabled:opacity-50;
   }
 }

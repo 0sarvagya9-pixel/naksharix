@@ -23,8 +23,8 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} />
-          <p className="mt-4 text-sm text-muted-foreground">
-            New here? <Link href="/signup" className="text-primary">Create an account</Link>
+          <p className="mt-4 text-sm naksh-muted-text">
+            New here? <Link href="/signup" className="text-[#B56CFF]">Create an account</Link>
           </p>
         </CardContent>
       </Card>

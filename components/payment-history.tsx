@@ -30,16 +30,16 @@ export function PaymentHistory() {
   }, []);
 
   return (
-    <Card className="border-amber-200/15 bg-card/75">
+    <Card className="border-[#F5C542]/20 bg-[#201037]/80">
       <CardHeader><CardTitle className="font-cinzel">Payment History</CardTitle></CardHeader>
       <CardContent className="space-y-3">
-        {loading ? <p className="text-sm text-muted-foreground">Loading payments...</p> : null}
-        {!loading && !payments.length ? <p className="text-sm text-muted-foreground">No payments yet.</p> : null}
+        {loading ? <p className="text-sm naksh-muted-text">Loading payments...</p> : null}
+        {!loading && !payments.length ? <p className="text-sm naksh-muted-text">No payments yet.</p> : null}
         {payments.map((payment) => (
-          <div key={payment.id} className="flex flex-col gap-3 rounded-md border border-amber-200/15 bg-background/45 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div key={payment.id} className="flex flex-col gap-3 rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-medium">{payment.purchasedReport?.title ?? payment.purpose}</p>
-              <p className="text-sm text-muted-foreground">{payment.currency} {payment.amount} - {payment.status}</p>
+              <p className="text-sm naksh-muted-text">{payment.currency} {payment.amount} - {payment.status}</p>
             </div>
             {payment.invoice ? (
               <Button variant="outline" size="sm" asChild>

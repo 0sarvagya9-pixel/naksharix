@@ -111,9 +111,9 @@ export function MatchmakingForm() {
         <PersonPanel title={tr("brideDetails")} personKey="bride" value={people.bride} errors={fieldErrors} onChange={(patch) => updatePerson("bride", patch)} onResolvedLocation={(location) => updateResolvedLocation("bride", location)} />
         <PersonPanel title={tr("groomDetails")} personKey="groom" value={people.groom} errors={fieldErrors} onChange={(patch) => updatePerson("groom", patch)} onResolvedLocation={(location) => updateResolvedLocation("groom", location)} />
       </div>
-      {error ? <p className="rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="rounded-lg border border-[#FF4D4F]/30 bg-[#FF4D4F]/10 p-3 text-sm text-[#FF4D4F]">{error}</p> : null}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">{tr("locationConvertedInternally")}</p>
+        <p className="text-sm naksh-muted-text">{tr("locationConvertedInternally")}</p>
         <Button type="submit" size="lg" className="h-12 w-full sm:w-auto" disabled={loading}>
           <HeartHandshake className="h-4 w-4" />
           {loading ? tr("preparingReading") : tr("generateMatch")}
@@ -129,13 +129,13 @@ function PersonPanel({ title, personKey, value, onChange, onResolvedLocation, er
   const err = (field: keyof VisiblePerson) => errors[`${personKey}.${field}`];
   return (
     <Card className="glass overflow-visible">
-      <CardHeader className="border-b border-amber-200/10 bg-white/5">
+      <CardHeader className="border-b border-[#F5C542]/15 bg-[#201037]/70">
         <CardTitle className="font-cinzel text-2xl">{title}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 overflow-visible p-4 sm:grid-cols-2 sm:p-6">
         <Field label={tr("name")} error={err("name")}><Input data-field={`${personKey}.name`} className={errorClass(Boolean(err("name")))} value={value.name} onChange={(event) => onChange({ name: event.target.value })} /></Field>
         <Field label={tr("gender")}>
-          <select value={value.gender} onChange={(event) => onChange({ gender: event.target.value })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+          <select value={value.gender} onChange={(event) => onChange({ gender: event.target.value })} className="h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm">
             <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
             <option value="Female">{tr("genderFemale")}</option>
             <option value="Male">{tr("genderMale")}</option>
@@ -163,7 +163,7 @@ function MatchResultView({ result }: { result: MatchResult }) {
   const { tr, apiLocale } = useLanguage();
   return (
     <Card className="glass overflow-visible">
-      <CardHeader className="border-b border-amber-200/10 bg-white/5">
+      <CardHeader className="border-b border-[#F5C542]/15 bg-[#201037]/70">
         <CardTitle className="font-cinzel text-2xl">{tr("premiumCompatibilityReport")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 p-4 sm:p-6">
@@ -184,14 +184,14 @@ function MatchResultView({ result }: { result: MatchResult }) {
         <section>
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold">{tr("gunaMilan")}</h3>
-            <span className="rounded-full border border-amber-200/20 bg-amber-200/10 px-3 py-1 text-xs text-amber-100">{tr("pdfComingSoon")}</span>
+            <span className="rounded-full border border-[#F5C542]/25 bg-[#F5C542]/10 px-3 py-1 text-xs text-[#FFD36A]">{tr("pdfComingSoon")}</span>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {(result.gunaMilan?.ashtakoot ?? result.factors ?? []).map((factor) => (
-              <div key={factor.name} className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4">
+              <div key={factor.name} className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4">
                 <p className="font-semibold">{factor.name}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{factor.score ?? 0} / {getFactorMax(factor)}</p>
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">{factor.meaning ?? tr("notAvailable")}</p>
+                <p className="mt-1 text-sm naksh-muted-text">{factor.score ?? 0} / {getFactorMax(factor)}</p>
+                <p className="mt-2 text-xs leading-5 naksh-muted-text">{factor.meaning ?? tr("notAvailable")}</p>
               </div>
             ))}
           </div>
@@ -202,7 +202,7 @@ function MatchResultView({ result }: { result: MatchResult }) {
 }
 
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
-  return <div className="space-y-2"><Label>{label}</Label>{children}{error ? <p className="text-sm text-destructive">{error}</p> : null}</div>;
+  return <div className="space-y-2"><Label>{label}</Label>{children}{error ? <p className="text-sm text-[#FF4D4F]">{error}</p> : null}</div>;
 }
 
 function validateMatchFields(people: Record<PersonKey, VisiblePerson>, locations: Record<PersonKey, ResolvedLocation | null>, requiredMessage: string, invalidLocationMessage: string) {
@@ -217,12 +217,12 @@ function validateMatchFields(people: Record<PersonKey, VisiblePerson>, locations
 }
 
 function ScoreCard({ icon, label, value }: { icon: React.ReactElement; label: string; value: string }) {
-  return <div className="rounded-lg border border-amber-200/20 bg-gradient-to-br from-primary/20 to-amber-300/10 p-5"><div className="mb-3 text-amber-200">{icon}</div><p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p><p className="mt-2 font-cinzel text-3xl font-black">{value}</p></div>;
+  return <div className="rounded-lg border border-[#F5C542]/25 bg-gradient-to-br from-primary/20 to-amber-300/10 p-5"><div className="mb-3 text-[#FFD36A]">{icon}</div><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-2 font-cinzel text-3xl font-black">{value}</p></div>;
 }
 
 function InsightCard({ title, icon, text }: { title: string; icon: React.ReactNode; text?: string }) {
   const { tr } = useLanguage();
-  return <div className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4"><h3 className="flex items-center gap-2 font-semibold text-amber-200">{icon}{title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{text ?? tr("notAvailable")}</p></div>;
+  return <div className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4"><h3 className="flex items-center gap-2 font-semibold text-[#FFD36A]">{icon}{title}</h3><p className="mt-3 text-sm leading-7 naksh-muted-text">{text ?? tr("notAvailable")}</p></div>;
 }
 
 function getFactorMax(factor: { max?: number; maxScore?: number }) {

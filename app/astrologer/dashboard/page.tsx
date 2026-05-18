@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarClock, IndianRupee, Star, UserRound } from "lucide-react";
+import { CalendarClock, IndianRupee, MessageCircle, Star, UserRound, WalletCards } from "lucide-react";
 import { AstrologerBookingActions } from "@/components/astrologer-booking-actions";
 import { AstrologerNoteForm } from "@/components/astrologer-note-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,94 +20,116 @@ export const metadata: Metadata = seo({
 
 export default async function AstrologerDashboardPage() {
   const user = await requireAstroRole();
+  const isConsultant = user.role === "CONSULTANT";
   const [profile, consultantProfile] = await Promise.all([
     prisma.astrologerProfile.findUnique({
       where: { userId: user.id },
-      include: { bookings: { include: { user: { select: { id: true, name: true, email: true } } }, orderBy: { scheduledAt: "desc" }, take: 8 }, slots: true, payouts: true }
+      include: {
+        bookings: { include: { user: { select: { id: true, name: true, email: true } } }, orderBy: { scheduledAt: "asc" }, take: 8 },
+        slots: true,
+        payouts: true,
+        reviews: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 3 }
+      }
     }),
     prisma.consultantProfile.findUnique({ where: { userId: user.id } })
   ]);
   const activeProfile = profile ?? consultantProfile;
-  const today = new Date().toDateString();
   const bookings = profile?.bookings ?? [];
-  const todayBookings = bookings.filter((booking) => booking.scheduledAt.toDateString() === today).length;
+  const now = new Date();
+  const todayKey = now.toDateString();
+  const todayBookings = bookings.filter((booking) => booking.scheduledAt.toDateString() === todayKey).length;
+  const upcomingBookings = bookings.filter((booking) => booking.scheduledAt >= now && booking.status !== "CANCELED").length;
   const pendingBookings = bookings.filter((booking) => booking.status === "REQUESTED" || booking.status === "PAYMENT_PENDING").length;
   const completedBookings = bookings.filter((booking) => booking.status === "COMPLETED").length;
-  const earnings = (profile?.payouts ?? []).reduce((sum, payout) => sum + Number(payout.amount), 0);
-  const profileCompletion = activeProfile
-    ? Math.round([
-      activeProfile.displayName,
-      activeProfile.bio,
-      activeProfile.specialization,
-      activeProfile.languages?.length,
-      Number(activeProfile.consultationPrice) > 0
-    ].filter(Boolean).length / 5 * 100)
-    : 0;
+  const totalEarnings = (profile?.payouts ?? []).reduce((sum, payout) => sum + Number(payout.amount), 0);
+  const pendingPayout = (profile?.payouts ?? []).filter((payout) => payout.status === "PENDING").reduce((sum, payout) => sum + Number(payout.amount), 0);
+  const completedPayout = (profile?.payouts ?? []).filter((payout) => payout.status === "PAID" || payout.status === "COMPLETED").reduce((sum, payout) => sum + Number(payout.amount), 0);
+  const completion = profileCompletion(activeProfile, (profile?.slots.length ?? 0) > 0);
+  const status = activeProfile?.status ?? "DRAFT";
 
   return (
     <main className="star-field">
       <Section>
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Consultant Workspace</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black">Welcome, {user.name}</h1>
-            <p className="mt-3 max-w-3xl text-muted-foreground">
-              Manage your Naksharix marketplace profile, schedule, bookings, and payout readiness from one calm dashboard.
-            </p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">{isConsultant ? "Consultant Dashboard" : "Astrologer Dashboard"}</p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black">{isConsultant ? "Consultant Dashboard" : "Astrologer Dashboard"}</h1>
+            <p className="mt-3 max-w-3xl naksh-muted-text">Manage your profile, bookings, availability, consultations, earnings, and reviews.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button asChild><Link href="/astrologer/profile">Edit profile</Link></Button>
-            <Button variant="outline" asChild><Link href="/astrologer/availability">Availability</Link></Button>
-            <Button variant="outline" asChild><Link href="/astrologer/earnings">Earnings</Link></Button>
-            <Button variant="secondary" asChild><Link href="/astrologer/report-generator">AI Reports</Link></Button>
+            <Button asChild><Link href="/astrologer/profile">Edit Astrologer Profile</Link></Button>
+            <Button variant="outline" asChild><Link href="/astrologer/availability">Set Availability</Link></Button>
+            <Button variant="outline" asChild><Link href="#bookings">View Bookings</Link></Button>
+            <Button variant="outline" asChild><Link href="/astrologer/earnings">View Earnings</Link></Button>
           </div>
         </div>
 
-        {!activeProfile ? (
-          <Card className="mt-8 glass">
-            <CardContent className="p-6">
-              <p className="font-cinzel text-xl font-bold">Your profile is not created yet.</p>
-              <p className="mt-2 text-sm text-muted-foreground">Complete your marketplace profile so admins can review and approve it for public booking.</p>
-              <Button className="mt-4" asChild><Link href="/astrologer/profile">Create profile</Link></Button>
-            </CardContent>
-          </Card>
-        ) : null}
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Metric icon={UserRound} label="Profile completion" value={`${profileCompletion}%`} note={activeProfile?.status ?? "Not submitted"} />
-          <Metric icon={CalendarClock} label="Today bookings" value={todayBookings.toString()} note={`${pendingBookings} pending`} />
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <Metric icon={UserRound} label="Profile Status" value={statusLabel(status)} note={`${completion}% complete`} />
+          <Metric icon={CalendarClock} label="Today’s Bookings" value={todayBookings.toString()} note={`${upcomingBookings} upcoming`} />
+          <Metric icon={MessageCircle} label="Pending Requests" value={pendingBookings.toString()} note={`${completedBookings} completed`} />
+          <Metric icon={IndianRupee} label="Total Earnings" value={`INR ${totalEarnings.toLocaleString("en-IN")}`} note={`Pending INR ${pendingPayout.toLocaleString("en-IN")}`} />
           <Metric icon={Star} label="Rating" value={(activeProfile?.rating ?? 0).toFixed(1)} note={`${activeProfile?.reviewCount ?? 0} reviews`} />
-          <Metric icon={IndianRupee} label="Earnings summary" value={`INR ${earnings.toLocaleString("en-IN")}`} note={activeProfile?.availabilityStatus ?? "OFFLINE"} />
         </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
-          <Card className="glass">
-            <CardHeader><CardTitle className="font-cinzel">Booking Snapshot</CardTitle></CardHeader>
-            <CardContent className="grid gap-3 text-sm text-muted-foreground">
-              <p>Pending bookings: <span className="text-foreground">{pendingBookings}</span></p>
-              <p>Completed consultations: <span className="text-foreground">{completedBookings}</span></p>
-              <p>Next phase can connect accepted bookings to secure chat/audio/video without changing this data model.</p>
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <Card className="glass lg:col-span-2">
+            <CardHeader><CardTitle className="font-cinzel">Profile Completion</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="h-3 overflow-hidden rounded-full bg-[#12051f]/70"><div className="h-full rounded-full bg-gradient-to-r from-[#9B5CFF] to-[#FFD36A]" style={{ width: `${completion}%` }} /></div>
+              <div className="grid gap-2 text-sm naksh-muted-text sm:grid-cols-2">
+                {completionItems(activeProfile, (profile?.slots.length ?? 0) > 0).map((item) => <p key={item.label} className={item.done ? "text-[#FFD36A]" : "naksh-muted-text"}>{item.done ? "✓" : "○"} {item.label}</p>)}
+              </div>
             </CardContent>
           </Card>
           <Card className="glass">
             <CardHeader><CardTitle className="font-cinzel">Approval Status</CardTitle></CardHeader>
-            <CardContent className="grid gap-3 text-sm text-muted-foreground">
-              <p>Status: <span className="text-amber-200">{activeProfile?.status ?? "DRAFT"}</span></p>
-              <p>Availability: <span className="text-foreground">{activeProfile?.availabilityStatus ?? "OFFLINE"}</span></p>
-              <p>Approved profiles appear on the public astrologer marketplace. Pending profiles stay private until admin review.</p>
+            <CardContent className="space-y-3 text-sm naksh-muted-text">
+              <p className="text-lg font-semibold text-[#FFD36A]">{statusLabel(status)}</p>
+              <p>{approvalMessage(status)}</p>
+              {activeProfile?.rejectionReason ? <p className="rounded-md border border-[#FF4D4F]/30 bg-[#FF4D4F]/10 p-3 text-[#FFB4B5]">{activeProfile.rejectionReason}</p> : null}
             </CardContent>
           </Card>
         </div>
-        <Card className="mt-8 glass">
-          <CardHeader><CardTitle className="font-cinzel">Recent Booking Actions</CardTitle></CardHeader>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <Card className="glass">
+            <CardHeader><CardTitle className="font-cinzel">Earnings Overview</CardTitle></CardHeader>
+            <CardContent className="space-y-3 text-sm naksh-muted-text">
+              <p>Total earnings: <span className="text-[#FFF7E8]">INR {totalEarnings.toLocaleString("en-IN")}</span></p>
+              <p>Pending payout: <span className="text-[#FFF7E8]">INR {pendingPayout.toLocaleString("en-IN")}</span></p>
+              <p>Completed payout: <span className="text-[#FFF7E8]">INR {completedPayout.toLocaleString("en-IN")}</span></p>
+              <Button variant="outline" asChild><Link href="/astrologer/earnings"><WalletCards className="h-4 w-4" /> Payout Request</Link></Button>
+            </CardContent>
+          </Card>
+          <Card className="glass">
+            <CardHeader><CardTitle className="font-cinzel">Availability Status</CardTitle></CardHeader>
+            <CardContent className="space-y-3 text-sm naksh-muted-text">
+              <p>Current status: <span className="text-[#FFD36A]">{activeProfile?.availabilityStatus ?? "OFFLINE"}</span></p>
+              <p>Chat: {activeProfile?.availableForChat ? "Available" : "Off"}</p>
+              <p>Call: {activeProfile?.availableForCall ? "Available" : "Off"}</p>
+              <p>Video: {activeProfile?.availableForVideo ? "Available" : "Off"}</p>
+            </CardContent>
+          </Card>
+          <Card className="glass">
+            <CardHeader><CardTitle className="font-cinzel">Reviews</CardTitle></CardHeader>
+            <CardContent className="space-y-3 text-sm naksh-muted-text">
+              {(profile?.reviews ?? []).map((review) => <p key={review.id} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3">{review.rating}/5 - {review.body ?? "No written review"}</p>)}
+              {!profile?.reviews.length ? <p>No reviews yet.</p> : null}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card id="bookings" className="mt-8 glass">
+          <CardHeader><CardTitle className="font-cinzel">Upcoming Consultations</CardTitle></CardHeader>
           <CardContent className="grid gap-4">
             {bookings.map((booking) => (
-              <div key={booking.id} className="rounded-lg border border-amber-200/15 bg-card/60 p-4">
+              <div key={booking.id} className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
                 <div className="grid gap-3 lg:grid-cols-[1fr_1fr]">
                   <div>
                     <p className="font-cinzel font-bold">{booking.user.name}</p>
-                    <p className="text-sm text-muted-foreground">{booking.mode} | {booking.scheduledAt.toLocaleString("en-IN")} | {booking.status}</p>
-                    <p className="mt-2 text-sm text-muted-foreground">{booking.question}</p>
+                    <p className="text-sm naksh-muted-text">{booking.mode} | {booking.scheduledAt.toLocaleString("en-IN")} | {booking.status}</p>
+                    <p className="mt-2 text-sm naksh-muted-text">{booking.question}</p>
                   </div>
                   <AstrologerBookingActions bookingId={booking.id} />
                 </div>
@@ -116,7 +138,7 @@ export default async function AstrologerDashboardPage() {
                 </div>
               </div>
             ))}
-            {!bookings.length ? <p className="text-sm text-muted-foreground">No bookings yet.</p> : null}
+            {!bookings.length ? <p className="text-sm naksh-muted-text">No upcoming consultations yet.</p> : null}
           </CardContent>
         </Card>
       </Section>
@@ -128,11 +150,43 @@ function Metric({ icon: Icon, label, value, note }: { icon: typeof UserRound; la
   return (
     <Card className="glass">
       <CardContent className="p-5">
-        <Icon className="h-5 w-5 text-amber-200" />
-        <p className="mt-4 text-sm text-muted-foreground">{label}</p>
+        <Icon className="h-5 w-5 text-[#FFD36A]" />
+        <p className="mt-4 text-sm naksh-muted-text">{label}</p>
         <p className="mt-1 font-cinzel text-2xl font-black">{value}</p>
-        <p className="mt-2 text-xs text-muted-foreground">{note}</p>
+        <p className="mt-2 text-xs naksh-muted-text">{note}</p>
       </CardContent>
     </Card>
   );
+}
+
+function profileCompletion(profile: Record<string, unknown> | null | undefined, hasAvailability: boolean) {
+  return Math.round(completionItems(profile, hasAvailability).filter((item) => item.done).length / 8 * 100);
+}
+
+function completionItems(profile: Record<string, unknown> | null | undefined, hasAvailability: boolean) {
+  const languages = Array.isArray(profile?.languages) ? profile.languages : [];
+  const price = Number(profile?.consultationPrice ?? 0);
+  return [
+    { label: "Display name", done: Boolean(profile?.displayName) },
+    { label: "Bio", done: Boolean(profile?.bio) },
+    { label: "Expertise", done: Boolean(profile?.specialization) || Boolean((profile?.skills as unknown[])?.length) },
+    { label: "Languages", done: languages.length > 0 },
+    { label: "Experience", done: Number(profile?.experienceYears ?? 0) > 0 },
+    { label: "Consultation price", done: price > 0 },
+    { label: "Availability", done: hasAvailability || profile?.availabilityStatus === "ONLINE" },
+    { label: "Profile photo", done: Boolean(profile?.photoUrl) }
+  ];
+}
+
+function statusLabel(status: string) {
+  if (status === "APPROVED") return "Approved";
+  if (status === "REJECTED") return "Rejected";
+  if (status === "PENDING_REVIEW") return "Pending";
+  return "Draft";
+}
+
+function approvalMessage(status: string) {
+  if (status === "APPROVED") return "Your profile is live and visible to users.";
+  if (status === "REJECTED") return "Your profile needs changes. Please update your details or contact support.";
+  return "Your astrologer profile is under review. You will appear publicly after admin approval.";
 }

@@ -22,7 +22,7 @@ export function SavedKundliReportList({ reports, emptyText }: { reports: SavedRe
   if (!reports.length) {
     return (
       <Card className="glass">
-        <CardContent className="space-y-4 p-6 text-sm text-muted-foreground">
+        <CardContent className="space-y-4 p-6 text-sm naksh-muted-text">
           <p>{emptyText}</p>
           <Button asChild><Link href="/kundli">Generate Kundli</Link></Button>
         </CardContent>
@@ -39,12 +39,12 @@ export function SavedKundliReportList({ reports, emptyText }: { reports: SavedRe
             <CardContent className="space-y-4 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-cinzel text-xl font-bold text-amber-50">{report.name}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{report.gender || "-"}</p>
+                  <p className="font-cinzel text-xl font-bold text-[#FFF7E8]">{report.name}</p>
+                  <p className="mt-1 text-sm naksh-muted-text">{report.gender || "-"}</p>
                 </div>
-                <span className="rounded-full border border-amber-200/20 bg-amber-200/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-amber-100">{report.language}</span>
+                <span className="rounded-full border border-[#F5C542]/25 bg-[#F5C542]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#FFD36A]">{report.language}</span>
               </div>
-              <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+              <div className="grid gap-3 text-sm naksh-muted-text sm:grid-cols-2">
                 <Meta icon={<CalendarDays className="h-4 w-4" />} label="DOB" value={`${formatDate(report.dateOfBirth, language)} | ${report.timeOfBirth}`} />
                 <Meta icon={<MapPin className="h-4 w-4" />} label="Place" value={report.birthPlace} />
                 <Meta icon={<UserRound className="h-4 w-4" />} label="Saved" value={formatDateTime(report.createdAt, language)} />
@@ -60,9 +60,9 @@ export function SavedKundliReportList({ reports, emptyText }: { reports: SavedRe
 
 function Meta({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-amber-200/15 bg-white/[0.04] p-3">
-      <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-amber-200/80">{icon}{label}</p>
-      <p className="mt-1 break-words text-foreground">{value}</p>
+    <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-3">
+      <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[#FFD36A]/80">{icon}{label}</p>
+      <p className="mt-1 break-words text-[#FFF7E8]">{value}</p>
     </div>
   );
 }

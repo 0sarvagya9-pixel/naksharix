@@ -149,7 +149,7 @@ export function MainNav() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-amber-200/20 bg-[#090016]/86 shadow-[0_12px_45px_rgba(3,0,12,0.42),0_0_28px_rgba(155,92,255,0.08)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full border-b border-[#F5C542]/20 bg-[#090016]/92 shadow-[0_12px_45px_rgba(3,0,12,0.42),0_0_28px_rgba(155,92,255,0.08)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-screen-2xl items-center justify-between gap-4 px-4">
         <div className="flex-shrink-0 2xl:mr-6 2xl:min-w-[220px]">
           <BrandLogo />
@@ -163,10 +163,10 @@ export function MainNav() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-3 py-2 font-cinzel text-sm leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-amber-200 after:shadow-[0_0_12px_rgba(245,190,88,0.8)] after:transition-transform hover:bg-amber-200/10 hover:text-amber-100 hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.45)]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-3 py-2 font-cinzel text-sm leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#F5C542] after:shadow-[0_0_12px_rgba(245,190,88,0.8)] after:transition-transform hover:bg-[#F5C542]/10 hover:text-[#FFD36A] hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.45)]",
                 active
-                  ? "bg-[linear-gradient(135deg,rgba(245,190,88,0.14),rgba(126,72,255,0.12))] text-amber-200 shadow-[0_0_24px_rgba(126,72,255,0.16)] after:scale-x-100"
-                  : "text-muted-foreground"
+                  ? "bg-[linear-gradient(135deg,rgba(245,190,88,0.14),rgba(126,72,255,0.12))] text-[#FFD36A] shadow-[0_0_24px_rgba(126,72,255,0.16)] after:scale-x-100"
+                  : "text-[#CDBFE8]"
               )}
             >
               {tr(item.labelKey)}
@@ -179,15 +179,15 @@ export function MainNav() {
               aria-haspopup="menu"
               aria-expanded={moreActive}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-3 py-2 font-cinzel text-sm leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-amber-200 after:shadow-[0_0_12px_rgba(245,190,88,0.8)] after:transition-transform hover:bg-amber-200/10 hover:text-amber-100",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-3 py-2 font-cinzel text-sm leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#F5C542] after:shadow-[0_0_12px_rgba(245,190,88,0.8)] after:transition-transform hover:bg-[#F5C542]/10 hover:text-[#FFD36A]",
                 moreActive
-                  ? "bg-[linear-gradient(135deg,rgba(245,190,88,0.14),rgba(126,72,255,0.12))] text-amber-200 shadow-[0_0_24px_rgba(126,72,255,0.16)] after:scale-x-100"
-                  : "text-muted-foreground"
+                  ? "bg-[linear-gradient(135deg,rgba(245,190,88,0.14),rgba(126,72,255,0.12))] text-[#FFD36A] shadow-[0_0_24px_rgba(126,72,255,0.16)] after:scale-x-100"
+                  : "text-[#CDBFE8]"
               )}
             >
               {tr("moreShort")}
             </button>
-            <div className="invisible absolute right-0 top-full z-50 mt-3 w-56 translate-y-2 rounded-lg border border-amber-200/20 bg-background/95 p-2 opacity-0 shadow-[0_18px_60px_rgba(5,2,14,0.6),0_0_32px_rgba(126,72,255,0.18)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+            <div className="invisible absolute right-0 top-full z-50 mt-3 w-56 translate-y-2 rounded-lg border border-[#F5C542]/20 bg-[#12051f]/95 p-2 opacity-0 shadow-[0_18px_60px_rgba(5,2,14,0.6),0_0_32px_rgba(126,72,255,0.18)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {moreLinks.map((item) => {
                 const active = isActiveRoute(pathname, item.href, item.activePaths);
                 return (
@@ -196,8 +196,8 @@ export function MainNav() {
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "block rounded-md px-3 py-2 font-cinzel text-sm outline-none transition hover:bg-amber-200/10 hover:text-amber-100 focus:bg-amber-200/10 focus:text-amber-100",
-                      active ? "bg-amber-200/12 text-amber-200 shadow-[inset_3px_0_0_rgba(245,190,88,0.8)]" : "text-muted-foreground"
+                      "block rounded-md px-3 py-2 font-cinzel text-sm outline-none transition hover:bg-[#F5C542]/10 hover:text-[#FFD36A] focus:bg-[#F5C542]/10 focus:text-[#FFD36A]",
+                      active ? "bg-[#F5C542]/10 text-[#FFD36A] shadow-[inset_3px_0_0_rgba(245,190,88,0.8)]" : "text-[#CDBFE8]"
                     )}
                   >
                     {tr(item.labelKey)}
@@ -265,13 +265,13 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
             role="dialog"
             aria-modal="true"
             aria-label="Naksharix navigation menu"
-            className="fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-[24rem] flex-col overflow-hidden border-l border-amber-200/20 bg-[linear-gradient(180deg,rgba(38,17,72,0.98),rgba(12,5,27,0.99)_58%,rgba(34,17,45,0.99))] shadow-[0_0_80px_rgba(126,72,255,0.22)] 2xl:hidden"
+            className="fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-[24rem] flex-col overflow-hidden border-l border-[#F5C542]/20 bg-[linear-gradient(180deg,rgba(38,17,72,0.98),rgba(12,5,27,0.99)_58%,rgba(34,17,45,0.99))] shadow-[0_0_80px_rgba(126,72,255,0.22)] 2xl:hidden"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 32 }}
           >
-            <div className="border-b border-amber-200/15 p-4">
+            <div className="border-b border-[#F5C542]/15 p-4">
               <div className="flex items-center justify-between gap-3">
                 <BrandLogo />
                 <Button variant="ghost" size="icon" aria-label="Close navigation menu" onClick={onClose}>
@@ -296,7 +296,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
                 ))}
               </div>
             </div>
-            <div className="border-t border-amber-200/15 bg-[#12051f]/78 p-4">
+            <div className="border-t border-[#F5C542]/15 bg-[#12051f]/80 p-4">
               <Button className="w-full" asChild onClick={onClose}>
                 <Link href="/signup"><Sparkles className="h-4 w-4" />{tr("startReading")}</Link>
               </Button>
@@ -315,12 +315,12 @@ function SidebarMenuGroup({ group, onClose, pathname, firstLinkRef }: { group: S
   return (
     <section
       className={cn(
-        "rounded-lg border bg-white/[0.045] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition",
-        groupActive ? "border-amber-200/40 shadow-[inset_3px_0_0_rgba(245,190,88,0.75),0_0_24px_rgba(126,72,255,0.13)]" : "border-amber-200/15"
+        "rounded-lg border bg-[#201037]/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition",
+        groupActive ? "border-[#F5C542]/40 shadow-[inset_3px_0_0_rgba(245,190,88,0.75),0_0_24px_rgba(126,72,255,0.13)]" : "border-[#F5C542]/15"
       )}
     >
-      <h2 className={cn("flex items-center gap-2 font-cinzel text-sm font-bold", groupActive ? "text-amber-200" : "text-amber-100")}>
-        <span className={cn("grid h-8 w-8 place-items-center rounded-md text-amber-200", groupActive ? "bg-amber-200/18 shadow-[0_0_16px_rgba(245,190,88,0.22)]" : "bg-amber-200/10")}>
+      <h2 className={cn("flex items-center gap-2 font-cinzel text-sm font-bold", groupActive ? "text-[#FFD36A]" : "text-[#FFD36A]")}>
+        <span className={cn("grid h-8 w-8 place-items-center rounded-md text-[#FFD36A]", groupActive ? "bg-[#F5C542]/18 shadow-[0_0_16px_rgba(245,190,88,0.22)]" : "bg-[#F5C542]/10")}>
           <GroupIcon className="h-4 w-4" />
         </span>
         {tr(group.titleKey)}
@@ -336,14 +336,14 @@ function SidebarMenuGroup({ group, onClose, pathname, firstLinkRef }: { group: S
             onClick={onClose}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-sm outline-none transition hover:bg-amber-200/10 hover:text-foreground focus:bg-amber-200/10 focus:text-foreground",
+              "flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-sm outline-none transition hover:bg-[#F5C542]/10 hover:text-foreground focus:bg-[#F5C542]/10 focus:text-foreground",
               active
-                ? "bg-[linear-gradient(135deg,rgba(245,190,88,0.16),rgba(126,72,255,0.14))] text-amber-100 shadow-[inset_3px_0_0_rgba(245,190,88,0.85),0_0_18px_rgba(126,72,255,0.14)]"
-                : "text-muted-foreground"
+                ? "bg-[linear-gradient(135deg,rgba(245,190,88,0.16),rgba(126,72,255,0.14))] text-[#FFD36A] shadow-[inset_3px_0_0_rgba(245,190,88,0.85),0_0_18px_rgba(126,72,255,0.14)]"
+                : "text-[#CDBFE8]"
             )}
           >
             <span className="whitespace-nowrap">{tr(item.labelKey)}</span>
-            {item.labelKey === "callAstrologers" ? <PhoneCall className="h-4 w-4 text-amber-200/80" /> : item.labelKey.toLowerCase().includes("report") ? <FileText className="h-4 w-4 text-amber-200/80" /> : <ScrollText className="h-4 w-4 text-amber-200/60" />}
+            {item.labelKey === "callAstrologers" ? <PhoneCall className="h-4 w-4 text-[#FFD36A]/80" /> : item.labelKey.toLowerCase().includes("report") ? <FileText className="h-4 w-4 text-[#FFD36A]/80" /> : <ScrollText className="h-4 w-4 text-[#FFD36A]/60" />}
           </Link>
           );
         })}

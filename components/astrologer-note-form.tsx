@@ -23,13 +23,13 @@ export function AstrologerNoteForm({ userId }: { userId: string }) {
   }
 
   return (
-    <form action={save} className="space-y-3 rounded-lg border border-amber-200/15 bg-card/50 p-4">
+    <form action={save} className="space-y-3 rounded-lg border border-[#F5C542]/20 bg-[#201037]/60 p-4">
       <Label>Private note title</Label>
       <Input name="title" required placeholder="Consultation context" />
       <Label>Private note</Label>
       <Textarea name="body" required placeholder="Observations, follow-up reminders, remedies discussed..." />
       <Button size="sm"><StickyNote className="h-4 w-4" />Save private note</Button>
-      {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
+      {message ? <p className="text-xs naksh-muted-text">{message}</p> : null}
     </form>
   );
 }

@@ -15,6 +15,18 @@ type AdminAnalytics = {
   appointments: number;
   posts: number;
 };
+type AstrologerApprovalRow = {
+  id: string;
+  createdAt: string;
+  displayName: string;
+  specialization: string;
+  languages: string[];
+  experienceYears: number;
+  consultationPrice: string | number;
+  status: string;
+  user?: { email?: string | null; name?: string | null } | null;
+};
+
 type ReportRequestRow = {
   id: string;
   createdAt: string;
@@ -48,16 +60,18 @@ const operations = [
 export default function AdminPage() {
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [reportRequests, setReportRequests] = useState<ReportRequestRow[]>([]);
+  const [astrologerApprovals, setAstrologerApprovals] = useState<AstrologerApprovalRow[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/analytics").then((r) => r.json()).then((json) => setAnalytics(json.data)).catch(() => setAnalytics(null));
     fetch("/api/admin/report-requests").then((r) => r.json()).then((json) => setReportRequests(json.data?.reportRequests ?? [])).catch(() => setReportRequests([]));
+    fetch("/api/admin/astrologers").then((r) => r.json()).then((json) => setAstrologerApprovals(json.data?.profiles ?? [])).catch(() => setAstrologerApprovals([]));
   }, []);
 
   return (
     <Section>
       <h1 className="text-4xl font-black">Admin Panel</h1>
-      <p className="mt-3 text-muted-foreground">Manage users, astrologers, subscriptions, revenue, blogs, moderation, support tickets, and analytics.</p>
+      <p className="mt-3 naksh-muted-text">Manage users, astrologers, subscriptions, revenue, blogs, moderation, support tickets, and analytics.</p>
       <div className="mt-5 flex flex-wrap gap-3">
         <Button asChild>
           <Link href="/admin/blog">Open Blog CMS</Link>
@@ -77,17 +91,53 @@ export default function AdminPage() {
           <Card key={key}>
             <CardContent className="pt-5">
               <p className="text-2xl font-black">{analytics?.[key] ?? "-"}</p>
-              <p className="capitalize text-sm text-muted-foreground">{key}</p>
+              <p className="capitalize text-sm naksh-muted-text">{key}</p>
             </CardContent>
           </Card>
         ))}
       </div>
       <Card className="mt-6 overflow-hidden">
+        <CardHeader><CardTitle>Astrologer Approvals</CardTitle></CardHeader>
+        <CardContent className="overflow-x-auto">
+          <table className="w-full min-w-[820px] text-left text-sm">
+            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD36A]">
+              <tr className="border-b border-[#F5C542]/20">
+                <th className="py-3 pr-4">Created</th>
+                <th className="py-3 pr-4">Astrologer</th>
+                <th className="py-3 pr-4">Email</th>
+                <th className="py-3 pr-4">Expertise</th>
+                <th className="py-3 pr-4">Languages</th>
+                <th className="py-3 pr-4">Experience</th>
+                <th className="py-3 pr-4">Price</th>
+                <th className="py-3 pr-4">Status</th>
+                <th className="py-3 pr-4">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {astrologerApprovals.map((profile) => (
+                <tr key={profile.id} className="border-b border-[#F5C542]/15 naksh-muted-text">
+                  <td className="py-3 pr-4">{new Date(profile.createdAt).toLocaleString()}</td>
+                  <td className="py-3 pr-4 text-[#FFF7E8]">{profile.displayName}</td>
+                  <td className="py-3 pr-4">{profile.user?.email}</td>
+                  <td className="py-3 pr-4">{profile.specialization}</td>
+                  <td className="py-3 pr-4">{profile.languages?.join(", ")}</td>
+                  <td className="py-3 pr-4">{profile.experienceYears}+ years</td>
+                  <td className="py-3 pr-4">INR {Number(profile.consultationPrice).toLocaleString("en-IN")}</td>
+                  <td className="py-3 pr-4">{profile.status}</td>
+                  <td className="py-3 pr-4"><Link className="text-[#FFD36A] hover:underline" href="/admin/astrologers">Review</Link></td>
+                </tr>
+              ))}
+              {!astrologerApprovals.length ? <tr><td colSpan={9} className="py-6 text-center naksh-muted-text">No astrologer profiles submitted yet.</td></tr> : null}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
+      <Card className="mt-6 overflow-hidden">
         <CardHeader><CardTitle>Report Requests</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-[0.18em] text-amber-200">
-              <tr className="border-b border-amber-200/15">
+            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD36A]">
+              <tr className="border-b border-[#F5C542]/20">
                 <th className="py-3 pr-4">Created</th>
                 <th className="py-3 pr-4">User</th>
                 <th className="py-3 pr-4">Email</th>
@@ -104,9 +154,9 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {reportRequests.map((request) => (
-                <tr key={request.id} className="border-b border-amber-200/10 text-muted-foreground">
+                <tr key={request.id} className="border-b border-[#F5C542]/15 naksh-muted-text">
                   <td className="py-3 pr-4">{new Date(request.createdAt).toLocaleString()}</td>
-                  <td className="py-3 pr-4 text-foreground">{request.fullName}</td>
+                  <td className="py-3 pr-4 text-[#FFF7E8]">{request.fullName}</td>
                   <td className="py-3 pr-4">{request.deliveryEmail || request.user?.email}</td>
                   <td className="py-3 pr-4">{request.planType}</td>
                   <td className="py-3 pr-4">{request.paymentStatus}</td>
@@ -116,10 +166,10 @@ export default function AdminPage() {
                   <td className="py-3 pr-4">{request.birthPlace ?? "-"}</td>
                   <td className="py-3 pr-4">{request.phone ?? "-"}</td>
                   <td className="max-w-[16rem] truncate py-3 pr-4">{request.concern ?? "-"}</td>
-                  <td className="py-3 pr-4"><Link className="text-amber-200 hover:underline" href={`/admin/report-requests/${request.id}`}>View details</Link></td>
+                  <td className="py-3 pr-4"><Link className="text-[#FFD36A] hover:underline" href={`/admin/report-requests/${request.id}`}>View details</Link></td>
                 </tr>
               ))}
-              {!reportRequests.length ? <tr><td colSpan={12} className="py-6 text-center text-muted-foreground">No report requests yet.</td></tr> : null}
+              {!reportRequests.length ? <tr><td colSpan={12} className="py-6 text-center naksh-muted-text">No report requests yet.</td></tr> : null}
             </tbody>
           </table>
         </CardContent>
@@ -132,11 +182,11 @@ export default function AdminPage() {
       </Card>
       <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {operations.map(({ title, copy, icon: Icon }) => (
-          <Card key={title} className="border-amber-200/15 bg-card/75">
+          <Card key={title} className="border-[#F5C542]/20 bg-[#201037]/80">
             <CardContent className="p-5">
-              <Icon className="h-5 w-5 text-amber-200" />
+              <Icon className="h-5 w-5 text-[#FFD36A]" />
               <h2 className="mt-4 font-cinzel text-lg font-bold">{title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy}</p>
+              <p className="mt-2 text-sm leading-6 naksh-muted-text">{copy}</p>
             </CardContent>
           </Card>
         ))}

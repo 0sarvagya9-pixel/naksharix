@@ -99,9 +99,9 @@ export function AuthProfileMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="flex h-10 items-center gap-2 rounded-full border border-amber-200/20 bg-white/[0.04] px-2 pr-3 text-sm text-foreground transition hover:border-amber-200/45 hover:bg-amber-200/10"
+        className="flex h-10 items-center gap-2 rounded-full border border-[#F5C542]/25 bg-[#201037]/70 px-2 pr-3 text-sm text-foreground transition hover:border-[#F5C542]/55 hover:bg-[#F5C542]/10"
       >
-        <span className="grid h-7 w-7 overflow-hidden rounded-full border border-amber-200/30 bg-amber-200/12 place-items-center text-xs font-bold text-amber-100">
+        <span className="grid h-7 w-7 overflow-hidden rounded-full border border-[#F5C542]/35 bg-[#F5C542]/10 place-items-center text-xs font-bold text-[#FFD36A]">
           {image ? <Image src={image} alt="" width={28} height={28} className="h-full w-full object-cover" /> : initials}
         </span>
         <span className="hidden max-w-[7rem] truncate xl:block">{user.name ?? user.email}</span>
@@ -110,11 +110,11 @@ export function AuthProfileMenu() {
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-amber-200/20 bg-background/95 p-2 shadow-[0_18px_60px_rgba(5,2,14,0.62),0_0_32px_rgba(126,72,255,0.18)] backdrop-blur-xl"
+          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-[#F5C542]/25 bg-[#12051f]/95 p-2 shadow-[0_18px_60px_rgba(5,2,14,0.62),0_0_32px_rgba(126,72,255,0.18)] backdrop-blur-xl"
         >
-          <div className="border-b border-amber-200/15 px-3 py-3">
-            <p className="truncate font-cinzel text-sm font-bold text-amber-100">{user.name ?? "Naksharix"}</p>
-            <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+          <div className="border-b border-[#F5C542]/20 px-3 py-3">
+            <p className="truncate font-cinzel text-sm font-bold text-[#FFD36A]">{user.name ?? "Naksharix"}</p>
+            <p className="truncate text-xs naksh-muted-text">{user.email}</p>
           </div>
           <ProfileLink href="/profile" icon={UserRound} label={tr("myProfile")} onClick={() => setOpen(false)} />
           <ProfileLink href="/my-readings" icon={BookOpen} label={tr("myReadings")} onClick={() => setOpen(false)} />
@@ -124,7 +124,7 @@ export function AuthProfileMenu() {
             type="button"
             role="menuitem"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-muted-foreground transition hover:bg-amber-200/10 hover:text-amber-100"
+            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm naksh-muted-text transition hover:bg-[#F5C542]/10 hover:text-[#FFD36A]"
           >
             <LogOut className="h-4 w-4" />
             {tr("logout")}
@@ -141,7 +141,7 @@ function ProfileLink({ href, icon: Icon, label, onClick }: { href: string; icon:
       role="menuitem"
       href={href}
       onClick={onClick}
-      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-amber-200/10 hover:text-amber-100"
+      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm naksh-muted-text transition hover:bg-[#F5C542]/10 hover:text-[#FFD36A]"
     >
       <Icon className="h-4 w-4" />
       {label}

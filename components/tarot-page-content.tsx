@@ -9,7 +9,7 @@ export function TarotPageContent() {
   return (
     <Section>
       <h1 className="font-decorative text-4xl font-black">{tr("tarotPageTitle")}</h1>
-      <p className="mt-3 text-muted-foreground">{tr("tarotPageSubtitle")}</p>
+      <p className="mt-3 naksh-muted-text">{tr("tarotPageSubtitle")}</p>
       <div className="mt-8"><InteractiveTarot /></div>
     </Section>
   );

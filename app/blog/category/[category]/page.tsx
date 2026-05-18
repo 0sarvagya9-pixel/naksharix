@@ -31,22 +31,22 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ c
 
   return (
     <Section>
-      <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Blog Category</p>
+      <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Blog Category</p>
       <h1 className="mt-3 font-cinzel text-4xl font-black">{category.name} Articles</h1>
-      <p className="mt-4 max-w-3xl text-muted-foreground">{category.description}</p>
+      <p className="mt-4 max-w-3xl naksh-muted-text">{category.description}</p>
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         {(posts.length ? posts : []).map((post) => (
           <Card key={post.slug}>
             <CardHeader><CardTitle>{post.title}</CardTitle></CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">{post.description}</p>
-              <Link className="mt-4 inline-block text-sm font-semibold text-primary" href={`/blog/${post.slug}`}>Read article</Link>
+              <p className="text-sm naksh-muted-text">{post.description}</p>
+              <Link className="mt-4 inline-block text-sm font-semibold text-[#B56CFF]" href={`/blog/${post.slug}`}>Read article</Link>
             </CardContent>
           </Card>
         ))}
         {!posts.length ? (
           <Card className="md:col-span-3">
-            <CardContent className="pt-6 text-sm text-muted-foreground">New {category.name.toLowerCase()} articles are being prepared. Explore related Naksharix tools below.</CardContent>
+            <CardContent className="pt-6 text-sm naksh-muted-text">New {category.name.toLowerCase()} articles are being prepared. Explore related Naksharix tools below.</CardContent>
           </Card>
         ) : null}
       </div>

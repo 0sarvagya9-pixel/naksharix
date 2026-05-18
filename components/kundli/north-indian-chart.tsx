@@ -27,26 +27,26 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-amber-200/20 bg-[radial-gradient(circle_at_16%_0%,rgba(245,190,88,0.16),transparent_24rem),linear-gradient(135deg,rgba(25,8,48,0.92),rgba(9,4,19,0.98))] p-4 shadow-[0_22px_70px_rgba(5,2,14,0.34)]",
+        "relative overflow-hidden rounded-2xl border border-[#F5C542]/25 bg-[radial-gradient(circle_at_16%_0%,rgba(245,190,88,0.16),transparent_24rem),linear-gradient(135deg,rgba(25,8,48,0.92),rgba(9,4,19,0.98))] p-4 shadow-[0_22px_70px_rgba(5,2,14,0.34)]",
         className
       )}
       onPointerLeave={() => setActiveCell(null)}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="font-cinzel text-xl font-black text-amber-50">{title}</p>
-          <p className="mt-1 text-xs text-amber-100/75">
-            {labels.sign}: <span className="font-semibold text-amber-100">{translatedAscendant(data.ascendantSign, data.language)}</span>
+          <p className="font-cinzel text-xl font-black text-[#FFF7E8]">{title}</p>
+          <p className="mt-1 text-xs text-[#FFD36A]/75">
+            {labels.sign}: <span className="font-semibold text-[#FFD36A]">{translatedAscendant(data.ascendantSign, data.language)}</span>
           </p>
         </div>
-        <span className="rounded-full border border-amber-200/30 bg-amber-200/12 px-3 py-1 text-xs font-bold text-amber-100">
+        <span className="rounded-full border border-[#F5C542]/35 bg-[#F5C542]/10 px-3 py-1 text-xs font-bold text-[#FFD36A]">
           {data.chartType}
         </span>
       </div>
 
       {!hasCalculatedChart ? (
-        <div className="grid min-h-[18rem] place-items-center rounded-xl border border-amber-200/20 bg-white/[0.04] p-6 text-center">
-          <p className="max-w-xs text-sm font-semibold text-amber-100">{chartUnavailable(data.chartType, data.language)}</p>
+        <div className="grid min-h-[18rem] place-items-center rounded-xl border border-[#F5C542]/25 bg-[#201037]/70 p-6 text-center">
+          <p className="max-w-xs text-sm font-semibold text-[#FFD36A]">{chartUnavailable(data.chartType, data.language)}</p>
         </div>
       ) : (
         <div className="relative mx-auto aspect-[10/7] max-w-[38rem] rounded-xl border border-[#3d2c19]/30 bg-[#fff4d8] p-2 shadow-[inset_0_0_0_1px_rgba(100,61,21,0.16),inset_0_18px_60px_rgba(118,72,21,0.09)]">

@@ -53,16 +53,16 @@ export default async function TodayHoroscopePage({ params }: PageProps) {
     <main className="star-field">
       <Section>
         <JsonLd id={`${sign.slug}-today-horoscope-schema`} data={schema} />
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">{date}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">{date}</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">{sign.name} Today Horoscope</h1>
-        <p className="mt-4 max-w-3xl text-muted-foreground">Today highlights {sign.focus}. Read your sign-level guidance below, then generate a free kundli for birth-chart personalization.</p>
+        <p className="mt-4 max-w-3xl naksh-muted-text">Today highlights {sign.focus}. Read your sign-level guidance below, then generate a free kundli for birth-chart personalization.</p>
         <div className="mt-8 grid gap-4 md:grid-cols-4">
           {sections.map(({ title, icon: Icon, copy }) => (
             <Card key={title} className="glass">
               <CardContent className="space-y-3 pt-6">
-                <Icon className="h-5 w-5 text-amber-200" />
+                <Icon className="h-5 w-5 text-[#FFD36A]" />
                 <h2 className="font-cinzel text-lg font-bold">{title}</h2>
-                <p className="text-sm text-muted-foreground">{copy}</p>
+                <p className="text-sm naksh-muted-text">{copy}</p>
               </CardContent>
             </Card>
           ))}

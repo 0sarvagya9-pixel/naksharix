@@ -22,14 +22,14 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
 
   return (
     <Section className="max-w-3xl">
-      <Card className="glass border-amber-200/25 text-center">
+      <Card className="glass border-[#F5C542]/30 text-center">
         <CardHeader>
-          <CardTitle className="font-cinzel text-3xl text-amber-50">{t(locale, "reportRequestReceived")}</CardTitle>
-          <p className="text-muted-foreground">{t(locale, "yourPaymentSuccessful")}</p>
+          <CardTitle className="font-cinzel text-3xl text-[#FFF7E8]">{t(locale, "reportRequestReceived")}</CardTitle>
+          <p className="naksh-muted-text">{t(locale, "yourPaymentSuccessful")}</p>
         </CardHeader>
-        <CardContent className="space-y-4 text-muted-foreground">
+        <CardContent className="space-y-4 naksh-muted-text">
           {showAdminBypass ? (
-            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-amber-200/25 bg-amber-200/10 px-4 py-2 text-sm text-amber-100">
+            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-[#F5C542]/30 bg-[#F5C542]/10 px-4 py-2 text-sm text-[#FFD36A]">
               <ShieldCheck className="h-4 w-4" />
               {t(locale, "adminTestingModePaymentBypassed")}
             </div>

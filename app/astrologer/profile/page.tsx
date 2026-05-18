@@ -27,21 +27,28 @@ export default async function AstrologerProfilePage() {
       <Section>
         <Card className="glass">
           <CardHeader>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Profile Management</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Profile Management</p>
             <CardTitle className="font-cinzel text-3xl">Marketplace Profile</CardTitle>
-            <p className="text-sm text-muted-foreground">Update your public details, consultation pricing, skills, certificates placeholder, and online status.</p>
+            <p className="text-sm naksh-muted-text">Update your public profile, consultation pricing, expertise, languages, city, and availability for admin approval.</p>
           </CardHeader>
           <CardContent>
             <AstrologerProfileForm defaults={activeProfile ? {
               displayName: activeProfile.displayName,
               photoUrl: activeProfile.photoUrl ?? "",
               bio: activeProfile.bio,
+              introLine: activeProfile.introLine ?? "",
               experienceYears: activeProfile.experienceYears,
               specialization: activeProfile.specialization,
               languages: activeProfile.languages,
               consultationPrice: Number(activeProfile.consultationPrice).toString(),
+              pricePerSession: activeProfile.pricePerSession ? Number(activeProfile.pricePerSession).toString() : "",
+              city: activeProfile.city ?? "",
+              country: activeProfile.country ?? "",
               skills: activeProfile.skills,
-              availabilityStatus: activeProfile.availabilityStatus
+              availabilityStatus: activeProfile.availabilityStatus,
+              availableForChat: activeProfile.availableForChat,
+              availableForCall: activeProfile.availableForCall,
+              availableForVideo: activeProfile.availableForVideo
             } : { displayName: user.name }} />
           </CardContent>
         </Card>

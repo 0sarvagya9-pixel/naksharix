@@ -27,15 +27,15 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Search</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Search</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Search Naksharix</h1>
-        <p className="mt-4 max-w-3xl text-muted-foreground">{query ? `Showing recommended astrology tools for "${query}".` : "Explore the most-used Naksharix astrology tools."}</p>
+        <p className="mt-4 max-w-3xl naksh-muted-text">{query ? `Showing recommended astrology tools for "${query}".` : "Explore the most-used Naksharix astrology tools."}</p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {results.map(([label, href]) => (
             <Link key={href} href={href}>
-              <Card className="glass h-full transition hover:border-amber-200/45">
-                <CardHeader><CardTitle className="flex items-center gap-2 font-cinzel"><Search className="h-4 w-4 text-amber-200" />{label}</CardTitle></CardHeader>
-                <CardContent className="text-sm text-muted-foreground">Open {label.toLowerCase()} on Naksharix.</CardContent>
+              <Card className="glass h-full transition hover:border-[#F5C542]/55">
+                <CardHeader><CardTitle className="flex items-center gap-2 font-cinzel"><Search className="h-4 w-4 text-[#FFD36A]" />{label}</CardTitle></CardHeader>
+                <CardContent className="text-sm naksh-muted-text">Open {label.toLowerCase()} on Naksharix.</CardContent>
               </Card>
             </Link>
           ))}

@@ -33,10 +33,10 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
 
   return (
     <Section className="max-w-4xl">
-      <Card className="glass overflow-visible border-amber-200/20">
+      <Card className="glass overflow-visible border-[#F5C542]/25">
         <CardHeader>
           <CardTitle className="font-cinzel text-3xl">{t(locale, "reportRequestDetails")}</CardTitle>
-          <p className="text-sm text-muted-foreground">{t(locale, "reportSentWithin24Hours")}</p>
+          <p className="text-sm naksh-muted-text">{t(locale, "reportSentWithin24Hours")}</p>
         </CardHeader>
         <CardContent className="overflow-visible">
           <ReportRequestForm userEmail={user.email} orderId={params.orderId} plan={plan} adminBypass={adminMode && isAdmin} />

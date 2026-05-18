@@ -8,14 +8,14 @@ export function ModuleCard({ title, description, href, icon: Icon }: { title: st
     <Link href={href}>
       <Card className="h-full transition hover:-translate-y-1 hover:border-primary/60">
         <CardHeader>
-          <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-primary/15 text-primary">
+          <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-primary/15 text-[#B56CFF]">
             <Icon className="h-5 w-5" />
           </div>
           <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">{description}</p>
-          <p className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+          <p className="text-sm naksh-muted-text">{description}</p>
+          <p className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#B56CFF]">
             Open <ArrowRight className="h-4 w-4" />
           </p>
         </CardContent>

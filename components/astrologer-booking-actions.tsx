@@ -35,7 +35,7 @@ export function AstrologerBookingActions({ bookingId }: { bookingId: string }) {
         <Input type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} />
         <Button size="sm" variant="outline" disabled={busy || !scheduledAt} onClick={() => act("RESCHEDULE")}><CalendarClock className="h-4 w-4" />Reschedule</Button>
       </div>
-      {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
+      {message ? <p className="text-xs naksh-muted-text">{message}</p> : null}
     </div>
   );
 }

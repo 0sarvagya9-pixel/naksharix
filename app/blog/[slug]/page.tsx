@@ -45,9 +45,9 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
     <Section className="max-w-3xl">
       <JsonLd id={`article-schema-${slug}`} data={articleSchema} />
       <article>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">{post.category}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">{post.category}</p>
         <h1 className="mt-3 text-balance text-4xl font-black">{post.title}</h1>
-        <p className="mt-6 text-lg leading-8 text-muted-foreground">{post.body}</p>
+        <p className="mt-6 text-lg leading-8 naksh-muted-text">{post.body}</p>
       </article>
       <SeoInternalLinks title="Continue your astrology journey" />
     </Section>

@@ -13,7 +13,7 @@ export async function requireRole(allowed: AppRole[]) {
 }
 
 export async function requireAstroRole() {
-  return requireRole(["ASTROLOGER", "CONSULTANT", "ADMIN", "SUPER_ADMIN"]);
+  return requireRole(["ASTROLOGER", "CONSULTANT"]);
 }
 
 export async function requireAdminRole() {

@@ -110,7 +110,7 @@ export function CalculatorSuite() {
               error={errors.birthPlace}
               placeholder={tr("searchLocationPlaceholder")}
             />
-            <p className="rounded-md border border-amber-200/15 bg-white/[0.04] p-3 text-xs leading-5 text-muted-foreground sm:col-span-2"><MapPin className="mr-1 inline h-3 w-3 text-amber-200" />{tr("calculatorLocationNote")}</p>
+            <p className="rounded-md border border-[#F5C542]/20 bg-[#201037]/70 p-3 text-xs leading-5 naksh-muted-text sm:col-span-2"><MapPin className="mr-1 inline h-3 w-3 text-[#FFD36A]" />{tr("calculatorLocationNote")}</p>
             <Button className="h-11 sm:col-span-2" disabled={loading}>
               <Calculator className="h-4 w-4" />
               {loading ? tr("calculating") : tr("calculate")}
@@ -135,10 +135,10 @@ export function CalculatorSuite() {
                 <ResultCard icon={<Users />} label={tr("friendshipScore")} value={`${result.friendshipScore ?? 0}%`} />
                 <ResultCard icon={<Calculator />} label={tr("lifePath")} value={String(result.numerology?.lifePathNumber ?? "-")} />
               </div>
-              <p className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4 text-sm leading-7 text-muted-foreground">{result.guidance}</p>
+              <p className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4 text-sm leading-7 naksh-muted-text">{result.guidance}</p>
             </div>
           ) : (
-            <p className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-5 text-sm leading-6 text-muted-foreground">{tr("calculatorEmpty")}</p>
+            <p className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-5 text-sm leading-6 naksh-muted-text">{tr("calculatorEmpty")}</p>
           )}
         </CardContent>
       </Card>
@@ -151,5 +151,5 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 }
 
 function ResultCard({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string }) {
-  return <div className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4"><div className="text-amber-200">{icon}</div><p className="mt-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p><p className="mt-1 font-cinzel text-xl font-bold">{value ?? "Calculated"}</p></div>;
+  return <div className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4"><div className="text-[#FFD36A]">{icon}</div><p className="mt-3 text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-xl font-bold">{value ?? "Calculated"}</p></div>;
 }

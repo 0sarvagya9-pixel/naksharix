@@ -16,9 +16,9 @@ export default function AstrologerOnboardingPage() {
       <Section className="max-w-3xl">
         <Card className="glass">
           <CardHeader>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Guide Portal</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Guide Portal</p>
             <CardTitle className="font-cinzel text-3xl">Apply as Astrologer / Consultant</CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm naksh-muted-text">
               Create your professional account. Naksharix admins will review your profile before public approval.
             </p>
           </CardHeader>

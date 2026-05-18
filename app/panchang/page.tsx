@@ -28,9 +28,9 @@ export default function PanchangPage() {
     <main className="star-field">
       <Section>
         <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Daily Panchang</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Daily Panchang</p>
           <h1 className="mt-3 font-cinzel text-4xl font-black sm:text-5xl">Today&apos;s Panchang</h1>
-          <p className="mt-4 text-muted-foreground">A clean daily view of tithi, nakshatra, rahu kaal, choghadiya, sunrise, sunset, festivals, and auspicious timing.</p>
+          <p className="mt-4 naksh-muted-text">A clean daily view of tithi, nakshatra, rahu kaal, choghadiya, sunrise, sunset, festivals, and auspicious timing.</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild><Link href="/festival-calendar">Festival Calendar</Link></Button>
             <Button variant="outline" asChild><Link href="/shubh-muhurat">Shubh Muhurat</Link></Button>
@@ -41,7 +41,7 @@ export default function PanchangPage() {
           {highlights.map(({ label, value, icon: Icon }) => (
             <Card key={label} className="glass">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base"><Icon className="h-5 w-5 text-amber-200" />{label}</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-base"><Icon className="h-5 w-5 text-[#FFD36A]" />{label}</CardTitle>
               </CardHeader>
               <CardContent><p className="font-cinzel text-2xl font-bold">{value}</p></CardContent>
             </Card>
@@ -61,9 +61,9 @@ export default function PanchangPage() {
           <Card className="glass">
             <CardHeader><CardTitle className="font-cinzel text-2xl">Festival Note</CardTitle></CardHeader>
             <CardContent>
-              <div className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4">
-                <CalendarDays className="mb-3 h-5 w-5 text-amber-200" />
-                <p className="leading-7 text-muted-foreground">{panchang.festival ?? "No major festival is highlighted for this generated panchang. Use the muhurat window for focused planning and devotional routines."}</p>
+              <div className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4">
+                <CalendarDays className="mb-3 h-5 w-5 text-[#FFD36A]" />
+                <p className="leading-7 naksh-muted-text">{panchang.festival ?? "No major festival is highlighted for this generated panchang. Use the muhurat window for focused planning and devotional routines."}</p>
               </div>
             </CardContent>
           </Card>
@@ -74,5 +74,5 @@ export default function PanchangPage() {
 }
 
 function PanchangRow({ label, value, icon }: { label: string; value?: string | null; icon?: React.ReactNode }) {
-  return <div className="rounded-lg border border-amber-200/20 bg-white/[0.04] p-4"><p className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">{icon}{label}</p><p className="mt-2 font-semibold">{value ?? "None"}</p></div>;
+  return <div className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4"><p className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] naksh-muted-text">{icon}{label}</p><p className="mt-2 font-semibold">{value ?? "None"}</p></div>;
 }

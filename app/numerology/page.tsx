@@ -14,7 +14,7 @@ export default function NumerologyPage() {
   return (
     <Section>
       <h1 className="font-cinzel text-4xl font-black">Numerology</h1>
-      <p className="mt-3 text-muted-foreground">Life path, destiny, soul urge, personality, name, mobile, vehicle, and daily numerology predictions.</p>
+      <p className="mt-3 naksh-muted-text">Life path, destiny, soul urge, personality, name, mobile, vehicle, and daily numerology predictions.</p>
       <div className="mt-8"><AstroTool type="numerology" /></div>
     </Section>
   );

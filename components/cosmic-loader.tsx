@@ -9,7 +9,7 @@ export function CosmicLoader({ label = "Aligning your stars" }: { label?: string
       <div className="text-center">
         <div className="relative mx-auto mb-8 h-32 w-32">
           <motion.div
-            className="absolute inset-0 rounded-full border border-amber-200/40"
+            className="absolute inset-0 rounded-full border border-[#F5C542]/45"
             animate={{ rotate: 360 }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
           />
@@ -23,7 +23,7 @@ export function CosmicLoader({ label = "Aligning your stars" }: { label?: string
           </div>
         </div>
         <p className="font-cinzel text-xl font-bold text-foreground">{label}</p>
-        <p className="mt-2 text-sm text-muted-foreground">Unlock Your Cosmic Destiny</p>
+        <p className="mt-2 text-sm naksh-muted-text">Unlock Your Cosmic Destiny</p>
       </div>
     </div>
   );

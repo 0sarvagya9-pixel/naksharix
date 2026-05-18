@@ -16,18 +16,18 @@ export function Footer() {
   const { tr } = useLanguage();
 
   return (
-    <footer className="border-t border-amber-200/15 bg-background/70">
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 text-sm text-muted-foreground md:grid-cols-4">
+    <footer className="border-t border-[#F5C542]/20 bg-[#090016]/80">
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 text-sm naksh-muted-text md:grid-cols-4">
         <div>
           <BrandLogo />
           <p className="mt-4">{tr("footerCopy")}</p>
         </div>
         {footerLinks.map(([label, href]) => (
-          <Link key={href} href={href} className="hover:text-foreground">
+          <Link key={href} href={href} className="hover:text-[#FFF7E8]">
             {tr(label)}
           </Link>
         ))}
-        <Link href="/hi" className="hover:text-foreground">हिन्दी</Link>
+        <Link href="/hi" className="hover:text-[#FFF7E8]">हिन्दी</Link>
       </div>
     </footer>
   );

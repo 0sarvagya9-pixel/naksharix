@@ -31,28 +31,28 @@ export default function AdminRevenuePage() {
 
   return (
     <Section>
-      <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Revenue Ops</p>
+      <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Revenue Ops</p>
       <h1 className="mt-3 font-cinzel text-4xl font-black">Admin Revenue Dashboard</h1>
       <div className="mt-8 grid gap-4 md:grid-cols-5">
         {cards.map(({ label, value, icon: Icon }) => (
-          <Card key={label} className="border-amber-200/15 bg-card/75">
+          <Card key={label} className="border-[#F5C542]/20 bg-[#201037]/80">
             <CardContent className="pt-5">
-              <Icon className="h-5 w-5 text-amber-200" />
+              <Icon className="h-5 w-5 text-[#FFD36A]" />
               <p className="mt-4 text-2xl font-black">{value}</p>
-              <p className="text-sm text-muted-foreground">{label}</p>
+              <p className="text-sm naksh-muted-text">{label}</p>
             </CardContent>
           </Card>
         ))}
       </div>
-      <Card className="mt-6 border-amber-200/15 bg-card/75">
+      <Card className="mt-6 border-[#F5C542]/20 bg-[#201037]/80">
         <CardHeader><CardTitle className="font-cinzel">Recent Payments</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {data?.recent?.map((payment) => (
-            <div key={payment.id} className="rounded-md border border-amber-200/15 bg-background/45 p-3">
+            <div key={payment.id} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3">
               <p className="font-medium">{payment.user.name} - {payment.purpose}</p>
-              <p className="text-sm text-muted-foreground">{payment.currency} {payment.amount} - {payment.status} - {payment.user.email}</p>
+              <p className="text-sm naksh-muted-text">{payment.currency} {payment.amount} - {payment.status} - {payment.user.email}</p>
             </div>
-          )) ?? <p className="text-sm text-muted-foreground">Loading revenue data...</p>}
+          )) ?? <p className="text-sm naksh-muted-text">Loading revenue data...</p>}
         </CardContent>
       </Card>
     </Section>

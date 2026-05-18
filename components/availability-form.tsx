@@ -49,10 +49,10 @@ export function AvailabilityForm() {
   }
 
   return (
-    <form action={addSlot} className="grid gap-4 rounded-lg border border-amber-200/15 bg-card/60 p-4 md:grid-cols-5">
+    <form action={addSlot} className="grid gap-4 rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 md:grid-cols-5">
       <div className="space-y-2">
         <Label>Day</Label>
-        <select name="dayOfWeek" data-field="dayOfWeek" defaultValue="1" className={`h-10 w-full rounded-md border border-input bg-background px-3 text-sm ${errorClass(Boolean(errors.dayOfWeek))}`} onChange={() => clear("dayOfWeek")}>
+        <select name="dayOfWeek" data-field="dayOfWeek" defaultValue="1" className={`h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm ${errorClass(Boolean(errors.dayOfWeek))}`} onChange={() => clear("dayOfWeek")}>
           {days.map((day, index) => <option key={day} value={index}>{day}</option>)}
         </select>
         {errors.dayOfWeek ? <p className="text-sm text-destructive">{errors.dayOfWeek}</p> : null}
@@ -69,7 +69,7 @@ export function AvailabilityForm() {
       </div>
       <div className="space-y-2">
         <Label>Status</Label>
-        <select name="status" data-field="status" defaultValue="ONLINE" className={`h-10 w-full rounded-md border border-input bg-background px-3 text-sm ${errorClass(Boolean(errors.status))}`} onChange={() => clear("status")}>
+        <select name="status" data-field="status" defaultValue="ONLINE" className={`h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm ${errorClass(Boolean(errors.status))}`} onChange={() => clear("status")}>
           <option value="ONLINE">Online</option>
           <option value="BUSY">Busy</option>
           <option value="OFFLINE">Offline</option>
@@ -77,7 +77,7 @@ export function AvailabilityForm() {
         {errors.status ? <p className="text-sm text-destructive">{errors.status}</p> : null}
       </div>
       <div className="flex flex-col justify-end gap-3">
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <label className="flex items-center gap-2 text-sm naksh-muted-text">
           <input type="checkbox" name="isHoliday" />
           Mark holiday
         </label>
@@ -86,7 +86,7 @@ export function AvailabilityForm() {
           Add slot
         </Button>
       </div>
-      {status ? <p className="md:col-span-5 text-sm text-muted-foreground">{status}</p> : null}
+      {status ? <p className="md:col-span-5 text-sm naksh-muted-text">{status}</p> : null}
     </form>
   );
 }

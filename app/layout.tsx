@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { cookies } from "next/headers";
 import { Cinzel, Cinzel_Decorative, Inter, Poppins } from "next/font/google";
 import "@/app/globals.css";
 import { env } from "@/lib/env";
@@ -11,12 +12,12 @@ import { WhatsAppButton } from "@/components/whatsapp-button";
 import { LanguageProvider } from "@/components/language-provider";
 import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo";
+import { normalizeLocale } from "@/lib/i18n";
 
 const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display: "swap" });
 const cinzelDecorative = Cinzel_Decorative({ subsets: ["latin"], weight: ["400", "700", "900"], variable: "--font-cinzel-decorative", display: "swap" });
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-poppins", display: "swap" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-
 
 export const metadata: Metadata = {
   ...seo({
@@ -44,11 +45,15 @@ export const viewport: Viewport = {
   initialScale: 1
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const initialLocale = normalizeLocale(cookieStore.get("naksharix-language")?.value);
+  const htmlLang = initialLocale === "hi" ? "hi" : initialLocale === "hinglish" ? "hi-Latn" : "en";
+
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={cn("font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
-        <LanguageProvider>
+    <html lang={htmlLang} className="dark" suppressHydrationWarning>
+      <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
+        <LanguageProvider initialLocale={initialLocale}>
           <MainNav />
           {children}
           <Footer />
@@ -68,5 +73,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-
-

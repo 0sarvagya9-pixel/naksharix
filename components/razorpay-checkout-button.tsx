@@ -94,7 +94,7 @@ export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay" }:
         <CreditCard className="h-4 w-4" />
         {loading ? tr("processing") : label}
       </Button>
-      {status ? <p className="text-sm text-muted-foreground">{status}</p> : null}
+      {status ? <p className="text-sm naksh-muted-text">{status}</p> : null}
     </div>
   );
 }

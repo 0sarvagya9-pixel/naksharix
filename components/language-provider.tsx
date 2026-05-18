@@ -13,22 +13,24 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === "undefined") return "en";
-    const cookieLocale = document.cookie.match(/(?:^|;\s*)naksharix-language=([^;]+)/)?.[1];
-    return normalizeLocale(window.localStorage.getItem("naksharix-language") ?? cookieLocale);
-  });
+export function LanguageProvider({ children, initialLocale = "en" }: { children: React.ReactNode; initialLocale?: Locale }) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
     const cookieLocale = document.cookie.match(/(?:^|;\s*)naksharix-language=([^;]+)/)?.[1];
-    const saved = window.localStorage.getItem("naksharix-language") ?? cookieLocale;
-    updateLocale(normalizeLocale(saved), false);
+    const savedLocale = window.localStorage.getItem("naksharix-language");
+    const nextLocale = normalizeLocale(cookieLocale ?? savedLocale ?? initialLocale);
+
+    updateLocale(nextLocale, !cookieLocale);
+    window.localStorage.setItem("naksharix-language", nextLocale);
+
     const listener = (event: StorageEvent) => {
-      if (event.key === "naksharix-language") updateLocale(normalizeLocale(event.newValue), false);
+      if (event.key === "naksharix-language") updateLocale(normalizeLocale(event.newValue), true);
     };
     window.addEventListener("storage", listener);
     return () => window.removeEventListener("storage", listener);
+    // Run once after hydration so the first client render matches the server cookie locale.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function updateLocale(nextLocale: Locale, persist = true) {

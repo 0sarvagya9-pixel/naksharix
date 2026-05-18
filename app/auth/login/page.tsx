@@ -23,11 +23,11 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} />
-          <p className="mt-4 text-sm text-muted-foreground">
-            New here? <Link href="/auth/signup" className="text-primary">Create an account</Link>
+          <p className="mt-4 text-sm naksh-muted-text">
+            New here? <Link href="/auth/signup" className="text-[#B56CFF]">Create an account</Link>
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Are you an astrologer or consultant? <Link href="/auth/astrologer-login" className="text-primary">Login as Astrologer / Consultant</Link>
+          <p className="mt-2 text-sm naksh-muted-text">
+            Are you an astrologer or consultant? <Link href="/auth/astrologer-login" className="text-[#B56CFF]">Login as Astrologer / Consultant</Link>
           </p>
         </CardContent>
       </Card>

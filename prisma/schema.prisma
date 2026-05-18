@@ -618,6 +618,14 @@ model AstrologerProfile {
   specialization     String                @default("Vedic Astrology")
   languages          String[]              @default(["Hindi", "English"])
   consultationPrice  Decimal               @default(0) @db.Decimal(12, 2)
+  pricePerSession    Decimal?              @db.Decimal(12, 2)
+  city               String?
+  country            String?
+  introLine          String?
+  availableForChat   Boolean               @default(false)
+  availableForCall   Boolean               @default(false)
+  availableForVideo  Boolean               @default(false)
+  profileViews       Int                   @default(0)
   skills             String[]              @default([])
   certificates       Json?
   status             ProfileStatus         @default(PENDING_REVIEW)
@@ -650,12 +658,23 @@ model ConsultantProfile {
   specialization     String           @default("Spiritual Consultant")
   languages          String[]         @default(["Hindi", "English"])
   consultationPrice  Decimal          @default(0) @db.Decimal(12, 2)
+  pricePerSession    Decimal?              @db.Decimal(12, 2)
+  city               String?
+  country            String?
+  introLine          String?
+  availableForChat   Boolean               @default(false)
+  availableForCall   Boolean               @default(false)
+  availableForVideo  Boolean               @default(false)
+  profileViews       Int                   @default(0)
   skills             String[]         @default([])
   certificates       Json?
   status             ProfileStatus    @default(PENDING_REVIEW)
   availabilityStatus ConsultantStatus @default(OFFLINE)
   rating             Float            @default(0)
   reviewCount        Int              @default(0)
+  approvedAt         DateTime?
+  rejectedAt         DateTime?
+  rejectionReason    String?
   user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt

@@ -81,7 +81,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      <div className="rounded-lg border border-amber-200/20 bg-amber-200/10 p-4 text-sm text-amber-50">
+      <div className="rounded-lg border border-[#F5C542]/25 bg-[#F5C542]/10 p-4 text-sm text-[#FFF7E8]">
         {tr("reportDeliveryEmailNotice")}: <span className="font-semibold">{userEmail}</span>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
@@ -130,7 +130,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
           <textarea value={concern} onChange={(event) => setConcern(event.target.value)} rows={4} className="cosmic-textarea" />
         </div>
       </div>
-      {adminBypass ? <p className="text-sm text-amber-100">{tr("adminTestingModePaymentBypassed")}</p> : null}
+      {adminBypass ? <p className="text-sm text-[#FFD36A]">{tr("adminTestingModePaymentBypassed")}</p> : null}
       {status ? <p className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">{status}</p> : null}
       <Button type="submit" disabled={loading} className="w-full md:w-auto">
         {loading ? tr("submittingReportRequest") : tr("submitReportRequest")}

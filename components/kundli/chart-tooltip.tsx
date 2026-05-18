@@ -22,7 +22,7 @@ export function ChartTooltip({
   return (
     <div
       className={cn(
-        "pointer-events-none fixed z-[80] w-[min(18rem,calc(100vw-2rem))] rounded-xl border border-amber-200/25 bg-[#12081f]/95 p-4 text-sm shadow-[0_18px_60px_rgba(5,2,14,0.65),0_0_36px_rgba(126,72,255,0.25)] backdrop-blur-xl",
+        "pointer-events-none fixed z-[80] w-[min(18rem,calc(100vw-2rem))] rounded-xl border border-[#F5C542]/30 bg-[#12081f]/95 p-4 text-sm shadow-[0_18px_60px_rgba(5,2,14,0.65),0_0_36px_rgba(126,72,255,0.25)] backdrop-blur-xl",
         className
       )}
       style={{
@@ -31,21 +31,21 @@ export function ChartTooltip({
       }}
       role="status"
     >
-      <div className="mb-3 border-b border-amber-200/15 pb-2">
-        <p className="font-cinzel text-base font-bold text-amber-100">
+      <div className="mb-3 border-b border-[#F5C542]/20 pb-2">
+        <p className="font-cinzel text-base font-bold text-[#FFD36A]">
           {labels.house} {cell.house}
         </p>
-        <p className="text-xs text-muted-foreground">
-          {labels.sign}: <span className="text-amber-100">{cell.signLabel}</span>
-          {cell.signLordLabel ? <> · {labels.signLord}: <span className="text-amber-100">{cell.signLordLabel}</span></> : null}
+        <p className="text-xs naksh-muted-text">
+          {labels.sign}: <span className="text-[#FFD36A]">{cell.signLabel}</span>
+          {cell.signLordLabel ? <> · {labels.signLord}: <span className="text-[#FFD36A]">{cell.signLordLabel}</span></> : null}
         </p>
       </div>
       {cell.planets?.length ? (
         <div className="grid gap-2">
           {cell.planets.map((planet, index) => (
-            <div key={`${cell.house}-${planet.planet}-${planet.degree ?? "na"}`} className="rounded-lg border border-white/10 bg-white/[0.04] p-2">
+            <div key={`${cell.house}-${planet.planet}-${planet.degree ?? "na"}`} className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-2">
               <p className="font-medium text-foreground">{cell.planetFullLabels[index] ?? planet.planet}</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              <p className="mt-1 text-xs leading-5 naksh-muted-text">
                 {typeof planet.degree === "number" ? `${labels.degree}: ${planet.degree.toFixed(2)}°` : null}
                 {planet.nakshatra ? ` · ${labels.nakshatra}: ${planet.nakshatra}` : ""}
                 {planet.pada ? ` · ${labels.pada}: ${planet.pada}` : ""}
@@ -54,7 +54,7 @@ export function ChartTooltip({
           ))}
         </div>
       ) : (
-        <p className="text-xs text-muted-foreground">{labels.noPlanets}</p>
+        <p className="text-xs naksh-muted-text">{labels.noPlanets}</p>
       )}
     </div>
   );

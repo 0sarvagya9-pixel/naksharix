@@ -22,17 +22,17 @@ export function ConsultationReviewForm({ bookingId }: { bookingId: string }) {
   }
 
   return (
-    <form action={submit} className="space-y-3 rounded-lg border border-amber-200/15 bg-background/45 p-4">
+    <form action={submit} className="space-y-3 rounded-lg border border-[#F5C542]/20 bg-[#12051f]/60 p-4">
       <div className="flex gap-2">
         {[1, 2, 3, 4, 5].map((value) => (
-          <button key={value} type="button" onClick={() => setRating(value)} className={value <= rating ? "text-amber-200" : "text-muted-foreground"}>
+          <button key={value} type="button" onClick={() => setRating(value)} className={value <= rating ? "text-[#FFD36A]" : "naksh-muted-text"}>
             <Star className="h-5 w-5 fill-current" />
           </button>
         ))}
       </div>
       <Textarea name="body" placeholder="Share your consultation experience..." />
       <Button size="sm">Submit review</Button>
-      {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
+      {message ? <p className="text-xs naksh-muted-text">{message}</p> : null}
     </form>
   );
 }

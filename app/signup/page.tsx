@@ -23,8 +23,8 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <AuthForm mode="signup" googleEnabled={googleEnabled} />
-          <p className="mt-4 text-sm text-muted-foreground">
-            Already registered? <Link href="/login" className="text-primary">Sign in</Link>
+          <p className="mt-4 text-sm naksh-muted-text">
+            Already registered? <Link href="/login" className="text-[#B56CFF]">Sign in</Link>
           </p>
         </CardContent>
       </Card>

@@ -20,10 +20,10 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
 
   return (
     <Section>
-      <Card className="glass border-amber-200/20">
+      <Card className="glass border-[#F5C542]/25">
         <CardHeader>
           <CardTitle className="font-cinzel text-3xl">Report Request Details</CardTitle>
-          <p className="text-sm text-muted-foreground">Purchased/requested at {request.createdAt.toLocaleString()}</p>
+          <p className="text-sm naksh-muted-text">Purchased/requested at {request.createdAt.toLocaleString()}</p>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm md:grid-cols-2">
           <Detail label="User" value={request.user?.name ?? request.fullName} />
@@ -44,9 +44,9 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
           <Detail label="Phone" value={request.phone ?? "-"} />
           <Detail label="Language" value={request.language} />
           <Detail label="Support email" value="care@naksharix.com" />
-          <div className="md:col-span-2 rounded-lg border border-amber-200/15 bg-white/[0.04] p-4">
-            <p className="text-amber-100">Concern</p>
-            <p className="mt-2 text-muted-foreground">{request.concern ?? "-"}</p>
+          <div className="md:col-span-2 rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
+            <p className="text-[#FFD36A]">Concern</p>
+            <p className="mt-2 naksh-muted-text">{request.concern ?? "-"}</p>
           </div>
         </CardContent>
       </Card>
@@ -56,8 +56,8 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-amber-200/15 bg-white/[0.04] p-4">
-      <p className="text-xs uppercase tracking-[0.18em] text-amber-200">{label}</p>
+    <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
+      <p className="text-xs uppercase tracking-[0.18em] text-[#FFD36A]">{label}</p>
       <p className="mt-2 text-foreground">{value}</p>
     </div>
   );

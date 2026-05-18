@@ -23,11 +23,11 @@ export default function AstrologerLoginPage() {
         </CardHeader>
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} />
-          <p className="mt-4 text-sm text-muted-foreground">
-            New guide on Naksharix? <Link href="/astrologer/onboarding" className="text-primary">Start onboarding</Link>
+          <p className="mt-4 text-sm naksh-muted-text">
+            New guide on Naksharix? <Link href="/astrologer/onboarding" className="text-[#B56CFF]">Start onboarding</Link>
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Looking for your personal dashboard? <Link href="/auth/login" className="text-primary">User login</Link>
+          <p className="mt-2 text-sm naksh-muted-text">
+            Looking for your personal dashboard? <Link href="/auth/login" className="text-[#B56CFF]">User login</Link>
           </p>
         </CardContent>
       </Card>

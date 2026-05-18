@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -96,23 +96,23 @@ export function AiChatbot() {
   return (
     <Card className="glass">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-cinzel"><Bot className="h-5 w-5 text-amber-200" />{tr("askYourKundliQuestions")}</CardTitle>
-        <p className="text-sm text-muted-foreground">{tr("askKundliSubtitle")}</p>
+        <CardTitle className="flex items-center gap-2 font-cinzel"><Bot className="h-5 w-5 text-[#FFD36A]" />{tr("askYourKundliQuestions")}</CardTitle>
+        <p className="text-sm naksh-muted-text">{tr("askKundliSubtitle")}</p>
         <div className="flex flex-wrap gap-2 pt-2"><Button asChild variant="outline"><Link href="/kundli">{tr("generateKundliFirst")}</Link></Button><Button asChild variant="secondary"><Link href="/reports/kundli-pro">{tr("unlockPremiumReport")}</Link></Button></div>
       </CardHeader>
       <CardContent className="grid gap-5 lg:grid-cols-[0.75fr_1.25fr]">
-        <aside className="space-y-4 rounded-lg border border-amber-200/15 bg-background/35 p-4">
-          <div className="space-y-2"><Label>{tr("responseLanguage")}</Label><div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">{selectedLanguage === "Hindi" ? tr("hindi") : selectedLanguage === "Hinglish" ? "Hinglish" : tr("english")}</div><p className="text-xs text-muted-foreground">{tr("globalLanguageControlsAi")}</p></div>
+        <aside className="space-y-4 rounded-lg border border-[#F5C542]/20 bg-[#12051f]/55 p-4">
+          <div className="space-y-2"><Label>{tr("responseLanguage")}</Label><div className="h-10 rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 py-2 text-sm">{selectedLanguage === "Hindi" ? tr("hindi") : selectedLanguage === "Hinglish" ? "Hinglish" : tr("english")}</div><p className="text-xs naksh-muted-text">{tr("globalLanguageControlsAi")}</p></div>
           <div className="space-y-2"><Label>{tr("birthDetailsMemory")}</Label><Textarea value={kundliContext} onChange={(event) => setKundliContext(event.target.value)} placeholder={tr("birthDetailsExample")} className="min-h-28" /></div>
-          <div className="space-y-2"><Label>{tr("suggestedQuestions")}</Label><div className="grid gap-2">{[tr("qCareer"), tr("qMarriage"), tr("qFinance"), tr("qDosha"), tr("qToday")].map((question) => <button key={question} type="button" onClick={() => send(question)} className="rounded-md border border-amber-200/15 bg-white/[0.04] p-3 text-left text-sm transition hover:border-amber-200/45">{question}</button>)}</div></div>
-          {recentLimitReached ? <div className="rounded-md border border-amber-200/20 bg-amber-200/10 p-3 text-sm text-muted-foreground">{tr("freeAiLimitNotice")}</div> : null}
+          <div className="space-y-2"><Label>{tr("suggestedQuestions")}</Label><div className="grid gap-2">{[tr("qCareer"), tr("qMarriage"), tr("qFinance"), tr("qDosha"), tr("qToday")].map((question) => <button key={question} type="button" onClick={() => send(question)} className="rounded-md border border-[#F5C542]/20 bg-[#201037]/70 p-3 text-left text-sm transition hover:border-[#F5C542]/55">{question}</button>)}</div></div>
+          {recentLimitReached ? <div className="rounded-md border border-[#F5C542]/25 bg-[#F5C542]/10 p-3 text-sm naksh-muted-text">{tr("freeAiLimitNotice")}</div> : null}
         </aside>
         <div className="space-y-4">
-          <div className="max-h-[520px] space-y-3 overflow-y-auto rounded-lg border border-amber-200/15 bg-background/40 p-3">
-            {messages.map((message, index) => <div key={`${message.role}-${index}`} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}><div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-card"}`}><div className="mb-1 flex items-center gap-2 text-xs opacity-80">{message.role === "user" ? <UserRound className="h-3 w-3" /> : <Bot className="h-3 w-3" />}{message.role === "user" ? tr("you") : "Naksharix"}</div>{message.content}</div></div>)}
-            {loading ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Sparkles className="h-4 w-4 animate-pulse text-amber-200" /> {tr("aiThinking")}</p> : null}
+          <div className="max-h-[520px] space-y-3 overflow-y-auto rounded-lg border border-[#F5C542]/20 bg-[#12051f]/60 p-3">
+            {messages.map((message, index) => <div key={`${message.role}-${index}`} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}><div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 ${message.role === "user" ? "bg-primary text-[#B56CFF]-foreground" : "bg-[#201037]"}`}><div className="mb-1 flex items-center gap-2 text-xs opacity-80">{message.role === "user" ? <UserRound className="h-3 w-3" /> : <Bot className="h-3 w-3" />}{message.role === "user" ? tr("you") : "Naksharix"}</div>{message.content}</div></div>)}
+            {loading ? <p className="flex items-center gap-2 text-sm naksh-muted-text"><Sparkles className="h-4 w-4 animate-pulse text-[#FFD36A]" /> {tr("aiThinking")}</p> : null}
           </div>
-          {notice ? <p className="rounded-md border border-amber-200/15 bg-white/[0.04] p-3 text-sm text-muted-foreground">{notice}</p> : null}
+          {notice ? <p className="rounded-md border border-[#F5C542]/20 bg-[#201037]/70 p-3 text-sm naksh-muted-text">{notice}</p> : null}
           <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]"><div><Input data-field="message" value={input} onChange={(event) => { setInput(event.target.value); setMessageError(null); }} placeholder={tr("chatPlaceholder")} className={errorClass(Boolean(messageError))} />{messageError ? <p className="mt-2 text-sm text-destructive">{messageError}</p> : null}</div><Button type="button" variant="outline" onClick={startVoiceInput}><Mic className="h-4 w-4" />{tr("voice")}</Button><Button onClick={() => send()} disabled={loading || !input.trim()}><Send className="h-4 w-4" />{tr("send")}</Button></div>
         </div>
       </CardContent>

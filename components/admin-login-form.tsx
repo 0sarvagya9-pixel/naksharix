@@ -38,14 +38,14 @@ export function AdminLoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 rounded-xl border border-amber-200/20 bg-gradient-to-br from-amber-200/10 via-white/[0.04] to-primary/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+    <form onSubmit={onSubmit} className="mt-6 rounded-xl border border-[#F5C542]/25 bg-gradient-to-br from-amber-200/10 via-white/[0.04] to-primary/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
       <div className="mb-4 flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-lg border border-amber-200/30 bg-amber-200/10 text-amber-100">
+        <span className="grid h-10 w-10 place-items-center rounded-lg border border-[#F5C542]/35 bg-[#F5C542]/10 text-[#FFD36A]">
           <ShieldCheck className="h-5 w-5" />
         </span>
         <div>
-          <h2 className="font-cinzel text-lg font-bold text-amber-50">{tr("adminLogin")}</h2>
-          <p className="text-xs text-muted-foreground">{tr("unlimitedAdminCredits")}</p>
+          <h2 className="font-cinzel text-lg font-bold text-[#FFF7E8]">{tr("adminLogin")}</h2>
+          <p className="text-xs naksh-muted-text">{tr("unlimitedAdminCredits")}</p>
         </div>
       </div>
       <div className="space-y-4">

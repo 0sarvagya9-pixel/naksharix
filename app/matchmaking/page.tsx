@@ -14,7 +14,7 @@ export default function MatchmakingPage() {
   return (
     <Section>
       <h1 className="font-cinzel text-4xl font-black">Kundli Matching</h1>
-      <p className="mt-3 text-muted-foreground">Gun Milan, compatibility score, manglik matching, marriage prediction, relationship analysis, charts, and PDF-ready reports.</p>
+      <p className="mt-3 naksh-muted-text">Gun Milan, compatibility score, manglik matching, marriage prediction, relationship analysis, charts, and PDF-ready reports.</p>
       <MatchmakingForm />
     </Section>
   );

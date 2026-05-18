@@ -8,30 +8,47 @@ const schema = z.object({
   displayName: z.string().min(2).max(80),
   photoUrl: z.string().url().optional().or(z.literal("")),
   bio: z.string().min(10).max(1200),
+  introLine: z.string().max(160).optional().or(z.literal("")),
   experienceYears: z.coerce.number().min(0).max(80),
-  specialization: z.string().min(2).max(120),
-  languages: z.string().min(2).max(160),
+  specialization: z.string().min(2).max(160),
+  languages: z.string().min(2).max(200),
   consultationPrice: z.coerce.number().min(0).max(100000),
-  skills: z.string().min(2).max(300),
-  availabilityStatus: z.enum(["ONLINE", "BUSY", "OFFLINE"])
+  pricePerSession: z.coerce.number().min(0).max(100000).optional().or(z.literal("")),
+  skills: z.string().min(2).max(400),
+  city: z.string().max(80).optional().or(z.literal("")),
+  country: z.string().max(80).optional().or(z.literal("")),
+  availabilityStatus: z.enum(["ONLINE", "BUSY", "OFFLINE"]),
+  availableForChat: z.coerce.boolean().default(false),
+  availableForCall: z.coerce.boolean().default(false),
+  availableForVideo: z.coerce.boolean().default(false)
 });
 
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    if (!user || !["ASTROLOGER", "CONSULTANT", "ADMIN", "SUPER_ADMIN"].includes(user.role)) return fail("Unauthorized", 403);
+    if (!user || !["ASTROLOGER", "CONSULTANT"].includes(user.role)) return fail("Unauthorized", 403);
     const body = await validateJson(request, schema);
     const data = {
       displayName: body.displayName,
       photoUrl: body.photoUrl || null,
       bio: body.bio,
+      introLine: body.introLine || null,
       experienceYears: body.experienceYears,
       specialization: body.specialization,
-      languages: body.languages.split(",").map((item) => item.trim()).filter(Boolean),
+      languages: splitList(body.languages),
       consultationPrice: body.consultationPrice,
-      skills: body.skills.split(",").map((item) => item.trim()).filter(Boolean),
+      pricePerSession: body.pricePerSession === "" || body.pricePerSession === undefined ? null : Number(body.pricePerSession),
+      skills: splitList(body.skills),
+      city: body.city || null,
+      country: body.country || null,
       availabilityStatus: body.availabilityStatus,
-      status: "PENDING_REVIEW" as const
+      availableForChat: body.availableForChat,
+      availableForCall: body.availableForCall,
+      availableForVideo: body.availableForVideo,
+      status: "PENDING_REVIEW" as const,
+      approvedAt: null,
+      rejectedAt: null,
+      rejectionReason: null
     };
     const profile = user.role === "CONSULTANT"
       ? await prisma.consultantProfile.upsert({ where: { userId: user.id }, create: { userId: user.id, ...data }, update: data })
@@ -40,4 +57,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleApiError(error);
   }
+}
+
+function splitList(value: string) {
+  return value.split(",").map((item) => item.trim()).filter(Boolean);
 }

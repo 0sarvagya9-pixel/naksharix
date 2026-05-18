@@ -28,23 +28,23 @@ export default async function PaymentSuccessPage({ searchParams }: { searchParam
 
   return (
     <Section className="max-w-3xl">
-      <Card className="glass overflow-hidden border-amber-200/25">
-        <CardHeader className="border-b border-amber-200/10 bg-[radial-gradient(circle_at_top,rgba(245,190,88,0.18),transparent_24rem)] text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-emerald-300/35 bg-emerald-300/12 text-emerald-200">
+      <Card className="glass overflow-hidden border-[#F5C542]/30">
+        <CardHeader className="border-b border-[#F5C542]/15 bg-[radial-gradient(circle_at_top,rgba(245,190,88,0.18),transparent_24rem)] text-center">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-emerald-300/35 bg-emerald-300/10 text-emerald-200">
             <CheckCircle2 className="h-7 w-7" />
           </div>
-          <CardTitle className="mt-4 font-cinzel text-3xl text-amber-50">{t(locale, "paymentSuccessful")}</CardTitle>
-          <p className="text-sm text-muted-foreground">{title}</p>
+          <CardTitle className="mt-4 font-cinzel text-3xl text-[#FFF7E8]">{t(locale, "paymentSuccessful")}</CardTitle>
+          <p className="text-sm naksh-muted-text">{title}</p>
         </CardHeader>
         <CardContent className="space-y-5 p-6 text-center">
           {isAdminMode ? (
-            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-amber-200/25 bg-amber-200/10 px-4 py-2 text-sm font-semibold text-amber-100">
+            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-[#F5C542]/30 bg-[#F5C542]/10 px-4 py-2 text-sm font-semibold text-[#FFD36A]">
               <ShieldCheck className="h-4 w-4" />
               {t(locale, "adminTestingModePaymentBypassed")}
             </div>
           ) : null}
-          <div className="space-y-3 text-base leading-8 text-muted-foreground">
-            <p className="text-lg font-semibold text-foreground">{thankYou}</p>
+          <div className="space-y-3 text-base leading-8 naksh-muted-text">
+            <p className="text-lg font-semibold text-[#FFF7E8]">{thankYou}</p>
             <p>{reportMessage}</p>
             {isVip ? <p>{t(locale, "consultingCredits1000")}</p> : null}
             <p>{t(locale, "contactSupportCare")}</p>

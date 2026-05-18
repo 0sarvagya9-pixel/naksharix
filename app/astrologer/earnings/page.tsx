@@ -40,7 +40,7 @@ export default async function AstrologerEarningsPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Earnings</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Earnings</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Astrologer Earnings Dashboard</h1>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           <Metric label="Gross earnings" value={`INR ${gross.toLocaleString("en-IN")}`} />
@@ -53,14 +53,14 @@ export default async function AstrologerEarningsPage() {
         </Card>
         <div className="mt-8 grid gap-4">
           {(profile?.payouts ?? []).map((payout) => (
-            <Card key={payout.id} className="border-amber-200/15 bg-card/70">
+            <Card key={payout.id} className="border-[#F5C542]/20 bg-[#201037]/75">
               <CardContent className="flex flex-col gap-2 p-5 md:flex-row md:items-center md:justify-between">
                 <p className="font-cinzel font-bold">INR {Number(payout.amount).toLocaleString("en-IN")}</p>
-                <p className="text-sm text-muted-foreground">{payout.status} | {payout.provider} | {payout.createdAt.toDateString()}</p>
+                <p className="text-sm naksh-muted-text">{payout.status} | {payout.provider} | {payout.createdAt.toDateString()}</p>
               </CardContent>
             </Card>
           ))}
-          {!profile?.payouts.length ? <p className="rounded-lg border border-amber-200/15 bg-card/60 p-4 text-sm text-muted-foreground">No payouts recorded yet.</p> : null}
+          {!profile?.payouts.length ? <p className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 text-sm naksh-muted-text">No payouts recorded yet.</p> : null}
         </div>
       </Section>
     </main>
@@ -71,9 +71,9 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <Card className="glass">
       <CardContent className="p-5">
-        {label.includes("Pending") ? <Wallet className="h-5 w-5 text-amber-200" /> : <IndianRupee className="h-5 w-5 text-amber-200" />}
+        {label.includes("Pending") ? <Wallet className="h-5 w-5 text-[#FFD36A]" /> : <IndianRupee className="h-5 w-5 text-[#FFD36A]" />}
         <p className="mt-4 font-cinzel text-2xl font-black">{value}</p>
-        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-sm naksh-muted-text">{label}</p>
       </CardContent>
     </Card>
   );

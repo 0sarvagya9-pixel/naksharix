@@ -22,9 +22,9 @@ export default function HindiHomePage() {
       <Section>
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Naksharix Hindi</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Naksharix Hindi</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black">{t("hi", "tagline")}</h1>
-            <p className="mt-4 max-w-3xl text-muted-foreground">{t("hi", "heroCopy")}</p>
+            <p className="mt-4 max-w-3xl naksh-muted-text">{t("hi", "heroCopy")}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild>
                 <Link href="/auth/signup">
@@ -40,8 +40,8 @@ export default function HindiHomePage() {
           <Card className="glass">
             <CardContent className="grid gap-3 pt-6">
               {features.map((feature) => (
-                <div key={feature} className="flex items-center gap-3 rounded-md border border-amber-200/15 bg-card/60 p-3">
-                  <MoonStar className="h-4 w-4 text-amber-200" />
+                <div key={feature} className="flex items-center gap-3 rounded-md border border-[#F5C542]/20 bg-[#201037]/70 p-3">
+                  <MoonStar className="h-4 w-4 text-[#FFD36A]" />
                   {feature}
                 </div>
               ))}

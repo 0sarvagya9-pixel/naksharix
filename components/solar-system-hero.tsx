@@ -23,7 +23,7 @@ export function SolarSystemHero() {
         {planets.map((planet) => (
           <div
             key={planet.name}
-            className={`absolute left-1/2 top-1/2 rounded-full border border-amber-200/15 ${planet.depth}`}
+            className={`absolute left-1/2 top-1/2 rounded-full border border-[#F5C542]/20 ${planet.depth}`}
             style={{
               width: `${planet.orbit * 2}%`,
               height: `${planet.orbit * 2}%`,
@@ -49,7 +49,7 @@ export function SolarSystemHero() {
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
       <div className="absolute inset-10 rounded-full border border-purple-300/10" />
-      <div className="absolute inset-20 rounded-full border border-amber-200/10" />
+      <div className="absolute inset-20 rounded-full border border-[#F5C542]/15" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_34%,rgba(8,3,20,0.18)_70%)]" />
     </div>
   );

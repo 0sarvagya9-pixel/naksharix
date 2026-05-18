@@ -17,17 +17,17 @@ export default function ZodiacPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Zodiac SEO Hub</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Zodiac SEO Hub</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Explore Zodiac Signs</h1>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {zodiacSigns.map((sign) => (
             <Link key={sign.slug} href={`/zodiac/${sign.slug}`}>
-              <Card className="glass h-full transition hover:border-amber-200/45">
+              <Card className="glass h-full transition hover:border-[#F5C542]/55">
                 <CardHeader>
                   <CardTitle className="font-cinzel">{sign.name}</CardTitle>
                 </CardHeader>
-                <CardContent className="flex items-start gap-3 text-sm text-muted-foreground">
-                  <Sparkles className="mt-0.5 h-4 w-4 text-amber-200" />
+                <CardContent className="flex items-start gap-3 text-sm naksh-muted-text">
+                  <Sparkles className="mt-0.5 h-4 w-4 text-[#FFD36A]" />
                   {sign.element} sign focused on {sign.focus}.
                 </CardContent>
               </Card>

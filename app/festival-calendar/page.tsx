@@ -26,21 +26,21 @@ export default function FestivalCalendarPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Hindu Calendar</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Hindu Calendar</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Festival Calendar 2026</h1>
-        <p className="mt-4 max-w-3xl text-muted-foreground">Plan important festivals, vrata days, devotional routines, and auspicious windows with Naksharix Panchang and Muhurat tools.</p>
+        <p className="mt-4 max-w-3xl naksh-muted-text">Plan important festivals, vrata days, devotional routines, and auspicious windows with Naksharix Panchang and Muhurat tools.</p>
         <div className="mt-7 flex flex-wrap gap-3">
           <Button asChild><Link href="/panchang">Today&apos;s Panchang</Link></Button>
           <Button variant="outline" asChild><Link href="/shubh-muhurat">Find Shubh Muhurat</Link></Button>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {festivals.map(([name, date, copy]) => (
-            <Card key={name} className="border-amber-200/15 bg-card/70">
+            <Card key={name} className="border-[#F5C542]/20 bg-[#201037]/75">
               <CardContent className="p-5">
-                <CalendarDays className="h-5 w-5 text-amber-200" />
+                <CalendarDays className="h-5 w-5 text-[#FFD36A]" />
                 <h2 className="mt-4 font-cinzel text-xl font-bold">{name}</h2>
-                <p className="mt-1 text-sm text-amber-200">{date}</p>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">{copy}</p>
+                <p className="mt-1 text-sm text-[#FFD36A]">{date}</p>
+                <p className="mt-3 text-sm leading-6 naksh-muted-text">{copy}</p>
               </CardContent>
             </Card>
           ))}

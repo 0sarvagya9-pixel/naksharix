@@ -65,7 +65,7 @@ export function AdminBlogEditor() {
             </div>
             <div className="space-y-2">
               <Label>Status</Label>
-              <select name="status" className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+              <select name="status" className="h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm">
                 <option value="DRAFT">Draft</option>
                 <option value="PUBLISHED">Published</option>
               </select>
@@ -75,7 +75,7 @@ export function AdminBlogEditor() {
             <Send className="h-4 w-4" />
             Save Post
           </Button>
-          {status ? <p className="text-sm text-muted-foreground">{status}</p> : null}
+          {status ? <p className="text-sm naksh-muted-text">{status}</p> : null}
         </form>
       </CardContent>
     </Card>

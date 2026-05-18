@@ -27,26 +27,26 @@ export default async function AstrologerAvailabilityPage() {
       <Section>
         <Card className="glass">
           <CardHeader>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">Availability</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Availability</p>
             <CardTitle className="font-cinzel text-3xl">Consultation Slots</CardTitle>
-            <p className="text-sm text-muted-foreground">Add available days, time windows, holiday marks, and your current online/busy/offline status.</p>
+            <p className="text-sm naksh-muted-text">Add available days, time windows, holiday marks, and your current online/busy/offline status.</p>
           </CardHeader>
           <CardContent className="space-y-6">
             {profile ? <AvailabilityForm /> : (
-              <div className="rounded-lg border border-amber-200/15 bg-card/60 p-4 text-sm text-muted-foreground">
+              <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 text-sm naksh-muted-text">
                 Create your astrologer profile before adding availability.
                 <Button className="mt-4 block w-fit" asChild><Link href="/astrologer/profile">Create profile</Link></Button>
               </div>
             )}
             <div className="grid gap-3 md:grid-cols-2">
               {(profile?.slots ?? []).map((slot) => (
-                <div key={slot.id} className="rounded-lg border border-amber-200/15 bg-card/60 p-4">
+                <div key={slot.id} className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
                   <p className="font-cinzel font-bold">{days[slot.dayOfWeek]} {slot.isHoliday ? "(Holiday)" : ""}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{slot.startTime} - {slot.endTime} | {slot.status}</p>
+                  <p className="mt-1 text-sm naksh-muted-text">{slot.startTime} - {slot.endTime} | {slot.status}</p>
                 </div>
               ))}
             </div>
-            {profile?.slots.length === 0 ? <p className="text-sm text-muted-foreground">No slots added yet.</p> : null}
+            {profile?.slots.length === 0 ? <p className="text-sm naksh-muted-text">No slots added yet.</p> : null}
           </CardContent>
         </Card>
       </Section>

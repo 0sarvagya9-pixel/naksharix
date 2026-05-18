@@ -49,7 +49,7 @@ export function KundliReportDashboard({ report, language }: { report: DashboardR
   const fallback = tr("notAvailable");
 
   return (
-    <section className="rounded-3xl border border-amber-200/20 bg-[radial-gradient(circle_at_12%_6%,rgba(245,190,88,0.12),transparent_28rem),linear-gradient(135deg,rgba(22,8,43,0.82),rgba(8,4,18,0.96))] p-4 shadow-[0_24px_80px_rgba(5,2,14,0.32)] sm:p-6">
+    <section className="rounded-3xl border border-[#F5C542]/25 bg-[radial-gradient(circle_at_12%_6%,rgba(245,190,88,0.12),transparent_28rem),linear-gradient(135deg,rgba(22,8,43,0.82),rgba(8,4,18,0.96))] p-4 shadow-[0_24px_80px_rgba(5,2,14,0.32)] sm:p-6">
       <ReportSectionHeader eyebrow={labels.dashboard} title={labels.title} />
 
       <div className="space-y-6">
@@ -81,8 +81,8 @@ function ReportSectionHeader({ eyebrow, title }: { eyebrow: string; title: strin
   return (
     <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-amber-200/80">{eyebrow}</p>
-        <h3 className="font-cinzel text-2xl font-black text-amber-50 sm:text-3xl">{title}</h3>
+        <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#FFD36A]/80">{eyebrow}</p>
+        <h3 className="font-cinzel text-2xl font-black text-[#FFF7E8] sm:text-3xl">{title}</h3>
       </div>
       <div className="h-px flex-1 bg-gradient-to-r from-amber-200/60 via-purple-300/25 to-transparent sm:max-w-sm" />
     </div>
@@ -90,7 +90,7 @@ function ReportSectionHeader({ eyebrow, title }: { eyebrow: string; title: strin
 }
 
 function PanelTitle({ title }: { title: string }) {
-  return <h4 className="mb-3 flex items-center gap-2 font-cinzel text-lg font-bold text-amber-50"><Sparkles className="h-4 w-4 text-amber-200" />{title}</h4>;
+  return <h4 className="mb-3 flex items-center gap-2 font-cinzel text-lg font-bold text-[#FFF7E8]"><Sparkles className="h-4 w-4 text-[#FFD36A]" />{title}</h4>;
 }
 
 function PlanetaryPositionTable({
@@ -107,7 +107,7 @@ function PlanetaryPositionTable({
   const rows = planets.length ? planets : [{ planet: undefined, sign: undefined, house: undefined, degree: undefined, nakshatra: undefined, pada: undefined, dignity: undefined }];
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-amber-200/25 bg-[#fbf0d6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_18px_48px_rgba(4,2,12,0.2)]">
+    <div className="overflow-hidden rounded-2xl border border-[#F5C542]/30 bg-[#fbf0d6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_18px_48px_rgba(4,2,12,0.2)]">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[42rem] border-collapse text-left text-sm text-[#241609]">
           <thead className="sticky top-0 z-10 bg-[#3a2110] font-cinzel text-xs uppercase tracking-[0.13em] text-[#fff1c7]">
@@ -165,11 +165,11 @@ function BirthPanchangPanel({
   ];
 
   return (
-    <div className="rounded-2xl border border-amber-200/25 bg-[#160a28] p-3 shadow-[0_18px_48px_rgba(4,2,12,0.22)]">
+    <div className="rounded-2xl border border-[#F5C542]/30 bg-[#160a28] p-3 shadow-[0_18px_48px_rgba(4,2,12,0.22)]">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
         {items.map((item) => (
-          <div key={item.label} className="flex items-start gap-3 rounded-xl border border-amber-200/18 bg-[#fff7e6] p-3 text-[#211407] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#3a2110] text-amber-100">
+          <div key={item.label} className="flex items-start gap-3 rounded-xl border border-[#F5C542]/20 bg-[#fff7e6] p-3 text-[#211407] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#3a2110] text-[#FFD36A]">
               <item.icon className="h-4 w-4" />
             </span>
             <span className="min-w-0">
