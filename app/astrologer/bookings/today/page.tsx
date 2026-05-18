@@ -15,7 +15,7 @@ export default async function Page() {
     where: { userId: user.id },
     include: {
       bookings: {
-        where: { status: "CONFIRMED", scheduledAt: { gte: start, lt: end } },
+        where: { status: { in: ["ACCEPTED", "CONFIRMED"] }, scheduledAt: { gte: start, lt: end } },
         include: { user: { select: { id: true, name: true, email: true } } },
         orderBy: { scheduledAt: "asc" }
       }

@@ -23,12 +23,12 @@ export async function POST(request: NextRequest) {
     if (profile && booking.astrologerProfileId !== profile.id) return fail("You cannot update this booking", 403);
 
     const data = body.action === "ACCEPT"
-      ? { status: "CONFIRMED" as const }
+      ? { status: "ACCEPTED" as const }
       : body.action === "REJECT"
-        ? { status: "CANCELED" as const, metadata: { reason: body.reason ?? "Rejected by astrologer" } }
+        ? { status: "REJECTED" as const, metadata: { reason: body.reason ?? "Rejected by astrologer" } }
         : body.action === "COMPLETE"
           ? { status: "COMPLETED" as const }
-          : { status: "CONFIRMED" as const, scheduledAt: body.scheduledAt };
+          : { status: "ACCEPTED" as const, scheduledAt: body.scheduledAt };
 
     if (body.action === "RESCHEDULE" && !body.scheduledAt) return fail("Reschedule date and time is required", 422);
     const updated = await prisma.consultationBooking.update({ where: { id: body.bookingId }, data });

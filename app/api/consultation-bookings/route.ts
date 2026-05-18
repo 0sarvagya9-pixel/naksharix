@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         birthPlace: body.birthPlace || null,
         question: body.question,
         amount: adminBypass ? 0 : profile.consultationPrice,
-        status: "REQUESTED",
+        status: "PENDING",
         paymentStatus: adminBypass ? "ADMIN_BYPASS" : "PENDING",
         metadata: {
           customerName: body.customerName,

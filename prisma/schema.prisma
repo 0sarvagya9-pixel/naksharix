@@ -30,9 +30,12 @@ enum ConsultantStatus {
 }
 
 enum BookingStatus {
+  PENDING
   REQUESTED
   PAYMENT_PENDING
+  ACCEPTED
   CONFIRMED
+  REJECTED
   COMPLETED
   CANCELED
 }

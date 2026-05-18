@@ -37,10 +37,10 @@ export default async function AstrologerDashboardPage() {
   const bookings = profile?.bookings ?? [];
   const now = new Date();
   const todayKey = now.toDateString();
-  const acceptedBookings = bookings.filter((booking) => booking.status === "CONFIRMED");
+  const acceptedBookings = bookings.filter((booking) => booking.status === "ACCEPTED" || booking.status === "CONFIRMED");
   const todayBookings = acceptedBookings.filter((booking) => booking.scheduledAt.toDateString() === todayKey).length;
   const upcomingBookings = acceptedBookings.filter((booking) => booking.scheduledAt >= now).length;
-  const pendingBookings = bookings.filter((booking) => booking.status === "REQUESTED" || booking.status === "PAYMENT_PENDING").length;
+  const pendingBookings = bookings.filter((booking) => booking.status === "PENDING" || booking.status === "REQUESTED" || booking.status === "PAYMENT_PENDING").length;
   const completedBookings = bookings.filter((booking) => booking.status === "COMPLETED").length;
   const totalEarnings = bookings
     .filter((booking) => booking.status === "COMPLETED" && (booking.paymentStatus === "PAID" || booking.paymentStatus === "ADMIN_BYPASS" || booking.paymentStatus === "FREE"))

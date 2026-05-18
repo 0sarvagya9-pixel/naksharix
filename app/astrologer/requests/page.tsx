@@ -11,7 +11,7 @@ export default async function Page() {
     where: { userId: user.id },
     include: {
       bookings: {
-        where: { status: { in: ["REQUESTED", "PAYMENT_PENDING"] } },
+        where: { status: { in: ["PENDING", "REQUESTED", "PAYMENT_PENDING"] } },
         include: { user: { select: { id: true, name: true, email: true } } },
         orderBy: { createdAt: "desc" }
       }
