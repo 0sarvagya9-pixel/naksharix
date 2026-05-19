@@ -146,29 +146,34 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
   const PdfText = Text as unknown as PdfComponent;
   const PdfView = View as unknown as PdfComponent;
   const lang = labels[language] ? language : "en";
+  const isHindi = lang === "hi";
   const styles = StyleSheet.create({
-    page: { position: "relative", padding: 28, paddingBottom: 40, backgroundColor: "#fffaf0", color: "#241036", fontFamily: PDF_FONT_FAMILY, fontSize: 9.2, lineHeight: 1.35 },
-    watermark: { position: "absolute", top: "43%", left: 24, right: 24, transform: "rotate(-28deg)", color: "#6d3bbd", opacity: 0.06, fontFamily: PDF_FONT_FAMILY, fontSize: 25, textAlign: "center", fontWeight: 800 },
-    header: { marginBottom: 10, paddingBottom: 8, borderBottomWidth: 1.2, borderBottomColor: "#d4af37", display: "flex", flexDirection: "row", justifyContent: "space-between" },
-    brand: { color: "#2b124d", fontSize: 21, fontWeight: 800, fontFamily: PDF_FONT_FAMILY },
-    subtitle: { color: "#8b6a22", fontSize: 9 },
-    section: { marginBottom: 8, padding: 8, borderWidth: 1, borderColor: "#dfc47a", borderRadius: 7, backgroundColor: "#fffdf8" },
-    sectionTitle: { color: "#2b124d", fontSize: 11.5, fontWeight: 800, marginBottom: 6 },
-    row: { display: "flex", flexDirection: "row", borderBottomWidth: 0.45, borderBottomColor: "#ead9aa", paddingVertical: 3.5 },
-    key: { width: "38%", color: "#6d3bbd", fontWeight: 700 },
-    value: { width: "62%", color: "#241036" },
+    page: { position: "relative", padding: 30, paddingTop: 26, paddingBottom: 42, backgroundColor: "#fffaf0", color: "#241036", fontFamily: PDF_FONT_FAMILY, fontSize: isHindi ? 9.6 : 9.2, lineHeight: isHindi ? 1.58 : 1.42 },
+    watermark: { position: "absolute", top: "44%", left: 30, right: 30, transform: "rotate(-28deg)", color: "#6d3bbd", opacity: 0.045, fontFamily: PDF_FONT_FAMILY, fontSize: isHindi ? 20 : 23, textAlign: "center", fontWeight: 700 },
+    header: { marginBottom: 8, paddingBottom: 8, borderBottomWidth: 1.2, borderBottomColor: "#d4af37", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    brandBlock: { width: "62%" },
+    brand: { color: "#2b124d", fontSize: 20, fontWeight: 800, fontFamily: PDF_FONT_FAMILY, lineHeight: 1.1 },
+    site: { color: "#8b6a22", fontSize: 8.8, textAlign: "right" },
+    reportTitle: { color: "#2b124d", fontSize: isHindi ? 13 : 12.5, fontWeight: 800, marginBottom: 10, lineHeight: isHindi ? 1.42 : 1.25 },
+    subtitle: { color: "#8b6a22", fontSize: 9, lineHeight: isHindi ? 1.45 : 1.25 },
+    content: { marginTop: 2 },
+    section: { marginBottom: 9, padding: 9, borderWidth: 1, borderColor: "#dfc47a", borderRadius: 7, backgroundColor: "#fffdf8" },
+    sectionTitle: { color: "#2b124d", fontSize: isHindi ? 11.6 : 11.2, fontWeight: 800, marginBottom: 7, lineHeight: isHindi ? 1.38 : 1.2 },
+    row: { display: "flex", flexDirection: "row", borderBottomWidth: 0.45, borderBottomColor: "#ead9aa", paddingVertical: isHindi ? 4.2 : 3.7 },
+    key: { width: "38%", color: "#6d3bbd", fontWeight: 700, paddingRight: 5, lineHeight: isHindi ? 1.45 : 1.25 },
+    value: { width: "62%", color: "#241036", lineHeight: isHindi ? 1.45 : 1.25 },
     grid2: { display: "flex", flexDirection: "row", gap: 8 },
     col: { flex: 1 },
-    chartRow: { display: "flex", flexDirection: "row", gap: 8 },
-    chartBox: { flex: 1, padding: 6, borderWidth: 1, borderColor: "#d4af37", borderRadius: 6, backgroundColor: "#fff7df" },
-    tableHeader: { display: "flex", flexDirection: "row", backgroundColor: "#2b124d", color: "#fff6d8", paddingVertical: 5, paddingHorizontal: 4, fontSize: 7.8, fontWeight: 800 },
-    tableRow: { display: "flex", flexDirection: "row", paddingVertical: 4.3, paddingHorizontal: 4, borderBottomWidth: 0.45, borderBottomColor: "#e6d09a", fontSize: 7.8 },
+    chartRow: { display: "flex", flexDirection: "row", gap: 7, marginTop: 2 },
+    chartBox: { flex: 1, padding: 6, borderWidth: 1, borderColor: "#d4af37", borderRadius: 6, backgroundColor: "#fff7df", minHeight: 178 },
+    tableHeader: { display: "flex", flexDirection: "row", backgroundColor: "#2b124d", color: "#fff6d8", paddingVertical: 5.5, paddingHorizontal: 4, fontSize: isHindi ? 8 : 7.8, fontWeight: 800, lineHeight: 1.28 },
+    tableRow: { display: "flex", flexDirection: "row", paddingVertical: isHindi ? 5 : 4.3, paddingHorizontal: 4, borderBottomWidth: 0.45, borderBottomColor: "#e6d09a", fontSize: isHindi ? 8 : 7.8, lineHeight: isHindi ? 1.42 : 1.25 },
     cellPlanet: { width: "15%" },
     cellSign: { width: "18%" },
     cellSmall: { width: "10%" },
     cellWide: { width: "24%" },
-    paragraph: { marginBottom: 5, fontSize: 9.2, color: "#34223d" },
-    footer: { position: "absolute", left: 28, right: 28, bottom: 16, display: "flex", flexDirection: "row", justifyContent: "space-between", color: "#7d6f83", fontSize: 7.5 }
+    paragraph: { marginBottom: 6, fontSize: isHindi ? 9.8 : 9.2, color: "#34223d", lineHeight: isHindi ? 1.62 : 1.42 },
+    footer: { position: "absolute", left: 30, right: 30, bottom: 16, display: "flex", flexDirection: "row", justifyContent: "space-between", color: "#7d6f83", fontSize: 7.5 }
   });
 
   const text: PdfTextFactory = (value, style, props = {}) => h(PdfText, { ...props, style }, safeText(value, lang));
@@ -252,10 +257,11 @@ function page(
   return h(Page, { key: title, size: "A4", style: styles.page }, [
     pdfType === "FREE" ? text(labels[lang].watermark, styles.watermark, { key: "watermark", fixed: true }) : null,
     h(View, { key: "header", fixed: true, style: styles.header }, [
-      h(View, { key: "brand" }, [text("Naksharix", styles.brand, { key: "brand-text" }), text(title, styles.subtitle, { key: "sub" })]),
-      text("naksharix.com", styles.subtitle, { key: "site" })
+      h(View, { key: "brand", style: styles.brandBlock }, [text("Naksharix", styles.brand, { key: "brand-text" })]),
+      text("naksharix.com", styles.site, { key: "site" })
     ]),
-    ...children,
+    text(title, styles.reportTitle, { key: "page-title" }),
+    h(View, { key: "content", style: styles.content }, children),
     h(View, { key: "footer", fixed: true, style: styles.footer }, [text("naksharix.com", undefined, { key: "url" }), text(new Date().toISOString().slice(0, 10), undefined, { key: "date" })])
   ]);
 }
