@@ -1,8 +1,39 @@
-// @ts-nocheck
 import type { normalizeKundliPdfData } from "@/lib/kundli/pdf-data";
+import type { ComponentType, ReactElement } from "react";
 
 type PdfData = ReturnType<typeof normalizeKundliPdfData>;
 type Locale = "en" | "hi" | "hinglish";
+type PdfElementFactory = typeof import("react").createElement;
+type PdfComponent = ComponentType<Record<string, unknown>>;
+type PdfStyles = Record<string, unknown>;
+type PdfTextFactory = (value: unknown, style?: unknown, props?: Record<string, unknown>) => ReactElement;
+
+type PlanetRow = {
+  planet?: unknown;
+  sign?: unknown;
+  house?: unknown;
+  degree?: unknown;
+  nakshatra?: unknown;
+  pada?: unknown;
+};
+
+type DashaRow = {
+  planet?: unknown;
+  name?: unknown;
+  startDate?: unknown;
+  endDate?: unknown;
+};
+
+type ChartPlanet = {
+  planet?: unknown;
+  name?: unknown;
+};
+
+type ChartHouse = {
+  house?: unknown;
+  signNumber?: unknown;
+  planets?: Array<string | ChartPlanet>;
+};
 
 const labels = {
   en: {
@@ -95,6 +126,13 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
   const ReactForPdf = requirePdfReact();
   const { Document, Line, Page, Rect, StyleSheet, Svg, Text, View, pdf } = await import("@react-pdf/renderer");
   const h = ReactForPdf.createElement;
+  const PdfDocument = Document as unknown as PdfComponent;
+  const PdfLine = Line as unknown as PdfComponent;
+  const PdfPage = Page as unknown as PdfComponent;
+  const PdfRect = Rect as unknown as PdfComponent;
+  const PdfSvg = Svg as unknown as PdfComponent;
+  const PdfText = Text as unknown as PdfComponent;
+  const PdfView = View as unknown as PdfComponent;
   const lang = labels[language] ? language : "en";
   const styles = StyleSheet.create({
     page: { position: "relative", padding: 28, paddingBottom: 40, backgroundColor: "#fffaf0", color: "#241036", fontSize: 9.2, lineHeight: 1.35 },
@@ -121,20 +159,20 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
     footer: { position: "absolute", left: 28, right: 28, bottom: 16, display: "flex", flexDirection: "row", justifyContent: "space-between", color: "#7d6f83", fontSize: 7.5 }
   });
 
-  const text = (value: unknown, style?: unknown, props = {}) => h(Text, { ...props, style }, safeText(value, lang));
-  const row = (key: unknown, value: unknown) => h(View, { key: `${safeText(key, lang)}-${safeText(value, lang)}`, style: styles.row }, [
+  const text: PdfTextFactory = (value, style, props = {}) => h(PdfText, { ...props, style }, safeText(value, lang));
+  const row = (key: unknown, value: unknown) => h(PdfView, { key: `${safeText(key, lang)}-${safeText(value, lang)}`, style: styles.row }, [
     text(key, styles.key, { key: "k" }),
     text(value, styles.value, { key: "v" })
   ]);
-  const section = (title: unknown, children: unknown[]) => h(View, { key: safeText(title, lang), style: styles.section }, [
+  const section = (title: unknown, children: ReactElement[]) => h(PdfView, { key: safeText(title, lang), style: styles.section }, [
     text(title, styles.sectionTitle, { key: "title" }),
     ...children
   ]);
 
-  const document = h(Document, { title: `${labels[lang].title} - ${safeText(data.personDetails?.name, lang)}`, author: "Naksharix" }, [
-    page(h, text, Page, View, styles, lang, pdfType, labels[lang].title, [
-      h(View, { key: "top", style: styles.grid2 }, [
-        h(View, { key: "left", style: styles.col }, [
+  const document = h(PdfDocument, { title: `${labels[lang].title} - ${safeText(data.personDetails?.name, lang)}`, author: "Naksharix" }, [
+    page(h, text, PdfPage, PdfView, styles, lang, pdfType, labels[lang].title, [
+      h(PdfView, { key: "top", style: styles.grid2 }, [
+        h(PdfView, { key: "left", style: styles.col }, [
           section(labels[lang].birth, [
             row(labels[lang].name, data.personDetails?.name),
             row(labels[lang].gender, data.personDetails?.gender),
@@ -144,7 +182,7 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
             row(labels[lang].timezone, data.birthDetails?.timezone)
           ])
         ]),
-        h(View, { key: "right", style: styles.col }, [
+        h(PdfView, { key: "right", style: styles.col }, [
           section(labels[lang].panchang, [
             row("Tithi / तिथि", data.panchang?.tithi),
             row("Paksha / पक्ष", data.panchang?.paksha),
@@ -155,24 +193,24 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
           ])
         ])
       ]),
-      h(View, { key: "charts", style: styles.chartRow }, [
-        chartPanel(h, text, View, styles, Svg, Rect, Line, Text, labels[lang].charts + " D1", data.d1Chart, lang),
-        chartPanel(h, text, View, styles, Svg, Rect, Line, Text, "D9", data.d9Chart, lang),
-        chartPanel(h, text, View, styles, Svg, Rect, Line, Text, "Chalit", data.chalitChart, lang)
+      h(PdfView, { key: "charts", style: styles.chartRow }, [
+        chartPanel(h, text, PdfView, styles, PdfSvg, PdfRect, PdfLine, PdfText, labels[lang].charts + " D1", data.d1Chart, lang),
+        chartPanel(h, text, PdfView, styles, PdfSvg, PdfRect, PdfLine, PdfText, "D9", data.d9Chart, lang),
+        chartPanel(h, text, PdfView, styles, PdfSvg, PdfRect, PdfLine, PdfText, "Chalit", data.chalitChart, lang)
       ])
     ]),
-    page(h, text, Page, View, styles, lang, pdfType, labels[lang].planets, [
-      section(labels[lang].planets, [planetTable(h, text, View, styles, data.planetaryPositions, lang)])
+    page(h, text, PdfPage, PdfView, styles, lang, pdfType, labels[lang].planets, [
+      section(labels[lang].planets, [planetTable(h, text, PdfView, styles, data.planetaryPositions, lang)])
     ]),
-    page(h, text, Page, View, styles, lang, pdfType, labels[lang].dasha, [
-      section(labels[lang].dasha, [dashaTable(h, text, View, styles, data.vimshottariDasha, lang)]),
+    page(h, text, PdfPage, PdfView, styles, lang, pdfType, labels[lang].dasha, [
+      section(labels[lang].dasha, [dashaTable(h, text, PdfView, styles, data.vimshottariDasha, lang)]),
       section(labels[lang].summary, [
         text(data.predictions?.lagnaAnalysis, styles.paragraph),
         text(data.predictions?.nakshatraAnalysis, styles.paragraph),
         text(data.predictions?.aiSummary, styles.paragraph)
       ])
     ]),
-    page(h, text, Page, View, styles, lang, pdfType, labels[lang].remedies, [
+    page(h, text, PdfPage, PdfView, styles, lang, pdfType, labels[lang].remedies, [
       section(labels[lang].remedies, renderRemedies(text, data.remedies, lang, styles)),
       section(labels[lang].disclaimer, [text(data.predictions?.disclaimer, styles.paragraph)])
     ])
@@ -188,7 +226,17 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
   return buffer;
 }
 
-function page(h: any, text: any, Page: any, View: any, styles: any, lang: Locale, pdfType: "FREE" | "PREMIUM", title: string, children: unknown[]) {
+function page(
+  h: PdfElementFactory,
+  text: PdfTextFactory,
+  Page: PdfComponent,
+  View: PdfComponent,
+  styles: PdfStyles,
+  lang: Locale,
+  pdfType: "FREE" | "PREMIUM",
+  title: string,
+  children: ReactElement[]
+) {
   return h(Page, { key: title, size: "A4", style: styles.page }, [
     pdfType === "FREE" ? text(labels[lang].watermark, styles.watermark, { key: "watermark", fixed: true }) : null,
     h(View, { key: "header", fixed: true, style: styles.header }, [
@@ -200,8 +248,8 @@ function page(h: any, text: any, Page: any, View: any, styles: any, lang: Locale
   ]);
 }
 
-function planetTable(h: any, text: any, View: any, styles: any, planets: unknown[], lang: Locale) {
-  const rows = Array.isArray(planets) && planets.length ? planets : [{ planet: labels[lang].notAvailable }];
+function planetTable(h: PdfElementFactory, text: PdfTextFactory, View: PdfComponent, styles: PdfStyles, planets: unknown[], lang: Locale) {
+  const rows: PlanetRow[] = Array.isArray(planets) && planets.length ? planets.map(toPlanetRow) : [{ planet: labels[lang].notAvailable }];
   return h(View, { key: "planet-table" }, [
     h(View, { key: "head", style: styles.tableHeader }, [
       text(labels[lang].planet, styles.cellPlanet, { key: "planet" }),
@@ -211,7 +259,7 @@ function planetTable(h: any, text: any, View: any, styles: any, planets: unknown
       text(labels[lang].nakshatra, styles.cellWide, { key: "nakshatra" }),
       text(labels[lang].pada, styles.cellSmall, { key: "pada" })
     ]),
-    ...rows.map((planet: any, index: number) => h(View, { key: `planet-${index}`, style: styles.tableRow }, [
+    ...rows.map((planet, index) => h(View, { key: `planet-${index}`, style: styles.tableRow }, [
       text(planet?.planet, styles.cellPlanet, { key: "planet" }),
       text(planet?.sign, styles.cellSign, { key: "sign" }),
       text(planet?.house, styles.cellSmall, { key: "house" }),
@@ -222,27 +270,48 @@ function planetTable(h: any, text: any, View: any, styles: any, planets: unknown
   ]);
 }
 
-function dashaTable(h: any, text: any, View: any, styles: any, dashas: unknown[], lang: Locale) {
-  const rows = Array.isArray(dashas) && dashas.length ? dashas : [{ planet: labels[lang].notAvailable }];
-  return h(View, { key: "dasha-table" }, rows.map((dasha: any, index: number) => h(View, { key: `dasha-${index}`, style: styles.row }, [
+function dashaTable(h: PdfElementFactory, text: PdfTextFactory, View: PdfComponent, styles: PdfStyles, dashas: unknown[], lang: Locale) {
+  const rows: DashaRow[] = Array.isArray(dashas) && dashas.length ? dashas.map(toDashaRow) : [{ planet: labels[lang].notAvailable }];
+  return h(View, { key: "dasha-table" }, rows.map((dasha, index) => h(View, { key: `dasha-${index}`, style: styles.row }, [
     text(dasha?.planet ?? dasha?.name, styles.key, { key: "planet" }),
     text(`${safeText(dasha?.startDate, lang)} - ${safeText(dasha?.endDate, lang)}`, styles.value, { key: "dates" })
   ])));
 }
 
-function renderRemedies(text: any, remedies: unknown[], lang: Locale, styles: any) {
+function renderRemedies(text: PdfTextFactory, remedies: unknown[], lang: Locale, styles: PdfStyles) {
   if (!Array.isArray(remedies) || remedies.length === 0) return [text(labels[lang].notAvailable, styles.paragraph, { key: "empty" })];
   return remedies.map((remedy, index) => text(`• ${safeText(remedy, lang)}`, styles.paragraph, { key: `remedy-${index}` }));
 }
 
-function chartPanel(h: any, text: any, View: any, styles: any, Svg: any, Rect: any, Line: any, SvgText: any, title: string, houses: unknown[], lang: Locale) {
+function chartPanel(
+  h: PdfElementFactory,
+  text: PdfTextFactory,
+  View: PdfComponent,
+  styles: PdfStyles,
+  Svg: PdfComponent,
+  Rect: PdfComponent,
+  Line: PdfComponent,
+  SvgText: PdfComponent,
+  title: string,
+  houses: unknown[],
+  lang: Locale
+) {
   return h(View, { key: title, style: styles.chartBox, wrap: false }, [
     text(title, styles.sectionTitle, { key: "title" }),
     Array.isArray(houses) && houses.length ? chart(h, View, Svg, Rect, Line, SvgText, houses, lang) : text(labels[lang].notAvailable, styles.paragraph, { key: "empty" })
   ]);
 }
 
-function chart(h: any, View: any, Svg: any, Rect: any, Line: any, SvgText: any, houses: any[], lang: Locale) {
+function chart(
+  h: PdfElementFactory,
+  View: PdfComponent,
+  Svg: PdfComponent,
+  Rect: PdfComponent,
+  Line: PdfComponent,
+  SvgText: PdfComponent,
+  houses: unknown[],
+  lang: Locale
+) {
   const chartLayout: Record<number, { signX: number; signY: number; planetX: number; planetY: number }> = {
     1: { signX: 150, signY: 32, planetX: 150, planetY: 54 }, 2: { signX: 78, signY: 24, planetX: 88, planetY: 56 },
     3: { signX: 34, signY: 78, planetX: 56, planetY: 100 }, 4: { signX: 78, signY: 136, planetX: 88, planetY: 156 },
@@ -258,7 +327,7 @@ function chart(h: any, View: any, Svg: any, Rect: any, Line: any, SvgText: any, 
       ...lines.map(([x1, y1, x2, y2], index) => h(Line, { key: `line-${index}`, x1, y1, x2, y2, stroke: "#2e1b0d", strokeWidth: index < 6 ? 1.4 : 1.1 })),
       ...Array.from({ length: 12 }, (_, index) => {
         const houseNumber = index + 1;
-        const house = houses.find((item) => Number(item?.house) === houseNumber) ?? { house: houseNumber, planets: [] };
+        const house = houses.map(toChartHouse).find((item) => Number(item.house) === houseNumber) ?? { house: houseNumber, planets: [] };
         const layout = chartLayout[houseNumber];
         const planets = planetLabels(house, lang).slice(0, 4);
         return [
@@ -270,9 +339,33 @@ function chart(h: any, View: any, Svg: any, Rect: any, Line: any, SvgText: any, 
   ]);
 }
 
-function planetLabels(house: any, lang: Locale) {
+function planetLabels(house: ChartHouse, lang: Locale) {
   const planets = Array.isArray(house?.planets) ? house.planets : [];
-  return planets.map((planet) => shortPlanet(typeof planet === "string" ? planet : planet?.planet, lang)).filter(Boolean);
+  return planets.map((planet) => shortPlanet(typeof planet === "string" ? planet : planet.planet ?? planet.name, lang)).filter(Boolean);
+}
+
+function toPlanetRow(value: unknown): PlanetRow {
+  return isRecord(value) ? value : { planet: safeText(value, "en") };
+}
+
+function toDashaRow(value: unknown): DashaRow {
+  return isRecord(value) ? value : { planet: safeText(value, "en") };
+}
+
+function toChartHouse(value: unknown): ChartHouse {
+  if (!isRecord(value)) return { planets: [] };
+  const planets = Array.isArray(value.planets) ? value.planets.map(toChartPlanet) : [];
+  return { house: value.house, signNumber: value.signNumber, planets };
+}
+
+function toChartPlanet(value: unknown): string | ChartPlanet {
+  if (typeof value === "string") return value;
+  if (!isRecord(value)) return safeText(value, "en");
+  return { planet: value.planet, name: value.name };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function shortPlanet(planet: unknown, lang: Locale) {
