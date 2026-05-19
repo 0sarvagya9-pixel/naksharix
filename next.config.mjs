@@ -2,6 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  serverExternalPackages: ["@react-pdf/renderer"],
+  outputFileTracingIncludes: {
+    "/api/kundli/pdf": ["./lib/pdf/**/*"]
+  },
   ...(process.env.NEXT_STANDALONE === "true" ? { output: "standalone" } : {}),
   experimental: {
     serverActions: {
