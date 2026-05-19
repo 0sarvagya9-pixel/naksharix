@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import path from "node:path";
-import { pathToFileURL } from "node:url";
 import { cacheGet, cacheSet } from "@/lib/cache";
 import { cacheTtl, createHashKey, pdfCacheKey } from "@/lib/report-hash";
 import type { KundliReport } from "@/lib/astrology/types";
+import { renderBundledKundliPdf } from "@/lib/pdf/kundli-renderer";
 import { logKundliPdfValidation, normalizeKundliPdfData } from "@/lib/kundli/pdf-data";
 import { readLanguageFromRequest } from "@/lib/server-language";
 
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
       chalitHouses: kundliPdfData.chalitChart.length,
       rahuKetuOpposite: kundliPdfData.validation.rahuKetuOpposite
     });
-    const buffer = await renderIsolatedKundliPdf(kundliPdfData, language, body.pdfType);
+    const buffer = await renderKundliPdf(report as KundliReport, kundliPdfData, language, body.pdfType);
     console.info("[Naksharix PDF] PDF generated", { ...debugContext, bytes: buffer.length });
     await cacheSet(key, buffer.toString("base64"), cacheTtl.longTerm);
     return pdfResponse(buffer);
@@ -116,13 +115,9 @@ function pdfResponse(body: Buffer | Uint8Array | ArrayBuffer) {
   });
 }
 
-async function renderIsolatedKundliPdf(kundliPdfData: unknown, language: string, pdfType: "FREE" | "PREMIUM") {
-  const rendererUrl = pathToFileURL(path.join(process.cwd(), "lib/pdf/kundli-renderer.mjs")).href;
-  const importer = new Function("specifier", "return import(specifier)") as (specifier: string) => Promise<{
-    renderKundliPdf: (data: unknown, language: string, pdfType: "FREE" | "PREMIUM") => Promise<Buffer>;
-  }>;
-  const renderer = await importer(rendererUrl);
-  return renderer.renderKundliPdf(kundliPdfData, language, pdfType);
+async function renderKundliPdf(report: KundliReport, kundliPdfData: ReturnType<typeof normalizeKundliPdfData>, language: "en" | "hi" | "hinglish", pdfType: "FREE" | "PREMIUM") {
+  void report;
+  return renderBundledKundliPdf(kundliPdfData, language, pdfType);
 }
 
 function findObjects(value: unknown, path = "root") {
