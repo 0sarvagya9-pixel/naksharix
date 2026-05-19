@@ -1,5 +1,6 @@
 import type { normalizeKundliPdfData } from "@/lib/kundli/pdf-data";
 import type { ComponentType, ReactElement } from "react";
+import path from "node:path";
 
 type PdfData = ReturnType<typeof normalizeKundliPdfData>;
 type Locale = "en" | "hi" | "hinglish";
@@ -34,6 +35,16 @@ type ChartHouse = {
   signNumber?: unknown;
   planets?: Array<string | ChartPlanet>;
 };
+
+type PdfFontRegistry = {
+  register: (config: {
+    family: string;
+    fonts: Array<{ src: string; fontWeight?: string | number }>;
+  }) => void;
+};
+
+const PDF_FONT_FAMILY = "NotoSansDevanagari";
+let pdfFontsRegistered = false;
 
 const labels = {
   en: {
@@ -124,7 +135,8 @@ const labels = {
 
 export async function renderBundledKundliPdf(data: PdfData, language: Locale, pdfType: "FREE" | "PREMIUM") {
   const ReactForPdf = requirePdfReact();
-  const { Document, Line, Page, Rect, StyleSheet, Svg, Text, View, pdf } = await import("@react-pdf/renderer");
+  const { Document, Font, Line, Page, Rect, StyleSheet, Svg, Text, View, pdf } = await import("@react-pdf/renderer");
+  registerPdfFonts(Font as PdfFontRegistry);
   const h = ReactForPdf.createElement;
   const PdfDocument = Document as unknown as PdfComponent;
   const PdfLine = Line as unknown as PdfComponent;
@@ -135,10 +147,10 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
   const PdfView = View as unknown as PdfComponent;
   const lang = labels[language] ? language : "en";
   const styles = StyleSheet.create({
-    page: { position: "relative", padding: 28, paddingBottom: 40, backgroundColor: "#fffaf0", color: "#241036", fontSize: 9.2, lineHeight: 1.35 },
-    watermark: { position: "absolute", top: "43%", left: 24, right: 24, transform: "rotate(-28deg)", color: "#6d3bbd", opacity: 0.06, fontSize: 25, textAlign: "center", fontWeight: 800 },
+    page: { position: "relative", padding: 28, paddingBottom: 40, backgroundColor: "#fffaf0", color: "#241036", fontFamily: PDF_FONT_FAMILY, fontSize: 9.2, lineHeight: 1.35 },
+    watermark: { position: "absolute", top: "43%", left: 24, right: 24, transform: "rotate(-28deg)", color: "#6d3bbd", opacity: 0.06, fontFamily: PDF_FONT_FAMILY, fontSize: 25, textAlign: "center", fontWeight: 800 },
     header: { marginBottom: 10, paddingBottom: 8, borderBottomWidth: 1.2, borderBottomColor: "#d4af37", display: "flex", flexDirection: "row", justifyContent: "space-between" },
-    brand: { color: "#2b124d", fontSize: 21, fontWeight: 800 },
+    brand: { color: "#2b124d", fontSize: 21, fontWeight: 800, fontFamily: PDF_FONT_FAMILY },
     subtitle: { color: "#8b6a22", fontSize: 9 },
     section: { marginBottom: 8, padding: 8, borderWidth: 1, borderColor: "#dfc47a", borderRadius: 7, backgroundColor: "#fffdf8" },
     sectionTitle: { color: "#2b124d", fontSize: 11.5, fontWeight: 800, marginBottom: 6 },
@@ -331,12 +343,26 @@ function chart(
         const layout = chartLayout[houseNumber];
         const planets = planetLabels(house, lang).slice(0, 4);
         return [
-          h(SvgText, { key: "sign", x: layout.signX, y: layout.signY, textAnchor: "middle", fill: "#7b4b16", style: { fontSize: 12, fontWeight: "bold" } }, safeText(house?.signNumber ?? "-", lang)),
-          ...(planets.length ? planets : ["-"]).map((planet, planetIndex) => h(SvgText, { key: `p-${planetIndex}`, x: layout.planetX, y: layout.planetY + planetIndex * 15, textAnchor: "middle", fill: "#3a2110", style: { fontSize: 10.5, fontWeight: "bold" } }, safeText(planet, lang)))
+          h(SvgText, { key: "sign", x: layout.signX, y: layout.signY, textAnchor: "middle", fill: "#7b4b16", style: { fontFamily: PDF_FONT_FAMILY, fontSize: 12, fontWeight: "bold" } }, safeText(house?.signNumber ?? "-", lang)),
+          ...(planets.length ? planets : ["-"]).map((planet, planetIndex) => h(SvgText, { key: `p-${planetIndex}`, x: layout.planetX, y: layout.planetY + planetIndex * 15, textAnchor: "middle", fill: "#3a2110", style: { fontFamily: PDF_FONT_FAMILY, fontSize: 10.5, fontWeight: "bold" } }, safeText(planet, lang)))
         ];
       }).flat()
     ])
   ]);
+}
+
+function registerPdfFonts(Font: PdfFontRegistry) {
+  if (pdfFontsRegistered) return;
+  const fontDir = path.join(process.cwd(), "public", "fonts");
+  Font.register({
+    family: PDF_FONT_FAMILY,
+    fonts: [
+      { src: path.join(fontDir, "NotoSansDevanagari-Regular.ttf"), fontWeight: 400 },
+      { src: path.join(fontDir, "NotoSansDevanagari-Bold.ttf"), fontWeight: 700 },
+      { src: path.join(fontDir, "NotoSansDevanagari-Bold.ttf"), fontWeight: 800 }
+    ]
+  });
+  pdfFontsRegistered = true;
 }
 
 function planetLabels(house: ChartHouse, lang: Locale) {
