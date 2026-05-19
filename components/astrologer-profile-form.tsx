@@ -86,8 +86,8 @@ export function AstrologerProfileForm({ defaults }: { defaults?: ProfileDefaults
 
   return (
     <form action={save} className="grid gap-5">
-      <div className="flex items-center gap-4 rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
-        <div className="grid h-16 w-16 place-items-center rounded-lg bg-primary/15 text-[#B56CFF]">
+      <div className="flex items-center gap-4 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
+        <div className="grid h-16 w-16 place-items-center rounded-lg bg-primary/15 text-[#01A361]">
           <UserRound className="h-8 w-8" />
         </div>
         <div>
@@ -122,7 +122,7 @@ export function AstrologerProfileForm({ defaults }: { defaults?: ProfileDefaults
           <Input name="country" data-field="country" defaultValue={defaults?.country ?? ""} />
         </Field>
         <Field label="Availability status" name="availabilityStatus" error={errors.availabilityStatus}>
-          <select name="availabilityStatus" data-field="availabilityStatus" defaultValue={defaults?.availabilityStatus ?? "OFFLINE"} className={`h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm ${errorClass(Boolean(errors.availabilityStatus))}`} onChange={() => clear("availabilityStatus")}>
+          <select name="availabilityStatus" data-field="availabilityStatus" defaultValue={defaults?.availabilityStatus ?? "OFFLINE"} className={`h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm ${errorClass(Boolean(errors.availabilityStatus))}`} onChange={() => clear("availabilityStatus")}>
             <option value="ONLINE">Online</option>
             <option value="BUSY">Busy</option>
             <option value="OFFLINE">Offline</option>
@@ -159,7 +159,7 @@ export function AstrologerProfileForm({ defaults }: { defaults?: ProfileDefaults
         <Textarea name="bio" data-field="bio" defaultValue={defaults?.bio ?? ""} className={errorClass(Boolean(errors.bio))} onChange={() => clear("bio")} />
       </Field>
 
-      <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 text-sm naksh-muted-text">
+      <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4 text-sm naksh-muted-text">
         Education/certification details can be added in your bio for now. Secure document upload can be enabled later.
       </div>
 
@@ -184,7 +184,7 @@ function Field({ label, name, error, children }: { label: string; name: string; 
 
 function Toggle({ checked, onChange, children }: { checked: boolean; onChange: () => void; children: ReactNode }) {
   return (
-    <button type="button" onClick={onChange} className={`rounded-md border px-3 py-2 text-left text-sm transition ${checked ? "border-[#FFD36A] bg-[#F5C542]/10 text-[#FFD36A]" : "border-[#F5C542]/20 bg-[#12051f]/60 naksh-muted-text hover:border-[#FFD36A]/50"}`}>
+    <button type="button" onClick={onChange} className={`rounded-md border px-3 py-2 text-left text-sm transition ${checked ? "border-[#FFD700] bg-[#D4AF37]/10 text-[#FFD700]" : "border-[#D4AF37]/20 bg-[#02112C]/60 naksh-muted-text hover:border-[#FFD700]/50"}`}>
       {children}
     </button>
   );
@@ -192,7 +192,7 @@ function Toggle({ checked, onChange, children }: { checked: boolean; onChange: (
 
 function Checkbox({ name, defaultChecked, children }: { name: string; defaultChecked?: boolean; children: ReactNode }) {
   return (
-    <label className="flex items-center gap-3 rounded-lg border border-[#F5C542]/20 bg-[#12051f]/60 p-3 text-sm">
+    <label className="flex items-center gap-3 rounded-lg border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm">
       <input name={name} type="checkbox" defaultChecked={defaultChecked} className="h-4 w-4" />
       {children}
     </label>

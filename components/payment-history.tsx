@@ -30,13 +30,13 @@ export function PaymentHistory() {
   }, []);
 
   return (
-    <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+    <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
       <CardHeader><CardTitle className="font-cinzel">Payment History</CardTitle></CardHeader>
       <CardContent className="space-y-3">
         {loading ? <p className="text-sm naksh-muted-text">Loading payments...</p> : null}
         {!loading && !payments.length ? <p className="text-sm naksh-muted-text">No payments yet.</p> : null}
         {payments.map((payment) => (
-          <div key={payment.id} className="flex flex-col gap-3 rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div key={payment.id} className="flex flex-col gap-3 rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-medium">{payment.purchasedReport?.title ?? payment.purpose}</p>
               <p className="text-sm naksh-muted-text">{payment.currency} {payment.amount} - {payment.status}</p>

@@ -21,7 +21,7 @@ export default function NakshatraIndexPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {nakshatras.map((slug) => (
             <Link key={slug} href={`/nakshatra/${slug}`}>
-              <Card className="h-full border-[#F5C542]/20 bg-[#201037]/75 transition hover:border-[#F5C542]/55">
+              <Card className="h-full border-[#D4AF37]/20 bg-[#061D3C]/75 transition hover:border-[#D4AF37]/55">
                 <CardContent className="p-5">
                   <h2 className="font-cinzel text-xl font-bold">{titleFromSlug(slug)}</h2>
                   <p className="mt-2 text-sm naksh-muted-text">Meaning, traits, remedies, and Kundli links.</p>

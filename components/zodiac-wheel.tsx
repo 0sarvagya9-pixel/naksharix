@@ -7,7 +7,7 @@ export function ZodiacWheel() {
   return (
     <div className="relative mx-auto aspect-square w-full max-w-lg">
       <motion.div
-        className="absolute inset-0 rounded-full border border-primary/40 bg-[#201037]/60"
+        className="absolute inset-0 rounded-full border border-primary/40 bg-[#061D3C]/60"
         animate={{ rotate: 360 }}
         transition={{ duration: 44, repeat: Infinity, ease: "linear" }}
       >
@@ -24,7 +24,7 @@ export function ZodiacWheel() {
           );
         })}
       </motion.div>
-      <div className="absolute inset-16 grid place-items-center rounded-full border bg-[#12051f]/80 text-center">
+      <div className="absolute inset-16 grid place-items-center rounded-full border bg-[#02112C]/80 text-center">
         <div>
           <p className="text-sm naksh-muted-text">AI Kundli Engine</p>
           <p className="mt-2 text-4xl font-bold">360°</p>

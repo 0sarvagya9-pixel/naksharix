@@ -196,7 +196,7 @@ export function KundliForm() {
           <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="grid gap-4 sm:grid-cols-2">
             <Field label={tr("name")} error={fieldError("name")}><Input data-field="name" className={errorClass(Boolean(fieldError("name")))} {...form.register("name", { onChange: () => form.clearErrors("name") })} /></Field>
             <Field label={tr("gender")}>
-              <select {...form.register("gender")} className="h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm">
+              <select {...form.register("gender")} className="h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm">
                 <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
                 <option value="Female">{tr("genderFemale")}</option>
                 <option value="Male">{tr("genderMale")}</option>
@@ -208,7 +208,7 @@ export function KundliForm() {
                 data-field="locale"
                 value={form.watch("locale") ?? apiLocale}
                 onChange={(event) => updateLanguage(event.target.value as Locale)}
-                className={`h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm ${errorClass(Boolean(fieldError("locale")))}`}
+                className={`h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm ${errorClass(Boolean(fieldError("locale")))}`}
               >
                 <option value="en">{languageOptionLabel("en", apiLocale)}</option>
                 <option value="hi">{languageOptionLabel("hi", apiLocale)}</option>
@@ -229,7 +229,7 @@ export function KundliForm() {
               placeholder={tr("searchLocationPlaceholder")}
             />
             <div className="flex items-end">
-              <p className="rounded-md border border-[#F5C542]/20 bg-[#201037]/70 p-3 text-xs leading-5 naksh-muted-text"><MapPin className="mr-1 inline h-3 w-3 text-[#FFD36A]" />{placeStatus}</p>
+              <p className="rounded-md border border-[#D4AF37]/20 bg-[#061D3C]/70 p-3 text-xs leading-5 naksh-muted-text"><MapPin className="mr-1 inline h-3 w-3 text-[#FFD700]" />{placeStatus}</p>
             </div>
             <Button className="h-12 sm:col-span-2" disabled={form.formState.isSubmitting || generating} size="lg">
               <Sparkles className="h-4 w-4" />
@@ -256,9 +256,9 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 
 function Meta({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-3">
+    <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-3">
       <p className="text-[11px] uppercase tracking-[0.16em] naksh-muted-text">{label}</p>
-      <p className="mt-1 break-words font-cinzel text-sm font-bold text-[#FFF7E8]">{value || "-"}</p>
+      <p className="mt-1 break-words font-cinzel text-sm font-bold text-[#FFFFFF]">{value || "-"}</p>
     </div>
   );
 }
@@ -296,11 +296,11 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
   }
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-2xl border border-[#F5C542]/25 bg-[radial-gradient(circle_at_10%_10%,rgba(245,190,88,0.14),transparent_26rem),linear-gradient(135deg,rgba(126,72,255,0.18),rgba(8,4,18,0.94))] p-5 shadow-[0_24px_80px_rgba(5,2,14,0.3)] sm:p-6">
+      <section className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/25 bg-[radial-gradient(circle_at_10%_10%,rgba(245,190,88,0.14),transparent_26rem),linear-gradient(135deg,rgba(126,72,255,0.18),rgba(8,4,18,0.94))] p-5 shadow-[0_24px_80px_rgba(5,2,14,0.3)] sm:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#FFD36A]/75">Naksharix</p>
-            <h2 className="mt-2 font-cinzel text-3xl font-black text-[#FFF7E8]">{tr("generatedKundliReport")}</h2>
+            <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#FFD700]/75">Naksharix</p>
+            <h2 className="mt-2 font-cinzel text-3xl font-black text-[#FFFFFF]">{tr("generatedKundliReport")}</h2>
             <div className="mt-4 grid gap-2 text-sm naksh-muted-text sm:grid-cols-2 lg:grid-cols-3">
               <Meta label={tr("name")} value={result.profile?.name} />
               <Meta label={tr("dateOfBirth")} value={result.birthDetails?.dateOfBirth} />
@@ -320,10 +320,10 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
           </div>
         </div>
         {pdfError ? <p className="mt-4 rounded-lg border border-[#FF4D4F]/30 bg-[#FF4D4F]/10 p-3 text-sm text-[#FF4D4F]">{pdfError}</p> : null}
-        {!result.saved ? <div className="mt-4 rounded-lg border border-[#F5C542]/30 bg-[#F5C542]/10 p-4 text-sm text-[#FFF7E8]"><p>{tr("loginToSaveReport")}</p><Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button></div> : null}
+        {!result.saved ? <div className="mt-4 rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/10 p-4 text-sm text-[#FFFFFF]"><p>{tr("loginToSaveReport")}</p><Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button></div> : null}
       </section>
       {result.language && result.language !== selectedLanguage ? (
-        <div className="rounded-lg border border-[#F5C542]/30 bg-[#F5C542]/10 p-4 text-sm text-[#FFF7E8]">
+        <div className="rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/10 p-4 text-sm text-[#FFFFFF]">
           <p>{tr("reportLanguageMismatch")}</p>
           <Button className="mt-3" size="sm" variant="outline" onClick={onRegenerate}>
             {tr("regenerateReportSelectedLanguage")}
@@ -356,7 +356,7 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
         <InfoPanel title={tr("education")}><p>{result.educationAnalysis}</p></InfoPanel>
       </div>
       <VimshottariDashaTimeline mahadashas={result.vimshottariDasha} language={selectedLanguage} />
-      <div className="rounded-lg border border-[#F5C542]/25 bg-[linear-gradient(135deg,rgba(126,72,255,0.22),rgba(245,190,88,0.14))] p-5">
+      <div className="rounded-lg border border-[#D4AF37]/25 bg-[linear-gradient(135deg,rgba(126,72,255,0.22),rgba(245,190,88,0.14))] p-5">
         <h3 className="font-cinzel text-xl font-bold">{tr("premiumKundliUpsell")}</h3>
         <p className="mt-2 text-sm leading-6 naksh-muted-text">{tr("premiumKundliUpsellCopy")}</p>
         <div className="mt-4 flex flex-wrap gap-3">
@@ -417,15 +417,15 @@ function localizedSadeSati(sadeSati: KundliResult["sadeSati"], language: Locale,
 
 function GeneratingKundli() {
   const { tr } = useLanguage();
-  return <div className="mt-4 rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4"><p className="font-cinzel font-bold"><CalendarDays className="mr-2 inline h-4 w-4 text-[#FFD36A]" />{tr("generatingKundli")}</p><p className="mt-1 text-sm naksh-muted-text">{tr("kundliIntro")}</p></div>;
+  return <div className="mt-4 rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><p className="font-cinzel font-bold"><CalendarDays className="mr-2 inline h-4 w-4 text-[#FFD700]" />{tr("generatingKundli")}</p><p className="mt-1 text-sm naksh-muted-text">{tr("kundliIntro")}</p></div>;
 }
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4"><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold">{value}</p></div>;
+  return <div className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold">{value}</p></div>;
 }
 
 function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4 text-sm leading-7 naksh-muted-text"><h3 className="mb-3 font-semibold text-[#FFD36A]">{title}</h3>{children}</section>;
+  return <section className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4 text-sm leading-7 naksh-muted-text"><h3 className="mb-3 font-semibold text-[#FFD700]">{title}</h3>{children}</section>;
 }
 
 function round(value: number) {

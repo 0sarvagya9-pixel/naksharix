@@ -31,24 +31,24 @@ export default function AdminRevenuePage() {
 
   return (
     <Section>
-      <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Revenue Ops</p>
+      <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Revenue Ops</p>
       <h1 className="mt-3 font-cinzel text-4xl font-black">Admin Revenue Dashboard</h1>
       <div className="mt-8 grid gap-4 md:grid-cols-5">
         {cards.map(({ label, value, icon: Icon }) => (
-          <Card key={label} className="border-[#F5C542]/20 bg-[#201037]/80">
+          <Card key={label} className="border-[#D4AF37]/20 bg-[#061D3C]/80">
             <CardContent className="pt-5">
-              <Icon className="h-5 w-5 text-[#FFD36A]" />
+              <Icon className="h-5 w-5 text-[#FFD700]" />
               <p className="mt-4 text-2xl font-black">{value}</p>
               <p className="text-sm naksh-muted-text">{label}</p>
             </CardContent>
           </Card>
         ))}
       </div>
-      <Card className="mt-6 border-[#F5C542]/20 bg-[#201037]/80">
+      <Card className="mt-6 border-[#D4AF37]/20 bg-[#061D3C]/80">
         <CardHeader><CardTitle className="font-cinzel">Recent Payments</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {data?.recent?.map((payment) => (
-            <div key={payment.id} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3">
+            <div key={payment.id} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3">
               <p className="font-medium">{payment.user.name} - {payment.purpose}</p>
               <p className="text-sm naksh-muted-text">{payment.currency} {payment.amount} - {payment.status} - {payment.user.email}</p>
             </div>

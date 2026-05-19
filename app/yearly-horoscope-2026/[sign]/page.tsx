@@ -39,7 +39,7 @@ export default async function YearlySignPage({ params }: { params: Params }) {
     <main className="star-field">
       <JsonLd id={`${zodiac.slug}-2026-faq`} data={{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) }} />
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Yearly Horoscope 2026</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Yearly Horoscope 2026</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">{zodiac.name} Yearly Horoscope 2026</h1>
         <p className="mt-4 max-w-3xl text-lg leading-8 naksh-muted-text">
           2026 asks {zodiac.name} natives to combine ambition with steadiness. Use this yearly horoscope for broad planning, then generate a personalized kundli or yearly report for deeper timing.
@@ -50,7 +50,7 @@ export default async function YearlySignPage({ params }: { params: Params }) {
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {["Career", "Love", "Finance", "Health"].map((topic) => (
-            <Card key={topic} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={topic} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
                 <h2 className="font-cinzel text-lg font-bold">{topic}</h2>
                 <p className="mt-3 text-sm leading-6 naksh-muted-text">{topic} themes favor thoughtful planning, patient communication, and practical routines for {zodiac.name} in 2026.</p>
@@ -60,7 +60,7 @@ export default async function YearlySignPage({ params }: { params: Params }) {
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {faqs.map((faq) => (
-            <Card key={faq.question} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={faq.question} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
                 <h2 className="font-cinzel text-lg font-bold">{faq.question}</h2>
                 <p className="mt-3 text-sm leading-6 naksh-muted-text">{faq.answer}</p>

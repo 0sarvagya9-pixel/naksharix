@@ -26,7 +26,7 @@ export default async function AdminAstrologersPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Admin Review</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Admin Review</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Astrologer Approvals</h1>
         <p className="mt-3 max-w-3xl naksh-muted-text">Review marketplace submissions before they appear on the public Naksharix astrologer listing.</p>
         <div className="mt-8 grid gap-4">
@@ -54,7 +54,7 @@ export default async function AdminAstrologersPage() {
             </Card>
           ))}
         </div>
-        {!profiles.length ? <p className="mt-6 rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 text-sm naksh-muted-text">No astrologer profiles submitted yet.</p> : null}
+        {!profiles.length ? <p className="mt-6 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4 text-sm naksh-muted-text">No astrologer profiles submitted yet.</p> : null}
       </Section>
     </main>
   );

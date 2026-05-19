@@ -24,7 +24,7 @@ export default function LoginPage() {
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} />
           <p className="mt-4 text-sm naksh-muted-text">
-            New here? <Link href="/signup" className="text-[#B56CFF]">Create an account</Link>
+            New here? <Link href="/signup" className="text-[#01A361]">Create an account</Link>
           </p>
         </CardContent>
       </Card>

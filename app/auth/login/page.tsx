@@ -24,10 +24,10 @@ export default function LoginPage() {
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} />
           <p className="mt-4 text-sm naksh-muted-text">
-            New here? <Link href="/auth/signup" className="text-[#B56CFF]">Create an account</Link>
+            New here? <Link href="/auth/signup" className="text-[#01A361]">Create an account</Link>
           </p>
           <p className="mt-2 text-sm naksh-muted-text">
-            Are you an astrologer or consultant? <Link href="/auth/astrologer-login" className="text-[#B56CFF]">Login as Astrologer / Consultant</Link>
+            Are you an astrologer or consultant? <Link href="/auth/astrologer-login" className="text-[#01A361]">Login as Astrologer / Consultant</Link>
           </p>
         </CardContent>
       </Card>

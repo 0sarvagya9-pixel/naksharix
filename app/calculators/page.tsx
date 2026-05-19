@@ -14,7 +14,7 @@ export default function CalculatorsPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Astrology Calculators</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Astrology Calculators</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Moon Sign, Sun Sign, Ascendant, Nakshatra and More</h1>
         <p className="mt-4 max-w-3xl naksh-muted-text">Quick calculators for sign, nakshatra, ayanamsa, love, friendship, and numerology. For deeper detail, generate a full Kundli after this quick check.</p>
         <div className="mt-8"><CalculatorSuite /></div>

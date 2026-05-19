@@ -15,7 +15,7 @@ export function ReportsContent() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">{tr("premiumReports")}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">{tr("premiumReports")}</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">{tr("reportsTitle")}</h1>
         <p className="mt-4 max-w-3xl naksh-muted-text">{tr("reportsSubtitle")}</p>
         <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -23,14 +23,14 @@ export function ReportsContent() {
             <Card key={report.id} className="glass">
               <CardHeader>
                 <CardTitle className="font-cinzel">{report.name}</CardTitle>
-                <p className="text-3xl font-black text-[#FFD36A]">{report.price}</p>
+                <p className="text-3xl font-black text-[#FFD700]">{report.price}</p>
               </CardHeader>
               <CardContent className="space-y-5">
                 <p className="text-sm naksh-muted-text">{report.description}</p>
                 <ul className="space-y-2 text-sm">
                   {report.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-[#FFD36A]" />
+                      <CheckCircle2 className="h-4 w-4 text-[#FFD700]" />
                       {feature}
                     </li>
                   ))}

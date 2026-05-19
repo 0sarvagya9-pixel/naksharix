@@ -9,7 +9,7 @@ export function AstrologersPageContent({ profiles }: { profiles: MarketplaceAstr
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">{tr("verifiedGuides")}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">{tr("verifiedGuides")}</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">{tr("astrologersTitle")}</h1>
         <p className="mt-4 max-w-3xl naksh-muted-text">{tr("astrologersIntro")}</p>
         <AstrologerListing profiles={profiles} />

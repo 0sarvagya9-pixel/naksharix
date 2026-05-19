@@ -27,7 +27,7 @@ export default async function UserConsultationHistoryPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Your sessions</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Your sessions</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Consultation History</h1>
         {!user ? (
           <Card className="mt-8 glass"><CardContent className="p-6"><p>Please sign in to view consultation history.</p><Button className="mt-4" asChild><Link href="/auth/login">Sign in</Link></Button></CardContent></Card>
@@ -42,11 +42,11 @@ export default async function UserConsultationHistoryPage() {
               <CardContent className="space-y-4">
                 <p className="text-sm naksh-muted-text">{booking.question}</p>
                 {booking.status === "COMPLETED" && !booking.reviews.length ? <ConsultationReviewForm bookingId={booking.id} /> : null}
-                {booking.reviews.length ? <p className="rounded-lg border border-[#F5C542]/20 bg-[#12051f]/60 p-3 text-sm naksh-muted-text">Reviewed with {booking.reviews[0].rating}/5 stars.</p> : null}
+                {booking.reviews.length ? <p className="rounded-lg border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm naksh-muted-text">Reviewed with {booking.reviews[0].rating}/5 stars.</p> : null}
               </CardContent>
             </Card>
           ))}
-          {user && !bookings.length ? <p className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 text-sm naksh-muted-text">No consultation bookings yet.</p> : null}
+          {user && !bookings.length ? <p className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4 text-sm naksh-muted-text">No consultation bookings yet.</p> : null}
         </div>
       </Section>
     </main>

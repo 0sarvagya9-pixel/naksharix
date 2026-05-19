@@ -23,7 +23,7 @@ export function AstrologerNoteForm({ userId }: { userId: string }) {
   }
 
   return (
-    <form action={save} className="space-y-3 rounded-lg border border-[#F5C542]/20 bg-[#201037]/60 p-4">
+    <form action={save} className="space-y-3 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/60 p-4">
       <Label>Private note title</Label>
       <Input name="title" required placeholder="Consultation context" />
       <Label>Private note</Label>

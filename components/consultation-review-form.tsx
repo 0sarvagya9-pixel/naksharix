@@ -22,10 +22,10 @@ export function ConsultationReviewForm({ bookingId }: { bookingId: string }) {
   }
 
   return (
-    <form action={submit} className="space-y-3 rounded-lg border border-[#F5C542]/20 bg-[#12051f]/60 p-4">
+    <form action={submit} className="space-y-3 rounded-lg border border-[#D4AF37]/20 bg-[#02112C]/60 p-4">
       <div className="flex gap-2">
         {[1, 2, 3, 4, 5].map((value) => (
-          <button key={value} type="button" onClick={() => setRating(value)} className={value <= rating ? "text-[#FFD36A]" : "naksh-muted-text"}>
+          <button key={value} type="button" onClick={() => setRating(value)} className={value <= rating ? "text-[#FFD700]" : "naksh-muted-text"}>
             <Star className="h-5 w-5 fill-current" />
           </button>
         ))}

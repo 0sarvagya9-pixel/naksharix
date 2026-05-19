@@ -45,13 +45,13 @@ export function AstrologerBookingsList({
           const customerEmail = String(metadata.customerEmail ?? booking.user?.email ?? "-");
           const customerPhone = metadata.customerPhone ? String(metadata.customerPhone) : "-";
           return (
-            <div key={booking.id} className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
+            <div key={booking.id} className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
               <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-cinzel text-lg font-bold text-[#FFF7E8]">{customerName}</p>
-                    <span className="rounded-full border border-[#F5C542]/25 px-2 py-0.5 text-xs text-[#FFD36A]">{booking.status}</span>
-                    <span className="rounded-full border border-[#A855F7]/25 px-2 py-0.5 text-xs naksh-muted-text">{booking.mode}</span>
+                    <p className="font-cinzel text-lg font-bold text-[#FFFFFF]">{customerName}</p>
+                    <span className="rounded-full border border-[#D4AF37]/25 px-2 py-0.5 text-xs text-[#FFD700]">{booking.status}</span>
+                    <span className="rounded-full border border-[#01A361]/25 px-2 py-0.5 text-xs naksh-muted-text">{booking.mode}</span>
                   </div>
                   <p className="text-sm naksh-muted-text">{booking.scheduledAt.toLocaleString("en-IN")} | {booking.durationMins} min</p>
                   <p className="text-sm naksh-muted-text">Email: {customerEmail} | Phone: {customerPhone}</p>
@@ -61,14 +61,14 @@ export function AstrologerBookingsList({
                       Birth details: {[booking.birthDate ? booking.birthDate.toLocaleDateString("en-IN") : null, booking.birthTime, booking.birthPlace].filter(Boolean).join(" | ")}
                     </p>
                   ) : null}
-                  <p className="text-sm leading-6 text-[#F8F1FF]">{booking.question}</p>
+                  <p className="text-sm leading-6 text-[#F0F0F0]">{booking.question}</p>
                 </div>
                 {showActions ? <AstrologerBookingActions bookingId={booking.id} /> : null}
               </div>
             </div>
           );
         })}
-        {!bookings.length ? <p className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/50 p-4 text-sm naksh-muted-text">{emptyText}</p> : null}
+        {!bookings.length ? <p className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/50 p-4 text-sm naksh-muted-text">{emptyText}</p> : null}
       </CardContent>
     </Card>
   );

@@ -21,7 +21,7 @@ export default function ShubhMuhuratPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Muhurat Finder</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Muhurat Finder</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Shubh Muhurat</h1>
         <p className="mt-4 max-w-3xl naksh-muted-text">Use Naksharix for auspicious timing categories and daily panchang context. For major rituals, confirm with a qualified astrologer.</p>
         <div className="mt-7 flex flex-wrap gap-3">
@@ -30,17 +30,17 @@ export default function ShubhMuhuratPage() {
         </div>
         <Card className="glass mt-10">
           <CardContent className="p-6">
-            <Clock className="h-6 w-6 text-[#FFD36A]" />
+            <Clock className="h-6 w-6 text-[#FFD700]" />
             <h2 className="mt-4 font-cinzel text-2xl font-black">Today&apos;s highlighted Muhurat</h2>
-            <p className="mt-3 text-lg text-[#FFD36A]">{panchang.muhurat}</p>
+            <p className="mt-3 text-lg text-[#FFD700]">{panchang.muhurat}</p>
             <p className="mt-2 text-sm naksh-muted-text">Choghadiya: {panchang.choghadiya} · Nakshatra: {panchang.nakshatra} · Tithi: {panchang.tithi}</p>
           </CardContent>
         </Card>
         <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
-            <Card key={category} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={category} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
-                <Sparkles className="h-5 w-5 text-[#FFD36A]" />
+                <Sparkles className="h-5 w-5 text-[#FFD700]" />
                 <h2 className="mt-4 font-cinzel text-xl font-bold">{category}</h2>
                 <p className="mt-3 text-sm leading-6 naksh-muted-text">Use location, panchang, lunar day, nakshatra, and family context before finalizing this timing.</p>
               </CardContent>

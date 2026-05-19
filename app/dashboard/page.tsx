@@ -90,7 +90,7 @@ export default function DashboardPage() {
       <Section className="star-field">
         <Card className="glass">
           <CardContent className="p-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Consultant Dashboard</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Consultant Dashboard</p>
             <h1 className="mt-3 font-cinzel text-3xl font-black">Consultant Portal</h1>
             <p className="mt-3 naksh-muted-text">Your consultant dashboard is being prepared. You can manage your profile from the professional portal.</p>
             <Button className="mt-5" asChild><Link href="/astrologer/profile">Edit Profile</Link></Button>
@@ -102,11 +102,11 @@ export default function DashboardPage() {
 
   return (
     <Section className="star-field">
-      <div className="relative overflow-hidden rounded-lg border border-[#F5C542]/25 bg-[linear-gradient(135deg,rgba(72,36,128,0.78),rgba(18,9,31,0.94)_58%,rgba(166,119,42,0.48))] p-6 sm:p-8">
-        <div className="absolute right-8 top-6 hidden h-28 w-28 rounded-full border border-[#F5C542]/25 md:block" />
+      <div className="relative overflow-hidden rounded-lg border border-[#D4AF37]/25 bg-[linear-gradient(135deg,rgba(72,36,128,0.78),rgba(18,9,31,0.94)_58%,rgba(166,119,42,0.48))] p-6 sm:p-8">
+        <div className="absolute right-8 top-6 hidden h-28 w-28 rounded-full border border-[#D4AF37]/25 md:block" />
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Naksharix Premium</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix Premium</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black">Cosmic Dashboard</h1>
             <p className="mt-3 max-w-2xl naksh-muted-text">Track kundlis, horoscope history, AI guidance, subscriptions, credits, and premium astrology reports from one refined workspace.</p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -128,16 +128,16 @@ export default function DashboardPage() {
               {showBecomeAstrologer ? <BecomeAstrologerButton /> : null}
             </div>
           </div>
-          <div className="grid h-20 w-20 place-items-center rounded-lg border border-[#F5C542]/30 bg-[#F5C542]/10">
-            <MoonStar className="h-9 w-9 text-[#FFD36A]" />
+          <div className="grid h-20 w-20 place-items-center rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/10">
+            <MoonStar className="h-9 w-9 text-[#FFD700]" />
           </div>
         </div>
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-4">
         {stats.map(({ label, value, icon: Icon, tone }) => (
-          <Card key={label} className={`border-[#F5C542]/20 bg-gradient-to-br ${tone}`}>
+          <Card key={label} className={`border-[#D4AF37]/20 bg-gradient-to-br ${tone}`}>
             <CardContent className="pt-5">
-              <Icon className="h-5 w-5 text-[#FFD36A]" />
+              <Icon className="h-5 w-5 text-[#FFD700]" />
               <p className="mt-4 font-cinzel text-3xl font-black">{value}</p>
               <p className="text-sm naksh-muted-text">{label}</p>
             </CardContent>
@@ -146,9 +146,9 @@ export default function DashboardPage() {
       </div>
       <div className="mt-6 grid gap-5 md:grid-cols-4">
         {dailyGuidance.map(({ label, value, detail, icon: Icon }) => (
-          <Card key={label} className="border-[#F5C542]/20 bg-[#201037]/80">
+          <Card key={label} className="border-[#D4AF37]/20 bg-[#061D3C]/80">
             <CardContent className="p-5">
-              <Icon className="h-5 w-5 text-[#FFD36A]" />
+              <Icon className="h-5 w-5 text-[#FFD700]" />
               <p className="mt-4 font-cinzel text-2xl font-black">{value}</p>
               <p className="text-sm font-medium">{label}</p>
               <p className="mt-2 text-xs leading-5 naksh-muted-text">{detail}</p>
@@ -157,7 +157,7 @@ export default function DashboardPage() {
         ))}
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Weekly Cosmic Activity</CardTitle></CardHeader>
           <CardContent className="h-72">
             <ResponsiveContainer width="100%" height="100%"><BarChart data={data}><XAxis dataKey="name" /><Tooltip /><Bar dataKey="v" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer>
@@ -166,28 +166,28 @@ export default function DashboardPage() {
         <AstroTool type="chat" />
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Kundli Overview</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm naksh-muted-text">
-            {["Lagna: Virgo", "Moon sign: Taurus", "Nakshatra: Rohini", "Current focus: steady career growth"].map((item) => <p key={item} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3">{item}</p>)}
+            {["Lagna: Virgo", "Moon sign: Taurus", "Nakshatra: Rohini", "Current focus: steady career growth"].map((item) => <p key={item} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3">{item}</p>)}
           </CardContent>
         </Card>
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Planet Strength</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {planetStrength.map(([planet, value]) => (
               <div key={planet}>
                 <div className="mb-1 flex justify-between text-sm"><span>{planet}</span><span>{value}%</span></div>
-                <div className="h-2 rounded-full bg-[#201037]/75"><div className="h-2 rounded-full bg-[#F5C542]" style={{ width: `${value}%` }} /></div>
+                <div className="h-2 rounded-full bg-[#061D3C]/75"><div className="h-2 rounded-full bg-[#D4AF37]" style={{ width: `${value}%` }} /></div>
               </div>
             ))}
           </CardContent>
         </Card>
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Dasha Timeline</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {dashas.map(([planet, time]) => (
-              <div key={planet} className="border-l border-[#F5C542]/35 pl-3">
+              <div key={planet} className="border-l border-[#D4AF37]/35 pl-3">
                 <p className="font-semibold">{planet}</p>
                 <p className="text-sm naksh-muted-text">{time}</p>
               </div>
@@ -196,18 +196,18 @@ export default function DashboardPage() {
         </Card>
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Upcoming and Recent</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {upcoming.map((item) => (
-              <div key={item.title} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3">
+              <div key={item.title} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3">
                 <p className="font-medium">{item.title}</p>
                 <p className="text-sm naksh-muted-text">{item.meta}</p>
               </div>
             ))}
           </CardContent>
         </Card>
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Account Workspace</CardTitle></CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             {[
@@ -224,25 +224,25 @@ export default function DashboardPage() {
         </Card>
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Streak and Notifications</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <p className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3 text-sm naksh-muted-text">12-day guidance streak. Ask today’s question to keep it alive.</p>
+            <p className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm naksh-muted-text">12-day guidance streak. Ask today’s question to keep it alive.</p>
             {["Daily horoscope", "Report delivery", "Consultation reminders"].map((label) => (
-              <label key={label} className="flex items-center justify-between rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3 text-sm">
-                <span className="flex items-center gap-2"><Bell className="h-4 w-4 text-[#FFD36A]" />{label}</span>
+              <label key={label} className="flex items-center justify-between rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm">
+                <span className="flex items-center gap-2"><Bell className="h-4 w-4 text-[#FFD700]" />{label}</span>
                 <input type="checkbox" defaultChecked className="h-4 w-4" />
               </label>
             ))}
           </CardContent>
         </Card>
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Recommended Remedies</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {remedies.map((remedy) => <p key={remedy} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3 text-sm naksh-muted-text"><HeartPulse className="mr-2 inline h-4 w-4 text-[#FFD36A]" />{remedy}</p>)}
+            {remedies.map((remedy) => <p key={remedy} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm naksh-muted-text"><HeartPulse className="mr-2 inline h-4 w-4 text-[#FFD700]" />{remedy}</p>)}
           </CardContent>
         </Card>
-        <Card className="border-[#F5C542]/20 bg-[#201037]/80">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Today’s Question</CardTitle></CardHeader>
           <CardContent>
             <p className="text-sm leading-6 naksh-muted-text">Ask one focused question about your day, then save the answer in chat history.</p>
@@ -255,9 +255,9 @@ export default function DashboardPage() {
       </div>
       <div className="mt-6 grid gap-5 md:grid-cols-3">
         {premiumActions.map(({ title, copy, icon: Icon }) => (
-          <Card key={title} className="border-[#F5C542]/20 bg-[#201037]/75">
+          <Card key={title} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
             <CardContent className="p-5">
-              <Icon className="h-5 w-5 text-[#FFD36A]" />
+              <Icon className="h-5 w-5 text-[#FFD700]" />
               <h2 className="mt-4 font-cinzel text-lg font-bold">{title}</h2>
               <p className="mt-2 text-sm leading-6 naksh-muted-text">{copy}</p>
             </CardContent>

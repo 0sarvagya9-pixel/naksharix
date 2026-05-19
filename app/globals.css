@@ -3,58 +3,64 @@
 @tailwind utilities;
 
 :root {
-  --background: 266 100% 4%;
-  --foreground: 38 100% 95%;
-  --card: 265 62% 9%;
-  --card-foreground: 270 100% 98%;
-  --primary: 267 100% 68%;
+  --color-bg: #02112C;
+  --color-gold: #D4AF37;
+  --color-gold-glow: #FFD700;
+  --color-emerald: #01A361;
+  --color-emerald-dark: #024B30;
+  --color-text: #F0F0F0;
+  --background: 218 91% 9%;
+  --foreground: 0 0% 94%;
+  --card: 218 78% 12%;
+  --card-foreground: 0 0% 100%;
+  --primary: 156 99% 32%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 43 92% 61%;
-  --secondary-foreground: 266 100% 5%;
-  --muted: 264 48% 13%;
-  --muted-foreground: 263 38% 78%;
-  --accent: 43 100% 71%;
-  --accent-foreground: 266 100% 5%;
+  --secondary: 46 65% 52%;
+  --secondary-foreground: 218 91% 9%;
+  --muted: 218 66% 14%;
+  --muted-foreground: 0 0% 88%;
+  --accent: 51 100% 50%;
+  --accent-foreground: 218 91% 9%;
   --destructive: 359 100% 65%;
   --destructive-foreground: 0 0% 100%;
   --success: 142 71% 45%;
   --success-foreground: 0 0% 100%;
-  --border: 43 92% 61% / 0.25;
-  --input: 267 67% 72% / 0.25;
-  --ring: 43 100% 71%;
+  --border: 46 65% 52% / 0.28;
+  --input: 156 99% 32% / 0.26;
+  --ring: 51 100% 50%;
   --radius: 0.75rem;
-  --cosmic-950: #090016;
-  --cosmic-900: #12051f;
-  --cosmic-850: #160926;
-  --cosmic-800: #1a0b2e;
-  --cosmic-750: #201037;
-  --cosmic-700: #28143f;
-  --cosmic-purple: #9b5cff;
-  --cosmic-purple-soft: #b56cff;
-  --cosmic-gold: #f5c542;
-  --cosmic-gold-soft: #ffd36a;
+  --cosmic-950: #02112C;
+  --cosmic-900: #031936;
+  --cosmic-850: #061D3C;
+  --cosmic-800: #082444;
+  --cosmic-750: #062D3A;
+  --cosmic-700: #024B30;
+  --cosmic-purple: #01A361;
+  --cosmic-purple-soft: #16C77B;
+  --cosmic-gold: #D4AF37;
+  --cosmic-gold-soft: #FFD700;
 }
 
 .dark {
-  --background: 266 100% 4%;
-  --foreground: 38 100% 95%;
-  --card: 265 62% 9%;
-  --card-foreground: 270 100% 98%;
-  --primary: 267 100% 68%;
+  --background: 218 91% 9%;
+  --foreground: 0 0% 94%;
+  --card: 218 78% 12%;
+  --card-foreground: 0 0% 100%;
+  --primary: 156 99% 32%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 43 92% 61%;
-  --secondary-foreground: 266 100% 5%;
-  --muted: 264 48% 13%;
-  --muted-foreground: 263 38% 78%;
-  --accent: 43 100% 71%;
-  --accent-foreground: 266 100% 5%;
+  --secondary: 46 65% 52%;
+  --secondary-foreground: 218 91% 9%;
+  --muted: 218 66% 14%;
+  --muted-foreground: 0 0% 88%;
+  --accent: 51 100% 50%;
+  --accent-foreground: 218 91% 9%;
   --destructive: 359 100% 65%;
   --destructive-foreground: 0 0% 100%;
   --success: 142 71% 45%;
   --success-foreground: 0 0% 100%;
-  --border: 43 92% 61% / 0.25;
-  --input: 267 67% 72% / 0.25;
-  --ring: 43 100% 71%;
+  --border: 46 65% 52% / 0.28;
+  --input: 156 99% 32% / 0.26;
+  --ring: 51 100% 50%;
 }
 
 * {
@@ -68,32 +74,32 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 8%, rgba(155, 92, 255, 0.34), transparent 31rem),
-    radial-gradient(circle at 82% 2%, rgba(245, 197, 66, 0.18), transparent 28rem),
-    radial-gradient(circle at 56% 78%, rgba(168, 85, 247, 0.16), transparent 38rem),
-    linear-gradient(135deg, #090016 0%, #12051f 44%, #1a0b2e 100%);
+    radial-gradient(circle at 12% 8%, rgba(1, 163, 97, 0.22), transparent 31rem),
+    radial-gradient(circle at 82% 2%, rgba(255, 215, 0, 0.16), transparent 28rem),
+    radial-gradient(circle at 56% 78%, rgba(2, 75, 48, 0.22), transparent 38rem),
+    linear-gradient(135deg, #02112C 0%, #031936 48%, #02112C 100%);
   color: hsl(var(--foreground));
   font-family: var(--font-poppins), var(--font-inter), system-ui, sans-serif;
 }
 
 ::selection {
-  background: rgba(245, 197, 66, 0.32);
+  background: rgba(212, 175, 55, 0.32);
   color: #fff7e8;
 }
 
 .glass {
-  border: 1px solid rgba(245, 197, 66, 0.22);
+  border: 1px solid rgba(212, 175, 55, 0.28);
   background:
-    linear-gradient(145deg, rgba(32, 16, 55, 0.9), rgba(22, 9, 38, 0.82)),
-    radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 20rem);
-  box-shadow: 0 24px 90px rgba(3, 0, 12, 0.46), 0 0 34px rgba(155, 92, 255, 0.11), inset 0 1px 0 rgba(255, 211, 106, 0.08);
+    linear-gradient(145deg, rgba(2, 17, 44, 0.92), rgba(2, 75, 48, 0.36)),
+    radial-gradient(circle at top left, rgba(255, 215, 0, 0.14), transparent 20rem);
+  box-shadow: 0 24px 90px rgba(0, 5, 16, 0.52), 0 0 34px rgba(1, 163, 97, 0.13), inset 0 1px 0 rgba(255, 215, 0, 0.1);
   backdrop-filter: blur(18px);
 }
 
 .luxury-panel {
-  border: 1px solid rgba(245, 197, 66, 0.2);
-  background: linear-gradient(145deg, rgba(22, 9, 38, 0.92), rgba(40, 20, 63, 0.74));
-  box-shadow: 0 18px 60px rgba(3, 0, 12, 0.38);
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  background: linear-gradient(145deg, rgba(2, 17, 44, 0.94), rgba(2, 75, 48, 0.38));
+  box-shadow: 0 18px 60px rgba(0, 5, 16, 0.44);
 }
 
 .text-balance {
@@ -109,7 +115,7 @@ body {
 }
 
 .cosmic-gold-text {
-  background: linear-gradient(90deg, #fff7e8, #ffd36a 42%, #b56cff 95%);
+  background: linear-gradient(90deg, #ffffff, #ffd700 46%, #01a361 95%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -117,8 +123,8 @@ body {
 
 .star-field {
   background-image:
-    radial-gradient(circle, rgba(255, 247, 232, 0.78) 1px, transparent 1px),
-    radial-gradient(circle, rgba(181, 108, 255, 0.55) 1px, transparent 1px);
+    radial-gradient(circle, rgba(255, 255, 255, 0.72) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 215, 0, 0.42) 1px, transparent 1px);
   background-position: 0 0, 24px 34px;
   background-size: 84px 84px, 128px 128px;
 }
@@ -131,64 +137,64 @@ body {
   }
 
   option {
-    background: #160926;
+    background: #061D3C;
     color: #fff7e8;
   }
 }
 
 @layer components {
   .naksh-page-bg {
-    @apply bg-[#090016] text-[#FFF7E8];
+    @apply bg-[#02112C] text-[#F0F0F0];
     background:
-      radial-gradient(circle at 10% 8%, rgba(155, 92, 255, 0.32), transparent 30rem),
-      radial-gradient(circle at 85% 0%, rgba(245, 197, 66, 0.16), transparent 28rem),
-      radial-gradient(circle at 55% 78%, rgba(168, 85, 247, 0.16), transparent 36rem),
-      linear-gradient(135deg, #090016 0%, #12051f 48%, #1a0b2e 100%);
+      radial-gradient(circle at 10% 8%, rgba(1, 163, 97, 0.24), transparent 30rem),
+      radial-gradient(circle at 85% 0%, rgba(255, 215, 0, 0.16), transparent 28rem),
+      radial-gradient(circle at 55% 78%, rgba(2, 75, 48, 0.22), transparent 36rem),
+      linear-gradient(135deg, #02112C 0%, #031936 48%, #02112C 100%);
   }
 
   .naksh-card {
-    @apply rounded-xl border border-[#F5C542]/25 bg-[#160926]/90 text-[#F8F1FF] shadow-[0_22px_70px_rgba(3,0,12,0.42),inset_0_1px_0_rgba(255,211,106,0.07)] backdrop-blur-xl;
+    @apply rounded-xl border border-[#D4AF37]/25 bg-[#02112C]/90 text-[#FFFFFF] shadow-[0_22px_70px_rgba(0,5,16,0.48),inset_0_1px_0_rgba(255,215,0,0.08)] backdrop-blur-xl;
     background:
-      linear-gradient(145deg, rgba(32, 16, 55, 0.92), rgba(22, 9, 38, 0.88)),
-      radial-gradient(circle at top left, rgba(168, 85, 247, 0.16), transparent 18rem);
+      linear-gradient(145deg, rgba(2, 17, 44, 0.94), rgba(2, 75, 48, 0.35)),
+      radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 18rem);
   }
 
   .naksh-card-soft {
-    @apply rounded-lg border border-[#A855F7]/25 bg-[#201037]/70 text-[#F8F1FF] shadow-[0_14px_46px_rgba(3,0,12,0.28)] backdrop-blur-md;
+    @apply rounded-lg border border-[#01A361]/25 bg-[#061D3C]/75 text-[#F0F0F0] shadow-[0_14px_46px_rgba(0,5,16,0.32)] backdrop-blur-md;
   }
 
   .naksh-button-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-[#B56CFF]/35 bg-gradient-to-r from-[#9B5CFF] via-[#A855F7] to-[#B56CFF] px-4 py-2 font-semibold text-[#FFF7E8] shadow-[0_12px_34px_rgba(155,92,255,0.30),inset_0_1px_0_rgba(255,255,255,0.18)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_46px_rgba(155,92,255,0.42)] disabled:pointer-events-none disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-[#01A361]/40 bg-[#01A361] px-4 py-2 font-semibold text-white shadow-[0_12px_34px_rgba(2,75,48,0.44),inset_0_1px_0_rgba(255,255,255,0.16)] transition hover:-translate-y-0.5 hover:bg-[#12b873] hover:shadow-[0_16px_46px_rgba(1,163,97,0.36)] disabled:pointer-events-none disabled:opacity-60;
   }
 
   .naksh-button-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-[#F5C542]/35 bg-[#160926]/75 px-4 py-2 font-semibold text-[#FFD36A] shadow-[inset_0_1px_0_rgba(255,211,106,0.08)] transition hover:border-[#FFD36A]/60 hover:bg-[#201037] hover:text-[#FFF7E8] disabled:pointer-events-none disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-[#D4AF37]/45 bg-[#02112C]/80 px-4 py-2 font-semibold text-[#FFD700] shadow-[inset_0_1px_0_rgba(255,215,0,0.09)] transition hover:border-[#FFD700]/70 hover:bg-[#024B30]/45 hover:text-white disabled:pointer-events-none disabled:opacity-60;
   }
 
   .naksh-gold-text {
-    @apply text-[#FFD36A];
+    @apply text-[#FFD700];
   }
 
   .naksh-muted-text {
-    @apply text-[#CDBFE8];
+    @apply text-[#F0F0F0]/80;
   }
 
   .naksh-border {
-    @apply border border-[#F5C542]/25;
+    @apply border border-[#D4AF37]/25;
   }
 
   .naksh-input {
-    @apply w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/80 px-3 py-2 text-sm text-[#FFF7E8] outline-none placeholder:text-[#BFAFD9]/75 transition focus:border-[#FFD36A]/70 focus:ring-2 focus:ring-[#A855F7]/35 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply w-full rounded-md border border-[#D4AF37]/25 bg-[#02112C]/85 px-3 py-2 text-sm text-white outline-none placeholder:text-[#F0F0F0]/55 transition focus:border-[#FFD700]/75 focus:ring-2 focus:ring-[#01A361]/35 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .naksh-glow {
-    @apply shadow-[0_0_34px_rgba(155,92,255,0.18),0_0_18px_rgba(245,197,66,0.08)];
+    @apply shadow-[0_0_34px_rgba(1,163,97,0.18),0_0_18px_rgba(255,215,0,0.10)];
   }
   .cosmic-select {
-    @apply h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/80 px-3 py-2 text-sm text-[#FFF7E8] outline-none placeholder:text-[#BFAFD9]/75 transition focus:border-[#FFD36A]/70 focus:ring-2 focus:ring-[#A855F7]/35 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply h-10 w-full rounded-md border border-[#D4AF37]/25 bg-[#02112C]/85 px-3 py-2 text-sm text-white outline-none placeholder:text-[#F0F0F0]/55 transition focus:border-[#FFD700]/75 focus:ring-2 focus:ring-[#01A361]/35 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .cosmic-textarea {
-    @apply min-h-24 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/80 px-3 py-2 text-sm text-[#FFF7E8] outline-none placeholder:text-[#BFAFD9]/75 transition focus:border-[#FFD36A]/70 focus:ring-2 focus:ring-[#A855F7]/35 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply min-h-24 w-full rounded-md border border-[#D4AF37]/25 bg-[#02112C]/85 px-3 py-2 text-sm text-white outline-none placeholder:text-[#F0F0F0]/55 transition focus:border-[#FFD700]/75 focus:ring-2 focus:ring-[#01A361]/35 disabled:cursor-not-allowed disabled:opacity-50;
   }
 }

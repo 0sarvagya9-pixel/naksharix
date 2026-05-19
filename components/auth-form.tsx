@@ -99,13 +99,13 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     <div className="space-y-5">
       {showRoleCards ? <RoleCards selected={roleIntent} onSelect={chooseRole} /> : null}
       {mode === "signup" && roleIntent === "ASTROLOGER" ? (
-        <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
+        <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
           <Label htmlFor="professionalRole">{tr("professionalType")}</Label>
           <select
             id="professionalRole"
             value={professionalRole}
             onChange={(event) => chooseProfessionalRole(event.target.value as "ASTROLOGER" | "CONSULTANT")}
-            className="mt-2 h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm"
+            className="mt-2 h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm"
           >
             <option value="ASTROLOGER">{tr("astrologer")}</option>
             <option value="CONSULTANT">{tr("consultant")}</option>
@@ -125,9 +125,9 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
             {tr("continueWithGoogle")}
           </Button>
           <div className="flex items-center gap-3 text-xs uppercase tracking-[0.18em] naksh-muted-text">
-            <span className="h-px flex-1 bg-[#F5C542]/25" />
+            <span className="h-px flex-1 bg-[#D4AF37]/25" />
             {tr("or")}
-            <span className="h-px flex-1 bg-[#F5C542]/25" />
+            <span className="h-px flex-1 bg-[#D4AF37]/25" />
           </div>
         </>
       ) : null}
@@ -165,18 +165,18 @@ function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (ro
       <button
         type="button"
         onClick={() => onSelect("USER")}
-        className={`group rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#FFD36A]/60 hover:bg-[#28143f]/76 ${selected === "USER" ? "border-[#F5C542] bg-[#F5C542]/10" : "border-[#F5C542]/20 bg-[#201037]/70"}`}
+        className={`group rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#FFD700]/60 hover:bg-[#024B30]/76 ${selected === "USER" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-[#D4AF37]/20 bg-[#061D3C]/70"}`}
       >
-        <UserRound className="h-5 w-5 text-[#FFD36A]" />
+        <UserRound className="h-5 w-5 text-[#FFD700]" />
         <p className="mt-3 font-cinzel font-bold">{tr("loginAsUser")}</p>
         <p className="mt-1 text-xs leading-5 naksh-muted-text">{tr("userRoleCopy")}</p>
       </button>
       <button
         type="button"
         onClick={() => onSelect("ASTROLOGER")}
-        className={`group rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#FFD36A]/60 hover:bg-[#28143f]/76 ${selected === "ASTROLOGER" ? "border-[#F5C542] bg-[#F5C542]/10" : "border-[#F5C542]/20 bg-[#201037]/70"}`}
+        className={`group rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#FFD700]/60 hover:bg-[#024B30]/76 ${selected === "ASTROLOGER" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-[#D4AF37]/20 bg-[#061D3C]/70"}`}
       >
-        <BriefcaseBusiness className="h-5 w-5 text-[#FFD36A]" />
+        <BriefcaseBusiness className="h-5 w-5 text-[#FFD700]" />
         <p className="mt-3 font-cinzel font-bold">{tr("loginAsPro")}</p>
         <p className="mt-1 text-xs leading-5 naksh-muted-text">{tr("proRoleCopy")}</p>
       </button>

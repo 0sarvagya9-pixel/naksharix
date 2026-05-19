@@ -39,7 +39,7 @@ export default async function NakshatraPage({ params }: { params: Params }) {
     <main className="star-field">
       <JsonLd id={`${slug}-faq`} data={{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) }} />
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Nakshatra Guide</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Nakshatra Guide</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">{name} Nakshatra</h1>
         <p className="mt-4 max-w-3xl text-lg leading-8 naksh-muted-text">
           {name} Nakshatra reflects lunar themes connected with personality, emotional rhythm, instinctive choices, and spiritual remedies. Use it as a reflective lens alongside your full Kundli.
@@ -50,7 +50,7 @@ export default async function NakshatraPage({ params }: { params: Params }) {
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {["Personality themes", "Timing patterns", "Suggested remedies"].map((title) => (
-            <Card key={title} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={title} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
                 <h2 className="font-cinzel text-lg font-bold">{title}</h2>
                 <p className="mt-3 text-sm leading-6 naksh-muted-text">Review this section with chart context for balanced guidance.</p>
@@ -60,7 +60,7 @@ export default async function NakshatraPage({ params }: { params: Params }) {
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {faqs.map((faq) => (
-            <Card key={faq.question} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={faq.question} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
                 <h2 className="font-cinzel text-lg font-bold">{faq.question}</h2>
                 <p className="mt-3 text-sm leading-6 naksh-muted-text">{faq.answer}</p>

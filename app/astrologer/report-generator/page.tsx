@@ -18,7 +18,7 @@ export default async function AstrologerReportGeneratorPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Gemini Assistant</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Gemini Assistant</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">AI-assisted Report Generator</h1>
         <p className="mt-3 max-w-3xl naksh-muted-text">Create polished consultation notes and report drafts. Review every output before sharing with users.</p>
         <div className="mt-8"><AiReportGeneratorForm /></div>

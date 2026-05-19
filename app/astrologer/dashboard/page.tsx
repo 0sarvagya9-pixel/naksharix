@@ -56,7 +56,7 @@ export default async function AstrologerDashboardPage() {
       <Section>
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">{isConsultant ? "Consultant Dashboard" : "Astrologer Dashboard"}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">{isConsultant ? "Consultant Dashboard" : "Astrologer Dashboard"}</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black">Welcome, {activeProfile?.displayName ?? user.name}</h1>
             <p className="mt-3 max-w-3xl naksh-muted-text">Manage your consultations, availability, earnings, and client requests from one place.</p>
           </div>
@@ -87,16 +87,16 @@ export default async function AstrologerDashboardPage() {
           <Card className="glass lg:col-span-2">
             <CardHeader><CardTitle className="font-cinzel">Profile Completion</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="h-3 overflow-hidden rounded-full bg-[#12051f]/70"><div className="h-full rounded-full bg-gradient-to-r from-[#9B5CFF] to-[#FFD36A]" style={{ width: `${completion}%` }} /></div>
+              <div className="h-3 overflow-hidden rounded-full bg-[#02112C]/70"><div className="h-full rounded-full bg-gradient-to-r from-[#01A361] to-[#FFD700]" style={{ width: `${completion}%` }} /></div>
               <div className="grid gap-2 text-sm naksh-muted-text sm:grid-cols-2">
-                {completionItems(activeProfile, hasActiveSlots).map((item) => <p key={item.label} className={item.done ? "text-[#FFD36A]" : "naksh-muted-text"}>{item.done ? "✓" : "○"} {item.label}</p>)}
+                {completionItems(activeProfile, hasActiveSlots).map((item) => <p key={item.label} className={item.done ? "text-[#FFD700]" : "naksh-muted-text"}>{item.done ? "✓" : "○"} {item.label}</p>)}
               </div>
             </CardContent>
           </Card>
           <Card className="glass">
             <CardHeader><CardTitle className="font-cinzel">Approval Status</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm naksh-muted-text">
-              <p className="text-lg font-semibold text-[#FFD36A]">{statusLabel(status)}</p>
+              <p className="text-lg font-semibold text-[#FFD700]">{statusLabel(status)}</p>
               <p>{approvalMessage(status)}</p>
               {activeProfile?.rejectionReason ? <p className="rounded-md border border-[#FF4D4F]/30 bg-[#FF4D4F]/10 p-3 text-[#FFB4B5]">{activeProfile.rejectionReason}</p> : null}
             </CardContent>
@@ -107,16 +107,16 @@ export default async function AstrologerDashboardPage() {
           <Card className="glass">
             <CardHeader><CardTitle className="font-cinzel">Earnings Overview</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm naksh-muted-text">
-              <p>Total earnings: <span className="text-[#FFF7E8]">INR {totalEarnings.toLocaleString("en-IN")}</span></p>
-              <p>Pending payout: <span className="text-[#FFF7E8]">INR {pendingPayout.toLocaleString("en-IN")}</span></p>
-              <p>Completed payout: <span className="text-[#FFF7E8]">INR {completedPayout.toLocaleString("en-IN")}</span></p>
+              <p>Total earnings: <span className="text-[#FFFFFF]">INR {totalEarnings.toLocaleString("en-IN")}</span></p>
+              <p>Pending payout: <span className="text-[#FFFFFF]">INR {pendingPayout.toLocaleString("en-IN")}</span></p>
+              <p>Completed payout: <span className="text-[#FFFFFF]">INR {completedPayout.toLocaleString("en-IN")}</span></p>
               <Button variant="outline" asChild><Link href="/astrologer/earnings"><WalletCards className="h-4 w-4" /> Payout Request</Link></Button>
             </CardContent>
           </Card>
           <Card className="glass">
             <CardHeader><CardTitle className="font-cinzel">Availability Status</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm naksh-muted-text">
-              <p>Current status: <span className="text-[#FFD36A]">{hasActiveSlots ? "Available" : "Not available"}</span></p>
+              <p>Current status: <span className="text-[#FFD700]">{hasActiveSlots ? "Available" : "Not available"}</span></p>
               <p>Chat: {activeProfile?.availableForChat ? "Available" : "Off"}</p>
               <p>Call: {activeProfile?.availableForCall ? "Available" : "Off"}</p>
               <p>Video: {activeProfile?.availableForVideo ? "Available" : "Off"}</p>
@@ -125,7 +125,7 @@ export default async function AstrologerDashboardPage() {
           <Card id="reviews" className="glass">
             <CardHeader><CardTitle className="font-cinzel">Reviews</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm naksh-muted-text">
-              {(profile?.reviews ?? []).map((review) => <p key={review.id} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3">{review.rating}/5 - {review.body ?? "No written review"}</p>)}
+              {(profile?.reviews ?? []).map((review) => <p key={review.id} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3">{review.rating}/5 - {review.body ?? "No written review"}</p>)}
               {!profile?.reviews.length ? <p>No reviews yet.</p> : null}
             </CardContent>
           </Card>
@@ -135,7 +135,7 @@ export default async function AstrologerDashboardPage() {
           <CardHeader><CardTitle className="font-cinzel">Upcoming Consultations</CardTitle></CardHeader>
           <CardContent className="grid gap-4">
             {bookings.map((booking) => (
-              <div key={booking.id} className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
+              <div key={booking.id} className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
                 <div className="grid gap-3 lg:grid-cols-[1fr_1fr]">
                   <div>
                     <p className="font-cinzel font-bold">{booking.user.name}</p>
@@ -161,7 +161,7 @@ function Metric({ icon: Icon, label, value, note }: { icon: typeof UserRound; la
   return (
     <Card className="glass">
       <CardContent className="p-5">
-        <Icon className="h-5 w-5 text-[#FFD36A]" />
+        <Icon className="h-5 w-5 text-[#FFD700]" />
         <p className="mt-4 text-sm naksh-muted-text">{label}</p>
         <p className="mt-1 font-cinzel text-2xl font-black">{value}</p>
         <p className="mt-2 text-xs naksh-muted-text">{note}</p>

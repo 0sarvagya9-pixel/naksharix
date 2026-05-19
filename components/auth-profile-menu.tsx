@@ -102,9 +102,9 @@ export function AuthProfileMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="flex h-10 items-center gap-2 rounded-full border border-[#F5C542]/25 bg-[#201037]/70 px-2 pr-3 text-sm text-foreground transition hover:border-[#F5C542]/55 hover:bg-[#F5C542]/10"
+        className="flex h-10 items-center gap-2 rounded-full border border-[#D4AF37]/25 bg-[#061D3C]/70 px-2 pr-3 text-sm text-foreground transition hover:border-[#D4AF37]/55 hover:bg-[#D4AF37]/10"
       >
-        <span className="grid h-7 w-7 overflow-hidden rounded-full border border-[#F5C542]/35 bg-[#F5C542]/10 place-items-center text-xs font-bold text-[#FFD36A]">
+        <span className="grid h-7 w-7 overflow-hidden rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 place-items-center text-xs font-bold text-[#FFD700]">
           {image ? <Image src={image} alt="" width={28} height={28} className="h-full w-full object-cover" /> : initials}
         </span>
         <span className="hidden max-w-[7rem] truncate xl:block">{user.name ?? user.email}</span>
@@ -113,10 +113,10 @@ export function AuthProfileMenu() {
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-[#F5C542]/25 bg-[#12051f]/95 p-2 shadow-[0_18px_60px_rgba(5,2,14,0.62),0_0_32px_rgba(126,72,255,0.18)] backdrop-blur-xl"
+          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-[#D4AF37]/25 bg-[#02112C]/95 p-2 shadow-[0_18px_60px_rgba(5,2,14,0.62),0_0_32px_rgba(126,72,255,0.18)] backdrop-blur-xl"
         >
-          <div className="border-b border-[#F5C542]/20 px-3 py-3">
-            <p className="truncate font-cinzel text-sm font-bold text-[#FFD36A]">{user.name ?? "Naksharix"}</p>
+          <div className="border-b border-[#D4AF37]/20 px-3 py-3">
+            <p className="truncate font-cinzel text-sm font-bold text-[#FFD700]">{user.name ?? "Naksharix"}</p>
             <p className="truncate text-xs naksh-muted-text">{user.email}</p>
           </div>
           <ProfileLink href="/profile" icon={UserRound} label={tr("myProfile")} onClick={() => setOpen(false)} />
@@ -127,7 +127,7 @@ export function AuthProfileMenu() {
             type="button"
             role="menuitem"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm naksh-muted-text transition hover:bg-[#F5C542]/10 hover:text-[#FFD36A]"
+            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm naksh-muted-text transition hover:bg-[#D4AF37]/10 hover:text-[#FFD700]"
           >
             <LogOut className="h-4 w-4" />
             {tr("logout")}
@@ -144,7 +144,7 @@ function ProfileLink({ href, icon: Icon, label, onClick }: { href: string; icon:
       role="menuitem"
       href={href}
       onClick={onClick}
-      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm naksh-muted-text transition hover:bg-[#F5C542]/10 hover:text-[#FFD36A]"
+      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm naksh-muted-text transition hover:bg-[#D4AF37]/10 hover:text-[#FFD700]"
     >
       <Icon className="h-4 w-4" />
       {label}

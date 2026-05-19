@@ -32,7 +32,7 @@ export default async function ConsultationPage({ searchParams }: { searchParams:
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Live Guidance</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Live Guidance</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Consult an Astrologer</h1>
         <p className="mt-4 max-w-3xl naksh-muted-text">
           Request a secure chat, audio, or video session for kundli review, marriage compatibility, career timing, tarot clarity, numerology, or panchang-based muhurat.

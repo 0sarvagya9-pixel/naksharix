@@ -132,7 +132,7 @@ export function LocationAutocomplete({
         </Label>
       ) : null}
       <div className="relative">
-        <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#FFD36A]/80" />
+        <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#FFD700]/80" />
         <input
           id={inputId}
           data-field={dataField}
@@ -147,18 +147,18 @@ export function LocationAutocomplete({
           aria-autocomplete="list"
           aria-invalid={Boolean(error)}
           className={cn(
-            "h-10 w-full rounded-md border border-[#F5C542]/25 bg-[#12051f]/80 px-9 text-sm text-[#FFF7E8] outline-none ring-offset-background transition placeholder:text-[#BFAFD9]/75 focus-visible:border-[#FFD36A]/70 focus-visible:ring-2 focus-visible:ring-[#A855F7]/35 focus-visible:ring-offset-2",
+            "h-10 w-full rounded-md border border-[#D4AF37]/25 bg-[#02112C]/80 px-9 text-sm text-[#FFFFFF] outline-none ring-offset-background transition placeholder:text-[#F0F0F0]/75 focus-visible:border-[#FFD700]/70 focus-visible:ring-2 focus-visible:ring-[#01A361]/35 focus-visible:ring-offset-2",
             error && "border-destructive focus-visible:ring-destructive"
           )}
         />
-        {loading ? <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[#FFD36A]" /> : null}
+        {loading ? <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[#FFD700]" /> : null}
       </div>
       {error ? <p className="text-sm text-[#FF4D4F]">{error}</p> : null}
       {open ? (
         <div
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 top-full z-[9999] mt-1 max-h-72 overflow-y-auto rounded-lg border border-[#F5C542]/30 bg-[#12051f]/98 p-1 shadow-[0_22px_70px_rgba(5,2,14,0.78),0_0_34px_rgba(126,72,255,0.22)] backdrop-blur-xl"
+          className="absolute left-0 right-0 top-full z-[9999] mt-1 max-h-72 overflow-y-auto rounded-lg border border-[#D4AF37]/30 bg-[#02112C]/98 p-1 shadow-[0_22px_70px_rgba(5,2,14,0.78),0_0_34px_rgba(126,72,255,0.22)] backdrop-blur-xl"
         >
           {loading ? <p className="px-3 py-2 text-sm naksh-muted-text">{tr("searchingLocations")}</p> : null}
           {!loading && suggestions.length === 0 ? <p className="px-3 py-2 text-sm naksh-muted-text">{tr("noLocationsFound")}</p> : null}
@@ -172,17 +172,17 @@ export function LocationAutocomplete({
               onClick={() => selectLocation(location)}
               className={cn(
                 "flex w-full items-start gap-3 rounded-md px-3 py-2 text-left text-sm transition",
-                index === activeIndex ? "bg-[#F5C542]/10 text-[#FFD36A] shadow-[inset_3px_0_0_rgba(245,190,88,0.82)]" : "naksh-muted-text hover:bg-[#F5C542]/10 hover:text-[#FFF7E8]"
+                index === activeIndex ? "bg-[#D4AF37]/10 text-[#FFD700] shadow-[inset_3px_0_0_rgba(245,190,88,0.82)]" : "naksh-muted-text hover:bg-[#D4AF37]/10 hover:text-[#FFFFFF]"
               )}
             >
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#FFD36A]" />
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#FFD700]" />
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{location.displayName}</span>
                 {[location.city, location.state, location.country].filter(Boolean).length ? (
                   <span className="mt-0.5 block text-xs naksh-muted-text">{[location.city, location.state, location.country].filter(Boolean).join(", ")}</span>
                 ) : null}
               </span>
-              {index === activeIndex ? <Check className="mt-0.5 h-4 w-4 text-[#FFD36A]" /> : null}
+              {index === activeIndex ? <Check className="mt-0.5 h-4 w-4 text-[#FFD700]" /> : null}
             </button>
           ))}
         </div>

@@ -53,13 +53,13 @@ export function PanchangCard({ data }: { data: PanchangVisualData }) {
   ];
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[#F5C542]/30 bg-[radial-gradient(circle_at_15%_10%,rgba(245,190,88,0.16),transparent_28%),linear-gradient(135deg,rgba(23,8,45,0.94),rgba(10,4,24,0.98)_56%,rgba(54,28,68,0.9))] p-5 shadow-[0_24px_80px_rgba(5,2,14,0.42)]">
-      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full border border-[#F5C542]/25 opacity-50" />
+    <section className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/30 bg-[radial-gradient(circle_at_15%_10%,rgba(245,190,88,0.16),transparent_28%),linear-gradient(135deg,rgba(23,8,45,0.94),rgba(10,4,24,0.98)_56%,rgba(54,28,68,0.9))] p-5 shadow-[0_24px_80px_rgba(5,2,14,0.42)]">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full border border-[#D4AF37]/25 opacity-50" />
       <div className="pointer-events-none absolute right-6 top-8 h-28 w-28 rounded-full border border-purple-300/20 opacity-60" />
       <div className="relative mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#FFD36A]/80">{tr("kundliGenerator")}</p>
-          <h3 className="mt-2 font-cinzel text-2xl font-black text-[#FFF7E8]">{tr("panchangSnapshot")}</h3>
+          <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#FFD700]/80">{tr("kundliGenerator")}</p>
+          <h3 className="mt-2 font-cinzel text-2xl font-black text-[#FFFFFF]">{tr("panchangSnapshot")}</h3>
         </div>
         <div className="h-px flex-1 bg-gradient-to-r from-amber-200/60 via-purple-300/30 to-transparent sm:max-w-xs" />
       </div>
@@ -74,9 +74,9 @@ export function PanchangCard({ data }: { data: PanchangVisualData }) {
 
 function PanchangMetric({ label, value, icon: Icon }: { label: string; value: string; icon: typeof CalendarDays }) {
   return (
-    <div className="group rounded-xl border border-[#F5C542]/20 bg-[#201037]/75 p-4 backdrop-blur transition hover:border-[#F5C542]/40 hover:bg-[#28143f]/80">
+    <div className="group rounded-xl border border-[#D4AF37]/20 bg-[#061D3C]/75 p-4 backdrop-blur transition hover:border-[#D4AF37]/40 hover:bg-[#024B30]/80">
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#F5C542]/10 text-[#FFD36A] shadow-[0_0_20px_rgba(245,190,88,0.12)]">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#D4AF37]/10 text-[#FFD700] shadow-[0_0_20px_rgba(245,190,88,0.12)]">
           <Icon className="h-5 w-5" />
         </span>
         <span className="min-w-0">

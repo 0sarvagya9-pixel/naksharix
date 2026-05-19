@@ -28,13 +28,13 @@ export default function AllSignsTodayHoroscopePage() {
     <main className="star-field">
       <Section>
         <JsonLd id="all-signs-today-schema" data={schema} />
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Daily Horoscope</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Daily Horoscope</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Today Horoscope for All Zodiac Signs</h1>
         <p className="mt-4 max-w-3xl naksh-muted-text">Choose your zodiac sign for today&apos;s love, career, finance, health, lucky color, and cosmic timing guidance from Naksharix.</p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {zodiacSigns.map((sign) => (
             <Link key={sign.slug} href={`/horoscope/${sign.slug}/today`}>
-              <Card className="glass h-full transition hover:border-[#F5C542]/55">
+              <Card className="glass h-full transition hover:border-[#D4AF37]/55">
                 <CardHeader><CardTitle className="font-cinzel">{sign.name} Today</CardTitle></CardHeader>
                 <CardContent className="text-sm naksh-muted-text">{sign.element} energy for {sign.focus}.</CardContent>
               </Card>

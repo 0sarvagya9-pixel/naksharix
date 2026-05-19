@@ -62,17 +62,17 @@ export function HomeHero() {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(139,92,246,0.34),transparent_28rem),radial-gradient(circle_at_85%_20%,rgba(245,190,88,0.22),transparent_24rem)]" />
-      <div className="absolute left-1/2 top-12 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full border border-[#F5C542]/15" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(1,163,97,0.24),transparent_28rem),radial-gradient(circle_at_85%_20%,rgba(255,215,0,0.18),transparent_24rem),linear-gradient(135deg,#02112C_0%,#031936_55%,#02112C_100%)]" />
+      <div className="absolute left-1/2 top-12 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full border border-[#D4AF37]/18" />
       <Section className="relative grid min-h-[calc(100vh-4rem)] items-center gap-10 pb-24 lg:grid-cols-[1fr_0.88fr]">
         <motion.div initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <p className="mb-5 inline-flex rounded-full border border-[#F5C542]/35 bg-[#F5C542]/10 px-4 py-2 text-sm font-semibold text-[#FFD36A]">
+          <p className="mb-5 inline-flex rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-2 text-sm font-semibold text-[#FFD700]">
             {tr("heroEyebrow")}
           </p>
-          <h1 className="max-w-4xl text-balance font-decorative text-5xl font-black tracking-wide text-[#FFF7E8] sm:text-6xl lg:text-7xl">
+          <h1 className="max-w-4xl text-balance font-decorative text-5xl font-black tracking-wide text-[#FFD700] drop-shadow-[0_0_26px_rgba(255,215,0,0.22)] sm:text-6xl lg:text-7xl">
             Naksharix
           </h1>
-          <p className="mt-4 font-cinzel text-2xl font-bold text-[#FFD36A]">{tr("tagline")}</p>
+          <p className="mt-4 font-cinzel text-2xl font-bold text-white">{tr("tagline")}</p>
           <p className="mt-6 max-w-2xl text-lg leading-8 naksh-muted-text">
             {tr("heroCopy")}
           </p>
@@ -91,7 +91,7 @@ export function HomeHero() {
           </div>
           <div className="mt-10 grid gap-3 text-sm naksh-muted-text sm:grid-cols-3">
             {(["personalBirthChart", "hindiEnglish", "paymentsReadyReports"] as const).map((item) => (
-              <span key={item} className="rounded-md border border-[#F5C542]/20 bg-[#201037]/60 px-4 py-3">{tr(item)}</span>
+              <span key={item} className="rounded-md border border-[#D4AF37]/25 bg-[#02112C]/70 px-4 py-3 shadow-[0_0_22px_rgba(1,163,97,0.08)]">{tr(item)}</span>
             ))}
           </div>
         </motion.div>
@@ -108,9 +108,9 @@ export function TrustCounters() {
     <Section className="pt-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {counters.map(([value, label]) => (
-          <Card key={label} className="border-[#F5C542]/20 bg-[#201037]/75">
+          <Card key={label} className="border-[#D4AF37]/25 bg-[#02112C]/80 hover:border-[#01A361]/45">
             <CardContent className="p-5">
-              <p className="font-cinzel text-3xl font-black text-[#FFD36A]">{value}</p>
+              <p className="font-cinzel text-3xl font-black text-[#FFD700]">{value}</p>
               <p className="mt-1 text-sm naksh-muted-text">{label}</p>
             </CardContent>
           </Card>
@@ -124,16 +124,16 @@ export function FeatureGrid() {
   return (
     <Section className="pt-8">
       <div className="mb-10 max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">AI Astrology Suite</p>
-        <h2 className="mt-3 font-cinzel text-4xl font-black">A complete platform, not a single horoscope tool</h2>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#01A361]">AI Astrology Suite</p>
+        <h2 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">A complete platform, not a single horoscope tool</h2>
       </div>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {features.map(({ title, description, icon: Icon, href }, index) => (
           <motion.div key={title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.04 }}>
             <Link href={href} className="block h-full">
-              <Card className="h-full border-[#F5C542]/20 bg-[#201037]/75 transition hover:-translate-y-1 hover:border-[#F5C542]/55">
+              <Card className="h-full border-[#D4AF37]/22 bg-[#02112C]/82 transition hover:-translate-y-1 hover:border-[#01A361]/60 hover:shadow-[0_24px_70px_rgba(1,163,97,0.18)]">
                 <CardContent className="p-6">
-                  <div className="grid h-11 w-11 place-items-center rounded-lg bg-[linear-gradient(135deg,rgba(126,72,255,0.35),rgba(245,190,88,0.28))] text-[#FFD36A]">
+                  <div className="grid h-11 w-11 place-items-center rounded-lg bg-[linear-gradient(135deg,rgba(1,163,97,0.35),rgba(255,215,0,0.22))] text-[#FFD700]">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="mt-5 font-cinzel text-xl font-bold">{title}</h3>
@@ -151,11 +151,11 @@ export function FeatureGrid() {
 export function CTASection() {
   return (
     <Section>
-      <div className="relative overflow-hidden rounded-lg border border-[#F5C542]/25 bg-[linear-gradient(135deg,rgba(72,36,128,0.88),rgba(21,15,48,0.96)_52%,rgba(180,128,45,0.62))] p-8 sm:p-12">
-        <div className="absolute right-8 top-8 h-32 w-32 rounded-full border border-[#F5C542]/25" />
+      <div className="relative overflow-hidden rounded-lg border border-[#D4AF37]/30 bg-[linear-gradient(135deg,rgba(2,17,44,0.95),rgba(2,75,48,0.72)_58%,rgba(212,175,55,0.24))] p-8 shadow-[0_24px_80px_rgba(0,5,16,0.42)] sm:p-12">
+        <div className="absolute right-8 top-8 h-32 w-32 rounded-full border border-[#D4AF37]/25" />
         <div className="relative max-w-3xl">
-          <ShieldCheck className="h-8 w-8 text-[#FFD36A]" />
-          <h2 className="mt-5 font-cinzel text-4xl font-black">Start with a free kundli, upgrade when you want depth</h2>
+          <ShieldCheck className="h-8 w-8 text-[#FFD700]" />
+          <h2 className="mt-5 font-cinzel text-4xl font-black text-[#FFD700]">Start with a free kundli, upgrade when you want depth</h2>
           <p className="mt-4 naksh-muted-text">
             Naksharix shows useful free guidance first, then gives clear paths to premium reports, AI chat, subscriptions, and human astrologer consultation.
           </p>
@@ -174,20 +174,20 @@ export function AstrologerShowcase() {
     <Section>
       <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Human Guidance</p>
-          <h2 className="mt-3 font-cinzel text-4xl font-black">Featured astrologers</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#01A361]">Human Guidance</p>
+          <h2 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">Featured astrologers</h2>
         </div>
         <Button variant="outline" asChild><Link href="/astrologers">Explore marketplace</Link></Button>
       </div>
       <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-3 md:grid md:grid-cols-3 md:overflow-visible">
         {featuredAstrologers.map((astrologer) => (
-          <Card key={astrologer.id} className="min-w-[82vw] snap-start border-[#F5C542]/20 bg-[#201037]/75 sm:min-w-[22rem] md:min-w-0">
+          <Card key={astrologer.id} className="min-w-[82vw] snap-start border-[#D4AF37]/22 bg-[#02112C]/82 sm:min-w-[22rem] md:min-w-0">
             <CardContent className="p-6">
-              <div className="grid h-16 w-16 place-items-center rounded-lg bg-[#F5C542]/10 font-cinzel text-2xl font-black text-[#FFD36A]">
+              <div className="grid h-16 w-16 place-items-center rounded-lg bg-[#D4AF37]/10 font-cinzel text-2xl font-black text-[#FFD700]">
                 {astrologer.name.split(" ").map((part) => part[0]).join("").slice(0, 2)}
               </div>
-              <h3 className="mt-5 flex items-center gap-2 font-cinzel text-xl font-bold">{astrologer.name}<BadgeCheck className="h-5 w-5 text-[#FFD36A]" /></h3>
-              <p className="mt-1 text-sm text-[#FFD36A]">{astrologer.specialty}</p>
+              <h3 className="mt-5 flex items-center gap-2 font-cinzel text-xl font-bold">{astrologer.name}<BadgeCheck className="h-5 w-5 text-[#FFD700]" /></h3>
+              <p className="mt-1 text-sm text-[#FFD700]">{astrologer.specialty}</p>
               <p className="mt-3 text-sm leading-6 naksh-muted-text">{astrologer.experienceYears} years experience · {astrologer.languages.join(", ")} · {astrologer.rating} rating · INR {astrologer.pricePerMinute}/min</p>
               <div className="mt-5 flex gap-2">
                 <Button asChild className="flex-1"><Link href={`/astrologers/${astrologer.id}`}>View profile</Link></Button>
@@ -206,18 +206,18 @@ export function Testimonials() {
     <Section className="pt-4">
       <div className="mb-10 flex items-end justify-between gap-6">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Client Trust</p>
-          <h2 className="mt-3 font-cinzel text-4xl font-black">Built for daily guidance and serious decisions</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#01A361]">Client Trust</p>
+          <h2 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">Built for daily guidance and serious decisions</h2>
         </div>
-        <WandSparkles className="hidden h-10 w-10 text-[#FFD36A] md:block" />
+        <WandSparkles className="hidden h-10 w-10 text-[#FFD700] md:block" />
       </div>
       <div className="grid gap-5 md:grid-cols-3">
         {testimonials.map(([name, role, quote, kind]) => (
-          <Card key={name} className="border-[#F5C542]/20 bg-[#201037]/75">
+          <Card key={name} className="border-[#D4AF37]/22 bg-[#02112C]/82">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                {kind === "video" ? <PlayCircle className="h-7 w-7 text-[#FFD36A]" /> : <Quote className="h-6 w-6 text-[#FFD36A]" />}
-                <div className="flex gap-1 text-[#FFD36A]">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3 w-3 fill-current" />)}</div>
+                {kind === "video" ? <PlayCircle className="h-7 w-7 text-[#FFD700]" /> : <Quote className="h-6 w-6 text-[#FFD700]" />}
+                <div className="flex gap-1 text-[#FFD700]">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3 w-3 fill-current" />)}</div>
               </div>
               <p className="mt-5 leading-7 naksh-muted-text">{quote}</p>
               <p className="mt-6 font-cinzel font-bold">{name}</p>
@@ -233,10 +233,10 @@ export function Testimonials() {
 export function FeaturedIn() {
   return (
     <Section className="py-8">
-      <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/60 p-5">
-        <p className="text-center text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Featured in and trusted by builders</p>
+      <div className="rounded-lg border border-[#D4AF37]/22 bg-[#02112C]/70 p-5">
+        <p className="text-center text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Featured in and trusted by builders</p>
         <div className="mt-5 grid gap-3 text-center text-sm naksh-muted-text sm:grid-cols-3 lg:grid-cols-5">
-          {featuredIn.map((item) => <span key={item} className="rounded-md bg-[#201037]/70 px-3 py-3">{item}</span>)}
+          {featuredIn.map((item) => <span key={item} className="rounded-md bg-[#024B30]/28 px-3 py-3">{item}</span>)}
         </div>
       </div>
     </Section>
@@ -247,14 +247,14 @@ export function FAQSection() {
   return (
     <Section>
       <div className="mb-8 max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">FAQ</p>
-        <h2 className="mt-3 font-cinzel text-4xl font-black">Clear answers before you begin</h2>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#01A361]">FAQ</p>
+        <h2 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">Clear answers before you begin</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {faqs.map(([question, answer]) => (
-          <Card key={question} className="border-[#F5C542]/20 bg-[#201037]/75">
+          <Card key={question} className="border-[#D4AF37]/22 bg-[#02112C]/82">
             <CardContent className="p-5">
-              <h3 className="flex gap-2 font-cinzel text-lg font-bold"><CheckCircle2 className="mt-1 h-4 w-4 text-[#FFD36A]" />{question}</h3>
+              <h3 className="flex gap-2 font-cinzel text-lg font-bold"><CheckCircle2 className="mt-1 h-4 w-4 text-[#01A361]" />{question}</h3>
               <p className="mt-3 text-sm leading-6 naksh-muted-text">{answer}</p>
             </CardContent>
           </Card>
@@ -266,7 +266,7 @@ export function FAQSection() {
 
 export function StickyMobileCTA() {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#F5C542]/25 bg-[#12051f]/95 p-3 backdrop-blur md:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#D4AF37]/25 bg-[#02112C]/95 p-3 backdrop-blur md:hidden">
       <div className="grid grid-cols-3 gap-2">
         <Button size="sm" asChild><Link href="/kundli"><MoonStar className="h-4 w-4" />Kundli</Link></Button>
         <Button size="sm" variant="outline" asChild><Link href="/chatbot"><MessageCircle className="h-4 w-4" />AI</Link></Button>

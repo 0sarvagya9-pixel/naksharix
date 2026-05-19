@@ -8,11 +8,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "border border-purple-300/20 bg-gradient-to-r from-[#9B5CFF] via-[#A855F7] to-[#B56CFF] text-[#FFF7E8] shadow-[0_10px_30px_rgba(155,92,255,0.28),inset_0_1px_0_rgba(255,255,255,0.22)] hover:-translate-y-0.5 hover:shadow-[0_14px_42px_rgba(155,92,255,0.38)]",
-        secondary: "border border-[#F5C542]/40 bg-gradient-to-r from-[#F5C542] to-[#FFD36A] text-[#12051f] shadow-[0_10px_28px_rgba(245,197,66,0.18)] hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(245,197,66,0.26)]",
-        outline: "border border-[#F5C542]/30 bg-[#160926]/70 text-[#FFF7E8] shadow-[inset_0_1px_0_rgba(255,211,106,0.08)] hover:border-[#FFD36A]/60 hover:bg-[#201037] hover:text-[#FFD36A]",
-        ghost: "text-[#FFF7E8] hover:bg-[#F5C542]/10 hover:text-[#FFD36A]",
-        destructive: "border border-red-300/20 bg-[#FF4D4F] text-[#FFF7E8] shadow-[0_10px_30px_rgba(255,77,79,0.22)] hover:bg-[#ff6365]"
+        default: "border border-[#01A361]/35 bg-[#01A361] text-white shadow-[0_10px_30px_rgba(2,75,48,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] hover:-translate-y-0.5 hover:bg-[#12b873] hover:shadow-[0_14px_42px_rgba(1,163,97,0.34)]",
+        secondary: "border border-[#D4AF37]/45 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-[#02112C] shadow-[0_10px_28px_rgba(255,215,0,0.18)] hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(255,215,0,0.26)]",
+        outline: "border border-[#D4AF37]/35 bg-[#02112C]/70 text-[#FFD700] shadow-[inset_0_1px_0_rgba(255,215,0,0.08)] hover:border-[#FFD700]/70 hover:bg-[#024B30]/45 hover:text-white",
+        ghost: "text-[#F0F0F0] hover:bg-[#D4AF37]/10 hover:text-[#FFD700]",
+        destructive: "border border-red-300/20 bg-[#FF4D4F] text-[#FFFFFF] shadow-[0_10px_30px_rgba(255,77,79,0.22)] hover:bg-[#ff6365]"
       },
       size: {
         sm: "h-8 px-3 text-xs",

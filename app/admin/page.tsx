@@ -118,8 +118,8 @@ export default function AdminPage() {
         <CardHeader><CardTitle>Astrologer Approvals</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD36A]">
-              <tr className="border-b border-[#F5C542]/20">
+            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD700]">
+              <tr className="border-b border-[#D4AF37]/20">
                 <th className="py-3 pr-4">Created</th>
                 <th className="py-3 pr-4">Astrologer</th>
                 <th className="py-3 pr-4">Email</th>
@@ -133,16 +133,16 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {astrologerApprovals.map((profile) => (
-                <tr key={profile.id} className="border-b border-[#F5C542]/15 naksh-muted-text">
+                <tr key={profile.id} className="border-b border-[#D4AF37]/15 naksh-muted-text">
                   <td className="py-3 pr-4">{new Date(profile.createdAt).toLocaleString()}</td>
-                  <td className="py-3 pr-4 text-[#FFF7E8]">{profile.displayName}</td>
+                  <td className="py-3 pr-4 text-[#FFFFFF]">{profile.displayName}</td>
                   <td className="py-3 pr-4">{profile.user?.email}</td>
                   <td className="py-3 pr-4">{profile.specialization}</td>
                   <td className="py-3 pr-4">{profile.languages?.join(", ")}</td>
                   <td className="py-3 pr-4">{profile.experienceYears}+ years</td>
                   <td className="py-3 pr-4">INR {Number(profile.consultationPrice).toLocaleString("en-IN")}</td>
                   <td className="py-3 pr-4">{profile.status}</td>
-                  <td className="py-3 pr-4"><Link className="text-[#FFD36A] hover:underline" href="/admin/astrologers">Review</Link></td>
+                  <td className="py-3 pr-4"><Link className="text-[#FFD700] hover:underline" href="/admin/astrologers">Review</Link></td>
                 </tr>
               ))}
               {!astrologerApprovals.length ? <tr><td colSpan={9} className="py-6 text-center naksh-muted-text">No astrologer profiles submitted yet.</td></tr> : null}
@@ -154,8 +154,8 @@ export default function AdminPage() {
         <CardHeader><CardTitle>Booking Requests</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[1080px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD36A]">
-              <tr className="border-b border-[#F5C542]/20">
+            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD700]">
+              <tr className="border-b border-[#D4AF37]/20">
                 <th className="py-3 pr-4">Created</th>
                 <th className="py-3 pr-4">Customer</th>
                 <th className="py-3 pr-4">Customer Email</th>
@@ -175,9 +175,9 @@ export default function AdminPage() {
                 const customerName = String(metadata.customerName ?? booking.user?.name ?? "-");
                 const customerEmail = String(metadata.customerEmail ?? booking.user?.email ?? "-");
                 return (
-                  <tr key={booking.id} className="border-b border-[#F5C542]/15 naksh-muted-text">
+                  <tr key={booking.id} className="border-b border-[#D4AF37]/15 naksh-muted-text">
                     <td className="py-3 pr-4">{new Date(booking.createdAt).toLocaleString()}</td>
-                    <td className="py-3 pr-4 text-[#FFF7E8]">{customerName}</td>
+                    <td className="py-3 pr-4 text-[#FFFFFF]">{customerName}</td>
                     <td className="py-3 pr-4">{customerEmail}</td>
                     <td className="py-3 pr-4">{booking.astrologerProfile?.displayName ?? booking.astrologerProfile?.user?.name ?? "-"}</td>
                     <td className="py-3 pr-4">{booking.astrologerProfile?.user?.email ?? "-"}</td>
@@ -199,8 +199,8 @@ export default function AdminPage() {
         <CardHeader><CardTitle>Report Requests</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD36A]">
-              <tr className="border-b border-[#F5C542]/20">
+            <thead className="text-xs uppercase tracking-[0.18em] text-[#FFD700]">
+              <tr className="border-b border-[#D4AF37]/20">
                 <th className="py-3 pr-4">Created</th>
                 <th className="py-3 pr-4">User</th>
                 <th className="py-3 pr-4">Email</th>
@@ -217,9 +217,9 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {reportRequests.map((request) => (
-                <tr key={request.id} className="border-b border-[#F5C542]/15 naksh-muted-text">
+                <tr key={request.id} className="border-b border-[#D4AF37]/15 naksh-muted-text">
                   <td className="py-3 pr-4">{new Date(request.createdAt).toLocaleString()}</td>
-                  <td className="py-3 pr-4 text-[#FFF7E8]">{request.fullName}</td>
+                  <td className="py-3 pr-4 text-[#FFFFFF]">{request.fullName}</td>
                   <td className="py-3 pr-4">{request.deliveryEmail || request.user?.email}</td>
                   <td className="py-3 pr-4">{request.planType}</td>
                   <td className="py-3 pr-4">{request.paymentStatus}</td>
@@ -229,7 +229,7 @@ export default function AdminPage() {
                   <td className="py-3 pr-4">{request.birthPlace ?? "-"}</td>
                   <td className="py-3 pr-4">{request.phone ?? "-"}</td>
                   <td className="max-w-[16rem] truncate py-3 pr-4">{request.concern ?? "-"}</td>
-                  <td className="py-3 pr-4"><Link className="text-[#FFD36A] hover:underline" href={`/admin/report-requests/${request.id}`}>View details</Link></td>
+                  <td className="py-3 pr-4"><Link className="text-[#FFD700] hover:underline" href={`/admin/report-requests/${request.id}`}>View details</Link></td>
                 </tr>
               ))}
               {!reportRequests.length ? <tr><td colSpan={12} className="py-6 text-center naksh-muted-text">No report requests yet.</td></tr> : null}
@@ -245,9 +245,9 @@ export default function AdminPage() {
       </Card>
       <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {operations.map(({ title, copy, icon: Icon }) => (
-          <Card key={title} className="border-[#F5C542]/20 bg-[#201037]/80">
+          <Card key={title} className="border-[#D4AF37]/20 bg-[#061D3C]/80">
             <CardContent className="p-5">
-              <Icon className="h-5 w-5 text-[#FFD36A]" />
+              <Icon className="h-5 w-5 text-[#FFD700]" />
               <h2 className="mt-4 font-cinzel text-lg font-bold">{title}</h2>
               <p className="mt-2 text-sm leading-6 naksh-muted-text">{copy}</p>
             </CardContent>

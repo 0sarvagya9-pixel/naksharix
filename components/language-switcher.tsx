@@ -12,7 +12,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
       aria-label="Language"
       value={locale}
       onChange={(event) => setLocale(event.target.value as Locale)}
-      className={cn("hidden h-9 w-[120px] min-w-[120px] flex-shrink-0 rounded-md border border-[#F5C542]/25 bg-[#12051f] px-2 text-xs naksh-muted-text sm:block", className)}
+      className={cn("hidden h-9 w-[120px] min-w-[120px] flex-shrink-0 rounded-md border border-[#D4AF37]/25 bg-[#02112C] px-2 text-xs naksh-muted-text sm:block", className)}
     >
       <option value="en">English</option>
       <option value="hi">हिन्दी</option>

@@ -28,7 +28,7 @@ export default async function AdminPayoutsPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Finance Ops</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Finance Ops</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Admin Payout Dashboard</h1>
         <div className="mt-8 grid gap-4">
           {pendingRows.map(({ profile, pending, gross, paid }) => (
@@ -37,16 +37,16 @@ export default async function AdminPayoutsPage() {
                 <p className="font-cinzel font-bold">{profile.displayName}</p>
                 <p className="text-sm naksh-muted-text">Gross INR {gross.toLocaleString("en-IN")}</p>
                 <p className="text-sm naksh-muted-text">Paid INR {paid.toLocaleString("en-IN")}</p>
-                <p className="text-sm text-[#FFD36A]">Pending INR {pending.toLocaleString("en-IN")}</p>
+                <p className="text-sm text-[#FFD700]">Pending INR {pending.toLocaleString("en-IN")}</p>
               </CardContent>
             </Card>
           ))}
-          {!pendingRows.length ? <p className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 text-sm naksh-muted-text">No pending payout balances found.</p> : null}
+          {!pendingRows.length ? <p className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4 text-sm naksh-muted-text">No pending payout balances found.</p> : null}
         </div>
         <h2 className="mt-10 font-cinzel text-2xl font-bold">Recent payout records</h2>
         <div className="mt-4 grid gap-4">
           {payouts.map((payout) => (
-            <Card key={payout.id} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={payout.id} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="grid gap-2 p-5 md:grid-cols-4">
                 <p className="font-cinzel font-bold">{payout.astrologerProfile.displayName}</p>
                 <p className="text-sm naksh-muted-text">INR {Number(payout.amount).toLocaleString("en-IN")}</p>

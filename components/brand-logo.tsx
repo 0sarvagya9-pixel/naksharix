@@ -5,14 +5,14 @@ import { cn } from "@/lib/utils";
 export function BrandLogo({ className, compact = false }: { className?: string; compact?: boolean }) {
   return (
     <Link href="/" className={cn("group flex flex-shrink-0 items-center gap-3 whitespace-nowrap", className)} aria-label="Naksharix home">
-      <span className="relative grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg border border-amber-300/35 bg-[linear-gradient(135deg,rgba(126,72,255,0.95),rgba(245,190,88,0.9))] text-[#FFF7E8] shadow-[0_0_32px_rgba(177,132,255,0.35)]">
-        <span className="absolute inset-1 rounded-md border border-[#F5C542]/25" />
+      <span className="relative grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg border border-[#D4AF37]/45 bg-[radial-gradient(circle_at_35%_25%,#FFD700,#D4AF37_42%,#024B30_100%)] text-[#02112C] shadow-[0_0_32px_rgba(255,215,0,0.28)]">
+        <span className="absolute inset-1 rounded-md border border-[#FFD700]/30" />
         <MoonStar className="relative h-5 w-5" />
       </span>
       {!compact ? (
         <span className="min-w-0 leading-none">
-          <span className="block font-cinzel text-xl font-black tracking-wide text-[#FFF7E8]">Naksharix</span>
-          <span className="hidden text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[#FFD36A]/80 sm:block">Cosmic Destiny</span>
+          <span className="block font-cinzel text-xl font-black tracking-wide text-[#FFD700]">Naksharix</span>
+          <span className="hidden text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[#F0F0F0]/75 sm:block">Cosmic Destiny</span>
         </span>
       ) : null}
     </Link>

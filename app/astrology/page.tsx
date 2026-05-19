@@ -34,7 +34,7 @@ export default function AstrologySeoIndexPage() {
         {JSON.stringify(itemListSchema)}
       </Script>
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Naksharix SEO Hub</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix SEO Hub</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black sm:text-5xl">Astrology Services</h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 naksh-muted-text">
           Discover premium astrology tools for Horoscope, Kundli, Numerology, Tarot Reading, Panchang, compatibility, AI remedies, and personalized cosmic guidance.
@@ -42,12 +42,12 @@ export default function AstrologySeoIndexPage() {
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {seoLandingPages.map(({ slug, keyword, description, icon: Icon }) => (
             <Link key={slug} href={`/astrology/${slug}`}>
-              <Card className="h-full border-[#F5C542]/20 bg-[#201037]/80 transition hover:-translate-y-1 hover:border-[#F5C542]/55">
+              <Card className="h-full border-[#D4AF37]/20 bg-[#061D3C]/80 transition hover:-translate-y-1 hover:border-[#D4AF37]/55">
                 <CardContent className="p-6">
-                  <Icon className="h-6 w-6 text-[#FFD36A]" />
+                  <Icon className="h-6 w-6 text-[#FFD700]" />
                   <h2 className="mt-5 font-cinzel text-xl font-bold">{keyword}</h2>
                   <p className="mt-3 text-sm leading-6 naksh-muted-text">{description}</p>
-                  <p className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#FFD36A]">
+                  <p className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#FFD700]">
                     Explore <ArrowRight className="h-4 w-4" />
                   </p>
                 </CardContent>

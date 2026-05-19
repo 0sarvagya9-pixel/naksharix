@@ -43,7 +43,7 @@ export default async function ZodiacSignPage({ params }: PageProps) {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">{sign.element} Zodiac Sign</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">{sign.element} Zodiac Sign</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">{sign.name} Horoscope and Astrology</h1>
         <p className="mt-4 max-w-3xl naksh-muted-text">
           {sign.name} is associated with {sign.focus}. Use this page as a starting point for daily horoscope, kundli reading, tarot reflection, numerology, and panchang-aware timing.
@@ -52,7 +52,7 @@ export default async function ZodiacSignPage({ params }: PageProps) {
           {sections.map(({ icon: Icon, title, copy }) => (
             <Card key={title} className="glass">
               <CardContent className="space-y-3 pt-6">
-                <Icon className="h-5 w-5 text-[#FFD36A]" />
+                <Icon className="h-5 w-5 text-[#FFD700]" />
                 <h2 className="font-cinzel text-lg font-bold">{title}</h2>
                 <p className="text-sm naksh-muted-text">{copy}</p>
               </CardContent>

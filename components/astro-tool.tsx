@@ -68,16 +68,16 @@ export function AstroTool({ type }: { type: ToolType }) {
 
   return (
     <Card className="glass overflow-hidden">
-      <CardHeader className="border-b border-[#F5C542]/15 bg-[#201037]/70">
+      <CardHeader className="border-b border-[#D4AF37]/15 bg-[#061D3C]/70">
         <CardTitle className="flex items-center gap-2 font-cinzel text-xl sm:text-2xl">
-          <Sparkles className="h-5 w-5 text-[#FFD36A]" />
+          <Sparkles className="h-5 w-5 text-[#FFD700]" />
           {tr("horoscopeStudio")}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
-        <div className="mb-5 grid gap-2 rounded-lg border border-[#F5C542]/20 bg-[#090016]/45 p-1 sm:grid-cols-2">
-          <button type="button" onClick={() => setMode("general")} className={`rounded-md px-4 py-3 font-cinzel text-sm transition ${mode === "general" ? "bg-[#F5C542] text-background" : "naksh-muted-text hover:bg-[#201037]/70"}`}>{tr("generalHoroscope")}</button>
-          <button type="button" onClick={() => setMode("personalized")} className={`rounded-md px-4 py-3 font-cinzel text-sm transition ${mode === "personalized" ? "bg-[#F5C542] text-background" : "naksh-muted-text hover:bg-[#201037]/70"}`}>{tr("personalizedHoroscope")}</button>
+        <div className="mb-5 grid gap-2 rounded-lg border border-[#D4AF37]/20 bg-[#02112C]/45 p-1 sm:grid-cols-2">
+          <button type="button" onClick={() => setMode("general")} className={`rounded-md px-4 py-3 font-cinzel text-sm transition ${mode === "general" ? "bg-[#D4AF37] text-background" : "naksh-muted-text hover:bg-[#061D3C]/70"}`}>{tr("generalHoroscope")}</button>
+          <button type="button" onClick={() => setMode("personalized")} className={`rounded-md px-4 py-3 font-cinzel text-sm transition ${mode === "personalized" ? "bg-[#D4AF37] text-background" : "naksh-muted-text hover:bg-[#061D3C]/70"}`}>{tr("personalizedHoroscope")}</button>
         </div>
         {mode === "general" ? (
           <form key={`${type}-${apiLocale}`} action={run} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -150,8 +150,8 @@ function SelectField({ label, name, options, defaultValue, error }: { label: str
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <select name={name} data-field={name} defaultValue={defaultValue} className={`h-12 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/70 px-3 text-sm font-medium text-foreground shadow-sm outline-none transition focus:border-[#F5C542] focus:ring-2 focus:ring-[#FFD36A]/30 ${errorClass(Boolean(error))}`}>
-        {options.map(([value, text]) => <option key={value} value={value} className="bg-[#12051f] text-foreground">{text}</option>)}
+      <select name={name} data-field={name} defaultValue={defaultValue} className={`h-12 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C]/70 px-3 text-sm font-medium text-foreground shadow-sm outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#FFD700]/30 ${errorClass(Boolean(error))}`}>
+        {options.map(([value, text]) => <option key={value} value={value} className="bg-[#02112C] text-foreground">{text}</option>)}
       </select>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
@@ -173,7 +173,7 @@ function HoroscopeResultView({ data }: { data: HoroscopeResult }) {
       </div>
       <div className="grid gap-3 sm:grid-cols-[0.7fr_1.3fr]">
         <MiniCard icon={<Palette />} label={tr("luckyColor")} value={data.luckyColor ?? (isHindi ? "राजसी सुनहरा" : "Royal Gold")} />
-        <article className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-5 leading-7 naksh-muted-text">
+        <article className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-5 leading-7 naksh-muted-text">
           <p>{data.content ?? fallbackHoroscope(data.zodiac, data.category, data.locale)}</p>
         </article>
       </div>
@@ -182,7 +182,7 @@ function HoroscopeResultView({ data }: { data: HoroscopeResult }) {
 }
 
 function MiniCard({ icon, label, value }: { icon: React.ReactElement; label: string; value: string }) {
-  return <div className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4"><div className="mb-3 text-[#FFD36A]">{icon}</div><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold capitalize text-foreground">{value}</p></div>;
+  return <div className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><div className="mb-3 text-[#FFD700]">{icon}</div><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold capitalize text-foreground">{value}</p></div>;
 }
 
 function PersonalizedHoroscopeForm({ values, setValues, resolvedLocation, setResolvedLocation, loading, errors, onSubmit }: { values: { name: string; gender: string; dateOfBirth: string; timeOfBirth: string; birthPlace: string; period: string }; setValues: React.Dispatch<React.SetStateAction<{ name: string; gender: string; dateOfBirth: string; timeOfBirth: string; birthPlace: string; period: string }>>; resolvedLocation: ResolvedLocation | null; setResolvedLocation: (location: ResolvedLocation | null) => void; loading: boolean; errors: FieldErrors; onSubmit: () => void }) {
@@ -192,7 +192,7 @@ function PersonalizedHoroscopeForm({ values, setValues, resolvedLocation, setRes
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <TextField label={tr("name")} error={errors.name}><Input data-field="name" className={errorClass(Boolean(errors.name))} value={values.name} onChange={(event) => update({ name: event.target.value })} /></TextField>
       <TextField label={tr("gender")} error={errors.gender}>
-        <select data-field="gender" value={values.gender} onChange={(event) => update({ gender: event.target.value })} className={`h-12 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/70 px-3 text-sm ${errorClass(Boolean(errors.gender))}`}>
+        <select data-field="gender" value={values.gender} onChange={(event) => update({ gender: event.target.value })} className={`h-12 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C]/70 px-3 text-sm ${errorClass(Boolean(errors.gender))}`}>
           <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
           <option value="Female">{tr("genderFemale")}</option>
           <option value="Male">{tr("genderMale")}</option>
@@ -202,7 +202,7 @@ function PersonalizedHoroscopeForm({ values, setValues, resolvedLocation, setRes
       <TextField label={tr("dateOfBirth")} error={errors.dateOfBirth}><Input data-field="dateOfBirth" type="date" className={errorClass(Boolean(errors.dateOfBirth))} value={values.dateOfBirth} onChange={(event) => update({ dateOfBirth: event.target.value })} /></TextField>
       <TextField label={tr("timeOfBirth")} error={errors.timeOfBirth}><Input data-field="timeOfBirth" type="time" className={errorClass(Boolean(errors.timeOfBirth))} value={values.timeOfBirth} onChange={(event) => update({ timeOfBirth: event.target.value })} /></TextField>
       <TextField label={tr("period")} error={errors.period}>
-        <select data-field="period" value={values.period} onChange={(event) => update({ period: event.target.value })} className={`h-12 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f]/70 px-3 text-sm ${errorClass(Boolean(errors.period))}`}>
+        <select data-field="period" value={values.period} onChange={(event) => update({ period: event.target.value })} className={`h-12 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C]/70 px-3 text-sm ${errorClass(Boolean(errors.period))}`}>
           {periodOptions.map((period) => <option key={period} value={period}>{tr(period)}</option>)}
         </select>
       </TextField>
@@ -244,19 +244,19 @@ function PersonalizedHoroscopeView({ data }: { data: PersonalizedResult }) {
         <MiniCard icon={<Globe2 />} label={tr("moonSign")} value={data.calculationData?.moonSign ?? "-"} />
         <MiniCard icon={<Gem />} label={tr("nakshatra")} value={data.calculationData?.nakshatra ?? "-"} />
       </div>
-      <article className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-5 leading-7 naksh-muted-text">
-        <h3 className="mb-3 font-cinzel text-xl font-bold text-[#FFD36A]">AI Summary</h3>
+      <article className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-5 leading-7 naksh-muted-text">
+        <h3 className="mb-3 font-cinzel text-xl font-bold text-[#FFD700]">AI Summary</h3>
         <p>{data.aiSummary}</p>
       </article>
       <div className="grid gap-4 lg:grid-cols-2">
         {Object.entries(data.sections ?? {}).map(([title, value]) => (
-          <div key={title} className="rounded-lg border border-[#F5C542]/25 bg-[#201037]/70 p-4">
-            <h3 className="font-semibold text-[#FFD36A]">{title}</h3>
+          <div key={title} className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4">
+            <h3 className="font-semibold text-[#FFD700]">{title}</h3>
             <p className="mt-2 text-sm leading-7 naksh-muted-text">{Array.isArray(value) ? value.join(", ") : value}</p>
           </div>
         ))}
       </div>
-      {data.lockedSections?.length ? <p className="rounded-lg border border-[#F5C542]/25 bg-[#F5C542]/10 p-4 text-sm text-[#FFD36A]">Premium preview: {data.lockedSections.join(", ")}</p> : null}
+      {data.lockedSections?.length ? <p className="rounded-lg border border-[#D4AF37]/25 bg-[#D4AF37]/10 p-4 text-sm text-[#FFD700]">Premium preview: {data.lockedSections.join(", ")}</p> : null}
       <p className="text-xs naksh-muted-text">{data.disclaimer}</p>
     </div>
   );

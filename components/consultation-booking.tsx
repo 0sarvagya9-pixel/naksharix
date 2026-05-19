@@ -74,7 +74,7 @@ export function ConsultationBooking({ selectedAstrologerId, profiles = [] }: { s
         <form action={book} className="grid gap-5">
           <div className="grid gap-3 md:grid-cols-3">
             {astrologers.map((astrologer) => (
-              <label key={astrologer.id} className="cursor-pointer rounded-lg border border-[#F5C542]/20 bg-[#201037]/75 p-4 transition hover:border-[#F5C542]/55">
+              <label key={astrologer.id} className="cursor-pointer rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/75 p-4 transition hover:border-[#D4AF37]/55">
                 <input
                   className="sr-only peer"
                   type="radio"
@@ -84,7 +84,7 @@ export function ConsultationBooking({ selectedAstrologerId, profiles = [] }: { s
                   defaultChecked={(selectedAstrologerId ?? astrologers[0]?.id) === astrologer.id}
                   onChange={() => clear("astrologerProfileId")}
                 />
-                <span className="block font-cinzel font-bold peer-checked:text-[#FFD36A]">{astrologer.name}</span>
+                <span className="block font-cinzel font-bold peer-checked:text-[#FFD700]">{astrologer.name}</span>
                 <span className="mt-1 block text-sm naksh-muted-text">{astrologer.specialty}</span>
                 <span className="mt-3 block text-sm">INR {astrologer.pricePerMinute}/min | {astrologer.rating} rating</span>
                 <span className="mt-2 inline-flex rounded-full border border-emerald-300/30 px-2 py-1 text-xs text-emerald-200">{astrologer.status ?? "Online demo"}</span>
@@ -97,7 +97,7 @@ export function ConsultationBooking({ selectedAstrologerId, profiles = [] }: { s
             {modes.map(({ value, label, icon: Icon }) => (
               <label key={value} className={`flex cursor-pointer items-center gap-3 rounded-md border p-3 ${errorClass(Boolean(fieldErrors.mode))}`}>
                 <input type="radio" name="mode" value={value} defaultChecked={value === "CHAT"} data-field="mode" onChange={() => clear("mode")} />
-                <Icon className="h-4 w-4 text-[#FFD36A]" />
+                <Icon className="h-4 w-4 text-[#FFD700]" />
                 {label}
               </label>
             ))}
@@ -129,14 +129,14 @@ export function ConsultationBooking({ selectedAstrologerId, profiles = [] }: { s
             <Textarea name="question" data-field="question" placeholder="Marriage, career, finance, health, muhurat..." className={errorClass(Boolean(fieldErrors.question))} onChange={() => clear("question")} />
           </Field>
 
-          <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 text-sm naksh-muted-text">
+          <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4 text-sm naksh-muted-text">
             Payment coming soon. Demo bookings are allowed while Razorpay keys are not configured.
           </div>
           <Button>
             <CalendarClock className="h-4 w-4" />
             {tr("requestBooking")}
           </Button>
-          {status ? <p className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-3 text-sm naksh-muted-text">{status}</p> : null}
+          {status ? <p className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-3 text-sm naksh-muted-text">{status}</p> : null}
         </form>
       </CardContent>
     </Card>

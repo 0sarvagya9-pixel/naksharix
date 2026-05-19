@@ -39,10 +39,10 @@ export function SavedKundliReportList({ reports, emptyText }: { reports: SavedRe
             <CardContent className="space-y-4 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-cinzel text-xl font-bold text-[#FFF7E8]">{report.name}</p>
+                  <p className="font-cinzel text-xl font-bold text-[#FFFFFF]">{report.name}</p>
                   <p className="mt-1 text-sm naksh-muted-text">{report.gender || "-"}</p>
                 </div>
-                <span className="rounded-full border border-[#F5C542]/25 bg-[#F5C542]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#FFD36A]">{report.language}</span>
+                <span className="rounded-full border border-[#D4AF37]/25 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#FFD700]">{report.language}</span>
               </div>
               <div className="grid gap-3 text-sm naksh-muted-text sm:grid-cols-2">
                 <Meta icon={<CalendarDays className="h-4 w-4" />} label="DOB" value={`${formatDate(report.dateOfBirth, language)} | ${report.timeOfBirth}`} />
@@ -60,9 +60,9 @@ export function SavedKundliReportList({ reports, emptyText }: { reports: SavedRe
 
 function Meta({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-3">
-      <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[#FFD36A]/80">{icon}{label}</p>
-      <p className="mt-1 break-words text-[#FFF7E8]">{value}</p>
+    <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-3">
+      <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[#FFD700]/80">{icon}{label}</p>
+      <p className="mt-1 break-words text-[#FFFFFF]">{value}</p>
     </div>
   );
 }

@@ -24,7 +24,7 @@ export default function SignupPage() {
         <CardContent>
           <AuthForm mode="signup" googleEnabled={googleEnabled} />
           <p className="mt-4 text-sm naksh-muted-text">
-            Already registered? <Link href="/login" className="text-[#B56CFF]">Sign in</Link>
+            Already registered? <Link href="/login" className="text-[#01A361]">Sign in</Link>
           </p>
         </CardContent>
       </Card>

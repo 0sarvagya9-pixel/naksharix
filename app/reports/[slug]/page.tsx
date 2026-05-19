@@ -38,7 +38,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
       <Section>
         <div className="grid gap-8 lg:grid-cols-[1fr_0.42fr]">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Premium Report</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Premium Report</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black">{report.name}</h1>
             <p className="mt-4 max-w-3xl text-lg leading-8 naksh-muted-text">{report.description}</p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -49,7 +49,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
           <Card className="glass h-fit">
             <CardContent className="p-6">
               <p className="text-sm naksh-muted-text">One-time report</p>
-              <p className="mt-2 font-cinzel text-4xl font-black text-[#FFD36A]">{report.price}</p>
+              <p className="mt-2 font-cinzel text-4xl font-black text-[#FFD700]">{report.price}</p>
               <div className="mt-5"><RazorpayCheckoutButton payload={{ purpose: report.purpose, reportId: report.id }} label="Buy report" /></div>
             </CardContent>
           </Card>
@@ -57,9 +57,9 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
 
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {report.features.map((feature) => (
-            <Card key={feature} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={feature} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
-                <CheckCircle2 className="h-5 w-5 text-[#FFD36A]" />
+                <CheckCircle2 className="h-5 w-5 text-[#FFD700]" />
                 <p className="mt-3 text-sm leading-6 naksh-muted-text">{feature}</p>
               </CardContent>
             </Card>
@@ -69,10 +69,10 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
         <div className="mt-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <Card className="glass">
             <CardContent className="p-6">
-              <Sparkles className="h-6 w-6 text-[#FFD36A]" />
+              <Sparkles className="h-6 w-6 text-[#FFD700]" />
               <h2 className="mt-4 font-cinzel text-2xl font-black">Sample preview</h2>
               <ul className="mt-4 space-y-3 text-sm naksh-muted-text">
-                {report.sample.map((item) => <li key={item} className="rounded-md border border-[#F5C542]/20 bg-[#12051f]/60 p-3">{item}</li>)}
+                {report.sample.map((item) => <li key={item} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3">{item}</li>)}
               </ul>
             </CardContent>
           </Card>
@@ -81,9 +81,9 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
 
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {["Clear, practical and easy to read.", "The sample report made the upgrade decision simple.", "Loved the remedies because they were grounded."].map((quote, index) => (
-            <Card key={quote} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={quote} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
-                <Quote className="h-5 w-5 text-[#FFD36A]" />
+                <Quote className="h-5 w-5 text-[#FFD700]" />
                 <p className="mt-4 text-sm leading-6 naksh-muted-text">{quote}</p>
                 <p className="mt-4 font-cinzel font-bold">Naksharix user {index + 1}</p>
               </CardContent>
@@ -93,7 +93,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
 
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {report.faqs.map((question) => (
-            <Card key={question} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={question} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
                 <h2 className="font-cinzel text-lg font-bold">{question}</h2>
                 <p className="mt-3 text-sm leading-6 naksh-muted-text">Naksharix keeps this report practical, ethical, and personalized around the details you provide.</p>

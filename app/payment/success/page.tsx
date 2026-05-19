@@ -28,23 +28,23 @@ export default async function PaymentSuccessPage({ searchParams }: { searchParam
 
   return (
     <Section className="max-w-3xl">
-      <Card className="glass overflow-hidden border-[#F5C542]/30">
-        <CardHeader className="border-b border-[#F5C542]/15 bg-[radial-gradient(circle_at_top,rgba(245,190,88,0.18),transparent_24rem)] text-center">
+      <Card className="glass overflow-hidden border-[#D4AF37]/30">
+        <CardHeader className="border-b border-[#D4AF37]/15 bg-[radial-gradient(circle_at_top,rgba(245,190,88,0.18),transparent_24rem)] text-center">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-emerald-300/35 bg-emerald-300/10 text-emerald-200">
             <CheckCircle2 className="h-7 w-7" />
           </div>
-          <CardTitle className="mt-4 font-cinzel text-3xl text-[#FFF7E8]">{t(locale, "paymentSuccessful")}</CardTitle>
+          <CardTitle className="mt-4 font-cinzel text-3xl text-[#FFFFFF]">{t(locale, "paymentSuccessful")}</CardTitle>
           <p className="text-sm naksh-muted-text">{title}</p>
         </CardHeader>
         <CardContent className="space-y-5 p-6 text-center">
           {isAdminMode ? (
-            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-[#F5C542]/30 bg-[#F5C542]/10 px-4 py-2 text-sm font-semibold text-[#FFD36A]">
+            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-4 py-2 text-sm font-semibold text-[#FFD700]">
               <ShieldCheck className="h-4 w-4" />
               {t(locale, "adminTestingModePaymentBypassed")}
             </div>
           ) : null}
           <div className="space-y-3 text-base leading-8 naksh-muted-text">
-            <p className="text-lg font-semibold text-[#FFF7E8]">{thankYou}</p>
+            <p className="text-lg font-semibold text-[#FFFFFF]">{thankYou}</p>
             <p>{reportMessage}</p>
             {isVip ? <p>{t(locale, "consultingCredits1000")}</p> : null}
             <p>{t(locale, "contactSupportCare")}</p>

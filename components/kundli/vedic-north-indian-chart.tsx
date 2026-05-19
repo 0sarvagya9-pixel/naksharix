@@ -51,16 +51,16 @@ export function VedicNorthIndianChart({
   const houses = buildHouseCells(data);
 
   return (
-    <section className={cn("rounded-2xl border border-[#F5C542]/25 bg-[#160a28] p-4 shadow-[0_22px_70px_rgba(5,2,14,0.34)]", className)}>
+    <section className={cn("rounded-2xl border border-[#D4AF37]/25 bg-[#160a28] p-4 shadow-[0_22px_70px_rgba(5,2,14,0.34)]", className)}>
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <h3 className="font-cinzel text-xl font-black text-[#FFF7E8]">{title}</h3>
-          <p className="text-xs text-[#FFD36A]/75">
+          <h3 className="font-cinzel text-xl font-black text-[#FFFFFF]">{title}</h3>
+          <p className="text-xs text-[#FFD700]/75">
             Lagna: {data.ascendant.rashiNumber} {data.ascendant.rashi}
             {typeof data.ascendant.degreeInSign === "number" ? ` ${data.ascendant.degreeInSign.toFixed(2)}°` : ""}
           </p>
         </div>
-        <span className="rounded-full border border-[#F5C542]/35 bg-[#F5C542]/10 px-3 py-1 text-xs font-bold text-[#FFD36A]">D1</span>
+        <span className="rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold text-[#FFD700]">D1</span>
       </div>
 
       <div className="mx-auto aspect-square max-w-[34rem] rounded-xl border border-[#3d2c19]/30 bg-[#fff5dd] p-2">

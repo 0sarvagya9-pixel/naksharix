@@ -65,7 +65,7 @@ export function AdminBlogEditor() {
             </div>
             <div className="space-y-2">
               <Label>Status</Label>
-              <select name="status" className="h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm">
+              <select name="status" className="h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm">
                 <option value="DRAFT">Draft</option>
                 <option value="PUBLISHED">Published</option>
               </select>

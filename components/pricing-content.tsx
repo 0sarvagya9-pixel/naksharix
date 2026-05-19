@@ -44,11 +44,11 @@ export function PricingContent() {
 
   return (
     <Section>
-      <h1 className="font-cinzel text-4xl font-black">{tr("pricingTitle")}</h1>
+      <h1 className="font-cinzel text-4xl font-black text-[#FFD700]">{tr("pricingTitle")}</h1>
       <p className="mt-4 max-w-3xl naksh-muted-text">{tr("pricingSubtitle")}</p>
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         {plans.map(({ id, name, price, features }) => (
-          <Card key={`${id}-${name}`} className={id === "VIP" ? "relative overflow-hidden border-[#F5C542]/55 bg-[radial-gradient(circle_at_top,rgba(245,197,66,0.16),transparent_16rem),linear-gradient(145deg,rgba(40,20,63,0.96),rgba(18,5,31,0.9))] shadow-[0_24px_80px_rgba(245,197,66,0.12)]" : id === "PREMIUM" ? "relative overflow-hidden border-[#A855F7]/45 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_16rem),linear-gradient(145deg,rgba(32,16,55,0.94),rgba(18,5,31,0.9))]" : "bg-[#201037]/80"}>
+          <Card key={`${id}-${name}`} className={id === "VIP" ? "relative overflow-hidden border-[#FFD700]/55 bg-[radial-gradient(circle_at_top,rgba(255,215,0,0.16),transparent_16rem),linear-gradient(145deg,rgba(2,17,44,0.96),rgba(2,75,48,0.56))] shadow-[0_24px_80px_rgba(255,215,0,0.12)]" : id === "PREMIUM" ? "relative overflow-hidden border-[#01A361]/45 bg-[radial-gradient(circle_at_top,rgba(1,163,97,0.18),transparent_16rem),linear-gradient(145deg,rgba(2,17,44,0.95),rgba(3,25,54,0.9))]" : "bg-[#02112C]/80"}>
             <CardHeader>
               <CardTitle>{name}</CardTitle>
               <p className="cosmic-gold-text text-3xl font-black">{price}</p>
@@ -57,7 +57,7 @@ export function PricingContent() {
               <ul className="space-y-3 text-sm naksh-muted-text">
                 {features.map((feature) => (
                   <li key={feature} className="flex gap-2">
-                    <Check className="h-4 w-4 text-[#FFD36A]" />
+                    <Check className="h-4 w-4 text-[#01A361]" />
                     {feature}
                   </li>
                 ))}

@@ -9,7 +9,7 @@ export function CosmicLoader({ label = "Aligning your stars" }: { label?: string
       <div className="text-center">
         <div className="relative mx-auto mb-8 h-32 w-32">
           <motion.div
-            className="absolute inset-0 rounded-full border border-[#F5C542]/45"
+            className="absolute inset-0 rounded-full border border-[#D4AF37]/45"
             animate={{ rotate: 360 }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
           />

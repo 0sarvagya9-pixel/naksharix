@@ -56,7 +56,7 @@ export function AstrologerOnboardingForm() {
           <Field label={tr("email")} name="email" error={errors.email}><Input name="email" data-field="email" type="email" className={errorClass(Boolean(errors.email))} /></Field>
           <Field label={tr("password")} name="password" error={errors.password}><Input name="password" data-field="password" type="password" className={errorClass(Boolean(errors.password))} /></Field>
           <Field label="Account type" name="role" error={errors.role}>
-            <select name="role" data-field="role" className={`h-10 w-full rounded-md border border-[#F5C542]/20 bg-[#12051f] px-3 text-sm ${errorClass(Boolean(errors.role))}`}>
+            <select name="role" data-field="role" className={`h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm ${errorClass(Boolean(errors.role))}`}>
               <option value="ASTROLOGER">{tr("astrologer")}</option>
               <option value="CONSULTANT">{tr("consultant")}</option>
             </select>

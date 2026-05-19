@@ -28,22 +28,22 @@ export default function ContactPage() {
       <Section>
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">Contact</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Contact</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black">We are here to help you use Naksharix with confidence</h1>
             <p className="mt-4 max-w-2xl leading-8 naksh-muted-text">
               For report delivery, consultation booking, billing, account access, or product feedback, write to our care team.
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <Card className="border-[#F5C542]/20 bg-[#201037]/75">
+              <Card className="border-[#D4AF37]/20 bg-[#061D3C]/75">
                 <CardContent className="p-5">
-                  <Mail className="h-5 w-5 text-[#FFD36A]" />
+                  <Mail className="h-5 w-5 text-[#FFD700]" />
                   <p className="mt-3 font-semibold">care@naksharix.com</p>
                   <p className="text-sm naksh-muted-text">Primary support email</p>
                 </CardContent>
               </Card>
-              <Card className="border-[#F5C542]/20 bg-[#201037]/75">
+              <Card className="border-[#D4AF37]/20 bg-[#061D3C]/75">
                 <CardContent className="p-5">
-                  <Clock className="h-5 w-5 text-[#FFD36A]" />
+                  <Clock className="h-5 w-5 text-[#FFD700]" />
                   <p className="mt-3 font-semibold">24 to 48 hours</p>
                   <p className="text-sm naksh-muted-text">Typical response time</p>
                 </CardContent>
@@ -67,9 +67,9 @@ export default function ContactPage() {
 
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {supportLinks.map(({ title, copy, href, Icon }) => (
-            <Card key={title} className="border-[#F5C542]/20 bg-[#201037]/75">
+            <Card key={title} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
-                <Icon className="h-5 w-5 text-[#FFD36A]" />
+                <Icon className="h-5 w-5 text-[#FFD700]" />
                 <h2 className="mt-4 font-cinzel text-lg font-bold">{title}</h2>
                 <p className="mt-2 text-sm leading-6 naksh-muted-text">{copy}</p>
                 <Button className="mt-4" variant="outline" asChild><Link href={href}>Open</Link></Button>

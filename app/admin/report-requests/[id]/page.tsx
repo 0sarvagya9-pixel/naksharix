@@ -20,7 +20,7 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
 
   return (
     <Section>
-      <Card className="glass border-[#F5C542]/25">
+      <Card className="glass border-[#D4AF37]/25">
         <CardHeader>
           <CardTitle className="font-cinzel text-3xl">Report Request Details</CardTitle>
           <p className="text-sm naksh-muted-text">Purchased/requested at {request.createdAt.toLocaleString()}</p>
@@ -44,8 +44,8 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
           <Detail label="Phone" value={request.phone ?? "-"} />
           <Detail label="Language" value={request.language} />
           <Detail label="Support email" value="care@naksharix.com" />
-          <div className="md:col-span-2 rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
-            <p className="text-[#FFD36A]">Concern</p>
+          <div className="md:col-span-2 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
+            <p className="text-[#FFD700]">Concern</p>
             <p className="mt-2 naksh-muted-text">{request.concern ?? "-"}</p>
           </div>
         </CardContent>
@@ -56,8 +56,8 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4">
-      <p className="text-xs uppercase tracking-[0.18em] text-[#FFD36A]">{label}</p>
+    <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
+      <p className="text-xs uppercase tracking-[0.18em] text-[#FFD700]">{label}</p>
       <p className="mt-2 text-foreground">{value}</p>
     </div>
   );

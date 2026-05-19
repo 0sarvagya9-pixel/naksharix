@@ -25,7 +25,7 @@ const links = [
 export function AstrologerNavbar() {
   const pathname = usePathname();
   return (
-    <header className="sticky top-0 z-50 border-b border-[#F5C542]/20 bg-[#090016]/95 shadow-[0_16px_42px_rgba(3,0,12,0.5)] backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[#D4AF37]/20 bg-[#02112C]/95 shadow-[0_16px_42px_rgba(3,0,12,0.5)] backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 max-w-screen-2xl flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center justify-between gap-4">
           <BrandLogo />
@@ -40,7 +40,7 @@ export function AstrologerNavbar() {
                 href={href}
                 className={cn(
                   "inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-xs font-semibold transition",
-                  active ? "border-[#F5C542]/50 bg-[#F5C542]/12 text-[#FFD36A]" : "border-[#F5C542]/15 bg-[#201037]/55 text-[#CDBFE8] hover:border-[#F5C542]/40 hover:text-[#FFD36A]"
+                  active ? "border-[#D4AF37]/50 bg-[#D4AF37]/12 text-[#FFD700]" : "border-[#D4AF37]/15 bg-[#061D3C]/55 text-[#F0F0F0] hover:border-[#D4AF37]/40 hover:text-[#FFD700]"
                 )}
               >
                 <Icon className="h-4 w-4" />

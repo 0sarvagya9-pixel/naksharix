@@ -27,14 +27,14 @@ export default async function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           {reportRequests.map((request) => (
-            <div key={request.id} className="flex flex-col gap-2 rounded-lg border border-[#F5C542]/20 bg-[#201037]/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div key={request.id} className="flex flex-col gap-2 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-semibold text-foreground">{request.planType} Report</p>
                 <p className="naksh-muted-text">{request.createdAt.toLocaleString()} | {request.paymentStatus} | {request.status}</p>
                 <p className="naksh-muted-text">Delivery: {request.deliveryEmail}</p>
-                <p className="text-xs text-[#FFD36A]">Report will be sent within 24 hours.</p>
+                <p className="text-xs text-[#FFD700]">Report will be sent within 24 hours.</p>
               </div>
-              <Link className="text-[#FFD36A] hover:underline" href={`/report-request/success?id=${request.id}`}>View</Link>
+              <Link className="text-[#FFD700] hover:underline" href={`/report-request/success?id=${request.id}`}>View</Link>
             </div>
           ))}
           {!reportRequests.length ? <p className="naksh-muted-text">No report requests yet.</p> : null}

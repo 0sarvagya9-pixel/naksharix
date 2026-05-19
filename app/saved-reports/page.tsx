@@ -20,7 +20,7 @@ export default async function SavedReportsPage() {
   return (
     <Section>
       <div className="mb-8">
-        <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]"><FileText className="h-4 w-4" />{t(locale, "savedReports")}</p>
+        <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]"><FileText className="h-4 w-4" />{t(locale, "savedReports")}</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">{t(locale, "savedReports")}</h1>
         <p className="mt-3 max-w-2xl naksh-muted-text">{t(locale, "noSavedReports")}</p>
       </div>

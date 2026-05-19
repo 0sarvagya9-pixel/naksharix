@@ -16,7 +16,7 @@ export default function TalkToKundliPage() {
   return (
     <main className="star-field">
       <Section>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD36A]">AI Talk to Kundli</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">AI Talk to Kundli</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black">Ask Your Kundli Questions</h1>
         <p className="mt-4 max-w-3xl naksh-muted-text">Paste your birth details or Kundli summary into the memory box and ask about planets, houses, dasha, transit, manglik, sade sati, dosha, remedies, career, marriage, finance, or health.</p>
         <div className="mt-6 flex flex-wrap gap-3">

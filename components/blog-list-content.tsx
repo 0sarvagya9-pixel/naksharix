@@ -14,7 +14,7 @@ export function BlogListContent() {
       <h1 className="font-cinzel text-4xl font-black">{tr("blogTitle")}</h1>
       <div className="mt-5 flex flex-wrap gap-2">
         {blogCategories.map((category) => (
-          <Link key={category.slug} href={`/blog/category/${category.slug}`} className="rounded-full border border-[#F5C542]/25 px-3 py-2 text-sm naksh-muted-text transition hover:text-foreground">
+          <Link key={category.slug} href={`/blog/category/${category.slug}`} className="rounded-full border border-[#D4AF37]/25 px-3 py-2 text-sm naksh-muted-text transition hover:text-foreground">
             {category.name}
           </Link>
         ))}
@@ -27,7 +27,7 @@ export function BlogListContent() {
             </CardHeader>
             <CardContent>
               <p className="text-sm naksh-muted-text">{post.description}</p>
-              <Link className="mt-4 inline-block text-sm font-semibold text-[#B56CFF]" href={`/blog/${post.slug}`}>
+              <Link className="mt-4 inline-block text-sm font-semibold text-[#01A361]" href={`/blog/${post.slug}`}>
                 {tr("readArticle")}
               </Link>
             </CardContent>
