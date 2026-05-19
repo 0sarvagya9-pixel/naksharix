@@ -61,18 +61,19 @@ export function HomeHero() {
   const { tr } = useLanguage();
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(1,163,97,0.24),transparent_28rem),radial-gradient(circle_at_85%_20%,rgba(255,215,0,0.18),transparent_24rem),linear-gradient(135deg,#02112C_0%,#031936_55%,#02112C_100%)]" />
-      <div className="absolute left-1/2 top-12 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full border border-[#D4AF37]/18" />
-      <Section className="relative grid min-h-[calc(100vh-4rem)] items-center gap-10 pb-24 lg:grid-cols-[1fr_0.88fr]">
+    <section className="relative overflow-hidden bg-[#02112C]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(0,180,160,0.18),transparent_30rem),radial-gradient(circle_at_76%_35%,rgba(212,175,55,0.18),transparent_26rem),radial-gradient(circle_at_82%_72%,rgba(1,163,97,0.12),transparent_34rem),linear-gradient(135deg,#02112C_0%,#031936_48%,#02112C_100%)]" />
+      <div className="absolute inset-y-0 left-0 z-0 w-full bg-[linear-gradient(90deg,#02112C_0%,rgba(2,17,44,0.92)_38%,rgba(2,17,44,0.22)_72%,#02112C_100%)] lg:w-[72%]" />
+      <div className="absolute left-1/2 top-12 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full border border-[#D4AF37]/14" />
+      <Section className="relative grid min-h-[calc(100vh-4rem)] items-center gap-12 pb-24 pt-10 lg:grid-cols-[0.92fr_1.08fr]">
         <motion.div initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <p className="mb-5 inline-flex rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-2 text-sm font-semibold text-[#FFD700]">
             {tr("heroEyebrow")}
           </p>
-          <h1 className="max-w-4xl text-balance font-decorative text-5xl font-black tracking-wide text-[#FFD700] drop-shadow-[0_0_26px_rgba(255,215,0,0.22)] sm:text-6xl lg:text-7xl">
-            Naksharix
+          <h1 className="max-w-4xl text-balance font-decorative text-5xl font-black leading-tight tracking-wide text-transparent drop-shadow-[0_0_26px_rgba(212,175,55,0.22)] [background:linear-gradient(90deg,#F7E7A6,#D4AF37_48%,#8A6A16)] bg-clip-text sm:text-6xl lg:text-7xl">
+            {tr("tagline")}
           </h1>
-          <p className="mt-4 font-cinzel text-2xl font-bold text-white">{tr("tagline")}</p>
+          <p className="mt-4 font-cinzel text-lg font-bold uppercase tracking-[0.26em] text-[#D4AF37]">Naksharix</p>
           <p className="mt-6 max-w-2xl text-lg leading-8 naksh-muted-text">
             {tr("heroCopy")}
           </p>
@@ -95,7 +96,7 @@ export function HomeHero() {
             ))}
           </div>
         </motion.div>
-        <motion.div initial={false} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.1 }}>
+        <motion.div className="lg:-mr-8" initial={false} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.1 }}>
           <SolarSystemHero />
         </motion.div>
       </Section>
