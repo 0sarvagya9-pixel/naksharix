@@ -8,11 +8,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "border border-[#01A361]/35 bg-[#01A361] text-white shadow-[0_10px_30px_rgba(2,75,48,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] hover:-translate-y-0.5 hover:bg-[#12b873] hover:shadow-[0_14px_42px_rgba(1,163,97,0.34)]",
-        secondary: "border border-[#D4AF37]/45 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-[#02112C] shadow-[0_10px_28px_rgba(255,215,0,0.18)] hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(255,215,0,0.26)]",
-        outline: "border border-[#D4AF37]/35 bg-[#02112C]/70 text-[#FFD700] shadow-[inset_0_1px_0_rgba(255,215,0,0.08)] hover:border-[#FFD700]/70 hover:bg-[#024B30]/45 hover:text-white",
-        ghost: "text-[#F0F0F0] hover:bg-[#D4AF37]/10 hover:text-[#FFD700]",
-        destructive: "border border-red-300/20 bg-[#FF4D4F] text-[#FFFFFF] shadow-[0_10px_30px_rgba(255,77,79,0.22)] hover:bg-[#ff6365]"
+        default: "border border-[#009b72]/45 bg-[#009b72] text-white shadow-[0_10px_30px_rgba(0,155,114,0.28),inset_0_1px_0_rgba(255,255,255,0.16)] hover:-translate-y-0.5 hover:bg-[#009b72] hover:shadow-[0_0_30px_rgba(0,245,160,0.26)]",
+        secondary: "border border-[#dca956]/45 bg-gradient-to-r from-[#f3d382] via-[#dca956] to-[#dca956] text-[#020612] shadow-[0_10px_28px_rgba(220,169,86,0.18)] hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(220,169,86,0.26)]",
+        outline: "border border-[#1e293b] bg-[#020612]/70 text-[#f3d382] shadow-[inset_0_1px_0_rgba(243,211,130,0.08)] hover:border-[#dca956]/70 hover:bg-[#0f1c3a] hover:text-white",
+        ghost: "text-[#ffffff] hover:bg-[#dca956]/10 hover:text-[#f3d382]",
+        destructive: "border border-red-300/20 bg-[#FF4D4F] text-[#ffffff] shadow-[0_10px_30px_rgba(255,77,79,0.22)] hover:bg-[#ff6365]"
       },
       size: {
         sm: "h-8 px-3 text-xs",

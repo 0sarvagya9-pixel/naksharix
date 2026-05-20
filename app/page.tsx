@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { DesktopHomepageArtboard } from "@/components/homepage-artboard";
-import { MobileHomeFallback } from "@/components/mobile-home-fallback";
+import { AstrologerShowcase, FeatureGrid, HomeHero, StickyMobileCTA, TrustBar } from "@/components/home-sections";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
@@ -12,9 +11,12 @@ export const metadata: Metadata = seo({
 
 export default function HomePage() {
   return (
-    <main className="overflow-hidden bg-[#020817]">
-      <DesktopHomepageArtboard />
-      <MobileHomeFallback />
+    <main className="overflow-hidden bg-[#020612]">
+      <HomeHero />
+      <FeatureGrid />
+      <AstrologerShowcase />
+      <TrustBar />
+      <StickyMobileCTA />
     </main>
   );
 }

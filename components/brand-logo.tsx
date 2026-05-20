@@ -1,18 +1,20 @@
 import Link from "next/link";
-import { MoonStar } from "lucide-react";
+import { MoonStar, Sparkle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BrandLogo({ className, compact = false }: { className?: string; compact?: boolean }) {
   return (
     <Link href="/" className={cn("group flex flex-shrink-0 items-center gap-3 whitespace-nowrap", className)} aria-label="Naksharix home">
-      <span className="relative grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg border border-[#D4AF37]/45 bg-[radial-gradient(circle_at_35%_25%,#FFD700,#D4AF37_42%,#024B30_100%)] text-[#02112C] shadow-[0_0_32px_rgba(255,215,0,0.28)]">
-        <span className="absolute inset-1 rounded-md border border-[#FFD700]/30" />
+      <span className="relative grid h-11 w-11 flex-shrink-0 place-items-center rounded-full border border-[#dca956]/60 bg-[radial-gradient(circle_at_34%_24%,#f3d382_0%,#f3d382_24%,#dca956_50%,#dca956_74%,#020612_100%)] text-[#020612] shadow-[0_0_30px_rgba(220,169,86,0.32),0_0_18px_rgba(0,245,160,0.16)]">
+        <span className="absolute inset-1.5 rounded-full border border-[#f3d382]/40" />
+        <span className="absolute inset-2.5 rounded-full border border-[#020612]/25" />
         <MoonStar className="relative h-5 w-5" />
+        <Sparkle className="absolute right-1 top-1 h-2.5 w-2.5 text-[#f3d382]" />
       </span>
       {!compact ? (
         <span className="min-w-0 leading-none">
-          <span className="block font-cinzel text-xl font-black tracking-wide text-[#FFD700]">Naksharix</span>
-          <span className="hidden text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[#F0F0F0]/75 sm:block">Cosmic Destiny</span>
+          <span className="block bg-gradient-to-r from-[#f3d382] via-[#f3d382] to-[#dca956] bg-clip-text font-cinzel text-xl font-black tracking-[0.16em] text-transparent">NAKSHARIX</span>
+          <span className="hidden text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-[#94a3b8] lg:block">Cosmic Destiny</span>
         </span>
       ) : null}
     </Link>

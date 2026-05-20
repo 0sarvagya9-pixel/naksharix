@@ -4,18 +4,23 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  BadgeCheck,
   Bot,
-  CalendarDays,
+  BrainCircuit,
+  BriefcaseBusiness,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Gem,
+  Grid3X3,
+  HeartHandshake,
+  LineChart,
+  LockKeyhole,
   MessageCircle,
   MoonStar,
-  PlayCircle,
-  Quote,
+  Phone,
   ShieldCheck,
   Sparkles,
-  Star,
+  SunMoon,
   Users,
   WandSparkles
 } from "lucide-react";
@@ -26,239 +31,341 @@ import { SolarSystemHero } from "@/components/solar-system-hero";
 import { featuredAstrologers } from "@/lib/astrologers";
 import { useLanguage } from "@/components/language-provider";
 
-const features = [
-  { title: "Free Kundli Summary", description: "Collect birth details, generate chart data, show clear insights, then upsell a premium PDF report.", icon: MoonStar, href: "/kundli" },
-  { title: "AI Astrologer", description: "Ask Gemini-powered guidance about career, marriage, finance, health, dosha, remedies, and daily choices.", icon: Bot, href: "/chatbot" },
-  { title: "Premium Reports", description: "Focused report pages for kundli, career, marriage, finance, health, yearly prediction, and numerology.", icon: Sparkles, href: "/reports" },
-  { title: "Human Consultation", description: "Astrologer marketplace, profile cards, booking CTAs, language support, and coming-soon call/chat states.", icon: Users, href: "/astrologers" },
-  { title: "Daily Retention", description: "Cosmic score, streaks, lucky number, lucky color, lucky time, and notification preferences.", icon: CalendarDays, href: "/dashboard" },
-  { title: "SEO Growth Engine", description: "Programmatic zodiac, horoscope, kundli, panchang, numerology, compatibility, and nakshatra pages.", icon: Gem, href: "/zodiac" }
-];
+const featureStrip = [
+  ["Kundli Generator", MoonStar, "/kundli"],
+  ["AI Astrologer", Bot, "/talk-to-kundli"],
+  ["Matching Compatibility", HeartHandshake, "/matchmaking"],
+  ["Premium Reports", BriefcaseBusiness, "/reports"],
+  ["Tarot Reading", Gem, "/tarot"],
+  ["Consultation with Experts", Users, "/astrologers"]
+] as const;
 
-const counters = [
-  ["120K+", "Users served"],
-  ["86K+", "Kundlis generated"],
-  ["18K+", "AI questions answered"],
-  ["9.4K+", "Consultations booked"]
-];
+const intelligenceLayers = [
+  ["Vedic Astrology", "Birth-chart intelligence", SunMoon, "chart"],
+  ["Numerology / Lo Shu", "Direction and life path", Grid3X3, "loshu"],
+  ["Wealth & Growth Meter", "Prosperity timing signals", LineChart, "wealth"],
+  ["AI Insights", "Personalized predictions", BrainCircuit, "ai"],
+  ["Personalized Remedies", "Mantras, rituals, guidance", WandSparkles, "remedy"]
+] as const;
 
-const testimonials = [
-  ["Aarav Mehta", "Founder", "The free kundli to premium report flow feels polished and conversion-ready.", "video"],
-  ["Isha Rao", "Product Lead", "Naksharix makes horoscope, AI chat, reports, and consultation feel like one platform.", "card"],
-  ["Devika S.", "Astrology Creator", "The UI feels premium without hiding the practical actions users need every day.", "card"]
-];
+const reportBenefits = ["Detailed Kundli Analysis", "Career & Finance Outlook", "Love & Relationships", "Health & Well-being", "Remedies & Guidance"];
 
-const featuredIn = ["AstroTech Weekly", "FounderStack", "SaaS India", "Vedic AI Review", "Cosmic Product Lab"];
-
-const faqs = [
-  ["Is Naksharix only AI-generated?", "No. Naksharix combines traditional Vedic astrology principles with AI-assisted interpretation, structured forms, reports, and human astrologer workflows."],
-  ["Can I generate a free Kundli?", "Yes. The free kundli flow gives a readable summary first and then offers an optional premium report."],
-  ["Does Naksharix support Hindi?", "Yes. Horoscope and AI guidance support English, Hindi, and Hinglish modes, with Hindi output generated in Devanagari."],
-  ["What happens if payment keys are missing?", "Payment buttons stay visible but show a Payments coming soon state until Razorpay keys are configured."]
-];
+const trustItems = [
+  ["100% Secure & Private", ShieldCheck],
+  ["Trusted by Millions", Users],
+  ["Authentic Vedic Guidance", SunMoon],
+  ["AI-Powered Accuracy", BrainCircuit],
+  ["24/7 Customer Support", MessageCircle]
+] as const;
 
 export function HomeHero() {
-  const { tr } = useLanguage();
+  const { locale } = useLanguage();
+  const primaryCta = locale === "hi" ? "अपनी कुंडली बनाएं" : locale === "hinglish" ? "Apni Kundli Banayein" : "Generate Kundli";
+  const secondaryCta = locale === "hi" ? "AI ज्योतिषी से बात करें" : locale === "hinglish" ? "AI Jyotishi se baat karein" : "Talk to AI Astrologer";
 
   return (
-    <section className="relative overflow-hidden bg-[#02112C]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(0,180,160,0.18),transparent_30rem),radial-gradient(circle_at_76%_35%,rgba(212,175,55,0.18),transparent_26rem),radial-gradient(circle_at_82%_72%,rgba(1,163,97,0.12),transparent_34rem),linear-gradient(135deg,#02112C_0%,#031936_48%,#02112C_100%)]" />
-      <div className="absolute inset-y-0 left-0 z-0 w-full bg-[linear-gradient(90deg,#02112C_0%,rgba(2,17,44,0.92)_38%,rgba(2,17,44,0.22)_72%,#02112C_100%)] lg:w-[72%]" />
-      <div className="absolute left-1/2 top-12 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full border border-[#D4AF37]/14" />
-      <Section className="relative grid min-h-[calc(100vh-4rem)] items-center gap-12 pb-24 pt-10 lg:grid-cols-[0.92fr_1.08fr]">
-        <motion.div initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <p className="mb-5 inline-flex rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-2 text-sm font-semibold text-[#FFD700]">
-            {tr("heroEyebrow")}
-          </p>
-          <h1 className="max-w-4xl text-balance font-decorative text-5xl font-black leading-tight tracking-wide text-transparent drop-shadow-[0_0_26px_rgba(212,175,55,0.22)] [background:linear-gradient(90deg,#F7E7A6,#D4AF37_48%,#8A6A16)] bg-clip-text sm:text-6xl lg:text-7xl">
-            {tr("tagline")}
+    <section className="relative overflow-hidden">
+      <CosmicBackground />
+      <div className="relative mx-auto grid w-full max-w-[1440px] grid-cols-1 items-center gap-8 px-6 pb-12 pt-24 sm:px-8 lg:min-h-[calc(100vh-96px)] lg:grid-cols-12 lg:px-12 lg:pb-16 lg:pt-10">
+        <motion.div className="relative z-10 lg:col-span-6" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#dca956]/40 bg-white/[0.035] px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#dca956] shadow-[0_0_30px_rgba(220,169,86,0.13)] backdrop-blur">
+            <Sparkles className="h-4 w-4 text-[#f3d382]" />
+            Premium AI + Vedic Astrology Platform
+          </div>
+          <h1 className="max-w-[42rem] text-balance bg-[linear-gradient(180deg,#f3d382_0%,#dca956_50%,#dca956_100%)] bg-clip-text font-decorative text-[2.65rem] font-black uppercase leading-[1.1] tracking-[0.02em] text-transparent antialiased drop-shadow-[0_10px_30px_rgba(0,0,0,0.44)] sm:text-6xl xl:text-[4.75rem]">
+            Unlock Your
+            <br />
+            Cosmic Destiny
           </h1>
-          <p className="mt-4 font-cinzel text-lg font-bold uppercase tracking-[0.26em] text-[#D4AF37]">Naksharix</p>
-          <p className="mt-6 max-w-2xl text-lg leading-8 naksh-muted-text">
-            {tr("heroCopy")}
+          <div className="relative mt-5 flex w-full max-w-[35rem] items-center justify-center gap-4 text-center text-lg font-semibold leading-relaxed text-[#dca956] sm:text-2xl">
+            <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#dca956] sm:w-16" />
+            <span>अपनी कॉस्मिक नियति समझें</span>
+            <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#dca956] sm:w-16" />
+          </div>
+          <p className="mt-5 max-w-2xl text-base leading-7 tracking-wide text-[#94a3b8] sm:text-lg">
+            Ancient Vedic wisdom, numerology direction, AI interpretation, and expert consultation flows in one premium spiritual-tech platform.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" asChild>
-              <Link href="/kundli">
-                {tr("generateFreeKundli")} <ArrowRight className="h-4 w-4" />
-              </Link>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Button size="lg" variant="secondary" className="shadow-[0_0_26px_rgba(220,169,86,0.18),0_12px_30px_rgba(0,0,0,0.32)]" asChild>
+              <Link href="/kundli">{primaryCta}<ArrowRight className="h-4 w-4" /></Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/chatbot">{tr("askAiAstrologer")}</Link>
-            </Button>
-            <Button size="lg" variant="secondary" asChild>
-              <Link href="/reports">{tr("buyPremiumReport")}</Link>
+            <Button size="lg" className="shadow-[0_0_25px_rgba(0,245,160,0.25),0_12px_30px_rgba(0,0,0,0.28)]" asChild>
+              <Link href="/talk-to-kundli">{secondaryCta}<ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </div>
-          <div className="mt-10 grid gap-3 text-sm naksh-muted-text sm:grid-cols-3">
-            {(["personalBirthChart", "hindiEnglish", "paymentsReadyReports"] as const).map((item) => (
-              <span key={item} className="rounded-md border border-[#D4AF37]/25 bg-[#02112C]/70 px-4 py-3 shadow-[0_0_22px_rgba(1,163,97,0.08)]">{tr(item)}</span>
+          <div className="mt-7 grid max-w-3xl grid-cols-2 gap-0 overflow-hidden rounded-2xl border border-[#1e293b] bg-[#0a1224]/72 shadow-[0_18px_50px_rgba(0,5,16,0.34)] backdrop-blur sm:grid-cols-4">
+            {[
+              ["1M+", "Happy Users"],
+              ["4.8★", "App Rating"],
+              ["10k+", "Expert Astrologers"],
+              ["98%", "Accuracy Rate"]
+            ].map(([value, label]) => (
+              <div key={label} className="border-b border-r border-[#1e293b] px-4 py-3 last:border-r-0 sm:border-b-0">
+                <p className="font-cinzel text-xl font-black text-[#fbc02d]">{value}</p>
+                <p className="mt-0.5 text-xs text-[#94a3b8]">{label}</p>
+              </div>
             ))}
           </div>
         </motion.div>
-        <motion.div className="lg:-mr-8" initial={false} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.1 }}>
+        <motion.div className="relative z-0 lg:col-span-6" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, delay: 0.1 }}>
           <SolarSystemHero />
         </motion.div>
-      </Section>
-    </section>
-  );
-}
-
-export function TrustCounters() {
-  return (
-    <Section className="pt-4">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {counters.map(([value, label]) => (
-          <Card key={label} className="border-[#D4AF37]/25 bg-[#02112C]/80 hover:border-[#01A361]/45">
-            <CardContent className="p-5">
-              <p className="font-cinzel text-3xl font-black text-[#FFD700]">{value}</p>
-              <p className="mt-1 text-sm naksh-muted-text">{label}</p>
-            </CardContent>
-          </Card>
-        ))}
       </div>
-    </Section>
+    </section>
   );
 }
 
 export function FeatureGrid() {
   return (
-    <Section className="pt-8">
-      <div className="mb-10 max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#01A361]">AI Astrology Suite</p>
-        <h2 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">A complete platform, not a single horoscope tool</h2>
-      </div>
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {features.map(({ title, description, icon: Icon, href }, index) => (
-          <motion.div key={title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.04 }}>
-            <Link href={href} className="block h-full">
-              <Card className="h-full border-[#D4AF37]/22 bg-[#02112C]/82 transition hover:-translate-y-1 hover:border-[#01A361]/60 hover:shadow-[0_24px_70px_rgba(1,163,97,0.18)]">
-                <CardContent className="p-6">
-                  <div className="grid h-11 w-11 place-items-center rounded-lg bg-[linear-gradient(135deg,rgba(1,163,97,0.35),rgba(255,215,0,0.22))] text-[#FFD700]">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="mt-5 font-cinzel text-xl font-bold">{title}</h3>
-                  <p className="mt-3 text-sm leading-6 naksh-muted-text">{description}</p>
-                </CardContent>
-              </Card>
+    <>
+      <Section className="relative max-w-[1440px] px-6 py-3 lg:px-12">
+        <CosmicBackground soft />
+        <div className="relative grid gap-2 overflow-hidden rounded-2xl border border-[#1e293b] bg-[#0a1224]/82 p-3 shadow-[0_24px_80px_rgba(0,5,16,0.42)] backdrop-blur md:grid-cols-3 xl:grid-cols-6">
+          {featureStrip.map(([title, Icon, href], index) => (
+            <Link key={title} href={href} className="group flex min-h-16 items-center gap-3 rounded-xl border border-[#1e293b] bg-[#0f1c3a] px-4 py-3 transition hover:-translate-y-0.5 hover:border-[#dca956]/50 hover:shadow-[0_0_24px_rgba(0,245,160,0.1)]">
+              <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg border border-[#dca956]/28 bg-[#dca956]/10 text-[#f3d382]">
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="text-sm font-semibold leading-tight text-[#ffffff]">{title}</span>
+              {index < featureStrip.length - 1 ? <span className="ml-auto hidden h-8 w-px bg-[#1e293b] xl:block" /> : null}
             </Link>
-          </motion.div>
-        ))}
-      </div>
-    </Section>
+          ))}
+        </div>
+      </Section>
+
+      <Section className="relative max-w-[1440px] px-6 py-4 lg:px-12">
+        <CosmicBackground soft />
+        <div className="relative grid gap-4 xl:grid-cols-[1fr_1.25fr_1fr]">
+          <Panel title="Cosmic Intelligence Platform" subtitle="AI-powered insights with ancient Vedic wisdom">
+            <div className="grid gap-3">
+              {intelligenceLayers.map(([title, copy, Icon, type]) => (
+                  <div key={title} className="group grid min-h-[5.6rem] grid-cols-[2.8rem_1fr_auto] items-center gap-3 rounded-2xl border border-[#1e293b] bg-[#0f1c3a] p-3 transition hover:-translate-y-0.5 hover:border-[#dca956]/40 hover:shadow-[0_0_24px_rgba(0,245,160,0.1)]">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[radial-gradient(circle_at_35%_25%,rgba(243,211,130,0.16),rgba(0,245,160,0.08))] text-[#f3d382] shadow-[0_0_16px_rgba(220,169,86,0.12)]">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-cinzel text-sm font-bold leading-snug text-[#f3d382]">{title}</p>
+                    <p className="mt-1 text-xs leading-5 text-[#94a3b8]">{copy}</p>
+                  </div>
+                  <IntelligencePreview type={type} />
+                </div>
+              ))}
+            </div>
+          </Panel>
+
+          <Panel title="Your Cosmic Dashboard" subtitle="Visual preview of personalized guidance">
+            <DashboardPreview />
+          </Panel>
+
+          <Panel title="Premium Report Preview" subtitle="40-50 page premium guidance experience">
+            <div className="grid gap-5 md:grid-cols-[0.9fr_1.1fr] xl:grid-cols-1 2xl:grid-cols-[0.9fr_1fr]">
+              <div className="relative min-h-52 rounded-2xl bg-[radial-gradient(circle_at_50%_0%,rgba(220,169,86,0.16),transparent_11rem),#0a1224] p-5 shadow-[inset_0_0_0_1px_rgba(220,169,86,0.22),0_20px_45px_rgba(0,0,0,0.34)]">
+                <div className="absolute left-8 top-8 h-36 w-28 rotate-[-8deg] rounded-lg bg-gradient-to-br from-[#f3d382] via-[#dca956] to-[#dca956] shadow-[18px_18px_45px_rgba(0,0,0,0.42),inset_-10px_0_18px_rgba(2,6,18,0.28)]" />
+                <div className="absolute left-12 top-10 h-36 w-28 rotate-[5deg] rounded-lg border border-[#f3d382]/45 bg-[linear-gradient(135deg,#0f1c3a,#0a1224_45%,#0f1c3a)] p-4 shadow-[18px_18px_55px_rgba(0,0,0,0.5)]">
+                  <p className="text-[0.62rem] uppercase tracking-[0.18em] text-[#dca956]">Naksharix</p>
+                  <p className="mt-5 font-cinzel text-sm font-black leading-tight text-[#f3d382]">Your Comprehensive Cosmic Report</p>
+                  <MoonStar className="mt-6 h-9 w-9 text-[#dca956]" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#dca956]">Premium Report Preview</p>
+                {reportBenefits.map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-sm text-[#ffffff]/82">
+                    <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-[#f3d382]" />
+                    {item}
+                  </div>
+                ))}
+                <Button className="mt-4 w-full" size="sm" variant="secondary" asChild><Link href="/reports"><LockKeyhole className="h-4 w-4" />Unlock Full Report</Link></Button>
+              </div>
+            </div>
+          </Panel>
+        </div>
+      </Section>
+    </>
   );
 }
 
-export function CTASection() {
+function DashboardPreview() {
   return (
-    <Section>
-      <div className="relative overflow-hidden rounded-lg border border-[#D4AF37]/30 bg-[linear-gradient(135deg,rgba(2,17,44,0.95),rgba(2,75,48,0.72)_58%,rgba(212,175,55,0.24))] p-8 shadow-[0_24px_80px_rgba(0,5,16,0.42)] sm:p-12">
-        <div className="absolute right-8 top-8 h-32 w-32 rounded-full border border-[#D4AF37]/25" />
-        <div className="relative max-w-3xl">
-          <ShieldCheck className="h-8 w-8 text-[#FFD700]" />
-          <h2 className="mt-5 font-cinzel text-4xl font-black text-[#FFD700]">Start with a free kundli, upgrade when you want depth</h2>
-          <p className="mt-4 naksh-muted-text">
-            Naksharix shows useful free guidance first, then gives clear paths to premium reports, AI chat, subscriptions, and human astrologer consultation.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button size="lg" asChild><Link href="/kundli">Generate Free Kundli</Link></Button>
-            <Button size="lg" variant="outline" asChild><Link href="/pricing">View Plans</Link></Button>
+    <div className="grid gap-3">
+      <div className="rounded-2xl border border-[#1e293b] bg-[#0f1c3a] p-4">
+        <div className="flex items-center gap-3">
+          <div className="relative grid h-11 w-11 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_25%,rgba(243,211,130,0.34),rgba(0,245,160,0.12))] text-[#f3d382]">
+            ॐ
+            <span className="absolute -right-0.5 bottom-1 h-3 w-3 rounded-full border-2 border-[#0a1224] bg-[#00f5a0]" />
+          </div>
+          <div>
+            <p className="font-cinzel text-sm font-bold text-[#f3d382]">Hello, Arjun</p>
+            <p className="text-xs text-[#ffffff]/64">Explore your cosmic insights</p>
           </div>
         </div>
       </div>
-    </Section>
+
+      <div className="grid gap-3 md:grid-cols-[0.88fr_1.12fr]">
+        <div className="rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_20%_0%,rgba(88,28,135,0.22),transparent_11rem),#0f1c3a] p-4">
+          <p className="text-xs text-[#94a3b8]">Life Path Number</p>
+          <p className="mt-2 font-cinzel text-5xl font-black text-[#f3d382]">7</p>
+          <p className="mt-1 text-sm font-semibold text-[#dca956]">Seeker</p>
+        </div>
+        <div className="rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_80%_15%,rgba(0,245,160,0.18),transparent_11rem),#0f1c3a] p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-xs text-[#94a3b8]">Today&apos;s Cosmic Energy</p>
+              <p className="font-cinzel text-xl font-bold text-[#00f5a0]">Favorable</p>
+              <div className="mt-3 grid grid-cols-4 gap-1">
+                {["▾", "▾", "▾", "▾"].map((item, index) => (
+                  <span key={`${item}-${index}`} className="grid h-6 w-6 place-items-center rounded-full bg-[#00f5a0]/12 text-xs text-[#00f5a0]">{item}</span>
+                ))}
+              </div>
+            </div>
+            <ProgressRing value={86} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-[0.92fr_1.08fr]">
+        <div className="rounded-2xl border border-[#1e293b] bg-[#0f1c3a] p-4">
+          <p className="text-xs text-[#94a3b8]">Planetary Overview</p>
+          {["Sun Strong", "Moon Favorable", "Mars Good", "Jupiter Strong"].map((item) => <p key={item} className="mt-1 text-xs text-[#ffffff]/78">{item}</p>)}
+        </div>
+        <div className="rounded-2xl border border-[#1e293b] bg-[linear-gradient(135deg,rgba(0,155,114,0.12),rgba(88,28,135,0.08))] p-4">
+          <p className="text-xs font-semibold text-[#00f5a0]">AI Prediction for You</p>
+          <p className="mt-2 text-xs leading-5 text-[#ffffff]/72">A positive career shift is indicated between 23 May - 10 June.</p>
+          <Link href="/dashboard" className="mt-3 inline-flex rounded-full bg-[#00f5a0]/12 px-3 py-1 text-xs font-semibold text-[#00f5a0] transition hover:bg-[#00f5a0]/20">
+            View Details
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IntelligencePreview({ type }: { type: "chart" | "loshu" | "wealth" | "ai" | "remedy" }) {
+  if (type === "loshu") {
+    return (
+      <div className="grid h-14 w-14 grid-cols-3 gap-0.5 rounded-lg bg-[#0a1224]/80 p-1 shadow-[inset_0_0_0_1px_rgba(220,169,86,0.18)]">
+        {[4, 9, 2, 3, 5, 7, 8, 1, 6].map((number) => (
+          <span key={number} className="grid place-items-center rounded bg-[#dca956]/10 text-[0.62rem] font-bold text-[#f3d382]">{number}</span>
+        ))}
+      </div>
+    );
+  }
+
+  if (type === "wealth") {
+    return (
+      <div className="flex h-14 w-16 items-end gap-1 rounded-lg bg-[#009b72]/18 p-2 shadow-[inset_0_0_0_1px_rgba(0,245,160,0.14)]">
+        {[35, 52, 44, 70, 86].map((height, index) => (
+          <span key={height} className="w-2 rounded-t bg-gradient-to-t from-[#009b72] to-[#00f5a0]" style={{ height: `${height}%`, opacity: 0.72 + index * 0.05 }} />
+        ))}
+      </div>
+    );
+  }
+
+  if (type === "ai") {
+    return <div className="h-14 w-14 rounded-full bg-[radial-gradient(circle_at_35%_25%,rgba(88,28,135,0.7),rgba(0,245,160,0.22)_48%,transparent_70%)] shadow-[0_0_24px_rgba(88,28,135,0.22)]" />;
+  }
+
+  if (type === "remedy") {
+    return (
+      <div className="relative h-14 w-14">
+        <span className="absolute left-1/2 top-2 h-9 w-5 -translate-x-1/2 rounded-full bg-[#dca956]/20 shadow-[0_0_18px_rgba(220,169,86,0.18)]" />
+        <span className="absolute bottom-2 left-3 h-6 w-6 rotate-45 rounded-full bg-[#f3d382]/24" />
+        <span className="absolute bottom-2 right-3 h-6 w-6 -rotate-45 rounded-full bg-[#f3d382]/24" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-14 w-14 rounded-lg bg-[#0a1224]/80 shadow-[inset_0_0_0_1px_rgba(220,169,86,0.18)]">
+      <span className="absolute inset-x-2 top-1/2 h-px bg-[#dca956]/50" />
+      <span className="absolute inset-y-2 left-1/2 w-px bg-[#dca956]/50" />
+      <span className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-[#dca956]/45" />
+    </div>
+  );
+}
+
+function ProgressRing({ value }: { value: number }) {
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (value / 100) * circumference;
+
+  return (
+    <div className="relative h-[4.6rem] w-[4.6rem] flex-shrink-0">
+      <svg viewBox="0 0 72 72" className="h-full w-full -rotate-90">
+        <circle cx="36" cy="36" r={radius} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="7" />
+        <circle
+          cx="36"
+          cy="36"
+          r={radius}
+          fill="none"
+          stroke="url(#energyGradient)"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+        <defs>
+          <linearGradient id="energyGradient" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="#00f5a0" />
+            <stop offset="100%" stopColor="#00f5a0" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <span className="absolute inset-0 grid place-items-center text-sm font-black text-white">{value}%</span>
+    </div>
   );
 }
 
 export function AstrologerShowcase() {
   return (
-    <Section>
-      <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#01A361]">Human Guidance</p>
-          <h2 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">Featured astrologers</h2>
+    <Section className="relative max-w-[1440px] px-6 py-4 lg:px-12">
+      <CosmicBackground soft />
+      <Panel title="Connect With Verified Astrologers" subtitle="Talk to top astro experts and get personalized guidance">
+        <div className="relative">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {featuredAstrologers.slice(0, 5).map((astrologer) => (
+            <Card key={astrologer.id} className="group border-[#1e293b] bg-[#0f1c3a] shadow-[0_18px_48px_rgba(0,5,16,0.25)] transition hover:-translate-y-1 hover:border-[#dca956]/40 hover:shadow-[0_0_28px_rgba(0,245,160,0.12)]">
+              <CardContent className="p-4">
+                <div className="relative flex items-center gap-3">
+                  <div className="grid h-14 w-14 flex-shrink-0 place-items-center rounded-full border border-[#dca956]/45 bg-[radial-gradient(circle_at_35%_25%,rgba(243,211,130,0.34),rgba(0,155,114,0.42))] font-cinzel text-lg font-black text-[#f3d382] shadow-[0_0_18px_rgba(220,169,86,0.12)]">
+                    {astrologer.name.split(" ").map((part) => part[0]).join("").slice(0, 2)}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="truncate font-cinzel text-sm font-bold text-[#f3d382]">{astrologer.name}</h3>
+                    <p className="truncate text-xs text-[#ffffff]/62">{astrologer.specialty}</p>
+                    <p className="mt-0.5 text-xs text-[#94a3b8]">{astrologer.experienceYears}+ Yrs</p>
+                    <p className="mt-1 text-xs font-semibold text-[#fbc02d]">{astrologer.rating} ★ <span className="text-[#94a3b8]">({Math.round(astrologer.rating * 470)})</span></p>
+                  </div>
+                  <Button size="icon" className="absolute -bottom-8 right-0 h-9 w-9 rounded-full bg-[#009b72] text-white shadow-[0_0_18px_rgba(0,245,160,0.25)]" asChild><Link href={`/consultation/book/${astrologer.id}`} aria-label={`Book ${astrologer.name}`}><Phone className="h-4 w-4" /></Link></Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          </div>
+          <div className="mt-5 flex justify-end gap-2">
+            <button type="button" aria-label="Previous astrologers" className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.035] text-[#f3d382] shadow-[inset_0_0_0_1px_rgba(220,169,86,0.24)] transition hover:bg-[#dca956]/10">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button type="button" aria-label="Next astrologers" className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.035] text-[#f3d382] shadow-[inset_0_0_0_1px_rgba(220,169,86,0.24)] transition hover:bg-[#dca956]/10">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        <Button variant="outline" asChild><Link href="/astrologers">Explore marketplace</Link></Button>
-      </div>
-      <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-3 md:grid md:grid-cols-3 md:overflow-visible">
-        {featuredAstrologers.map((astrologer) => (
-          <Card key={astrologer.id} className="min-w-[82vw] snap-start border-[#D4AF37]/22 bg-[#02112C]/82 sm:min-w-[22rem] md:min-w-0">
-            <CardContent className="p-6">
-              <div className="grid h-16 w-16 place-items-center rounded-lg bg-[#D4AF37]/10 font-cinzel text-2xl font-black text-[#FFD700]">
-                {astrologer.name.split(" ").map((part) => part[0]).join("").slice(0, 2)}
-              </div>
-              <h3 className="mt-5 flex items-center gap-2 font-cinzel text-xl font-bold">{astrologer.name}<BadgeCheck className="h-5 w-5 text-[#FFD700]" /></h3>
-              <p className="mt-1 text-sm text-[#FFD700]">{astrologer.specialty}</p>
-              <p className="mt-3 text-sm leading-6 naksh-muted-text">{astrologer.experienceYears} years experience · {astrologer.languages.join(", ")} · {astrologer.rating} rating · INR {astrologer.pricePerMinute}/min</p>
-              <div className="mt-5 flex gap-2">
-                <Button asChild className="flex-1"><Link href={`/astrologers/${astrologer.id}`}>View profile</Link></Button>
-                <Button variant="outline" asChild className="flex-1"><Link href={`/consultation?astrologer=${astrologer.id}`}>Book</Link></Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      </Panel>
     </Section>
   );
 }
 
-export function Testimonials() {
+export function TrustBar() {
   return (
-    <Section className="pt-4">
-      <div className="mb-10 flex items-end justify-between gap-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#01A361]">Client Trust</p>
-          <h2 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">Built for daily guidance and serious decisions</h2>
-        </div>
-        <WandSparkles className="hidden h-10 w-10 text-[#FFD700] md:block" />
-      </div>
-      <div className="grid gap-5 md:grid-cols-3">
-        {testimonials.map(([name, role, quote, kind]) => (
-          <Card key={name} className="border-[#D4AF37]/22 bg-[#02112C]/82">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                {kind === "video" ? <PlayCircle className="h-7 w-7 text-[#FFD700]" /> : <Quote className="h-6 w-6 text-[#FFD700]" />}
-                <div className="flex gap-1 text-[#FFD700]">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3 w-3 fill-current" />)}</div>
-              </div>
-              <p className="mt-5 leading-7 naksh-muted-text">{quote}</p>
-              <p className="mt-6 font-cinzel font-bold">{name}</p>
-              <p className="text-sm naksh-muted-text">{role}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-export function FeaturedIn() {
-  return (
-    <Section className="py-8">
-      <div className="rounded-lg border border-[#D4AF37]/22 bg-[#02112C]/70 p-5">
-        <p className="text-center text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Featured in and trusted by builders</p>
-        <div className="mt-5 grid gap-3 text-center text-sm naksh-muted-text sm:grid-cols-3 lg:grid-cols-5">
-          {featuredIn.map((item) => <span key={item} className="rounded-md bg-[#024B30]/28 px-3 py-3">{item}</span>)}
-        </div>
-      </div>
-    </Section>
-  );
-}
-
-export function FAQSection() {
-  return (
-    <Section>
-      <div className="mb-8 max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#01A361]">FAQ</p>
-        <h2 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">Clear answers before you begin</h2>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        {faqs.map(([question, answer]) => (
-          <Card key={question} className="border-[#D4AF37]/22 bg-[#02112C]/82">
-            <CardContent className="p-5">
-              <h3 className="flex gap-2 font-cinzel text-lg font-bold"><CheckCircle2 className="mt-1 h-4 w-4 text-[#01A361]" />{question}</h3>
-              <p className="mt-3 text-sm leading-6 naksh-muted-text">{answer}</p>
-            </CardContent>
-          </Card>
+    <Section className="relative max-w-[1440px] px-6 pb-28 pt-4 md:pb-10 lg:px-12">
+      <CosmicBackground soft />
+      <div className="relative grid gap-3 border-y border-[#1e293b] bg-[#0a1224]/80 p-4 shadow-[0_0_30px_rgba(220,169,86,0.06)] backdrop-blur sm:grid-cols-2 lg:grid-cols-5">
+        {trustItems.map(([label, Icon]) => (
+          <div key={label} className="flex items-center justify-center gap-3 border-[#1e293b] px-3 py-2 lg:border-r lg:last:border-r-0">
+            <Icon className="h-5 w-5 text-[#dca956]" />
+            <span className="text-sm font-semibold text-[#94a3b8]">{label}</span>
+          </div>
         ))}
       </div>
     </Section>
@@ -267,12 +374,61 @@ export function FAQSection() {
 
 export function StickyMobileCTA() {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#D4AF37]/25 bg-[#02112C]/95 p-3 backdrop-blur md:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#dca956]/25 bg-[#020612]/95 p-3 backdrop-blur md:hidden">
       <div className="grid grid-cols-3 gap-2">
-        <Button size="sm" asChild><Link href="/kundli"><MoonStar className="h-4 w-4" />Kundli</Link></Button>
-        <Button size="sm" variant="outline" asChild><Link href="/chatbot"><MessageCircle className="h-4 w-4" />AI</Link></Button>
-        <Button size="sm" variant="secondary" asChild><Link href="/reports"><Sparkles className="h-4 w-4" />Report</Link></Button>
+        <Button size="sm" variant="secondary" asChild><Link href="/kundli"><MoonStar className="h-4 w-4" />Kundli</Link></Button>
+        <Button size="sm" asChild><Link href="/talk-to-kundli"><MessageCircle className="h-4 w-4" />AI</Link></Button>
+        <Button size="sm" variant="outline" asChild><Link href="/reports"><Sparkles className="h-4 w-4" />Report</Link></Button>
       </div>
     </div>
+  );
+}
+
+function Panel({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-[#1e293b] bg-[#0a1224]/86 p-5 shadow-[0_24px_80px_rgba(0,5,16,0.42),inset_0_1px_0_rgba(243,211,130,0.05)] backdrop-blur">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(220,169,86,0.1),transparent_16rem),radial-gradient(circle_at_88%_100%,rgba(0,155,114,0.1),transparent_18rem)]" />
+      <div className="relative">
+        <p className="font-cinzel text-lg font-black uppercase tracking-wide text-[#f3d382]">+ {title}</p>
+        <p className="mt-1 text-sm text-[#ffffff]/68">{subtitle}</p>
+        <div className="mt-5">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function CosmicBackground({ soft = false }: { soft?: boolean }) {
+  const stars = [
+    ["left-[6%] top-[12%] h-1 w-1 opacity-70 blur-[0.2px]", "bg-white"],
+    ["left-[18%] top-[28%] h-1.5 w-1.5 opacity-70 blur-[0.4px]", "bg-[#f3d382]"],
+    ["left-[32%] top-[14%] h-1 w-1 opacity-50 blur-[0.1px]", "bg-white"],
+    ["left-[44%] top-[38%] h-2 w-2 opacity-50 blur-[0.7px]", "bg-[#00f5a0]"],
+    ["left-[58%] top-[18%] h-1.5 w-1.5 opacity-60 blur-[0.3px]", "bg-[#f3d382]"],
+    ["left-[72%] top-[30%] h-1 w-1 opacity-70 blur-[0.1px]", "bg-white"],
+    ["left-[86%] top-[14%] h-2 w-2 opacity-55 blur-[0.8px]", "bg-[#f3d382]"],
+    ["left-[12%] bottom-[18%] h-2 w-2 opacity-45 blur-[0.8px]", "bg-[#00f5a0]"],
+    ["left-[36%] bottom-[12%] h-1 w-1 opacity-60 blur-[0.2px]", "bg-white"],
+    ["left-[64%] bottom-[20%] h-1.5 w-1.5 opacity-55 blur-[0.4px]", "bg-[#f3d382]"],
+    ["left-[90%] bottom-[24%] h-1 w-1 opacity-70 blur-[0.2px]", "bg-white"],
+    ["left-[23%] top-[58%] h-3 w-3 opacity-25 blur-[1.4px]", "bg-[#00f5a0]"],
+    ["left-[76%] top-[54%] h-2.5 w-2.5 opacity-35 blur-[1.2px]", "bg-[#00f5a0]"],
+    ["left-[50%] bottom-[34%] h-1 w-1 opacity-55 blur-[0.2px]", "bg-white"],
+    ["left-[8%] bottom-[42%] h-1.5 w-1.5 opacity-42 blur-[0.5px]", "bg-[#f3d382]"],
+    ["right-[6%] bottom-[46%] h-3 w-3 opacity-24 blur-[1.5px]", "bg-[#00f5a0]"]
+  ];
+  return (
+    <>
+      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-45" : "opacity-100"} bg-[radial-gradient(circle_at_80%_20%,rgba(10,18,36,0.6),transparent_50%),radial-gradient(circle_at_15%_22%,rgba(0,155,114,0.16),transparent_26rem),radial-gradient(circle_at_78%_18%,rgba(220,169,86,0.13),transparent_28rem),radial-gradient(circle_at_62%_78%,rgba(0,155,114,0.11),transparent_32rem),linear-gradient(135deg,#020612_0%,#0a1224_52%,#0a1224_100%)]`} />
+      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-24" : "opacity-42"} bg-[radial-gradient(circle_at_7%_16%,rgba(255,255,255,0.42)_0_1px,transparent_2px),radial-gradient(circle_at_18%_62%,rgba(255,255,255,0.34)_0_1px,transparent_2px),radial-gradient(circle_at_31%_28%,rgba(243,211,130,0.38)_0_1px,transparent_2px),radial-gradient(circle_at_46%_72%,rgba(255,255,255,0.3)_0_1px,transparent_2px),radial-gradient(circle_at_62%_34%,rgba(0,245,160,0.32)_0_1px,transparent_2px),radial-gradient(circle_at_79%_18%,rgba(243,211,130,0.34)_0_1px,transparent_2px),radial-gradient(circle_at_92%_66%,rgba(255,255,255,0.36)_0_1px,transparent_2px),radial-gradient(circle_at_70%_88%,rgba(0,245,160,0.28)_0_1px,transparent_2px)]`} />
+      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-18" : "opacity-34"} bg-[radial-gradient(circle_at_22%_36%,rgba(220,169,86,0.32)_0_1.4px,transparent_3px),radial-gradient(circle_at_38%_11%,rgba(255,255,255,0.22)_0_1.2px,transparent_3px),radial-gradient(circle_at_57%_58%,rgba(243,211,130,0.26)_0_1.5px,transparent_3px),radial-gradient(circle_at_84%_42%,rgba(0,245,160,0.24)_0_1.4px,transparent_3px),radial-gradient(circle_at_11%_78%,rgba(0,245,160,0.18)_0_1.5px,transparent_3px)] blur-[0.3px]`} />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_35%_40%,rgba(0,155,114,0.12),transparent_34rem),radial-gradient(ellipse_at_82%_62%,rgba(220,169,86,0.1),transparent_30rem)] blur-[1px]" />
+      {stars.map(([position, color], index) => (
+        <span
+          key={`${position}-${index}`}
+          className={`pointer-events-none absolute rounded-full ${position} ${color} shadow-[0_0_16px_currentColor]`}
+          style={{ animation: `cosmic-float ${8 + index * 0.7}s ease-in-out infinite`, animationDelay: `${index * 0.35}s` }}
+        />
+      ))}
+    </>
   );
 }
