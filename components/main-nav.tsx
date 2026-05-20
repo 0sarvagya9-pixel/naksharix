@@ -31,13 +31,13 @@ import type { TranslationKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const desktopLinks = [
-  { labelKey: "horoscope", href: "/horoscope", activePaths: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope-2026"] },
-  { labelKey: "kundli", href: "/kundli", activePaths: ["/kundli", "/free-kundli"] },
-  { labelKey: "match", href: "/matchmaking", activePaths: ["/match", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
-  { labelKey: "astrologers", href: "/astrologers", activePaths: ["/astrologers", "/consult", "/consultation"] },
-  { labelKey: "aiChat", href: "/talk-to-kundli", activePaths: ["/ai-chat", "/talk-to-kundli", "/chatbot"] },
-  { labelKey: "tarot", href: "/tarot", activePaths: ["/tarot"] },
-  { labelKey: "pricing", href: "/pricing", activePaths: ["/pricing"] }
+  { label: "Home", href: "/", activePaths: ["/"] },
+  { label: "Kundli", href: "/kundli", activePaths: ["/kundli", "/free-kundli"] },
+  { label: "Match Making", href: "/matchmaking", activePaths: ["/match", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
+  { label: "Numerology", href: "/numerology", activePaths: ["/numerology"] },
+  { label: "AI Astrologer", href: "/talk-to-kundli", activePaths: ["/ai-chat", "/talk-to-kundli", "/chatbot"] },
+  { label: "Tarot", href: "/tarot", activePaths: ["/tarot"] },
+  { label: "Remedies", href: "/reports", activePaths: ["/reports"] }
 ] as const;
 
 const moreLinks = [
@@ -149,15 +149,15 @@ export function MainNav() {
     };
   }, [open]);
 
-  if (isAstrologerPortal) return null;
+  if (pathname === "/" || isAstrologerPortal) return null;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#D4AF37]/25 bg-[#02112C]/75 shadow-[0_12px_45px_rgba(0,5,16,0.48),0_0_28px_rgba(1,163,97,0.10)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full border-b border-[#D4AF37]/22 bg-[#020b1f]/70 shadow-[0_12px_45px_rgba(0,5,16,0.48),0_0_28px_rgba(1,163,97,0.10)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-screen-2xl items-center justify-between gap-4 px-4">
-        <div className="flex-shrink-0 2xl:mr-6 2xl:min-w-[220px]">
+        <div className="flex-shrink-0 xl:mr-5 xl:min-w-[250px]">
           <BrandLogo />
         </div>
-        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-5 2xl:flex" aria-label="Primary navigation">
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-4 xl:flex" aria-label="Primary navigation">
           {desktopLinks.map((item) => {
             const active = isActiveRoute(pathname, item.href, item.activePaths);
             return (
@@ -166,13 +166,13 @@ export function MainNav() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-3 py-2 font-cinzel text-sm leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#FFD700] after:shadow-[0_0_12px_rgba(255,215,0,0.8)] after:transition-transform hover:bg-[#D4AF37]/10 hover:text-[#FFD700] hover:drop-shadow-[0_0_10px_rgba(1,163,97,0.38)]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-2.5 py-2 text-sm font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#D4AF37] after:shadow-[0_0_12px_rgba(212,175,55,0.68)] after:transition-transform hover:bg-[#D4AF37]/10 hover:text-[#F5D76E] hover:drop-shadow-[0_0_10px_rgba(1,163,97,0.38)]",
                 active
-                  ? "bg-[linear-gradient(135deg,rgba(212,175,55,0.14),rgba(1,163,97,0.12))] text-[#FFD700] shadow-[0_0_24px_rgba(1,163,97,0.16)] after:scale-x-100"
+                  ? "bg-[linear-gradient(135deg,rgba(212,175,55,0.14),rgba(1,163,97,0.12))] text-[#F5D76E] shadow-[0_0_24px_rgba(1,163,97,0.16)] after:scale-x-100"
                   : "text-[#F0F0F0]"
               )}
             >
-              {tr(item.labelKey)}
+              {item.label}
             </Link>
             );
           })}
@@ -182,9 +182,9 @@ export function MainNav() {
               aria-haspopup="menu"
               aria-expanded={moreActive}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-3 py-2 font-cinzel text-sm leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#FFD700] after:shadow-[0_0_12px_rgba(255,215,0,0.8)] after:transition-transform hover:bg-[#D4AF37]/10 hover:text-[#FFD700]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-2.5 py-2 text-sm font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#D4AF37] after:shadow-[0_0_12px_rgba(212,175,55,0.68)] after:transition-transform hover:bg-[#D4AF37]/10 hover:text-[#F5D76E]",
                 moreActive
-                  ? "bg-[linear-gradient(135deg,rgba(212,175,55,0.14),rgba(1,163,97,0.12))] text-[#FFD700] shadow-[0_0_24px_rgba(1,163,97,0.16)] after:scale-x-100"
+                  ? "bg-[linear-gradient(135deg,rgba(212,175,55,0.14),rgba(1,163,97,0.12))] text-[#F5D76E] shadow-[0_0_24px_rgba(1,163,97,0.16)] after:scale-x-100"
                   : "text-[#F0F0F0]"
               )}
             >
@@ -199,8 +199,8 @@ export function MainNav() {
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "block rounded-md px-3 py-2 font-cinzel text-sm outline-none transition hover:bg-[#D4AF37]/10 hover:text-[#FFD700] focus:bg-[#D4AF37]/10 focus:text-[#FFD700]",
-                      active ? "bg-[#D4AF37]/10 text-[#FFD700] shadow-[inset_3px_0_0_rgba(255,215,0,0.8)]" : "text-[#F0F0F0]"
+                      "block rounded-md px-3 py-2 font-cinzel text-sm outline-none transition hover:bg-[#D4AF37]/10 hover:text-[#F5D76E] focus:bg-[#D4AF37]/10 focus:text-[#F5D76E]",
+                      active ? "bg-[#D4AF37]/10 text-[#F5D76E] shadow-[inset_3px_0_0_rgba(212,175,55,0.8)]" : "text-[#F0F0F0]"
                     )}
                   >
                     {tr(item.labelKey)}
@@ -214,17 +214,17 @@ export function MainNav() {
           <LanguageSwitcher />
           <ThemeToggle />
           <AuthProfileMenu />
-          <Button asChild className="hidden flex-shrink-0 whitespace-nowrap px-4 2xl:inline-flex">
+          <Button asChild className="hidden flex-shrink-0 whitespace-nowrap rounded-lg bg-[#01A361] px-4 xl:inline-flex">
             <Link href="/signup">
               <Sparkles className="h-4 w-4" />
-              <span>{tr("startShort")}</span>
+              <span>शुरू करें</span>
             </Link>
           </Button>
           <Button
             ref={menuButtonRef}
             variant="outline"
             size="icon"
-            className="2xl:hidden"
+            className="xl:hidden"
             aria-label="Open navigation menu"
             aria-expanded={open}
             aria-controls="naksharix-mobile-sidebar"
@@ -257,7 +257,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
           <motion.button
             type="button"
             aria-label="Close navigation overlay"
-            className="fixed inset-0 z-40 bg-[radial-gradient(circle_at_20%_20%,rgba(126,72,255,0.28),transparent_28rem),rgba(5,2,14,0.76)] backdrop-blur-sm 2xl:hidden"
+            className="fixed inset-0 z-40 bg-[radial-gradient(circle_at_20%_20%,rgba(126,72,255,0.28),transparent_28rem),rgba(5,2,14,0.76)] backdrop-blur-sm xl:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -268,7 +268,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
             role="dialog"
             aria-modal="true"
             aria-label="Naksharix navigation menu"
-            className="fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-[24rem] flex-col overflow-hidden border-l border-[#D4AF37]/20 bg-[linear-gradient(180deg,rgba(38,17,72,0.98),rgba(12,5,27,0.99)_58%,rgba(34,17,45,0.99))] shadow-[0_0_80px_rgba(126,72,255,0.22)] 2xl:hidden"
+            className="fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-[24rem] flex-col overflow-hidden border-l border-[#D4AF37]/20 bg-[linear-gradient(180deg,rgba(38,17,72,0.98),rgba(12,5,27,0.99)_58%,rgba(34,17,45,0.99))] shadow-[0_0_80px_rgba(126,72,255,0.22)] xl:hidden"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -322,8 +322,8 @@ function SidebarMenuGroup({ group, onClose, pathname, firstLinkRef }: { group: S
         groupActive ? "border-[#D4AF37]/40 shadow-[inset_3px_0_0_rgba(245,190,88,0.75),0_0_24px_rgba(126,72,255,0.13)]" : "border-[#D4AF37]/15"
       )}
     >
-      <h2 className={cn("flex items-center gap-2 font-cinzel text-sm font-bold", groupActive ? "text-[#FFD700]" : "text-[#FFD700]")}>
-        <span className={cn("grid h-8 w-8 place-items-center rounded-md text-[#FFD700]", groupActive ? "bg-[#D4AF37]/18 shadow-[0_0_16px_rgba(245,190,88,0.22)]" : "bg-[#D4AF37]/10")}>
+      <h2 className={cn("flex items-center gap-2 font-cinzel text-sm font-bold", groupActive ? "text-[#F5D76E]" : "text-[#F5D76E]")}>
+        <span className={cn("grid h-8 w-8 place-items-center rounded-md text-[#F5D76E]", groupActive ? "bg-[#D4AF37]/18 shadow-[0_0_16px_rgba(245,190,88,0.22)]" : "bg-[#D4AF37]/10")}>
           <GroupIcon className="h-4 w-4" />
         </span>
         {tr(group.titleKey)}
@@ -341,12 +341,12 @@ function SidebarMenuGroup({ group, onClose, pathname, firstLinkRef }: { group: S
             className={cn(
               "flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-sm outline-none transition hover:bg-[#D4AF37]/10 hover:text-foreground focus:bg-[#D4AF37]/10 focus:text-foreground",
               active
-                ? "bg-[linear-gradient(135deg,rgba(245,190,88,0.16),rgba(126,72,255,0.14))] text-[#FFD700] shadow-[inset_3px_0_0_rgba(245,190,88,0.85),0_0_18px_rgba(126,72,255,0.14)]"
+                ? "bg-[linear-gradient(135deg,rgba(245,190,88,0.16),rgba(126,72,255,0.14))] text-[#F5D76E] shadow-[inset_3px_0_0_rgba(245,190,88,0.85),0_0_18px_rgba(126,72,255,0.14)]"
                 : "text-[#F0F0F0]"
             )}
           >
             <span className="whitespace-nowrap">{tr(item.labelKey)}</span>
-            {item.labelKey === "callAstrologers" ? <PhoneCall className="h-4 w-4 text-[#FFD700]/80" /> : item.labelKey.toLowerCase().includes("report") ? <FileText className="h-4 w-4 text-[#FFD700]/80" /> : <ScrollText className="h-4 w-4 text-[#FFD700]/60" />}
+            {item.labelKey === "callAstrologers" ? <PhoneCall className="h-4 w-4 text-[#F5D76E]/80" /> : item.labelKey.toLowerCase().includes("report") ? <FileText className="h-4 w-4 text-[#F5D76E]/80" /> : <ScrollText className="h-4 w-4 text-[#F5D76E]/60" />}
           </Link>
           );
         })}

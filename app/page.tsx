@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { AstrologerShowcase, CTASection, FAQSection, FeaturedIn, FeatureGrid, HomeHero, StickyMobileCTA, Testimonials, TrustCounters } from "@/components/home-sections";
+import { DesktopHomepageArtboard } from "@/components/homepage-artboard";
+import { MobileHomeFallback } from "@/components/mobile-home-fallback";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
@@ -11,16 +12,9 @@ export const metadata: Metadata = seo({
 
 export default function HomePage() {
   return (
-    <main className="star-field">
-      <HomeHero />
-      <TrustCounters />
-      <FeatureGrid />
-      <AstrologerShowcase />
-      <CTASection />
-      <Testimonials />
-      <FeaturedIn />
-      <FAQSection />
-      <StickyMobileCTA />
+    <main className="overflow-hidden bg-[#020817]">
+      <DesktopHomepageArtboard />
+      <MobileHomeFallback />
     </main>
   );
 }
