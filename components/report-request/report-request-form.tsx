@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { LocationAutocomplete, type ResolvedLocation } from "@/components/location-autocomplete";
 import { useLanguage } from "@/components/language-provider";
 import { secureFetch } from "@/lib/security/csrf";
+import { errorClass, scrollToFirstError } from "@/lib/form-validation";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -41,6 +42,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
     if (!dateOfBirth) next.dateOfBirth = requiredMessage;
     if (!birthPlace.trim() || !location) next.birthPlace = birthPlace.trim() ? tr("selectLocationFromSuggestions") : requiredMessage;
     setErrors(next);
+    if (Object.keys(next).length) scrollToFirstError(next);
     return Object.keys(next).length === 0;
   }
 
@@ -86,7 +88,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label={tr("fullName")} error={errors.fullName}>
-          <Input value={fullName} onChange={(event) => { setFullName(event.target.value); setErrors((e) => ({ ...e, fullName: undefined })); }} className={cn(errors.fullName && "border-destructive")} />
+          <Input data-field="fullName" value={fullName} onChange={(event) => { setFullName(event.target.value); setErrors((e) => ({ ...e, fullName: undefined })); }} className={cn(errorClass(Boolean(errors.fullName)))} />
         </Field>
         <Field label={tr("gender")}>
           <select value={gender} onChange={(event) => setGender(event.target.value)} className="cosmic-select">
@@ -97,7 +99,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
           </select>
         </Field>
         <Field label={tr("dateOfBirth")} error={errors.dateOfBirth}>
-          <Input type="date" value={dateOfBirth} onChange={(event) => { setDateOfBirth(event.target.value); setErrors((e) => ({ ...e, dateOfBirth: undefined })); }} className={cn(errors.dateOfBirth && "border-destructive")} />
+          <Input data-field="dateOfBirth" type="date" value={dateOfBirth} onChange={(event) => { setDateOfBirth(event.target.value); setErrors((e) => ({ ...e, dateOfBirth: undefined })); }} className={cn(errorClass(Boolean(errors.dateOfBirth)))} />
         </Field>
         <Field label={tr("timeOfBirth")}>
           <Input type="time" value={timeOfBirth} onChange={(event) => setTimeOfBirth(event.target.value)} />
@@ -109,6 +111,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
             onResolvedLocation={(next) => { setLocation(next); setErrors((e) => ({ ...e, birthPlace: undefined })); }}
             label={tr("birthPlace")}
             required
+            dataField="birthPlace"
             error={errors.birthPlace}
           />
         </div>

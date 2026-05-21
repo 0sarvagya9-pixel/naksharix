@@ -1,5 +1,6 @@
 export type ChartLanguage = "en" | "hi" | "hinglish";
 export type ChartType = "D1" | "D9";
+export type AstroValueCategory = "planet" | "sign" | "weekday" | "paksha" | "tithi" | "nakshatra" | "yoga" | "karan";
 
 export type ChartPlanet = {
   planet: string;
@@ -175,7 +176,9 @@ const HOUSE_LAYOUT: Record<number, { points: string; labelX: number; labelY: num
   10: { points: "504,210 402,108 300,210 402,312", labelX: 402, labelY: 210, signX: 470, signY: 210, planetX: 402, planetY: 210, planetLineHeight: 16, maxWidth: 72, maxLines: 4 },
   11: { points: "504,6 504,210 402,108", labelX: 468, labelY: 112, signX: 482, signY: 160, planetX: 458, planetY: 116, planetLineHeight: 15, maxWidth: 64, maxLines: 4 },
   12: { points: "300,6 504,6 402,108", labelX: 402, labelY: 52, signX: 472, signY: 34, planetX: 422, planetY: 58, planetLineHeight: 15, maxWidth: 70, maxLines: 4 }
-};export function normalizeNorthIndianChart(input: NorthIndianChartData): ChartCell[] {
+};
+
+export function normalizeNorthIndianChart(input: NorthIndianChartData): ChartCell[] {
   return Array.from({ length: 12 }, (_, index) => {
     const houseNumber = index + 1;
     const layout = HOUSE_LAYOUT[houseNumber];
@@ -209,12 +212,24 @@ const HOUSE_LAYOUT: Record<number, { points: string; labelX: number; labelY: num
 
 export function translateSign(sign: string | undefined, language: ChartLanguage) {
   if (!sign) return "";
-  return signLabels[language][sign] ?? sign;
+  const canonical = canonicalKey(sign, signLabels.en);
+  return canonical ? signLabels[language][canonical] ?? sign : sign;
 }
 
 export function translatePlanet(planet: string | undefined, language: ChartLanguage) {
   if (!planet) return "";
-  return planetFullLabels[language][planet] ?? planet;
+  const canonical = canonicalKey(planet, planetFullLabels.en);
+  return canonical ? planetFullLabels[language][canonical] ?? planet : planet;
+}
+
+export function translateAstroValue(value: unknown, language: ChartLanguage, category: AstroValueCategory) {
+  if (value === null || value === undefined || value === "") return "";
+  const text = String(value);
+  if (category === "planet") return translatePlanet(text, language) || text;
+  if (category === "sign") return translateSign(text, language) || text;
+  const map = astroValueLabels[category];
+  const canonical = canonicalKey(text, map.en);
+  return canonical ? map[language][canonical] ?? text : text;
 }
 
 export function abbreviatePlanet(planet: string, language: ChartLanguage) {
@@ -235,6 +250,65 @@ function signFromAscendant(ascendantSign: string, house: number) {
   const ascendantIndex = Math.max(0, signOrder.indexOf(ascendantSign));
   return signOrder[(ascendantIndex + house - 1) % signOrder.length];
 }
+
+function canonicalKey(value: string, dictionary: Record<string, string>) {
+  const normalized = normalizeAstroKey(value);
+  return Object.keys(dictionary).find((key) => normalizeAstroKey(key) === normalized || normalizeAstroKey(dictionary[key]) === normalized);
+}
+
+function normalizeAstroKey(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+const astroValueLabels: Record<Exclude<AstroValueCategory, "planet" | "sign">, Record<ChartLanguage, Record<string, string>>> = {
+  weekday: {
+    en: { Monday: "Monday", Tuesday: "Tuesday", Wednesday: "Wednesday", Thursday: "Thursday", Friday: "Friday", Saturday: "Saturday", Sunday: "Sunday" },
+    hi: { Monday: "सोमवार", Tuesday: "मंगलवार", Wednesday: "बुधवार", Thursday: "गुरुवार", Friday: "शुक्रवार", Saturday: "शनिवार", Sunday: "रविवार" },
+    hinglish: { Monday: "Somvar", Tuesday: "Mangalvar", Wednesday: "Budhvar", Thursday: "Guruvar", Friday: "Shukravar", Saturday: "Shanivar", Sunday: "Ravivar" }
+  },
+  paksha: {
+    en: { "Shukla Paksha": "Shukla Paksha", "Krishna Paksha": "Krishna Paksha", Shukla: "Shukla Paksha", Krishna: "Krishna Paksha" },
+    hi: { "Shukla Paksha": "शुक्ल पक्ष", "Krishna Paksha": "कृष्ण पक्ष", Shukla: "शुक्ल पक्ष", Krishna: "कृष्ण पक्ष" },
+    hinglish: { "Shukla Paksha": "Shukla Paksha", "Krishna Paksha": "Krishna Paksha", Shukla: "Shukla Paksha", Krishna: "Krishna Paksha" }
+  },
+  tithi: {
+    en: {
+      Pratipada: "Pratipada", Dwitiya: "Dwitiya", Tritiya: "Tritiya", Chaturthi: "Chaturthi", Panchami: "Panchami", Shashthi: "Shashthi", Saptami: "Saptami", Ashtami: "Ashtami", Navami: "Navami", Dashami: "Dashami", Ekadashi: "Ekadashi", Dwadashi: "Dwadashi", Trayodashi: "Trayodashi", Chaturdashi: "Chaturdashi", Purnima: "Purnima", Amavasya: "Amavasya"
+    },
+    hi: {
+      Pratipada: "प्रतिपदा", Dwitiya: "द्वितीया", Tritiya: "तृतीया", Chaturthi: "चतुर्थी", Panchami: "पंचमी", Shashthi: "षष्ठी", Saptami: "सप्तमी", Ashtami: "अष्टमी", Navami: "नवमी", Dashami: "दशमी", Ekadashi: "एकादशी", Dwadashi: "द्वादशी", Trayodashi: "त्रयोदशी", Chaturdashi: "चतुर्दशी", Purnima: "पूर्णिमा", Amavasya: "अमावस्या"
+    },
+    hinglish: {
+      Pratipada: "Pratipada", Dwitiya: "Dwitiya", Tritiya: "Tritiya", Chaturthi: "Chaturthi", Panchami: "Panchami", Shashthi: "Shashthi", Saptami: "Saptami", Ashtami: "Ashtami", Navami: "Navami", Dashami: "Dashami", Ekadashi: "Ekadashi", Dwadashi: "Dwadashi", Trayodashi: "Trayodashi", Chaturdashi: "Chaturdashi", Purnima: "Purnima", Amavasya: "Amavasya"
+    }
+  },
+  nakshatra: {
+    en: {
+      Ashwini: "Ashwini", Bharani: "Bharani", Krittika: "Krittika", Rohini: "Rohini", Mrigashira: "Mrigashira", Ardra: "Ardra", Punarvasu: "Punarvasu", Pushya: "Pushya", Ashlesha: "Ashlesha", Magha: "Magha", "Purva Phalguni": "Purva Phalguni", "Uttara Phalguni": "Uttara Phalguni", Hasta: "Hasta", Chitra: "Chitra", Swati: "Swati", Vishakha: "Vishakha", Anuradha: "Anuradha", Jyeshtha: "Jyeshtha", Mula: "Mula", "Purva Ashadha": "Purva Ashadha", "Uttara Ashadha": "Uttara Ashadha", Shravana: "Shravana", Dhanishta: "Dhanishta", Shatabhisha: "Shatabhisha", "Purva Bhadrapada": "Purva Bhadrapada", "Uttara Bhadrapada": "Uttara Bhadrapada", Revati: "Revati"
+    },
+    hi: {
+      Ashwini: "अश्विनी", Bharani: "भरणी", Krittika: "कृत्तिका", Rohini: "रोहिणी", Mrigashira: "मृगशिरा", Ardra: "आर्द्रा", Punarvasu: "पुनर्वसु", Pushya: "पुष्य", Ashlesha: "आश्लेषा", Magha: "मघा", "Purva Phalguni": "पूर्व फाल्गुनी", "Uttara Phalguni": "उत्तर फाल्गुनी", Hasta: "हस्त", Chitra: "चित्रा", Swati: "स्वाती", Vishakha: "विशाखा", Anuradha: "अनुराधा", Jyeshtha: "ज्येष्ठा", Mula: "मूल", "Purva Ashadha": "पूर्वाषाढ़ा", "Uttara Ashadha": "उत्तराषाढ़ा", Shravana: "श्रवण", Dhanishta: "धनिष्ठा", Shatabhisha: "शतभिषा", "Purva Bhadrapada": "पूर्व भाद्रपद", "Uttara Bhadrapada": "उत्तर भाद्रपद", Revati: "रेवती"
+    },
+    hinglish: {
+      Ashwini: "Ashwini", Bharani: "Bharani", Krittika: "Krittika", Rohini: "Rohini", Mrigashira: "Mrigashira", Ardra: "Ardra", Punarvasu: "Punarvasu", Pushya: "Pushya", Ashlesha: "Ashlesha", Magha: "Magha", "Purva Phalguni": "Purva Phalguni", "Uttara Phalguni": "Uttara Phalguni", Hasta: "Hasta", Chitra: "Chitra", Swati: "Swati", Vishakha: "Vishakha", Anuradha: "Anuradha", Jyeshtha: "Jyeshtha", Mula: "Mula", "Purva Ashadha": "Purva Ashadha", "Uttara Ashadha": "Uttara Ashadha", Shravana: "Shravana", Dhanishta: "Dhanishta", Shatabhisha: "Shatabhisha", "Purva Bhadrapada": "Purva Bhadrapada", "Uttara Bhadrapada": "Uttara Bhadrapada", Revati: "Revati"
+    }
+  },
+  yoga: {
+    en: { Siddha: "Siddha" },
+    hi: { Siddha: "सिद्ध" },
+    hinglish: { Siddha: "Siddha" }
+  },
+  karan: {
+    en: { Balava: "Balava", Kaulava: "Kaulava", Taitila: "Taitila", Gara: "Gara", Vanija: "Vanija", Vishti: "Vishti", Bava: "Bava" },
+    hi: { Balava: "बालव", Kaulava: "कौलव", Taitila: "तैतिल", Gara: "गर", Vanija: "वणिज", Vishti: "विष्टि", Bava: "बव" },
+    hinglish: { Balava: "Balava", Kaulava: "Kaulava", Taitila: "Taitila", Gara: "Gara", Vanija: "Vanija", Vishti: "Vishti", Bava: "Bava" }
+  }
+};
 
 
 

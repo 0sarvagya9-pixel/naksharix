@@ -51,22 +51,22 @@ export function VedicNorthIndianChart({
   const houses = buildHouseCells(data);
 
   return (
-    <section className={cn("rounded-2xl border border-[#D4AF37]/25 bg-[#160a28] p-4 shadow-[0_22px_70px_rgba(5,2,14,0.34)]", className)}>
+    <section className={cn("rounded-2xl border border-[#1e293b] bg-[#0a1224] p-4 shadow-[0_22px_70px_rgba(2,6,18,0.44)]", className)}>
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <h3 className="font-cinzel text-xl font-black text-[#FFFFFF]">{title}</h3>
-          <p className="text-xs text-[#FFD700]/75">
+          <h3 className="font-cinzel text-xl font-black text-[#ffffff]">{title}</h3>
+          <p className="text-xs text-[#94a3b8]">
             Lagna: {data.ascendant.rashiNumber} {data.ascendant.rashi}
             {typeof data.ascendant.degreeInSign === "number" ? ` ${data.ascendant.degreeInSign.toFixed(2)}°` : ""}
           </p>
         </div>
-        <span className="rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold text-[#FFD700]">D1</span>
+        <span className="rounded-full border border-[#dca956]/35 bg-[#dca956]/10 px-3 py-1 text-xs font-bold text-[#f3d382]">D1</span>
       </div>
 
-      <div className="mx-auto aspect-square max-w-[34rem] rounded-xl border border-[#3d2c19]/30 bg-[#fff5dd] p-2">
+      <div className="mx-auto aspect-square max-w-[34rem] rounded-xl border border-[#1e293b] bg-[#0f1c3a] p-2">
         <svg viewBox="0 0 400 400" className="h-full w-full" role="img" aria-label={title}>
-          <rect x="16" y="16" width="368" height="368" rx="8" fill="#fff8e8" stroke="#2b1c10" strokeWidth="2" />
-          <g stroke="#2b1c10" strokeWidth="1.55" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="16" y="16" width="368" height="368" rx="8" fill="#0a1224" stroke="#dca956" strokeOpacity="0.42" strokeWidth="2" />
+          <g stroke="#1e293b" strokeWidth="1.55" fill="none" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 16 H384 V384 H16 Z" />
             <path d="M200 16 L384 200 L200 384 L16 200 Z" />
             <path d="M16 16 L384 384 M384 16 L16 384" />
@@ -75,20 +75,20 @@ export function VedicNorthIndianChart({
 
           {houses.map((house) => (
             <g key={house.house}>
-              <polygon points={house.points} fill={house.house === 1 ? "rgba(245,190,88,0.22)" : "transparent"} stroke="transparent" />
-              <text x={house.x} y={house.y - 20} textAnchor="middle" className="fill-[#5f3813] font-cinzel text-[13px] font-black">
+              <polygon points={house.points} fill={house.house === 1 ? "rgba(220,169,86,0.18)" : "transparent"} stroke="transparent" />
+              <text x={house.x} y={house.y - 20} textAnchor="middle" className="fill-[#f3d382] font-cinzel text-[13px] font-black">
                 {house.rashiNumber}
               </text>
-              <text x={house.x} y={house.y - 5} textAnchor="middle" className="fill-[#211407] text-[10px] font-bold">
+              <text x={house.x} y={house.y - 5} textAnchor="middle" className="fill-[#94a3b8] text-[10px] font-bold">
                 H{house.house}
               </text>
               {house.planets.slice(0, 4).map((planet, index) => (
-                <text key={`${house.house}-${planet.name}`} x={house.x} y={house.y + 13 + index * 13} textAnchor="middle" className="fill-[#7c2d12] text-[11px] font-bold">
+                <text key={`${house.house}-${planet.name}`} x={house.x} y={house.y + 13 + index * 13} textAnchor="middle" className="fill-[#ffffff] text-[11px] font-bold">
                   {planetAbbreviation(planet.name)}
                 </text>
               ))}
               {house.planets.length > 4 ? (
-                <text x={house.x} y={house.y + 66} textAnchor="middle" className="fill-[#6b4a21] text-[10px] font-semibold">
+                <text x={house.x} y={house.y + 66} textAnchor="middle" className="fill-[#f3d382] text-[10px] font-semibold">
                   +{house.planets.length - 4}
                 </text>
               ) : null}

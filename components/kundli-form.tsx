@@ -19,6 +19,7 @@ import { errorClass, scrollToFirstError } from "@/lib/form-validation";
 import { LocationAutocomplete, type ResolvedLocation } from "@/components/location-autocomplete";
 import { KundliReportDashboard } from "@/components/kundli/kundli-report-dashboard";
 import { VimshottariDashaTimeline, type DashaTimelinePeriod } from "@/components/kundli/vimshottari-dasha-timeline";
+import { translateAstroValue, translateSign, type AstroValueCategory } from "@/lib/kundli/chart-mapping";
 
 type BirthDetailsInput = z.input<typeof birthDetailsSchema>;
 type PlanetPosition = { planet?: string; sign?: string; house?: number; degree?: number; nakshatra?: string; pada?: number; dignity?: string };
@@ -196,7 +197,7 @@ export function KundliForm() {
           <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="grid gap-4 sm:grid-cols-2">
             <Field label={tr("name")} error={fieldError("name")}><Input data-field="name" className={errorClass(Boolean(fieldError("name")))} {...form.register("name", { onChange: () => form.clearErrors("name") })} /></Field>
             <Field label={tr("gender")}>
-              <select {...form.register("gender")} className="h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm">
+              <select {...form.register("gender")} className="h-10 w-full rounded-md border border-[#1e293b] bg-[#0f1c3a] px-3 text-sm text-[#ffffff] outline-none transition focus:border-[#dca956] focus:ring-2 focus:ring-[#dca956]/20">
                 <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
                 <option value="Female">{tr("genderFemale")}</option>
                 <option value="Male">{tr("genderMale")}</option>
@@ -208,7 +209,7 @@ export function KundliForm() {
                 data-field="locale"
                 value={form.watch("locale") ?? apiLocale}
                 onChange={(event) => updateLanguage(event.target.value as Locale)}
-                className={`h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm ${errorClass(Boolean(fieldError("locale")))}`}
+                className={`h-10 w-full rounded-md border border-[#1e293b] bg-[#0f1c3a] px-3 text-sm text-[#ffffff] outline-none transition focus:border-[#dca956] focus:ring-2 focus:ring-[#dca956]/20 ${errorClass(Boolean(fieldError("locale")))}`}
               >
                 <option value="en">{languageOptionLabel("en", apiLocale)}</option>
                 <option value="hi">{languageOptionLabel("hi", apiLocale)}</option>
@@ -229,7 +230,7 @@ export function KundliForm() {
               placeholder={tr("searchLocationPlaceholder")}
             />
             <div className="flex items-end">
-              <p className="rounded-md border border-[#D4AF37]/20 bg-[#061D3C]/70 p-3 text-xs leading-5 naksh-muted-text"><MapPin className="mr-1 inline h-3 w-3 text-[#FFD700]" />{placeStatus}</p>
+              <p className="rounded-md border border-[#1e293b] bg-[#0f1c3a]/80 p-3 text-xs leading-5 naksh-muted-text"><MapPin className="mr-1 inline h-3 w-3 text-[#dca956]" />{placeStatus}</p>
             </div>
             <Button className="h-12 sm:col-span-2" disabled={form.formState.isSubmitting || generating} size="lg">
               <Sparkles className="h-4 w-4" />
@@ -256,9 +257,9 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 
 function Meta({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-3">
+    <div className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/85 p-3">
       <p className="text-[11px] uppercase tracking-[0.16em] naksh-muted-text">{label}</p>
-      <p className="mt-1 break-words font-cinzel text-sm font-bold text-[#FFFFFF]">{value || "-"}</p>
+      <p className="mt-1 break-words font-cinzel text-sm font-bold text-[#ffffff]">{value || "-"}</p>
     </div>
   );
 }
@@ -296,11 +297,11 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
   }
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/25 bg-[radial-gradient(circle_at_10%_10%,rgba(245,190,88,0.14),transparent_26rem),linear-gradient(135deg,rgba(126,72,255,0.18),rgba(8,4,18,0.94))] p-5 shadow-[0_24px_80px_rgba(5,2,14,0.3)] sm:p-6">
+      <section className="relative overflow-hidden rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_10%_10%,rgba(220,169,86,0.13),transparent_26rem),linear-gradient(135deg,#0a1224,#020612_82%)] p-5 shadow-[0_24px_80px_rgba(2,6,18,0.45)] sm:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#FFD700]/75">Naksharix</p>
-            <h2 className="mt-2 font-cinzel text-3xl font-black text-[#FFFFFF]">{tr("generatedKundliReport")}</h2>
+            <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#dca956]">Naksharix</p>
+            <h2 className="mt-2 font-cinzel text-3xl font-black text-[#f3d382]">{tr("generatedKundliReport")}</h2>
             <div className="mt-4 grid gap-2 text-sm naksh-muted-text sm:grid-cols-2 lg:grid-cols-3">
               <Meta label={tr("name")} value={result.profile?.name} />
               <Meta label={tr("dateOfBirth")} value={result.birthDetails?.dateOfBirth} />
@@ -320,10 +321,10 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
           </div>
         </div>
         {pdfError ? <p className="mt-4 rounded-lg border border-[#FF4D4F]/30 bg-[#FF4D4F]/10 p-3 text-sm text-[#FF4D4F]">{pdfError}</p> : null}
-        {!result.saved ? <div className="mt-4 rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/10 p-4 text-sm text-[#FFFFFF]"><p>{tr("loginToSaveReport")}</p><Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button></div> : null}
+        {!result.saved ? <div className="mt-4 rounded-lg border border-[#dca956]/30 bg-[#dca956]/10 p-4 text-sm text-[#ffffff]"><p>{tr("loginToSaveReport")}</p><Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button></div> : null}
       </section>
       {result.language && result.language !== selectedLanguage ? (
-        <div className="rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/10 p-4 text-sm text-[#FFFFFF]">
+        <div className="rounded-lg border border-[#dca956]/30 bg-[#dca956]/10 p-4 text-sm text-[#ffffff]">
           <p>{tr("reportLanguageMismatch")}</p>
           <Button className="mt-3" size="sm" variant="outline" onClick={onRegenerate}>
             {tr("regenerateReportSelectedLanguage")}
@@ -336,28 +337,28 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
         <SummaryCard label={tr("status")} value={result.saved ? tr("savedToDashboard") : tr("loginToSaveReport")} />
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
-        <InfoPanel title={tr("birthDetails")}><p>{result.birthDetails?.dateOfBirth} | {result.birthDetails?.timeOfBirth} | {result.birthDetails?.timezone}</p></InfoPanel>
-        <InfoPanel title={tr("panchangSnapshot")}><p>{result.panchang?.tithi ?? tr("notAvailable")} | {tr("nakshatra")}: {result.panchang?.nakshatra ?? tr("notAvailable")} | {tr("rahuKaal")}: {result.panchang?.rahuKaal ?? tr("notAvailable")}</p></InfoPanel>
-        <InfoPanel title={tr("avakhada")}><p>{tr("moon")}: {result.avakhada?.moonSign ?? tr("notAvailable")} | {tr("lagna")}: {result.avakhada?.ascendant ?? tr("notAvailable")} | {tr("nakshatra")}: {result.avakhada?.nakshatra ?? tr("notAvailable")}</p></InfoPanel>
+        <InfoPanel title={tr("birthDetails")}><p>{safeJoin([result.birthDetails?.dateOfBirth, result.birthDetails?.timeOfBirth, result.birthDetails?.timezone], tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("panchangSnapshot")}><p>{localizedAstro(result.panchang?.tithi, selectedLanguage, "tithi", tr("notAvailable"))} | {tr("nakshatra")}: {localizedAstro(result.panchang?.nakshatra, selectedLanguage, "nakshatra", tr("notAvailable"))} | {tr("rahuKaal")}: {safeText(result.panchang?.rahuKaal, tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("avakhada")}><p>{tr("moon")}: {localizedSign(result.avakhada?.moonSign, selectedLanguage, tr("notAvailable"))} | {tr("lagna")}: {localizedSign(result.avakhada?.ascendant, selectedLanguage, tr("notAvailable"))} | {tr("nakshatra")}: {localizedAstro(result.avakhada?.nakshatra, selectedLanguage, "nakshatra", tr("notAvailable"))}</p></InfoPanel>
       </div>
       <InfoPanel title={tr("kundliInterpretation")}><p>{result.aiSummary ?? tr("kundliEmpty")}</p></InfoPanel>
       <KundliReportDashboard report={result} language={selectedLanguage} />
       <div className="grid gap-4 lg:grid-cols-2">
         <InfoPanel title={tr("manglikStatus")}><p>{localizedDoshaSummary(result.manglikDosha, selectedLanguage, tr("previewReport"))}</p></InfoPanel>
         <InfoPanel title={tr("sadeSati")}><p>{localizedSadeSati(result.sadeSati, selectedLanguage, tr("notAvailable"))}</p></InfoPanel>
-        <InfoPanel title={tr("remedies")}><p>{(result.remedies ?? []).join(" ") || tr("remedies")}</p></InfoPanel>
-        <InfoPanel title={tr("nakshatraAnalysis")}><p>{result.nakshatraAnalysis}</p></InfoPanel>
-        <InfoPanel title={tr("lagnaAnalysis")}><p>{result.lagnaAnalysis}</p></InfoPanel>
-        <InfoPanel title={tr("personalityAnalysis")}><p>{result.personalityAnalysis}</p></InfoPanel>
-        <InfoPanel title={tr("career")}><p>{result.careerAnalysis}</p></InfoPanel>
-        <InfoPanel title={tr("marriageAnalysis")}><p>{result.marriageAnalysis}</p></InfoPanel>
-        <InfoPanel title={tr("finance")}><p>{result.financeAnalysis}</p></InfoPanel>
-        <InfoPanel title={tr("health")}><p>{result.healthAnalysis}</p></InfoPanel>
-        <InfoPanel title={tr("education")}><p>{result.educationAnalysis}</p></InfoPanel>
+        <InfoPanel title={tr("remedies")}><p>{(result.remedies ?? []).join(" ") || tr("notAvailable")}</p></InfoPanel>
+        <InfoPanel title={tr("nakshatraAnalysis")}><p>{safeText(result.nakshatraAnalysis, tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("lagnaAnalysis")}><p>{safeText(result.lagnaAnalysis, tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("personalityAnalysis")}><p>{safeText(result.personalityAnalysis, tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("career")}><p>{safeText(result.careerAnalysis, tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("marriageAnalysis")}><p>{safeText(result.marriageAnalysis, tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("finance")}><p>{safeText(result.financeAnalysis, tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("health")}><p>{safeText(result.healthAnalysis, tr("notAvailable"))}</p></InfoPanel>
+        <InfoPanel title={tr("education")}><p>{safeText(result.educationAnalysis, tr("notAvailable"))}</p></InfoPanel>
       </div>
       <VimshottariDashaTimeline mahadashas={result.vimshottariDasha} language={selectedLanguage} />
-      <div className="rounded-lg border border-[#D4AF37]/25 bg-[linear-gradient(135deg,rgba(126,72,255,0.22),rgba(245,190,88,0.14))] p-5">
-        <h3 className="font-cinzel text-xl font-bold">{tr("premiumKundliUpsell")}</h3>
+      <div className="rounded-lg border border-[#1e293b] bg-[linear-gradient(135deg,#0f1c3a,rgba(10,18,36,0.92))] p-5">
+        <h3 className="font-cinzel text-xl font-bold text-[#f3d382]">{tr("premiumKundliUpsell")}</h3>
         <p className="mt-2 text-sm leading-6 naksh-muted-text">{tr("premiumKundliUpsellCopy")}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Button asChild><Link href="/reports/kundli-pro">{tr("unlockPremiumReport")}</Link></Button>
@@ -377,6 +378,26 @@ function languageOptionLabel(option: Locale, current: Locale) {
   if (option === "en") return "English";
   if (option === "hi") return "Hindi";
   return "Hinglish";
+}
+
+function localizedAstro(value: unknown, language: Locale, category: AstroValueCategory, fallback: string) {
+  const translated = translateAstroValue(value, language, category);
+  return translated || fallback;
+}
+
+function localizedSign(value: string | undefined, language: Locale, fallback: string) {
+  return translateSign(value, language) || fallback;
+}
+
+function safeText(value: unknown, fallback: string) {
+  if (value === null || value === undefined || value === "") return fallback;
+  if (typeof value === "object") return fallback;
+  return String(value);
+}
+
+function safeJoin(values: Array<string | undefined>, fallback: string) {
+  const clean = values.filter((value): value is string => Boolean(value));
+  return clean.length ? clean.join(" | ") : fallback;
 }
 
 function formatGeneratedDate(value: string | undefined, locale: Locale) {
@@ -417,15 +438,15 @@ function localizedSadeSati(sadeSati: KundliResult["sadeSati"], language: Locale,
 
 function GeneratingKundli() {
   const { tr } = useLanguage();
-  return <div className="mt-4 rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><p className="font-cinzel font-bold"><CalendarDays className="mr-2 inline h-4 w-4 text-[#FFD700]" />{tr("generatingKundli")}</p><p className="mt-1 text-sm naksh-muted-text">{tr("kundliIntro")}</p></div>;
+  return <div className="mt-4 rounded-lg border border-[#1e293b] bg-[#0f1c3a]/80 p-4"><p className="font-cinzel font-bold text-[#f3d382]"><CalendarDays className="mr-2 inline h-4 w-4 text-[#dca956]" />{tr("generatingKundli")}</p><p className="mt-1 text-sm naksh-muted-text">{tr("kundliIntro")}</p></div>;
 }
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold">{value}</p></div>;
+  return <div className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/85 p-4"><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold text-[#ffffff]">{value}</p></div>;
 }
 
 function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4 text-sm leading-7 naksh-muted-text"><h3 className="mb-3 font-semibold text-[#FFD700]">{title}</h3>{children}</section>;
+  return <section className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/85 p-4 text-sm leading-7 naksh-muted-text"><h3 className="mb-3 font-semibold text-[#f3d382]">{title}</h3>{children}</section>;
 }
 
 function round(value: number) {

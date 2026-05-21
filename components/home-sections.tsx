@@ -59,9 +59,7 @@ const trustItems = [
 ] as const;
 
 export function HomeHero() {
-  const { locale } = useLanguage();
-  const primaryCta = locale === "hi" ? "अपनी कुंडली बनाएं" : locale === "hinglish" ? "Apni Kundli Banayein" : "Generate Kundli";
-  const secondaryCta = locale === "hi" ? "AI ज्योतिषी से बात करें" : locale === "hinglish" ? "AI Jyotishi se baat karein" : "Talk to AI Astrologer";
+  const { tr } = useLanguage();
 
   return (
     <section className="nx-night-sky relative overflow-x-hidden overflow-y-visible">
@@ -74,7 +72,7 @@ export function HomeHero() {
         <motion.div className="relative z-20 max-w-[62rem] overflow-visible" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#dca956]/40 bg-white/[0.035] px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#dca956] shadow-[0_0_30px_rgba(220,169,86,0.13)] backdrop-blur">
             <Sparkles className="h-4 w-4 text-[#f3d382]" />
-            Premium AI + Vedic Astrology Platform
+            {tr("heroEyebrow")}
           </div>
           <h1 className="max-w-[62rem] overflow-visible pb-2 pr-3 bg-[linear-gradient(180deg,#f3d382_0%,#dca956_52%,#dca956_100%)] bg-clip-text font-decorative text-[clamp(3rem,4.45vw,4.95rem)] font-black uppercase leading-[0.96] tracking-[-0.025em] text-transparent antialiased drop-shadow-[0_10px_30px_rgba(0,0,0,0.44)] sm:text-[clamp(3.65rem,4.45vw,4.95rem)]">
             <span className="block sm:whitespace-nowrap">UNLOCK YOUR</span>
@@ -86,14 +84,14 @@ export function HomeHero() {
             <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#dca956] sm:w-16" />
           </div>
           <p className="mt-5 max-w-2xl text-base leading-7 tracking-wide text-[#94a3b8] sm:text-lg">
-            Ancient Vedic wisdom, numerology direction, AI interpretation, and expert consultation flows in one premium spiritual-tech platform.
+            {tr("heroCopy")}
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Button size="lg" variant="secondary" className="shadow-[0_0_26px_rgba(220,169,86,0.18),0_12px_30px_rgba(0,0,0,0.32)]" asChild>
-              <Link href="/kundli">{primaryCta}<ArrowRight className="h-4 w-4" /></Link>
+              <Link href="/kundli">{tr("generateKundli")}<ArrowRight className="h-4 w-4" /></Link>
             </Button>
             <Button size="lg" className="shadow-[0_0_25px_rgba(0,245,160,0.25),0_12px_30px_rgba(0,0,0,0.28)]" asChild>
-              <Link href="/talk-to-kundli">{secondaryCta}<ArrowRight className="h-4 w-4" /></Link>
+              <Link href="/talk-to-kundli">{tr("talkToAiAstrologer")}<ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </div>
           <div className="mt-7 grid max-w-3xl grid-cols-2 gap-0 overflow-hidden rounded-2xl border border-[#1e293b] bg-[#0a1224]/72 shadow-[0_18px_50px_rgba(0,5,16,0.34)] backdrop-blur sm:grid-cols-4">

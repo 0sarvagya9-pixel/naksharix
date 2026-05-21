@@ -22,7 +22,7 @@ export function ChartTooltip({
   return (
     <div
       className={cn(
-        "pointer-events-none fixed z-[80] w-[min(18rem,calc(100vw-2rem))] rounded-xl border border-[#D4AF37]/30 bg-[#12081f]/95 p-4 text-sm shadow-[0_18px_60px_rgba(5,2,14,0.65),0_0_36px_rgba(126,72,255,0.25)] backdrop-blur-xl",
+        "pointer-events-none fixed z-[80] w-[min(18rem,calc(100vw-2rem))] rounded-xl border border-[#1e293b] bg-[#0a1224]/95 p-4 text-sm shadow-[0_18px_60px_rgba(2,6,18,0.68),0_0_30px_rgba(220,169,86,0.12)] backdrop-blur-xl",
         className
       )}
       style={{
@@ -31,19 +31,19 @@ export function ChartTooltip({
       }}
       role="status"
     >
-      <div className="mb-3 border-b border-[#D4AF37]/20 pb-2">
-        <p className="font-cinzel text-base font-bold text-[#FFD700]">
+      <div className="mb-3 border-b border-[#1e293b] pb-2">
+        <p className="font-cinzel text-base font-bold text-[#f3d382]">
           {labels.house} {cell.house}
         </p>
         <p className="text-xs naksh-muted-text">
-          {labels.sign}: <span className="text-[#FFD700]">{cell.signLabel}</span>
-          {cell.signLordLabel ? <> · {labels.signLord}: <span className="text-[#FFD700]">{cell.signLordLabel}</span></> : null}
+          {labels.sign}: <span className="text-[#f3d382]">{cell.signLabel}</span>
+          {cell.signLordLabel ? <> · {labels.signLord}: <span className="text-[#f3d382]">{cell.signLordLabel}</span></> : null}
         </p>
       </div>
       {cell.planets?.length ? (
         <div className="grid gap-2">
           {cell.planets.map((planet, index) => (
-            <div key={`${cell.house}-${planet.planet}-${planet.degree ?? "na"}`} className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-2">
+            <div key={`${cell.house}-${planet.planet}-${planet.degree ?? "na"}`} className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/85 p-2">
               <p className="font-medium text-foreground">{cell.planetFullLabels[index] ?? planet.planet}</p>
               <p className="mt-1 text-xs leading-5 naksh-muted-text">
                 {typeof planet.degree === "number" ? `${labels.degree}: ${planet.degree.toFixed(2)}°` : null}

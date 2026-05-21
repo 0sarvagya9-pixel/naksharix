@@ -115,7 +115,7 @@ export function AuthProfileMenu() {
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-[#D4AF37]/25 bg-[#02112C]/95 p-2 shadow-[0_18px_60px_rgba(5,2,14,0.62),0_0_32px_rgba(126,72,255,0.18)] backdrop-blur-xl"
+          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-[#1e293b] bg-[#0a1224]/95 p-2 shadow-[0_18px_60px_rgba(2,6,18,0.62),0_0_28px_rgba(0,245,160,0.12)] backdrop-blur-xl"
         >
           <div className="border-b border-[#dca956]/20 px-3 py-3">
             <p className="truncate font-cinzel text-sm font-bold text-[#f3d382]">{displayName}</p>
@@ -146,7 +146,7 @@ function ProfileLink({ href, icon: Icon, label, onClick }: { href: string; icon:
       role="menuitem"
       href={href}
       onClick={onClick}
-      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm naksh-muted-text transition hover:bg-[#D4AF37]/10 hover:text-[#FFD700]"
+      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm naksh-muted-text transition hover:bg-[#0f1c3a] hover:text-[#f3d382]"
     >
       <Icon className="h-4 w-4" />
       {label}

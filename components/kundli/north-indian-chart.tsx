@@ -27,29 +27,29 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-[#D4AF37]/25 bg-[radial-gradient(circle_at_16%_0%,rgba(245,190,88,0.16),transparent_24rem),linear-gradient(135deg,rgba(25,8,48,0.92),rgba(9,4,19,0.98))] p-4 shadow-[0_22px_70px_rgba(5,2,14,0.34)]",
+        "relative overflow-hidden rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_16%_0%,rgba(220,169,86,0.13),transparent_24rem),linear-gradient(135deg,#0a1224,#020612_82%)] p-4 shadow-[0_22px_70px_rgba(2,6,18,0.44)]",
         className
       )}
       onPointerLeave={() => setActiveCell(null)}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="font-cinzel text-xl font-black text-[#FFFFFF]">{title}</p>
-          <p className="mt-1 text-xs text-[#FFD700]/75">
-            {labels.sign}: <span className="font-semibold text-[#FFD700]">{translatedAscendant(data.ascendantSign, data.language)}</span>
+          <p className="font-cinzel text-xl font-black text-[#ffffff]">{title}</p>
+          <p className="mt-1 text-xs text-[#94a3b8]">
+            {labels.sign}: <span className="font-semibold text-[#f3d382]">{translatedAscendant(data.ascendantSign, data.language)}</span>
           </p>
         </div>
-        <span className="rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold text-[#FFD700]">
+        <span className="rounded-full border border-[#dca956]/35 bg-[#dca956]/10 px-3 py-1 text-xs font-bold text-[#f3d382]">
           {data.chartType}
         </span>
       </div>
 
       {!hasCalculatedChart ? (
-        <div className="grid min-h-[18rem] place-items-center rounded-xl border border-[#D4AF37]/25 bg-[#061D3C]/70 p-6 text-center">
-          <p className="max-w-xs text-sm font-semibold text-[#FFD700]">{chartUnavailable(data.chartType, data.language)}</p>
+        <div className="grid min-h-[18rem] place-items-center rounded-xl border border-[#1e293b] bg-[#0f1c3a]/85 p-6 text-center">
+          <p className="max-w-xs text-sm font-semibold text-[#f3d382]">{chartUnavailable(data.chartType, data.language)}</p>
         </div>
       ) : (
-        <div className="relative mx-auto aspect-[10/7] max-w-[38rem] rounded-xl border border-[#3d2c19]/30 bg-[#fff4d8] p-2 shadow-[inset_0_0_0_1px_rgba(100,61,21,0.16),inset_0_18px_60px_rgba(118,72,21,0.09)]">
+        <div className="relative mx-auto aspect-[10/7] max-w-[38rem] rounded-xl border border-[#1e293b] bg-[#0f1c3a] p-2 shadow-[inset_0_0_0_1px_rgba(220,169,86,0.08),inset_0_18px_60px_rgba(0,0,0,0.2)]">
           <svg viewBox="0 0 600 420" className="h-full w-full touch-manipulation select-none" aria-label={`${title} North Indian chart`}>
             <defs>
               <filter id={`chartActive-${data.chartType}`} x="-20%" y="-20%" width="140%" height="140%">
@@ -60,11 +60,11 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                 </feMerge>
               </filter>
               <pattern id={`paperDots-${data.chartType}`} width="28" height="28" patternUnits="userSpaceOnUse">
-                <circle cx="2" cy="2" r="0.8" fill="rgba(92,54,19,0.12)" />
+                <circle cx="2" cy="2" r="0.8" fill="rgba(220,169,86,0.12)" />
               </pattern>
             </defs>
 
-            <rect x="96" y="6" width="408" height="408" rx="4" fill="#fff7e6" stroke="#3f2a14" strokeWidth="2.2" />
+            <rect x="96" y="6" width="408" height="408" rx="4" fill="#0a1224" stroke="#dca956" strokeOpacity="0.42" strokeWidth="2.2" />
             <rect x="96" y="6" width="408" height="408" rx="4" fill={`url(#paperDots-${data.chartType})`} opacity="0.42" />
 
             {cells.map((cell) => {
@@ -76,10 +76,10 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                   tabIndex={0}
                   role="button"
                   aria-label={`${labels.house} ${cell.house}, ${labels.sign} ${cell.signLabel}`}
-                  fill={active ? "rgba(245,190,88,0.24)" : "rgba(255,247,230,0.82)"}
-                  stroke={active ? "#9a5b16" : "#2b1c10"}
+                  fill={active ? "rgba(220,169,86,0.22)" : "rgba(15,28,58,0.9)"}
+                  stroke={active ? "#dca956" : "#1e293b"}
                   strokeWidth={active ? 2.1 : 1.45}
-                  className="cursor-pointer outline-none transition duration-200 focus:stroke-[#9a5b16]"
+                  className="cursor-pointer outline-none transition duration-200 focus:stroke-[#dca956]"
                   filter={active ? `url(#chartActive-${data.chartType})` : undefined}
                   onPointerMove={(event) => showTooltip(cell, event)}
                   onPointerDown={(event) => showTooltip(cell, event)}
@@ -104,9 +104,9 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                     x={cell.signX}
                     y={cell.signY}
                     textAnchor="middle"
-                    className="fill-[#6b4a21] font-cinzel text-[10px] font-black sm:text-[12px]"
+                    className="fill-[#f3d382] font-cinzel text-[10px] font-black sm:text-[12px]"
                     paintOrder="stroke"
-                    stroke="#fff4d8"
+                    stroke="#020612"
                     strokeWidth="2"
                   >
                     {cell.signShortLabel}
@@ -118,9 +118,9 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                       y={startY + index * cell.planetLineHeight}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      className="fill-[#7c2d12] text-[12px] font-black sm:text-[14px]"
+                      className="fill-[#ffffff] text-[12px] font-black sm:text-[14px]"
                       paintOrder="stroke"
-                      stroke="#fff4d8"
+                      stroke="#020612"
                       strokeWidth="2.4"
                     >
                       {planet}
@@ -132,9 +132,9 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
                       y={startY + visiblePlanets.length * cell.planetLineHeight}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      className="fill-[#6b4a21] text-[10px] font-black sm:text-[12px]"
+                      className="fill-[#f3d382] text-[10px] font-black sm:text-[12px]"
                       paintOrder="stroke"
-                      stroke="#fff4d8"
+                      stroke="#020612"
                       strokeWidth="2"
                     >
                       +{overflowCount}

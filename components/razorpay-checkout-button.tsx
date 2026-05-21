@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { secureFetch } from "@/lib/security/csrf";
 import { useLanguage } from "@/components/language-provider";
 import { canBypassPayment } from "@/lib/auth/permissions";
@@ -27,7 +27,7 @@ declare global {
   }
 }
 
-export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay" }: { payload: CheckoutPayload; label?: string }) {
+export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay", variant = "default" }: { payload: CheckoutPayload; label?: string; variant?: ButtonProps["variant"] }) {
   const { tr } = useLanguage();
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
@@ -90,7 +90,7 @@ export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay" }:
 
   return (
     <div className="space-y-2">
-      <Button className="w-full" onClick={startCheckout} disabled={loading}>
+      <Button className="w-full" variant={variant} onClick={startCheckout} disabled={loading}>
         <CreditCard className="h-4 w-4" />
         {loading ? tr("processing") : label}
       </Button>

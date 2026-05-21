@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { CalendarDays, Clock, MapPin, Moon, Sparkles, Star, Sun, Sunrise, Sunset } from "lucide-react";
 import { NorthIndianChart } from "@/components/kundli/north-indian-chart";
 import { useLanguage } from "@/components/language-provider";
-import { translatePlanet, translateSign, type ChartHouse, type ChartLanguage, type ChartType } from "@/lib/kundli/chart-mapping";
+import { translateAstroValue, translatePlanet, translateSign, type AstroValueCategory, type ChartHouse, type ChartLanguage, type ChartType } from "@/lib/kundli/chart-mapping";
 
 type PlanetPosition = {
   planet?: string;
@@ -49,7 +49,7 @@ export function KundliReportDashboard({ report, language }: { report: DashboardR
   const fallback = tr("notAvailable");
 
   return (
-    <section className="rounded-3xl border border-[#D4AF37]/25 bg-[radial-gradient(circle_at_12%_6%,rgba(245,190,88,0.12),transparent_28rem),linear-gradient(135deg,rgba(22,8,43,0.82),rgba(8,4,18,0.96))] p-4 shadow-[0_24px_80px_rgba(5,2,14,0.32)] sm:p-6">
+    <section className="rounded-3xl border border-[#1e293b] bg-[radial-gradient(circle_at_12%_6%,rgba(220,169,86,0.12),transparent_28rem),linear-gradient(135deg,#0a1224,#020612_76%)] p-4 shadow-[0_24px_80px_rgba(0,5,16,0.46)] sm:p-6">
       <ReportSectionHeader eyebrow={labels.dashboard} title={labels.title} />
 
       <div className="space-y-6">
@@ -81,16 +81,16 @@ function ReportSectionHeader({ eyebrow, title }: { eyebrow: string; title: strin
   return (
     <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#FFD700]/80">{eyebrow}</p>
-        <h3 className="font-cinzel text-2xl font-black text-[#FFFFFF] sm:text-3xl">{title}</h3>
+        <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#dca956]">{eyebrow}</p>
+        <h3 className="font-cinzel text-2xl font-black text-[#f3d382] sm:text-3xl">{title}</h3>
       </div>
-      <div className="h-px flex-1 bg-gradient-to-r from-amber-200/60 via-purple-300/25 to-transparent sm:max-w-sm" />
+      <div className="h-px flex-1 bg-gradient-to-r from-[#dca956]/60 via-[#00f5a0]/20 to-transparent sm:max-w-sm" />
     </div>
   );
 }
 
 function PanelTitle({ title }: { title: string }) {
-  return <h4 className="mb-3 flex items-center gap-2 font-cinzel text-lg font-bold text-[#FFFFFF]"><Sparkles className="h-4 w-4 text-[#FFD700]" />{title}</h4>;
+  return <h4 className="mb-3 flex items-center gap-2 font-cinzel text-lg font-bold text-[#f3d382]"><Sparkles className="h-4 w-4 text-[#dca956]" />{title}</h4>;
 }
 
 function PlanetaryPositionTable({
@@ -107,10 +107,10 @@ function PlanetaryPositionTable({
   const rows = planets.length ? planets : [{ planet: undefined, sign: undefined, house: undefined, degree: undefined, nakshatra: undefined, pada: undefined, dignity: undefined }];
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#D4AF37]/30 bg-[#fbf0d6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_18px_48px_rgba(4,2,12,0.2)]">
+    <div className="overflow-hidden rounded-2xl border border-[#1e293b] bg-[#0a1224] shadow-[0_18px_48px_rgba(0,5,16,0.34)]">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[42rem] border-collapse text-left text-sm text-[#241609]">
-          <thead className="sticky top-0 z-10 bg-[#3a2110] font-cinzel text-xs uppercase tracking-[0.13em] text-[#fff1c7]">
+        <table className="w-full min-w-[42rem] border-collapse text-left text-sm text-[#ffffff]">
+          <thead className="sticky top-0 z-10 bg-[#0f1c3a] font-cinzel text-xs uppercase tracking-[0.13em] text-[#f3d382]">
             <tr>
               <Th>{labels.planet}</Th>
               <Th>{labels.sign}</Th>
@@ -122,12 +122,12 @@ function PlanetaryPositionTable({
           </thead>
           <tbody>
             {rows.map((planet, index) => (
-              <tr key={`${planet.planet ?? "missing"}-${index}`} className="border-t border-[#d6b56f]/45 transition odd:bg-[#fff8e8] even:bg-[#f8ebce] hover:bg-[#f4dcaa]">
+              <tr key={`${planet.planet ?? "missing"}-${index}`} className="border-t border-[#1e293b] transition odd:bg-[#0f1c3a] even:bg-[#0a1224] hover:bg-[#102247]">
                 <Td strong>{valueOrFallback(translatePlanet(planet.planet, language), fallback)}</Td>
                 <Td>{valueOrFallback(translateSign(planet.sign, language), fallback)}</Td>
                 <Td>{valueOrFallback(planet.house, fallback)}</Td>
                 <Td>{typeof planet.degree === "number" ? `${planet.degree.toFixed(2)}°` : fallback}</Td>
-                <Td>{valueOrFallback(planet.nakshatra, fallback)}</Td>
+                <Td>{valueOrFallback(translateAstroValue(planet.nakshatra, language, "nakshatra"), fallback)}</Td>
                 <Td>{valueOrFallback(planet.pada, fallback)}</Td>
               </tr>
             ))}
@@ -150,12 +150,12 @@ function BirthPanchangPanel({
   language: ChartLanguage;
 }) {
   const items = [
-    { label: labels.tithi, value: report.panchang?.tithi, icon: Moon },
-    { label: labels.paksha, value: report.panchang?.paksha, icon: CalendarDays },
-    { label: labels.vaar, value: report.panchang?.vaar, icon: Sun },
-    { label: labels.nakshatra, value: report.panchang?.nakshatra ?? report.avakhada?.nakshatra, icon: Star },
-    { label: labels.yoga, value: report.panchang?.yoga, icon: Sparkles },
-    { label: labels.karan, value: report.panchang?.karan, icon: CalendarDays },
+    { label: labels.tithi, value: report.panchang?.tithi, icon: Moon, category: "tithi" },
+    { label: labels.paksha, value: report.panchang?.paksha, icon: CalendarDays, category: "paksha" },
+    { label: labels.vaar, value: report.panchang?.vaar, icon: Sun, category: "weekday" },
+    { label: labels.nakshatra, value: report.panchang?.nakshatra ?? report.avakhada?.nakshatra, icon: Star, category: "nakshatra" },
+    { label: labels.yoga, value: report.panchang?.yoga, icon: Sparkles, category: "yoga" },
+    { label: labels.karan, value: report.panchang?.karan, icon: CalendarDays, category: "karan" },
     { label: labels.sunrise, value: report.panchang?.sunrise, icon: Sunrise },
     { label: labels.sunset, value: report.panchang?.sunset, icon: Sunset },
     { label: labels.moonSign, value: translateSign(report.avakhada?.moonSign, language), icon: Moon },
@@ -165,16 +165,16 @@ function BirthPanchangPanel({
   ];
 
   return (
-    <div className="rounded-2xl border border-[#D4AF37]/30 bg-[#160a28] p-3 shadow-[0_18px_48px_rgba(4,2,12,0.22)]">
+    <div className="rounded-2xl border border-[#1e293b] bg-[#0a1224] p-3 shadow-[0_18px_48px_rgba(0,5,16,0.34)]">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
         {items.map((item) => (
-          <div key={item.label} className="flex items-start gap-3 rounded-xl border border-[#D4AF37]/20 bg-[#fff7e6] p-3 text-[#211407] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#3a2110] text-[#FFD700]">
+          <div key={item.label} className="flex items-start gap-3 rounded-xl border border-[#1e293b] bg-[#0f1c3a] p-3 text-[#ffffff] shadow-[inset_0_1px_0_rgba(243,211,130,0.05)]">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#dca956]/10 text-[#dca956]">
               <item.icon className="h-4 w-4" />
             </span>
             <span className="min-w-0">
-              <span className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[#79552a]">{item.label}</span>
-              <span className="mt-1 block break-words text-sm font-bold text-[#211407]">{valueOrFallback(item.value, fallback)}</span>
+              <span className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[#94a3b8]">{item.label}</span>
+              <span className="mt-1 block break-words text-sm font-bold text-[#ffffff]">{valueOrFallback(item.category ? translateAstroValue(item.value, language, item.category as AstroValueCategory) : item.value, fallback)}</span>
             </span>
           </div>
         ))}
@@ -188,7 +188,7 @@ function Th({ children }: { children: ReactNode }) {
 }
 
 function Td({ children, strong = false }: { children: ReactNode; strong?: boolean }) {
-  return <td className={`px-4 py-3.5 align-top ${strong ? "font-bold text-[#5b2d0e]" : "text-[#2a1a0c]"}`}>{children}</td>;
+  return <td className={`px-4 py-3.5 align-top ${strong ? "font-bold text-[#f3d382]" : "text-[#ffffff]"}`}>{children}</td>;
 }
 
 function valueOrFallback(value: unknown, fallback: string) {

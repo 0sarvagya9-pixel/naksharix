@@ -31,23 +31,23 @@ import type { TranslationKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const desktopLinks = [
-  { label: "Home", href: "/", activePaths: ["/"] },
-  { label: "Kundli", href: "/kundli", activePaths: ["/kundli", "/free-kundli"] },
-  { label: "Match Making", href: "/matchmaking", activePaths: ["/match", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
-  { label: "Numerology", href: "/numerology", activePaths: ["/numerology"] },
-  { label: "AI Astrologer", href: "/talk-to-kundli", activePaths: ["/ai-chat", "/talk-to-kundli", "/chatbot"] },
-  { label: "Tarot", href: "/tarot", activePaths: ["/tarot"] }
+  { id: "home", labelKey: "navHome", href: "/", activePaths: ["/"] },
+  { id: "kundli", labelKey: "navKundli", href: "/kundli", activePaths: ["/kundli", "/free-kundli"] },
+  { id: "matchmaking", labelKey: "navMatchMaking", href: "/matchmaking", activePaths: ["/match", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
+  { id: "numerology", labelKey: "navNumerology", href: "/numerology", activePaths: ["/numerology"] },
+  { id: "ai-astrologer", labelKey: "navAiAstrologer", href: "/talk-to-kundli", activePaths: ["/ai-chat", "/talk-to-kundli", "/chatbot"] },
+  { id: "tarot", labelKey: "navTarot", href: "/tarot", activePaths: ["/tarot"] }
 ] as const;
 
 const moreLinks = [
-  { labelKey: "remedies", href: "/reports", activePaths: ["/reports"] },
-  { labelKey: "reports", href: "/reports", activePaths: ["/reports"] },
-  { labelKey: "calculators", href: "/calculators", activePaths: ["/calculators"] },
-  { labelKey: "zodiac", href: "/zodiac", activePaths: ["/zodiac"] },
-  { labelKey: "consult", href: "/consultation", activePaths: ["/consult", "/consultation"] },
-  { labelKey: "blog", href: "/blog", activePaths: ["/blog"] },
-  { labelKey: "about", href: "/about", activePaths: ["/about"] },
-  { labelKey: "contact", href: "/contact", activePaths: ["/contact"] }
+  { id: "remedies", labelKey: "navRemedies", href: "/reports", activePaths: ["/reports"] },
+  { id: "reports", labelKey: "navReports", href: "/reports", activePaths: ["/reports"] },
+  { id: "calculator", labelKey: "navCalculator", href: "/calculators", activePaths: ["/calculators"] },
+  { id: "zodiac", labelKey: "navZodiac", href: "/zodiac", activePaths: ["/zodiac"] },
+  { id: "panchang", labelKey: "navPanchang", href: "/panchang", activePaths: ["/panchang", "/festival-calendar", "/shubh-muhurat"] },
+  { id: "lo-shu", labelKey: "navLoShu", href: "/numerology", activePaths: ["/numerology"] },
+  { id: "about", labelKey: "navAboutUs", href: "/about", activePaths: ["/about"] },
+  { id: "contact", labelKey: "navContact", href: "/contact", activePaths: ["/contact"] }
 ] as const;
 
 type SidebarItem = { labelKey: TranslationKey; href: string; activePaths?: readonly string[]; icon?: LucideIcon };
@@ -162,7 +162,7 @@ export function MainNav() {
             const active = isActiveRoute(pathname, item.href, item.activePaths);
             return (
             <Link
-              key={`${item.label}-${item.href}-${index}`}
+              key={`${item.id}-${item.href}-${index}`}
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
@@ -172,7 +172,7 @@ export function MainNav() {
                   : "text-[#ffffff]"
               )}
             >
-              {item.label}
+              {tr(item.labelKey)}
             </Link>
             );
           })}
@@ -188,18 +188,18 @@ export function MainNav() {
                   : "text-[#ffffff]"
               )}
             >
-              {tr("moreShort")}
+              {tr("navMore")}
             </button>
             <div className="invisible absolute right-0 top-full z-50 mt-3 w-56 translate-y-2 rounded-lg border border-[#dca956]/25 bg-[#020612]/95 p-2 opacity-0 shadow-[0_18px_60px_rgba(0,5,16,0.62),0_0_32px_rgba(0,155,114,0.18)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {moreLinks.map((item, index) => {
                 const active = isActiveRoute(pathname, item.href, item.activePaths);
                 return (
                   <Link
-                    key={`${item.labelKey}-${item.href}-${index}`}
+                    key={`${item.id}-${item.href}-${index}`}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "block rounded-md px-3 py-2 font-cinzel text-sm outline-none transition hover:bg-[#dca956]/10 hover:text-[#f3d382] focus:bg-[#dca956]/10 focus:text-[#f3d382]",
+                      "block rounded-md px-3 py-2 font-cinzel text-sm text-[#ffffff] outline-none transition hover:bg-[#0f1c3a] hover:text-[#f3d382] focus:bg-[#0f1c3a] focus:text-[#f3d382]",
                       active ? "bg-[#dca956]/10 text-[#f3d382] shadow-[inset_3px_0_0_rgba(220,169,86,0.8)]" : "text-[#ffffff]"
                     )}
                   >

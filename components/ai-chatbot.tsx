@@ -32,7 +32,7 @@ export function AiChatbot() {
     try {
       const savedMessages = window.localStorage.getItem(storageKey);
       const savedContext = window.localStorage.getItem(contextKey);
-      if (savedMessages) setMessages(JSON.parse(savedMessages) as ChatMessage[]);
+      if (savedMessages) setMessages(normalizeMessages(JSON.parse(savedMessages)));
       if (savedContext) setKundliContext(savedContext);
     } catch {
       setNotice(tr("savedChatFailed"));
@@ -68,7 +68,7 @@ export function AiChatbot() {
       });
       const json = await response.json();
       if (response.ok && typeof json.data?.memory === "string") setKundliContext(json.data.memory);
-      setMessages((current) => [...current, { role: "assistant", content: response.ok ? json.data.answer : json.error ?? friendlyFallback(selectedLanguage) }]);
+      setMessages((current) => [...current, { role: "assistant", content: response.ok ? safeUiText(json?.data?.answer, friendlyFallback(selectedLanguage)) : friendlyFallback(selectedLanguage) }]);
     } catch {
       setMessages((current) => [...current, { role: "assistant", content: friendlyFallback(selectedLanguage) }]);
     } finally {
@@ -118,6 +118,21 @@ export function AiChatbot() {
       </CardContent>
     </Card>
   );
+}
+
+function safeUiText(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function normalizeMessages(value: unknown): ChatMessage[] {
+  if (!Array.isArray(value)) return [{ role: "assistant", content: "Namaste. Share your birth details once, then ask your question." }];
+  return value.flatMap((item): ChatMessage[] => {
+    if (!item || typeof item !== "object") return [];
+    const message = item as Partial<ChatMessage>;
+    if (message.role !== "user" && message.role !== "assistant") return [];
+    if (typeof message.content !== "string" || !message.content.trim()) return [];
+    return [{ role: message.role, content: message.content }];
+  });
 }
 
 type SpeechRecognitionConstructor = new () => SpeechRecognition;

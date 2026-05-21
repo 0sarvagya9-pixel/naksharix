@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { BriefcaseBusiness, Chrome, UserRound } from "lucide-react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, type Resolver, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { loginSchema, signupSchema } from "@/lib/validations/auth";
 import { secureFetch } from "@/lib/security/csrf";
 import { useLanguage } from "@/components/language-provider";
+import { errorClass, scrollToFirstError } from "@/lib/form-validation";
 
 type Mode = "login" | "signup";
 type RoleIntent = "USER" | "ASTROLOGER";
@@ -25,7 +26,7 @@ function landingPath(effectiveRole?: LoginMode) {
 
 export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", showRoleCards = true }: { mode: Mode; googleEnabled?: boolean; loginMode?: LoginMode; showRoleCards?: boolean }) {
   const router = useRouter();
-  const { tr, apiLocale } = useLanguage();
+  const { tr, apiLocale, requiredMessage } = useLanguage();
   const [error, setError] = useState<string | null>(null);
   const [roleIntent, setRoleIntent] = useState<RoleIntent>(loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER");
   const [professionalRole, setProfessionalRole] = useState<"ASTROLOGER" | "CONSULTANT">("ASTROLOGER");
@@ -44,6 +45,10 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     if (saved === "USER" || saved === "ASTROLOGER") chooseRole(saved);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (mode === "signup") form.setValue("locale", apiLocale);
+  }, [apiLocale, form, mode]);
 
   function chooseRole(next: RoleIntent) {
     setRoleIntent(next);
@@ -83,6 +88,15 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     window.localStorage.setItem("naksharix-role-intent", roleIntent);
     if (mode === "login") window.localStorage.setItem("naksharix-login-mode", selectedLoginMode);
     router.push(landingPath(result.data?.user?.effectiveRole));
+  }
+
+  function onInvalid(errors: FieldErrors<Record<string, string>>) {
+    const nextErrors = Object.fromEntries(Object.keys(errors).map((key) => [key, requiredMessage]));
+    scrollToFirstError(nextErrors);
+  }
+
+  function fieldError(name: "name" | "email" | "password") {
+    return form.formState.errors[name] ? requiredMessage : undefined;
   }
 
   function handleGoogleSignIn() {
@@ -131,11 +145,12 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
           </div>
         </>
       ) : null}
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-4" noValidate>
         {mode === "signup" ? (
           <div className="space-y-2">
             <Label htmlFor="name">{tr("name")}</Label>
-            <Input id="name" {...form.register("name")} placeholder="Anaya Sharma" />
+            <Input id="name" data-field="name" className={errorClass(Boolean(fieldError("name")))} {...form.register("name", { onChange: () => form.clearErrors("name") })} placeholder="Anaya Sharma" aria-invalid={Boolean(fieldError("name"))} />
+            {fieldError("name") ? <p className="text-sm text-destructive">{fieldError("name")}</p> : null}
           </div>
         ) : null}
         <input type="hidden" {...form.register(mode === "signup" ? "role" : "roleIntent")} />
@@ -143,11 +158,13 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         {mode === "signup" ? <input type="hidden" {...form.register("locale")} value={apiLocale} readOnly /> : null}
         <div className="space-y-2">
           <Label htmlFor="email">{tr("email")}</Label>
-          <Input id="email" type="email" {...form.register("email")} placeholder="you@example.com" />
+          <Input id="email" data-field="email" type="email" className={errorClass(Boolean(fieldError("email")))} {...form.register("email", { onChange: () => form.clearErrors("email") })} placeholder="you@example.com" aria-invalid={Boolean(fieldError("email"))} />
+          {fieldError("email") ? <p className="text-sm text-destructive">{fieldError("email")}</p> : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">{tr("password")}</Label>
-          <Input id="password" type="password" {...form.register("password")} placeholder={tr("minimumPassword")} />
+          <Input id="password" data-field="password" type="password" className={errorClass(Boolean(fieldError("password")))} {...form.register("password", { onChange: () => form.clearErrors("password") })} placeholder={tr("minimumPassword")} aria-invalid={Boolean(fieldError("password"))} />
+          {fieldError("password") ? <p className="text-sm text-destructive">{fieldError("password")}</p> : null}
         </div>
         {error ? <p className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">{error}</p> : null}
         <Button className="w-full" disabled={form.formState.isSubmitting}>

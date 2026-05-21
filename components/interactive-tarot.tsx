@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { secureFetch } from "@/lib/security/csrf";
 import { useLanguage } from "@/components/language-provider";
-import { errorClass, isBlank } from "@/lib/form-validation";
+import { errorClass, isBlank, scrollToFirstError } from "@/lib/form-validation";
 
 type TarotCard = { name?: string; position?: string; reversed?: boolean };
 type TarotReading = { spread?: string; question?: string; cards?: TarotCard[]; interpretation?: string };
@@ -33,6 +33,7 @@ export function InteractiveTarot() {
   function shuffle() {
     if (isBlank(question)) {
       setError(requiredMessage);
+      scrollToFirstError({ tarotQuestion: requiredMessage });
       return;
     }
     setError(null);
@@ -55,13 +56,13 @@ export function InteractiveTarot() {
       });
       const json = await response.json();
       if (!response.ok) {
-        setError(json.error ?? "We could not complete the tarot reading right now.");
+        setError(tr("errorGeneric"));
         return;
       }
-      setReading(json.data.reading);
+      setReading(normalizeReading(json?.data?.reading));
       setStage("revealed");
     } catch {
-      setError("We could not complete the tarot reading right now.");
+      setError(tr("errorGeneric"));
     } finally {
       setLoading(false);
     }
@@ -91,7 +92,7 @@ export function InteractiveTarot() {
             ))}
           </div>
           <div className="space-y-2">
-            <Textarea value={question} onChange={(event) => { setQuestion(event.target.value); setError(null); }} className={errorClass(Boolean(error))} placeholder={tr("tarotQuestionPlaceholder")} />
+            <Textarea data-field="tarotQuestion" value={question} onChange={(event) => { setQuestion(event.target.value); setError(null); }} className={errorClass(Boolean(error))} placeholder={tr("tarotQuestionPlaceholder")} aria-invalid={Boolean(error)} />
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -186,4 +187,15 @@ function positionKey(position: string) {
     "Next Step": "nextStep"
   } as const;
   return map[position as keyof typeof map] ?? "guidance";
+}
+
+function normalizeReading(value: unknown): TarotReading {
+  if (!value || typeof value !== "object") return {};
+  const reading = value as TarotReading;
+  return {
+    spread: typeof reading.spread === "string" ? reading.spread : undefined,
+    question: typeof reading.question === "string" ? reading.question : undefined,
+    interpretation: typeof reading.interpretation === "string" ? reading.interpretation : undefined,
+    cards: Array.isArray(reading.cards) ? reading.cards : []
+  };
 }
