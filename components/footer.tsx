@@ -9,6 +9,7 @@ const footerLinks = [
   ["kundli", "/kundli"],
   ["tarot", "/tarot"],
   ["navCalculator", "/calculators"],
+  ["navReports", "/reports"],
   ["navContact", "/contact"]
 ] as const;
 

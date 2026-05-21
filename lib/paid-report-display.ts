@@ -120,3 +120,71 @@ const reportCopy = {
 export function localizePaidReport(report: PaidReport, locale: Locale) {
   return reportCopy[locale][report.id] ?? reportCopy.en[report.id];
 }
+
+const detailItems = {
+  en: Object.fromEntries(paidReports.map((report) => [report.id, { sample: [...report.sample], faqs: [...report.faqs] }])) as Record<PaidReport["id"], { sample: string[]; faqs: string[] }>,
+  hi: {
+    "kundli-pro": {
+      sample: ["लग्न स्वभाव अवलोकन", "मजबूत और कमजोर ग्रह नोट्स", "अगले 30 दिनों के लिए उपाय योजना"],
+      faqs: ["क्या इसमें मांगलिक विश्लेषण शामिल है?", "क्या इसे करियर और विवाह समय के लिए उपयोग कर सकता/सकती हूं?", "क्या रिपोर्ट डाउनलोड हो सकती है?"]
+    },
+    "career-report": {
+      sample: ["उपयुक्त कार्य विषय", "भूमिका बदलाव का समय", "संवाद और नेतृत्व नोट्स"],
+      faqs: ["क्या यह सटीक नौकरी बताता है?", "क्या इसमें व्यवसाय मार्गदर्शन है?", "क्या यह उपाय सुझाएगा?"]
+    },
+    "marriage-report": {
+      sample: ["संवाद पैटर्न", "परिवार सामंजस्य नोट्स", "अनुशंसित चर्चा चेकलिस्ट"],
+      faqs: ["क्या यह कुंडली मिलान जैसा है?", "क्या यह समय में मदद करेगा?", "क्या इसमें उपाय शामिल हैं?"]
+    },
+    "finance-report": {
+      sample: ["वित्तीय आदत निदान", "अनुकूल योजना समय", "खर्च सावधानी अवधि"],
+      faqs: ["क्या यह वित्तीय सलाह है?", "क्या यह प्लानर की जगह ले सकता है?", "क्या इसमें शुभ तिथियां हैं?"]
+    },
+    "health-report": {
+      sample: ["नींद और दिनचर्या फोकस", "ऊर्जा प्रबंधन नोट", "मन-शरीर आदत सुझाव"],
+      faqs: ["क्या यह चिकित्सा सलाह है?", "क्या डॉक्टर से मिलना चाहिए?", "क्या इसमें जीवनशैली सुझाव हैं?"]
+    },
+    "yearly-ai": {
+      sample: ["त्रैमासिक थीम", "महत्वपूर्ण निर्णय महीने", "वार्षिक उपाय योजना"],
+      faqs: ["क्या यह व्यक्तिगत है?", "क्या यह सभी महीनों को कवर करता है?", "क्या बाद में दोबारा बना सकता/सकती हूं?"]
+    },
+    "numerology-report": {
+      sample: ["मुख्य अंक मैट्रिक्स", "नाम ऊर्जा नोट्स", "लकी नंबर दिनचर्या"],
+      faqs: ["क्या व्यवसाय नाम विश्लेषण कर सकता/सकती हूं?", "क्या इसमें मोबाइल नंबर शामिल हैं?", "क्या यह स्पेलिंग बदलाव सुझा सकता है?"]
+    }
+  },
+  hinglish: {
+    "kundli-pro": {
+      sample: ["Ascendant temperament overview", "Strong aur weak planet notes", "Next 30 days ke liye remedy plan"],
+      faqs: ["Kya isme Manglik analysis hai?", "Kya career aur marriage timing ke liye use kar sakta/sakti hoon?", "Kya report downloadable hai?"]
+    },
+    "career-report": {
+      sample: ["Best-fit work themes", "Role change ka timing", "Communication aur leadership notes"],
+      faqs: ["Kya ye exact job predict karta hai?", "Kya business guidance include hai?", "Kya remedies suggest karega?"]
+    },
+    "marriage-report": {
+      sample: ["Communication pattern", "Family alignment notes", "Recommended discussion checklist"],
+      faqs: ["Kya ye kundli matching jaisa hai?", "Kya timing me help karega?", "Kya remedies include hain?"]
+    },
+    "finance-report": {
+      sample: ["Financial habit diagnosis", "Favorable planning windows", "Spending caution periods"],
+      faqs: ["Kya ye financial advice hai?", "Kya ye planner replace kar sakta hai?", "Kya lucky dates include hain?"]
+    },
+    "health-report": {
+      sample: ["Sleep aur routine focus", "Energy management note", "Mind-body habit suggestions"],
+      faqs: ["Kya ye medical advice hai?", "Kya doctor se milna chahiye?", "Kya lifestyle tips include hain?"]
+    },
+    "yearly-ai": {
+      sample: ["Quarterly themes", "Important decision months", "Yearly remedy plan"],
+      faqs: ["Kya ye personalized hai?", "Kya ye all months cover karta hai?", "Kya baad me regenerate kar sakte hain?"]
+    },
+    "numerology-report": {
+      sample: ["Core number matrix", "Name vibration notes", "Lucky number routine"],
+      faqs: ["Kya business name analyze kar sakta/sakti hoon?", "Kya mobile numbers include hain?", "Kya spelling changes suggest kar sakta hai?"]
+    }
+  }
+} as const;
+
+export function localizePaidReportDetailItems(report: PaidReport, locale: Locale) {
+  return detailItems[locale][report.id] ?? detailItems.en[report.id];
+}

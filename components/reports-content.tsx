@@ -39,7 +39,7 @@ export function ReportsContent() {
                   ))}
                 </ul>
                 <div className="grid gap-2">
-                  <RazorpayCheckoutButton payload={{ purpose: report.purpose, reportId: report.id }} label={tr("buyReport")} variant="secondary" />
+                  <RazorpayCheckoutButton payload={{ purpose: report.purpose, reportId: report.id }} label={tr("buyReport")} />
                   <Button variant="outline" asChild>
                     <Link href={`/reports/${report.id}`}>{tr("viewDetails")}</Link>
                   </Button>

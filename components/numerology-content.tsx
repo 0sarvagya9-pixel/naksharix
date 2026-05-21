@@ -1,16 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Calculator, Grid3X3, Hash, Sparkles } from "lucide-react";
+import { CalendarDays, Calculator, Car, Grid3X3, Hash, Route, Smartphone, Sparkles, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { useLanguage } from "@/components/language-provider";
 
 const featureCards = [
-  { titleKey: "numerologyCoreNumbers", copyKey: "numerologyCoreNumbersCopy", icon: Hash },
-  { titleKey: "numerologyNameVibration", copyKey: "numerologyNameVibrationCopy", icon: Sparkles },
-  { titleKey: "numerologyLoShu", copyKey: "numerologyLoShuCopy", icon: Grid3X3 }
+  { titleKey: "numerologyLifePath", copyKey: "numerologyLifePathCopy", icon: Route },
+  { titleKey: "numerologyDestinyNumber", copyKey: "numerologyDestinyNumberCopy", icon: Target },
+  { titleKey: "numerologyNameNumber", copyKey: "numerologyNameNumberCopy", icon: Sparkles },
+  { titleKey: "numerologyLoShu", copyKey: "numerologyLoShuCopy", icon: Grid3X3 },
+  { titleKey: "numerologyMobileAnalysis", copyKey: "numerologyMobileAnalysisCopy", icon: Smartphone },
+  { titleKey: "numerologyVehicleAnalysis", copyKey: "numerologyVehicleAnalysisCopy", icon: Car },
+  { titleKey: "numerologyDaily", copyKey: "numerologyDailyCopy", icon: CalendarDays },
+  { titleKey: "numerologyCoreNumbers", copyKey: "numerologyCoreNumbersCopy", icon: Hash }
 ] as const;
 
 export function NumerologyContent() {
@@ -34,7 +39,7 @@ export function NumerologyContent() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featureCards.map(({ titleKey, copyKey, icon: Icon }) => (
               <Card key={titleKey} className="border-[#1e293b] bg-[#0f1c3a]/88 shadow-[0_18px_60px_rgba(2,6,18,0.32)]">
                 <CardContent className="p-5">

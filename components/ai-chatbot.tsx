@@ -96,23 +96,23 @@ export function AiChatbot() {
   return (
     <Card className="glass">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-cinzel"><Bot className="h-5 w-5 text-[#FFD700]" />{tr("askYourKundliQuestions")}</CardTitle>
+        <CardTitle className="flex items-center gap-2 font-cinzel text-[#f3d382]"><Bot className="h-5 w-5 text-[#dca956]" />{tr("askYourKundliQuestions")}</CardTitle>
         <p className="text-sm naksh-muted-text">{tr("askKundliSubtitle")}</p>
         <div className="flex flex-wrap gap-2 pt-2"><Button asChild variant="outline"><Link href="/kundli">{tr("generateKundliFirst")}</Link></Button><Button asChild variant="secondary"><Link href="/reports/kundli-pro">{tr("unlockPremiumReport")}</Link></Button></div>
       </CardHeader>
       <CardContent className="grid gap-5 lg:grid-cols-[0.75fr_1.25fr]">
-        <aside className="space-y-4 rounded-lg border border-[#D4AF37]/20 bg-[#02112C]/55 p-4">
-          <div className="space-y-2"><Label>{tr("responseLanguage")}</Label><div className="h-10 rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 py-2 text-sm">{selectedLanguage === "Hindi" ? tr("hindi") : selectedLanguage === "Hinglish" ? "Hinglish" : tr("english")}</div><p className="text-xs naksh-muted-text">{tr("globalLanguageControlsAi")}</p></div>
+        <aside className="space-y-4 rounded-lg border border-[#1e293b] bg-[#0a1224]/70 p-4">
+          <div className="space-y-2"><Label>{tr("responseLanguage")}</Label><div className="h-10 rounded-md border border-[#1e293b] bg-[#0f1c3a] px-3 py-2 text-sm text-[#ffffff]">{selectedLanguage === "Hindi" ? tr("hindi") : selectedLanguage === "Hinglish" ? "Hinglish" : tr("english")}</div><p className="text-xs naksh-muted-text">{tr("globalLanguageControlsAi")}</p></div>
           <div className="space-y-2"><Label>{tr("birthDetailsMemory")}</Label><Textarea value={kundliContext} onChange={(event) => setKundliContext(event.target.value)} placeholder={tr("birthDetailsExample")} className="min-h-28" /></div>
-          <div className="space-y-2"><Label>{tr("suggestedQuestions")}</Label><div className="grid gap-2">{[tr("qCareer"), tr("qMarriage"), tr("qFinance"), tr("qDosha"), tr("qToday")].map((question) => <button key={question} type="button" onClick={() => send(question)} className="rounded-md border border-[#D4AF37]/20 bg-[#061D3C]/70 p-3 text-left text-sm transition hover:border-[#D4AF37]/55">{question}</button>)}</div></div>
-          {recentLimitReached ? <div className="rounded-md border border-[#D4AF37]/25 bg-[#D4AF37]/10 p-3 text-sm naksh-muted-text">{tr("freeAiLimitNotice")}</div> : null}
+          <div className="space-y-2"><Label>{tr("suggestedQuestions")}</Label><div className="grid gap-2">{[tr("qCareer"), tr("qMarriage"), tr("qFinance"), tr("qDosha"), tr("qToday")].map((question) => <button key={question} type="button" onClick={() => send(question)} className="rounded-md border border-[#1e293b] bg-[#0f1c3a]/78 p-3 text-left text-sm text-[#ffffff] transition hover:border-[#dca956]/55 hover:text-[#f3d382]">{question}</button>)}</div></div>
+          {recentLimitReached ? <div className="rounded-md border border-[#dca956]/25 bg-[#dca956]/10 p-3 text-sm naksh-muted-text">{tr("freeAiLimitNotice")}</div> : null}
         </aside>
         <div className="space-y-4">
-          <div className="max-h-[520px] space-y-3 overflow-y-auto rounded-lg border border-[#D4AF37]/20 bg-[#02112C]/60 p-3">
-            {messages.map((message, index) => <div key={`${message.role}-${index}`} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}><div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 ${message.role === "user" ? "bg-primary text-[#01A361]-foreground" : "bg-[#061D3C]"}`}><div className="mb-1 flex items-center gap-2 text-xs opacity-80">{message.role === "user" ? <UserRound className="h-3 w-3" /> : <Bot className="h-3 w-3" />}{message.role === "user" ? tr("you") : "Naksharix"}</div>{message.content}</div></div>)}
-            {loading ? <p className="flex items-center gap-2 text-sm naksh-muted-text"><Sparkles className="h-4 w-4 animate-pulse text-[#FFD700]" /> {tr("aiThinking")}</p> : null}
+          <div className="max-h-[520px] space-y-3 overflow-y-auto rounded-lg border border-[#1e293b] bg-[#020612]/70 p-3">
+            {messages.map((message, index) => <div key={`${message.role}-${index}`} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}><div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 ${message.role === "user" ? "bg-[#009b72] text-[#ffffff] shadow-[0_0_24px_rgba(0,245,160,0.14)]" : "bg-[#0f1c3a] text-[#ffffff]"}`}><div className="mb-1 flex items-center gap-2 text-xs opacity-80">{message.role === "user" ? <UserRound className="h-3 w-3" /> : <Bot className="h-3 w-3" />}{message.role === "user" ? tr("you") : "Naksharix"}</div>{message.content}</div></div>)}
+            {loading ? <p className="flex items-center gap-2 text-sm naksh-muted-text"><Sparkles className="h-4 w-4 animate-pulse text-[#dca956]" /> {tr("aiThinking")}</p> : null}
           </div>
-          {notice ? <p className="rounded-md border border-[#D4AF37]/20 bg-[#061D3C]/70 p-3 text-sm naksh-muted-text">{notice}</p> : null}
+          {notice ? <p className="rounded-md border border-[#1e293b] bg-[#0f1c3a]/78 p-3 text-sm naksh-muted-text">{notice}</p> : null}
           <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]"><div><Input data-field="message" value={input} onChange={(event) => { setInput(event.target.value); setMessageError(null); }} placeholder={tr("chatPlaceholder")} className={errorClass(Boolean(messageError))} />{messageError ? <p className="mt-2 text-sm text-destructive">{messageError}</p> : null}</div><Button type="button" variant="outline" onClick={startVoiceInput}><Mic className="h-4 w-4" />{tr("voice")}</Button><Button onClick={() => send()} disabled={loading || !input.trim()}><Send className="h-4 w-4" />{tr("send")}</Button></div>
         </div>
       </CardContent>
@@ -121,7 +121,11 @@ export function AiChatbot() {
 }
 
 function safeUiText(value: unknown, fallback: string) {
-  return typeof value === "string" && value.trim() ? value : fallback;
+  if (typeof value !== "string") return fallback;
+  const text = value.trim();
+  if (!text || text === "undefined" || text === "null" || text === "[object Object]") return fallback;
+  if (/^\s*[{[]/.test(text)) return fallback;
+  return text;
 }
 
 function normalizeMessages(value: unknown): ChatMessage[] {

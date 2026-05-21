@@ -129,13 +129,13 @@ function PersonPanel({ title, personKey, value, onChange, onResolvedLocation, er
   const err = (field: keyof VisiblePerson) => errors[`${personKey}.${field}`];
   return (
     <Card className="glass overflow-visible">
-      <CardHeader className="border-b border-[#D4AF37]/15 bg-[#061D3C]/70">
-        <CardTitle className="font-cinzel text-2xl">{title}</CardTitle>
+      <CardHeader className="border-b border-[#1e293b] bg-[#0a1224]/70">
+        <CardTitle className="font-cinzel text-2xl text-[#f3d382]">{title}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 overflow-visible p-4 sm:grid-cols-2 sm:p-6">
         <Field label={tr("name")} error={err("name")}><Input data-field={`${personKey}.name`} className={errorClass(Boolean(err("name")))} value={value.name} onChange={(event) => onChange({ name: event.target.value })} /></Field>
         <Field label={tr("gender")}>
-          <select value={value.gender} onChange={(event) => onChange({ gender: event.target.value })} className="h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm">
+          <select value={value.gender} onChange={(event) => onChange({ gender: event.target.value })} className="h-10 w-full rounded-md border border-[#1e293b] bg-[#0f1c3a] px-3 text-sm text-[#ffffff] outline-none transition focus:border-[#dca956] focus:ring-2 focus:ring-[#00f5a0]/20">
             <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
             <option value="Female">{tr("genderFemale")}</option>
             <option value="Male">{tr("genderMale")}</option>
@@ -163,8 +163,8 @@ function MatchResultView({ result }: { result: MatchResult }) {
   const { tr, apiLocale } = useLanguage();
   return (
     <Card className="glass overflow-visible">
-      <CardHeader className="border-b border-[#D4AF37]/15 bg-[#061D3C]/70">
-        <CardTitle className="font-cinzel text-2xl">{tr("premiumCompatibilityReport")}</CardTitle>
+      <CardHeader className="border-b border-[#1e293b] bg-[#0a1224]/70">
+        <CardTitle className="font-cinzel text-2xl text-[#f3d382]">{tr("premiumCompatibilityReport")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 p-4 sm:p-6">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -177,21 +177,25 @@ function MatchResultView({ result }: { result: MatchResult }) {
           <InsightCard title={tr("brideDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.brideProfile, result.brideChart, tr("notAvailable"), chartSummaryLabels(apiLocale))} />
           <InsightCard title={tr("groomDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.groomProfile, result.groomChart, tr("notAvailable"), chartSummaryLabels(apiLocale))} />
           <InsightCard title={tr("emotionalCompatibility")} icon={<HeartHandshake className="h-4 w-4" />} text={result.aiSummary ?? result.emotionalCompatibility ?? result.relationshipAnalysis} />
+          <InsightCard title={tr("mentalCompatibility")} icon={<Sparkles className="h-4 w-4" />} text={scoreLine(apiLocale, tr("mentalCompatibility"), result.compatibility?.mental)} />
+          <InsightCard title={tr("physicalCompatibility")} icon={<ShieldCheck className="h-4 w-4" />} text={scoreLine(apiLocale, tr("physicalCompatibility"), result.compatibility?.physical)} />
           <InsightCard title={tr("careerFinanceCompatibility")} icon={<WalletCards className="h-4 w-4" />} text={compatibilityLine(apiLocale, result.compatibility?.financial ?? 0, result.compatibility?.mental ?? 0)} />
-          <InsightCard title={tr("marriageRecommendation")} icon={<CalendarHeart className="h-4 w-4" />} text={result.gunaMilan?.verdict ?? result.marriageRecommendation ?? result.marriagePrediction} />
+          <InsightCard title={tr("familyMarriageStability")} icon={<CalendarHeart className="h-4 w-4" />} text={scoreLine(apiLocale, tr("familyMarriageStability"), result.compatibility?.family ?? result.compatibility?.longTerm)} />
+          <InsightCard title={tr("doshaManglikNotes")} icon={<ShieldCheck className="h-4 w-4" />} text={doshaLine(result, tr("notAvailable"))} />
+          <InsightCard title={tr("finalRecommendation")} icon={<CalendarHeart className="h-4 w-4" />} text={result.gunaMilan?.verdict ?? result.marriageRecommendation ?? result.marriagePrediction} />
           <InsightCard title={tr("remedies")} icon={<Sparkles className="h-4 w-4" />} text={result.doshaAnalysis?.remedies?.join(" ") ?? result.remedies} />
         </div>
         <section>
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold">{tr("gunaMilan")}</h3>
-            <span className="rounded-full border border-[#D4AF37]/25 bg-[#D4AF37]/10 px-3 py-1 text-xs text-[#FFD700]">{tr("pdfComingSoon")}</span>
+            <span className="rounded-full border border-[#dca956]/25 bg-[#dca956]/10 px-3 py-1 text-xs text-[#f3d382]">{tr("pdfComingSoon")}</span>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {(result.gunaMilan?.ashtakoot ?? result.factors ?? []).map((factor) => (
-              <div key={factor.name} className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4">
-                <p className="font-semibold">{factor.name}</p>
+            {(result.gunaMilan?.ashtakoot ?? result.factors ?? []).map((factor, index) => (
+              <div key={`${factor.name ?? "factor"}-${index}`} className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/78 p-4">
+                <p className="font-semibold text-[#f3d382]">{safeText(factor.name, tr("notAvailable"))}</p>
                 <p className="mt-1 text-sm naksh-muted-text">{factor.score ?? 0} / {getFactorMax(factor)}</p>
-                <p className="mt-2 text-xs leading-5 naksh-muted-text">{factor.meaning ?? tr("notAvailable")}</p>
+                <p className="mt-2 text-xs leading-5 naksh-muted-text">{safeText(factor.meaning, tr("notAvailable"))}</p>
               </div>
             ))}
           </div>
@@ -217,12 +221,12 @@ function validateMatchFields(people: Record<PersonKey, VisiblePerson>, locations
 }
 
 function ScoreCard({ icon, label, value }: { icon: React.ReactElement; label: string; value: string }) {
-  return <div className="rounded-lg border border-[#D4AF37]/25 bg-gradient-to-br from-primary/20 to-amber-300/10 p-5"><div className="mb-3 text-[#FFD700]">{icon}</div><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-2 font-cinzel text-3xl font-black">{value}</p></div>;
+  return <div className="rounded-lg border border-[#1e293b] bg-[radial-gradient(circle_at_top,rgba(0,245,160,0.08),transparent_14rem),#0f1c3a] p-5"><div className="mb-3 text-[#dca956]">{icon}</div><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-2 font-cinzel text-3xl font-black text-[#fbc02d]">{value}</p></div>;
 }
 
 function InsightCard({ title, icon, text }: { title: string; icon: React.ReactNode; text?: string }) {
   const { tr } = useLanguage();
-  return <div className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><h3 className="flex items-center gap-2 font-semibold text-[#FFD700]">{icon}{title}</h3><p className="mt-3 text-sm leading-7 naksh-muted-text">{text ?? tr("notAvailable")}</p></div>;
+  return <div className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/78 p-4"><h3 className="flex items-center gap-2 font-semibold text-[#f3d382]">{icon}{title}</h3><p className="mt-3 text-sm leading-7 naksh-muted-text">{safeText(text, tr("notAvailable"))}</p></div>;
 }
 
 function getFactorMax(factor: { max?: number; maxScore?: number }) {
@@ -250,6 +254,28 @@ function compatibilityLine(language: "en" | "hi" | "hinglish", financial: number
   if (language === "hi") return `वित्तीय अनुकूलता: ${financial}%. मानसिक अनुकूलता: ${mental}%.`;
   if (language === "hinglish") return `Financial compatibility: ${financial}%. Mental compatibility: ${mental}%.`;
   return `Financial compatibility: ${financial}%. Mental compatibility: ${mental}%.`;
+}
+
+function scoreLine(language: "en" | "hi" | "hinglish", label: string, value?: number) {
+  if (typeof value !== "number") return undefined;
+  if (language === "hi") return `${label}: ${value}%.`;
+  return `${label}: ${value}%.`;
+}
+
+function doshaLine(result: MatchResult, fallback: string) {
+  return [
+    result.doshaAnalysis?.manglikCompatibility,
+    result.doshaAnalysis?.nadiDosh?.summary,
+    result.doshaAnalysis?.bhakootDosh?.summary
+  ].filter((item): item is string => typeof item === "string" && item.trim().length > 0).join(" ") || fallback;
+}
+
+function safeText(value: unknown, fallback: string) {
+  if (typeof value !== "string") return fallback;
+  const text = value.trim();
+  if (!text || text === "undefined" || text === "null" || text === "[object Object]") return fallback;
+  if (/^\s*[{[]/.test(text)) return fallback;
+  return text;
 }
 
 
