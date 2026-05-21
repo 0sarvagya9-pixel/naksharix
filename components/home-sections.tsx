@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -27,7 +28,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
-import { SolarSystemHero } from "@/components/solar-system-hero";
 import { featuredAstrologers } from "@/lib/astrologers";
 import { useLanguage } from "@/components/language-provider";
 
@@ -64,18 +64,21 @@ export function HomeHero() {
   const secondaryCta = locale === "hi" ? "AI ज्योतिषी से बात करें" : locale === "hinglish" ? "AI Jyotishi se baat karein" : "Talk to AI Astrologer";
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="nx-night-sky relative overflow-x-hidden overflow-y-visible">
       <CosmicBackground />
-      <div className="relative mx-auto grid w-full max-w-[1440px] grid-cols-1 items-center gap-8 px-6 pb-12 pt-24 sm:px-8 lg:min-h-[calc(100vh-96px)] lg:grid-cols-12 lg:px-12 lg:pb-16 lg:pt-10">
-        <motion.div className="relative z-10 lg:col-span-6" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+      <div className="nx-nebula-layer" aria-hidden="true" />
+      <div className="nx-starfield" aria-hidden="true" />
+      <div className="nx-star-depth" aria-hidden="true" />
+      <div className="pointer-events-none absolute right-[-12rem] top-14 hidden h-[42rem] w-[42rem] rounded-full bg-[radial-gradient(circle,rgba(0,245,160,0.18)_0%,rgba(220,169,86,0.11)_30%,rgba(10,18,36,0.18)_48%,transparent_72%)] blur-3xl lg:block" aria-hidden="true" />
+      <div className="relative mx-auto grid w-full max-w-[1440px] grid-cols-1 items-center gap-10 overflow-visible px-6 pb-12 pt-24 sm:px-8 lg:min-h-[calc(100vh-96px)] lg:grid-cols-[minmax(0,1.1fr)_minmax(400px,0.9fr)] lg:gap-16 lg:px-12 lg:pb-16 lg:pt-10 xl:gap-20">
+        <motion.div className="relative z-20 max-w-[62rem] overflow-visible" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#dca956]/40 bg-white/[0.035] px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#dca956] shadow-[0_0_30px_rgba(220,169,86,0.13)] backdrop-blur">
             <Sparkles className="h-4 w-4 text-[#f3d382]" />
             Premium AI + Vedic Astrology Platform
           </div>
-          <h1 className="max-w-[42rem] text-balance bg-[linear-gradient(180deg,#f3d382_0%,#dca956_50%,#dca956_100%)] bg-clip-text font-decorative text-[2.65rem] font-black uppercase leading-[1.1] tracking-[0.02em] text-transparent antialiased drop-shadow-[0_10px_30px_rgba(0,0,0,0.44)] sm:text-6xl xl:text-[4.75rem]">
-            Unlock Your
-            <br />
-            Cosmic Destiny
+          <h1 className="max-w-[62rem] overflow-visible pb-2 pr-3 bg-[linear-gradient(180deg,#f3d382_0%,#dca956_52%,#dca956_100%)] bg-clip-text font-decorative text-[clamp(3rem,4.45vw,4.95rem)] font-black uppercase leading-[0.96] tracking-[-0.025em] text-transparent antialiased drop-shadow-[0_10px_30px_rgba(0,0,0,0.44)] sm:text-[clamp(3.65rem,4.45vw,4.95rem)]">
+            <span className="block sm:whitespace-nowrap">UNLOCK YOUR</span>
+            <span className="block sm:whitespace-nowrap">COSMIC DESTINY</span>
           </h1>
           <div className="relative mt-5 flex w-full max-w-[35rem] items-center justify-center gap-4 text-center text-lg font-semibold leading-relaxed text-[#dca956] sm:text-2xl">
             <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#dca956] sm:w-16" />
@@ -107,8 +110,25 @@ export function HomeHero() {
             ))}
           </div>
         </motion.div>
-        <motion.div className="relative z-0 lg:col-span-6" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, delay: 0.1 }}>
-          <SolarSystemHero />
+        <motion.div
+          className="relative z-20 mx-auto flex w-full max-w-[42rem] items-center justify-center lg:max-w-none"
+          initial={{ opacity: 0, x: 24, scale: 0.98 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.12 }}
+          aria-hidden="true"
+        >
+          <div className="pointer-events-none absolute inset-[-10%] rounded-full bg-[radial-gradient(circle_at_center,rgba(220,169,86,0.18)_0%,rgba(0,245,160,0.1)_30%,transparent_58%)] blur-3xl" />
+          <div className="pointer-events-none absolute right-[-8%] top-[6%] h-40 w-40 rounded-full bg-[#00f5a0]/10 blur-3xl" />
+          <div className="relative aspect-[1553/672] w-full max-w-[740px] bg-transparent lg:ml-auto lg:scale-[1.02] xl:scale-[1.04]">
+            <Image
+              src="/images/naksharix-hero-right-visual.png"
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 1280px) 48vw, (min-width: 1024px) 50vw, 92vw"
+              className="object-contain drop-shadow-[0_0_34px_rgba(220,169,86,0.22)]"
+            />
+          </div>
         </motion.div>
       </div>
     </section>
@@ -418,9 +438,9 @@ function CosmicBackground({ soft = false }: { soft?: boolean }) {
   ];
   return (
     <>
-      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-45" : "opacity-100"} bg-[radial-gradient(circle_at_80%_20%,rgba(10,18,36,0.6),transparent_50%),radial-gradient(circle_at_15%_22%,rgba(0,155,114,0.16),transparent_26rem),radial-gradient(circle_at_78%_18%,rgba(220,169,86,0.13),transparent_28rem),radial-gradient(circle_at_62%_78%,rgba(0,155,114,0.11),transparent_32rem),linear-gradient(135deg,#020612_0%,#0a1224_52%,#0a1224_100%)]`} />
-      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-24" : "opacity-42"} bg-[radial-gradient(circle_at_7%_16%,rgba(255,255,255,0.42)_0_1px,transparent_2px),radial-gradient(circle_at_18%_62%,rgba(255,255,255,0.34)_0_1px,transparent_2px),radial-gradient(circle_at_31%_28%,rgba(243,211,130,0.38)_0_1px,transparent_2px),radial-gradient(circle_at_46%_72%,rgba(255,255,255,0.3)_0_1px,transparent_2px),radial-gradient(circle_at_62%_34%,rgba(0,245,160,0.32)_0_1px,transparent_2px),radial-gradient(circle_at_79%_18%,rgba(243,211,130,0.34)_0_1px,transparent_2px),radial-gradient(circle_at_92%_66%,rgba(255,255,255,0.36)_0_1px,transparent_2px),radial-gradient(circle_at_70%_88%,rgba(0,245,160,0.28)_0_1px,transparent_2px)]`} />
-      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-18" : "opacity-34"} bg-[radial-gradient(circle_at_22%_36%,rgba(220,169,86,0.32)_0_1.4px,transparent_3px),radial-gradient(circle_at_38%_11%,rgba(255,255,255,0.22)_0_1.2px,transparent_3px),radial-gradient(circle_at_57%_58%,rgba(243,211,130,0.26)_0_1.5px,transparent_3px),radial-gradient(circle_at_84%_42%,rgba(0,245,160,0.24)_0_1.4px,transparent_3px),radial-gradient(circle_at_11%_78%,rgba(0,245,160,0.18)_0_1.5px,transparent_3px)] blur-[0.3px]`} />
+      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-45" : "opacity-92"} bg-[radial-gradient(circle_at_80%_20%,rgba(10,18,36,0.42),transparent_50%),radial-gradient(circle_at_15%_22%,rgba(0,245,160,0.14),transparent_26rem),radial-gradient(circle_at_78%_18%,rgba(220,169,86,0.13),transparent_28rem),radial-gradient(circle_at_62%_78%,rgba(0,155,114,0.11),transparent_32rem),linear-gradient(135deg,rgba(2,6,18,0.82)_0%,rgba(10,18,36,0.74)_52%,rgba(10,18,36,0.42)_100%)]`} />
+      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-38" : "opacity-76"} bg-[radial-gradient(circle_at_7%_16%,rgba(255,255,255,0.62)_0_1px,transparent_2px),radial-gradient(circle_at_18%_62%,rgba(255,255,255,0.48)_0_1px,transparent_2px),radial-gradient(circle_at_31%_28%,rgba(243,211,130,0.58)_0_1px,transparent_2px),radial-gradient(circle_at_46%_72%,rgba(255,255,255,0.46)_0_1px,transparent_2px),radial-gradient(circle_at_62%_34%,rgba(0,245,160,0.5)_0_1px,transparent_2px),radial-gradient(circle_at_79%_18%,rgba(243,211,130,0.56)_0_1px,transparent_2px),radial-gradient(circle_at_92%_66%,rgba(255,255,255,0.54)_0_1px,transparent_2px),radial-gradient(circle_at_70%_88%,rgba(0,245,160,0.44)_0_1px,transparent_2px)]`} />
+      <div className={`pointer-events-none absolute inset-0 ${soft ? "opacity-28" : "opacity-58"} bg-[radial-gradient(circle_at_22%_36%,rgba(220,169,86,0.54)_0_1.4px,transparent_3px),radial-gradient(circle_at_38%_11%,rgba(255,255,255,0.38)_0_1.2px,transparent_3px),radial-gradient(circle_at_57%_58%,rgba(243,211,130,0.46)_0_1.5px,transparent_3px),radial-gradient(circle_at_84%_42%,rgba(0,245,160,0.38)_0_1.4px,transparent_3px),radial-gradient(circle_at_11%_78%,rgba(0,245,160,0.32)_0_1.5px,transparent_3px)] blur-[0.3px]`} />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_35%_40%,rgba(0,155,114,0.12),transparent_34rem),radial-gradient(ellipse_at_82%_62%,rgba(220,169,86,0.1),transparent_30rem)] blur-[1px]" />
       {stars.map(([position, color], index) => (
         <span

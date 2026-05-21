@@ -36,11 +36,11 @@ const desktopLinks = [
   { label: "Match Making", href: "/matchmaking", activePaths: ["/match", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
   { label: "Numerology", href: "/numerology", activePaths: ["/numerology"] },
   { label: "AI Astrologer", href: "/talk-to-kundli", activePaths: ["/ai-chat", "/talk-to-kundli", "/chatbot"] },
-  { label: "Tarot", href: "/tarot", activePaths: ["/tarot"] },
-  { label: "Remedies", href: "/reports", activePaths: ["/reports"] }
+  { label: "Tarot", href: "/tarot", activePaths: ["/tarot"] }
 ] as const;
 
 const moreLinks = [
+  { labelKey: "remedies", href: "/reports", activePaths: ["/reports"] },
   { labelKey: "reports", href: "/reports", activePaths: ["/reports"] },
   { labelKey: "calculators", href: "/calculators", activePaths: ["/calculators"] },
   { labelKey: "zodiac", href: "/zodiac", activePaths: ["/zodiac"] },
@@ -153,20 +153,20 @@ export function MainNav() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/[0.04] bg-[#020612]/72 shadow-[0_14px_48px_rgba(0,0,0,0.42)] backdrop-blur-md">
-      <div className="mx-auto flex h-24 w-full max-w-[1440px] items-center gap-8 px-6 xl:px-12">
-        <div className="flex-shrink-0 xl:min-w-[220px] 2xl:min-w-[236px]">
-          <BrandLogo />
+      <div className="mx-auto flex h-24 w-full max-w-[1440px] items-center gap-3 px-4 lg:gap-4 xl:h-24 xl:px-6 2xl:gap-6 2xl:px-12">
+        <div className="flex min-w-[11.5rem] flex-shrink-0 items-center md:min-w-[13rem] xl:basis-[13rem] 2xl:basis-[14.5rem]">
+          <BrandLogo className="max-w-full" />
         </div>
-        <nav className="ml-12 hidden min-w-0 flex-1 items-center justify-center gap-8 xl:flex" aria-label="Primary navigation">
-          {desktopLinks.map((item) => {
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1.5 xl:flex 2xl:gap-3" aria-label="Primary navigation">
+          {desktopLinks.map((item, index) => {
             const active = isActiveRoute(pathname, item.href, item.activePaths);
             return (
             <Link
-              key={item.href}
+              key={`${item.label}-${item.href}-${index}`}
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-4 py-2 text-[0.82rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-4 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] hover:drop-shadow-[0_0_10px_rgba(0,155,114,0.38)] 2xl:text-sm",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.72rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-2.5 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] hover:drop-shadow-[0_0_10px_rgba(0,155,114,0.38)] 2xl:px-3.5 2xl:text-[0.84rem]",
                 active
                   ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
                   : "text-[#ffffff]"
@@ -182,7 +182,7 @@ export function MainNav() {
               aria-haspopup="menu"
               aria-expanded={moreActive}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-5 py-2 text-[0.82rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-5 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:text-sm",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[0.72rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-4 2xl:text-[0.84rem]",
                 moreActive
                   ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
                   : "text-[#ffffff]"
@@ -191,11 +191,11 @@ export function MainNav() {
               {tr("moreShort")}
             </button>
             <div className="invisible absolute right-0 top-full z-50 mt-3 w-56 translate-y-2 rounded-lg border border-[#dca956]/25 bg-[#020612]/95 p-2 opacity-0 shadow-[0_18px_60px_rgba(0,5,16,0.62),0_0_32px_rgba(0,155,114,0.18)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-              {moreLinks.map((item) => {
+              {moreLinks.map((item, index) => {
                 const active = isActiveRoute(pathname, item.href, item.activePaths);
                 return (
                   <Link
-                    key={item.href}
+                    key={`${item.labelKey}-${item.href}-${index}`}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
@@ -210,16 +210,10 @@ export function MainNav() {
             </div>
           </div>
         </nav>
-        <div className="ml-auto flex flex-shrink-0 items-center gap-4 border-l border-white/[0.08] pl-4">
-          <LanguageSwitcher />
+        <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-white/[0.08] pl-2 lg:gap-2.5 2xl:gap-4 2xl:pl-4">
+          <LanguageSwitcher className="w-[118px] min-w-[118px] 2xl:w-[132px] 2xl:min-w-[132px]" />
           <ThemeToggle />
           <AuthProfileMenu />
-          <Button asChild className="hidden flex-shrink-0 whitespace-nowrap rounded-lg bg-[#009b72] px-4 shadow-[0_0_20px_rgba(0,155,114,0.28)] xl:inline-flex">
-            <Link href="/signup">
-              <Sparkles className="h-4 w-4" />
-              <span>शुरू करें</span>
-            </Link>
-          </Button>
           <Button
             ref={menuButtonRef}
             variant="outline"

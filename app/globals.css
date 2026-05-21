@@ -86,14 +86,66 @@ html {
 }
 
 body {
+  position: relative;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
-    radial-gradient(circle at 12% 8%, rgba(0, 155, 114, 0.18), transparent 31rem),
-    radial-gradient(circle at 82% 2%, rgba(220, 169, 86, 0.14), transparent 28rem),
+    radial-gradient(circle, rgba(255, 255, 255, 0.5) 0.8px, transparent 1.3px),
+    radial-gradient(circle, rgba(243, 211, 130, 0.34) 0.9px, transparent 1.6px),
+    radial-gradient(circle, rgba(0, 245, 160, 0.18) 0.7px, transparent 1.3px),
+    radial-gradient(circle at 12% 8%, rgba(0, 245, 160, 0.13), transparent 30rem),
+    radial-gradient(circle at 82% 2%, rgba(220, 169, 86, 0.13), transparent 28rem),
     radial-gradient(circle at 56% 78%, rgba(88, 28, 135, 0.16), transparent 38rem),
-    linear-gradient(135deg, #020612 0%, #0a1224 52%, #020612 100%);
+    radial-gradient(circle at 50% 120%, rgba(10, 18, 36, 0.9), transparent 44rem),
+    linear-gradient(135deg, #020612 0%, #0a1224 48%, #020612 100%);
+  background-position: 0 0, 34px 58px, 88px 26px, center, center, center, center, center;
+  background-size: 92px 92px, 156px 156px, 220px 220px, auto, auto, auto, auto, auto;
   color: hsl(var(--foreground));
   font-family: var(--font-poppins), var(--font-inter), system-ui, sans-serif;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+body::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.78) 0.65px, transparent 1.2px),
+    radial-gradient(circle, rgba(148, 163, 184, 0.38) 0.75px, transparent 1.4px),
+    radial-gradient(circle, rgba(243, 211, 130, 0.48) 0.85px, transparent 1.7px),
+    radial-gradient(circle, rgba(0, 245, 160, 0.3) 0.75px, transparent 1.5px);
+  background-position: 0 0, 22px 47px, 64px 18px, 118px 72px;
+  background-size: 74px 74px, 118px 118px, 168px 168px, 230px 230px;
+  opacity: 0.78;
+  transform: translateZ(0);
+  animation: night-sky-drift 34s ease-in-out infinite alternate;
+}
+
+body::after {
+  background:
+    radial-gradient(circle at 8% 15%, rgba(255, 255, 255, 0.52) 0 1px, transparent 2.4px),
+    radial-gradient(circle at 14% 58%, rgba(243, 211, 130, 0.64) 0 1.8px, transparent 4.5px),
+    radial-gradient(circle at 24% 28%, rgba(255, 255, 255, 0.44) 0 1.2px, transparent 3px),
+    radial-gradient(circle at 38% 78%, rgba(0, 245, 160, 0.46) 0 1.6px, transparent 4px),
+    radial-gradient(circle at 54% 18%, rgba(243, 211, 130, 0.58) 0 1.5px, transparent 4px),
+    radial-gradient(circle at 68% 62%, rgba(255, 255, 255, 0.5) 0 1.4px, transparent 3.5px),
+    radial-gradient(circle at 79% 31%, rgba(251, 192, 45, 0.5) 0 1.8px, transparent 4.8px),
+    radial-gradient(circle at 91% 74%, rgba(0, 245, 160, 0.42) 0 1.5px, transparent 4px),
+    radial-gradient(circle at 96% 18%, rgba(255, 255, 255, 0.46) 0 1.2px, transparent 3px),
+    radial-gradient(ellipse at center, transparent 0%, transparent 62%, rgba(2, 6, 18, 0.86) 100%);
+  opacity: 0.92;
+  filter: drop-shadow(0 0 10px rgba(243, 211, 130, 0.22)) drop-shadow(0 0 16px rgba(0, 245, 160, 0.1));
+  animation: night-sky-twinkle 4.6s ease-in-out infinite alternate;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 ::selection {
@@ -137,10 +189,99 @@ body {
 
 .star-field {
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.72) 1px, transparent 1px),
-    radial-gradient(circle, rgba(220, 169, 86, 0.34) 1px, transparent 1px);
+    radial-gradient(circle, rgba(255, 255, 255, 0.58) 0.8px, transparent 1.2px),
+    radial-gradient(circle, rgba(220, 169, 86, 0.32) 0.9px, transparent 1.4px),
+    radial-gradient(circle, rgba(0, 245, 160, 0.2) 0.7px, transparent 1.2px);
   background-position: 0 0, 24px 34px;
-  background-size: 84px 84px, 128px 128px;
+  background-size: 84px 84px, 128px 128px, 156px 156px;
+}
+
+.nx-night-sky {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 75% 45%, rgba(0, 245, 160, 0.13), transparent 26%),
+    radial-gradient(circle at 18% 65%, rgba(220, 169, 86, 0.12), transparent 24%),
+    radial-gradient(circle at 50% 20%, rgba(15, 28, 58, 0.9), transparent 45%),
+    linear-gradient(135deg, #020612 0%, #0a1224 45%, #020612 100%);
+}
+
+.nx-night-sky::before,
+.nx-night-sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.nx-night-sky::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(243, 211, 130, 0.8) 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(0, 245, 160, 0.55) 1px, transparent 2px),
+    radial-gradient(circle, rgba(148, 163, 184, 0.36) 0.8px, transparent 1.4px);
+  background-position: 0 0, 40px 70px, 120px 40px, 18px 36px;
+  background-size: 90px 90px, 140px 140px, 220px 220px, 64px 64px;
+  opacity: 0.78;
+  animation: nx-star-drift 80s linear infinite;
+}
+
+.nx-night-sky::after {
+  background:
+    radial-gradient(circle at 12% 72%, rgba(243, 211, 130, 0.95) 0 2px, rgba(243, 211, 130, 0.24) 3px, transparent 18px),
+    radial-gradient(circle at 24% 48%, rgba(0, 245, 160, 0.95) 0 2px, rgba(0, 245, 160, 0.24) 4px, transparent 22px),
+    radial-gradient(circle at 64% 36%, rgba(255, 255, 255, 0.9) 0 2px, rgba(255, 255, 255, 0.18) 4px, transparent 18px),
+    radial-gradient(circle at 78% 70%, rgba(220, 169, 86, 0.95) 0 2px, rgba(220, 169, 86, 0.22) 4px, transparent 22px),
+    radial-gradient(circle at 92% 52%, rgba(0, 245, 160, 0.9) 0 3px, rgba(0, 245, 160, 0.2) 5px, transparent 28px),
+    radial-gradient(ellipse at center, transparent 0%, transparent 62%, rgba(2, 6, 18, 0.86) 100%);
+  opacity: 0.92;
+  filter: drop-shadow(0 0 10px rgba(243, 211, 130, 0.45));
+  animation: nx-twinkle 5s ease-in-out infinite alternate;
+}
+
+.nx-nebula-layer,
+.nx-starfield,
+.nx-star-depth {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nx-nebula-layer {
+  z-index: 1;
+  background:
+    radial-gradient(circle at 74% 38%, rgba(0, 245, 160, 0.18), transparent 22rem),
+    radial-gradient(circle at 18% 68%, rgba(220, 169, 86, 0.13), transparent 20rem),
+    radial-gradient(circle at 48% 18%, rgba(88, 28, 135, 0.18), transparent 26rem);
+  filter: blur(0.5px);
+}
+
+.nx-starfield {
+  z-index: 2;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.88) 0 1px, transparent 1.6px),
+    radial-gradient(circle, rgba(243, 211, 130, 0.72) 0 1px, transparent 1.9px),
+    radial-gradient(circle, rgba(0, 245, 160, 0.46) 0 1px, transparent 2px);
+  background-size: 72px 72px, 116px 116px, 184px 184px;
+  background-position: 8px 12px, 52px 78px, 118px 36px;
+  opacity: 0.72;
+  animation: nx-star-drift 80s linear infinite;
+}
+
+.nx-star-depth {
+  z-index: 3;
+  background:
+    radial-gradient(circle at 9% 24%, rgba(255, 255, 255, 0.62) 0 1.4px, transparent 5px),
+    radial-gradient(circle at 17% 72%, rgba(243, 211, 130, 0.8) 0 2px, rgba(243, 211, 130, 0.24) 4px, transparent 20px),
+    radial-gradient(circle at 31% 42%, rgba(0, 245, 160, 0.74) 0 1.8px, rgba(0, 245, 160, 0.22) 4px, transparent 19px),
+    radial-gradient(circle at 57% 20%, rgba(255, 255, 255, 0.62) 0 1.6px, transparent 8px),
+    radial-gradient(circle at 72% 60%, rgba(220, 169, 86, 0.78) 0 2px, rgba(220, 169, 86, 0.2) 5px, transparent 24px),
+    radial-gradient(circle at 91% 36%, rgba(0, 245, 160, 0.7) 0 2px, rgba(0, 245, 160, 0.2) 5px, transparent 24px);
+  opacity: 0.86;
+  filter: drop-shadow(0 0 10px rgba(243, 211, 130, 0.28));
+  animation: nx-twinkle 5s ease-in-out infinite alternate;
 }
 
 @keyframes cosmic-float {
@@ -193,6 +334,55 @@ body {
   }
 }
 
+@keyframes night-sky-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-18px, 12px, 0) scale(1.03);
+  }
+}
+
+@keyframes night-sky-twinkle {
+  from {
+    opacity: 0.62;
+  }
+  to {
+    opacity: 0.96;
+  }
+}
+
+@keyframes nx-star-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-90px, 60px, 0);
+  }
+}
+
+@keyframes nx-twinkle {
+  0% {
+    opacity: 0.55;
+    filter: brightness(0.9);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
+  .nx-night-sky::before,
+  .nx-night-sky::after,
+  .nx-starfield,
+  .nx-star-depth {
+    animation: none;
+  }
+}
+
 @layer base {
   select,
   textarea,
@@ -210,7 +400,7 @@ body {
   .naksh-page-bg {
     @apply bg-[#020612] text-[#ffffff];
     background:
-      radial-gradient(circle at 10% 8%, rgba(0, 155, 114, 0.2), transparent 30rem),
+      radial-gradient(circle at 10% 8%, rgba(0, 245, 160, 0.14), transparent 30rem),
       radial-gradient(circle at 85% 0%, rgba(220, 169, 86, 0.14), transparent 28rem),
       radial-gradient(circle at 55% 78%, rgba(88, 28, 135, 0.16), transparent 36rem),
       linear-gradient(135deg, #020612 0%, #0a1224 50%, #020612 100%);

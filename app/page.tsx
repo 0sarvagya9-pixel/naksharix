@@ -11,7 +11,7 @@ export const metadata: Metadata = seo({
 
 export default function HomePage() {
   return (
-    <main className="overflow-hidden bg-[#020612]">
+    <main className="nx-night-sky overflow-hidden bg-[#020612]">
       <HomeHero />
       <FeatureGrid />
       <AstrologerShowcase />
