@@ -1,6 +1,7 @@
 import type { normalizeKundliPdfData } from "@/lib/kundli/pdf-data";
 import { translateAstroValue, translatePlanet, translateSign, type AstroValueCategory } from "@/lib/kundli/chart-mapping";
 import type { ComponentType, ReactElement } from "react";
+import fs from "node:fs";
 import path from "node:path";
 
 type PdfData = ReturnType<typeof normalizeKundliPdfData>;
@@ -33,6 +34,7 @@ type ChartPlanet = {
 
 type ChartHouse = {
   house?: unknown;
+  sign?: unknown;
   signNumber?: unknown;
   planets?: Array<string | ChartPlanet>;
 };
@@ -47,7 +49,9 @@ type PdfFontRegistry = {
 
 const PDF_FONT_FAMILY = "NotoSansDevanagari";
 const PDF_LOGO_PATH = path.join(process.cwd(), "public", "images", "naksharix-final-logo-symbol.png");
+const PDF_LOGO_MIME = "image/png";
 let pdfFontsRegistered = false;
+let pdfLogoDataUri: string | null | undefined;
 
 const labels = {
   en: {
@@ -194,7 +198,7 @@ const labels = {
     premiumCta: "प्रीमियम रिपोर्ट में उपलब्ध सटीक डेटा के आधार पर गहरा समय विश्लेषण, योग, दोष नोट्स, व्यक्तिगत उपाय और विस्तृत व्याख्या जोड़ी जाती है।",
     freeReport: "मुफ्त कुंडली रिपोर्ट",
     premiumReport: "प्रीमियम कुंडली रिपोर्ट",
-    brandSubtitle: "कॉस्मिक डेस्टिनी",
+    brandSubtitle: "COSMIC DESTINY",
     generatedBy: "नक्षत्रिक्स द्वारा निर्मित",
     pageLabel: "पृष्ठ",
     cleanUnavailable: "उपलब्ध नहीं",
@@ -295,50 +299,53 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
   const PdfView = View as unknown as PdfComponent;
   const lang = labels[language] ? language : "en";
   const isHindi = lang === "hi";
+  const logoSource = loadPdfLogoSource();
   const styles = StyleSheet.create({
-    page: { position: "relative", padding: 30, paddingTop: 25, paddingBottom: 42, backgroundColor: "#020612", color: "#ffffff", fontFamily: PDF_FONT_FAMILY, fontSize: isHindi ? 9.4 : 9.1, lineHeight: isHindi ? 1.52 : 1.38 },
+    page: { position: "relative", padding: isHindi ? 24 : 28, paddingTop: isHindi ? 22 : 24, paddingBottom: 40, backgroundColor: "#020612", color: "#ffffff", fontFamily: PDF_FONT_FAMILY, fontSize: isHindi ? 8.55 : 9, lineHeight: isHindi ? 1.34 : 1.36 },
     watermark: { position: "absolute", top: "40%", left: 55, right: 55, transform: "rotate(-26deg)", opacity: 0.06, display: "flex", alignItems: "center" },
-    watermarkLogo: { width: 70, height: 70, objectFit: "contain", marginBottom: 6 },
-    watermarkText: { color: "#f3d382", fontSize: isHindi ? 24 : 27, textAlign: "center", fontWeight: 800, letterSpacing: 1.5 },
-    watermarkSubtext: { color: "#ffffff", fontSize: 8, textAlign: "center", marginTop: 1, letterSpacing: 2.4 },
-    header: { marginBottom: 7, paddingBottom: 7, borderBottomWidth: 1.2, borderBottomColor: "#dca956", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    watermarkLogo: { width: 96, height: 96, objectFit: "contain", marginBottom: 6 },
+    watermarkText: { color: "#f3d382", fontSize: isHindi ? 25 : 28, textAlign: "center", fontWeight: 800, letterSpacing: isHindi ? 0 : 1.5 },
+    watermarkSubtext: { color: "#ffffff", fontSize: 8, textAlign: "center", marginTop: 1, letterSpacing: isHindi ? 0 : 2.4 },
+    header: { marginBottom: isHindi ? 5 : 7, paddingBottom: isHindi ? 5 : 7, borderBottomWidth: 1.2, borderBottomColor: "#dca956", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
     brandBlock: { width: "56%", display: "flex", flexDirection: "row", alignItems: "center" },
     logo: { width: 28, height: 28, objectFit: "contain", marginRight: 8 },
     brandTextBlock: { display: "flex", flexDirection: "column" },
-    brand: { color: "#f3d382", fontSize: 14, fontWeight: 800, fontFamily: PDF_FONT_FAMILY, lineHeight: 1.05, letterSpacing: 0.8 },
-    brandSubtitle: { color: "#94a3b8", fontSize: 6.8, letterSpacing: 1.6, marginTop: 1 },
+    brand: { color: "#f3d382", fontSize: 14, fontWeight: 800, fontFamily: PDF_FONT_FAMILY, lineHeight: 1.05, letterSpacing: isHindi ? 0 : 0.8 },
+    brandSubtitle: { color: "#94a3b8", fontSize: 6.8, letterSpacing: isHindi ? 0 : 1.6, marginTop: 1 },
     headerMeta: { width: "42%" },
     headerTitle: { color: "#f3d382", fontSize: isHindi ? 9.4 : 8.8, fontWeight: 700, textAlign: "right", marginBottom: 2, lineHeight: isHindi ? 1.34 : 1.15 },
     site: { color: "#94a3b8", fontSize: 7.4, textAlign: "right" },
-    reportTitle: { color: "#f3d382", fontSize: isHindi ? 12.6 : 12.2, fontWeight: 800, marginBottom: 8, lineHeight: isHindi ? 1.34 : 1.2 },
+    reportTitle: { color: "#f3d382", fontSize: isHindi ? 11.4 : 12.2, fontWeight: 800, marginBottom: isHindi ? 6 : 8, lineHeight: isHindi ? 1.26 : 1.2 },
     subtitle: { color: "#94a3b8", fontSize: 9, lineHeight: isHindi ? 1.45 : 1.25 },
     content: { marginTop: 2 },
-    section: { marginBottom: 8, padding: 8.5, borderWidth: 1, borderColor: "#1e293b", borderRadius: 7, backgroundColor: "#0a1224" },
-    sectionTitle: { color: "#f3d382", fontSize: isHindi ? 11.2 : 10.8, fontWeight: 800, marginBottom: 6, lineHeight: isHindi ? 1.34 : 1.18 },
-    row: { display: "flex", flexDirection: "row", borderBottomWidth: 0.45, borderBottomColor: "#1e293b", paddingVertical: isHindi ? 3.8 : 3.5 },
-    key: { width: "38%", color: "#dca956", fontWeight: 700, paddingRight: 5, lineHeight: isHindi ? 1.45 : 1.25 },
-    value: { width: "62%", color: "#ffffff", lineHeight: isHindi ? 1.45 : 1.25 },
+    section: { marginBottom: isHindi ? 5.5 : 7, padding: isHindi ? 6.5 : 8, borderWidth: 1, borderColor: "#1e293b", borderRadius: 7, backgroundColor: "#0a1224" },
+    sectionTitle: { color: "#f3d382", fontSize: isHindi ? 10.3 : 10.8, fontWeight: 800, marginBottom: isHindi ? 4.5 : 6, lineHeight: isHindi ? 1.24 : 1.18 },
+    row: { display: "flex", flexDirection: "row", borderBottomWidth: 0.45, borderBottomColor: "#1e293b", paddingVertical: isHindi ? 2.8 : 3.5 },
+    key: { width: "38%", color: "#dca956", fontWeight: 700, paddingRight: 5, lineHeight: isHindi ? 1.3 : 1.25 },
+    value: { width: "62%", color: "#ffffff", lineHeight: isHindi ? 1.3 : 1.25 },
     grid2: { display: "flex", flexDirection: "row", gap: 8 },
     col: { flex: 1 },
-    chartRow: { display: "flex", flexDirection: "row", gap: 7, marginTop: 2 },
-    chartBox: { flex: 1, padding: 6, borderWidth: 1, borderColor: "#1e293b", borderRadius: 6, backgroundColor: "#0f1c3a", minHeight: 178 },
-    tableHeader: { display: "flex", flexDirection: "row", backgroundColor: "#0f1c3a", color: "#f3d382", paddingVertical: 5.5, paddingHorizontal: 4, fontSize: isHindi ? 8 : 7.8, fontWeight: 800, lineHeight: 1.28 },
-    tableRow: { display: "flex", flexDirection: "row", paddingVertical: isHindi ? 5 : 4.3, paddingHorizontal: 4, borderBottomWidth: 0.45, borderBottomColor: "#1e293b", fontSize: isHindi ? 8 : 7.8, lineHeight: isHindi ? 1.42 : 1.25, color: "#ffffff" },
+    chartRow: { display: "flex", flexDirection: "row", gap: 10, marginTop: 2, marginBottom: 8 },
+    chartBox: { flex: 1, padding: isHindi ? 7 : 8, borderWidth: 1.2, borderColor: "#334155", borderRadius: 7, backgroundColor: "#0f1c3a", minHeight: isHindi ? 258 : 270, alignItems: "center" },
+    chartTitle: { alignSelf: "stretch", color: "#f3d382", fontSize: isHindi ? 11.2 : 10.8, fontWeight: 800, marginBottom: 7, lineHeight: isHindi ? 1.34 : 1.18 },
+    chartNote: { marginBottom: 7, padding: 8, borderWidth: 1, borderColor: "#1e293b", borderRadius: 7, backgroundColor: "#0a1224" },
+    tableHeader: { display: "flex", flexDirection: "row", backgroundColor: "#0f1c3a", color: "#f3d382", paddingVertical: 4.8, paddingHorizontal: 4, fontSize: isHindi ? 7.8 : 7.5, fontWeight: 800, lineHeight: 1.24 },
+    tableRow: { display: "flex", flexDirection: "row", paddingVertical: isHindi ? 4.2 : 3.8, paddingHorizontal: 4, borderBottomWidth: 0.45, borderBottomColor: "#1e293b", fontSize: isHindi ? 7.8 : 7.5, lineHeight: isHindi ? 1.36 : 1.22, color: "#ffffff" },
     cellPlanet: { width: "15%" },
     cellSign: { width: "18%" },
     cellSmall: { width: "10%" },
     cellWide: { width: "24%" },
-    paragraph: { marginBottom: 5.2, fontSize: isHindi ? 9.45 : 9, color: "#ffffff", lineHeight: isHindi ? 1.52 : 1.36 },
-    mutedParagraph: { marginBottom: 5.2, fontSize: isHindi ? 8.9 : 8.6, color: "#94a3b8", lineHeight: isHindi ? 1.45 : 1.32 },
-    goldParagraph: { marginBottom: 5.2, fontSize: isHindi ? 9.45 : 9, color: "#f3d382", lineHeight: isHindi ? 1.52 : 1.36, fontWeight: 700 },
-    coverPanel: { marginBottom: 10, padding: 18, borderWidth: 1.3, borderColor: "#dca956", borderRadius: 10, backgroundColor: "#0a1224" },
-    coverBrandRow: { display: "flex", flexDirection: "row", alignItems: "center", marginBottom: 16 },
-    coverLogo: { width: 58, height: 58, objectFit: "contain", marginRight: 12 },
-    coverBrandName: { color: "#f3d382", fontSize: 26, fontWeight: 800, letterSpacing: 1.7, lineHeight: 1.02 },
-    coverBrandSubtitle: { color: "#94a3b8", fontSize: 8.5, letterSpacing: 2.6, marginTop: 3 },
-    coverDivider: { height: 1.2, backgroundColor: "#dca956", marginBottom: 14, opacity: 0.9 },
-    coverTitle: { color: "#f3d382", fontSize: isHindi ? 20 : 20, fontWeight: 800, marginBottom: 8, lineHeight: isHindi ? 1.3 : 1.1 },
-    coverSubtitle: { color: "#94a3b8", fontSize: isHindi ? 10 : 9.5, lineHeight: isHindi ? 1.55 : 1.35 },
+    paragraph: { marginBottom: isHindi ? 4.1 : 5.2, fontSize: isHindi ? 8.7 : 9, color: "#ffffff", lineHeight: isHindi ? 1.35 : 1.36 },
+    mutedParagraph: { marginBottom: isHindi ? 4.1 : 5.2, fontSize: isHindi ? 8.25 : 8.6, color: "#94a3b8", lineHeight: isHindi ? 1.32 : 1.32 },
+    goldParagraph: { marginBottom: isHindi ? 4.1 : 5.2, fontSize: isHindi ? 8.7 : 9, color: "#f3d382", lineHeight: isHindi ? 1.35 : 1.36, fontWeight: 700 },
+    coverPanel: { marginBottom: isHindi ? 6 : 8, padding: isHindi ? 11 : 14, borderWidth: 1.3, borderColor: "#dca956", borderRadius: 10, backgroundColor: "#0a1224" },
+    coverBrandRow: { display: "flex", flexDirection: "row", alignItems: "center", marginBottom: isHindi ? 8 : 11 },
+    coverLogo: { width: isHindi ? 58 : 72, height: isHindi ? 58 : 72, objectFit: "contain", marginRight: 12 },
+    coverBrandName: { color: "#f3d382", fontSize: isHindi ? 21 : 24, fontWeight: 800, letterSpacing: isHindi ? 0 : 1.5, lineHeight: 1.02 },
+    coverBrandSubtitle: { color: "#94a3b8", fontSize: 8.5, letterSpacing: isHindi ? 0 : 2.6, marginTop: 3 },
+    coverDivider: { height: 1.2, backgroundColor: "#dca956", marginBottom: isHindi ? 7 : 10, opacity: 0.9 },
+    coverTitle: { color: "#f3d382", fontSize: isHindi ? 15.5 : 18.5, fontWeight: 800, marginBottom: isHindi ? 4 : 6, lineHeight: isHindi ? 1.18 : 1.08 },
+    coverSubtitle: { color: "#94a3b8", fontSize: isHindi ? 8.2 : 9, lineHeight: isHindi ? 1.27 : 1.28 },
     badge: { alignSelf: "flex-start", marginBottom: 8, paddingVertical: 4, paddingHorizontal: 8, borderWidth: 1, borderColor: "#1e293b", borderRadius: 999, color: "#00f5a0", backgroundColor: "#0f1c3a", fontSize: 8.2, fontWeight: 700 },
     bullet: { marginBottom: 4, color: "#ffffff", fontSize: isHindi ? 9.4 : 8.9, lineHeight: isHindi ? 1.52 : 1.35 },
     footer: { position: "absolute", left: 30, right: 30, bottom: 15, paddingTop: 5, borderTopWidth: 0.6, borderTopColor: "#1e293b", display: "flex", flexDirection: "row", justifyContent: "space-between", color: "#94a3b8", fontSize: 7.2 },
@@ -346,7 +353,7 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
     pageCounter: { color: "#f3d382", fontSize: 7.2, fontWeight: 700 }
   });
 
-  const text: PdfTextFactory = (value, style, props = {}) => h(PdfText, { ...props, style }, safeText(value, lang));
+  const text: PdfTextFactory = (value, style, props = {}) => h(PdfText, { ...props, style: pdfTextStyle(style, lang) }, safeText(value, lang));
   const row = (key: unknown, value: unknown) => h(PdfView, { key: `${safeText(key, lang)}-${safeText(value, lang)}`, style: styles.row }, [
     text(key, styles.key, { key: "k" }),
     text(value, styles.value, { key: "v" })
@@ -358,7 +365,7 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
   const paragraph = (value: unknown, key: string, style = styles.paragraph) => text(value, style, { key });
   const bullets = (items: unknown[], keyPrefix: string) => items.map((item, index) => text(`• ${safeText(item, lang)}`, styles.bullet, { key: `${keyPrefix}-${index}` }));
   const generatedDate = new Date().toISOString().slice(0, 10);
-  const makePage = (title: string, children: ReactElement[]) => page(h, text, PdfPage, PdfView, PdfImage, PdfText, styles, lang, pdfType, title, generatedDate, children);
+  const makePage = (title: string, children: ReactElement[]) => page(h, text, PdfPage, PdfView, PdfImage, PdfText, styles, lang, title, generatedDate, logoSource, children);
 
   const ascendant = translateSignValue(data.avakahada?.ascendant, lang);
   const moonSign = translateSignValue(data.avakahada?.moonSign, lang);
@@ -383,7 +390,7 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
     makePage(labels[lang].title, [
       h(PdfView, { key: "cover", style: styles.coverPanel }, [
         h(PdfView, { key: "cover-brand", style: styles.coverBrandRow }, [
-          h(PdfImage, { key: "cover-logo", src: PDF_LOGO_PATH, style: styles.coverLogo }),
+          logoSource ? h(PdfImage, { key: "cover-logo", src: logoSource, style: styles.coverLogo }) : null,
           h(PdfView, { key: "cover-brand-text" }, [
             text("NAKSHARIX", styles.coverBrandName, { key: "cover-name" }),
             text(labels[lang].brandSubtitle, styles.coverBrandSubtitle, { key: "cover-subtitle" })
@@ -394,30 +401,35 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
         text(labels[lang].title, styles.coverTitle, { key: "cover-title" }),
         text(labels[lang].intro, styles.coverSubtitle, { key: "intro" })
       ]),
-      section(labels[lang].summary, [
-        row(labels[lang].nativeName, data.personDetails?.name),
-        row(labels[lang].reportLanguage, languageName(lang)),
-        row(labels[lang].generatedDate, generatedDate),
-        row(labels[lang].lagna, ascendant),
-        row(labels[lang].moonSign, moonSign),
-        row(labels[lang].nakshatra, translateByCategory(data.avakahada?.nakshatra ?? data.panchang?.nakshatra, lang, "nakshatra"))
-      ])
+      h(PdfView, { key: "cover-grid", style: styles.grid2 }, [
+        h(PdfView, { key: "summary-col", style: styles.col }, [section(labels[lang].summary, [
+          row(labels[lang].nativeName, data.personDetails?.name),
+          row(labels[lang].reportLanguage, languageName(lang)),
+          row(labels[lang].generatedDate, generatedDate),
+          row(labels[lang].lagna, ascendant),
+          row(labels[lang].moonSign, moonSign),
+          row(labels[lang].nakshatra, translateByCategory(data.avakahada?.nakshatra ?? data.panchang?.nakshatra, lang, "nakshatra"))
+        ])]),
+        h(PdfView, { key: "birth-col", style: styles.col }, [section(labels[lang].birth, birthRows)])
+      ]),
+      section(labels[lang].panchang, panchangRows)
     ]),
-    makePage(`${labels[lang].birth} + ${labels[lang].panchang}`, [
-      h(PdfView, { key: "top", style: styles.grid2 }, [
-        h(PdfView, { key: "left", style: styles.col }, [section(labels[lang].birth, birthRows)]),
-        h(PdfView, { key: "right", style: styles.col }, [section(labels[lang].panchang, panchangRows)])
-      ])
-    ]),
-    makePage(labels[lang].charts, [
+    makePage(`${labels[lang].charts} + ${labels[lang].planets}`, [
       h(PdfView, { key: "charts", style: styles.chartRow }, [
         chartPanel(h, text, PdfView, styles, PdfSvg, PdfRect, PdfLine, PdfText, labels[lang].d1Chart, data.d1Chart, lang),
-        chartPanel(h, text, PdfView, styles, PdfSvg, PdfRect, PdfLine, PdfText, labels[lang].d9Chart, data.d9Chart, lang),
-        chartPanel(h, text, PdfView, styles, PdfSvg, PdfRect, PdfLine, PdfText, labels[lang].chalitChart, data.chalitChart, lang)
+        chartPanel(h, text, PdfView, styles, PdfSvg, PdfRect, PdfLine, PdfText, labels[lang].d9Chart, data.d9Chart, lang)
+      ]),
+      h(PdfView, { key: "chalit-note", style: styles.chartNote }, [
+        text(labels[lang].chalitChart, styles.sectionTitle, { key: "title" }),
+        text(Array.isArray(data.chalitChart) && data.chalitChart.length ? chartExplanation(lang) : chartUnavailable(labels[lang].chalitChart, lang), styles.mutedParagraph, { key: "note" })
+      ]),
+      section(labels[lang].charts, [
+        paragraph(chartExplanation(lang), "chart-explanation", styles.mutedParagraph)
+      ]),
+      section(labels[lang].planets, [
+        planetTable(h, text, PdfView, styles, data.planetaryPositions, lang),
+        ...planetaryHighlights(data, lang).map((line, index) => paragraph(line, `planet-highlight-${index}`, index === 0 ? styles.goldParagraph : styles.mutedParagraph))
       ])
-    ]),
-    makePage(labels[lang].planets, [
-      section(labels[lang].planets, [planetTable(h, text, PdfView, styles, data.planetaryPositions, lang)])
     ]),
     makePage(labels[lang].detailedAnalysis, [
       section(labels[lang].lagnaSummary, [
@@ -485,20 +497,20 @@ function page(
   Text: PdfComponent,
   styles: PdfStyles,
   lang: Locale,
-  pdfType: "FREE" | "PREMIUM",
   title: string,
   generatedDate: string,
+  logoSource: string | null,
   children: ReactElement[]
 ) {
   return h(Page, { key: title, size: "A4", style: styles.page }, [
     h(View, { key: "watermark", fixed: true, style: styles.watermark }, [
-      h(Image, { key: "watermark-logo", src: PDF_LOGO_PATH, style: styles.watermarkLogo }),
+      logoSource ? h(Image, { key: "watermark-logo", src: logoSource, style: styles.watermarkLogo }) : null,
       text("NAKSHARIX", styles.watermarkText, { key: "watermark-name" }),
       text(labels[lang].brandSubtitle, styles.watermarkSubtext, { key: "watermark-subtitle" })
     ]),
     h(View, { key: "header", fixed: true, style: styles.header }, [
       h(View, { key: "brand", style: styles.brandBlock }, [
-        h(Image, { key: "logo", src: PDF_LOGO_PATH, style: styles.logo }),
+        logoSource ? h(Image, { key: "logo", src: logoSource, style: styles.logo }) : null,
         h(View, { key: "brand-texts", style: styles.brandTextBlock }, [
           text("NAKSHARIX", styles.brand, { key: "brand-text" }),
           text(labels[lang].brandSubtitle, styles.brandSubtitle, { key: "brand-subtitle" })
@@ -517,7 +529,7 @@ function page(
       h(Text, {
         key: "page-number",
         fixed: true,
-        style: styles.pageCounter,
+        style: pdfTextStyle(styles.pageCounter, lang),
         render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) => `${labels[lang].pageLabel} ${pageNumber} / ${totalPages}`
       })
     ])
@@ -576,8 +588,8 @@ function chartPanel(
   houses: unknown[],
   lang: Locale
 ) {
-  return h(View, { key: title, style: styles.chartBox, wrap: false }, [
-    text(title, styles.sectionTitle, { key: "title" }),
+  return h(View, { key: title, style: styles.chartBox }, [
+    text(title, styles.chartTitle, { key: "title" }),
     Array.isArray(houses) && houses.length ? chart(h, View, Svg, Rect, Line, SvgText, houses, lang) : text(chartUnavailable(title, lang), styles.mutedParagraph, { key: "empty" })
   ]);
 }
@@ -592,31 +604,82 @@ function chart(
   houses: unknown[],
   lang: Locale
 ) {
-  const chartLayout: Record<number, { signX: number; signY: number; planetX: number; planetY: number }> = {
-    1: { signX: 150, signY: 32, planetX: 150, planetY: 54 }, 2: { signX: 78, signY: 24, planetX: 88, planetY: 56 },
-    3: { signX: 34, signY: 78, planetX: 56, planetY: 100 }, 4: { signX: 78, signY: 136, planetX: 88, planetY: 156 },
-    5: { signX: 34, signY: 186, planetX: 56, planetY: 204 }, 6: { signX: 86, signY: 236, planetX: 96, planetY: 254 },
-    7: { signX: 150, signY: 220, planetX: 150, planetY: 244 }, 8: { signX: 214, signY: 236, planetX: 204, planetY: 254 },
-    9: { signX: 266, signY: 186, planetX: 244, planetY: 204 }, 10: { signX: 222, signY: 136, planetX: 212, planetY: 156 },
-    11: { signX: 266, signY: 78, planetX: 244, planetY: 100 }, 12: { signX: 214, signY: 24, planetX: 204, planetY: 56 }
+  const chartLayout: Record<number, { signX: number; signY: number; clusterX: number; clusterY: number; maxWidth?: number }> = {
+    1: { signX: 150, signY: 30, clusterX: 150, clusterY: 64, maxWidth: 74 },
+    2: { signX: 79, signY: 26, clusterX: 96, clusterY: 72, maxWidth: 58 },
+    3: { signX: 35, signY: 78, clusterX: 66, clusterY: 108, maxWidth: 52 },
+    4: { signX: 78, signY: 137, clusterX: 94, clusterY: 160, maxWidth: 58 },
+    5: { signX: 35, signY: 188, clusterX: 68, clusterY: 196, maxWidth: 52 },
+    6: { signX: 88, signY: 235, clusterX: 110, clusterY: 239, maxWidth: 54 },
+    7: { signX: 150, signY: 219, clusterX: 150, clusterY: 244, maxWidth: 74 },
+    8: { signX: 212, signY: 235, clusterX: 190, clusterY: 239, maxWidth: 54 },
+    9: { signX: 265, signY: 188, clusterX: 232, clusterY: 196, maxWidth: 52 },
+    10: { signX: 222, signY: 137, clusterX: 206, clusterY: 160, maxWidth: 58 },
+    11: { signX: 265, signY: 78, clusterX: 234, clusterY: 108, maxWidth: 52 },
+    12: { signX: 212, signY: 26, clusterX: 204, clusterY: 72, maxWidth: 58 }
   };
   const lines = [[0, 0, 300, 280], [300, 0, 0, 280], [150, 0, 300, 140], [300, 140, 150, 280], [150, 280, 0, 140], [0, 140, 150, 0], [75, 70, 225, 70], [75, 210, 225, 210], [75, 70, 75, 210], [225, 70, 225, 210]];
-  return h(View, { key: "chart-view", wrap: false, style: { width: 150, marginVertical: 4 } }, [
-    h(Svg, { key: "svg", width: 150, height: 140, viewBox: "0 0 300 280" }, [
-      h(Rect, { key: "border", x: 1, y: 1, width: 298, height: 278, fill: "#0a1224", stroke: "#dca956", strokeWidth: 2 }),
-      ...lines.map(([x1, y1, x2, y2], index) => h(Line, { key: `line-${index}`, x1, y1, x2, y2, stroke: "#1e293b", strokeWidth: index < 6 ? 1.4 : 1.1 })),
+  return h(View, { key: "chart-view", wrap: false, style: { width: 238, height: 222, marginVertical: 2, alignSelf: "center" } }, [
+    h(Svg, { key: "svg", width: 238, height: 222, viewBox: "0 0 300 280" }, [
+      h(Rect, { key: "border", x: 1, y: 1, width: 298, height: 278, rx: 5, fill: "#0f1c3a", stroke: "#dca956", strokeWidth: 2.6 }),
+      ...lines.map(([x1, y1, x2, y2], index) => h(Line, { key: `line-${index}`, x1, y1, x2, y2, stroke: index < 6 ? "#dca956" : "#334155", strokeOpacity: index < 6 ? 0.72 : 0.95, strokeWidth: index < 6 ? 1.7 : 1.45 })),
       ...Array.from({ length: 12 }, (_, index) => {
         const houseNumber = index + 1;
         const house = houses.map(toChartHouse).find((item) => Number(item.house) === houseNumber) ?? { house: houseNumber, planets: [] };
         const layout = chartLayout[houseNumber];
-        const planets = planetLabels(house, lang).slice(0, 4);
+        const planets = visibleChartPlanetLabels(planetLabels(house, lang));
+        const planetNodes = planetClusterPositions(planets.length, layout.clusterX, layout.clusterY, layout.maxWidth).map((position, planetIndex) => {
+          const planet = planets[planetIndex];
+          return h(SvgText, {
+            key: `p-${planetIndex}`,
+            x: position.x,
+            y: position.y,
+            textAnchor: "middle",
+            fill: planetIndex === 0 ? "#f3d382" : "#ffffff",
+            style: { fontFamily: PDF_FONT_FAMILY, fontSize: position.fontSize, fontWeight: "bold" }
+          }, safeText(planet, lang));
+        });
         return [
-          h(SvgText, { key: "sign", x: layout.signX, y: layout.signY, textAnchor: "middle", fill: "#f3d382", style: { fontFamily: PDF_FONT_FAMILY, fontSize: 12, fontWeight: "bold" } }, safeText(house?.signNumber ?? labels[lang].dash, lang)),
-          ...(planets.length ? planets : [labels[lang].dash]).map((planet, planetIndex) => h(SvgText, { key: `p-${planetIndex}`, x: layout.planetX, y: layout.planetY + planetIndex * 15, textAnchor: "middle", fill: "#ffffff", style: { fontFamily: PDF_FONT_FAMILY, fontSize: 10.5, fontWeight: "bold" } }, safeText(planet, lang)))
+          h(SvgText, { key: "sign", x: layout.signX, y: layout.signY, textAnchor: "middle", fill: "#fbc02d", style: { fontFamily: PDF_FONT_FAMILY, fontSize: 17, fontWeight: "bold" } }, safeText(house?.signNumber ?? labels[lang].dash, lang)),
+          ...planetNodes
         ];
       }).flat()
     ])
   ]);
+}
+
+function visibleChartPlanetLabels(planets: string[]) {
+  if (planets.length <= 6) return planets;
+  return [...planets.slice(0, 5), `+${planets.length - 5}`];
+}
+
+function pdfTextStyle(style: unknown, lang: Locale) {
+  const fontPatch = lang === "hi" ? { fontFamily: PDF_FONT_FAMILY, letterSpacing: 0 } : { fontFamily: PDF_FONT_FAMILY };
+  if (Array.isArray(style)) return [...style, fontPatch];
+  if (style && typeof style === "object") return { ...(style as Record<string, unknown>), ...fontPatch };
+  return fontPatch;
+}
+
+function planetClusterPositions(count: number, centerX: number, centerY: number, maxWidth = 64) {
+  if (count <= 0) return [];
+  const visibleCount = Math.min(count, 6);
+  const fontSize = visibleCount >= 5 ? 9.8 : visibleCount >= 4 ? 11.3 : visibleCount >= 2 ? 12.4 : 13.2;
+  const colGap = Math.min(21, Math.max(16, maxWidth / 3));
+  const rowGap = visibleCount >= 5 ? 10.8 : visibleCount >= 4 ? 12.8 : 14.4;
+  if (visibleCount === 1) return [{ x: centerX, y: centerY, fontSize }];
+  if (visibleCount === 2) return [
+    { x: centerX, y: centerY - rowGap / 2, fontSize },
+    { x: centerX, y: centerY + rowGap / 2, fontSize }
+  ];
+  const rows = Math.ceil(visibleCount / 2);
+  return Array.from({ length: visibleCount }, (_, index) => {
+    const row = Math.floor(index / 2);
+    const isLastOdd = visibleCount === 3 && index === 2;
+    const col = index % 2;
+    const x = isLastOdd ? centerX : centerX + (col === 0 ? -colGap / 2 : colGap / 2);
+    const y = centerY + (row - (rows - 1) / 2) * rowGap;
+    return { x, y, fontSize };
+  });
 }
 
 function registerPdfFonts(Font: PdfFontRegistry) {
@@ -632,6 +695,24 @@ function registerPdfFonts(Font: PdfFontRegistry) {
     ]
   });
   pdfFontsRegistered = true;
+}
+
+function loadPdfLogoSource() {
+  if (pdfLogoDataUri !== undefined) return pdfLogoDataUri;
+  try {
+    if (!fs.existsSync(PDF_LOGO_PATH)) {
+      console.warn("[Naksharix PDF] Logo asset not found for PDF branding", { path: PDF_LOGO_PATH });
+      pdfLogoDataUri = null;
+      return pdfLogoDataUri;
+    }
+    const bytes = fs.readFileSync(PDF_LOGO_PATH);
+    pdfLogoDataUri = `data:${PDF_LOGO_MIME};base64,${bytes.toString("base64")}`;
+    return pdfLogoDataUri;
+  } catch (error) {
+    console.warn("[Naksharix PDF] Unable to embed PDF logo asset", { path: PDF_LOGO_PATH, error });
+    pdfLogoDataUri = null;
+    return pdfLogoDataUri;
+  }
 }
 
 function planetLabels(house: ChartHouse, lang: Locale) {
@@ -650,7 +731,7 @@ function toDashaRow(value: unknown): DashaRow {
 function toChartHouse(value: unknown): ChartHouse {
   if (!isRecord(value)) return { planets: [] };
   const planets = Array.isArray(value.planets) ? value.planets.map(toChartPlanet) : [];
-  return { house: value.house, signNumber: value.signNumber, planets };
+  return { house: value.house, sign: value.sign, signNumber: value.signNumber, planets };
 }
 
 function toChartPlanet(value: unknown): string | ChartPlanet {
@@ -791,6 +872,44 @@ function translateGender(value: unknown, lang: Locale) {
     return "Other";
   }
   return safeText(value, lang);
+}
+
+function chartExplanation(lang: Locale) {
+  if (lang === "hi") return "D1 चार्ट जीवन की मूल संरचना और व्यक्तित्व संकेत देता है; D9 नवांश धर्म, संबंध और गहराई समझने में मदद करता है। चलित चार्ट उपलब्ध न होने पर उसके स्थान पर एक स्पष्ट नोट दिया गया है।";
+  if (lang === "hinglish") return "D1 chart life structure aur visible personality ko dikhata hai; D9 navamsa dharma, relationship aur deeper context samajhne me help karta hai. Chalit chart available na ho to clean note diya gaya hai.";
+  return "The D1 chart reflects life structure and visible personality; D9 supports deeper dharma, relationship, and inner context. If Chalit data is unavailable, the report shows one clean note instead.";
+}
+
+function planetaryHighlights(data: PdfData, lang: Locale) {
+  const planets = Array.isArray(data.planetaryPositions) ? data.planetaryPositions.map(toPlanetRow) : [];
+  const houseCounts = new Map<string, number>();
+  planets.forEach((planet) => {
+    const house = safeText(planet.house, lang);
+    if (!isUnavailableText(house)) houseCounts.set(house, (houseCounts.get(house) ?? 0) + 1);
+  });
+  const strongestHouse = Array.from(houseCounts.entries()).sort((a, b) => b[1] - a[1])[0];
+  const lagna = translateSignValue(data.avakahada?.ascendant, lang);
+  const moon = translateSignValue(data.avakahada?.moonSign, lang);
+  const nakshatra = translateByCategory(data.avakahada?.nakshatra ?? data.panchang?.nakshatra, lang, "nakshatra");
+  if (lang === "hi") {
+    return [
+      `ग्रह संकेत: लग्न ${lagna}, चंद्र राशि ${moon}, नक्षत्र ${nakshatra}`,
+      strongestHouse ? `मुख्य भाव जोर: भाव ${strongestHouse[0]} में ${strongestHouse[1]} ग्रह दिख रहे हैं। इसे पूरे चार्ट संदर्भ के साथ पढ़ें।` : "मुख्य भाव जोर: उपलब्ध ग्रह स्थिति से कोई स्पष्ट ग्रह समूह नहीं दिखता।",
+      "यह सारांश केवल उपलब्ध ग्रह स्थिति पर आधारित है; इसे दशा, दृष्टि और योग के साथ मिलाकर समझना चाहिए।"
+    ];
+  }
+  if (lang === "hinglish") {
+    return [
+      `Planetary highlights: Lagna ${lagna}, Moon sign ${moon}, Nakshatra ${nakshatra}`,
+      strongestHouse ? `Main house emphasis: House ${strongestHouse[0]} me ${strongestHouse[1]} grah dikh rahe hain. Isse full chart context ke saath padhein.` : "Main house emphasis: available positions se clear planet cluster nahi dikh raha.",
+      "Yeh summary available planetary positions par based hai; dasha, aspects aur yogas ke saath read karna best hai."
+    ];
+  }
+  return [
+    `Planetary highlights: Lagna ${lagna}, Moon sign ${moon}, Nakshatra ${nakshatra}`,
+    strongestHouse ? `Main house emphasis: house ${strongestHouse[0]} contains ${strongestHouse[1]} visible planet placements. Read it with the full chart context.` : "Main house emphasis: no clear planet cluster appears in the available positions.",
+    "This summary uses available planetary positions only; timing, aspects, and yogas should be reviewed together."
+  ];
 }
 
 function personalityBullets(lang: Locale) {
@@ -1042,10 +1161,25 @@ function houseInterpretationBlocks(houses: unknown[], lang: Locale) {
     const house = rows.find((row) => Number(row.house) === houseNumber);
     const planets = planetLabels(house ?? { planets: [] }, lang);
     const area = houseAreaLabels[lang][index];
+    const sign = house?.sign ? translateSignValue(house.sign, lang) : safeText(house?.signNumber ?? labels[lang].dash, lang);
     const planetText = planets.length ? planets.join(", ") : labels[lang].dash;
-    if (lang === "hi") return `${houseNumber}. ${area}: ${labels.hi.sign} ${safeText(house?.signNumber ?? labels.hi.dash, lang)} | ${labels.hi.planet}: ${planetText}`;
-    if (lang === "hinglish") return `${houseNumber}. ${area}: ${labels.hinglish.sign} ${safeText(house?.signNumber ?? labels.hinglish.dash, lang)} | ${labels.hinglish.planet}: ${planetText}`;
-    return `${houseNumber}. ${area}: ${labels.en.sign} ${safeText(house?.signNumber ?? labels.en.dash, lang)} | ${labels.en.planet}: ${planetText}`;
+    const theme = houseInterpretationThemes[lang][index];
+    if (lang === "hi") {
+      const planetNote = planets.length
+        ? `यहां ${planetText} का प्रभाव इस जीवन क्षेत्र में ग्रह की भूमिका को सक्रिय करता है।`
+        : "इस भाव में कोई प्रमुख ग्रह नहीं है, इसलिए इसके परिणाम भावेश, दृष्टि और संपूर्ण कुंडली संदर्भ से समझे जाने चाहिए।";
+      return `${houseNumber}. ${area} | ${labels.hi.sign}: ${sign} | ${labels.hi.planet}: ${planetText}\n${theme} ${planetNote}`;
+    }
+    if (lang === "hinglish") {
+      const planetNote = planets.length
+        ? `Yahan ${planetText} ka influence is life area me grah ki role ko activate karta hai.`
+        : "Is bhav me koi major planet nahi hai, isliye results ko lord, aspects aur full chart context se samjhein.";
+      return `${houseNumber}. ${area} | ${labels.hinglish.sign}: ${sign} | ${labels.hinglish.planet}: ${planetText}\n${theme} ${planetNote}`;
+    }
+    const planetNote = planets.length
+      ? `${planetText} activates this life area through the planet's role and condition.`
+      : "No major planet is placed here, so results should be read through the house lord, aspects, and full chart context.";
+    return `${houseNumber}. ${area} | ${labels.en.sign}: ${sign} | ${labels.en.planet}: ${planetText}\n${theme} ${planetNote}`;
   });
 }
 
@@ -1053,6 +1187,51 @@ const houseAreaLabels: Record<Locale, string[]> = {
   en: ["Self / personality", "Family / wealth / speech", "Courage / communication", "Home / mother / comfort", "Education / children / creativity", "Health / service / challenges", "Marriage / partnership", "Transformation", "Fortune / dharma", "Career / status", "Gains / network", "Expenses / spirituality"],
   hi: ["स्वयं / व्यक्तित्व", "परिवार / धन / वाणी", "साहस / संचार", "घर / माता / सुख", "शिक्षा / संतान / रचनात्मकता", "स्वास्थ्य / सेवा / चुनौतियां", "विवाह / साझेदारी", "परिवर्तन", "भाग्य / धर्म", "करियर / प्रतिष्ठा", "लाभ / नेटवर्क", "खर्च / आध्यात्मिकता"],
   hinglish: ["Self / personality", "Family / wealth / speech", "Courage / communication", "Home / mother / comfort", "Education / children / creativity", "Health / service / challenges", "Marriage / partnership", "Transformation", "Fortune / dharma", "Career / status", "Gains / network", "Expenses / spirituality"]
+};
+
+const houseInterpretationThemes: Record<Locale, string[]> = {
+  en: [
+    "The first house reflects personality, body, self-image, and the native's first response to life.",
+    "The second house relates to family, wealth, speech, values, and the way resources are handled.",
+    "The third house shows courage, communication, siblings, initiative, and practical effort.",
+    "The fourth house reflects home, mother, emotional comfort, property, and inner stability.",
+    "The fifth house relates to education, creativity, children, intelligence, and inspired expression.",
+    "The sixth house describes health routines, service, discipline, competition, debts, and challenges.",
+    "The seventh house reflects marriage, partnership, public dealings, and the way agreements are built.",
+    "The eighth house points to transformation, research, hidden matters, shared resources, and resilience.",
+    "The ninth house relates to fortune, dharma, higher learning, teachers, faith, and long journeys.",
+    "The tenth house shows career, status, responsibility, public work, and visible contribution.",
+    "The eleventh house reflects gains, networks, aspirations, elder support, and long-term fulfillment.",
+    "The twelfth house relates to expenses, solitude, sleep, foreign links, release, and spirituality."
+  ],
+  hi: [
+    "पहला भाव व्यक्तित्व, शरीर, आत्म-छवि और जीवन की पहली प्रतिक्रिया को दर्शाता है।",
+    "दूसरा भाव परिवार, धन, वाणी और मूल्य प्रणाली से जुड़ा है।",
+    "तीसरा भाव साहस, संवाद, भाई-बहन, पहल और व्यावहारिक प्रयास को दर्शाता है।",
+    "चौथा भाव घर, माता, भावनात्मक सुख, संपत्ति और आंतरिक स्थिरता से जुड़ा है।",
+    "पांचवां भाव शिक्षा, रचनात्मकता, संतान, बुद्धि और प्रेरित अभिव्यक्ति को दर्शाता है।",
+    "छठा भाव स्वास्थ्य दिनचर्या, सेवा, अनुशासन, प्रतियोगिता, ऋण और चुनौतियों को दर्शाता है।",
+    "सातवां भाव विवाह, साझेदारी, सार्वजनिक व्यवहार और समझौते बनाने की शैली को दर्शाता है।",
+    "आठवां भाव परिवर्तन, शोध, गुप्त विषय, साझा संसाधन और धैर्य को दर्शाता है।",
+    "नवां भाव भाग्य, धर्म, उच्च शिक्षा, गुरु, विश्वास और लंबी यात्राओं से जुड़ा है।",
+    "दसवां भाव करियर, प्रतिष्ठा, जिम्मेदारी, सार्वजनिक कार्य और योगदान को दर्शाता है।",
+    "ग्यारहवां भाव लाभ, नेटवर्क, आकांक्षा, बड़े सहयोग और दीर्घकालीन पूर्णता को दर्शाता है।",
+    "बारहवां भाव खर्च, एकांत, नींद, विदेश संबंध, त्याग और आध्यात्मिकता से जुड़ा है।"
+  ],
+  hinglish: [
+    "First house personality, body, self-image aur life ke first response ko dikhata hai.",
+    "Second house family, wealth, speech, values aur resources handle karne ka tareeka dikhata hai.",
+    "Third house courage, communication, siblings, initiative aur practical effort ko show karta hai.",
+    "Fourth house home, mother, emotional comfort, property aur inner stability se linked hai.",
+    "Fifth house education, creativity, children, intelligence aur inspired expression se juda hai.",
+    "Sixth house health routines, service, discipline, competition, debts aur challenges ko dikhata hai.",
+    "Seventh house marriage, partnership, public dealing aur agreements build karne ka style dikhata hai.",
+    "Eighth house transformation, research, hidden matters, shared resources aur resilience ko point karta hai.",
+    "Ninth house fortune, dharma, higher learning, teachers, faith aur long journeys se linked hai.",
+    "Tenth house career, status, responsibility, public work aur visible contribution dikhata hai.",
+    "Eleventh house gains, networks, aspirations, elder support aur long-term fulfillment ko show karta hai.",
+    "Twelfth house expenses, solitude, sleep, foreign links, release aur spirituality se related hai."
+  ]
 };
 
 function fallbackRemedies(lang: Locale) {
