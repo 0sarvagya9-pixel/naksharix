@@ -92,6 +92,7 @@ export function calculateOwnEngineBirthChart(input: AstrologyBirthInput): BirthC
       sign: planet.sign,
       house: planet.house,
       degree: planet.degree,
+      absoluteLongitude: planet.absoluteLongitude,
       nakshatra: planet.nakshatra,
       pada: planet.pada,
       retrograde: planet.retrograde
@@ -111,7 +112,8 @@ export function calculateOwnEngineBirthChart(input: AstrologyBirthInput): BirthC
       houseSystem: "Vedic Whole Sign",
       nodeMode: "Mean lunar node benchmark mode",
       julianDay: Number(julianDay.toFixed(8)),
-      utcDate: utcDate.toISOString()
+      utcDate: utcDate.toISOString(),
+      ascendantLongitude: Number(ascendantLongitude.toFixed(6))
     }
   };
 }

@@ -33,6 +33,29 @@ type KundliResult = {
   aiSummary?: string;
   planetPositions?: PlanetPosition[];
   vimshottariDasha?: DashaTimelinePeriod[];
+  calculatedDasha?: {
+    available?: boolean;
+    note?: string;
+    birthMahadasha?: string;
+    birthBalanceYears?: number;
+    currentMahadasha?: DashaTimelinePeriod;
+    currentAntardasha?: DashaTimelinePeriod;
+  };
+  chalitChart?: {
+    available?: boolean;
+    method?: string;
+    note?: string;
+    placements?: Array<{ planet?: string; sign?: string; d1House?: number; chalitHouse?: number; degree?: number; changed?: boolean; note?: string }>;
+  };
+  doshaAnalysis?: {
+    manglik?: { present?: boolean; severity?: string; summary?: string; marsHouseFromLagna?: number; marsHouseFromMoon?: number; marsHouseFromVenus?: number; remedies?: string[] };
+    kaalSarp?: { present?: boolean; severity?: string; summary?: string; remedies?: string[] };
+    notes?: string[];
+  };
+  yogaAnalysis?: {
+    detected?: Array<{ name?: string; detected?: boolean; basis?: string; interpretation?: string; caveat?: string }>;
+    note?: string;
+  };
   charts?: { lagna?: Array<{ house?: number; sign?: string; planets?: string[] }>; navamsa?: Array<{ house?: number; sign?: string; planets?: string[] }> };
   remedies?: string[];
   panchang?: { tithi?: string; paksha?: string; vaar?: string; nakshatra?: string; nakshatraPada?: string | number; yoga?: string; karan?: string; sunrise?: string; sunset?: string; rahuKaal?: string; muhurat?: string };
@@ -343,6 +366,7 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
       </div>
       <InfoPanel title={tr("kundliInterpretation")}><p>{result.aiSummary ?? tr("kundliEmpty")}</p></InfoPanel>
       <KundliReportDashboard report={result} language={selectedLanguage} />
+      <CoreAstrologySections result={result} language={selectedLanguage} fallback={tr("notAvailable")} />
       <div className="grid gap-4 lg:grid-cols-2">
         <InfoPanel title={tr("manglikStatus")}><p>{localizedDoshaSummary(result.manglikDosha, selectedLanguage, tr("previewReport"))}</p></InfoPanel>
         <InfoPanel title={tr("sadeSati")}><p>{localizedSadeSati(result.sadeSati, selectedLanguage, tr("notAvailable"))}</p></InfoPanel>
@@ -378,6 +402,131 @@ function languageOptionLabel(option: Locale, current: Locale) {
   if (option === "en") return "English";
   if (option === "hi") return "Hindi";
   return "Hinglish";
+}
+
+function CoreAstrologySections({ result, language, fallback }: { result: KundliResult; language: Locale; fallback: string }) {
+  const labels = coreAstroLabels(language);
+  const dasha = result.calculatedDasha;
+  const currentMaha = dasha?.currentMahadasha;
+  const currentAntar = dasha?.currentAntardasha;
+  const chalitPlacements = result.chalitChart?.placements ?? [];
+  const changedPlacements = chalitPlacements.filter((placement) => placement.changed);
+  const yogas = result.yogaAnalysis?.detected ?? [];
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <InfoPanel title={labels.dasha}>
+        {dasha?.available ? (
+          <div className="space-y-2">
+            <p><strong className="text-[#f3d382]">{labels.birthMahadasha}:</strong> {localizedPlanet(dasha.birthMahadasha, language, fallback)}{typeof dasha.birthBalanceYears === "number" ? ` (${dasha.birthBalanceYears.toFixed(2)} ${labels.years})` : ""}</p>
+            <p><strong className="text-[#f3d382]">{labels.currentMahadasha}:</strong> {formatDashaPeriod(currentMaha, language, fallback)}</p>
+            <p><strong className="text-[#f3d382]">{labels.currentAntardasha}:</strong> {formatDashaPeriod(currentAntar, language, fallback)}</p>
+          </div>
+        ) : <p>{safeText(dasha?.note, labels.dashaMissing)}</p>}
+      </InfoPanel>
+
+      <InfoPanel title={labels.chalit}>
+        {result.chalitChart?.available ? (
+          <div className="space-y-2">
+            <p>{result.chalitChart.method}</p>
+            <p><strong className="text-[#f3d382]">{labels.changed}:</strong> {changedPlacements.length ? changedPlacements.map((placement) => `${localizedPlanet(placement.planet, language, fallback)} ${placement.d1House ?? "-"}→${placement.chalitHouse ?? "-"}`).join(", ") : labels.noChanged}</p>
+          </div>
+        ) : <p>{safeText(result.chalitChart?.note, labels.chalitMissing)}</p>}
+      </InfoPanel>
+
+      <InfoPanel title={labels.dosha}>
+        <div className="space-y-2">
+          <p><strong className="text-[#f3d382]">{labels.manglik}:</strong> {safeText(result.doshaAnalysis?.manglik?.severity ?? result.manglikDosha?.severity, fallback)}</p>
+          <p>{safeText(result.doshaAnalysis?.manglik?.summary ?? result.manglikDosha?.summary, fallback)}</p>
+          <p><strong className="text-[#f3d382]">{labels.kaalSarp}:</strong> {safeText(result.doshaAnalysis?.kaalSarp?.summary ?? result.kaalSarpDosha?.summary, fallback)}</p>
+        </div>
+      </InfoPanel>
+
+      <InfoPanel title={labels.yoga}>
+        {yogas.length ? (
+          <div className="space-y-3">
+            {yogas.slice(0, 4).map((yoga, index) => (
+              <div key={`${yoga.name ?? "yoga"}-${index}`} className="rounded-lg border border-[#1e293b] bg-[#0a1224] p-3">
+                <p className="font-semibold text-[#f3d382]">{safeText(yoga.name, fallback)}</p>
+                <p>{safeText(yoga.basis, fallback)}</p>
+                <p>{safeText(yoga.interpretation, fallback)}</p>
+              </div>
+            ))}
+          </div>
+        ) : <p>{safeText(result.yogaAnalysis?.note, labels.noYoga)}</p>}
+      </InfoPanel>
+    </div>
+  );
+}
+
+function localizedPlanet(value: unknown, language: Locale, fallback: string) {
+  return translateAstroValue(value, language, "planet" as AstroValueCategory) || fallback;
+}
+
+function formatDashaPeriod(period: DashaTimelinePeriod | undefined, language: Locale, fallback: string) {
+  if (!period) return fallback;
+  const planet = localizedPlanet(period.planet, language, fallback);
+  const start = period.startsAt ?? period.startDate;
+  const end = period.endsAt ?? period.endDate;
+  return `${planet}${start || end ? ` (${safeJoin([start, end], fallback)})` : ""}`;
+}
+
+function coreAstroLabels(language: Locale) {
+  if (language === "hi") {
+    return {
+      dasha: "विंशोत्तरी दशा",
+      birthMahadasha: "जन्म महादशा",
+      currentMahadasha: "वर्तमान महादशा",
+      currentAntardasha: "वर्तमान अंतर्दशा",
+      years: "वर्ष शेष",
+      dashaMissing: "दशा गणना के लिए चंद्र नक्षत्र और डिग्री डेटा आवश्यक है।",
+      chalit: "चलित चार्ट",
+      changed: "बदले हुए भाव",
+      noChanged: "कोई प्रमुख भाव परिवर्तन नहीं",
+      chalitMissing: "चलित गणना के लिए लग्न डिग्री और ग्रह दीर्घांश डेटा आवश्यक है।",
+      dosha: "दोष विश्लेषण",
+      manglik: "मांगलिक स्थिति",
+      kaalSarp: "काल सर्प संकेत",
+      yoga: "योग विश्लेषण",
+      noYoga: "उपलब्ध डेटा से कोई प्रमुख योग स्पष्ट रूप से नहीं मिला।"
+    };
+  }
+  if (language === "hinglish") {
+    return {
+      dasha: "Vimshottari Dasha",
+      birthMahadasha: "Birth Mahadasha",
+      currentMahadasha: "Current Mahadasha",
+      currentAntardasha: "Current Antardasha",
+      years: "years balance",
+      dashaMissing: "Dasha calculation ke liye Moon nakshatra aur degree data zaroori hai.",
+      chalit: "Chalit Chart",
+      changed: "Changed houses",
+      noChanged: "Koi major house change nahi",
+      chalitMissing: "Chalit calculation ke liye lagna degree aur planet longitude data zaroori hai.",
+      dosha: "Dosha Analysis",
+      manglik: "Manglik Status",
+      kaalSarp: "Kaal Sarp Signal",
+      yoga: "Yoga Analysis",
+      noYoga: "Available data se koi major yoga clearly detect nahi hua."
+    };
+  }
+  return {
+    dasha: "Vimshottari Dasha",
+    birthMahadasha: "Birth Mahadasha",
+    currentMahadasha: "Current Mahadasha",
+    currentAntardasha: "Current Antardasha",
+    years: "years balance",
+    dashaMissing: "Dasha calculation needs Moon nakshatra degree data.",
+    chalit: "Chalit Chart",
+    changed: "Changed houses",
+    noChanged: "No major house changes",
+    chalitMissing: "Chalit calculation needs ascendant degree and planetary longitude data.",
+    dosha: "Dosha Analysis",
+    manglik: "Manglik Status",
+    kaalSarp: "Kaal Sarp Signal",
+    yoga: "Yoga Analysis",
+    noYoga: "No major yoga was detected from the currently available data."
+  };
 }
 
 function localizedAstro(value: unknown, language: Locale, category: AstroValueCategory, fallback: string) {

@@ -25,6 +25,8 @@ type DashaRow = {
   name?: unknown;
   startDate?: unknown;
   endDate?: unknown;
+  startsAt?: unknown;
+  endsAt?: unknown;
 };
 
 type ChartPlanet = {
@@ -62,6 +64,10 @@ const labels = {
     planets: "Planetary Positions",
     charts: "Charts",
     dasha: "Vimshottari Dasha",
+    currentMahadasha: "Current Mahadasha",
+    currentAntardasha: "Current Antardasha",
+    dashaBalance: "Dasha Balance",
+    dashaTimeline: "Dasha Timeline",
     summary: "Summary",
     remedies: "Remedies",
     disclaimer: "Disclaimer",
@@ -89,6 +95,16 @@ const labels = {
     d1Chart: "D1 Lagna Chart",
     d9Chart: "D9 Navamsa Chart",
     chalitChart: "Chalit Chart",
+    chalitMethod: "Chalit Method",
+    d1House: "D1 House",
+    chalitHouse: "Chalit House",
+    movement: "Movement",
+    doshaAnalysis: "Dosha Analysis",
+    manglikStatus: "Manglik Status",
+    kaalSarpStatus: "Kaal Sarp Signal",
+    yogaAnalysis: "Yoga Analysis",
+    detectedYogas: "Detected Yogas",
+    noYoga: "No major yoga was detected from the currently available data.",
     lagnaSummary: "Lagna Summary",
     nakshatraSummary: "Nakshatra Summary",
     careerOverview: "Career Overview",
@@ -138,6 +154,10 @@ const labels = {
     planets: "ग्रह स्थिति तालिका",
     charts: "चार्ट",
     dasha: "विंशोत्तरी दशा",
+    currentMahadasha: "वर्तमान महादशा",
+    currentAntardasha: "वर्तमान अंतर्दशा",
+    dashaBalance: "दशा शेष",
+    dashaTimeline: "दशा समयरेखा",
     summary: "सारांश",
     remedies: "उपाय",
     disclaimer: "अस्वीकरण",
@@ -165,6 +185,16 @@ const labels = {
     d1Chart: "D1 लग्न चार्ट",
     d9Chart: "D9 नवांश चार्ट",
     chalitChart: "चलित चार्ट",
+    chalitMethod: "चलित विधि",
+    d1House: "D1 भाव",
+    chalitHouse: "चलित भाव",
+    movement: "भाव परिवर्तन",
+    doshaAnalysis: "दोष विश्लेषण",
+    manglikStatus: "मांगलिक स्थिति",
+    kaalSarpStatus: "काल सर्प संकेत",
+    yogaAnalysis: "योग विश्लेषण",
+    detectedYogas: "मिले हुए योग",
+    noYoga: "उपलब्ध डेटा से कोई प्रमुख योग स्पष्ट रूप से नहीं मिला।",
     lagnaSummary: "लग्न सारांश",
     nakshatraSummary: "नक्षत्र सारांश",
     careerOverview: "करियर अवलोकन",
@@ -214,6 +244,10 @@ const labels = {
     planets: "Planetary Positions",
     charts: "Charts",
     dasha: "Vimshottari Dasha",
+    currentMahadasha: "Current Mahadasha",
+    currentAntardasha: "Current Antardasha",
+    dashaBalance: "Dasha Balance",
+    dashaTimeline: "Dasha Timeline",
     summary: "Summary",
     remedies: "Upay",
     disclaimer: "Disclaimer",
@@ -241,6 +275,16 @@ const labels = {
     d1Chart: "D1 Lagna Chart",
     d9Chart: "D9 Navamsa Chart",
     chalitChart: "Chalit Chart",
+    chalitMethod: "Chalit Method",
+    d1House: "D1 House",
+    chalitHouse: "Chalit House",
+    movement: "Movement",
+    doshaAnalysis: "Dosha Analysis",
+    manglikStatus: "Manglik Status",
+    kaalSarpStatus: "Kaal Sarp Signal",
+    yogaAnalysis: "Yoga Analysis",
+    detectedYogas: "Detected Yogas",
+    noYoga: "Available data se koi major yoga clearly detect nahi hua.",
     lagnaSummary: "Lagna Summary",
     nakshatraSummary: "Nakshatra Summary",
     careerOverview: "Career Overview",
@@ -459,7 +503,10 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
         paragraph(safeInsight(data.predictions?.healthAnalysis, lang, "health"), "health"),
         ...bullets(healthBullets(lang), "health")
       ]),
-      section(labels[lang].dasha, [dashaTable(h, text, PdfView, styles, data.vimshottariDasha, lang)]),
+      section(labels[lang].dasha, dashaSummary(h, text, PdfView, styles, data, lang)),
+      section(labels[lang].chalitChart, chalitSummary(h, text, PdfView, styles, data, lang)),
+      section(labels[lang].doshaAnalysis, doshaSummary(text, data, lang, styles)),
+      section(labels[lang].yogaAnalysis, yogaSummary(text, data, lang, styles)),
       section(labels[lang].timingGuidance, [
         paragraph(timingGuidance(lang), "timing-guidance", styles.mutedParagraph)
       ]),
@@ -565,6 +612,66 @@ function dashaTable(h: PdfElementFactory, text: PdfTextFactory, View: PdfCompone
     text(translatePlanetValue(dasha?.planet ?? dasha?.name, lang), styles.key, { key: "planet" }),
     text(formatDateRange(dasha?.startDate, dasha?.endDate, lang), styles.value, { key: "dates" })
   ])));
+}
+
+function dashaSummary(h: PdfElementFactory, text: PdfTextFactory, View: PdfComponent, styles: PdfStyles, data: PdfData, lang: Locale) {
+  const calculated = data.calculatedDasha;
+  if (!calculated?.available) {
+    return [text(calculated?.note ?? labels[lang].dashaUnavailable, styles.paragraph, { key: "dasha-note" })];
+  }
+  return [
+    h(View, { key: "current-maha", style: styles.row }, [
+      text(labels[lang].currentMahadasha, styles.key, { key: "k" }),
+      text(dashaPeriodLabel(calculated.currentMahadasha, lang), styles.value, { key: "v" })
+    ]),
+    h(View, { key: "current-antar", style: styles.row }, [
+      text(labels[lang].currentAntardasha, styles.key, { key: "k" }),
+      text(dashaPeriodLabel(calculated.currentAntardasha, lang), styles.value, { key: "v" })
+    ]),
+    h(View, { key: "balance", style: styles.row }, [
+      text(labels[lang].dashaBalance, styles.key, { key: "k" }),
+      text(typeof calculated.birthBalanceYears === "number" ? `${calculated.birthBalanceYears.toFixed(2)} years` : labels[lang].notAvailable, styles.value, { key: "v" })
+    ]),
+    text(labels[lang].dashaTimeline, styles.goldParagraph, { key: "timeline-title" }),
+    dashaTable(h, text, View, styles, data.vimshottariDasha.slice(0, 5), lang)
+  ];
+}
+
+function chalitSummary(h: PdfElementFactory, text: PdfTextFactory, View: PdfComponent, styles: PdfStyles, data: PdfData, lang: Locale) {
+  const chalit = data.chalitAnalysis;
+  if (!chalit?.available) return [text(chalit?.note ?? chartUnavailable(labels[lang].chalitChart, lang), styles.paragraph, { key: "chalit-note" })];
+  const changed = chalit.placements.filter((placement) => placement.changed);
+  const rows = (changed.length ? changed : chalit.placements.slice(0, 6)).slice(0, 8);
+  return [
+    h(View, { key: "method", style: styles.row }, [
+      text(labels[lang].chalitMethod, styles.key, { key: "k" }),
+      text(chalit.method, styles.value, { key: "v" })
+    ]),
+    ...rows.map((placement, index) => h(View, { key: `chalit-${index}`, style: styles.row }, [
+      text(translatePlanetValue(placement.planet, lang), styles.key, { key: "k" }),
+      text(`${labels[lang].d1House}: ${placement.d1House ?? labels[lang].dash} | ${labels[lang].chalitHouse}: ${placement.chalitHouse ?? labels[lang].dash} | ${safeText(placement.note, lang)}`, styles.value, { key: "v" })
+    ]))
+  ];
+}
+
+function doshaSummary(text: PdfTextFactory, data: PdfData, lang: Locale, styles: PdfStyles) {
+  const dosha = data.doshaAnalysis;
+  return [
+    text(`${labels[lang].manglikStatus}: ${safeText(dosha?.manglik?.severity ?? data.doshas.manglik.severity, lang)}`, styles.goldParagraph, { key: "manglik-title" }),
+    text(dosha?.manglik?.summary ?? data.doshas.manglik.summary, styles.paragraph, { key: "manglik-summary" }),
+    text(`${labels[lang].kaalSarpStatus}: ${safeText(dosha?.kaalSarp?.severity ?? data.doshas.kaalSarp.severity, lang)}`, styles.goldParagraph, { key: "kaal-title" }),
+    text(dosha?.kaalSarp?.summary ?? data.doshas.kaalSarp.summary, styles.paragraph, { key: "kaal-summary" }),
+    ...(dosha?.notes ?? []).slice(0, 2).map((note, index) => text(note, styles.mutedParagraph, { key: `dosha-note-${index}` }))
+  ];
+}
+
+function yogaSummary(text: PdfTextFactory, data: PdfData, lang: Locale, styles: PdfStyles) {
+  const yogas = data.yogaAnalysis?.detected ?? [];
+  if (!yogas.length) return [text(data.yogaAnalysis?.note ?? labels[lang].noYoga, styles.paragraph, { key: "no-yoga" })];
+  return yogas.slice(0, 6).flatMap((yoga, index) => [
+    text(`${labels[lang].detectedYogas}: ${safeText(yoga.name, lang)}`, styles.goldParagraph, { key: `yoga-name-${index}` }),
+    text(`${safeText(yoga.basis, lang)} ${safeText(yoga.interpretation, lang)}`, styles.paragraph, { key: `yoga-copy-${index}` })
+  ]);
 }
 
 function renderRemedies(text: PdfTextFactory, remedies: unknown[], lang: Locale, styles: PdfStyles) {
@@ -799,6 +906,11 @@ function formatDateRange(start: unknown, end: unknown, lang: Locale) {
   if (isUnavailableText(startText)) return endText;
   if (isUnavailableText(endText)) return startText;
   return `${startText} - ${endText}`;
+}
+
+function dashaPeriodLabel(period: DashaRow | undefined, lang: Locale) {
+  if (!period) return labels[lang].notAvailable;
+  return `${translatePlanetValue(period.planet ?? period.name, lang)} (${formatDateRange(period.startDate ?? period.startsAt, period.endDate ?? period.endsAt, lang)})`;
 }
 
 function safeInsight(value: unknown, lang: Locale, section: InsightSection) {

@@ -1,4 +1,4 @@
-import type { DashaPeriod, DoshaStatus, HousePosition, KundliReport, PanchangSnapshot, PlanetPosition, SadeSatiStatus } from "@/lib/astrology/types";
+import type { ChalitChartCalculation, DashaPeriod, DoshaAnalysis, DoshaStatus, HousePosition, KundliReport, PanchangSnapshot, PlanetPosition, SadeSatiStatus, VimshottariDashaCalculation, YogaAnalysis } from "@/lib/astrology/types";
 
 const SIGNS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
 
@@ -22,8 +22,10 @@ export type KundliPdfData = {
   d1Chart: PdfChartHouse[];
   d9Chart: PdfChartHouse[];
   chalitChart: PdfChartHouse[];
+  chalitAnalysis?: ChalitChartCalculation;
   shodashvarga: unknown[];
   vimshottariDasha: DashaPeriod[];
+  calculatedDasha?: VimshottariDashaCalculation;
   yoginiDasha: unknown[];
   ashtakavarga: unknown[];
   doshas: {
@@ -44,6 +46,8 @@ export type KundliPdfData = {
     disclaimer: string;
   };
   remedies: string[];
+  doshaAnalysis?: DoshaAnalysis;
+  yogaAnalysis?: YogaAnalysis;
   validation: {
     rahuKetuOpposite: boolean;
     d1MatchesPlanetTable: boolean;
@@ -59,7 +63,7 @@ export function normalizeKundliPdfData(report: KundliReport): KundliPdfData {
   const ascendantSign = report.charts?.lagna?.find((house) => house.house === 1)?.sign || report.avakhada?.ascendant || planetaryPositions.find((planet) => planet.house === 1)?.sign || "Aries";
   const d1Chart = normalizeD1Chart(ascendantSign, planetaryPositions);
   const d9Chart = normalizeSourceChart(report.charts?.navamsa, []);
-  const explicitChalitSource = chartSource(report, "chalit") ?? chartSource(report, "kpBhava") ?? chartSource(report, "bhavaChalit");
+  const explicitChalitSource = report.chalitChart?.houses ?? chartSource(report, "chalit") ?? chartSource(report, "kpBhava") ?? chartSource(report, "bhavaChalit");
   const chalitChart = explicitChalitSource ? normalizeSourceChart(explicitChalitSource, planetaryPositions) : [];
   const validation = {
     rahuKetuOpposite: validateRahuKetuOpposite(planetaryPositions),
@@ -109,8 +113,10 @@ export function normalizeKundliPdfData(report: KundliReport): KundliPdfData {
     d1Chart,
     d9Chart,
     chalitChart,
+    chalitAnalysis: report.chalitChart,
     shodashvarga: arraySource(report, "shodashvarga"),
     vimshottariDasha: report.vimshottariDasha ?? [],
+    calculatedDasha: report.calculatedDasha,
     yoginiDasha: arraySource(report, "yoginiDasha"),
     ashtakavarga: arraySource(report, "ashtakavarga"),
     doshas: {
@@ -131,6 +137,8 @@ export function normalizeKundliPdfData(report: KundliReport): KundliPdfData {
       disclaimer: report.disclaimer || "Naksharix reports are for reflection and planning only."
     },
     remedies: report.remedies ?? [],
+    doshaAnalysis: report.doshaAnalysis,
+    yogaAnalysis: report.yogaAnalysis,
     validation
   };
 }

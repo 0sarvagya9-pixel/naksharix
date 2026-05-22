@@ -7,6 +7,7 @@ import { createProkeralaProvider } from "@/lib/astrology/prokerala-provider";
 import { createDivineApiProvider } from "@/lib/astrology/divineapi-provider";
 import { createSwissBirthChart } from "@/lib/astrology/swiss-provider";
 import { calculateOwnEngineBirthChart } from "@/lib/astrology/own-engine";
+import { enrichBirthChartWithCoreCalculations } from "@/lib/astrology/core-calculations";
 import { normalizeBirthInput } from "@/lib/astrology/normalize";
 import type { AstrologyBirthInput, AstrologyProviderName, PersonalizedHoroscopeReport } from "@/lib/astrology/types";
 
@@ -148,8 +149,9 @@ const ownEngineProvider: AstrologyProvider = {
   async getPanchang(input) {
     return calculateOwnEngineBirthChart(normalizeBirthInput(input)).panchang;
   },
-  async getVimshottariDasha() {
-    return [];
+  async getVimshottariDasha(input) {
+    const normalized = normalizeBirthInput(input);
+    return enrichBirthChartWithCoreCalculations(calculateOwnEngineBirthChart(normalized), normalized).vimshottariDasha;
   },
   async getDoshaAnalysis(input) {
     const chart = calculateOwnEngineBirthChart(normalizeBirthInput(input));

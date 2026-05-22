@@ -21,6 +21,7 @@ export type PlanetPosition = {
   nakshatra?: string;
   pada?: number;
   degree?: number;
+  absoluteLongitude?: number;
   house?: number;
   retrograde?: boolean;
 };
@@ -53,6 +54,64 @@ export type DashaPeriod = {
   startsAt: string;
   endsAt: string;
   period?: string;
+  level?: "mahadasha" | "antardasha";
+  parentPlanet?: string;
+  durationYears?: number;
+  antardashas?: DashaPeriod[];
+};
+
+export type VimshottariDashaCalculation = {
+  available: boolean;
+  method: string;
+  note?: string;
+  birthMahadasha?: string;
+  currentMahadasha?: DashaPeriod;
+  currentAntardasha?: DashaPeriod;
+  birthBalanceYears?: number;
+  mahadashas: DashaPeriod[];
+  currentAntardashas: DashaPeriod[];
+};
+
+export type ChalitPlacement = {
+  planet: string;
+  sign: string;
+  d1House?: number;
+  chalitHouse?: number;
+  degree?: number;
+  changed: boolean;
+  note: string;
+};
+
+export type ChalitChartCalculation = {
+  available: boolean;
+  method: string;
+  note?: string;
+  placements: ChalitPlacement[];
+  houses: HousePosition[];
+};
+
+export type DoshaAnalysis = {
+  manglik: DoshaStatus & {
+    marsHouseFromLagna?: number;
+    marsHouseFromMoon?: number;
+    marsHouseFromVenus?: number;
+  };
+  kaalSarp: DoshaStatus;
+  notes: string[];
+};
+
+export type YogaDetection = {
+  name: string;
+  detected: boolean;
+  basis: string;
+  interpretation: string;
+  caveat: string;
+};
+
+export type YogaAnalysis = {
+  detected: YogaDetection[];
+  evaluated: YogaDetection[];
+  note: string;
 };
 
 export type DoshaStatus = {
@@ -96,6 +155,10 @@ export type BirthChartData = {
   planetPositions: PlanetPosition[];
   housePositions: HousePosition[];
   vimshottariDasha: DashaPeriod[];
+  calculatedDasha?: VimshottariDashaCalculation;
+  chalitChart?: ChalitChartCalculation;
+  doshaAnalysis?: DoshaAnalysis;
+  yogaAnalysis?: YogaAnalysis;
   manglikDosha: DoshaStatus;
   kaalSarpDosha: DoshaStatus;
   sadeSati: SadeSatiStatus;
@@ -110,6 +173,7 @@ export type BirthChartData = {
     nodeMode: string;
     julianDay: number;
     utcDate: string;
+    ascendantLongitude?: number;
   };
 };
 

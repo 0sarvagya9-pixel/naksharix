@@ -1,9 +1,9 @@
 import "server-only";
 
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { calculateKundli, wholeSignHouse, type SwissKundliPlanet, type SwissKundliResult } from "@/lib/astrology/swiss-kundli";
 import { getPanchang } from "@/lib/astrology/engine";
-import type { AstrologyBirthInput, BirthChartData, DashaPeriod, HousePosition, PlanetPosition } from "@/lib/astrology/types";
+import type { AstrologyBirthInput, BirthChartData, HousePosition, PlanetPosition } from "@/lib/astrology/types";
 
 const rashis = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
 const nakshatras = [
@@ -26,9 +26,6 @@ export function createSwissBirthChart(input: AstrologyBirthInput): BirthChartDat
   const moon = planetPositions.find((planet) => planet.planet === "Moon");
   const sun = planetPositions.find((planet) => planet.planet === "Sun");
   const moonNakshatra = moon ? nakshatraFromLongitude(toAbsoluteLongitude(moon.sign, moon.degree ?? 0)) : undefined;
-  const manglikPresent = planetPositions.some((planet) => planet.planet === "Mars" && [1, 2, 4, 7, 8, 12].includes(planet.house ?? 0));
-  const dashaStart = new Date(`${dateOfBirth}T00:00:00.000Z`);
-
   return {
     profile: { name: input.name, gender: input.gender },
     birthDetails: {
@@ -55,13 +52,8 @@ export function createSwissBirthChart(input: AstrologyBirthInput): BirthChartDat
     },
     planetPositions,
     housePositions: lagnaChart,
-    vimshottariDasha: createVerificationDasha(dashaStart),
-    manglikDosha: {
-      present: manglikPresent,
-      severity: manglikPresent ? "Requires full chart review" : "Not indicated by Mars house placement",
-      summary: manglikPresent ? "Mars is placed in a traditional Manglik-sensitive house in the D1 chart." : "Mars is not placed in a traditional Manglik-sensitive house in this D1 chart.",
-      remedies: manglikPresent ? ["Review the full chart with a qualified astrologer before marriage decisions."] : ["Maintain balanced communication and steady relationship habits."]
-    },
+    vimshottariDasha: [],
+    manglikDosha: unavailableDosha("Core dosha analysis runs in the report enrichment layer."),
     kaalSarpDosha: {
       present: false,
       severity: "Not verified",
@@ -74,7 +66,17 @@ export function createSwissBirthChart(input: AstrologyBirthInput): BirthChartDat
     },
     nakshatraAnalysis: `${moonNakshatra?.name ?? "Moon nakshatra"} and pada ${moonNakshatra?.pada ?? "-"} are calculated from the Moon's sidereal longitude.`,
     lagnaAnalysis: `${kundli.ascendant.rashi} Lagna at ${kundli.ascendant.degreeInSign.toFixed(2)}° sets the whole-sign first house.`,
-    remedies: ["Calculation not available yet."]
+    remedies: ["Calculation not available yet."],
+    calculationMeta: {
+      provider: "swiss",
+      ayanamsaName: kundli.ayanamsa,
+      ayanamsaDegree: 0,
+      houseSystem: kundli.houseSystem,
+      nodeMode: kundli.nodeType,
+      julianDay: kundli.julianDayUtc,
+      utcDate: new Date().toISOString(),
+      ascendantLongitude: kundli.ascendant.longitude
+    }
   };
 }
 
@@ -87,6 +89,7 @@ function toPlanetPositions(planets: SwissKundliPlanet[]): PlanetPosition[] {
       sign: planet.rashi,
       house: planet.house,
       degree: planet.degreeInSign,
+      absoluteLongitude,
       nakshatra: nakshatra.name,
       pada: nakshatra.pada,
       retrograde: planet.retrograde
@@ -104,6 +107,7 @@ function toNavamsaPositions(planets: SwissKundliPlanet[], navamsaAscendantSignNu
       sign: navamsa.rashi,
       house: wholeSignHouse(navamsa.rashiNumber, navamsaAscendantSignNumber),
       degree: longitudeInNavamsa,
+      absoluteLongitude: planet.longitude,
       nakshatra: nakshatra.name,
       pada: nakshatra.pada,
       retrograde: planet.retrograde
@@ -155,15 +159,6 @@ function toAbsoluteLongitude(sign: string, degree: number) {
   return signIndex * 30 + degree;
 }
 
-function createVerificationDasha(start: Date): DashaPeriod[] {
-  return ["Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Saturn", "Mercury"].map((planet, index) => ({
-    planet,
-    startsAt: format(addDays(start, index * 365), "yyyy-MM-dd"),
-    endsAt: format(addDays(start, (index + 1) * 365), "yyyy-MM-dd"),
-    period: `${format(addDays(start, index * 365), "yyyy-MM-dd")} to ${format(addDays(start, (index + 1) * 365), "yyyy-MM-dd")}`
-  }));
-}
-
 function resolveTimezoneOffset(timezone: string, date: string, time: string) {
   const numeric = Number(timezone);
   if (Number.isFinite(numeric)) return numeric;
@@ -192,6 +187,10 @@ function withSeconds(time: string) {
 
 function formatDate(value: string | Date) {
   return value instanceof Date ? format(value, "yyyy-MM-dd") : value.slice(0, 10);
+}
+
+function unavailableDosha(summary: string) {
+  return { present: false, severity: "Not verified", summary, remedies: ["Avoid fear-based conclusions from a single factor."] };
 }
 
 function logKundliDebug(input: AstrologyBirthInput, kundli: SwissKundliResult, timezoneOffset: string | number) {

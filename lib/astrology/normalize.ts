@@ -1,4 +1,5 @@
 import type { AstrologyBirthInput, BirthChartData, KundliReport } from "@/lib/astrology/types";
+import { enrichBirthChartWithCoreCalculations } from "@/lib/astrology/core-calculations";
 
 export function normalizeBirthInput(input: AstrologyBirthInput): AstrologyBirthInput {
   return {
@@ -15,10 +16,11 @@ export function normalizeBirthInput(input: AstrologyBirthInput): AstrologyBirthI
 
 export function buildKundliReport(input: AstrologyBirthInput, chart: BirthChartData, aiSummary: string): KundliReport {
   const language = input.language ?? input.locale ?? "en";
-  const copy = kundliReportCopy(language, chart);
+  const enrichedChart = enrichBirthChartWithCoreCalculations(chart, input);
+  const copy = kundliReportCopy(language, enrichedChart);
   return {
     reportId: `kundli_${Date.now()}`,
-    ...chart,
+    ...enrichedChart,
     nakshatraAnalysis: copy.nakshatraAnalysis,
     lagnaAnalysis: copy.lagnaAnalysis,
     remedies: copy.remedies,
