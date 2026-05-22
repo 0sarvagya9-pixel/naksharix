@@ -32,30 +32,30 @@ import { featuredAstrologers } from "@/lib/astrologers";
 import { useLanguage } from "@/components/language-provider";
 
 const featureStrip = [
-  ["Kundli Generator", MoonStar, "/kundli"],
-  ["AI Astrologer", Bot, "/talk-to-kundli"],
-  ["Matching Compatibility", HeartHandshake, "/matchmaking"],
-  ["Premium Reports", BriefcaseBusiness, "/reports"],
-  ["Tarot Reading", Gem, "/tarot"],
-  ["Consultation with Experts", Users, "/astrologers"]
+  ["homeFeatureKundliGenerator", MoonStar, "/kundli"],
+  ["homeFeatureAiAstrologer", Bot, "/talk-to-kundli"],
+  ["homeFeatureMatchingCompatibility", HeartHandshake, "/matchmaking"],
+  ["homeFeaturePremiumReports", BriefcaseBusiness, "/reports"],
+  ["homeFeatureTarotReading", Gem, "/tarot"],
+  ["homeFeatureConsultationExperts", Users, "/astrologers"]
 ] as const;
 
 const intelligenceLayers = [
-  ["Vedic Astrology", "Birth-chart intelligence", SunMoon, "chart"],
-  ["Numerology / Lo Shu", "Direction and life path", Grid3X3, "loshu"],
-  ["Wealth & Growth Meter", "Prosperity timing signals", LineChart, "wealth"],
-  ["AI Insights", "Personalized predictions", BrainCircuit, "ai"],
-  ["Personalized Remedies", "Mantras, rituals, guidance", WandSparkles, "remedy"]
+  ["homeVedicAstrology", "homeVedicAstrologyCopy", SunMoon, "chart"],
+  ["homeNumerologyLoShu", "homeNumerologyLoShuCopy", Grid3X3, "loshu"],
+  ["homeWealthGrowthMeter", "homeWealthGrowthCopy", LineChart, "wealth"],
+  ["homeAiInsights", "homeAiInsightsCopy", BrainCircuit, "ai"],
+  ["homePersonalizedRemedies", "homePersonalizedRemediesCopy", WandSparkles, "remedy"]
 ] as const;
 
-const reportBenefits = ["Detailed Kundli Analysis", "Career & Finance Outlook", "Love & Relationships", "Health & Well-being", "Remedies & Guidance"];
+const reportBenefits = ["homeDetailedKundliAnalysis", "homeCareerFinanceOutlook", "homeLoveRelationships", "homeHealthWellbeing", "homeRemediesGuidance"];
 
 const trustItems = [
-  ["100% Secure & Private", ShieldCheck],
-  ["Trusted by Millions", Users],
-  ["Authentic Vedic Guidance", SunMoon],
-  ["AI-Powered Accuracy", BrainCircuit],
-  ["24/7 Customer Support", MessageCircle]
+  ["homeTrustSecurePrivate", ShieldCheck],
+  ["homeTrustMillions", Users],
+  ["homeTrustVedic", SunMoon],
+  ["homeTrustAiAccuracy", BrainCircuit],
+  ["homeTrustSupport", MessageCircle]
 ] as const;
 
 export function HomeHero() {
@@ -134,17 +134,19 @@ export function HomeHero() {
 }
 
 export function FeatureGrid() {
+  const { tr } = useLanguage();
+
   return (
     <>
       <Section className="relative max-w-[1440px] px-6 py-3 lg:px-12">
         <CosmicBackground soft />
         <div className="relative grid gap-2 overflow-hidden rounded-2xl border border-[#1e293b] bg-[#0a1224]/82 p-3 shadow-[0_24px_80px_rgba(0,5,16,0.42)] backdrop-blur md:grid-cols-3 xl:grid-cols-6">
-          {featureStrip.map(([title, Icon, href], index) => (
-            <Link key={title} href={href} className="group flex min-h-16 items-center gap-3 rounded-xl border border-[#1e293b] bg-[#0f1c3a] px-4 py-3 transition hover:-translate-y-0.5 hover:border-[#dca956]/50 hover:shadow-[0_0_24px_rgba(0,245,160,0.1)]">
+          {featureStrip.map(([titleKey, Icon, href], index) => (
+            <Link key={titleKey} href={href} className="group flex min-h-16 items-center gap-3 rounded-xl border border-[#1e293b] bg-[#0f1c3a] px-4 py-3 transition hover:-translate-y-0.5 hover:border-[#dca956]/50 hover:shadow-[0_0_24px_rgba(0,245,160,0.1)]">
               <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg border border-[#dca956]/28 bg-[#dca956]/10 text-[#f3d382]">
                 <Icon className="h-5 w-5" />
               </span>
-              <span className="text-sm font-semibold leading-tight text-[#ffffff]">{title}</span>
+              <span className="text-sm font-semibold leading-tight text-[#ffffff]">{tr(titleKey)}</span>
               {index < featureStrip.length - 1 ? <span className="ml-auto hidden h-8 w-px bg-[#1e293b] xl:block" /> : null}
             </Link>
           ))}
@@ -154,16 +156,16 @@ export function FeatureGrid() {
       <Section className="relative max-w-[1440px] px-6 py-4 lg:px-12">
         <CosmicBackground soft />
         <div className="relative grid gap-4 xl:grid-cols-[1fr_1.25fr_1fr]">
-          <Panel title="Cosmic Intelligence Platform" subtitle="AI-powered insights with ancient Vedic wisdom">
+          <Panel title={tr("homeCosmicIntelligencePlatform")} subtitle={tr("homeCosmicIntelligenceSubtitle")}>
             <div className="grid gap-3">
-              {intelligenceLayers.map(([title, copy, Icon, type]) => (
-                  <div key={title} className="group grid min-h-[5.6rem] grid-cols-[2.8rem_1fr_auto] items-center gap-3 rounded-2xl border border-[#1e293b] bg-[#0f1c3a] p-3 transition hover:-translate-y-0.5 hover:border-[#dca956]/40 hover:shadow-[0_0_24px_rgba(0,245,160,0.1)]">
+              {intelligenceLayers.map(([titleKey, copyKey, Icon, type]) => (
+                  <div key={titleKey} className="group grid min-h-[5.6rem] grid-cols-[2.8rem_1fr_auto] items-center gap-3 rounded-2xl border border-[#1e293b] bg-[#0f1c3a] p-3 transition hover:-translate-y-0.5 hover:border-[#dca956]/40 hover:shadow-[0_0_24px_rgba(0,245,160,0.1)]">
                   <span className="grid h-11 w-11 place-items-center rounded-xl bg-[radial-gradient(circle_at_35%_25%,rgba(243,211,130,0.16),rgba(0,245,160,0.08))] text-[#f3d382] shadow-[0_0_16px_rgba(220,169,86,0.12)]">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
-                    <p className="font-cinzel text-sm font-bold leading-snug text-[#f3d382]">{title}</p>
-                    <p className="mt-1 text-xs leading-5 text-[#94a3b8]">{copy}</p>
+                    <p className="font-cinzel text-sm font-bold leading-snug text-[#f3d382]">{tr(titleKey)}</p>
+                    <p className="mt-1 text-xs leading-5 text-[#94a3b8]">{tr(copyKey)}</p>
                   </div>
                   <IntelligencePreview type={type} />
                 </div>
@@ -171,29 +173,29 @@ export function FeatureGrid() {
             </div>
           </Panel>
 
-          <Panel title="Your Cosmic Dashboard" subtitle="Visual preview of personalized guidance">
+          <Panel title={tr("homeDashboardTitle")} subtitle={tr("homeDashboardSubtitle")}>
             <DashboardPreview />
           </Panel>
 
-          <Panel title="Premium Report Preview" subtitle="40-50 page premium guidance experience">
+          <Panel title={tr("homePremiumReportPreview")} subtitle={tr("homePremiumReportSubtitle")}>
             <div className="grid gap-5 md:grid-cols-[0.9fr_1.1fr] xl:grid-cols-1 2xl:grid-cols-[0.9fr_1fr]">
               <div className="relative min-h-52 rounded-2xl bg-[radial-gradient(circle_at_50%_0%,rgba(220,169,86,0.16),transparent_11rem),#0a1224] p-5 shadow-[inset_0_0_0_1px_rgba(220,169,86,0.22),0_20px_45px_rgba(0,0,0,0.34)]">
                 <div className="absolute left-8 top-8 h-36 w-28 rotate-[-8deg] rounded-lg bg-gradient-to-br from-[#f3d382] via-[#dca956] to-[#dca956] shadow-[18px_18px_45px_rgba(0,0,0,0.42),inset_-10px_0_18px_rgba(2,6,18,0.28)]" />
                 <div className="absolute left-12 top-10 h-36 w-28 rotate-[5deg] rounded-lg border border-[#f3d382]/45 bg-[linear-gradient(135deg,#0f1c3a,#0a1224_45%,#0f1c3a)] p-4 shadow-[18px_18px_55px_rgba(0,0,0,0.5)]">
                   <p className="text-[0.62rem] uppercase tracking-[0.18em] text-[#dca956]">Naksharix</p>
-                  <p className="mt-5 font-cinzel text-sm font-black leading-tight text-[#f3d382]">Your Comprehensive Cosmic Report</p>
+                  <p className="mt-5 font-cinzel text-sm font-black leading-tight text-[#f3d382]">{tr("homeReportBookTitle")}</p>
                   <MoonStar className="mt-6 h-9 w-9 text-[#dca956]" />
                 </div>
               </div>
               <div className="space-y-2">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#dca956]">Premium Report Preview</p>
-                {reportBenefits.map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-sm text-[#ffffff]/82">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#dca956]">{tr("homePremiumReportPreview")}</p>
+                {reportBenefits.map((itemKey) => (
+                  <div key={itemKey} className="flex items-center gap-2 text-sm text-[#ffffff]/82">
                     <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-[#f3d382]" />
-                    {item}
+                    {tr(itemKey)}
                   </div>
                 ))}
-                <Button className="mt-4 w-full" size="sm" variant="secondary" asChild><Link href="/reports"><LockKeyhole className="h-4 w-4" />Unlock Full Report</Link></Button>
+                <Button className="mt-4 w-full" size="sm" variant="secondary" asChild><Link href="/reports"><LockKeyhole className="h-4 w-4" />{tr("homeUnlockFullReport")}</Link></Button>
               </div>
             </div>
           </Panel>
@@ -204,6 +206,8 @@ export function FeatureGrid() {
 }
 
 function DashboardPreview() {
+  const { tr } = useLanguage();
+
   return (
     <div className="grid gap-3">
       <div className="rounded-2xl border border-[#1e293b] bg-[#0f1c3a] p-4">
@@ -213,23 +217,23 @@ function DashboardPreview() {
             <span className="absolute -right-0.5 bottom-1 h-3 w-3 rounded-full border-2 border-[#0a1224] bg-[#00f5a0]" />
           </div>
           <div>
-            <p className="font-cinzel text-sm font-bold text-[#f3d382]">Hello, Arjun</p>
-            <p className="text-xs text-[#ffffff]/64">Explore your cosmic insights</p>
+            <p className="font-cinzel text-sm font-bold text-[#f3d382]">{tr("homeHelloArjun")}</p>
+            <p className="text-xs text-[#ffffff]/64">{tr("homeExploreInsights")}</p>
           </div>
         </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-[0.88fr_1.12fr]">
         <div className="rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_20%_0%,rgba(88,28,135,0.22),transparent_11rem),#0f1c3a] p-4">
-          <p className="text-xs text-[#94a3b8]">Life Path Number</p>
+          <p className="text-xs text-[#94a3b8]">{tr("homeLifePathNumber")}</p>
           <p className="mt-2 font-cinzel text-5xl font-black text-[#f3d382]">7</p>
-          <p className="mt-1 text-sm font-semibold text-[#dca956]">Seeker</p>
+          <p className="mt-1 text-sm font-semibold text-[#dca956]">{tr("homeSeeker")}</p>
         </div>
         <div className="rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_80%_15%,rgba(0,245,160,0.18),transparent_11rem),#0f1c3a] p-4">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs text-[#94a3b8]">Today&apos;s Cosmic Energy</p>
-              <p className="font-cinzel text-xl font-bold text-[#00f5a0]">Favorable</p>
+              <p className="text-xs text-[#94a3b8]">{tr("homeTodaysCosmicEnergy")}</p>
+              <p className="font-cinzel text-xl font-bold text-[#00f5a0]">{tr("homeFavorable")}</p>
               <div className="mt-3 grid grid-cols-4 gap-1">
                 {["▾", "▾", "▾", "▾"].map((item, index) => (
                   <span key={`${item}-${index}`} className="grid h-6 w-6 place-items-center rounded-full bg-[#00f5a0]/12 text-xs text-[#00f5a0]">{item}</span>
@@ -243,14 +247,14 @@ function DashboardPreview() {
 
       <div className="grid gap-3 md:grid-cols-[0.92fr_1.08fr]">
         <div className="rounded-2xl border border-[#1e293b] bg-[#0f1c3a] p-4">
-          <p className="text-xs text-[#94a3b8]">Planetary Overview</p>
-          {["Sun Strong", "Moon Favorable", "Mars Good", "Jupiter Strong"].map((item) => <p key={item} className="mt-1 text-xs text-[#ffffff]/78">{item}</p>)}
+          <p className="text-xs text-[#94a3b8]">{tr("homePlanetaryOverview")}</p>
+          {["homeSunStrong", "homeMoonFavorable", "homeMarsGood", "homeJupiterStrong"].map((itemKey) => <p key={itemKey} className="mt-1 text-xs text-[#ffffff]/78">{tr(itemKey)}</p>)}
         </div>
         <div className="rounded-2xl border border-[#1e293b] bg-[linear-gradient(135deg,rgba(0,155,114,0.12),rgba(88,28,135,0.08))] p-4">
-          <p className="text-xs font-semibold text-[#00f5a0]">AI Prediction for You</p>
-          <p className="mt-2 text-xs leading-5 text-[#ffffff]/72">A positive career shift is indicated between 23 May - 10 June.</p>
+          <p className="text-xs font-semibold text-[#00f5a0]">{tr("homeAiPredictionForYou")}</p>
+          <p className="mt-2 text-xs leading-5 text-[#ffffff]/72">{tr("homeCareerShiftPrediction")}</p>
           <Link href="/dashboard" className="mt-3 inline-flex rounded-full bg-[#00f5a0]/12 px-3 py-1 text-xs font-semibold text-[#00f5a0] transition hover:bg-[#00f5a0]/20">
-            View Details
+            {tr("viewDetails")}
           </Link>
         </div>
       </div>
@@ -335,10 +339,12 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 export function AstrologerShowcase() {
+  const { tr } = useLanguage();
+
   return (
     <Section className="relative max-w-[1440px] px-6 py-4 lg:px-12">
       <CosmicBackground soft />
-      <Panel title="Connect With Verified Astrologers" subtitle="Talk to top astro experts and get personalized guidance">
+      <Panel title={tr("homeAstrologerTitle")} subtitle={tr("homeAstrologerSubtitle")}>
         <div className="relative">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {featuredAstrologers.slice(0, 5).map((astrologer) => (
@@ -375,14 +381,16 @@ export function AstrologerShowcase() {
 }
 
 export function TrustBar() {
+  const { tr } = useLanguage();
+
   return (
     <Section className="relative max-w-[1440px] px-6 pb-28 pt-4 md:pb-10 lg:px-12">
       <CosmicBackground soft />
       <div className="relative grid gap-3 border-y border-[#1e293b] bg-[#0a1224]/80 p-4 shadow-[0_0_30px_rgba(220,169,86,0.06)] backdrop-blur sm:grid-cols-2 lg:grid-cols-5">
-        {trustItems.map(([label, Icon]) => (
-          <div key={label} className="flex items-center justify-center gap-3 border-[#1e293b] px-3 py-2 lg:border-r lg:last:border-r-0">
+        {trustItems.map(([labelKey, Icon]) => (
+          <div key={labelKey} className="flex items-center justify-center gap-3 border-[#1e293b] px-3 py-2 lg:border-r lg:last:border-r-0">
             <Icon className="h-5 w-5 text-[#dca956]" />
-            <span className="text-sm font-semibold text-[#94a3b8]">{label}</span>
+            <span className="text-sm font-semibold text-[#94a3b8]">{tr(labelKey)}</span>
           </div>
         ))}
       </div>
@@ -391,12 +399,14 @@ export function TrustBar() {
 }
 
 export function StickyMobileCTA() {
+  const { tr } = useLanguage();
+
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#dca956]/25 bg-[#020612]/95 p-3 backdrop-blur md:hidden">
       <div className="grid grid-cols-3 gap-2">
-        <Button size="sm" variant="secondary" asChild><Link href="/kundli"><MoonStar className="h-4 w-4" />Kundli</Link></Button>
+        <Button size="sm" variant="secondary" asChild><Link href="/kundli"><MoonStar className="h-4 w-4" />{tr("kundli")}</Link></Button>
         <Button size="sm" asChild><Link href="/talk-to-kundli"><MessageCircle className="h-4 w-4" />AI</Link></Button>
-        <Button size="sm" variant="outline" asChild><Link href="/reports"><Sparkles className="h-4 w-4" />Report</Link></Button>
+        <Button size="sm" variant="outline" asChild><Link href="/reports"><Sparkles className="h-4 w-4" />{tr("reports")}</Link></Button>
       </div>
     </div>
   );

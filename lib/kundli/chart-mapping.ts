@@ -304,9 +304,9 @@ const astroValueLabels: Record<Exclude<AstroValueCategory, "planet" | "sign">, R
     hinglish: { Siddha: "Siddha" }
   },
   karan: {
-    en: { Balava: "Balava", Kaulava: "Kaulava", Taitila: "Taitila", Gara: "Gara", Vanija: "Vanija", Vishti: "Vishti", Bava: "Bava" },
-    hi: { Balava: "बालव", Kaulava: "कौलव", Taitila: "तैतिल", Gara: "गर", Vanija: "वणिज", Vishti: "विष्टि", Bava: "बव" },
-    hinglish: { Balava: "Balava", Kaulava: "Kaulava", Taitila: "Taitila", Gara: "Gara", Vanija: "Vanija", Vishti: "Vishti", Bava: "Bava" }
+    en: { Balava: "Balava", Kaulava: "Kaulava", Taitila: "Taitila", Gara: "Gara", Garaja: "Garaja", Vanija: "Vanija", Vishti: "Vishti", Bava: "Bava" },
+    hi: { Balava: "बालव", Kaulava: "कौलव", Taitila: "तैतिल", Gara: "गर", Garaja: "गरज", Vanija: "वणिज", Vishti: "विष्टि", Bava: "बव" },
+    hinglish: { Balava: "Balava", Kaulava: "Kaulava", Taitila: "Taitila", Gara: "Gara", Garaja: "Garaja", Vanija: "Vanija", Vishti: "Vishti", Bava: "Bava" }
   }
 };
 
