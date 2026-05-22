@@ -369,9 +369,14 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
     value: { width: "62%", color: "#ffffff", lineHeight: isHindi ? 1.3 : 1.25 },
     grid2: { display: "flex", flexDirection: "row", gap: 8 },
     col: { flex: 1 },
-    chartRow: { display: "flex", flexDirection: "row", gap: 10, marginTop: 2, marginBottom: 8 },
-    chartBox: { flex: 1, padding: isHindi ? 7 : 8, borderWidth: 1.2, borderColor: "#334155", borderRadius: 7, backgroundColor: "#0f1c3a", minHeight: isHindi ? 258 : 270, alignItems: "center" },
-    chartTitle: { alignSelf: "stretch", color: "#f3d382", fontSize: isHindi ? 11.2 : 10.8, fontWeight: 800, marginBottom: 7, lineHeight: isHindi ? 1.34 : 1.18 },
+    chartRow: { display: "flex", flexDirection: "column", gap: 7, marginTop: 2, marginBottom: 8 },
+    chartBox: { padding: isHindi ? 7 : 8, borderWidth: 1.2, borderColor: "#334155", borderRadius: 7, backgroundColor: "#0f1c3a" },
+    chartTitle: { color: "#f3d382", fontSize: isHindi ? 10.5 : 10.7, fontWeight: 800, marginBottom: 5, lineHeight: isHindi ? 1.28 : 1.16 },
+    chartGrid: { display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 4 },
+    chartHouseCard: { width: "23.5%", minHeight: isHindi ? 45 : 43, padding: 4.5, borderWidth: 0.8, borderColor: "#1e293b", borderRadius: 5, backgroundColor: "#0a1224" },
+    chartHouseHeader: { color: "#fbc02d", fontSize: isHindi ? 7.2 : 7.4, fontWeight: 800, marginBottom: 1.8, lineHeight: isHindi ? 1.2 : 1.1 },
+    chartHouseSign: { color: "#f3d382", fontSize: isHindi ? 8.1 : 8.3, fontWeight: 700, marginBottom: 2.5, lineHeight: isHindi ? 1.24 : 1.15 },
+    chartPlanetLine: { color: "#ffffff", fontSize: isHindi ? 8.7 : 8.3, fontWeight: 800, lineHeight: isHindi ? 1.34 : 1.22 },
     chartNote: { marginBottom: 7, padding: 8, borderWidth: 1, borderColor: "#1e293b", borderRadius: 7, backgroundColor: "#0a1224" },
     tableHeader: { display: "flex", flexDirection: "row", backgroundColor: "#0f1c3a", color: "#f3d382", paddingVertical: 4.8, paddingHorizontal: 4, fontSize: isHindi ? 7.8 : 7.5, fontWeight: 800, lineHeight: 1.24 },
     tableRow: { display: "flex", flexDirection: "row", paddingVertical: isHindi ? 4.2 : 3.8, paddingHorizontal: 4, borderBottomWidth: 0.45, borderBottomColor: "#1e293b", fontSize: isHindi ? 7.8 : 7.5, lineHeight: isHindi ? 1.36 : 1.22, color: "#ffffff" },
@@ -403,6 +408,10 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
     text(value, styles.value, { key: "v" })
   ]);
   const section = (title: unknown, children: ReactElement[]) => h(PdfView, { key: safeText(title, lang), style: styles.section }, [
+    text(title, styles.sectionTitle, { key: "title" }),
+    ...children
+  ]);
+  const fixedSection = (title: unknown, children: ReactElement[]) => h(PdfView, { key: safeText(title, lang), style: styles.section, wrap: false }, [
     text(title, styles.sectionTitle, { key: "title" }),
     ...children
   ]);
@@ -469,10 +478,19 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
       ]),
       section(labels[lang].charts, [
         paragraph(chartExplanation(lang), "chart-explanation", styles.mutedParagraph)
-      ]),
-      section(labels[lang].planets, [
+      ])
+    ]),
+    makePage(labels[lang].planets, [
+      fixedSection(labels[lang].planets, [
         planetTable(h, text, PdfView, styles, data.planetaryPositions, lang),
         ...planetaryHighlights(data, lang).map((line, index) => paragraph(line, `planet-highlight-${index}`, index === 0 ? styles.goldParagraph : styles.mutedParagraph))
+      ]),
+      section(labels[lang].dasha, dashaSummary(h, text, PdfView, styles, data, lang)),
+      section(labels[lang].chalitChart, chalitSummary(h, text, PdfView, styles, data, lang)),
+      section(labels[lang].doshaAnalysis, doshaSummary(text, data, lang, styles)),
+      section(labels[lang].yogaAnalysis, yogaSummary(text, data, lang, styles)),
+      section(labels[lang].timingGuidance, [
+        paragraph(timingGuidance(data, lang), "timing-guidance", styles.mutedParagraph)
       ])
     ]),
     makePage(labels[lang].detailedAnalysis, [
@@ -502,13 +520,6 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
       section(labels[lang].healthWellbeing, [
         paragraph(safeInsight(data.predictions?.healthAnalysis, lang, "health"), "health"),
         ...bullets(healthBullets(lang), "health")
-      ]),
-      section(labels[lang].dasha, dashaSummary(h, text, PdfView, styles, data, lang)),
-      section(labels[lang].chalitChart, chalitSummary(h, text, PdfView, styles, data, lang)),
-      section(labels[lang].doshaAnalysis, doshaSummary(text, data, lang, styles)),
-      section(labels[lang].yogaAnalysis, yogaSummary(text, data, lang, styles)),
-      section(labels[lang].timingGuidance, [
-        paragraph(timingGuidance(lang), "timing-guidance", styles.mutedParagraph)
       ]),
       section(labels[lang].generalRemedies, renderRemedies(text, data.remedies, lang, styles)),
       section(labels[lang].practicalGuidance, bullets(nextStepBullets(lang), "next-steps")),
@@ -610,7 +621,7 @@ function dashaTable(h: PdfElementFactory, text: PdfTextFactory, View: PdfCompone
   if (!rows.length) return h(View, { key: "dasha-table" }, [text(labels[lang].dashaUnavailable, styles.paragraph, { key: "dasha-note" })]);
   return h(View, { key: "dasha-table" }, rows.map((dasha, index) => h(View, { key: `dasha-${index}`, style: styles.row }, [
     text(translatePlanetValue(dasha?.planet ?? dasha?.name, lang), styles.key, { key: "planet" }),
-    text(formatDateRange(dasha?.startDate, dasha?.endDate, lang), styles.value, { key: "dates" })
+    text(formatDateRange(dasha?.startDate ?? dasha?.startsAt, dasha?.endDate ?? dasha?.endsAt, lang), styles.value, { key: "dates" })
   ])));
 }
 
@@ -645,11 +656,11 @@ function chalitSummary(h: PdfElementFactory, text: PdfTextFactory, View: PdfComp
   return [
     h(View, { key: "method", style: styles.row }, [
       text(labels[lang].chalitMethod, styles.key, { key: "k" }),
-      text(chalit.method, styles.value, { key: "v" })
+      text(translateEngineText(chalit.method, lang), styles.value, { key: "v" })
     ]),
     ...rows.map((placement, index) => h(View, { key: `chalit-${index}`, style: styles.row }, [
       text(translatePlanetValue(placement.planet, lang), styles.key, { key: "k" }),
-      text(`${labels[lang].d1House}: ${placement.d1House ?? labels[lang].dash} | ${labels[lang].chalitHouse}: ${placement.chalitHouse ?? labels[lang].dash} | ${safeText(placement.note, lang)}`, styles.value, { key: "v" })
+      text(`${labels[lang].d1House}: ${placement.d1House ?? labels[lang].dash} | ${labels[lang].chalitHouse}: ${placement.chalitHouse ?? labels[lang].dash} | ${translateEngineText(placement.note, lang)}`, styles.value, { key: "v" })
     ]))
   ];
 }
@@ -658,19 +669,19 @@ function doshaSummary(text: PdfTextFactory, data: PdfData, lang: Locale, styles:
   const dosha = data.doshaAnalysis;
   return [
     text(`${labels[lang].manglikStatus}: ${safeText(dosha?.manglik?.severity ?? data.doshas.manglik.severity, lang)}`, styles.goldParagraph, { key: "manglik-title" }),
-    text(dosha?.manglik?.summary ?? data.doshas.manglik.summary, styles.paragraph, { key: "manglik-summary" }),
+    text(translateEngineText(dosha?.manglik?.summary ?? data.doshas.manglik.summary, lang), styles.paragraph, { key: "manglik-summary" }),
     text(`${labels[lang].kaalSarpStatus}: ${safeText(dosha?.kaalSarp?.severity ?? data.doshas.kaalSarp.severity, lang)}`, styles.goldParagraph, { key: "kaal-title" }),
-    text(dosha?.kaalSarp?.summary ?? data.doshas.kaalSarp.summary, styles.paragraph, { key: "kaal-summary" }),
-    ...(dosha?.notes ?? []).slice(0, 2).map((note, index) => text(note, styles.mutedParagraph, { key: `dosha-note-${index}` }))
+    text(translateEngineText(dosha?.kaalSarp?.summary ?? data.doshas.kaalSarp.summary, lang), styles.paragraph, { key: "kaal-summary" }),
+    ...(dosha?.notes ?? []).slice(0, 2).map((note, index) => text(translateEngineText(note, lang), styles.mutedParagraph, { key: `dosha-note-${index}` }))
   ];
 }
 
 function yogaSummary(text: PdfTextFactory, data: PdfData, lang: Locale, styles: PdfStyles) {
   const yogas = data.yogaAnalysis?.detected ?? [];
-  if (!yogas.length) return [text(data.yogaAnalysis?.note ?? labels[lang].noYoga, styles.paragraph, { key: "no-yoga" })];
+  if (!yogas.length) return [text(translateEngineText(data.yogaAnalysis?.note ?? labels[lang].noYoga, lang), styles.paragraph, { key: "no-yoga" })];
   return yogas.slice(0, 6).flatMap((yoga, index) => [
-    text(`${labels[lang].detectedYogas}: ${safeText(yoga.name, lang)}`, styles.goldParagraph, { key: `yoga-name-${index}` }),
-    text(`${safeText(yoga.basis, lang)} ${safeText(yoga.interpretation, lang)}`, styles.paragraph, { key: `yoga-copy-${index}` })
+    text(`${labels[lang].detectedYogas}: ${translateYogaName(yoga.name, lang)}`, styles.goldParagraph, { key: `yoga-name-${index}` }),
+    text(`${translateEngineText(yoga.basis, lang)} ${translateEngineText(yoga.interpretation, lang)}`, styles.paragraph, { key: `yoga-copy-${index}` })
   ]);
 }
 
@@ -695,64 +706,53 @@ function chartPanel(
   houses: unknown[],
   lang: Locale
 ) {
+  void Svg;
+  void Rect;
+  void Line;
+  void SvgText;
   return h(View, { key: title, style: styles.chartBox }, [
     text(title, styles.chartTitle, { key: "title" }),
-    Array.isArray(houses) && houses.length ? chart(h, View, Svg, Rect, Line, SvgText, houses, lang) : text(chartUnavailable(title, lang), styles.mutedParagraph, { key: "empty" })
+    Array.isArray(houses) && houses.length ? chartGrid(h, text, View, styles, houses, lang) : text(chartUnavailable(title, lang), styles.mutedParagraph, { key: "empty" })
   ]);
 }
 
-function chart(
+function chartGrid(
   h: PdfElementFactory,
+  text: PdfTextFactory,
   View: PdfComponent,
-  Svg: PdfComponent,
-  Rect: PdfComponent,
-  Line: PdfComponent,
-  SvgText: PdfComponent,
+  styles: PdfStyles,
   houses: unknown[],
   lang: Locale
 ) {
-  const chartLayout: Record<number, { signX: number; signY: number; clusterX: number; clusterY: number; maxWidth?: number }> = {
-    1: { signX: 150, signY: 30, clusterX: 150, clusterY: 64, maxWidth: 74 },
-    2: { signX: 79, signY: 26, clusterX: 96, clusterY: 72, maxWidth: 58 },
-    3: { signX: 35, signY: 78, clusterX: 66, clusterY: 108, maxWidth: 52 },
-    4: { signX: 78, signY: 137, clusterX: 94, clusterY: 160, maxWidth: 58 },
-    5: { signX: 35, signY: 188, clusterX: 68, clusterY: 196, maxWidth: 52 },
-    6: { signX: 88, signY: 235, clusterX: 110, clusterY: 239, maxWidth: 54 },
-    7: { signX: 150, signY: 219, clusterX: 150, clusterY: 244, maxWidth: 74 },
-    8: { signX: 212, signY: 235, clusterX: 190, clusterY: 239, maxWidth: 54 },
-    9: { signX: 265, signY: 188, clusterX: 232, clusterY: 196, maxWidth: 52 },
-    10: { signX: 222, signY: 137, clusterX: 206, clusterY: 160, maxWidth: 58 },
-    11: { signX: 265, signY: 78, clusterX: 234, clusterY: 108, maxWidth: 52 },
-    12: { signX: 212, signY: 26, clusterX: 204, clusterY: 72, maxWidth: 58 }
-  };
-  const lines = [[0, 0, 300, 280], [300, 0, 0, 280], [150, 0, 300, 140], [300, 140, 150, 280], [150, 280, 0, 140], [0, 140, 150, 0], [75, 70, 225, 70], [75, 210, 225, 210], [75, 70, 75, 210], [225, 70, 225, 210]];
-  return h(View, { key: "chart-view", wrap: false, style: { width: 238, height: 222, marginVertical: 2, alignSelf: "center" } }, [
-    h(Svg, { key: "svg", width: 238, height: 222, viewBox: "0 0 300 280" }, [
-      h(Rect, { key: "border", x: 1, y: 1, width: 298, height: 278, rx: 5, fill: "#0f1c3a", stroke: "#dca956", strokeWidth: 2.6 }),
-      ...lines.map(([x1, y1, x2, y2], index) => h(Line, { key: `line-${index}`, x1, y1, x2, y2, stroke: index < 6 ? "#dca956" : "#334155", strokeOpacity: index < 6 ? 0.72 : 0.95, strokeWidth: index < 6 ? 1.7 : 1.45 })),
-      ...Array.from({ length: 12 }, (_, index) => {
-        const houseNumber = index + 1;
-        const house = houses.map(toChartHouse).find((item) => Number(item.house) === houseNumber) ?? { house: houseNumber, planets: [] };
-        const layout = chartLayout[houseNumber];
-        const planets = visibleChartPlanetLabels(planetLabels(house, lang));
-        const planetNodes = planetClusterPositions(planets.length, layout.clusterX, layout.clusterY, layout.maxWidth).map((position, planetIndex) => {
-          const planet = planets[planetIndex];
-          return h(SvgText, {
-            key: `p-${planetIndex}`,
-            x: position.x,
-            y: position.y,
-            textAnchor: "middle",
-            fill: planetIndex === 0 ? "#f3d382" : "#ffffff",
-            style: { fontFamily: PDF_FONT_FAMILY, fontSize: position.fontSize, fontWeight: "bold" }
-          }, safeText(planet, lang));
-        });
-        return [
-          h(SvgText, { key: "sign", x: layout.signX, y: layout.signY, textAnchor: "middle", fill: "#fbc02d", style: { fontFamily: PDF_FONT_FAMILY, fontSize: 17, fontWeight: "bold" } }, safeText(house?.signNumber ?? labels[lang].dash, lang)),
-          ...planetNodes
-        ];
-      }).flat()
-    ])
-  ]);
+  const normalized = houses.map(toChartHouse);
+  return h(View, { key: "chart-grid", style: styles.chartGrid, wrap: false }, Array.from({ length: 12 }, (_, index) => {
+    const houseNumber = index + 1;
+    const house = normalized.find((item) => Number(item.house) === houseNumber) ?? { house: houseNumber, planets: [] };
+    const sign = chartSignLabel(house, lang);
+    const planetLines = chartPlanetLines(planetLabels(house, lang), lang);
+
+    return h(View, { key: `house-${houseNumber}`, style: styles.chartHouseCard }, [
+      text(`${labels[lang].house} ${houseNumber}`, styles.chartHouseHeader, { key: "house" }),
+      text(sign, styles.chartHouseSign, { key: "sign" }),
+      ...planetLines.map((line, lineIndex) => text(line, styles.chartPlanetLine, { key: `planets-${lineIndex}` }))
+    ]);
+  }));
+}
+
+function chartSignLabel(house: ChartHouse, lang: Locale) {
+  const sign = translateSignValue(house.sign, lang);
+  if (!isUnavailableText(sign)) return sign;
+  const signNumber = safeText(house.signNumber, lang);
+  return isUnavailableText(signNumber) ? labels[lang].dash : signNumber;
+}
+
+function chartPlanetLines(planets: string[], lang: Locale) {
+  const visible = visibleChartPlanetLabels(planets);
+  if (!visible.length) return [labels[lang].dash];
+  if (visible.length <= 2) return [visible.join("  ")];
+  if (visible.length === 3) return [`${visible[0]}  ${visible[1]}`, visible[2]];
+  if (visible.length === 4) return [`${visible[0]}  ${visible[1]}`, `${visible[2]}  ${visible[3]}`];
+  return [visible.slice(0, 3).join("  "), visible.slice(3, 6).join("  ")];
 }
 
 function visibleChartPlanetLabels(planets: string[]) {
@@ -765,28 +765,6 @@ function pdfTextStyle(style: unknown, lang: Locale) {
   if (Array.isArray(style)) return [...style, fontPatch];
   if (style && typeof style === "object") return { ...(style as Record<string, unknown>), ...fontPatch };
   return fontPatch;
-}
-
-function planetClusterPositions(count: number, centerX: number, centerY: number, maxWidth = 64) {
-  if (count <= 0) return [];
-  const visibleCount = Math.min(count, 6);
-  const fontSize = visibleCount >= 5 ? 9.8 : visibleCount >= 4 ? 11.3 : visibleCount >= 2 ? 12.4 : 13.2;
-  const colGap = Math.min(21, Math.max(16, maxWidth / 3));
-  const rowGap = visibleCount >= 5 ? 10.8 : visibleCount >= 4 ? 12.8 : 14.4;
-  if (visibleCount === 1) return [{ x: centerX, y: centerY, fontSize }];
-  if (visibleCount === 2) return [
-    { x: centerX, y: centerY - rowGap / 2, fontSize },
-    { x: centerX, y: centerY + rowGap / 2, fontSize }
-  ];
-  const rows = Math.ceil(visibleCount / 2);
-  return Array.from({ length: visibleCount }, (_, index) => {
-    const row = Math.floor(index / 2);
-    const isLastOdd = visibleCount === 3 && index === 2;
-    const col = index % 2;
-    const x = isLastOdd ? centerX : centerX + (col === 0 ? -colGap / 2 : colGap / 2);
-    const y = centerY + (row - (rows - 1) / 2) * rowGap;
-    return { x, y, fontSize };
-  });
 }
 
 function registerPdfFonts(Font: PdfFontRegistry) {
@@ -897,6 +875,52 @@ function translateByCategory(value: unknown, lang: Locale, category: AstroValueC
   const raw = safeText(value, lang);
   if (isUnavailableText(raw)) return labels[lang].notAvailable;
   return translateAstroValue(raw, lang, category) || raw;
+}
+
+function translateYogaName(value: unknown, lang: Locale) {
+  const raw = safeText(value, lang);
+  if (isUnavailableText(raw)) return labels[lang].notAvailable;
+  const names: Record<string, Record<Locale, string>> = {
+    "Budh Aditya Yoga": { en: "Budh Aditya Yoga", hi: "बुध आदित्य योग", hinglish: "Budh Aditya Yoga" },
+    "Gaja Kesari Yoga": { en: "Gaja Kesari Yoga", hi: "गजकेसरी योग", hinglish: "Gaja Kesari Yoga" },
+    "Chandra Mangal Yoga": { en: "Chandra Mangal Yoga", hi: "चंद्र मंगल योग", hinglish: "Chandra Mangal Yoga" },
+    "Ruchaka Yoga": { en: "Ruchaka Yoga", hi: "रुचक योग", hinglish: "Ruchaka Yoga" },
+    "Bhadra Yoga": { en: "Bhadra Yoga", hi: "भद्र योग", hinglish: "Bhadra Yoga" },
+    "Hamsa Yoga": { en: "Hamsa Yoga", hi: "हंस योग", hinglish: "Hamsa Yoga" },
+    "Malavya Yoga": { en: "Malavya Yoga", hi: "मालव्य योग", hinglish: "Malavya Yoga" },
+    "Shasha Yoga": { en: "Shasha Yoga", hi: "शश योग", hinglish: "Shasha Yoga" }
+  };
+  return names[raw]?.[lang] ?? raw;
+}
+
+function translateEngineText(value: unknown, lang: Locale) {
+  const raw = safeText(value, lang);
+  if (isUnavailableText(raw)) return labels[lang].notAvailable;
+  if (lang !== "hi") return raw;
+  const exact: Record<string, string> = {
+    "Equal-house Chalit from available ascendant and planetary longitude data": "उपलब्ध लग्न और ग्रह देशांतर डेटा के आधार पर समान-भाव चलित गणना",
+    "Equal-house Chalit from ascendant longitude": "लग्न देशांतर के आधार पर समान-भाव चलित गणना",
+    "Needs full chart, strength, aspects, and dasha review before final judgment.": "अंतिम निर्णय से पहले पूरी कुंडली, ग्रह बल, दृष्टि और दशा समीक्षा आवश्यक है।"
+  };
+  if (exact[raw]) return exact[raw];
+  return raw
+    .replace(/\bBudh Aditya Yoga\b/g, "बुध आदित्य योग")
+    .replace(/\bGaja Kesari Yoga\b/g, "गजकेसरी योग")
+    .replace(/\bChandra Mangal Yoga\b/g, "चंद्र मंगल योग")
+    .replace(/\bRuchaka Yoga\b/g, "रुचक योग")
+    .replace(/\bBhadra Yoga\b/g, "भद्र योग")
+    .replace(/\bHamsa Yoga\b/g, "हंस योग")
+    .replace(/\bMalavya Yoga\b/g, "मालव्य योग")
+    .replace(/\bShasha Yoga\b/g, "शश योग")
+    .replace(/\bSun\b/g, "सूर्य")
+    .replace(/\bMoon\b/g, "चंद्र")
+    .replace(/\bMars\b/g, "मंगल")
+    .replace(/\bMercury\b/g, "बुध")
+    .replace(/\bJupiter\b/g, "गुरु")
+    .replace(/\bVenus\b/g, "शुक्र")
+    .replace(/\bSaturn\b/g, "शनि")
+    .replace(/\bRahu\b/g, "राहु")
+    .replace(/\bKetu\b/g, "केतु");
 }
 
 function formatDateRange(start: unknown, end: unknown, lang: Locale) {
@@ -1062,7 +1086,12 @@ function healthBullets(lang: Locale) {
   }[lang];
 }
 
-function timingGuidance(lang: Locale) {
+function timingGuidance(data: PdfData, lang: Locale) {
+  if (data.calculatedDasha?.available) {
+    if (lang === "hi") return "वर्तमान महादशा और अंतर्दशा को समय-संदर्भ के रूप में देखें, लेकिन अंतिम निर्णय के लिए पूरी कुंडली, गोचर और व्यावहारिक परिस्थिति को साथ में समझें।";
+    if (lang === "hinglish") return "Current Mahadasha aur Antardasha ko timing context ke roop mein dekhein, lekin final decision ke liye full chart strength, transits aur practical situation ko saath mein samjhein.";
+    return "Use the current Mahadasha and Antardasha as timing context, but combine them with full chart strength, transits, and practical circumstances.";
+  }
   if (lang === "hi") return "जब सटीक दशा उपलब्ध न हो, तब समय संबंधी निष्कर्षों को अंतिम भविष्यवाणी न मानें। उपलब्ध ग्रह स्थिति, लग्न, चंद्र राशि और व्यवहारिक परिस्थिति को मिलाकर निर्णय लें।";
   if (lang === "hinglish") return "Jab exact dasha available na ho, timing conclusions ko final prediction na samjhein. Available grah position, lagna, moon sign aur practical situation ko combine karke decision lein.";
   return "When exact dasha data is unavailable, timing notes should not be treated as final prediction. Combine available planetary positions, lagna, moon sign, and practical circumstances.";
