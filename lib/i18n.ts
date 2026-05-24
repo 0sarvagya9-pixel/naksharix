@@ -1429,6 +1429,30 @@ const hinglish: Record<string, string> = {
   premiumReports: "Premium Reports"
 };
 
+Object.assign(en, {
+  numerologyFormTitle: "Calculate your Numerology Report",
+  numerologyMissingNumbers: "Missing Numbers",
+  numerologyRepeatedNumbers: "Repeated Numbers",
+  numerologyPracticalRemedies: "Practical Remedies",
+  numerologyCalculate: "Calculate Numerology"
+});
+
+Object.assign(hi, {
+  numerologyFormTitle: "अपनी अंक ज्योतिष रिपोर्ट बनाएं",
+  numerologyMissingNumbers: "छूटे हुए अंक",
+  numerologyRepeatedNumbers: "दोहराए गए अंक",
+  numerologyPracticalRemedies: "व्यावहारिक उपाय",
+  numerologyCalculate: "अंक ज्योतिष गणना करें"
+});
+
+Object.assign(hinglish, {
+  numerologyFormTitle: "Apni Numerology Report Calculate Karein",
+  numerologyMissingNumbers: "Missing Numbers",
+  numerologyRepeatedNumbers: "Repeated Numbers",
+  numerologyPracticalRemedies: "Practical Remedies",
+  numerologyCalculate: "Numerology Calculate Karein"
+});
+
 export const dictionary: Record<Locale, Record<string, string>> = { en, hi, hinglish };
 
 export function normalizeLocale(value: string | null | undefined): Locale {

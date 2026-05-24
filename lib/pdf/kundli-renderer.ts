@@ -345,7 +345,7 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
   const isHindi = lang === "hi";
   const logoSource = loadPdfLogoSource();
   const styles = StyleSheet.create({
-    page: { position: "relative", padding: isHindi ? 24 : 28, paddingTop: isHindi ? 22 : 24, paddingBottom: 40, backgroundColor: "#020612", color: "#ffffff", fontFamily: PDF_FONT_FAMILY, fontSize: isHindi ? 8.55 : 9, lineHeight: isHindi ? 1.34 : 1.36 },
+    page: { position: "relative", padding: isHindi ? 24 : 28, paddingTop: isHindi ? 22 : 24, paddingBottom: isHindi ? 50 : 48, backgroundColor: "#020612", color: "#ffffff", fontFamily: PDF_FONT_FAMILY, fontSize: isHindi ? 8.45 : 8.9, lineHeight: isHindi ? 1.3 : 1.32 },
     watermark: { position: "absolute", top: "40%", left: 55, right: 55, transform: "rotate(-26deg)", opacity: 0.06, display: "flex", alignItems: "center" },
     watermarkLogo: { width: 96, height: 96, objectFit: "contain", marginBottom: 6 },
     watermarkText: { color: "#f3d382", fontSize: isHindi ? 25 : 28, textAlign: "center", fontWeight: 800, letterSpacing: isHindi ? 0 : 1.5 },
@@ -362,7 +362,7 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
     reportTitle: { color: "#f3d382", fontSize: isHindi ? 11.4 : 12.2, fontWeight: 800, marginBottom: isHindi ? 6 : 8, lineHeight: isHindi ? 1.26 : 1.2 },
     subtitle: { color: "#94a3b8", fontSize: 9, lineHeight: isHindi ? 1.45 : 1.25 },
     content: { marginTop: 2 },
-    section: { marginBottom: isHindi ? 5.5 : 7, padding: isHindi ? 6.5 : 8, borderWidth: 1, borderColor: "#1e293b", borderRadius: 7, backgroundColor: "#0a1224" },
+    section: { marginBottom: isHindi ? 4.5 : 5.8, padding: isHindi ? 5.8 : 7, borderWidth: 1, borderColor: "#1e293b", borderRadius: 7, backgroundColor: "#0a1224" },
     sectionTitle: { color: "#f3d382", fontSize: isHindi ? 10.3 : 10.8, fontWeight: 800, marginBottom: isHindi ? 4.5 : 6, lineHeight: isHindi ? 1.24 : 1.18 },
     row: { display: "flex", flexDirection: "row", borderBottomWidth: 0.45, borderBottomColor: "#1e293b", paddingVertical: isHindi ? 2.8 : 3.5 },
     key: { width: "38%", color: "#dca956", fontWeight: 700, paddingRight: 5, lineHeight: isHindi ? 1.3 : 1.25 },
@@ -384,9 +384,9 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
     cellSign: { width: "18%" },
     cellSmall: { width: "10%" },
     cellWide: { width: "24%" },
-    paragraph: { marginBottom: isHindi ? 4.1 : 5.2, fontSize: isHindi ? 8.7 : 9, color: "#ffffff", lineHeight: isHindi ? 1.35 : 1.36 },
-    mutedParagraph: { marginBottom: isHindi ? 4.1 : 5.2, fontSize: isHindi ? 8.25 : 8.6, color: "#94a3b8", lineHeight: isHindi ? 1.32 : 1.32 },
-    goldParagraph: { marginBottom: isHindi ? 4.1 : 5.2, fontSize: isHindi ? 8.7 : 9, color: "#f3d382", lineHeight: isHindi ? 1.35 : 1.36, fontWeight: 700 },
+    paragraph: { marginBottom: isHindi ? 3.2 : 4.2, fontSize: isHindi ? 8.45 : 8.8, color: "#ffffff", lineHeight: isHindi ? 1.28 : 1.3 },
+    mutedParagraph: { marginBottom: isHindi ? 3.2 : 4.2, fontSize: isHindi ? 8.1 : 8.4, color: "#94a3b8", lineHeight: isHindi ? 1.27 : 1.28 },
+    goldParagraph: { marginBottom: isHindi ? 3.2 : 4.2, fontSize: isHindi ? 8.45 : 8.8, color: "#f3d382", lineHeight: isHindi ? 1.28 : 1.3, fontWeight: 700 },
     coverPanel: { marginBottom: isHindi ? 6 : 8, padding: isHindi ? 11 : 14, borderWidth: 1.3, borderColor: "#dca956", borderRadius: 10, backgroundColor: "#0a1224" },
     coverBrandRow: { display: "flex", flexDirection: "row", alignItems: "center", marginBottom: isHindi ? 8 : 11 },
     coverLogo: { width: isHindi ? 58 : 72, height: isHindi ? 58 : 72, objectFit: "contain", marginRight: 12 },
@@ -396,10 +396,10 @@ export async function renderBundledKundliPdf(data: PdfData, language: Locale, pd
     coverTitle: { color: "#f3d382", fontSize: isHindi ? 15.5 : 18.5, fontWeight: 800, marginBottom: isHindi ? 4 : 6, lineHeight: isHindi ? 1.18 : 1.08 },
     coverSubtitle: { color: "#94a3b8", fontSize: isHindi ? 8.2 : 9, lineHeight: isHindi ? 1.27 : 1.28 },
     badge: { alignSelf: "flex-start", marginBottom: 8, paddingVertical: 4, paddingHorizontal: 8, borderWidth: 1, borderColor: "#1e293b", borderRadius: 999, color: "#00f5a0", backgroundColor: "#0f1c3a", fontSize: 8.2, fontWeight: 700 },
-    bullet: { marginBottom: 4, color: "#ffffff", fontSize: isHindi ? 9.4 : 8.9, lineHeight: isHindi ? 1.52 : 1.35 },
-    footer: { position: "absolute", left: 30, right: 30, bottom: 15, paddingTop: 5, borderTopWidth: 0.6, borderTopColor: "#1e293b", display: "flex", flexDirection: "row", justifyContent: "space-between", color: "#94a3b8", fontSize: 7.2 },
-    footerText: { color: "#94a3b8", fontSize: 7.2 },
-    pageCounter: { color: "#f3d382", fontSize: 7.2, fontWeight: 700 }
+    bullet: { marginBottom: isHindi ? 2.8 : 3.3, color: "#ffffff", fontSize: isHindi ? 8.55 : 8.55, lineHeight: isHindi ? 1.34 : 1.3 },
+    footer: { position: "absolute", left: 30, right: 30, bottom: 14, paddingTop: 5, borderTopWidth: 0.6, borderTopColor: "#1e293b", display: "flex", flexDirection: "row", justifyContent: "space-between", color: "#94a3b8", fontSize: 7.2 },
+    footerText: { color: "#94a3b8", fontSize: 7.2, width: "33%" },
+    pageCounter: { color: "#f3d382", fontSize: 7.2, fontWeight: 700, width: "33%", textAlign: "right" }
   });
 
   const text: PdfTextFactory = (value, style, props = {}) => h(PdfText, { ...props, style: pdfTextStyle(style, lang) }, safeText(value, lang));
