@@ -12,6 +12,8 @@ export type MatchingAshtakootFactor = AshtakootFactor & {
   available: boolean;
 };
 
+type CanonicalFactor = Pick<AshtakootFactor, "kootKey" | "ruleKey" | "brideKey" | "groomKey" | "details">;
+
 export type PremiumKundliMatchReport = KundliMatchReport & {
   matchingMode: string;
   limitationNotes: string[];
@@ -257,7 +259,12 @@ function varnaKoota(brideSign: string | undefined, groomSign: string | undefined
   const groom = groomSign ? varnas[groomSign] : undefined;
   if (!bride || !groom) return unavailableFactor(labels.varna, 1, labels.varnaMeaning, language);
   const score = groom.rank >= bride.rank ? 1 : 0;
-  return factor(labels.varna, score, 1, translateVarna(bride.label, language), translateVarna(groom.label, language), labels.varnaBasis, score ? labels.varnaGood : labels.varnaConcern, language);
+  return factor(labels.varna, score, 1, translateVarna(bride.label, language), translateVarna(groom.label, language), labels.varnaBasis, score ? labels.varnaGood : labels.varnaConcern, language, {
+    kootKey: "varna",
+    ruleKey: score ? "varna_good" : "varna_concern",
+    brideKey: bride.label,
+    groomKey: groom.label
+  });
 }
 
 function vashyaKoota(brideChart: BirthChartData, groomChart: BirthChartData, labels: ReturnType<typeof copy>, language: AstrologyLanguage) {
@@ -266,7 +273,13 @@ function vashyaKoota(brideChart: BirthChartData, groomChart: BirthChartData, lab
   if (!bride || !groom) return unavailableFactor(labels.vashya, 2, labels.vashyaMeaning, language);
   const same = bride === groom;
   const score = same ? 2 : bride === "Manav" || groom === "Manav" ? 1 : 0.5;
-  return factor(labels.vashya, score, 2, translateVashya(bride, language), translateVashya(groom, language), labels.vashyaBasis, same ? labels.vashyaGood : labels.vashyaAverage, language);
+  return factor(labels.vashya, score, 2, translateVashya(bride, language), translateVashya(groom, language), labels.vashyaBasis, same ? labels.vashyaGood : labels.vashyaAverage, language, {
+    kootKey: "vashya",
+    ruleKey: same ? "vashya_good" : "vashya_average",
+    brideKey: bride,
+    groomKey: groom,
+    details: { same }
+  });
 }
 
 function taraKoota(bride: NakshatraRef, groom: NakshatraRef, labels: ReturnType<typeof copy>, language: AstrologyLanguage) {
@@ -275,13 +288,25 @@ function taraKoota(bride: NakshatraRef, groom: NakshatraRef, labels: ReturnType<
   const brideGood = taraIsSupportive(brideToGroom);
   const groomGood = taraIsSupportive(groomToBride);
   const score = (brideGood ? 1.5 : 0) + (groomGood ? 1.5 : 0);
-  return factor(labels.tara, score, 3, formatNakshatraIndex(bride, language), formatNakshatraIndex(groom, language), labels.taraBasis, labels.taraResult(brideToGroom, groomToBride, score === 3 ? labels.good : score > 0 ? labels.average : labels.concern), language);
+  return factor(labels.tara, score, 3, formatNakshatraIndex(bride, language), formatNakshatraIndex(groom, language), labels.taraBasis, labels.taraResult(brideToGroom, groomToBride, score === 3 ? labels.good : score > 0 ? labels.average : labels.concern), language, {
+    kootKey: "tara",
+    ruleKey: score === 3 ? "tara_good" : score > 0 ? "tara_average" : "tara_concern",
+    brideKey: bride.name,
+    groomKey: groom.name,
+    details: { brideIndex: bride.index, groomIndex: groom.index, brideToGroom, groomToBride }
+  });
 }
 
 function yoniKoota(bride: NakshatraRef, groom: NakshatraRef, labels: ReturnType<typeof copy>, language: AstrologyLanguage) {
   const relation = yoniRelation(bride.yoni, groom.yoni);
   const score = relation === "same" ? 4 : relation === "friendly" ? 3 : relation === "neutral" ? 2 : 0;
-  return factor(labels.yoni, score, 4, `${formatNakshatraIndex(bride, language)} - ${translateYoni(bride.yoni, language)}`, `${formatNakshatraIndex(groom, language)} - ${translateYoni(groom.yoni, language)}`, labels.yoniBasis, score >= 3 ? labels.yoniGood : score >= 2 ? labels.yoniAverage : labels.yoniConcern, language);
+  return factor(labels.yoni, score, 4, `${formatNakshatraIndex(bride, language)} - ${translateYoni(bride.yoni, language)}`, `${formatNakshatraIndex(groom, language)} - ${translateYoni(groom.yoni, language)}`, labels.yoniBasis, score >= 3 ? labels.yoniGood : score >= 2 ? labels.yoniAverage : labels.yoniConcern, language, {
+    kootKey: "yoni",
+    ruleKey: score >= 3 ? "yoni_good" : score >= 2 ? "yoni_average" : "yoni_concern",
+    brideKey: bride.yoni,
+    groomKey: groom.yoni,
+    details: { brideNakshatra: bride.name, groomNakshatra: groom.name, brideIndex: bride.index, groomIndex: groom.index, relation }
+  });
 }
 
 function grahaMaitriKoota(brideSign: string | undefined, groomSign: string | undefined, labels: ReturnType<typeof copy>, language: AstrologyLanguage) {
@@ -290,7 +315,13 @@ function grahaMaitriKoota(brideSign: string | undefined, groomSign: string | und
   if (!brideLord || !groomLord) return unavailableFactor(labels.grahMaitri, 5, labels.grahMaitriMeaning, language);
   const relation = planetRelation(brideLord, groomLord);
   const score = relation === "mutualFriend" ? 5 : relation === "friend" ? 4 : relation === "neutral" ? 3 : relation === "mixed" ? 2 : 0;
-  return factor(labels.grahMaitri, score, 5, `${translateSign(brideSign ?? "", language)} - ${translatePlanet(brideLord, language)}`, `${translateSign(groomSign ?? "", language)} - ${translatePlanet(groomLord, language)}`, labels.grahMaitriBasis, labels.grahRelation(relationLabel(relation, language), score >= 4 ? labels.good : score >= 3 ? labels.average : labels.concern), language);
+  return factor(labels.grahMaitri, score, 5, `${translateSign(brideSign ?? "", language)} - ${translatePlanet(brideLord, language)}`, `${translateSign(groomSign ?? "", language)} - ${translatePlanet(groomLord, language)}`, labels.grahMaitriBasis, labels.grahRelation(relationLabel(relation, language), score >= 4 ? labels.good : score >= 3 ? labels.average : labels.concern), language, {
+    kootKey: "grahaMaitri",
+    ruleKey: score >= 4 ? "graha_good" : score >= 3 ? "graha_average" : "graha_concern",
+    brideKey: brideSign,
+    groomKey: groomSign,
+    details: { brideLord, groomLord, relation }
+  });
 }
 
 function ganaKoota(bride: NakshatraRef, groom: NakshatraRef, labels: ReturnType<typeof copy>, language: AstrologyLanguage) {
@@ -302,7 +333,12 @@ function ganaKoota(bride: NakshatraRef, groom: NakshatraRef, labels: ReturnType<
     "Deva|Rakshasa": 0, "Rakshasa|Deva": 0
   };
   const score = scores[key] ?? 3;
-  return factor(labels.gana, score, 6, translateGana(bride.gana, language), translateGana(groom.gana, language), labels.ganaBasis, score >= 5 ? labels.ganaGood : score >= 3 ? labels.ganaAverage : labels.ganaConcern, language);
+  return factor(labels.gana, score, 6, translateGana(bride.gana, language), translateGana(groom.gana, language), labels.ganaBasis, score >= 5 ? labels.ganaGood : score >= 3 ? labels.ganaAverage : labels.ganaConcern, language, {
+    kootKey: "gana",
+    ruleKey: score >= 5 ? "gana_good" : score >= 3 ? "gana_average" : "gana_concern",
+    brideKey: bride.gana,
+    groomKey: groom.gana
+  });
 }
 
 function bhakootKoota(brideSign: string | undefined, groomSign: string | undefined, labels: ReturnType<typeof copy>, language: AstrologyLanguage) {
@@ -313,13 +349,25 @@ function bhakootKoota(brideSign: string | undefined, groomSign: string | undefin
   const reverse = circularDistance(groom, bride);
   const concern = [2, 5, 6, 8, 9, 12].includes(distance);
   const score = concern ? 0 : 7;
-  return factor(labels.bhakoot, score, 7, translateSign(brideSign ?? "", language), translateSign(groomSign ?? "", language), labels.bhakootBasis, labels.bhakootResult(distance, reverse, concern ? labels.bhakootConcern : labels.bhakootGood), language);
+  return factor(labels.bhakoot, score, 7, translateSign(brideSign ?? "", language), translateSign(groomSign ?? "", language), labels.bhakootBasis, labels.bhakootResult(distance, reverse, concern ? labels.bhakootConcern : labels.bhakootGood), language, {
+    kootKey: "bhakoot",
+    ruleKey: concern ? "bhakoot_concern" : "bhakoot_good",
+    brideKey: brideSign,
+    groomKey: groomSign,
+    details: { distance, reverse }
+  });
 }
 
 function nadiKoota(bride: NakshatraRef, groom: NakshatraRef, labels: ReturnType<typeof copy>, language: AstrologyLanguage) {
   const same = bride.nadi === groom.nadi;
   const score = same ? 0 : 8;
-  return factor(labels.nadi, score, 8, translateNadi(bride.nadi, language), translateNadi(groom.nadi, language), labels.nadiBasis, labels.nadiResult(same, same ? labels.nadiConcern : labels.nadiGood), language);
+  return factor(labels.nadi, score, 8, translateNadi(bride.nadi, language), translateNadi(groom.nadi, language), labels.nadiBasis, labels.nadiResult(same, same ? labels.nadiConcern : labels.nadiGood), language, {
+    kootKey: "nadi",
+    ruleKey: same ? "nadi_same" : "nadi_different",
+    brideKey: bride.nadi,
+    groomKey: groom.nadi,
+    details: { same }
+  });
 }
 
 function compareManglik(brideChart: BirthChartData, groomChart: BirthChartData, language: AstrologyLanguage) {
@@ -354,10 +402,10 @@ function manglikDetails(chart: BirthChartData, language: AstrologyLanguage) {
   return { status, rank, basis };
 }
 
-function factor(koot: string, score: number, maxScore: number, brideValue: string, groomValue: string, basis: string, explanation: string, language: AstrologyLanguage): MatchingAshtakootFactor {
+function factor(koot: string, score: number, maxScore: number, brideValue: string, groomValue: string, basis: string, explanation: string, language: AstrologyLanguage, canonical: CanonicalFactor = {}): MatchingAshtakootFactor {
   const safeScore = Math.max(0, Math.min(maxScore, round(score, 1)));
   const status: KootStatus = safeScore >= maxScore * 0.72 ? "good" : safeScore > 0 ? "average" : "concern";
-  return { koot, name: koot, score: safeScore, maxScore, brideValue, groomValue, explanation, meaning: explanation, result: statusLabel(status, language), status, basis, available: true };
+  return { koot, name: koot, score: safeScore, maxScore, brideValue, groomValue, explanation, meaning: explanation, result: statusLabel(status, language), status, basis, available: true, ...canonical };
 }
 
 function unavailableFactor(koot: string, maxScore: number, basis: string, language: AstrologyLanguage): MatchingAshtakootFactor {
@@ -372,16 +420,16 @@ function doshaFromFactor(present: boolean, summary: string, language: AstrologyL
 function buildBasis(chart: BirthChartData, ref: NakshatraRef | undefined, language: AstrologyLanguage): MatchBasis {
   const moonSign = chart.avakhada.moonSign;
   return {
-    moonSign: translateSign(moonSign, language),
-    moonLord: translatePlanet(SIGN_LORDS[moonSign] ?? copy(language).notAvailable, language),
-    nakshatra: ref ? displayNakshatra(ref, language) : copy(language).notAvailable,
+    moonSign,
+    moonLord: SIGN_LORDS[moonSign] ?? copy(language).notAvailable,
+    nakshatra: ref ? ref.name : copy(language).notAvailable,
     nakshatraHindi: ref?.hindi ?? copy("hi").notAvailable,
     nakshatraIndex: ref?.index,
-    gana: ref ? translateGana(ref.gana, language) : copy(language).notAvailable,
-    nadi: ref ? translateNadi(ref.nadi, language) : copy(language).notAvailable,
-    yoni: ref ? translateYoni(ref.yoni, language) : copy(language).notAvailable,
-    varna: translateVarna(varnaForSign(moonSign)?.label ?? copy(language).notAvailable, language),
-    vashya: translateVashya(vashyaGroup(chart) ?? copy(language).notAvailable, language)
+    gana: ref ? ref.gana : copy(language).notAvailable,
+    nadi: ref ? ref.nadi : copy(language).notAvailable,
+    yoni: ref ? ref.yoni : copy(language).notAvailable,
+    varna: varnaForSign(moonSign)?.label ?? copy(language).notAvailable,
+    vashya: vashyaGroup(chart) ?? copy(language).notAvailable
   };
 }
 

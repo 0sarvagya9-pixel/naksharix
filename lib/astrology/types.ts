@@ -197,6 +197,11 @@ export type AshtakootFactor = {
   maxScore: number;
   meaning: string;
   result: string;
+  kootKey?: "varna" | "vashya" | "tara" | "yoni" | "grahaMaitri" | "gana" | "bhakoot" | "nadi";
+  ruleKey?: string;
+  brideKey?: string;
+  groomKey?: string;
+  details?: Record<string, string | number | boolean | undefined>;
   koot?: string;
   brideValue?: string;
   groomValue?: string;

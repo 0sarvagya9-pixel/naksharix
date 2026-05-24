@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 const desktopLinks = [
   { id: "home", labelKey: "navHome", href: "/", activePaths: ["/"] },
   { id: "kundli", labelKey: "navKundli", href: "/kundli", activePaths: ["/kundli", "/free-kundli"] },
-  { id: "matchmaking", labelKey: "navMatchMaking", href: "/matchmaking", activePaths: ["/match", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
+  { id: "matchmaking", labelKey: "navMatchMaking", href: "/matchmaking", activePaths: ["/match", "/match-making", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
   { id: "numerology", labelKey: "navNumerology", href: "/numerology", activePaths: ["/numerology"] },
   { id: "ai-astrologer", labelKey: "navAiAstrologer", href: "/talk-to-kundli", activePaths: ["/ai-chat", "/talk-to-kundli", "/chatbot"] },
   { id: "tarot", labelKey: "navTarot", href: "/tarot", activePaths: ["/tarot"] }
@@ -83,7 +83,7 @@ const sidebarGroups: SidebarGroup[] = [
     titleKey: "compatibilityMatch",
     icon: HeartHandshake,
     items: [
-      { labelKey: "kundliMatching", href: "/matchmaking", activePaths: ["/match", "/matchmaking", "/kundli-matching"] },
+      { labelKey: "kundliMatching", href: "/matchmaking", activePaths: ["/match", "/match-making", "/matchmaking", "/kundli-matching"] },
       { labelKey: "compatibilityReport", href: "/matchmaking", activePaths: ["/match", "/matchmaking", "/love-compatibility"] }
     ]
   },
