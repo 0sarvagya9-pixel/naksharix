@@ -13,6 +13,15 @@ const footerLinks = [
   ["navContact", "/contact"]
 ] as const;
 
+const trustLinks = [
+  ["about", "/about"],
+  ["contact", "/contact"],
+  ["privacyPolicy", "/privacy-policy"],
+  ["termsConditions", "/terms"],
+  ["disclaimer", "/disclaimer"],
+  ["refundPolicy", "/refund-policy"]
+] as const;
+
 export function Footer() {
   const { tr } = useLanguage();
 
@@ -36,6 +45,16 @@ export function Footer() {
             <Link href="/reports" className="text-[#ffffff] transition hover:text-[#f3d382]">{tr("navReports")}</Link>
             <Link href="/panchang" className="text-[#ffffff] transition hover:text-[#f3d382]">{tr("navPanchang")}</Link>
             <Link href="/numerology" className="text-[#ffffff] transition hover:text-[#f3d382]">{tr("navNumerology")}</Link>
+          </div>
+          <div className="mt-5 border-t border-[#1e293b] pt-4">
+            <p className="font-cinzel text-sm font-bold text-[#f3d382]">{tr("trustSafety")}</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {trustLinks.map(([label, href]) => (
+                <Link key={href} href={href} className="text-xs text-[#ffffff] transition hover:text-[#f3d382]">
+                  {tr(label)}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>

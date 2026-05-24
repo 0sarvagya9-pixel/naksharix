@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { env } from "@/lib/env";
 import { blogCategories, blogPosts } from "@/lib/blog-content";
 import { growthPages, nakshatras } from "@/lib/growth-pages";
-import { paidReports } from "@/lib/paid-reports";
+import { manualReports } from "@/lib/manual-catalogue";
 import { seoLandingPages } from "@/lib/seo-pages";
 import { zodiacSigns } from "@/lib/zodiac";
 
@@ -14,6 +14,10 @@ const staticRoutes = [
   "/hi/free-kundli",
   "/about",
   "/contact",
+  "/privacy-policy",
+  "/terms",
+  "/disclaimer",
+  "/refund-policy",
   "/astrology",
   "/calculators",
   "/free-kundli",
@@ -29,6 +33,7 @@ const staticRoutes = [
   "/festival-calendar",
   "/shubh-muhurat",
   "/shop",
+  "/ai-astrologer",
   "/talk-to-kundli",
   "/horoscope",
   "/horoscope/all-signs/today",
@@ -58,7 +63,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...zodiacSigns.map((sign): SitemapEntry => ({ route: `/zodiac/${sign.slug}`, priority: 0.82, frequency: "daily" })),
     ...Object.values(growthPages).map((page): SitemapEntry => ({ route: page.path, priority: 0.88, frequency: "weekly" })),
     ...nakshatras.map((slug): SitemapEntry => ({ route: `/nakshatra/${slug}`, priority: 0.76, frequency: "monthly" })),
-    ...paidReports.map((report): SitemapEntry => ({ route: `/reports/${report.id}`, priority: 0.78, frequency: "weekly" })),
+    ...manualReports.map((report): SitemapEntry => ({ route: `/reports/${report.slug}`, priority: 0.78, frequency: "weekly" })),
     ...seoLandingPages.map((page): SitemapEntry => ({ route: `/astrology/${page.slug}`, priority: 0.86, frequency: "weekly" })),
     ...blogCategories.map((category): SitemapEntry => ({ route: `/blog/category/${category.slug}`, priority: 0.76, frequency: "weekly" })),
     ...blogPosts.map((post): SitemapEntry => ({ route: `/blog/${post.slug}`, priority: 0.72, frequency: "monthly" }))

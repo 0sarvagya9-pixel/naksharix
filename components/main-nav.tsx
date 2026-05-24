@@ -35,19 +35,19 @@ const desktopLinks = [
   { id: "kundli", labelKey: "navKundli", href: "/kundli", activePaths: ["/kundli", "/free-kundli"] },
   { id: "matchmaking", labelKey: "navMatchMaking", href: "/matchmaking", activePaths: ["/match", "/match-making", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
   { id: "numerology", labelKey: "navNumerology", href: "/numerology", activePaths: ["/numerology"] },
-  { id: "ai-astrologer", labelKey: "navAiAstrologer", href: "/talk-to-kundli", activePaths: ["/ai-chat", "/talk-to-kundli", "/chatbot"] },
+  { id: "shop", labelKey: "navShop", href: "/shop", activePaths: ["/shop"] },
   { id: "tarot", labelKey: "navTarot", href: "/tarot", activePaths: ["/tarot"] }
 ] as const;
 
 const moreLinks = [
-  { id: "remedies", labelKey: "navRemedies", href: "/reports", activePaths: ["/reports"] },
+  { id: "ai-astrologer", labelKey: "navAiAstrologerComingSoon", href: "/ai-astrologer", activePaths: ["/ai-astrologer", "/ai-chat", "/talk-to-kundli", "/chatbot"] },
   { id: "reports", labelKey: "navReports", href: "/reports", activePaths: ["/reports"] },
-  { id: "calculator", labelKey: "navCalculator", href: "/calculators", activePaths: ["/calculators"] },
-  { id: "zodiac", labelKey: "navZodiac", href: "/zodiac", activePaths: ["/zodiac"] },
-  { id: "panchang", labelKey: "navPanchang", href: "/panchang", activePaths: ["/panchang", "/festival-calendar", "/shubh-muhurat"] },
-  { id: "lo-shu", labelKey: "navLoShu", href: "/numerology", activePaths: ["/numerology"] },
   { id: "about", labelKey: "navAboutUs", href: "/about", activePaths: ["/about"] },
-  { id: "contact", labelKey: "navContact", href: "/contact", activePaths: ["/contact"] }
+  { id: "contact", labelKey: "navContact", href: "/contact", activePaths: ["/contact"] },
+  { id: "disclaimer", labelKey: "disclaimer", href: "/disclaimer", activePaths: ["/disclaimer"] },
+  { id: "privacy", labelKey: "privacyPolicy", href: "/privacy-policy", activePaths: ["/privacy-policy"] },
+  { id: "terms", labelKey: "termsConditions", href: "/terms", activePaths: ["/terms"] },
+  { id: "refund", labelKey: "refundPolicy", href: "/refund-policy", activePaths: ["/refund-policy"] }
 ] as const;
 
 type SidebarItem = { labelKey: TranslationKey; href: string; activePaths?: readonly string[]; icon?: LucideIcon };
@@ -97,9 +97,16 @@ const sidebarGroups: SidebarGroup[] = [
     ]
   },
   {
-    titleKey: "chatWithAi",
+    titleKey: "trustSafety",
     icon: Bot,
-    items: [{ labelKey: "aiChat", href: "/talk-to-kundli", activePaths: ["/ai-chat", "/talk-to-kundli", "/chatbot"] }]
+    items: [
+      { labelKey: "navAiAstrologerComingSoon", href: "/ai-astrologer", activePaths: ["/ai-astrologer", "/ai-chat", "/talk-to-kundli", "/chatbot"] },
+      { labelKey: "navReports", href: "/reports", activePaths: ["/reports"] },
+      { labelKey: "disclaimer", href: "/disclaimer", activePaths: ["/disclaimer"] },
+      { labelKey: "privacyPolicy", href: "/privacy-policy", activePaths: ["/privacy-policy"] },
+      { labelKey: "termsConditions", href: "/terms", activePaths: ["/terms"] },
+      { labelKey: "refundPolicy", href: "/refund-policy", activePaths: ["/refund-policy"] }
+    ]
   },
   {
     titleKey: "tarotReadings",
@@ -111,6 +118,7 @@ const sidebarGroups: SidebarGroup[] = [
     icon: Calculator,
     items: [
       { labelKey: "planetaryCalculators", href: "/calculators", activePaths: ["/calculators"] },
+      { labelKey: "navShop", href: "/shop", activePaths: ["/shop"] },
       { labelKey: "reports", href: "/reports", activePaths: ["/reports"] }
     ]
   },

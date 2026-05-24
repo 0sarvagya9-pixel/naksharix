@@ -2,141 +2,181 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Quote, Sparkles } from "lucide-react";
-import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
-import { ReportPdfTemplate } from "@/components/report-pdf-template";
-import { Section } from "@/components/section";
+import { CheckCircle2, FileText, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { normalizeLocale, t } from "@/lib/i18n";
-import { localizePaidReport, localizePaidReportDetailItems } from "@/lib/paid-report-display";
-import { getPaidReport, paidReports } from "@/lib/paid-reports";
+import { Section } from "@/components/section";
+import { contactHref, requestCta } from "@/lib/contact-cta";
+import { getManualReport, manualReports } from "@/lib/manual-catalogue";
+import { normalizeLocale } from "@/lib/i18n";
 import { seo } from "@/lib/seo";
 
 type Params = Promise<{ slug: string }>;
 
 export function generateStaticParams() {
-  return paidReports.map((report) => ({ slug: report.id }));
+  return manualReports.map((report) => ({ slug: report.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const report = getPaidReport(slug);
+  const report = getManualReport(slug);
   if (!report) return {};
   return seo({
-    title: `${report.name} - Naksharix`,
-    description: report.description,
-    path: `/reports/${report.id}`,
-    keywords: [report.name, "Astrology Report", "Kundli Report", "Naksharix"]
+    title: `${report.name.en} | Naksharix Premium Astrology Report`,
+    description: report.description.en,
+    path: `/reports/${report.slug}`,
+    keywords: [report.name.en, "Premium Astrology Report", "Manual Astrology Report", "Naksharix"]
   });
 }
 
 export default async function ReportDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const report = getPaidReport(slug);
+  const report = getManualReport(slug);
   if (!report) notFound();
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
-  const copy = localizePaidReport(report, locale);
-  const detailItems = localizePaidReportDetailItems(report, locale);
-  const labels = reportDetailLabels(locale);
+  const labels = detailLabels(locale);
+  const cta = requestCta(report.name[locale], locale);
 
   return (
-    <main className="star-field">
+    <main className="inner-page-shell star-field">
       <Section>
-        <div className="grid gap-8 lg:grid-cols-[1fr_0.42fr]">
+        <div className="inner-section grid gap-8 rounded-3xl border border-[#263957] p-6 md:p-8 lg:grid-cols-[1fr_0.52fr]">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{t(locale, "premiumReports")}</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382]">{copy.name}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 naksh-muted-text">{copy.description}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{report.category}</p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{report.name[locale]}</h1>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{report.description[locale]}</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild variant="secondary"><Link href="/kundli">{t(locale, "generateFreeKundli")}</Link></Button>
-              <Button variant="outline" asChild><Link href="/chatbot">{t(locale, "askAiAstrologer")}</Link></Button>
+              <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
+                <a href={cta.href} target={cta.external ? "_blank" : undefined} rel={cta.external ? "noreferrer" : undefined}><MessageCircle className="h-4 w-4" />{labels.request}</a>
+              </Button>
+              <Button variant="outline" asChild><Link href="/contact">{labels.contactSupport}</Link></Button>
             </div>
           </div>
-          <Card className="glass h-fit">
+          <Card className="inner-card h-fit">
             <CardContent className="p-6">
-              <p className="text-sm naksh-muted-text">{labels.oneTime}</p>
-              <p className="mt-2 font-cinzel text-4xl font-black text-[#fbc02d]">{report.price}</p>
-              <div className="mt-5"><RazorpayCheckoutButton payload={{ purpose: report.purpose, reportId: report.id }} label={t(locale, "buyReport")} /></div>
+              <FileText className="h-6 w-6 text-[#00f5a0]" />
+              <p className="mt-4 text-sm text-[#a8b3c7]">{labels.price}</p>
+              <p className="mt-2 font-cinzel text-3xl font-black text-[#fbc02d]">{labels.priceOnRequest}</p>
+              <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{labels.manualNote}</p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {copy.features.map((feature) => (
-            <Card key={feature} className="border-[#1e293b] bg-[#0f1c3a]/88">
-              <CardContent className="p-5">
-                <CheckCircle2 className="h-5 w-5 text-[#dca956]" />
-                <p className="mt-3 text-sm leading-6 naksh-muted-text">{feature}</p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="mt-10 grid gap-5 lg:grid-cols-2">
+          <InfoSection title={labels.included} items={report.includes[locale]} />
+          <InfoSection title={labels.whoShouldRequest} items={report.who[locale]} />
+          <InfoSection title={labels.requiredDetails} items={report.required[locale]} />
+          <InfoSection title={labels.languageOptions} items={labels.languages} />
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <Card className="glass">
+        <div className="mt-10 grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+          <Card className="inner-card">
             <CardContent className="p-6">
               <Sparkles className="h-6 w-6 text-[#dca956]" />
-              <h2 className="mt-4 font-cinzel text-2xl font-black text-[#f3d382]">{labels.samplePreview}</h2>
-              <ul className="mt-4 space-y-3 text-sm naksh-muted-text">
-                {detailItems.sample.map((item) => <li key={item} className="rounded-md border border-[#1e293b] bg-[#0f1c3a]/80 p-3">{item}</li>)}
-              </ul>
+              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.samplePreview}</h2>
+              <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{report.preview[locale]}</p>
             </CardContent>
           </Card>
-          <ReportPdfTemplate reportName={copy.name} />
+          <Card className="inner-card">
+            <CardContent className="p-6">
+              <ShieldCheck className="h-6 w-6 text-[#00f5a0]" />
+              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.deliveryProcess}</h2>
+              <ol className="mt-4 grid gap-3 text-sm text-[#dbeafe]">
+                {labels.steps.map((step, index) => (
+                  <li key={step} className="rounded-lg border border-[#263957] bg-[#142647]/72 p-3"><span className="mr-2 text-[#fbc02d]">{index + 1}.</span>{step}</li>
+                ))}
+              </ol>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {labels.quotes.map((quote, index) => (
-            <Card key={quote} className="border-[#1e293b] bg-[#0f1c3a]/88">
-              <CardContent className="p-5">
-                <Quote className="h-5 w-5 text-[#dca956]" />
-                <p className="mt-4 text-sm leading-6 naksh-muted-text">{quote}</p>
-                <p className="mt-4 font-cinzel font-bold text-[#ffffff]">{labels.userLabel} {index + 1}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {detailItems.faqs.map((question) => (
-            <Card key={question} className="border-[#1e293b] bg-[#0f1c3a]/88">
-              <CardContent className="p-5">
-                <h2 className="font-cinzel text-lg font-bold text-[#f3d382]">{question}</h2>
-                <p className="mt-3 text-sm leading-6 naksh-muted-text">{labels.faqCopy}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card className="inner-card mt-10">
+          <CardContent className="p-6">
+            <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{labels.disclaimer}</h2>
+            <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{labels.disclaimerCopy}</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
+                <a href={cta.href} target={cta.external ? "_blank" : undefined} rel={cta.external ? "noreferrer" : undefined}><MessageCircle className="h-4 w-4" />{labels.request}</a>
+              </Button>
+              <Button variant="outline" asChild><a href={contactHref()}>{labels.emailSupport}</a></Button>
+            </div>
+          </CardContent>
+        </Card>
       </Section>
     </main>
   );
 }
 
-function reportDetailLabels(locale: "en" | "hi" | "hinglish") {
+function InfoSection({ title, items }: { title: string; items: string[] }) {
+  return (
+    <Card className="inner-card">
+      <CardContent className="p-6">
+        <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{title}</h2>
+        <ul className="mt-4 grid gap-3 text-sm text-[#dbeafe]">
+          {items.map((item) => <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-[#00f5a0]" />{item}</li>)}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") {
     return {
-      oneTime: "एक बार की रिपोर्ट",
-      samplePreview: "नमूना पूर्वावलोकन",
-      userLabel: "Naksharix उपयोगकर्ता",
-      faqCopy: "Naksharix इस रिपोर्ट को आपके दिए गए विवरणों के आधार पर व्यावहारिक, नैतिक और व्यक्तिगत रखता है।",
-      quotes: ["स्पष्ट, व्यावहारिक और पढ़ने में आसान।", "नमूना रिपोर्ट ने अपग्रेड निर्णय आसान कर दिया।", "उपाय संतुलित और जमीन से जुड़े लगे।"]
+      request: "WhatsApp/Contact अनुरोध",
+      contactSupport: "सपोर्ट से संपर्क करें",
+      emailSupport: "ईमेल सपोर्ट",
+      price: "Report fee",
+      priceOnRequest: "Price on request",
+      manualNote: "Payment automation active नहीं है। Team अलग से confirmation करेगी।",
+      included: "क्या शामिल है",
+      whoShouldRequest: "किसे request करनी चाहिए",
+      requiredDetails: "आवश्यक विवरण",
+      languageOptions: "भाषा विकल्प",
+      languages: ["English", "Hindi", "Hinglish"],
+      samplePreview: "Sample preview",
+      deliveryProcess: "Delivery process",
+      steps: ["जानकारी साझा करें", "टीम अनुरोध की पुष्टि करेगी", "भुगतान अलग से पुष्टि किया जाएगा", "रिपोर्ट मैन्युअल रूप से तैयार की जाएगी", "PDF ईमेल/WhatsApp पर भेजी जाएगी"],
+      disclaimer: "अस्वीकरण",
+      disclaimerCopy: "ज्योतिष रिपोर्ट चिंतनात्मक मार्गदर्शन के साधन हैं। ये परिणामों की गारंटी नहीं देतीं और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।"
     };
   }
   if (locale === "hinglish") {
     return {
-      oneTime: "One-time report",
+      request: "Request on WhatsApp",
+      contactSupport: "Contact Support",
+      emailSupport: "Email Support",
+      price: "Report fee",
+      priceOnRequest: "Price on request",
+      manualNote: "Payment automation active nahi hai. Team separately confirmation karegi.",
+      included: "What is included",
+      whoShouldRequest: "Who should request this report",
+      requiredDetails: "Required details",
+      languageOptions: "Language options",
+      languages: ["English", "Hindi", "Hinglish"],
       samplePreview: "Sample preview",
-      userLabel: "Naksharix user",
-      faqCopy: "Naksharix is report ko practical, ethical aur aapke details ke around personalized rakhta hai.",
-      quotes: ["Clear, practical aur easy to read.", "Sample report ne upgrade decision simple bana diya.", "Remedies grounded aur useful lage."]
+      deliveryProcess: "Delivery process",
+      steps: ["Details share karein", "Team request confirm karegi", "Payment separately confirm hoga", "Report manually prepare hogi", "PDF email/WhatsApp par deliver hogi"],
+      disclaimer: "Disclaimer",
+      disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
     };
   }
   return {
-    oneTime: "One-time report",
+    request: "Request on WhatsApp",
+    contactSupport: "Contact Support",
+    emailSupport: "Email Support",
+    price: "Report fee",
+    priceOnRequest: "Price on request",
+    manualNote: "Payment automation is not active. The team confirms request and payment separately.",
+    included: "What is included",
+    whoShouldRequest: "Who should request this report",
+    requiredDetails: "Required details",
+    languageOptions: "Language options",
+    languages: ["English", "Hindi", "Hinglish"],
     samplePreview: "Sample preview",
-    userLabel: "Naksharix user",
-    faqCopy: "Naksharix keeps this report practical, ethical, and personalized around the details you provide.",
-    quotes: ["Clear, practical and easy to read.", "The sample report made the upgrade decision simple.", "Loved the remedies because they were grounded."]
+    deliveryProcess: "Delivery process",
+    steps: ["Share details", "Team confirms request", "Payment is confirmed separately", "Report is prepared manually", "PDF is delivered by email/WhatsApp"],
+    disclaimer: "Disclaimer",
+    disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."
   };
 }

@@ -8,7 +8,7 @@ export function MatchmakingContent() {
   const { tr } = useLanguage();
 
   return (
-    <main className="star-field bg-[#020612]">
+    <main className="inner-page-shell star-field">
       <Section>
         <div className="max-w-3xl">
           <p className="font-cinzel text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{tr("compatibilityMatch")}</p>

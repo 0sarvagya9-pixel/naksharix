@@ -46,9 +46,9 @@ export function translatedApiMessage(locale: Locale, key: "required" | "serviceU
       hinglish: "Aapne aaj ki free limit complete kar li hai."
     },
     aiChatNotConfigured: {
-      en: "AI chat is not configured yet. Add GEMINI_API_KEY on the server to enable Naksharix AI Astrologer.",
-      hi: "AI चैट अभी कॉन्फ़िगर नहीं है। Naksharix AI ज्योतिषी चालू करने के लिए सर्वर पर GEMINI_API_KEY जोड़ें।",
-      hinglish: "AI chat abhi configured nahi hai. Naksharix AI Astrologer enable karne ke liye server par GEMINI_API_KEY add karein."
+      en: "AI service is not configured yet. Please add GEMINI_API_KEY.",
+      hi: "AI सेवा अभी कॉन्फ़िगर नहीं है। कृपया GEMINI_API_KEY जोड़ें।",
+      hinglish: "AI service abhi configured nahi hai. Please GEMINI_API_KEY add karein."
     },
     pdfMissing: {
       en: "Report data is missing. Please regenerate the Kundli report and try again.",

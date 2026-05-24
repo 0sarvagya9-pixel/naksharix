@@ -8,7 +8,7 @@ import { readLanguageFromRequest, toAiLanguage, translatedApiMessage } from "@/l
 const schema = z.object({
   messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(2000) })).min(1).max(24),
   language: z.union([z.enum(["English", "Hindi", "Hinglish"]), z.enum(["en", "hi", "hinglish"])]).optional(),
-  kundliContext: z.string().max(1500).optional()
+  kundliContext: z.string().max(4000).optional()
 });
 
 export async function POST(request: NextRequest) {

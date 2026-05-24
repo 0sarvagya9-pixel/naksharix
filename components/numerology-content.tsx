@@ -56,6 +56,28 @@ const labels: Record<Locale, Record<string, string>> = {
     vehicleCompatibility: "Vehicle Number Compatibility",
     compatibleSuggestions: "Compatible Suggestions",
     loShuResult: "Lo Shu Grid Result",
+    summary: "Numerology Summary",
+    overallCompatibility: "Overall Numerology Compatibility",
+    bestSupportiveNumbers: "Best Supportive Numbers",
+    loShuBalanceStatus: "Lo Shu Balance Status",
+    supportive: "Supportive",
+    neutral: "Neutral",
+    needsBalance: "Needs Balance",
+    strong: "Strong",
+    reviewSuggested: "Review Suggested",
+    present: "Present",
+    missingLegend: "Missing",
+    repeatedLegend: "Repeated",
+    coreAnchor: "Core Numbers",
+    loShuAnchor: "Lo Shu",
+    compatibilityAnchor: "Compatibility",
+    suggestionsAnchor: "Suggestions",
+    dailyAnchor: "Daily",
+    loShuImpact: "Lo Shu Compatibility Impact",
+    namePublicBest: "Best for Name/Public Identity",
+    phoneBest: "Best for Phone/Communication",
+    vehicleBest: "Best for Vehicle/Movement",
+    balanceCarefully: "Numbers to Balance Carefully",
     presentNumbers: "Present Numbers",
     strongAreas: "Strong Areas",
     balanceAreas: "Areas to Balance",
@@ -97,6 +119,28 @@ const labels: Record<Locale, Record<string, string>> = {
     vehicleCompatibility: "वाहन नंबर अनुकूलता",
     compatibleSuggestions: "अनुकूल सुझाव",
     loShuResult: "लो शू ग्रिड परिणाम",
+    summary: "अंक ज्योतिष सारांश",
+    overallCompatibility: "समग्र अंक ज्योतिष अनुकूलता",
+    bestSupportiveNumbers: "श्रेष्ठ सहयोगी अंक",
+    loShuBalanceStatus: "लो शू संतुलन स्थिति",
+    supportive: "सहयोगी",
+    neutral: "तटस्थ",
+    needsBalance: "संतुलन आवश्यक",
+    strong: "मजबूत",
+    reviewSuggested: "समीक्षा सुझाई गई",
+    present: "उपस्थित",
+    missingLegend: "अनुपस्थित",
+    repeatedLegend: "दोहराया गया",
+    coreAnchor: "मुख्य अंक",
+    loShuAnchor: "लो शू",
+    compatibilityAnchor: "अनुकूलता",
+    suggestionsAnchor: "सुझाव",
+    dailyAnchor: "दैनिक",
+    loShuImpact: "लो शू अनुकूलता प्रभाव",
+    namePublicBest: "नाम/सार्वजनिक पहचान के लिए श्रेष्ठ",
+    phoneBest: "फोन/संचार के लिए श्रेष्ठ",
+    vehicleBest: "वाहन/यात्रा के लिए श्रेष्ठ",
+    balanceCarefully: "सावधानी से संतुलित करने योग्य अंक",
     presentNumbers: "उपस्थित अंक",
     strongAreas: "मजबूत क्षेत्र",
     balanceAreas: "संतुलन की आवश्यकता वाले क्षेत्र",
@@ -138,6 +182,28 @@ const labels: Record<Locale, Record<string, string>> = {
     vehicleCompatibility: "Vehicle Number Compatibility",
     compatibleSuggestions: "Compatible Suggestions",
     loShuResult: "Lo Shu Grid Result",
+    summary: "Numerology Summary",
+    overallCompatibility: "Overall Numerology Compatibility",
+    bestSupportiveNumbers: "Best Supportive Numbers",
+    loShuBalanceStatus: "Lo Shu Balance Status",
+    supportive: "Supportive",
+    neutral: "Neutral",
+    needsBalance: "Balance Needed",
+    strong: "Strong",
+    reviewSuggested: "Review Suggested",
+    present: "Present",
+    missingLegend: "Missing",
+    repeatedLegend: "Repeated",
+    coreAnchor: "Core Numbers",
+    loShuAnchor: "Lo Shu",
+    compatibilityAnchor: "Compatibility",
+    suggestionsAnchor: "Suggestions",
+    dailyAnchor: "Daily",
+    loShuImpact: "Lo Shu Compatibility Impact",
+    namePublicBest: "Best for Name/Public Identity",
+    phoneBest: "Best for Phone/Communication",
+    vehicleBest: "Best for Vehicle/Movement",
+    balanceCarefully: "Numbers to Balance Carefully",
     presentNumbers: "Present Numbers",
     strongAreas: "Strong Areas",
     balanceAreas: "Balance Areas",
@@ -226,7 +292,7 @@ export function NumerologyContent() {
   ].join(" ");
 
   return (
-    <main className="star-field bg-[#020612]">
+    <main className="inner-page-shell star-field">
       <Section>
         <div className="relative overflow-hidden rounded-3xl border border-[#1e293b] bg-[radial-gradient(circle_at_78%_16%,rgba(0,245,160,0.12),transparent_24rem),radial-gradient(circle_at_10%_10%,rgba(220,169,86,0.14),transparent_22rem),linear-gradient(135deg,#0a1224,#020612_82%)] p-6 shadow-[0_24px_80px_rgba(2,6,18,0.48)] sm:p-8">
           <div className="max-w-3xl">
@@ -274,22 +340,54 @@ export function NumerologyContent() {
 
           {report ? (
             <div className="mt-8 space-y-6">
-              <section>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  [lang.coreAnchor, "#numerology-core"],
+                  [lang.loShuAnchor, "#numerology-loshu"],
+                  [lang.compatibilityAnchor, "#numerology-compatibility"],
+                  [lang.suggestionsAnchor, "#numerology-suggestions"],
+                  [lang.dailyAnchor, "#numerology-daily"]
+                ].map(([label, href]) => (
+                  <a key={href} href={href} className="rounded-full border border-[#1e293b] bg-[#0a1224] px-3 py-1.5 text-xs font-semibold text-[#f3d382] transition hover:border-[#dca956] hover:text-white">{label}</a>
+                ))}
+              </div>
+
+              <section id="numerology-summary" className="rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_top_right,rgba(0,245,160,0.12),transparent_18rem),#0a1224] p-5">
+                <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{lang.summary}</h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <SummaryCard label={lang.overallCompatibility} value={verdictLabel(overallNumerologyVerdict(report), locale, lang)} tone={overallNumerologyVerdict(report)} />
+                  <SummaryCard label={lang.bestSupportiveNumbers} value={supportiveNumbers(report).join(", ")} tone="supportive" />
+                  <SummaryCard label={lang.missing} value={missingValues(report).join(", ") || "-"} tone={missingValues(report).length ? "needsBalance" : "strong"} />
+                  <SummaryCard label={lang.repeated} value={repeatedValues(report).join(", ") || "-"} tone={repeatedValues(report).length ? "reviewSuggested" : "strong"} />
+                  <SummaryCard label={lang.nameCompatibility} value={verdictLabel(nameVerdict(report), locale, lang)} tone={nameVerdict(report)} />
+                  <SummaryCard label={lang.phoneCompatibility} value={verdictLabel(numberVerdict(report, report.mobileAnalysis?.value), locale, lang)} tone={numberVerdict(report, report.mobileAnalysis?.value)} />
+                  <SummaryCard label={lang.vehicleCompatibility} value={verdictLabel(numberVerdict(report, report.vehicleAnalysis?.value), locale, lang)} tone={numberVerdict(report, report.vehicleAnalysis?.value)} />
+                  <SummaryCard label={lang.loShuBalanceStatus} value={verdictLabel(loShuVerdict(report), locale, lang)} tone={loShuVerdict(report)} />
+                </div>
+              </section>
+
+              <section id="numerology-core">
                 <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{lang.coreNumbers}</h2>
                 <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {coreNumbers.map((item) => <NumberCard key={item.key} item={item} labels={lang} locale={locale} />)}
                 </div>
               </section>
 
-              <section className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+              <section id="numerology-loshu" className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
                 <Card className="border-[#1e293b] bg-[#0f1c3a]/90">
                   <CardContent className="p-5">
                     <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]"><span className="notranslate" translate="no">{lang.loShu}</span></h2>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                      <LegendDot tone="present" label={lang.present} />
+                      <LegendDot tone="missing" label={lang.missingLegend} />
+                      <LegendDot tone="repeated" label={lang.repeatedLegend} />
+                    </div>
                     <div className="mt-4 grid grid-cols-3 gap-3">
                       {report.loShuGrid.map((cell) => (
-                        <div key={cell.number} className={`min-h-24 rounded-xl border p-3 text-center ${cell.present ? "border-[#dca956]/60 bg-[#0a1224]" : "border-[#1e293b] bg-[#020612]/72"}`}>
-                          <div className="text-2xl font-black text-[#fbc02d]">{cell.number}</div>
-                          <div className="mt-1 text-sm font-semibold text-white">x{cell.count}</div>
+                        <div key={cell.number} className={`relative min-h-28 rounded-xl border p-3 text-center ${loShuCellClass(cell)}`}>
+                          {cell.count > 1 ? <span className="absolute right-2 top-2 rounded-full bg-[#00f5a0] px-2 py-0.5 text-[10px] font-black text-[#020612]">x{cell.count}</span> : null}
+                          <div className={`text-3xl font-black ${cell.present ? "text-[#fbc02d]" : "text-[#64748b]"}`}>{cell.number}</div>
+                          <div className="mt-1 text-xs font-semibold text-white">{cell.present ? lang.present : lang.missingLegend}</div>
                           <p className="mt-2 text-xs leading-5 text-[#94a3b8]">{loShuNumberMeaning(cell.number, locale)}</p>
                         </div>
                       ))}
@@ -312,17 +410,18 @@ export function NumerologyContent() {
                 <InsightList title={lang.careerGrowthPattern} items={[careerPattern(report, locale)]} />
               </section>
 
-              <section>
+              <section id="numerology-compatibility">
                 <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{lang.numerologyCompatibility}</h2>
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <InsightList title={lang.nameCompatibility} items={nameCompatibility(report, locale)} />
-                  <InsightList title={lang.phoneCompatibility} items={phoneCompatibility(report, locale)} />
-                  <InsightList title={lang.vehicleCompatibility} items={vehicleCompatibility(report, locale)} />
-                  <InsightList title={lang.compatibleSuggestions} items={compatibleNumberSuggestions(report, locale)} />
+                  <CompatibilityCard title={lang.nameCompatibility} verdict={nameVerdict(report)} items={nameCompatibility(report, locale)} lang={lang} locale={locale} />
+                  <CompatibilityCard title={lang.phoneCompatibility} verdict={numberVerdict(report, report.mobileAnalysis?.value)} items={phoneCompatibility(report, locale)} lang={lang} locale={locale} />
+                  <CompatibilityCard title={lang.vehicleCompatibility} verdict={numberVerdict(report, report.vehicleAnalysis?.value)} items={vehicleCompatibility(report, locale)} lang={lang} locale={locale} />
+                  <InsightList title={lang.loShuImpact} items={loShuImpact(report, locale, form)} />
+                  <div id="numerology-suggestions"><InsightList title={lang.compatibleSuggestions} items={compatibleNumberSuggestions(report, locale, lang)} /></div>
                 </div>
               </section>
 
-              <section className="grid gap-4 md:grid-cols-2">
+              <section id="numerology-daily" className="grid gap-4 md:grid-cols-2">
                 {report.mobileAnalysis ? <NumberCard item={{ key: "mobile", value: report.mobileAnalysis.value }} labels={lang} locale={locale} /> : null}
                 {report.vehicleAnalysis ? <NumberCard item={{ key: "vehicle", value: report.vehicleAnalysis.value }} labels={lang} locale={locale} /> : null}
                 <Card className="border-[#1e293b] bg-[#0f1c3a]/90 md:col-span-2">
@@ -415,6 +514,60 @@ function InsightList({ title, items, empty }: { title: string; items: string[]; 
   );
 }
 
+type Verdict = "supportive" | "neutral" | "needsBalance" | "strong" | "reviewSuggested";
+
+function SummaryCard({ label, value, tone }: { label: string; value: string; tone: Verdict }) {
+  return (
+    <div className={`rounded-xl border p-4 ${toneClass(tone)}`}>
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#94a3b8]">{label}</p>
+      <p className="mt-2 text-xl font-black text-white">{value}</p>
+    </div>
+  );
+}
+
+function CompatibilityCard({ title, verdict, items, lang, locale }: { title: string; verdict: Verdict; items: string[]; lang: Record<string, string>; locale: Locale }) {
+  return (
+    <Card className="border-[#1e293b] bg-[#0f1c3a]/90">
+      <CardContent className="p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <h2 className="font-cinzel text-xl font-bold text-[#f3d382]">{title}</h2>
+          <span className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${toneClass(verdict)}`}>{verdictLabel(verdict, locale, lang)}</span>
+        </div>
+        <div className="mt-4 space-y-3">
+          {items.map((item) => <p key={item} className="rounded-xl border border-[#1e293b] bg-[#0a1224] p-3 text-sm leading-6 text-white">{item}</p>)}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LegendDot({ tone, label }: { tone: "present" | "missing" | "repeated"; label: string }) {
+  const cls = tone === "present" ? "bg-[#fbc02d]" : tone === "repeated" ? "bg-[#00f5a0]" : "bg-[#64748b]";
+  return <span className="inline-flex items-center gap-2 rounded-full border border-[#1e293b] bg-[#0a1224] px-3 py-1 text-[#94a3b8]"><span className={`h-2.5 w-2.5 rounded-full ${cls}`} />{label}</span>;
+}
+
+function loShuCellClass(cell: { present: boolean; count: number }) {
+  if (!cell.present) return "border-dashed border-[#334155] bg-[#020612]/78";
+  if (cell.count > 1) return "border-[#00f5a0]/55 bg-[radial-gradient(circle_at_top,rgba(0,245,160,0.12),transparent_7rem),#0a1224]";
+  return "border-[#dca956]/65 bg-[radial-gradient(circle_at_top,rgba(251,192,45,0.12),transparent_7rem),#0a1224]";
+}
+
+function toneClass(tone: Verdict) {
+  if (tone === "strong") return "border-[#00f5a0]/45 bg-[#00f5a0]/12 text-[#00f5a0]";
+  if (tone === "supportive") return "border-[#009b72]/45 bg-[#009b72]/14 text-[#00f5a0]";
+  if (tone === "neutral") return "border-[#dca956]/40 bg-[#dca956]/12 text-[#f3d382]";
+  if (tone === "reviewSuggested") return "border-[#ea580c]/45 bg-[#ea580c]/12 text-[#f3d382]";
+  return "border-[#fbc02d]/45 bg-[#fbc02d]/12 text-[#fbc02d]";
+}
+
+function verdictLabel(verdict: Verdict, locale: Locale, lang: Record<string, string>) {
+  if (verdict === "strong") return lang.strong;
+  if (verdict === "supportive") return lang.supportive;
+  if (verdict === "neutral") return lang.neutral;
+  if (verdict === "reviewSuggested") return lang.reviewSuggested;
+  return lang.needsBalance;
+}
+
 function numberLabel(key: string, locale: Locale) {
   const map: Record<Locale, Record<string, string>> = {
     en: { moolank: "Moolank / Birth Number", lifePath: "Bhagyank / Life Path Number", destiny: "Destiny Number", nameNumber: "Name Number / Naamank", soulUrge: "Soul Urge Number", personality: "Personality Number", mobile: "Mobile Number Analysis", vehicle: "Vehicle Number Analysis" },
@@ -477,15 +630,81 @@ function loShuNumberMeaning(number: number, locale: Locale) {
 }
 
 function missingNumberText(number: number, locale: Locale) {
-  if (locale === "hi") return `${loShuNumberMeaning(number, locale)} को सचेत अभ्यास से विकसित करना उपयोगी रहेगा।`;
-  if (locale === "hinglish") return `${loShuNumberMeaning(number, locale)} ko conscious practice se develop karna helpful rahega.`;
-  return `${loShuNumberMeaning(number, locale)} needs conscious cultivation.`;
+  const text: Record<Locale, Record<number, string>> = {
+    en: {
+      1: "Confidence, independent decisions, and personal initiative need conscious strengthening. Practice small self-led decisions.",
+      2: "Emotional balance, cooperation, and listening need attention. Build calm partnership habits.",
+      3: "Creativity, expression, learning, and communication need active practice. Write, speak, and complete ideas.",
+      4: "Routine, discipline, planning, and structure need strengthening. Use lists, schedules, and steady systems.",
+      5: "Adaptability, balance, and practical communication need cultivation. Keep flexibility with clear priorities.",
+      6: "Family responsibility, care, and harmony need conscious support. Practice balanced responsibility without over-carrying.",
+      7: "Reflection, analysis, and spiritual learning need more space. Balance solitude with grounded action.",
+      8: "Money discipline, management, and responsibility need strengthening. Track resources and commitments carefully.",
+      9: "Compassion, completion, and broad thinking need cultivation. Finish old cycles and serve with boundaries."
+    },
+    hi: {
+      1: "आत्मविश्वास, स्वतंत्र निर्णय और व्यक्तिगत पहल को सचेत रूप से मजबूत करने की आवश्यकता है। छोटे स्वतंत्र निर्णयों का अभ्यास करें।",
+      2: "भावनात्मक संतुलन, सहयोग और सुनने की क्षमता पर ध्यान देना उपयोगी रहेगा। शांत साझेदारी की आदतें बनाएं।",
+      3: "रचनात्मकता, अभिव्यक्ति, सीखने और संवाद को सक्रिय अभ्यास की आवश्यकता है। लिखें, बोलें और विचार पूरे करें।",
+      4: "दिनचर्या, अनुशासन, योजना और संरचना को मजबूत करने की आवश्यकता है। सूची, समय-सारणी और स्थिर प्रणाली अपनाएं।",
+      5: "अनुकूलन, संतुलन और व्यावहारिक संवाद को विकसित करना उपयोगी रहेगा। स्पष्ट प्राथमिकताओं के साथ लचीलापन रखें।",
+      6: "परिवारिक जिम्मेदारी, देखभाल और सामंजस्य को सचेत सहयोग चाहिए। सब कुछ अकेले उठाए बिना जिम्मेदारी निभाएं।",
+      7: "चिंतन, विश्लेषण और आध्यात्मिक सीख के लिए अधिक स्थान बनाना उपयोगी रहेगा। एकांत को grounded action से संतुलित करें।",
+      8: "धन अनुशासन, प्रबंधन और जिम्मेदारी को मजबूत करने की आवश्यकता है। संसाधन और commitments ध्यान से ट्रैक करें।",
+      9: "करुणा, पूर्णता और व्यापक सोच को विकसित करना उपयोगी रहेगा। पुराने चक्र पूरे करें और सीमाओं के साथ सेवा करें।"
+    },
+    hinglish: {
+      1: "Confidence, independent decisions aur personal initiative ko consciously strong karna helpful rahega. Chhote self-led decisions practice karein.",
+      2: "Emotional balance, cooperation aur listening par dhyan dena helpful rahega. Calm partnership habits build karein.",
+      3: "Creativity, expression, learning aur communication ko active practice chahiye. Write, speak aur ideas complete karein.",
+      4: "Routine, discipline, planning aur structure ko strong karna helpful rahega. Lists, schedule aur steady systems use karein.",
+      5: "Adaptability, balance aur practical communication develop karna helpful rahega. Clear priorities ke saath flexibility rakhein.",
+      6: "Family responsibility, care aur harmony ko conscious support chahiye. Sab kuch akela carry kiye bina responsibility nibhayein.",
+      7: "Reflection, analysis aur spiritual learning ke liye space banana helpful rahega. Solitude ko grounded action se balance karein.",
+      8: "Money discipline, management aur responsibility ko strong karna helpful rahega. Resources aur commitments carefully track karein.",
+      9: "Compassion, completion aur broad thinking develop karna helpful rahega. Old cycles complete karein aur boundaries ke saath serve karein."
+    }
+  };
+  return text[locale][number] ?? `${loShuNumberMeaning(number, locale)}`;
 }
 
 function repeatedNumberText(number: number, locale: Locale) {
-  if (locale === "hi") return `${number} का दोहराव मजबूत ऊर्जा दिखा सकता है। इसे संतुलित अभ्यास से संभालें।`;
-  if (locale === "hinglish") return `Repeated ${number} strong energy dikhata hai. Isko balanced practice se handle karein.`;
-  return `Repeated ${number} can show strong energy. Balance it with conscious practice.`;
+  const text: Record<Locale, Record<number, string>> = {
+    en: {
+      1: "Repeated 1 shows strong individuality and self-drive. Balance it with listening, teamwork, and patience.",
+      2: "Repeated 2 shows heightened sensitivity and emotional awareness. Balance it with clear boundaries.",
+      3: "Repeated 3 shows expressive and creative energy. Balance it by completing ideas before starting new ones.",
+      4: "Repeated 4 shows strong structure and work focus. Balance it with flexibility and rest.",
+      5: "Repeated 5 shows movement, change, and communication. Balance it with consistency and grounded choices.",
+      6: "Repeated 6 shows care, family, and responsibility energy. Balance it by avoiding over-responsibility.",
+      7: "Repeated 7 shows analysis and inner inquiry. Balance it with practical action and social connection.",
+      8: "Repeated 8 shows ambition and management energy. Balance it with ethics, rest, and money discipline.",
+      9: "Repeated 9 shows compassion, wisdom, and completion energy. Balance it by avoiding emotional overload and over-giving."
+    },
+    hi: {
+      1: "1 का दोहराव मजबूत व्यक्तिगत ऊर्जा और आत्म-प्रेरणा दिखाता है। इसे सुनने की क्षमता, टीमवर्क और धैर्य से संतुलित करें।",
+      2: "2 का दोहराव संवेदनशीलता और भावनात्मक जागरूकता दिखाता है। इसे स्पष्ट सीमाओं से संतुलित करें।",
+      3: "3 का दोहराव अभिव्यक्ति और रचनात्मक ऊर्जा दिखाता है। नए विचार शुरू करने से पहले पुराने पूरे करें।",
+      4: "4 का दोहराव मजबूत संरचना और कार्य-केंद्रित ऊर्जा दिखाता है। इसे लचीलापन और विश्राम से संतुलित करें।",
+      5: "5 का दोहराव गति, बदलाव और संवाद की ऊर्जा दिखाता है। इसे नियमितता और grounded choices से संतुलित करें।",
+      6: "6 का दोहराव देखभाल, परिवार और जिम्मेदारी की ऊर्जा दिखाता है। अत्यधिक जिम्मेदारी से बचकर संतुलन रखें।",
+      7: "7 का दोहराव विश्लेषण और आंतरिक खोज दिखाता है। इसे व्यावहारिक action और सामाजिक जुड़ाव से संतुलित करें।",
+      8: "8 का दोहराव महत्वाकांक्षा और प्रबंधन ऊर्जा दिखाता है। इसे नैतिकता, विश्राम और धन अनुशासन से संतुलित करें।",
+      9: "9 का दोहराव करुणा, ज्ञान और पूर्णता की ऊर्जा दिखाता है। भावनात्मक बोझ और अत्यधिक देने की प्रवृत्ति से संतुलन रखें।"
+    },
+    hinglish: {
+      1: "Repeated 1 strong individuality aur self-drive dikhata hai. Isko listening, teamwork aur patience se balance karein.",
+      2: "Repeated 2 sensitivity aur emotional awareness dikhata hai. Isko clear boundaries se balance karein.",
+      3: "Repeated 3 expressive aur creative energy dikhata hai. New ideas se pehle old ideas complete karein.",
+      4: "Repeated 4 structure aur work focus dikhata hai. Isko flexibility aur rest se balance karein.",
+      5: "Repeated 5 movement, change aur communication dikhata hai. Isko consistency aur grounded choices se balance karein.",
+      6: "Repeated 6 care, family aur responsibility energy dikhata hai. Over-responsibility se balance rakhein.",
+      7: "Repeated 7 analysis aur inner inquiry dikhata hai. Isko practical action aur social connection se balance karein.",
+      8: "Repeated 8 ambition aur management energy dikhata hai. Isko ethics, rest aur money discipline se balance karein.",
+      9: "Repeated 9 compassion, wisdom aur completion energy dikhata hai. Emotional overload aur over-giving se balance rakhein."
+    }
+  };
+  return text[locale][number] ?? `${number}`;
 }
 
 function presentNumbers(report: NumerologyReport) {
@@ -567,42 +786,55 @@ function vehicleCompatibility(report: NumerologyReport, locale: Locale) {
 
 function compatibilityForNumber(report: NumerologyReport, value: number, type: "phone" | "vehicle", locale: Locale) {
   const number = reduceDisplayNumber(value);
-  const supportive = compatibleSet(report.moolank.value).includes(number) || compatibleSet(report.lifePath.value).includes(number);
+  const moolankSupport = compatibleSet(report.moolank.value).includes(number);
+  const lifePathSupport = compatibleSet(report.lifePath.value).includes(number);
+  const supportive = moolankSupport || lifePathSupport;
   const fillsMissing = missingValues(report).includes(number);
   const repeated = repeatedValues(report).includes(number);
   if (locale === "hi") return [
     `${type === "phone" ? "फोन" : "वाहन"} नंबर कुल: ${number}`,
-    supportive ? "यह मूलांक या जीवन पथ अंक के साथ सहयोगी माना जा सकता है।" : "यह तटस्थ है; भविष्य में मूलांक या जीवन पथ से मेल खाते नंबर पर विचार किया जा सकता है।",
+    `मूलांक संबंध: ${moolankSupport ? "सहयोगी" : "तटस्थ"}। भाग्यांक संबंध: ${lifePathSupport ? "सहयोगी" : "तटस्थ"}।`,
+    supportive ? `${type === "phone" ? "फोन" : "वाहन"} कुल ${number} जिम्मेदारी, संवाद या विकास को आपके अंक पैटर्न के अनुसार सहयोग दे सकता है।` : "यह तटस्थ है; भविष्य में मूलांक या जीवन पथ से मेल खाते नंबर पर विचार किया जा सकता है।",
     fillsMissing ? "यह लो शू के अनुपस्थित अंक को संतुलित करने में सहयोगी हो सकता है।" : repeated ? "यह पहले से सक्रिय अंक को और मजबूत कर सकता है; संतुलन रखें।" : "लो शू पैटर्न के साथ इसका प्रभाव तटस्थ दिखता है।"
   ];
   if (locale === "hinglish") return [
     `${type === "phone" ? "Phone" : "Vehicle"} number total: ${number}`,
-    supportive ? "Ye moolank ya life path ke saath supportive maana ja sakta hai." : "Ye neutral hai; future me moolank ya life path aligned number consider kiya ja sakta hai.",
+    `Moolank relation: ${moolankSupport ? "Supportive" : "Neutral"}. Bhagyank relation: ${lifePathSupport ? "Supportive" : "Neutral"}.`,
+    supportive ? `${type === "phone" ? "Phone" : "Vehicle"} total ${number} aapke number pattern ke hisab se communication, responsibility ya growth ko support kar sakta hai.` : "Ye neutral hai; future me moolank ya life path aligned number consider kiya ja sakta hai.",
     fillsMissing ? "Ye Lo Shu missing number ko balance karne me support kar sakta hai." : repeated ? "Ye already active number ko aur strong kar sakta hai; balance rakhein." : "Lo Shu pattern ke saath iska effect neutral dikhta hai."
   ];
   return [
     `${type === "phone" ? "Phone" : "Vehicle"} number total: ${number}`,
-    supportive ? "This may be supportive for your birth or life path number." : "This is neutral; numbers aligned with your birth or life path can be considered in future choices.",
+    `Moolank relation: ${moolankSupport ? "Supportive" : "Neutral"}. Bhagyank relation: ${lifePathSupport ? "Supportive" : "Neutral"}.`,
+    supportive ? `${type === "phone" ? "Phone" : "Vehicle"} total ${number} may support communication, responsibility, or growth based on your pattern.` : "This is neutral; numbers aligned with your birth or life path can be considered in future choices.",
     fillsMissing ? "It may help balance a missing Lo Shu number." : repeated ? "It can amplify an already active pattern; keep balance." : "Its Lo Shu influence appears neutral."
   ];
 }
 
-function compatibleNumberSuggestions(report: NumerologyReport, locale: Locale) {
-  const best = Array.from(new Set([report.moolank.value, report.lifePath.value, report.nameNumber.value, ...missingValues(report).slice(0, 3)].map(reduceDisplayNumber))).slice(0, 5);
+function compatibleNumberSuggestions(report: NumerologyReport, locale: Locale, lang: Record<string, string>) {
   const careful = repeatedValues(report).slice(0, 4);
+  const name = Array.from(new Set([report.nameNumber.value, report.lifePath.value].map(reduceDisplayNumber))).join(", ");
+  const phone = Array.from(new Set([report.moolank.value, report.lifePath.value, 5, ...missingValues(report).slice(0, 2)].map(reduceDisplayNumber))).slice(0, 4).join(", ");
+  const vehicle = Array.from(new Set([report.moolank.value, 4, 6, ...missingValues(report).slice(0, 2)].map(reduceDisplayNumber))).slice(0, 4).join(", ");
   if (locale === "hi") return [
-    `सहयोगी अंक: ${best.join(", ")}. इन्हें भविष्य के फोन/वाहन विकल्पों में विचार किया जा सकता है।`,
-    careful.length ? `संतुलन से उपयोग करें: ${careful.join(", ")}.` : "कोई अत्यधिक दोहराया गया अंक स्पष्ट नहीं है।",
+    `${lang.namePublicBest}: ${name}. ये सार्वजनिक पहचान या नाम समीक्षा में सहयोगी माने जा सकते हैं।`,
+    `${lang.phoneBest}: ${phone}. इन्हें भविष्य के फोन विकल्पों में विचार किया जा सकता है।`,
+    `${lang.vehicleBest}: ${vehicle}. इन्हें वाहन/यात्रा ऊर्जा के लिए विचार किया जा सकता है।`,
+    careful.length ? `${lang.balanceCarefully}: ${careful.join(", ")}.` : "कोई अत्यधिक दोहराया गया अंक स्पष्ट नहीं है।",
     "आधिकारिक नाम या नंबर बदलने से पहले व्यावहारिक और कानूनी पहलू जरूर देखें।"
   ];
   if (locale === "hinglish") return [
-    `Supportive numbers: ${best.join(", ")}. Future phone/vehicle choices me consider kiye ja sakte hain.`,
-    careful.length ? `Balance carefully: ${careful.join(", ")}.` : "Koi over-repeated number clearly nahi hai.",
+    `${lang.namePublicBest}: ${name}. Public identity ya name review me supportive maana ja sakta hai.`,
+    `${lang.phoneBest}: ${phone}. Future phone choices me consider kiye ja sakte hain.`,
+    `${lang.vehicleBest}: ${vehicle}. Vehicle/movement energy ke liye consider kiye ja sakte hain.`,
+    careful.length ? `${lang.balanceCarefully}: ${careful.join(", ")}.` : "Koi over-repeated number clearly nahi hai.",
     "Official name ya number change se pehle practical aur legal points zaroor dekhein."
   ];
   return [
-    `Supportive numbers: ${best.join(", ")}. These can be considered in future phone or vehicle choices.`,
-    careful.length ? `Balance carefully: ${careful.join(", ")}.` : "No strongly over-repeated number is visible.",
+    `${lang.namePublicBest}: ${name}. These may support public identity or name review.`,
+    `${lang.phoneBest}: ${phone}. These can be considered in future phone choices.`,
+    `${lang.vehicleBest}: ${vehicle}. These can be considered for vehicle or movement energy.`,
+    careful.length ? `${lang.balanceCarefully}: ${careful.join(", ")}.` : "No strongly over-repeated number is visible.",
     "Review practical and legal considerations before changing official names or numbers."
   ];
 }
@@ -610,6 +842,85 @@ function compatibleNumberSuggestions(report: NumerologyReport, locale: Locale) {
 function compatibleSet(value: number) {
   const n = reduceDisplayNumber(value);
   return Array.from(new Set([n, ((n + 2 - 1) % 9) + 1, ((n + 4 - 1) % 9) + 1]));
+}
+
+function supportiveNumbers(report: NumerologyReport) {
+  return Array.from(new Set([report.moolank.value, report.lifePath.value, report.nameNumber.value, ...missingValues(report).slice(0, 3)].map(reduceDisplayNumber))).slice(0, 5);
+}
+
+function overallNumerologyVerdict(report: NumerologyReport): Verdict {
+  const missingCount = missingValues(report).length;
+  const repeatedCount = repeatedValues(report).length;
+  const name = nameVerdict(report);
+  if (missingCount <= 2 && repeatedCount <= 2 && name !== "needsBalance") return "strong";
+  if (missingCount <= 4 && name !== "needsBalance") return "supportive";
+  if (missingCount >= 6 || repeatedCount >= 5) return "needsBalance";
+  return "neutral";
+}
+
+function loShuVerdict(report: NumerologyReport): Verdict {
+  const missingCount = missingValues(report).length;
+  const repeatedCount = repeatedValues(report).length;
+  if (missingCount <= 1 && repeatedCount <= 2) return "strong";
+  if (missingCount <= 3) return "supportive";
+  if (missingCount >= 6 || repeatedCount >= 5) return "reviewSuggested";
+  return "needsBalance";
+}
+
+function nameVerdict(report: NumerologyReport): Verdict {
+  const nameNumber = reduceDisplayNumber(report.nameNumber.value);
+  if (compatibleSet(report.lifePath.value).includes(nameNumber)) return "supportive";
+  if (missingValues(report).includes(nameNumber)) return "supportive";
+  if (repeatedValues(report).includes(nameNumber)) return "needsBalance";
+  return "neutral";
+}
+
+function numberVerdict(report: NumerologyReport, value?: number): Verdict {
+  if (!value) return "neutral";
+  const number = reduceDisplayNumber(value);
+  const supportive = compatibleSet(report.moolank.value).includes(number) || compatibleSet(report.lifePath.value).includes(number) || missingValues(report).includes(number);
+  if (supportive && !repeatedValues(report).includes(number)) return "supportive";
+  if (repeatedValues(report).includes(number)) return "needsBalance";
+  return "neutral";
+}
+
+function loShuImpact(report: NumerologyReport, locale: Locale, form: FormState) {
+  const missing = missingValues(report);
+  const repeated = repeatedValues(report);
+  const nameNumber = reduceDisplayNumber(report.nameNumber.value);
+  const phoneDigits = digitsFromInput(form.mobile);
+  const vehicleDigits = digitsFromInput(form.vehicle);
+  const phoneSupport = missing.filter((number) => phoneDigits.includes(number));
+  const vehicleSupport = missing.filter((number) => vehicleDigits.includes(number));
+  const overactivePhone = repeated.filter((number) => phoneDigits.includes(number));
+  const overactiveVehicle = repeated.filter((number) => vehicleDigits.includes(number));
+  const lines: string[] = [];
+  if (locale === "hi") {
+    lines.push(missing.includes(nameNumber) ? `नामांक ${nameNumber} लो शू के अनुपस्थित अंक को संतुलित करने में सहयोग दे सकता है।` : `नामांक ${nameNumber} आपके मूल अंक पैटर्न के साथ ${nameVerdict(report) === "supportive" ? "सहयोगी" : "तटस्थ"} दिखता है।`);
+    lines.push(phoneSupport.length ? `आपके फोन नंबर में ${phoneSupport.join(", ")} है, जो लो शू के अनुपस्थित पैटर्न को सहयोग दे सकता है।` : "फोन नंबर लो शू के अनुपस्थित अंकों को सीधे नहीं भरता; इसे तटस्थ रूप से देखें।");
+    lines.push(vehicleSupport.length ? `आपके वाहन नंबर में ${vehicleSupport.join(", ")} है, जो यात्रा/गतिशीलता में संतुलन संकेत दे सकता है।` : "वाहन नंबर लो शू के अनुपस्थित अंकों को सीधे नहीं भरता; सुरक्षित ड्राइविंग सबसे महत्वपूर्ण है।");
+    if (overactivePhone.length || overactiveVehicle.length) lines.push(`पहले से सक्रिय अंक ${[...overactivePhone, ...overactiveVehicle].join(", ")} दोहर रहे हैं; इन्हें संतुलित आदतों से संभालें।`);
+    lines.push(missing.length ? `श्रेष्ठ संतुलन दिशा: ${missing.slice(0, 3).map((number) => `${number} (${loShuNumberMeaning(number, locale)})`).join(", ")}.` : "श्रेष्ठ संतुलन दिशा: मौजूदा strengths को स्थिर अभ्यास से बनाए रखें।");
+    return lines;
+  }
+  if (locale === "hinglish") {
+    lines.push(missing.includes(nameNumber) ? `Naamank ${nameNumber} Lo Shu missing number ko balance karne me support kar sakta hai.` : `Naamank ${nameNumber} aapke pattern ke saath ${nameVerdict(report) === "supportive" ? "supportive" : "neutral"} dikhta hai.`);
+    lines.push(phoneSupport.length ? `Aapke phone number mein ${phoneSupport.join(", ")} hai, jo Lo Shu missing pattern ko support kar sakta hai.` : "Phone number Lo Shu missing numbers ko directly fill nahi karta; ise neutral dekhein.");
+    lines.push(vehicleSupport.length ? `Aapke vehicle number mein ${vehicleSupport.join(", ")} hai, jo movement energy me balance signal de sakta hai.` : "Vehicle number Lo Shu missing numbers ko directly fill nahi karta; safe driving most important hai.");
+    if (overactivePhone.length || overactiveVehicle.length) lines.push(`Already active numbers ${[...overactivePhone, ...overactiveVehicle].join(", ")} repeat ho rahe hain; balanced habits se handle karein.`);
+    lines.push(missing.length ? `Best balancing direction: ${missing.slice(0, 3).map((number) => `${number} (${loShuNumberMeaning(number, locale)})`).join(", ")}.` : "Best balancing direction: existing strengths ko steady practice se maintain karein.");
+    return lines;
+  }
+  lines.push(missing.includes(nameNumber) ? `Your name number ${nameNumber} may help balance a missing Lo Shu number.` : `Your name number ${nameNumber} looks ${nameVerdict(report) === "supportive" ? "supportive" : "neutral"} with your pattern.`);
+  lines.push(phoneSupport.length ? `Your phone number includes ${phoneSupport.join(", ")}, which may support missing Lo Shu patterns.` : "Your phone number does not directly fill missing Lo Shu numbers; treat it as neutral.");
+  lines.push(vehicleSupport.length ? `Your vehicle number includes ${vehicleSupport.join(", ")}, which may support movement and balance themes.` : "Your vehicle number does not directly fill missing Lo Shu numbers; safe driving remains most important.");
+  if (overactivePhone.length || overactiveVehicle.length) lines.push(`Already active numbers ${[...overactivePhone, ...overactiveVehicle].join(", ")} repeat in phone/vehicle inputs; balance them with steady habits.`);
+  lines.push(missing.length ? `Best balancing direction: ${missing.slice(0, 3).map((number) => `${number} (${loShuNumberMeaning(number, locale)})`).join(", ")}.` : "Best balancing direction: maintain existing strengths with steady practice.");
+  return lines;
+}
+
+function digitsFromInput(value: string) {
+  return value.replace(/\D/g, "").split("").map(Number).filter((number) => number >= 1 && number <= 9);
 }
 
 function numerologyRemedies(locale: Locale) {

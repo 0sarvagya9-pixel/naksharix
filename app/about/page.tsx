@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
-import { AboutContent } from "@/components/about-content";
+import { LegalTrustPage } from "@/components/legal-trust-page";
 
 export const metadata: Metadata = seo({
   title: "About Naksharix - AI Vedic Astrology Platform",
@@ -10,5 +10,5 @@ export const metadata: Metadata = seo({
 });
 
 export default function AboutPage() {
-  return <AboutContent />;
+  return <LegalTrustPage page="about" />;
 }
