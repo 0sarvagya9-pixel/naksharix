@@ -1524,7 +1524,20 @@ Object.assign(en, {
   numerologyMissingNumbers: "Missing Numbers",
   numerologyRepeatedNumbers: "Repeated Numbers",
   numerologyPracticalRemedies: "Practical Remedies",
-  numerologyCalculate: "Calculate Numerology"
+  numerologyCalculate: "Calculate Numerology",
+  navFreeCalculators: "Free Calculators",
+  navShopComingSoon: "Shop — Coming Soon",
+  navHoroscopeComingSoon: "Horoscope — Coming Soon",
+  navConsultationComingSoon: "Consultation — Coming Soon",
+  comingSoon: "Coming Soon",
+  support: "Support",
+  legal: "Legal",
+  heroCopy: "Use free Kundli, match making, numerology, Lo Shu, and tarot tools, then explore manual premium reports for deeper reflective guidance.",
+  homeFeatureNumerologyLoShu: "Numerology + Lo Shu",
+  homeActiveTools: "Active Tools",
+  homeReportsAvailable: "Reports Available",
+  homeLanguages: "Languages",
+  homeComingSoonModules: "Coming Soon"
 });
 
 Object.assign(hi, {
@@ -1532,7 +1545,20 @@ Object.assign(hi, {
   numerologyMissingNumbers: "छूटे हुए अंक",
   numerologyRepeatedNumbers: "दोहराए गए अंक",
   numerologyPracticalRemedies: "व्यावहारिक उपाय",
-  numerologyCalculate: "अंक ज्योतिष गणना करें"
+  numerologyCalculate: "अंक ज्योतिष गणना करें",
+  navFreeCalculators: "मुफ़्त कैलकुलेटर",
+  navShopComingSoon: "शॉप — जल्द आ रही है",
+  navHoroscopeComingSoon: "राशिफल — जल्द आ रहा है",
+  navConsultationComingSoon: "कंसल्टेशन — जल्द आ रहा है",
+  comingSoon: "जल्द आ रहा है",
+  support: "सहायता",
+  legal: "कानूनी",
+  heroCopy: "मुफ़्त कुंडली, मिलान, अंक ज्योतिष, लो शू और टैरो tools use करें, फिर deeper reflective guidance के लिए manual premium reports explore करें।",
+  homeFeatureNumerologyLoShu: "अंक ज्योतिष + लो शू",
+  homeActiveTools: "Active Tools",
+  homeReportsAvailable: "Reports Available",
+  homeLanguages: "Languages",
+  homeComingSoonModules: "Coming Soon"
 });
 
 Object.assign(hinglish, {
@@ -1540,7 +1566,20 @@ Object.assign(hinglish, {
   numerologyMissingNumbers: "Missing Numbers",
   numerologyRepeatedNumbers: "Repeated Numbers",
   numerologyPracticalRemedies: "Practical Remedies",
-  numerologyCalculate: "Numerology Calculate Karein"
+  numerologyCalculate: "Numerology Calculate Karein",
+  navFreeCalculators: "Free Calculators",
+  navShopComingSoon: "Shop — Coming Soon",
+  navHoroscopeComingSoon: "Horoscope — Coming Soon",
+  navConsultationComingSoon: "Consultation — Coming Soon",
+  comingSoon: "Coming Soon",
+  support: "Support",
+  legal: "Legal",
+  heroCopy: "Free Kundli, match making, numerology, Lo Shu aur tarot tools use karein, phir deeper reflective guidance ke liye manual premium reports explore karein.",
+  homeFeatureNumerologyLoShu: "Numerology + Lo Shu",
+  homeActiveTools: "Active Tools",
+  homeReportsAvailable: "Reports Available",
+  homeLanguages: "Languages",
+  homeComingSoonModules: "Coming Soon"
 });
 
 export const dictionary: Record<Locale, Record<string, string>> = { en, hi, hinglish };

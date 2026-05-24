@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, Newspaper, ShieldCheck, Ticket, Users, Wallet } from "lucide-react";
+import { CalendarClock, Newspaper, PackageSearch, ShieldCheck, Ticket, Users, Wallet } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { Section } from "@/components/section";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,7 @@ const operations = [
   { title: "Report Orders", copy: "Track paid kundli, career, marriage, finance, health, yearly, and numerology reports.", icon: Wallet },
   { title: "Astrologer Queue", copy: "Approve profiles, consultation pricing, ratings, and language coverage.", icon: ShieldCheck },
   { title: "Revenue Ops", copy: "Track subscriptions, paid reports, wallet credits, coupons, and refunds.", icon: Wallet },
+  { title: "Shop Catalogue", copy: "Manage spiritual products, images, active status, featured items, and WhatsApp request readiness.", icon: PackageSearch },
   { title: "Consultations", copy: "Monitor bookings, missed sessions, escalations, and customer feedback.", icon: CalendarClock },
   { title: "Testimonials", copy: "Moderate homepage reviews, video placeholders, ratings, and social proof cards.", icon: Ticket },
   { title: "Blog CMS", copy: "Publish SEO articles and moderate astrology content workflows.", icon: Newspaper },
@@ -102,6 +103,9 @@ export default function AdminPage() {
         </Button>
         <Button variant="outline" asChild>
           <Link href="/admin/payouts">Payout Dashboard</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/admin/shop">Shop Catalogue</Link>
         </Button>
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-4">

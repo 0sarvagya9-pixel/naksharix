@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AstrologerShowcase, FeatureGrid, HomeHero, StickyMobileCTA, TrustBar } from "@/components/home-sections";
+import { FeatureGrid, HomeHero, StickyMobileCTA, TrustBar } from "@/components/home-sections";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
@@ -14,7 +14,6 @@ export default function HomePage() {
     <main className="nx-night-sky overflow-hidden bg-[#020612]">
       <HomeHero />
       <FeatureGrid />
-      <AstrologerShowcase />
       <TrustBar />
       <StickyMobileCTA />
     </main>

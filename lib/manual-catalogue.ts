@@ -1,14 +1,26 @@
 import type { Locale } from "@/lib/i18n";
 
 export type CatalogueText = Record<Locale, string>;
+export type ProductStatus = "active" | "inactive";
 export type ShopProduct = {
   id: string;
+  slug: string;
   category: string;
   purpose: string;
   name: CatalogueText;
-  description: CatalogueText;
-  support: CatalogueText;
-  care: CatalogueText;
+  shortDescription: CatalogueText;
+  longDescription: CatalogueText;
+  imageUrl: string;
+  imageAlt: CatalogueText;
+  priceLabel: CatalogueText;
+  status: ProductStatus;
+  featured: boolean;
+  tags: string[];
+  howToUse: CatalogueText;
+  careNote: CatalogueText;
+  disclaimer: CatalogueText;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type ManualReport = {
@@ -34,6 +46,7 @@ export const shopCategories = [
 ] as const;
 
 export const shopPurposes = ["Career", "Wealth", "Love", "Protection", "Focus", "Peace", "Health", "Spiritual Growth"] as const;
+export const shopProductStorageKey = "naksharix-shop-products";
 
 export const shopProducts: ShopProduct[] = [
   product("5-mukhi-rudraksha", "rudraksha", "Peace", "5 Mukhi Rudraksha", "५ मुखी रुद्राक्ष", "5 Mukhi Rudraksha", "A classic rudraksha for calm, discipline, and daily spiritual grounding.", "शांति, अनुशासन और दैनिक आध्यात्मिक स्थिरता के लिए पारंपरिक रुद्राक्ष।", "Calm, discipline aur daily spiritual grounding ke liye classic rudraksha."),
@@ -77,24 +90,148 @@ export function categoryLabel(category: string, locale: Locale) {
   return match ? match[locale] : category;
 }
 
+export function normalizeShopProducts(value: unknown): ShopProduct[] {
+  if (!Array.isArray(value)) return shopProducts;
+  const normalized = value
+    .map((item) => normalizeShopProduct(item))
+    .filter((item): item is ShopProduct => Boolean(item));
+  return normalized.length ? normalized : shopProducts;
+}
+
+export function emptyShopProduct(): ShopProduct {
+  const now = new Date().toISOString();
+  return {
+    id: "",
+    slug: "",
+    category: shopCategories[0].key,
+    purpose: shopPurposes[0],
+    name: text(""),
+    shortDescription: text(""),
+    longDescription: text(""),
+    imageUrl: "",
+    imageAlt: text(""),
+    priceLabel: {
+      en: "Price on request",
+      hi: "Price on request",
+      hinglish: "Price on request"
+    },
+    status: "active",
+    featured: false,
+    tags: [],
+    howToUse: text(""),
+    careNote: text(""),
+    disclaimer: productDisclaimer(),
+    createdAt: now,
+    updatedAt: now
+  };
+}
+
 function product(id: string, category: string, purpose: string, en: string, hi: string, hinglish: string, descEn: string, descHi: string, descHinglish: string): ShopProduct {
+  const now = "2026-05-24T00:00:00.000Z";
+  const purposeTag = purpose.toLowerCase().replace(/\s+/g, "-");
   return {
     id,
+    slug: id,
     category,
     purpose,
     name: { en, hi, hinglish },
-    description: { en: descEn, hi: descHi, hinglish: descHinglish },
-    support: {
+    shortDescription: { en: descEn, hi: descHi, hinglish: descHinglish },
+    longDescription: {
+      en: `${descEn} It is offered as a reflective, faith-based catalogue item and should be selected with guidance, practical judgment, and personal comfort.`,
+      hi: `${descHi} इसे चिंतनात्मक, आस्था-आधारित catalogue item के रूप में देखें और guidance, practical judgment और personal comfort के साथ चुनें।`,
+      hinglish: `${descHinglish} Ise reflective, faith-based catalogue item ke roop mein dekhein aur guidance, practical judgment aur personal comfort ke saath choose karein.`
+    },
+    imageUrl: `/shop/${placeholderImageForCategory(category)}.svg`,
+    imageAlt: { en: `${en} product visual`, hi: `${hi} उत्पाद visual`, hinglish: `${hinglish} product visual` },
+    priceLabel: {
+      en: "Price on request",
+      hi: "Price on request",
+      hinglish: "Price on request"
+    },
+    status: "active",
+    featured: ["5-mukhi-rudraksha", "dhan-yog-bracelet", "shri-yantra", "career-growth-combo"].includes(id),
+    tags: [category, purposeTag],
+    howToUse: {
       en: "May support mindful practice, intention-setting, and a calmer routine when used with practical judgment.",
       hi: "व्यावहारिक समझ के साथ उपयोग करने पर mindful practice, संकल्प और शांत routine में सहयोगी माना जा सकता है।",
       hinglish: "Practical judgment ke saath use karne par mindful practice, intention-setting aur calm routine ko support kar sakta hai."
     },
-    care: {
+    careNote: {
       en: "Keep it clean and dry. Use respectfully as a faith-based support item, not as a guarantee.",
       hi: "इसे साफ और सूखा रखें। इसे आस्था-आधारित सहयोग के रूप में उपयोग करें, guarantee के रूप में नहीं।",
       hinglish: "Ise clean aur dry rakhein. Faith-based support ke roop mein use karein, guarantee ke roop mein nahi."
-    }
+    },
+    disclaimer: productDisclaimer(),
+    createdAt: now,
+    updatedAt: now
   };
+}
+
+function normalizeShopProduct(item: unknown): ShopProduct | null {
+  if (!item || typeof item !== "object") return null;
+  const source = item as Partial<ShopProduct> & { description?: CatalogueText; support?: CatalogueText; care?: CatalogueText };
+  const name = safeText(source.name);
+  const id = safeString(source.id || source.slug || name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
+  if (!id || !name.en) return null;
+  const now = new Date().toISOString();
+  const priceLabel = safeText(source.priceLabel);
+  const disclaimer = safeText(source.disclaimer);
+  return {
+    id,
+    slug: safeString(source.slug) || id,
+    category: safeString(source.category) || shopCategories[0].key,
+    purpose: safeString(source.purpose) || shopPurposes[0],
+    name,
+    shortDescription: safeText(source.shortDescription || source.description),
+    longDescription: safeText(source.longDescription || source.shortDescription || source.description),
+    imageUrl: safeString(source.imageUrl),
+    imageAlt: safeText(source.imageAlt || source.name),
+    priceLabel: priceLabel.en ? priceLabel : text("Price on request"),
+    status: source.status === "inactive" ? "inactive" : "active",
+    featured: Boolean(source.featured),
+    tags: Array.isArray(source.tags) ? source.tags.map((tag) => safeString(tag)).filter(Boolean) : [],
+    howToUse: safeText(source.howToUse || source.support),
+    careNote: safeText(source.careNote || source.care),
+    disclaimer: disclaimer.en ? disclaimer : productDisclaimer(),
+    createdAt: safeString(source.createdAt) || now,
+    updatedAt: safeString(source.updatedAt) || now
+  };
+}
+
+function productDisclaimer(): CatalogueText {
+  return {
+    en: "Spiritual products are faith-based and reflective support tools. They do not guarantee outcomes and do not replace medical, legal, financial, or professional advice.",
+    hi: "आध्यात्मिक उत्पाद आस्था-आधारित और चिंतनात्मक सहयोग के साधन हैं। ये परिणामों की गारंटी नहीं देते और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।",
+    hinglish: "Spiritual products faith-based aur reflective support tools hain. Ye guaranteed outcomes nahi dete aur medical, legal, financial ya professional advice ka replacement nahi hain."
+  };
+}
+
+function placeholderImageForCategory(category: string) {
+  if (category === "rudraksha") return "rudraksha-placeholder";
+  if (category === "gemstones") return "gemstone-placeholder";
+  if (category === "bracelets" || category === "zodiac") return "bracelet-placeholder";
+  if (category === "yantras") return "yantra-placeholder";
+  if (category === "mala") return "mala-placeholder";
+  return "combo-placeholder";
+}
+
+function text(value: string): CatalogueText {
+  return { en: value, hi: value, hinglish: value };
+}
+
+function safeText(value: unknown): CatalogueText {
+  if (!value || typeof value !== "object") return text("");
+  const source = value as Partial<CatalogueText>;
+  const en = safeString(source.en || source.hinglish || source.hi);
+  return {
+    en,
+    hi: safeString(source.hi || en),
+    hinglish: safeString(source.hinglish || en)
+  };
+}
+
+function safeString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
 }
 
 function report(slug: string, category: string, en: string, hi: string, hinglish: string): ManualReport {

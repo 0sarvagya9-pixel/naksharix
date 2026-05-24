@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Mala product placeholder">
+  <rect width="800" height="500" fill="#07111f"/>
+  <path d="M250 165c35 170 265 170 300 0" fill="none" stroke="#dca956" stroke-width="18" stroke-linecap="round"/>
+  <g fill="#6b341c" stroke="#f3d382" stroke-width="5">
+    <circle cx="250" cy="165" r="24"/><circle cx="290" cy="260" r="24"/><circle cx="360" cy="320" r="24"/><circle cx="440" cy="320" r="24"/><circle cx="510" cy="260" r="24"/><circle cx="550" cy="165" r="24"/>
+  </g>
+  <path d="M400 322v70" stroke="#f3d382" stroke-width="10" stroke-linecap="round"/>
+  <text x="400" y="445" text-anchor="middle" fill="#f3d382" font-family="serif" font-size="44" font-weight="700">Mala</text>
+</svg>

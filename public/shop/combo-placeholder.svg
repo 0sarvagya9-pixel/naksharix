@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Remedy combo product placeholder">
+  <rect width="800" height="500" fill="#07111f"/>
+  <rect x="220" y="145" width="170" height="190" rx="24" fill="#142647" stroke="#dca956" stroke-width="9"/>
+  <rect x="410" y="115" width="170" height="220" rx="24" fill="#0c1830" stroke="#f3d382" stroke-width="9"/>
+  <circle cx="305" cy="240" r="42" fill="#5b2f19" stroke="#f3d382" stroke-width="7"/>
+  <path d="M495 165 550 260H440Z" fill="none" stroke="#00f5a0" stroke-width="8"/>
+  <text x="400" y="430" text-anchor="middle" fill="#f3d382" font-family="serif" font-size="44" font-weight="700">Remedy Combo</text>
+</svg>

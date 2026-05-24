@@ -27,7 +27,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthProfileMenu } from "@/components/auth-profile-menu";
 import { useLanguage } from "@/components/language-provider";
-import type { TranslationKey } from "@/lib/i18n";
+import type { Locale, TranslationKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const desktopLinks = [
@@ -35,20 +35,41 @@ const desktopLinks = [
   { id: "kundli", labelKey: "navKundli", href: "/kundli", activePaths: ["/kundli", "/free-kundli"] },
   { id: "matchmaking", labelKey: "navMatchMaking", href: "/matchmaking", activePaths: ["/match", "/match-making", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
   { id: "numerology", labelKey: "navNumerology", href: "/numerology", activePaths: ["/numerology"] },
-  { id: "shop", labelKey: "navShop", href: "/shop", activePaths: ["/shop"] },
-  { id: "tarot", labelKey: "navTarot", href: "/tarot", activePaths: ["/tarot"] }
+  { id: "tarot", labelKey: "navTarot", href: "/tarot", activePaths: ["/tarot"] },
+  { id: "reports", labelKey: "navReports", href: "/reports", activePaths: ["/reports"] }
 ] as const;
 
-const moreLinks = [
-  { id: "ai-astrologer", labelKey: "navAiAstrologerComingSoon", href: "/ai-astrologer", activePaths: ["/ai-astrologer", "/ai-chat", "/talk-to-kundli", "/chatbot"] },
-  { id: "reports", labelKey: "navReports", href: "/reports", activePaths: ["/reports"] },
-  { id: "about", labelKey: "navAboutUs", href: "/about", activePaths: ["/about"] },
-  { id: "contact", labelKey: "navContact", href: "/contact", activePaths: ["/contact"] },
-  { id: "disclaimer", labelKey: "disclaimer", href: "/disclaimer", activePaths: ["/disclaimer"] },
-  { id: "privacy", labelKey: "privacyPolicy", href: "/privacy-policy", activePaths: ["/privacy-policy"] },
-  { id: "terms", labelKey: "termsConditions", href: "/terms", activePaths: ["/terms"] },
-  { id: "refund", labelKey: "refundPolicy", href: "/refund-policy", activePaths: ["/refund-policy"] }
-] as const;
+type NavDropdownItem = { id: string; labelKey: TranslationKey; href: string; activePaths: readonly string[] };
+type NavDropdownGroup = { titleKey: TranslationKey; items: NavDropdownItem[] };
+
+const moreGroups: NavDropdownGroup[] = [
+  {
+    titleKey: "comingSoon",
+    items: [
+      { id: "ai-astrologer", labelKey: "navAiAstrologerComingSoon", href: "/ai-astrologer", activePaths: ["/ai-astrologer", "/ai-chat", "/talk-to-kundli", "/chatbot"] },
+      { id: "shop", labelKey: "navShopComingSoon", href: "/shop", activePaths: ["/shop"] },
+      { id: "horoscope", labelKey: "navHoroscopeComingSoon", href: "/horoscope", activePaths: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope-2026"] },
+      { id: "consultation", labelKey: "navConsultationComingSoon", href: "/consultation", activePaths: ["/consultation", "/consult"] }
+    ]
+  },
+  {
+    titleKey: "support",
+    items: [
+      { id: "about", labelKey: "navAboutUs", href: "/about", activePaths: ["/about"] },
+      { id: "contact", labelKey: "navContact", href: "/contact", activePaths: ["/contact"] }
+    ]
+  },
+  {
+    titleKey: "legal",
+    items: [
+      { id: "disclaimer", labelKey: "disclaimer", href: "/disclaimer", activePaths: ["/disclaimer"] },
+      { id: "privacy", labelKey: "privacyPolicy", href: "/privacy-policy", activePaths: ["/privacy-policy"] },
+      { id: "terms", labelKey: "termsConditions", href: "/terms", activePaths: ["/terms"] },
+      { id: "refund", labelKey: "refundPolicy", href: "/refund-policy", activePaths: ["/refund-policy"] }
+    ]
+  }
+] ;
+const moreLinks = moreGroups.flatMap((group) => group.items);
 
 type SidebarItem = { labelKey: TranslationKey; href: string; activePaths?: readonly string[]; icon?: LucideIcon };
 type SidebarGroup = { titleKey: TranslationKey; icon: LucideIcon; items: SidebarItem[] };
@@ -67,7 +88,7 @@ const sidebarGroups: SidebarGroup[] = [
     titleKey: "dailyHoroscopeGroup",
     icon: MoonStar,
     items: [
-      { labelKey: "horoscope", href: "/horoscope", activePaths: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope-2026"] },
+      { labelKey: "navHoroscopeComingSoon", href: "/horoscope", activePaths: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope-2026"] },
       { labelKey: "zodiac", href: "/zodiac", activePaths: ["/zodiac"] }
     ]
   },
@@ -91,7 +112,7 @@ const sidebarGroups: SidebarGroup[] = [
     titleKey: "connectWithExperts",
     icon: Users,
     items: [
-      { labelKey: "consult", href: "/consultation", activePaths: ["/consult", "/consultation"] },
+      { labelKey: "navConsultationComingSoon", href: "/consultation", activePaths: ["/consult", "/consultation"] },
       { labelKey: "astrologers", href: "/astrologers", activePaths: ["/astrologers"] },
       { labelKey: "callAstrologers", href: "/consultation", activePaths: ["/consult", "/consultation"] }
     ]
@@ -117,8 +138,8 @@ const sidebarGroups: SidebarGroup[] = [
     titleKey: "dataTools",
     icon: Calculator,
     items: [
-      { labelKey: "planetaryCalculators", href: "/calculators", activePaths: ["/calculators"] },
-      { labelKey: "navShop", href: "/shop", activePaths: ["/shop"] },
+      { labelKey: "navFreeCalculators", href: "/free-calculators", activePaths: ["/free-calculators", "/calculators"] },
+      { labelKey: "navShopComingSoon", href: "/shop", activePaths: ["/shop"] },
       { labelKey: "reports", href: "/reports", activePaths: ["/reports"] }
     ]
   },
@@ -135,12 +156,13 @@ const sidebarGroups: SidebarGroup[] = [
 ];
 
 export function MainNav() {
-  const { tr } = useLanguage();
+  const { tr, locale } = useLanguage();
   const pathname = usePathname();
   const isAstrologerPortal = pathname.startsWith("/astrologer");
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const moreActive = moreLinks.some((item) => isActiveRoute(pathname, item.href, item.activePaths));
+  const calculatorsActive = isActiveRoute(pathname, "/free-calculators", ["/free-calculators", "/calculators"]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -161,20 +183,21 @@ export function MainNav() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/[0.04] bg-[#020612]/72 shadow-[0_14px_48px_rgba(0,0,0,0.42)] backdrop-blur-md">
-      <div className="mx-auto flex h-24 w-full max-w-[1440px] items-center gap-3 px-4 lg:gap-4 xl:h-24 xl:px-6 2xl:gap-6 2xl:px-12">
-        <div className="flex min-w-[11.5rem] flex-shrink-0 items-center md:min-w-[13rem] xl:basis-[13rem] 2xl:basis-[14.5rem]">
+      <div className="mx-auto flex h-24 w-full max-w-[1440px] items-center gap-2 px-4 lg:gap-3 xl:h-24 xl:px-5 2xl:gap-5 2xl:px-10">
+        <div className="flex min-w-[10.5rem] flex-shrink-0 items-center md:min-w-[12rem] xl:basis-[12rem] 2xl:basis-[13.5rem]">
           <BrandLogo className="max-w-full" />
         </div>
-        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1.5 xl:flex 2xl:gap-3" aria-label="Primary navigation">
-          {desktopLinks.map((item, index) => {
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex 2xl:gap-2" aria-label="Primary navigation">
+          {desktopLinks.map((item) => {
             const active = isActiveRoute(pathname, item.href, item.activePaths);
             return (
+            <div key={`${item.id}-nav-slot`} className="contents">
+            {item.id === "tarot" ? <CalculatorMegaDropdown key="free-calculators-mega" locale={locale} tr={tr} active={calculatorsActive} /> : null}
             <Link
-              key={`${item.id}-${item.href}-${index}`}
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.72rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-2.5 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] hover:drop-shadow-[0_0_10px_rgba(0,155,114,0.38)] 2xl:px-3.5 2xl:text-[0.84rem]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-1.5 py-2 text-[0.68rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-2.5 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] hover:drop-shadow-[0_0_10px_rgba(0,155,114,0.38)] 2xl:px-3 2xl:text-[0.82rem]",
                 active
                   ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
                   : "text-[#ffffff]"
@@ -182,6 +205,7 @@ export function MainNav() {
             >
               {tr(item.labelKey)}
             </Link>
+            </div>
             );
           })}
           <div className="group relative flex-shrink-0">
@@ -190,7 +214,7 @@ export function MainNav() {
               aria-haspopup="menu"
               aria-expanded={moreActive}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[0.72rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-4 2xl:text-[0.84rem]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-2.5 py-2 text-[0.68rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-3.5 2xl:text-[0.82rem]",
                 moreActive
                   ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
                   : "text-[#ffffff]"
@@ -198,27 +222,32 @@ export function MainNav() {
             >
               {tr("navMore")}
             </button>
-            <div className="invisible absolute right-0 top-full z-50 mt-3 w-56 translate-y-2 rounded-lg border border-[#dca956]/25 bg-[#020612]/95 p-2 opacity-0 shadow-[0_18px_60px_rgba(0,5,16,0.62),0_0_32px_rgba(0,155,114,0.18)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-              {moreLinks.map((item, index) => {
-                const active = isActiveRoute(pathname, item.href, item.activePaths);
-                return (
-                  <Link
-                    key={`${item.id}-${item.href}-${index}`}
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "block rounded-md px-3 py-2 font-cinzel text-sm text-[#ffffff] outline-none transition hover:bg-[#0f1c3a] hover:text-[#f3d382] focus:bg-[#0f1c3a] focus:text-[#f3d382]",
-                      active ? "bg-[#dca956]/10 text-[#f3d382] shadow-[inset_3px_0_0_rgba(220,169,86,0.8)]" : "text-[#ffffff]"
-                    )}
-                  >
-                    {tr(item.labelKey)}
-                  </Link>
-                );
-              })}
+            <div className="invisible absolute right-0 top-full z-50 mt-3 w-72 translate-y-2 rounded-xl border border-[#dca956]/25 bg-[#020612]/95 p-3 opacity-0 shadow-[0_18px_60px_rgba(0,5,16,0.62),0_0_32px_rgba(0,155,114,0.18)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+              {moreGroups.map((group) => (
+                <div key={group.titleKey} className="border-b border-[#263957]/70 py-2 first:pt-0 last:border-b-0 last:pb-0">
+                  <p className="px-3 pb-1 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#dca956]">{tr(group.titleKey)}</p>
+                  {group.items.map((item, index) => {
+                    const active = isActiveRoute(pathname, item.href, item.activePaths);
+                    return (
+                      <Link
+                        key={`${item.id}-${item.href}-${index}`}
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "block rounded-md px-3 py-2 text-sm font-semibold text-[#ffffff] outline-none transition hover:bg-[#0f1c3a] hover:text-[#f3d382] focus:bg-[#0f1c3a] focus:text-[#f3d382]",
+                          active ? "bg-[#dca956]/10 text-[#f3d382] shadow-[inset_3px_0_0_rgba(220,169,86,0.8)]" : "text-[#ffffff]"
+                        )}
+                      >
+                        {tr(item.labelKey)}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         </nav>
-        <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-white/[0.08] pl-2 lg:gap-2.5 2xl:gap-4 2xl:pl-4">
+        <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-white/[0.08] pl-3 lg:gap-2.5 2xl:gap-3 2xl:pl-5">
           <LanguageSwitcher className="w-[118px] min-w-[118px] 2xl:w-[132px] 2xl:min-w-[132px]" />
           <ThemeToggle />
           <AuthProfileMenu />
@@ -241,9 +270,58 @@ export function MainNav() {
   );
 }
 
+function CalculatorMegaDropdown({ locale, tr, active }: { locale: Locale; tr: (key: TranslationKey) => string; active: boolean }) {
+  const labels = calculatorDropdownLabels(locale);
+  return (
+    <div className="group relative flex-shrink-0">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={active}
+        className={cn(
+          "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.68rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-3 2xl:text-[0.82rem]",
+          active
+            ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
+            : "text-[#ffffff]"
+        )}
+      >
+        {tr("navFreeCalculators")}
+      </button>
+      <div className="invisible absolute left-1/2 top-full z-50 mt-3 w-[min(780px,calc(100vw-2rem))] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#dca956]/25 bg-[#020612]/96 p-4 opacity-0 shadow-[0_22px_70px_rgba(0,5,16,0.68),0_0_34px_rgba(0,155,114,0.16)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {labels.groups.map((group) => (
+            <div key={group.title} className="rounded-xl border border-[#263957] bg-[#0f1c3a]/74 p-3">
+              <p className="font-cinzel text-sm font-bold text-[#f3d382]">{group.title}</p>
+              <div className="mt-3 grid gap-1.5">
+                {group.items.map((item) => item.href ? (
+                  <Link key={item.label} href={item.href} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#dca956]/10 hover:text-[#f3d382]">
+                    <span>{item.label}</span>
+                    <span className="rounded-full border border-[#00f5a0]/35 bg-[#00f5a0]/10 px-2 py-0.5 text-[0.6rem] text-[#00f5a0]">{labels.active}</span>
+                  </Link>
+                ) : (
+                  <div key={item.label} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#94a3b8]">
+                    <span>{item.label}</span>
+                    <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-2 py-0.5 text-[0.6rem] text-[#f3d382]">{labels.comingSoon}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex justify-end border-t border-[#263957] pt-4">
+          <Link href="/free-calculators" className="rounded-full bg-[#009b72] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#008766]">
+            {labels.viewAll}
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: () => void; pathname: string }) {
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
-  const { tr } = useLanguage();
+  const { tr, locale } = useLanguage();
+  const [calculatorsOpen, setCalculatorsOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -290,6 +368,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
             </div>
             <div className="star-field flex-1 overflow-y-auto p-4">
               <div className="grid gap-4 pb-6">
+                <MobileCalculatorAccordion locale={locale} tr={tr} open={calculatorsOpen} setOpen={setCalculatorsOpen} onClose={onClose} />
                 {sidebarGroups.map((group, groupIndex) => (
                   <SidebarMenuGroup
                     key={group.titleKey}
@@ -310,6 +389,39 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
         </>
       ) : null}
     </AnimatePresence>
+  );
+}
+
+function MobileCalculatorAccordion({ locale, tr, open, setOpen, onClose }: { locale: Locale; tr: (key: TranslationKey) => string; open: boolean; setOpen: (value: boolean) => void; onClose: () => void }) {
+  const labels = calculatorDropdownLabels(locale);
+  return (
+    <section className="rounded-lg border border-[#dca956]/18 bg-[#0f1c3a]/70 p-3">
+      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left font-cinzel text-sm font-bold text-[#f3d382]">
+        <span className="flex items-center gap-2"><Calculator className="h-4 w-4" />{tr("navFreeCalculators")}</span>
+        <span className="text-xs text-[#dca956]">{open ? "−" : "+"}</span>
+      </button>
+      {open ? (
+        <div className="mt-3 grid gap-3">
+          {labels.groups.map((group) => (
+            <div key={group.title} className="rounded-lg border border-[#263957] bg-[#020612]/42 p-3">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#dca956]">{group.title}</p>
+              <div className="mt-2 grid gap-1.5">
+                {group.items.map((item) => item.href ? (
+                  <Link key={item.label} href={item.href} onClick={onClose} className="flex min-h-10 items-center justify-between rounded-md px-3 py-2 text-sm text-white hover:bg-[#dca956]/10">
+                    <span>{item.label}</span><span className="text-[0.65rem] text-[#00f5a0]">{labels.active}</span>
+                  </Link>
+                ) : (
+                  <div key={item.label} className="flex min-h-10 items-center justify-between rounded-md px-3 py-2 text-sm text-[#94a3b8]">
+                    <span>{item.label}</span><span className="text-[0.65rem] text-[#f3d382]">{labels.comingSoon}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          <Link href="/free-calculators" onClick={onClose} className="rounded-md bg-[#009b72] px-3 py-2 text-center text-sm font-semibold text-white">{labels.viewAll}</Link>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -371,5 +483,108 @@ function normalizePath(path: string) {
   return clean === "" ? "/" : clean;
 }
 
-
+function calculatorDropdownLabels(locale: Locale) {
+  const active = locale === "hi" ? "Active" : "Active";
+  const comingSoon = locale === "hi" ? "जल्द" : "Soon";
+  const viewAll = locale === "hi" ? "सभी मुफ़्त कैलकुलेटर देखें" : locale === "hinglish" ? "View All Free Calculators" : "View All Free Calculators";
+  if (locale === "hi") {
+    return {
+      active,
+      comingSoon,
+      viewAll,
+      groups: [
+        {
+          title: "कुंडली कैलकुलेटर",
+          items: [
+            { label: "मुफ़्त कुंडली कैलकुलेटर", href: "/kundli" },
+            { label: "दशा कैलकुलेटर" },
+            { label: "चंद्र राशि कैलकुलेटर" },
+            { label: "नक्षत्र कैलकुलेटर" },
+            { label: "लग्न कैलकुलेटर" },
+            { label: "मांगलिक कैलकुलेटर" }
+          ]
+        },
+        {
+          title: "अंक ज्योतिष कैलकुलेटर",
+          items: [
+            { label: "अंक ज्योतिष कैलकुलेटर", href: "/numerology" },
+            { label: "लो शू ग्रिड", href: "/numerology" },
+            { label: "नामांक", href: "/numerology" },
+            { label: "मोबाइल नंबर", href: "/numerology" },
+            { label: "वाहन नंबर", href: "/numerology" }
+          ]
+        },
+        {
+          title: "मिलान कैलकुलेटर",
+          items: [
+            { label: "कुंडली मिलान", href: "/matchmaking" },
+            { label: "गुण मिलान" },
+            { label: "नाड़ी दोष" },
+            { label: "भकूट" },
+            { label: "विवाह उपयुक्तता" }
+          ]
+        },
+        {
+          title: "टैरो और समय",
+          items: [
+            { label: "टैरो रीडिंग", href: "/tarot" },
+            { label: "राशिफल" },
+            { label: "पंचांग" },
+            { label: "मुहूर्त" },
+            { label: "साढ़े साती" }
+          ]
+        }
+      ]
+    };
+  }
+  const hinglish = locale === "hinglish";
+  return {
+    active,
+    comingSoon,
+    viewAll,
+    groups: [
+      {
+        title: "Kundli Calculators",
+        items: [
+          { label: "Free Kundli Calculator", href: "/kundli" },
+          { label: "Dasha Calculator" },
+          { label: "Moon Sign Calculator" },
+          { label: "Nakshatra Calculator" },
+          { label: "Lagna Calculator" },
+          { label: "Manglik Calculator" }
+        ]
+      },
+      {
+        title: "Numerology Calculators",
+        items: [
+          { label: "Numerology Calculator", href: "/numerology" },
+          { label: "Lo Shu Grid", href: "/numerology" },
+          { label: "Name Number", href: "/numerology" },
+          { label: "Mobile Number", href: "/numerology" },
+          { label: "Vehicle Number", href: "/numerology" }
+        ]
+      },
+      {
+        title: "Matching Calculators",
+        items: [
+          { label: hinglish ? "Match Making" : "Match Making", href: "/matchmaking" },
+          { label: "Guna Milan" },
+          { label: "Nadi Dosha" },
+          { label: "Bhakoot" },
+          { label: "Marriage Suitability" }
+        ]
+      },
+      {
+        title: "Tarot & Timing",
+        items: [
+          { label: "Tarot Reading", href: "/tarot" },
+          { label: "Horoscope" },
+          { label: "Panchang" },
+          { label: "Muhurat" },
+          { label: "Sade Sati" }
+        ]
+      }
+    ]
+  };
+}
 

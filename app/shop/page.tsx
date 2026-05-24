@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { ShopContent } from "@/components/shop-content";
+import { ShopComingSoonContent } from "@/components/shop-coming-soon-content";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Naksharix Spiritual Shop | Rudraksha, Gemstones, Yantras & Remedy Products",
-  description: "Explore curated spiritual products including rudraksha, gemstones, bracelets, yantras, malas, and remedy-based items from Naksharix.",
+  title: "Shop Coming Soon | Naksharix Spiritual Products",
+  description: "Naksharix spiritual shop with rudraksha, gemstones, yantras, malas, bracelets, and remedy-based products is coming soon.",
   path: "/shop",
   keywords: ["Naksharix Shop", "Rudraksha", "Gemstones", "Yantras", "Spiritual Products"]
 });
 
 export default function ShopPage() {
-  return <ShopContent />;
+  return <ShopComingSoonContent />;
 }

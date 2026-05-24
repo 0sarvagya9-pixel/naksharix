@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Yantra product placeholder">
+  <rect width="800" height="500" fill="#07111f"/>
+  <rect x="230" y="90" width="340" height="300" rx="28" fill="#142647" stroke="#dca956" stroke-width="10"/>
+  <path d="M400 140 510 335H290Z M400 340 290 145h220Z" fill="none" stroke="#f3d382" stroke-width="9"/>
+  <circle cx="400" cy="240" r="58" fill="none" stroke="#00f5a0" stroke-width="8" opacity=".75"/>
+  <text x="400" y="445" text-anchor="middle" fill="#f3d382" font-family="serif" font-size="44" font-weight="700">Yantra</text>
+</svg>

@@ -1,11 +1,11 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Bot,
   BrainCircuit,
   BriefcaseBusiness,
   CheckCircle2,
@@ -30,14 +30,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { featuredAstrologers } from "@/lib/astrologers";
 import { useLanguage } from "@/components/language-provider";
+import type { Locale } from "@/lib/i18n";
 
 const featureStrip = [
   ["homeFeatureKundliGenerator", MoonStar, "/kundli"],
-  ["homeFeatureAiAstrologer", Bot, "/talk-to-kundli"],
   ["homeFeatureMatchingCompatibility", HeartHandshake, "/matchmaking"],
+  ["homeFeatureNumerologyLoShu", Grid3X3, "/numerology"],
+  ["navFreeCalculators", WandSparkles, "/free-calculators"],
   ["homeFeaturePremiumReports", BriefcaseBusiness, "/reports"],
-  ["homeFeatureTarotReading", Gem, "/tarot"],
-  ["homeFeatureConsultationExperts", Users, "/astrologers"]
+  ["homeFeatureTarotReading", Gem, "/tarot"]
 ] as const;
 
 const intelligenceLayers = [
@@ -59,10 +60,20 @@ const trustItems = [
 ] as const;
 
 export function HomeHero() {
-  const { tr } = useLanguage();
+  const { tr, locale } = useLanguage();
+  const slides = useMemo(() => heroSlides(locale), [locale]);
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const slide = slides[active] ?? slides[0];
+
+  useEffect(() => {
+    if (paused) return;
+    const id = window.setInterval(() => setActive((current) => (current + 1) % slides.length), 5000);
+    return () => window.clearInterval(id);
+  }, [paused, slides.length]);
 
   return (
-    <section className="nx-night-sky relative overflow-x-hidden overflow-y-visible">
+    <section className="nx-night-sky relative overflow-x-hidden overflow-y-visible" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <CosmicBackground />
       <div className="nx-nebula-layer" aria-hidden="true" />
       <div className="nx-starfield" aria-hidden="true" />
@@ -72,11 +83,10 @@ export function HomeHero() {
         <motion.div className="relative z-20 max-w-[62rem] overflow-visible" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#dca956]/40 bg-white/[0.035] px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#dca956] shadow-[0_0_30px_rgba(220,169,86,0.13)] backdrop-blur">
             <Sparkles className="h-4 w-4 text-[#f3d382]" />
-            {tr("heroEyebrow")}
+            {slide.feature}
           </div>
           <h1 className="max-w-[62rem] overflow-visible pb-2 pr-3 bg-[linear-gradient(180deg,#f3d382_0%,#dca956_52%,#dca956_100%)] bg-clip-text font-decorative text-[clamp(3rem,4.45vw,4.95rem)] font-black uppercase leading-[0.96] tracking-[-0.025em] text-transparent antialiased drop-shadow-[0_10px_30px_rgba(0,0,0,0.44)] sm:text-[clamp(3.65rem,4.45vw,4.95rem)]">
-            <span className="block sm:whitespace-nowrap">UNLOCK YOUR</span>
-            <span className="block sm:whitespace-nowrap">COSMIC DESTINY</span>
+            {slide.headlineLines.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}
           </h1>
           <div className="relative mt-5 flex w-full max-w-[35rem] items-center justify-center gap-4 text-center text-lg font-semibold leading-relaxed text-[#dca956] sm:text-2xl">
             <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#dca956] sm:w-16" />
@@ -84,22 +94,33 @@ export function HomeHero() {
             <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#dca956] sm:w-16" />
           </div>
           <p className="mt-5 max-w-2xl text-base leading-7 tracking-wide text-[#94a3b8] sm:text-lg">
-            {tr("heroCopy")}
+            {slide.subheadline}
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Button size="lg" variant="secondary" className="shadow-[0_0_26px_rgba(220,169,86,0.18),0_12px_30px_rgba(0,0,0,0.32)]" asChild>
-              <Link href="/kundli">{tr("generateKundli")}<ArrowRight className="h-4 w-4" /></Link>
+              <Link href={slide.href}>{slide.cta}<ArrowRight className="h-4 w-4" /></Link>
             </Button>
             <Button size="lg" className="shadow-[0_0_25px_rgba(0,245,160,0.25),0_12px_30px_rgba(0,0,0,0.28)]" asChild>
-              <Link href="/talk-to-kundli">{tr("talkToAiAstrologer")}<ArrowRight className="h-4 w-4" /></Link>
+              <Link href="/free-calculators">{tr("navFreeCalculators")}<ArrowRight className="h-4 w-4" /></Link>
             </Button>
+          </div>
+          <div className="mt-6 flex items-center gap-2" aria-label="Hero carousel controls">
+            {slides.map((item, index) => (
+              <button
+                key={item.feature}
+                type="button"
+                aria-label={`Show ${item.feature}`}
+                onClick={() => setActive(index)}
+                className={`h-2.5 rounded-full transition-all ${active === index ? "w-9 bg-[#f3d382] shadow-[0_0_16px_rgba(243,211,130,0.45)]" : "w-2.5 bg-[#94a3b8]/45 hover:bg-[#dca956]"}`}
+              />
+            ))}
           </div>
           <div className="mt-7 grid max-w-3xl grid-cols-2 gap-0 overflow-hidden rounded-2xl border border-[#1e293b] bg-[#0a1224]/72 shadow-[0_18px_50px_rgba(0,5,16,0.34)] backdrop-blur sm:grid-cols-4">
             {[
-              ["1M+", "Happy Users"],
-              ["4.8★", "App Rating"],
-              ["10k+", "Expert Astrologers"],
-              ["98%", "Accuracy Rate"]
+              ["8", tr("homeActiveTools")],
+              ["15+", tr("homeReportsAvailable")],
+              ["3", tr("homeLanguages")],
+              ["4", tr("homeComingSoonModules")]
             ].map(([value, label]) => (
               <div key={label} className="border-b border-r border-[#1e293b] px-4 py-3 last:border-r-0 sm:border-b-0">
                 <p className="font-cinzel text-xl font-black text-[#fbc02d]">{value}</p>
@@ -131,6 +152,34 @@ export function HomeHero() {
       </div>
     </section>
   );
+}
+
+function heroSlides(locale: Locale) {
+  if (locale === "hi") {
+    return [
+      { feature: "Free Kundli Generator", headlineLines: ["UNLOCK YOUR", "COSMIC DESTINY"], subheadline: "जन्म विवरण से अपनी मुफ़्त Vedic Kundli और practical insights generate करें।", cta: "कुंडली बनाएं", href: "/kundli" },
+      { feature: "Match Making / Milan", headlineLines: ["DISCOVER", "COMPATIBILITY"], subheadline: "Guna Milan, Ashtakoot breakdown और marriage suitability guidance देखें।", cta: "मिलान करें", href: "/matchmaking" },
+      { feature: "Numerology + Lo Shu", headlineLines: ["UNDERSTAND", "YOUR NUMBERS"], subheadline: "Moolank, Bhagyank, Name Number, Lo Shu Grid, mobile और vehicle number compatibility explore करें।", cta: "Numerology करें", href: "/numerology" },
+      { feature: "Premium Reports", headlineLines: ["DEEPER MANUAL", "ASTRO REPORTS"], subheadline: "Kundli, career, wealth, love, matching और numerology reports manual contact process से explore करें।", cta: "Reports देखें", href: "/reports" },
+      { feature: "Tarot Reading", headlineLines: ["REFLECTIVE", "CARD GUIDANCE"], subheadline: "Clarity और self-awareness के लिए tarot को reflective spiritual tool की तरह use करें।", cta: "Tarot खोलें", href: "/tarot" }
+    ];
+  }
+  if (locale === "hinglish") {
+    return [
+      { feature: "Free Kundli Generator", headlineLines: ["UNLOCK YOUR", "COSMIC DESTINY"], subheadline: "Apni free Vedic Kundli birth details ke saath generate karein aur practical insights dekhein.", cta: "Generate Kundli", href: "/kundli" },
+      { feature: "Match Making / Milan", headlineLines: ["DISCOVER", "COMPATIBILITY"], subheadline: "Guna Milan, Ashtakoot breakdown aur marriage suitability guidance check karein.", cta: "Try Match Making", href: "/matchmaking" },
+      { feature: "Numerology + Lo Shu", headlineLines: ["UNDERSTAND", "YOUR NUMBERS"], subheadline: "Moolank, Bhagyank, Name Number, Lo Shu Grid, mobile aur vehicle number compatibility explore karein.", cta: "Calculate Numerology", href: "/numerology" },
+      { feature: "Premium Reports", headlineLines: ["DEEPER MANUAL", "ASTRO REPORTS"], subheadline: "Kundli, career, wealth, love, matching aur numerology reports manual contact ke through explore karein.", cta: "Explore Reports", href: "/reports" },
+      { feature: "Tarot Reading", headlineLines: ["REFLECTIVE", "CARD GUIDANCE"], subheadline: "Tarot ko clarity aur self-awareness ke liye reflective spiritual tool ki tarah use karein.", cta: "Try Tarot", href: "/tarot" }
+    ];
+  }
+  return [
+    { feature: "Free Kundli Generator", headlineLines: ["UNLOCK YOUR", "COSMIC DESTINY"], subheadline: "Generate your free Vedic Kundli with birth details and practical insights.", cta: "Generate Kundli", href: "/kundli" },
+    { feature: "Match Making / Milan", headlineLines: ["DISCOVER", "COMPATIBILITY"], subheadline: "Check Guna Milan, Ashtakoot breakdown, and marriage suitability guidance.", cta: "Try Match Making", href: "/matchmaking" },
+    { feature: "Numerology + Lo Shu", headlineLines: ["UNDERSTAND", "YOUR NUMBERS"], subheadline: "Explore Moolank, Bhagyank, Name Number, Lo Shu Grid, mobile and vehicle number compatibility.", cta: "Calculate Numerology", href: "/numerology" },
+    { feature: "Premium Reports", headlineLines: ["DEEPER MANUAL", "ASTRO REPORTS"], subheadline: "Explore Kundli, career, wealth, love, matching, and numerology reports prepared through manual contact.", cta: "Explore Reports", href: "/reports" },
+    { feature: "Tarot Reading", headlineLines: ["REFLECTIVE", "CARD GUIDANCE"], subheadline: "Use tarot as a reflective spiritual tool for clarity and self-awareness.", cta: "Try Tarot", href: "/tarot" }
+  ];
 }
 
 export function FeatureGrid() {
@@ -405,7 +454,7 @@ export function StickyMobileCTA() {
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#dca956]/25 bg-[#020612]/95 p-3 backdrop-blur md:hidden">
       <div className="grid grid-cols-3 gap-2">
         <Button size="sm" variant="secondary" asChild><Link href="/kundli"><MoonStar className="h-4 w-4" />{tr("kundli")}</Link></Button>
-        <Button size="sm" asChild><Link href="/talk-to-kundli"><MessageCircle className="h-4 w-4" />AI</Link></Button>
+        <Button size="sm" asChild><Link href="/free-calculators"><WandSparkles className="h-4 w-4" />{tr("navFreeCalculators")}</Link></Button>
         <Button size="sm" variant="outline" asChild><Link href="/reports"><Sparkles className="h-4 w-4" />{tr("reports")}</Link></Button>
       </div>
     </div>

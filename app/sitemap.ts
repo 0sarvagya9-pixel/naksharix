@@ -20,6 +20,7 @@ const staticRoutes = [
   "/refund-policy",
   "/astrology",
   "/calculators",
+  "/free-calculators",
   "/free-kundli",
   "/kundli-matching",
   "/daily-horoscope",

@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Gem, Info, MessageCircle, PackageSearch, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Section } from "@/components/section";
 import { useLanguage } from "@/components/language-provider";
-import { categoryLabel, shopCategories, shopProducts, shopPurposes, type ShopProduct } from "@/lib/manual-catalogue";
-import { requestCta } from "@/lib/contact-cta";
+import { categoryLabel, normalizeShopProducts, shopCategories, shopProducts, shopProductStorageKey, shopPurposes, type ShopProduct } from "@/lib/manual-catalogue";
+import { productRequestCta } from "@/lib/contact-cta";
+import type { Locale } from "@/lib/i18n";
 
 export function ShopContent() {
   const { locale } = useLanguage();
@@ -18,14 +20,27 @@ export function ShopContent() {
   const [category, setCategory] = useState("all");
   const [purpose, setPurpose] = useState("all");
   const [selected, setSelected] = useState<ShopProduct | null>(null);
+  const [catalogueProducts, setCatalogueProducts] = useState<ShopProduct[]>(shopProducts);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(shopProductStorageKey);
+      if (stored) setCatalogueProducts(normalizeShopProducts(JSON.parse(stored)));
+    } catch {
+      setCatalogueProducts(shopProducts);
+    }
+  }, []);
 
   const products = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return shopProducts.filter((product) => {
-      const text = `${product.name[locale]} ${product.description[locale]} ${product.purpose}`.toLowerCase();
-      return (!q || text.includes(q)) && (category === "all" || product.category === category) && (purpose === "all" || product.purpose === purpose);
-    });
-  }, [category, locale, purpose, query]);
+    return catalogueProducts
+      .filter((product) => product.status === "active")
+      .filter((product) => {
+        const text = `${product.name[locale]} ${product.shortDescription[locale]} ${product.purpose} ${product.tags.join(" ")}`.toLowerCase();
+        return (!q || text.includes(q)) && (category === "all" || product.category === category) && (purpose === "all" || product.purpose === purpose);
+      })
+      .sort((a, b) => Number(b.featured) - Number(a.featured) || a.name[locale].localeCompare(b.name[locale]));
+  }, [catalogueProducts, category, locale, purpose, query]);
 
   return (
     <main className="inner-page-shell star-field">
@@ -94,19 +109,20 @@ export function ShopContent() {
 }
 
 function ProductCard({ product, locale, labels, onDetails }: { product: ShopProduct; locale: "en" | "hi" | "hinglish"; labels: ReturnType<typeof shopLabels>; onDetails: () => void }) {
-  const cta = requestCta(product.name[locale], locale);
+  const cta = productRequestCta(product.name[locale], locale);
   return (
     <Card className="inner-card flex flex-col overflow-hidden">
+      <ProductVisual product={product} locale={locale} labels={labels} />
       <CardContent className="flex flex-1 flex-col p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#00f5a0]">{categoryLabel(product.category, locale)}</p>
             <h2 className="mt-2 font-cinzel text-2xl font-bold text-[#f3d382]">{product.name[locale]}</h2>
           </div>
-          <span className="rounded-full border border-[#dca956]/35 bg-[#dca956]/10 px-3 py-1 text-xs text-[#f3d382]">{product.purpose}</span>
+          {product.featured ? <span className="rounded-full border border-[#00f5a0]/35 bg-[#00f5a0]/10 px-3 py-1 text-xs text-[#00f5a0]">{labels.featured}</span> : null}
         </div>
-        <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{product.description[locale]}</p>
-        <p className="mt-4 rounded-lg border border-[#263957] bg-[#142647]/75 px-3 py-2 text-sm font-semibold text-[#fbc02d]">{labels.priceOnRequest}</p>
+        <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{product.shortDescription[locale]}</p>
+        <p className="mt-4 rounded-lg border border-[#263957] bg-[#142647]/75 px-3 py-2 text-sm font-semibold text-[#fbc02d]">{product.priceLabel[locale] || labels.priceOnRequest}</p>
         <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
           <Button variant="outline" onClick={onDetails}><Info className="h-4 w-4" />{labels.viewDetails}</Button>
           <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
@@ -119,18 +135,21 @@ function ProductCard({ product, locale, labels, onDetails }: { product: ShopProd
 }
 
 function ProductDetails({ product, labels, locale, onClose }: { product: ShopProduct; labels: ReturnType<typeof shopLabels>; locale: "en" | "hi" | "hinglish"; onClose: () => void }) {
-  const cta = requestCta(product.name[locale], locale);
+  const cta = productRequestCta(product.name[locale], locale);
   return (
     <div className="fixed inset-0 z-[70] grid place-items-center bg-[#020612]/78 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-      <Card className="inner-card max-h-[88vh] w-full max-w-2xl overflow-y-auto">
+      <Card className="inner-card max-h-[88vh] w-full max-w-3xl overflow-y-auto">
         <CardContent className="p-6">
+          <ProductVisual product={product} locale={locale} labels={labels} large />
           <PackageSearch className="h-6 w-6 text-[#00f5a0]" />
           <h2 className="mt-4 font-cinzel text-3xl font-black text-[#f3d382]">{product.name[locale]}</h2>
           <p className="mt-2 text-sm text-[#a8b3c7]">{categoryLabel(product.category, locale)} · {product.purpose}</p>
+          {product.tags.length ? <div className="mt-4 flex flex-wrap gap-2">{product.tags.map((tag) => <span key={tag} className="rounded-full border border-[#263957] bg-[#111f3a] px-3 py-1 text-xs text-[#a8b3c7]">{tag}</span>)}</div> : null}
           <div className="mt-6 grid gap-4">
-            <DetailBlock title={labels.whoMaySupport} copy={product.support[locale]} />
-            <DetailBlock title={labels.howToUse} copy={product.care[locale]} />
-            <DetailBlock title={labels.disclaimer} copy={labels.productDisclaimer} />
+            <DetailBlock title={labels.description} copy={product.longDescription[locale] || product.shortDescription[locale]} />
+            <DetailBlock title={labels.howToUse} copy={product.howToUse[locale]} />
+            <DetailBlock title={labels.careNote} copy={product.careNote[locale]} />
+            <DetailBlock title={labels.disclaimer} copy={product.disclaimer[locale] || labels.productDisclaimer} />
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
@@ -140,6 +159,41 @@ function ProductDetails({ product, labels, locale, onClose }: { product: ShopPro
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function ProductVisual({ product, locale, labels, large = false }: { product: ShopProduct; locale: Locale; labels: ReturnType<typeof shopLabels>; large?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const imageUrl = product.imageUrl?.trim();
+  const isOptimizableLocal = Boolean(imageUrl?.startsWith("/") && !imageUrl.toLowerCase().endsWith(".svg"));
+  const alt = product.imageAlt[locale] || product.name[locale];
+  return (
+    <div className={`relative overflow-hidden rounded-t-2xl border-b border-[#263957] bg-[#07111f] ${large ? "mb-5 aspect-[16/8] rounded-2xl border" : "aspect-[16/10]"}`}>
+      {imageUrl && !failed ? (
+        isOptimizableLocal ? (
+          <Image src={imageUrl} alt={alt} fill className="object-cover" onError={() => setFailed(true)} sizes={large ? "(max-width: 768px) 100vw, 760px" : "(max-width: 768px) 100vw, 360px"} />
+        ) : (
+          // External admin-provided image URLs are intentionally not optimized without a configured image domain.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={imageUrl} alt={alt} className="h-full w-full object-cover" onError={() => setFailed(true)} />
+        )
+      ) : (
+        <div className="flex h-full flex-col justify-between bg-[radial-gradient(circle_at_20%_20%,rgba(243,211,130,0.22),transparent_32%),linear-gradient(135deg,#142647,#07111f_58%,#0c1830)] p-4">
+          <div className="flex items-center justify-between gap-3">
+            <span className="rounded-full border border-[#dca956]/40 bg-[#dca956]/10 px-3 py-1 text-xs font-semibold text-[#f3d382]">{categoryLabel(product.category, locale)}</span>
+            <Gem className="h-6 w-6 text-[#fbc02d]" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#00f5a0]">{labels.catalogueVisual}</p>
+            <p className="mt-2 font-cinzel text-xl font-bold text-white">{product.name[locale]}</p>
+          </div>
+        </div>
+      )}
+      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2">
+        <span className="rounded-full border border-[#263957] bg-[#020612]/78 px-3 py-1 text-xs font-semibold text-[#f3d382] backdrop-blur">{product.purpose}</span>
+        {!imageUrl || failed ? <span className="rounded-full border border-[#263957] bg-[#020612]/78 px-3 py-1 text-xs text-[#a8b3c7] backdrop-blur">{labels.placeholderImage}</span> : null}
+      </div>
     </div>
   );
 }
@@ -165,10 +219,15 @@ function shopLabels(locale: "en" | "hi" | "hinglish") {
       allPurposes: "सभी purposes",
       noProducts: "इस filter में कोई product नहीं मिला।",
       priceOnRequest: "Price on request",
+      featured: "Featured",
+      catalogueVisual: "Product visual",
+      placeholderImage: "Placeholder",
       viewDetails: "विवरण देखें",
       request: "WhatsApp/Contact अनुरोध",
       whoMaySupport: "किसे सहयोग दे सकता है",
+      description: "विवरण",
       howToUse: "उपयोग / care note",
+      careNote: "Care note",
       disclaimer: "अस्वीकरण",
       productDisclaimer: "आध्यात्मिक उत्पाद आस्था-आधारित और चिंतनात्मक सहयोग के साधन हैं। ये परिणामों की गारंटी नहीं देते और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।",
       close: "बंद करें"
@@ -190,10 +249,15 @@ function shopLabels(locale: "en" | "hi" | "hinglish") {
       allPurposes: "All purposes",
       noProducts: "Is filter me koi product nahi mila.",
       priceOnRequest: "Price on request",
+      featured: "Featured",
+      catalogueVisual: "Product visual",
+      placeholderImage: "Placeholder",
       viewDetails: "View Details",
       request: "Request on WhatsApp",
       whoMaySupport: "Who it may support",
+      description: "Description",
       howToUse: "How to use / care note",
+      careNote: "Care note",
       disclaimer: "Disclaimer",
       productDisclaimer: "Spiritual products faith-based aur reflective support tools hain. Ye guaranteed outcomes nahi dete aur medical, legal, financial ya professional advice ka replacement nahi hain.",
       close: "Close"
@@ -214,10 +278,15 @@ function shopLabels(locale: "en" | "hi" | "hinglish") {
     allPurposes: "All purposes",
     noProducts: "No products found for this filter.",
     priceOnRequest: "Price on request",
+    featured: "Featured",
+    catalogueVisual: "Product visual",
+    placeholderImage: "Placeholder",
     viewDetails: "View Details",
     request: "Request on WhatsApp",
     whoMaySupport: "Who it may support",
+    description: "Description",
     howToUse: "How to use / care note",
+    careNote: "Care note",
     disclaimer: "Disclaimer",
     productDisclaimer: "Spiritual products are faith-based and reflective support tools. They do not guarantee outcomes and do not replace medical, legal, financial, or professional advice.",
     close: "Close"
