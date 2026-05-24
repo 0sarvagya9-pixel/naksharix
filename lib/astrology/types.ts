@@ -197,6 +197,13 @@ export type AshtakootFactor = {
   maxScore: number;
   meaning: string;
   result: string;
+  koot?: string;
+  brideValue?: string;
+  groomValue?: string;
+  explanation?: string;
+  status?: "good" | "average" | "concern";
+  basis?: string;
+  available?: boolean;
 };
 
 export type KundliMatchReport = {
@@ -236,6 +243,18 @@ export type KundliMatchReport = {
   practicalGuidance?: string[];
   moonCompatibility?: string;
   nakshatraCompatibility?: string;
+  calculationBasis?: {
+    bride: Record<string, string | number | undefined>;
+    groom: Record<string, string | number | undefined>;
+  };
+  manglikComparison?: {
+    brideStatus: string;
+    groomStatus: string;
+    brideBasis: string;
+    groomBasis: string;
+    compatible: boolean;
+    note: string;
+  };
   reportReady?: {
     title: string;
     sections: string[];

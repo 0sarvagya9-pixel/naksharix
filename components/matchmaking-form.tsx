@@ -14,6 +14,7 @@ import { LocationAutocomplete, type ResolvedLocation } from "@/components/locati
 
 type PersonKey = "bride" | "groom";
 type VisiblePerson = { name: string; gender: string; birthDate: string; birthTime: string; birthPlace: string };
+type DisplayFactor = { name?: string; koot?: string; score?: number; max?: number; maxScore?: number; meaning?: string; result?: string; brideValue?: string; groomValue?: string; explanation?: string; basis?: string; status?: string };
 type MatchResult = {
   brideProfile?: { name?: string; gender?: string; birthPlace?: string };
   groomProfile?: { name?: string; gender?: string; birthPlace?: string };
@@ -30,8 +31,8 @@ type MatchResult = {
   careerFinanceCompatibility?: string;
   marriageRecommendation?: string;
   remedies?: string;
-  factors?: Array<{ name?: string; score?: number; max?: number; meaning?: string }>;
-  gunaMilan?: { totalScore?: number; maxScore?: number; percentage?: number; verdict?: string; ashtakoot?: Array<{ name?: string; score?: number; maxScore?: number; meaning?: string; result?: string }> };
+  factors?: DisplayFactor[];
+  gunaMilan?: { totalScore?: number; maxScore?: number; percentage?: number; verdict?: string; ashtakoot?: DisplayFactor[] };
   doshaAnalysis?: { manglikCompatibility?: string; nadiDosh?: { present?: boolean; summary?: string }; bhakootDosh?: { present?: boolean; summary?: string }; remedies?: string[] };
   compatibility?: { emotional?: number; mental?: number; physical?: number; financial?: number; family?: number; longTerm?: number };
   limitationNotes?: string[];
@@ -40,6 +41,8 @@ type MatchResult = {
   practicalGuidance?: string[];
   moonCompatibility?: string;
   nakshatraCompatibility?: string;
+  calculationBasis?: { bride?: Record<string, string | number | undefined>; groom?: Record<string, string | number | undefined> };
+  manglikComparison?: { brideStatus?: string; groomStatus?: string; brideBasis?: string; groomBasis?: string; compatible?: boolean; note?: string };
   reportReady?: { title?: string; sections?: string[]; downloadAvailable?: boolean; note?: string };
   aiSummary?: string;
   disclaimer?: string;
@@ -180,14 +183,17 @@ function MatchResultView({ result }: { result: MatchResult }) {
       </CardHeader>
       <CardContent className="space-y-6 p-4 sm:p-6">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <ScoreCard icon={<HeartHandshake />} label={tr("compatibility")} value={`${result.compatibility?.longTerm ?? result.compatibilityScore ?? result.matchPercentage ?? 0}%`} />
-          <ScoreCard icon={<Sparkles />} label={tr("gunaMilan")} value={`${result.gunaMilan?.totalScore ?? result.guna ?? 0}/${result.gunaMilan?.maxScore ?? result.maxGuna ?? 36}`} />
-          <ScoreCard icon={<ShieldCheck />} label={tr("manglikStatus")} value={result.doshaAnalysis?.manglikCompatibility ?? (result.manglikCompatible ? tr("compatibility") : tr("challenge"))} />
+          <ScoreCard icon={<Sparkles />} label={tr("totalGuna")} value={`${result.gunaMilan?.totalScore ?? result.guna ?? 0} / ${result.gunaMilan?.maxScore ?? result.maxGuna ?? 36}`} />
           <ScoreCard icon={<CalendarHeart />} label={tr("matchPercent")} value={`${result.gunaMilan?.percentage ?? result.matchPercentage ?? 0}%`} />
+          <ScoreCard icon={<ShieldCheck />} label={tr("manglikStatus")} value={result.manglikComparison?.compatible ? tr("balanced") : tr("reviewNeeded")} />
+          <ScoreCard icon={<HeartHandshake />} label={tr("overallGuidance")} value={guidanceLabel(result.gunaMilan?.totalScore ?? result.guna ?? 0, apiLocale)} />
         </div>
+        <p className="rounded-xl border border-[#dca956]/25 bg-[#dca956]/10 p-4 text-sm leading-6 text-[#f3d382]">{tr("gunaScoreNote")}</p>
         <div className="grid gap-4 lg:grid-cols-2">
-          <InsightCard title={tr("brideDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.brideProfile, result.brideChart, tr("notAvailable"), chartSummaryLabels(apiLocale))} />
-          <InsightCard title={tr("groomDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.groomProfile, result.groomChart, tr("notAvailable"), chartSummaryLabels(apiLocale))} />
+          <InsightCard title={tr("brideDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.brideProfile, result.brideChart, tr("notAvailable"), chartSummaryLabels(apiLocale), apiLocale)} />
+          <InsightCard title={tr("groomDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.groomProfile, result.groomChart, tr("notAvailable"), chartSummaryLabels(apiLocale), apiLocale)} />
+          <InsightCard title={tr("brideAstroBasis")} icon={<Sparkles className="h-4 w-4" />} text={basisLine(result.calculationBasis?.bride, tr("notAvailable"), apiLocale)} />
+          <InsightCard title={tr("groomAstroBasis")} icon={<Sparkles className="h-4 w-4" />} text={basisLine(result.calculationBasis?.groom, tr("notAvailable"), apiLocale)} />
           <InsightCard title={tr("moonSignCompatibility")} icon={<HeartHandshake className="h-4 w-4" />} text={result.moonCompatibility} />
           <InsightCard title={tr("nakshatraCompatibility")} icon={<Sparkles className="h-4 w-4" />} text={result.nakshatraCompatibility} />
           <InsightCard title={tr("emotionalCompatibility")} icon={<HeartHandshake className="h-4 w-4" />} text={result.emotionalCompatibility ?? result.relationshipAnalysis ?? scoreLine(apiLocale, tr("emotionalCompatibility"), result.compatibility?.emotional)} />
@@ -195,7 +201,7 @@ function MatchResultView({ result }: { result: MatchResult }) {
           <InsightCard title={tr("physicalCompatibility")} icon={<ShieldCheck className="h-4 w-4" />} text={scoreLine(apiLocale, tr("physicalCompatibility"), result.compatibility?.physical)} />
           <InsightCard title={tr("careerFinanceCompatibility")} icon={<WalletCards className="h-4 w-4" />} text={compatibilityLine(apiLocale, result.compatibility?.financial ?? 0, result.compatibility?.mental ?? 0)} />
           <InsightCard title={tr("familyMarriageStability")} icon={<CalendarHeart className="h-4 w-4" />} text={scoreLine(apiLocale, tr("familyMarriageStability"), result.compatibility?.family ?? result.compatibility?.longTerm)} />
-          <InsightCard title={tr("manglikAnalysis")} icon={<ShieldCheck className="h-4 w-4" />} text={doshaLine(result, tr("notAvailable"))} />
+          <InsightCard title={tr("manglikAnalysis")} icon={<ShieldCheck className="h-4 w-4" />} text={manglikLine(result, tr("notAvailable"), apiLocale)} />
           <InsightCard title={tr("finalRecommendation")} icon={<CalendarHeart className="h-4 w-4" />} text={result.gunaMilan?.verdict ?? result.marriageRecommendation ?? result.marriagePrediction} />
           <InsightCard title={tr("reportReadyOutput")} icon={<WalletCards className="h-4 w-4" />} text={reportReadyLine(result, tr("notAvailable"))} />
           <ListCard title={tr("strengths")} items={result.strengths} empty={tr("notAvailable")} />
@@ -211,9 +217,17 @@ function MatchResultView({ result }: { result: MatchResult }) {
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {(result.gunaMilan?.ashtakoot ?? result.factors ?? []).map((factor, index) => (
               <div key={`${factor.name ?? "factor"}-${index}`} className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/78 p-4">
-                <p className="font-semibold text-[#f3d382]">{safeText(factor.name, tr("notAvailable"))}</p>
-                <p className="mt-1 text-sm naksh-muted-text">{factor.score ?? 0} / {getFactorMax(factor)}</p>
-                <p className="mt-2 text-xs leading-5 naksh-muted-text">{safeText(factor.meaning, tr("notAvailable"))}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-semibold text-[#f3d382]">{safeText(factor.koot ?? factor.name, tr("notAvailable"))}</p>
+                  <span className={`rounded-full border px-2 py-1 text-[11px] ${statusPillClass(factor.status)}`}>{safeText(factor.result ?? factor.status, tr("notAvailable"))}</span>
+                </div>
+                <p className="mt-2 font-cinzel text-2xl font-black text-[#fbc02d]">{factor.score ?? 0} / {getFactorMax(factor)}</p>
+                <div className="mt-3 grid gap-2 text-xs leading-5 naksh-muted-text">
+                  <p><span className="text-white">{tr("brideDetails")}:</span> {safeText(factor.brideValue, tr("notAvailable"))}</p>
+                  <p><span className="text-white">{tr("groomDetails")}:</span> {safeText(factor.groomValue, tr("notAvailable"))}</p>
+                  <p>{safeText(factor.explanation ?? factor.meaning, tr("notAvailable"))}</p>
+                  <p className="text-[#dca956]">{safeText(factor.basis, tr("notAvailable"))}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -274,9 +288,9 @@ function toFriendlyError(message: string | undefined, fallback: string) {
 }
 
 
-function chartSummary(profile: MatchResult["brideProfile"], chart: MatchResult["brideChart"], fallback: string, labels: { lagna: string; rashi: string; nakshatra: string }) {
+function chartSummary(profile: MatchResult["brideProfile"], chart: MatchResult["brideChart"], fallback: string, labels: { lagna: string; rashi: string; nakshatra: string }, language: "en" | "hi" | "hinglish") {
   const avakhada = chart?.avakhada;
-  return `${profile?.name ?? fallback} | ${labels.lagna}: ${avakhada?.ascendant ?? fallback} | ${labels.rashi}: ${avakhada?.moonSign ?? fallback} | ${labels.nakshatra}: ${avakhada?.nakshatra ?? fallback}`;
+  return `${profile?.name ?? fallback} | ${labels.lagna}: ${localizeSign(avakhada?.ascendant, language, fallback)} | ${labels.rashi}: ${localizeSign(avakhada?.moonSign, language, fallback)} | ${labels.nakshatra}: ${localizeNakshatra(avakhada?.nakshatra, language, fallback)}`;
 }
 
 function chartSummaryLabels(language: "en" | "hi" | "hinglish") {
@@ -309,6 +323,91 @@ function reportReadyLine(result: MatchResult, fallback: string) {
   const sections = result.reportReady?.sections?.filter(Boolean).join(", ");
   const note = safeText(result.reportReady?.note, "");
   return [safeText(result.reportReady?.title, ""), sections, note].filter(Boolean).join(" | ") || fallback;
+}
+
+function manglikLine(result: MatchResult, fallback: string, language: "en" | "hi" | "hinglish") {
+  const comparison = result.manglikComparison;
+  const labels = manglikLabels(language);
+  if (comparison) {
+    const parts = [
+      comparison.compatible ? `${labels.status}: ${labels.balanced}` : `${labels.status}: ${labels.review}`,
+      comparison.brideStatus ? `${labels.bride}: ${comparison.brideStatus}` : null,
+      comparison.groomStatus ? `${labels.groom}: ${comparison.groomStatus}` : null,
+      comparison.note ? `${labels.note}: ${comparison.note}` : null
+    ];
+    const basis = [comparison.brideBasis, comparison.groomBasis].filter((item) => item && !isGenericUnavailable(item, fallback));
+    return [...parts, ...basis].filter((item): item is string => typeof item === "string" && item.trim().length > 0).join(" ");
+  }
+  return doshaLine(result, fallback);
+}
+
+function basisLine(basis: Record<string, string | number | undefined> | undefined, fallback: string, language: "en" | "hi" | "hinglish") {
+  if (!basis) return fallback;
+  const labels = ["moonSign", "moonLord", "nakshatra", "gana", "nadi", "yoni", "varna", "vashya"] as const;
+  return labels.map((key) => `${basisLabel(key, language)}: ${basis[key] ?? fallback}`).join(" | ");
+}
+
+function basisLabel(key: string, language: "en" | "hi" | "hinglish") {
+  if (language === "hi") {
+    return ({ moonSign: "चंद्र राशि", moonLord: "राशि स्वामी", nakshatra: "नक्षत्र", gana: "गण", nadi: "नाड़ी", yoni: "योनि", varna: "वर्ण", vashya: "वश्य" } as Record<string, string>)[key] ?? key;
+  }
+  if (language === "hinglish") {
+    return ({ moonSign: "Moon Sign", moonLord: "Rashi Lord", nakshatra: "Nakshatra", gana: "Gana", nadi: "Nadi", yoni: "Yoni", varna: "Varna", vashya: "Vashya" } as Record<string, string>)[key] ?? key;
+  }
+  return ({ moonSign: "Moon Sign", moonLord: "Rashi Lord", nakshatra: "Nakshatra", gana: "Gana", nadi: "Nadi", yoni: "Yoni", varna: "Varna", vashya: "Vashya" } as Record<string, string>)[key] ?? key;
+}
+
+function guidanceLabel(score: number, language: "en" | "hi" | "hinglish") {
+  if (language === "hi") {
+    if (score >= 28) return "मजबूत";
+    if (score >= 24) return "अच्छा";
+    if (score >= 18) return "औसत";
+    return "समीक्षा आवश्यक";
+  }
+  if (score >= 28) return "Strong";
+  if (score >= 24) return "Good";
+  if (score >= 18) return "Average";
+  return language === "hinglish" ? "Review needed" : "Needs review";
+}
+
+function statusPillClass(status?: string) {
+  if (status === "good") return "border-[#00f5a0]/30 bg-[#00f5a0]/10 text-[#00f5a0]";
+  if (status === "average") return "border-[#fbc02d]/30 bg-[#fbc02d]/10 text-[#fbc02d]";
+  return "border-[#ea580c]/35 bg-[#ea580c]/10 text-[#f3d382]";
+}
+
+function manglikLabels(language: "en" | "hi" | "hinglish") {
+  if (language === "hi") return { status: "मांगलिक स्थिति", bride: "वधू", groom: "वर", note: "नोट", balanced: "संतुलित", review: "समीक्षा आवश्यक" };
+  if (language === "hinglish") return { status: "Manglik Status", bride: "Bride", groom: "Groom", note: "Note", balanced: "Balanced", review: "Review needed" };
+  return { status: "Manglik Status", bride: "Bride", groom: "Groom", note: "Note", balanced: "Balanced", review: "Needs review" };
+}
+
+function isGenericUnavailable(value: string | undefined, fallback: string) {
+  const normalized = safeText(value, "").toLowerCase();
+  return !normalized || normalized === fallback.toLowerCase() || normalized.includes("not available") || normalized.includes("available nahi") || normalized.includes("उपलब्ध नहीं");
+}
+
+function localizeSign(value: string | undefined, language: "en" | "hi" | "hinglish", fallback: string) {
+  const signs: Record<string, { hi: string; hinglish: string }> = {
+    Aries: { hi: "मेष", hinglish: "Aries" }, Taurus: { hi: "वृषभ", hinglish: "Taurus" }, Gemini: { hi: "मिथुन", hinglish: "Gemini" }, Cancer: { hi: "कर्क", hinglish: "Cancer" },
+    Leo: { hi: "सिंह", hinglish: "Leo" }, Virgo: { hi: "कन्या", hinglish: "Virgo" }, Libra: { hi: "तुला", hinglish: "Libra" }, Scorpio: { hi: "वृश्चिक", hinglish: "Scorpio" },
+    Sagittarius: { hi: "धनु", hinglish: "Sagittarius" }, Capricorn: { hi: "मकर", hinglish: "Capricorn" }, Aquarius: { hi: "कुंभ", hinglish: "Aquarius" }, Pisces: { hi: "मीन", hinglish: "Pisces" }
+  };
+  if (!value) return fallback;
+  if (language === "hi") return signs[value]?.hi ?? value;
+  if (language === "hinglish") return signs[value]?.hinglish ?? value;
+  return value;
+}
+
+function localizeNakshatra(value: string | undefined, language: "en" | "hi" | "hinglish", fallback: string) {
+  const nakshatras: Record<string, string> = {
+    Ashwini: "अश्विनी", Bharani: "भरणी", Krittika: "कृत्तिका", Rohini: "रोहिणी", Mrigashira: "मृगशिरा", Ardra: "आर्द्रा", Punarvasu: "पुनर्वसु", Pushya: "पुष्य", Ashlesha: "आश्लेषा",
+    Magha: "मघा", "Purva Phalguni": "पूर्वा फाल्गुनी", "Uttara Phalguni": "उत्तरा फाल्गुनी", Hasta: "हस्त", Chitra: "चित्रा", Swati: "स्वाती", Vishakha: "विशाखा", Anuradha: "अनुराधा",
+    Jyeshtha: "ज्येष्ठा", Mula: "मूल", "Purva Ashadha": "पूर्वाषाढ़ा", "Uttara Ashadha": "उत्तराषाढ़ा", Shravana: "श्रवण", Dhanishta: "धनिष्ठा", Shatabhisha: "शतभिषा",
+    "Purva Bhadrapada": "पूर्व भाद्रपद", "Uttara Bhadrapada": "उत्तर भाद्रपद", Revati: "रेवती"
+  };
+  if (!value) return fallback;
+  return language === "hi" ? nakshatras[value] ?? value : value;
 }
 
 function safeText(value: unknown, fallback: string) {
