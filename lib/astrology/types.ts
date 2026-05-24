@@ -229,6 +229,19 @@ export type KundliMatchReport = {
     family: number;
     longTerm: number;
   };
+  matchingMode?: string;
+  limitationNotes?: string[];
+  strengths?: string[];
+  concerns?: string[];
+  practicalGuidance?: string[];
+  moonCompatibility?: string;
+  nakshatraCompatibility?: string;
+  reportReady?: {
+    title: string;
+    sections: string[];
+    downloadAvailable: boolean;
+    note: string;
+  };
   aiSummary: string;
   disclaimer: string;
   generatedAt: string;

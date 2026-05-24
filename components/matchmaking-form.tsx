@@ -34,6 +34,13 @@ type MatchResult = {
   gunaMilan?: { totalScore?: number; maxScore?: number; percentage?: number; verdict?: string; ashtakoot?: Array<{ name?: string; score?: number; maxScore?: number; meaning?: string; result?: string }> };
   doshaAnalysis?: { manglikCompatibility?: string; nadiDosh?: { present?: boolean; summary?: string }; bhakootDosh?: { present?: boolean; summary?: string }; remedies?: string[] };
   compatibility?: { emotional?: number; mental?: number; physical?: number; financial?: number; family?: number; longTerm?: number };
+  limitationNotes?: string[];
+  strengths?: string[];
+  concerns?: string[];
+  practicalGuidance?: string[];
+  moonCompatibility?: string;
+  nakshatraCompatibility?: string;
+  reportReady?: { title?: string; sections?: string[]; downloadAvailable?: boolean; note?: string };
   aiSummary?: string;
   disclaimer?: string;
 };
@@ -70,7 +77,12 @@ export function MatchmakingForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const validationErrors = validateMatchFields(people, locations, requiredMessage, tr("selectLocationFromSuggestions"));
+    const validationErrors = validateMatchFields(people, locations, {
+      required: requiredMessage,
+      invalidLocation: tr("selectLocationFromSuggestions"),
+      invalidDate: tr("invalidDate"),
+      invalidTime: tr("invalidTime")
+    });
     setFieldErrors(validationErrors);
     if (Object.keys(validationErrors).length) {
       scrollToFirstError(validationErrors);
@@ -176,21 +188,27 @@ function MatchResultView({ result }: { result: MatchResult }) {
         <div className="grid gap-4 lg:grid-cols-2">
           <InsightCard title={tr("brideDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.brideProfile, result.brideChart, tr("notAvailable"), chartSummaryLabels(apiLocale))} />
           <InsightCard title={tr("groomDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.groomProfile, result.groomChart, tr("notAvailable"), chartSummaryLabels(apiLocale))} />
-          <InsightCard title={tr("emotionalCompatibility")} icon={<HeartHandshake className="h-4 w-4" />} text={result.aiSummary ?? result.emotionalCompatibility ?? result.relationshipAnalysis} />
+          <InsightCard title={tr("moonSignCompatibility")} icon={<HeartHandshake className="h-4 w-4" />} text={result.moonCompatibility} />
+          <InsightCard title={tr("nakshatraCompatibility")} icon={<Sparkles className="h-4 w-4" />} text={result.nakshatraCompatibility} />
+          <InsightCard title={tr("emotionalCompatibility")} icon={<HeartHandshake className="h-4 w-4" />} text={result.emotionalCompatibility ?? result.relationshipAnalysis ?? scoreLine(apiLocale, tr("emotionalCompatibility"), result.compatibility?.emotional)} />
           <InsightCard title={tr("mentalCompatibility")} icon={<Sparkles className="h-4 w-4" />} text={scoreLine(apiLocale, tr("mentalCompatibility"), result.compatibility?.mental)} />
           <InsightCard title={tr("physicalCompatibility")} icon={<ShieldCheck className="h-4 w-4" />} text={scoreLine(apiLocale, tr("physicalCompatibility"), result.compatibility?.physical)} />
           <InsightCard title={tr("careerFinanceCompatibility")} icon={<WalletCards className="h-4 w-4" />} text={compatibilityLine(apiLocale, result.compatibility?.financial ?? 0, result.compatibility?.mental ?? 0)} />
           <InsightCard title={tr("familyMarriageStability")} icon={<CalendarHeart className="h-4 w-4" />} text={scoreLine(apiLocale, tr("familyMarriageStability"), result.compatibility?.family ?? result.compatibility?.longTerm)} />
-          <InsightCard title={tr("doshaManglikNotes")} icon={<ShieldCheck className="h-4 w-4" />} text={doshaLine(result, tr("notAvailable"))} />
+          <InsightCard title={tr("manglikAnalysis")} icon={<ShieldCheck className="h-4 w-4" />} text={doshaLine(result, tr("notAvailable"))} />
           <InsightCard title={tr("finalRecommendation")} icon={<CalendarHeart className="h-4 w-4" />} text={result.gunaMilan?.verdict ?? result.marriageRecommendation ?? result.marriagePrediction} />
-          <InsightCard title={tr("remedies")} icon={<Sparkles className="h-4 w-4" />} text={result.doshaAnalysis?.remedies?.join(" ") ?? result.remedies} />
+          <InsightCard title={tr("reportReadyOutput")} icon={<WalletCards className="h-4 w-4" />} text={reportReadyLine(result, tr("notAvailable"))} />
+          <ListCard title={tr("strengths")} items={result.strengths} empty={tr("notAvailable")} />
+          <ListCard title={tr("concerns")} items={result.concerns} empty={tr("notAvailable")} />
+          <ListCard title={tr("practicalGuidance")} items={result.practicalGuidance ?? result.doshaAnalysis?.remedies} empty={tr("notAvailable")} />
+          <ListCard title={tr("limitationNotes")} items={result.limitationNotes} empty={tr("notAvailable")} />
         </div>
         <section>
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="font-semibold">{tr("gunaMilan")}</h3>
-            <span className="rounded-full border border-[#dca956]/25 bg-[#dca956]/10 px-3 py-1 text-xs text-[#f3d382]">{tr("pdfComingSoon")}</span>
+            <h3 className="font-semibold text-[#f3d382]">{tr("ashtakootBreakdown")}</h3>
+            <span className="rounded-full border border-[#dca956]/25 bg-[#dca956]/10 px-3 py-1 text-xs text-[#f3d382]">{tr("reportReadyOutput")}</span>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {(result.gunaMilan?.ashtakoot ?? result.factors ?? []).map((factor, index) => (
               <div key={`${factor.name ?? "factor"}-${index}`} className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/78 p-4">
                 <p className="font-semibold text-[#f3d382]">{safeText(factor.name, tr("notAvailable"))}</p>
@@ -200,6 +218,7 @@ function MatchResultView({ result }: { result: MatchResult }) {
             ))}
           </div>
         </section>
+        <p className="rounded-xl border border-[#1e293b] bg-[#020612]/72 p-4 text-xs leading-6 text-[#94a3b8]">{safeText(result.disclaimer, tr("notAvailable"))}</p>
       </CardContent>
     </Card>
   );
@@ -209,13 +228,15 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   return <div className="space-y-2"><Label>{label}</Label>{children}{error ? <p className="text-sm text-[#FF4D4F]">{error}</p> : null}</div>;
 }
 
-function validateMatchFields(people: Record<PersonKey, VisiblePerson>, locations: Record<PersonKey, ResolvedLocation | null>, requiredMessage: string, invalidLocationMessage: string) {
+function validateMatchFields(people: Record<PersonKey, VisiblePerson>, locations: Record<PersonKey, ResolvedLocation | null>, messages: { required: string; invalidLocation: string; invalidDate: string; invalidTime: string }) {
   const required: (keyof VisiblePerson)[] = ["name", "birthDate", "birthTime", "birthPlace"];
   return (["bride", "groom"] as PersonKey[]).reduce<FieldErrors>((errors, key) => {
     required.forEach((field) => {
-      if (isBlank(people[key][field])) errors[`${key}.${field}`] = requiredMessage;
+      if (isBlank(people[key][field])) errors[`${key}.${field}`] = messages.required;
     });
-    if (!errors[`${key}.birthPlace`] && (!locations[key] || locations[key]?.displayName !== people[key].birthPlace)) errors[`${key}.birthPlace`] = invalidLocationMessage;
+    if (!errors[`${key}.birthDate`] && Number.isNaN(new Date(`${people[key].birthDate}T00:00:00.000Z`).getTime())) errors[`${key}.birthDate`] = messages.invalidDate;
+    if (!errors[`${key}.birthTime`] && !/^\d{2}:\d{2}$/.test(people[key].birthTime)) errors[`${key}.birthTime`] = messages.invalidTime;
+    if (!errors[`${key}.birthPlace`] && (!locations[key] || locations[key]?.displayName !== people[key].birthPlace)) errors[`${key}.birthPlace`] = messages.invalidLocation;
     return errors;
   }, {});
 }
@@ -227,6 +248,20 @@ function ScoreCard({ icon, label, value }: { icon: React.ReactElement; label: st
 function InsightCard({ title, icon, text }: { title: string; icon: React.ReactNode; text?: string }) {
   const { tr } = useLanguage();
   return <div className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/78 p-4"><h3 className="flex items-center gap-2 font-semibold text-[#f3d382]">{icon}{title}</h3><p className="mt-3 text-sm leading-7 naksh-muted-text">{safeText(text, tr("notAvailable"))}</p></div>;
+}
+
+function ListCard({ title, items, empty }: { title: string; items?: string[]; empty: string }) {
+  const cleanItems = (items ?? []).filter((item) => safeText(item, "") !== "");
+  return (
+    <div className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/78 p-4">
+      <h3 className="font-semibold text-[#f3d382]">{title}</h3>
+      {cleanItems.length ? (
+        <ul className="mt-3 space-y-2 text-sm leading-6 naksh-muted-text">
+          {cleanItems.map((item, index) => <li key={`${title}-${index}`} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#00f5a0]" />{item}</li>)}
+        </ul>
+      ) : <p className="mt-3 text-sm naksh-muted-text">{empty}</p>}
+    </div>
+  );
 }
 
 function getFactorMax(factor: { max?: number; maxScore?: number }) {
@@ -268,6 +303,12 @@ function doshaLine(result: MatchResult, fallback: string) {
     result.doshaAnalysis?.nadiDosh?.summary,
     result.doshaAnalysis?.bhakootDosh?.summary
   ].filter((item): item is string => typeof item === "string" && item.trim().length > 0).join(" ") || fallback;
+}
+
+function reportReadyLine(result: MatchResult, fallback: string) {
+  const sections = result.reportReady?.sections?.filter(Boolean).join(", ");
+  const note = safeText(result.reportReady?.note, "");
+  return [safeText(result.reportReady?.title, ""), sections, note].filter(Boolean).join(" | ") || fallback;
 }
 
 function safeText(value: unknown, fallback: string) {
