@@ -497,9 +497,9 @@ function calculatorDropdownLabels(locale: Locale) {
           title: "कुंडली कैलकुलेटर",
           items: [
             { label: "मुफ़्त कुंडली कैलकुलेटर", href: "/kundli" },
-            { label: "दशा कैलकुलेटर" },
+            { label: "दशा कैलकुलेटर", href: "/free-calculators/dasha-calculator" },
             { label: "चंद्र राशि कैलकुलेटर" },
-            { label: "नक्षत्र कैलकुलेटर" },
+            { label: "नक्षत्र कैलकुलेटर", href: "/free-calculators/nakshatra-calculator" },
             { label: "लग्न कैलकुलेटर" },
             { label: "मांगलिक कैलकुलेटर" }
           ]
@@ -510,8 +510,8 @@ function calculatorDropdownLabels(locale: Locale) {
             { label: "अंक ज्योतिष कैलकुलेटर", href: "/numerology" },
             { label: "लो शू ग्रिड", href: "/numerology" },
             { label: "नामांक", href: "/numerology" },
-            { label: "मोबाइल नंबर", href: "/numerology" },
-            { label: "वाहन नंबर", href: "/numerology" }
+            { label: "मोबाइल नंबर", href: "/free-calculators/mobile-number-calculator" },
+            { label: "वाहन नंबर", href: "/free-calculators/vehicle-number-calculator" }
           ]
         },
         {
@@ -547,9 +547,9 @@ function calculatorDropdownLabels(locale: Locale) {
         title: "Kundli Calculators",
         items: [
           { label: "Free Kundli Calculator", href: "/kundli" },
-          { label: "Dasha Calculator" },
+          { label: "Dasha Calculator", href: "/free-calculators/dasha-calculator" },
           { label: "Moon Sign Calculator" },
-          { label: "Nakshatra Calculator" },
+          { label: "Nakshatra Calculator", href: "/free-calculators/nakshatra-calculator" },
           { label: "Lagna Calculator" },
           { label: "Manglik Calculator" }
         ]
@@ -560,8 +560,8 @@ function calculatorDropdownLabels(locale: Locale) {
           { label: "Numerology Calculator", href: "/numerology" },
           { label: "Lo Shu Grid", href: "/numerology" },
           { label: "Name Number", href: "/numerology" },
-          { label: "Mobile Number", href: "/numerology" },
-          { label: "Vehicle Number", href: "/numerology" }
+          { label: "Mobile Number", href: "/free-calculators/mobile-number-calculator" },
+          { label: "Vehicle Number", href: "/free-calculators/vehicle-number-calculator" }
         ]
       },
       {
@@ -587,4 +587,3 @@ function calculatorDropdownLabels(locale: Locale) {
     ]
   };
 }
-
