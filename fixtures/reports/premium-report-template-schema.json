@@ -8,6 +8,7 @@
   "automaticDeliveryEnabled": false,
   "requiresAdminReview": true,
   "renderer": "future_html_to_pdf_chromium",
+  "generationStatuses": ["draft", "pending_review", "ready_for_generation", "generated", "delivered", "failed"],
   "sections": [
     {
       "key": "birth-summary",

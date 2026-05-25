@@ -3,53 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
-import { Bell, Bot, CalendarClock, Clock, CreditCard, FileText, Gem, HeartPulse, MoonStar, Sparkles, Star, type LucideIcon } from "lucide-react";
-import { AstroTool } from "@/components/astro-tool";
+import { ClipboardList, FileText, History, LayoutDashboard, MoonStar, ShieldCheck, Sparkles } from "lucide-react";
 import { PaymentHistory } from "@/components/payment-history";
 import { Section } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BecomeAstrologerButton } from "@/components/become-astrologer-button";
 
-const data = [{ name: "Mon", v: 4 }, { name: "Tue", v: 8 }, { name: "Wed", v: 6 }, { name: "Thu", v: 12 }, { name: "Fri", v: 10 }];
-const stats = [
-  { label: "Saved Kundlis", value: "12", icon: FileText, tone: "from-violet-500/25 to-amber-300/15" },
-  { label: "Cosmic Credits", value: "125", icon: Star, tone: "from-amber-300/25 to-violet-500/15" },
-  { label: "Plan", value: "Premium", icon: CreditCard, tone: "from-fuchsia-500/20 to-amber-300/15" },
-  { label: "AI Sessions", value: "34", icon: Bot, tone: "from-indigo-400/25 to-amber-300/15" }
-];
-const premiumActions: { title: string; copy: string; icon: LucideIcon }[] = [
-  { title: "Premium Remedies", copy: "AI-generated gemstone, mantra, and puja recommendations.", icon: Gem },
-  { title: "Daily Rituals", copy: "Personalized horoscope nudges and notification-ready rituals.", icon: Sparkles },
-  { title: "Report Vault", copy: "Favorite kundlis, tarot readings, invoices, and paid reports.", icon: FileText }
-];
-const upcoming = [
-  { title: "Vedic consultation request", meta: "Today - 7:30 PM - Chat" },
-  { title: "Kundli Pro Report", meta: "Ready for checkout" },
-  { title: "Friday tarot reflection", meta: "Saved to favorites" }
-];
-const dailyGuidance = [
-  { label: "Cosmic Score", value: "82/100", detail: "Strong for planning and honest conversations.", icon: Sparkles },
-  { label: "Lucky Number", value: "7", detail: "Use it for focus, not superstition.", icon: Star },
-  { label: "Lucky Color", value: "Royal Gold", detail: "Best for confidence and visibility.", icon: Gem },
-  { label: "Lucky Time", value: "6:30 PM", detail: "Good window for reflection and outreach.", icon: Clock }
-];
-const planetStrength = [
-  ["Sun", 76],
-  ["Moon", 64],
-  ["Mars", 58],
-  ["Mercury", 82],
-  ["Jupiter", 71]
-];
-const dashas = [
-  ["Mercury", "Now - Aug 2026"],
-  ["Ketu", "Aug 2026 - Jul 2027"],
-  ["Venus", "Jul 2027 - Jul 2030"]
-];
-const remedies = ["10 minutes morning silence", "Offer gratitude before major decisions", "Keep communication direct but gentle"];
+type DashboardUser = { role?: string | null; effectiveRole?: string | null; name?: string | null; email?: string | null };
 
-type DashboardUser = { role?: string | null; effectiveRole?: string | null };
+const activeTools = [
+  { title: "Generate Kundli", href: "/kundli", copy: "Create a free Kundli using complete birth details.", icon: MoonStar },
+  { title: "Use Numerology", href: "/numerology", copy: "Explore deterministic numerology and Lo Shu tools.", icon: Sparkles },
+  { title: "Browse Reports", href: "/reports", copy: "Review manual report options without payment automation.", icon: ClipboardList },
+  { title: "Free Calculators", href: "/free-calculators", copy: "Open focused calculators that reuse existing engines.", icon: FileText }
+];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -59,7 +27,7 @@ export default function DashboardPage() {
   useEffect(() => {
     let mounted = true;
     fetch("/api/auth/me", { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : null)
+      .then((response) => (response.ok ? response.json() : null))
       .then((json) => {
         if (mounted) setUser(json?.data?.user ?? null);
       })
@@ -69,7 +37,9 @@ export default function DashboardPage() {
       .finally(() => {
         if (mounted) setCheckingRole(false);
       });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const role = user?.effectiveRole || user?.role || "USER";
@@ -90,10 +60,9 @@ export default function DashboardPage() {
       <Section className="star-field">
         <Card className="glass">
           <CardContent className="p-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Consultant Dashboard</p>
-            <h1 className="mt-3 font-cinzel text-3xl font-black">Consultant Portal</h1>
-            <p className="mt-3 naksh-muted-text">Your consultant dashboard is being prepared. You can manage your profile from the professional portal.</p>
-            <Button className="mt-5" asChild><Link href="/astrologer/profile">Edit Profile</Link></Button>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Consultant Portal</p>
+            <h1 className="mt-3 font-cinzel text-3xl font-black">Consultation Is On Hold</h1>
+            <p className="mt-3 naksh-muted-text">The consultation marketplace is not active in this phase. Profile and booking workflows will be completed in a later release.</p>
           </CardContent>
         </Card>
       </Section>
@@ -103,168 +72,81 @@ export default function DashboardPage() {
   return (
     <Section className="star-field">
       <div className="relative overflow-hidden rounded-lg border border-[#D4AF37]/25 bg-[linear-gradient(135deg,rgba(72,36,128,0.78),rgba(18,9,31,0.94)_58%,rgba(166,119,42,0.48))] p-6 sm:p-8">
-        <div className="absolute right-8 top-6 hidden h-28 w-28 rounded-full border border-[#D4AF37]/25 md:block" />
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix Premium</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black">Cosmic Dashboard</h1>
-            <p className="mt-3 max-w-2xl naksh-muted-text">Track kundlis, horoscope history, AI guidance, subscriptions, credits, and premium astrology reports from one refined workspace.</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix Dashboard</p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black">Your Account Workspace</h1>
+            <p className="mt-3 max-w-2xl naksh-muted-text">
+              Use active Naksharix tools and review real account activity as backend workflows become available. Future modules stay clearly marked until they are production-ready.
+            </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild>
-                <Link href="/consultation">
-                  <CalendarClock className="h-4 w-4" />
-                  Book Consultation
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/reports">Buy Report</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/chatbot">Open AI Chat</Link>
-              </Button>
-              <Button variant="secondary" asChild>
-                <Link href="/dashboard/consultations">Consultation History</Link>
-              </Button>
+              <Button asChild><Link href="/kundli">Generate Kundli</Link></Button>
+              <Button variant="outline" asChild><Link href="/reports">View Reports</Link></Button>
+              <Button variant="outline" asChild><Link href="/free-calculators">Free Calculators</Link></Button>
               {showBecomeAstrologer ? <BecomeAstrologerButton /> : null}
             </div>
           </div>
           <div className="grid h-20 w-20 place-items-center rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/10">
-            <MoonStar className="h-9 w-9 text-[#FFD700]" />
+            <LayoutDashboard className="h-9 w-9 text-[#FFD700]" />
           </div>
         </div>
       </div>
-      <div className="mt-8 grid gap-5 md:grid-cols-4">
-        {stats.map(({ label, value, icon: Icon, tone }) => (
-          <Card key={label} className={`border-[#D4AF37]/20 bg-gradient-to-br ${tone}`}>
-            <CardContent className="pt-5">
-              <Icon className="h-5 w-5 text-[#FFD700]" />
-              <p className="mt-4 font-cinzel text-3xl font-black">{value}</p>
-              <p className="text-sm naksh-muted-text">{label}</p>
-            </CardContent>
-          </Card>
-        ))}
+
+      <div className="mt-8 grid gap-5 md:grid-cols-3">
+        <StatusCard title="Saved Kundli History" copy="Saved Kundli history should show only real generated records. If no saved records exist yet, this section stays as an honest empty state." />
+        <StatusCard title="Report Requests" copy="Report request history will appear only after a real backend request is submitted and persisted." />
+        <StatusCard title="Premium PDF Reports" copy="Automated premium PDF generation is not active yet. No fake downloads or delivery promises are shown here." />
       </div>
-      <div className="mt-6 grid gap-5 md:grid-cols-4">
-        {dailyGuidance.map(({ label, value, detail, icon: Icon }) => (
-          <Card key={label} className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-            <CardContent className="p-5">
-              <Icon className="h-5 w-5 text-[#FFD700]" />
-              <p className="mt-4 font-cinzel text-2xl font-black">{value}</p>
-              <p className="text-sm font-medium">{label}</p>
-              <p className="mt-2 text-xs leading-5 naksh-muted-text">{detail}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Weekly Cosmic Activity</CardTitle></CardHeader>
-          <CardContent className="h-72">
-            <ResponsiveContainer width="100%" height="100%"><BarChart data={data}><XAxis dataKey="name" /><Tooltip /><Bar dataKey="v" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <AstroTool type="chat" />
-      </div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Kundli Overview</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm naksh-muted-text">
-            {["Lagna: Virgo", "Moon sign: Taurus", "Nakshatra: Rohini", "Current focus: steady career growth"].map((item) => <p key={item} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3">{item}</p>)}
-          </CardContent>
-        </Card>
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Planet Strength</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {planetStrength.map(([planet, value]) => (
-              <div key={planet}>
-                <div className="mb-1 flex justify-between text-sm"><span>{planet}</span><span>{value}%</span></div>
-                <div className="h-2 rounded-full bg-[#061D3C]/75"><div className="h-2 rounded-full bg-[#D4AF37]" style={{ width: `${value}%` }} /></div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Dasha Timeline</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {dashas.map(([planet, time]) => (
-              <div key={planet} className="border-l border-[#D4AF37]/35 pl-3">
-                <p className="font-semibold">{planet}</p>
-                <p className="text-sm naksh-muted-text">{time}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Upcoming and Recent</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {upcoming.map((item) => (
-              <div key={item.title} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3">
-                <p className="font-medium">{item.title}</p>
-                <p className="text-sm naksh-muted-text">{item.meta}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Account Workspace</CardTitle></CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2">
-            {[
-              ["Subscription", "/pricing"],
-              ["Payment history", "/reports"],
-              ["Saved kundlis", "/kundli"],
-              ["Favorite reports", "/dashboard"]
-            ].map(([label, href]) => (
-              <Button key={label} variant="outline" asChild>
-                <Link href={href}>{label}</Link>
-              </Button>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Streak and Notifications</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <p className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm naksh-muted-text">12-day guidance streak. Ask today’s question to keep it alive.</p>
-            {["Daily horoscope", "Report delivery", "Consultation reminders"].map((label) => (
-              <label key={label} className="flex items-center justify-between rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm">
-                <span className="flex items-center gap-2"><Bell className="h-4 w-4 text-[#FFD700]" />{label}</span>
-                <input type="checkbox" defaultChecked className="h-4 w-4" />
-              </label>
-            ))}
-          </CardContent>
-        </Card>
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Recommended Remedies</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {remedies.map((remedy) => <p key={remedy} className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm naksh-muted-text"><HeartPulse className="mr-2 inline h-4 w-4 text-[#FFD700]" />{remedy}</p>)}
-          </CardContent>
-        </Card>
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
-          <CardHeader><CardTitle className="font-cinzel">Today’s Question</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-sm leading-6 naksh-muted-text">Ask one focused question about your day, then save the answer in chat history.</p>
-            <Button className="mt-4 w-full" asChild><Link href="/chatbot">Ask today’s question</Link></Button>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="mt-6">
-        <PaymentHistory />
-      </div>
-      <div className="mt-6 grid gap-5 md:grid-cols-3">
-        {premiumActions.map(({ title, copy, icon: Icon }) => (
-          <Card key={title} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
+
+      <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        {activeTools.map(({ title, href, copy, icon: Icon }) => (
+          <Card key={title} className="border-[#D4AF37]/20 bg-[#061D3C]/80">
             <CardContent className="p-5">
               <Icon className="h-5 w-5 text-[#FFD700]" />
               <h2 className="mt-4 font-cinzel text-lg font-bold">{title}</h2>
               <p className="mt-2 text-sm leading-6 naksh-muted-text">{copy}</p>
+              <Button className="mt-4 w-full" variant="outline" asChild><Link href={href}>Open</Link></Button>
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
+          <CardHeader><CardTitle className="font-cinzel">Future Modules</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {["AI Astrologer", "Shop", "Consultation marketplace", "Panchang", "Transit predictions", "Premium PDF automation"].map((item) => (
+              <div key={item} className="flex items-center justify-between rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm">
+                <span>{item}</span>
+                <span className="rounded-full border border-[#D4AF37]/30 px-2 py-1 text-xs text-[#FFD700]">Coming Soon</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
+          <CardHeader><CardTitle className="font-cinzel">Trust Notes</CardTitle></CardHeader>
+          <CardContent className="space-y-3 text-sm leading-6 naksh-muted-text">
+            <p className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3"><ShieldCheck className="mr-2 inline h-4 w-4 text-[#00f5a0]" />Guidance on Naksharix is for reflection and spiritual insight, not guaranteed outcomes.</p>
+            <p className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3"><History className="mr-2 inline h-4 w-4 text-[#00f5a0]" />History and downloads should appear only from real saved data as workflows are completed.</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-6">
+        <PaymentHistory />
       </div>
     </Section>
   );
 }
 
+function StatusCard({ title, copy }: { title: string; copy: string }) {
+  return (
+    <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
+      <CardContent className="p-5">
+        <FileText className="h-5 w-5 text-[#FFD700]" />
+        <h2 className="mt-4 font-cinzel text-lg font-bold">{title}</h2>
+        <p className="mt-2 text-sm leading-6 naksh-muted-text">{copy}</p>
+      </CardContent>
+    </Card>
+  );
+}

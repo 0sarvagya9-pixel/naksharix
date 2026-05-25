@@ -1,0 +1,17 @@
+{
+  "id": "interpretation-rule-schema-v0",
+  "status": "schema_only",
+  "verifiedRulesCount": 0,
+  "sampleRule": {
+    "id": "sample-do-not-activate",
+    "scope": "graha",
+    "language": "en",
+    "requiredInputs": ["verifiedChart", "planet", "house", "rashi"],
+    "conditions": {},
+    "text": null,
+    "confidence": "low",
+    "claimBoundary": "Reflective guidance only. No guaranteed outcome.",
+    "verified": false,
+    "status": "blocked_until_engine_ready"
+  }
+}

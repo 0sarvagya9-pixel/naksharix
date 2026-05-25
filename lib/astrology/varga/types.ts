@@ -24,6 +24,12 @@ export type VargaChartKey =
   | "D60"
   | "D64";
 
+export type VargaImplementationStatus =
+  | "implemented_verified"
+  | "implemented_unverified"
+  | "planned"
+  | "blocked_until_fixture";
+
 export type VargaPlanetPlacement = {
   planet: CanonicalPlanet["planet"];
   sourceLongitude: number | null;
@@ -37,6 +43,7 @@ export type VargaChartDefinition = {
   label: string;
   divisor: number;
   priority: "base" | "first_candidate" | "future";
+  implementationStatus: VargaImplementationStatus;
   formulaVerified: boolean;
   publicEnabled: false;
   notes: string;

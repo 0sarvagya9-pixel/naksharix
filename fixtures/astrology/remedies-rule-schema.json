@@ -1,0 +1,16 @@
+{
+  "id": "remedies-rule-schema-v0",
+  "status": "schema_only",
+  "verifiedRulesCount": 0,
+  "allowedCategories": ["mantra", "daan", "vrat", "lifestyle", "spiritual_practice", "gemstone_caution", "rudraksha_caution"],
+  "sampleRule": {
+    "id": "sample-do-not-activate",
+    "trigger": "planet_weakness",
+    "category": "lifestyle",
+    "requiredInputs": ["verifiedChart", "reviewedInterpretation"],
+    "recommendation": null,
+    "caution": "No guarantee. Does not replace professional advice.",
+    "verified": false,
+    "status": "blocked_until_engine_ready"
+  }
+}

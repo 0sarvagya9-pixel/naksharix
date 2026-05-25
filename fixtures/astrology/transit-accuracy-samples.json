@@ -19,6 +19,11 @@
       "ingressAt": null,
       "retrogradeStart": null,
       "retrogradeEnd": null,
+      "directAt": null,
+      "positionBeforeIngress": null,
+      "positionAfterIngress": null,
+      "natalOverlayRequired": true,
+      "rashiWiseContentAllowed": false,
       "toleranceHours": null
     }
   },
@@ -42,6 +47,11 @@
       "ingressAt": null,
       "retrogradeStart": null,
       "retrogradeEnd": null,
+      "directAt": null,
+      "positionBeforeIngress": null,
+      "positionAfterIngress": null,
+      "natalOverlayRequired": true,
+      "rashiWiseContentAllowed": false,
       "toleranceHours": null
     }
   }

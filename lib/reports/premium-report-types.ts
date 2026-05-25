@@ -4,6 +4,14 @@ export type PremiumReportAutomationStatus =
   | "blocked_until_database_workflow"
   | "blocked_until_payment_workflow";
 
+export type PremiumReportGenerationStatus =
+  | "draft"
+  | "pending_review"
+  | "ready_for_generation"
+  | "generated"
+  | "delivered"
+  | "failed";
+
 export type PremiumReportSection = {
   key: string;
   title: string;

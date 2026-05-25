@@ -16,9 +16,11 @@ Run:
 npm run qa:foundation
 npm run qa:engine
 npm run qa:ephemeris
+npm run qa:panchang
 npm run qa:transit
 npm run qa:varga
 npm run qa:strength
+npm run qa:production-safety
 ```
 
 ## Engine Fixture Runner
@@ -76,7 +78,11 @@ This protects Naksharix from accidentally treating placeholder chart data as ver
 
 `npm run qa:advanced-engine` runs the transit, Varga, and strength checks together.
 
-`npm run qa:all` now includes foundation, engine, ephemeris, transit, Varga, and strength QA. Skipped fixtures are acceptable only when marked with a clear blocked or needs-validation status.
+`npm run qa:panchang` verifies Panchang stays guarded and documents required future fields.
+
+`npm run qa:production-safety` verifies hold modules remain held and scans critical public files for activation flags or unsafe claims.
+
+`npm run qa:all` now includes foundation, engine, ephemeris, Panchang, transit, Varga, strength, and production-safety QA. Skipped fixtures are acceptable only when marked with a clear blocked or needs-validation status.
 
 ## Required Engine Fixtures
 
@@ -121,3 +127,4 @@ This protects Naksharix from accidentally treating placeholder chart data as ver
 - Switch EN/HI/HIN on horoscope, calculator, and reports pages.
 - Verify Panchang, AI, Shop, Consultation remain held.
 - Confirm no payment/order success is reachable from report catalogue.
+- Confirm dashboard widgets show real data or honest empty states only.

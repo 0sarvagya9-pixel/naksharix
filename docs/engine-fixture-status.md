@@ -23,6 +23,11 @@ This document records what the fixture runner verifies today and what remains bl
 | Varga chart foundation | No | Schema + skipped fixtures | High | Verified formulas and expected placements | Foundation only |
 | Shadbala / Ashtakvarga foundation | No | Schema + guardrail fixtures | High | Verified formulas, external scores, and provider data | Foundation only |
 | Premium PDF automation | No | Template schema only | Medium | Database workflow, admin review, renderer, storage, and delivery | Foundation only |
+| Interpretation engine | No | Schema only | High | Verified chart data and reviewed rule database | Foundation only |
+| Remedies engine | No | Schema only | High | Expert-reviewed non-fear-based remedy rules | Foundation only |
+| Report backend workflow | Partial | Prisma/API/admin read surfaces | Medium | No-payment request policy, admin notes/status workflow, user history | Request-intent public flow |
+| Payment readiness | Partial | Route audit/docs | High | Env, webhook, invoices, refunds, entitlement review | Hold/foundation only |
+| Production safety QA | Yes | Source/route guard script | Medium | Expand scan when new public modules are added | Active guardrail |
 
 ## Rule For Promotion
 
@@ -48,3 +53,7 @@ Panchang fixture slots follow the same rule. A fixture with null Sunrise, Tithi,
 - Varga chart fixture slots must stay skipped or blocked until formulas and placements are verified.
 - Shadbala and Ashtakvarga fixture slots must stay skipped or blocked until trusted numeric scores exist.
 - Premium PDF automation is represented as schema and documentation only; no report generation or delivery is active.
+
+## Business Workflow Gate
+
+Report, dashboard, payment, admin, and history surfaces should show only persisted data or honest empty states. Payment and delivery language must not appear in non-payment report flows. Shop, Consultation, and AI Astrologer remain excluded hold modules.

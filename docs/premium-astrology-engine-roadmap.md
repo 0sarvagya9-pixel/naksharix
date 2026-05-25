@@ -111,6 +111,8 @@ This document is a product and engineering boundary map. It prevents Naksharix f
 - Added a typed ephemeris provider interface and blocked current-provider adapter for future canonical chart validation.
 - Added Panchang accuracy fixture schema and activation requirements.
 - Added transit, Varga, Shadbala, Ashtakvarga, and premium PDF automation foundation schemas.
+- Added interpretation and remedies schema-only foundations with blocked public activation.
+- Added production-safety QA and Panchang-specific QA guards.
 - Verified today: numerology formula contracts, Lo Shu counts, nakshatra degree boundaries, rashi degree boundaries, Vimshottari order/120-year cycle, Ashtakoot max-score contract, Panchang hold gate, transit hold gate, and selected public claim safety checks.
 - Skipped by design: external Kundli ephemeris samples, full Kundli benchmark assertion, exact Dasha transition dates, Panchang result accuracy, and transit date accuracy.
 - Activation rule: skipped fixtures must become deterministic assertions before the related public feature can be upgraded from Coming Soon to active.
@@ -127,6 +129,7 @@ This document is a product and engineering boundary map. It prevents Naksharix f
 - Verified Varga formula references and expected placements for D9 and D10 before expanding to other divisional charts.
 - Verified Shadbala and Ashtakvarga numeric score fixtures from trusted software/manual review.
 - Reviewed premium PDF template renderer with Devanagari shaping, chart visuals, storage, and admin review workflow.
+- Reviewed interpretation/remedies rule database with expert and language QA before public use.
 
 ## Phase Order
 
