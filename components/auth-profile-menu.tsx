@@ -5,11 +5,10 @@ import type React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { BookOpen, ChevronDown, FileText, LogOut, ShieldCheck, UserRound } from "lucide-react";
+import { BookOpen, FileText, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/language-provider";
 import { isAdmin as canOpenAdminPanel } from "@/lib/auth/permissions";
-import { cn } from "@/lib/utils";
 
 type SessionUser = {
   id: string;
@@ -98,19 +97,18 @@ export function AuthProfileMenu() {
   const showAdminPanel = canOpenAdminPanel(user) || Boolean(user.isAdminLogin);
 
   return (
-    <div ref={menuRef} className="relative hidden min-w-[2.5rem] flex-shrink-0 sm:block xl:min-w-[8.75rem] xl:max-w-[12rem] 2xl:min-w-[9.5rem] 2xl:max-w-[13.75rem]">
+    <div ref={menuRef} className="relative hidden min-w-10 flex-shrink-0 sm:block">
       <button
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label={displayName}
         onClick={() => setOpen((value) => !value)}
-        className="flex h-10 min-w-10 max-w-[12rem] items-center gap-2 rounded-full border border-[#dca956]/25 bg-[#0a1224]/82 px-2 pr-3 text-sm text-[#ffffff] shadow-[0_10px_28px_rgba(0,5,16,0.28)] transition hover:border-[#dca956]/55 hover:bg-[#dca956]/10 xl:w-full 2xl:max-w-[13.75rem]"
+        className="grid h-10 w-10 place-items-center rounded-full border border-[#dca956]/25 bg-[#0a1224]/82 p-1 text-sm text-[#ffffff] shadow-[0_10px_28px_rgba(0,5,16,0.28)] transition hover:border-[#dca956]/55 hover:bg-[#dca956]/10 focus:outline-none focus:ring-2 focus:ring-[#dca956]/25"
       >
-        <span className="grid h-7 w-7 flex-shrink-0 place-items-center overflow-hidden rounded-full border border-[#dca956]/35 bg-[#dca956]/10 text-xs font-bold text-[#fbc02d]">
+        <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-[#dca956]/35 bg-[#dca956]/10 text-xs font-bold text-[#fbc02d]">
           {image ? <Image src={image} alt="" width={28} height={28} className="h-full w-full object-cover" /> : initials}
         </span>
-        <span className="hidden min-w-0 flex-1 truncate xl:block">{displayName}</span>
-        <ChevronDown className={cn("h-3.5 w-3.5 transition", open ? "rotate-180" : "")} />
       </button>
       {open ? (
         <div

@@ -1,7 +1,23 @@
 import { calculateNumerologyReport } from "@/lib/numerology";
 import type { Locale } from "@/lib/i18n";
 
-export type FocusedCalculatorKind = "dasha" | "nakshatra" | "vehicle" | "mobile";
+export type FocusedCalculatorKind =
+  | "dasha"
+  | "nakshatra"
+  | "moon-sign"
+  | "lagna"
+  | "manglik"
+  | "yoga"
+  | "vehicle"
+  | "mobile"
+  | "name-number"
+  | "lo-shu"
+  | "destiny"
+  | "personality"
+  | "guna-milan"
+  | "nadi-dosha"
+  | "bhakoot"
+  | "marriage-suitability";
 export type NumberVerdict = "supportive" | "neutral" | "needsBalance";
 
 export type FocusedNumerologyInput = {
@@ -116,6 +132,28 @@ export function calculateFocusedNumerology(input: FocusedNumerologyInput): Focus
   };
 }
 
+export function calculateNameNumberValue(name: string) {
+  return reduceNumber(nameTotals(name).total || 1);
+}
+
+export function calculatePersonalityNumberValue(name: string) {
+  return reduceNumber(Math.max(1, nameTotals(name).consonants || nameTotals(name).total || 1));
+}
+
+export function reduceNumerologyNumber(value: number) {
+  return reduceNumber(value);
+}
+
+export function dateDigitCounts(dateOfBirth: string | Date) {
+  const date = dateOfBirth instanceof Date ? dateOfBirth : new Date(`${String(dateOfBirth).slice(0, 10)}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) return {};
+  const text = `${String(date.getUTCDate()).padStart(2, "0")}${String(date.getUTCMonth() + 1).padStart(2, "0")}${date.getUTCFullYear()}`;
+  return text.split("").map(Number).reduce<Record<number, number>>((acc, digit) => {
+    if (digit >= 1 && digit <= 9) acc[digit] = (acc[digit] ?? 0) + 1;
+    return acc;
+  }, {});
+}
+
 export function nakshatraIndex(name: string | undefined) {
   if (!name) return undefined;
   const normalized = normalizeName(name);
@@ -154,6 +192,20 @@ function alphaNumericTotal(value: string) {
     if (/\d/.test(char)) return sum + Number(char);
     return sum + ((char.charCodeAt(0) - 65) % 9) + 1;
   }, 0);
+}
+
+function nameTotals(name: string) {
+  const letters = name.toUpperCase().replace(/[^A-Z]/g, "");
+  return [...letters].reduce(
+    (acc, letter) => {
+      const value = ((letter.charCodeAt(0) - 65) % 9) + 1;
+      acc.total += value;
+      if (["A", "E", "I", "O", "U"].includes(letter)) acc.vowels += value;
+      else acc.consonants += value;
+      return acc;
+    },
+    { total: 0, vowels: 0, consonants: 0 }
+  );
 }
 
 function unique(values: number[]) {

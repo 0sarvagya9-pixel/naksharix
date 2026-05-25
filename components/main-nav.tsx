@@ -183,11 +183,11 @@ export function MainNav() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/[0.04] bg-[#020612]/72 shadow-[0_14px_48px_rgba(0,0,0,0.42)] backdrop-blur-md">
-      <div className="mx-auto flex h-24 w-full max-w-[1440px] items-center gap-2 px-4 lg:gap-3 xl:h-24 xl:px-5 2xl:gap-5 2xl:px-10">
-        <div className="flex min-w-[10.5rem] flex-shrink-0 items-center md:min-w-[12rem] xl:basis-[12rem] 2xl:basis-[13.5rem]">
+      <div className="mx-auto flex h-24 w-full max-w-[1440px] items-center gap-2 px-4 lg:gap-2 xl:h-24 xl:px-4 2xl:gap-4 2xl:px-8">
+        <div className="flex min-w-[10rem] flex-shrink-0 items-center md:min-w-[11rem] xl:basis-[11.25rem] 2xl:basis-[13rem]">
           <BrandLogo className="max-w-full" />
         </div>
-        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex 2xl:gap-2" aria-label="Primary navigation">
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex 2xl:gap-1.5" aria-label="Primary navigation">
           {desktopLinks.map((item) => {
             const active = isActiveRoute(pathname, item.href, item.activePaths);
             return (
@@ -197,7 +197,7 @@ export function MainNav() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-1.5 py-2 text-[0.68rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-2.5 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] hover:drop-shadow-[0_0_10px_rgba(0,155,114,0.38)] 2xl:px-3 2xl:text-[0.82rem]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-1.5 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-2.5 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] hover:drop-shadow-[0_0_10px_rgba(0,155,114,0.38)] 2xl:px-2.5 2xl:text-[0.8rem]",
                 active
                   ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
                   : "text-[#ffffff]"
@@ -214,7 +214,7 @@ export function MainNav() {
               aria-haspopup="menu"
               aria-expanded={moreActive}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-2.5 py-2 text-[0.68rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-3.5 2xl:text-[0.82rem]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-3 2xl:text-[0.8rem]",
                 moreActive
                   ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
                   : "text-[#ffffff]"
@@ -222,7 +222,7 @@ export function MainNav() {
             >
               {tr("navMore")}
             </button>
-            <div className="invisible absolute right-0 top-full z-50 mt-3 w-72 translate-y-2 rounded-xl border border-[#dca956]/25 bg-[#020612]/95 p-3 opacity-0 shadow-[0_18px_60px_rgba(0,5,16,0.62),0_0_32px_rgba(0,155,114,0.18)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+            <div className="invisible absolute right-0 top-full z-[80] mt-3 w-72 translate-y-2 rounded-xl border border-[#dca956]/30 bg-[#050b18]/95 p-3 opacity-0 shadow-2xl shadow-black/70 ring-1 ring-white/5 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {moreGroups.map((group) => (
                 <div key={group.titleKey} className="border-b border-[#263957]/70 py-2 first:pt-0 last:border-b-0 last:pb-0">
                   <p className="px-3 pb-1 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#dca956]">{tr(group.titleKey)}</p>
@@ -247,8 +247,8 @@ export function MainNav() {
             </div>
           </div>
         </nav>
-        <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-white/[0.08] pl-3 lg:gap-2.5 2xl:gap-3 2xl:pl-5">
-          <LanguageSwitcher className="w-[118px] min-w-[118px] 2xl:w-[132px] 2xl:min-w-[132px]" />
+        <div className="ml-auto flex flex-shrink-0 items-center gap-1.5 border-l border-white/[0.08] pl-2 lg:gap-2 2xl:gap-2.5 2xl:pl-4">
+          <LanguageSwitcher className="w-auto min-w-12" />
           <ThemeToggle />
           <AuthProfileMenu />
           <Button
@@ -279,7 +279,7 @@ function CalculatorMegaDropdown({ locale, tr, active }: { locale: Locale; tr: (k
         aria-haspopup="menu"
         aria-expanded={active}
         className={cn(
-          "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.68rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-3 2xl:text-[0.82rem]",
+          "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-2.5 2xl:text-[0.8rem]",
           active
             ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
             : "text-[#ffffff]"
@@ -287,10 +287,10 @@ function CalculatorMegaDropdown({ locale, tr, active }: { locale: Locale; tr: (k
       >
         {tr("navFreeCalculators")}
       </button>
-      <div className="invisible absolute left-1/2 top-full z-50 mt-3 w-[min(780px,calc(100vw-2rem))] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#dca956]/25 bg-[#020612]/96 p-4 opacity-0 shadow-[0_22px_70px_rgba(0,5,16,0.68),0_0_34px_rgba(0,155,114,0.16)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+      <div className="invisible absolute left-1/2 top-full z-[80] mt-3 w-[min(94vw,1100px)] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#dca956]/30 bg-[#050b18]/95 p-4 opacity-0 shadow-2xl shadow-black/70 ring-1 ring-white/5 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {labels.groups.map((group) => (
-            <div key={group.title} className="rounded-xl border border-[#263957] bg-[#0f1c3a]/74 p-3">
+            <div key={group.title} className="rounded-xl border border-[#263957]/70 bg-[#0a1224]/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <p className="font-cinzel text-sm font-bold text-[#f3d382]">{group.title}</p>
               <div className="mt-3 grid gap-1.5">
                 {group.items.map((item) => item.href ? (
@@ -299,7 +299,7 @@ function CalculatorMegaDropdown({ locale, tr, active }: { locale: Locale; tr: (k
                     <span className="rounded-full border border-[#00f5a0]/35 bg-[#00f5a0]/10 px-2 py-0.5 text-[0.6rem] text-[#00f5a0]">{labels.active}</span>
                   </Link>
                 ) : (
-                  <div key={item.label} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#94a3b8]">
+                  <div key={item.label} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#a8b3c7]">
                     <span>{item.label}</span>
                     <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-2 py-0.5 text-[0.6rem] text-[#f3d382]">{labels.comingSoon}</span>
                   </div>
@@ -498,30 +498,33 @@ function calculatorDropdownLabels(locale: Locale) {
           items: [
             { label: "मुफ़्त कुंडली कैलकुलेटर", href: "/kundli" },
             { label: "दशा कैलकुलेटर", href: "/free-calculators/dasha-calculator" },
-            { label: "चंद्र राशि कैलकुलेटर" },
+            { label: "चंद्र राशि कैलकुलेटर", href: "/free-calculators/moon-sign-calculator" },
             { label: "नक्षत्र कैलकुलेटर", href: "/free-calculators/nakshatra-calculator" },
-            { label: "लग्न कैलकुलेटर" },
-            { label: "मांगलिक कैलकुलेटर" }
+            { label: "लग्न कैलकुलेटर", href: "/free-calculators/lagna-calculator" },
+            { label: "मांगलिक कैलकुलेटर", href: "/free-calculators/manglik-calculator" },
+            { label: "योग कैलकुलेटर", href: "/free-calculators/yoga-calculator" }
           ]
         },
         {
           title: "अंक ज्योतिष कैलकुलेटर",
           items: [
             { label: "अंक ज्योतिष कैलकुलेटर", href: "/numerology" },
-            { label: "लो शू ग्रिड", href: "/numerology" },
-            { label: "नामांक", href: "/numerology" },
+            { label: "लो शू ग्रिड", href: "/free-calculators/lo-shu-grid-calculator" },
+            { label: "नामांक", href: "/free-calculators/name-number-calculator" },
             { label: "मोबाइल नंबर", href: "/free-calculators/mobile-number-calculator" },
-            { label: "वाहन नंबर", href: "/free-calculators/vehicle-number-calculator" }
+            { label: "वाहन नंबर", href: "/free-calculators/vehicle-number-calculator" },
+            { label: "भाग्यांक", href: "/free-calculators/destiny-number-calculator" },
+            { label: "व्यक्तित्व अंक", href: "/free-calculators/personality-number-calculator" }
           ]
         },
         {
           title: "मिलान कैलकुलेटर",
           items: [
             { label: "कुंडली मिलान", href: "/matchmaking" },
-            { label: "गुण मिलान" },
-            { label: "नाड़ी दोष" },
-            { label: "भकूट" },
-            { label: "विवाह उपयुक्तता" }
+            { label: "गुण मिलान", href: "/free-calculators/guna-milan-calculator" },
+            { label: "नाड़ी दोष", href: "/free-calculators/nadi-dosha-calculator" },
+            { label: "भकूट", href: "/free-calculators/bhakoot-calculator" },
+            { label: "विवाह उपयुक्तता", href: "/free-calculators/marriage-suitability-calculator" }
           ]
         },
         {
@@ -548,30 +551,33 @@ function calculatorDropdownLabels(locale: Locale) {
         items: [
           { label: "Free Kundli Calculator", href: "/kundli" },
           { label: "Dasha Calculator", href: "/free-calculators/dasha-calculator" },
-          { label: "Moon Sign Calculator" },
+          { label: "Moon Sign Calculator", href: "/free-calculators/moon-sign-calculator" },
           { label: "Nakshatra Calculator", href: "/free-calculators/nakshatra-calculator" },
-          { label: "Lagna Calculator" },
-          { label: "Manglik Calculator" }
+          { label: "Lagna Calculator", href: "/free-calculators/lagna-calculator" },
+          { label: "Manglik Calculator", href: "/free-calculators/manglik-calculator" },
+          { label: "Yoga Calculator", href: "/free-calculators/yoga-calculator" }
         ]
       },
       {
         title: "Numerology Calculators",
         items: [
           { label: "Numerology Calculator", href: "/numerology" },
-          { label: "Lo Shu Grid", href: "/numerology" },
-          { label: "Name Number", href: "/numerology" },
+          { label: "Lo Shu Grid", href: "/free-calculators/lo-shu-grid-calculator" },
+          { label: "Name Number", href: "/free-calculators/name-number-calculator" },
           { label: "Mobile Number", href: "/free-calculators/mobile-number-calculator" },
-          { label: "Vehicle Number", href: "/free-calculators/vehicle-number-calculator" }
+          { label: "Vehicle Number", href: "/free-calculators/vehicle-number-calculator" },
+          { label: "Destiny Number", href: "/free-calculators/destiny-number-calculator" },
+          { label: "Personality Number", href: "/free-calculators/personality-number-calculator" }
         ]
       },
       {
         title: "Matching Calculators",
         items: [
           { label: hinglish ? "Match Making" : "Match Making", href: "/matchmaking" },
-          { label: "Guna Milan" },
-          { label: "Nadi Dosha" },
-          { label: "Bhakoot" },
-          { label: "Marriage Suitability" }
+          { label: "Guna Milan", href: "/free-calculators/guna-milan-calculator" },
+          { label: "Nadi Dosha", href: "/free-calculators/nadi-dosha-calculator" },
+          { label: "Bhakoot", href: "/free-calculators/bhakoot-calculator" },
+          { label: "Marriage Suitability", href: "/free-calculators/marriage-suitability-calculator" }
         ]
       },
       {

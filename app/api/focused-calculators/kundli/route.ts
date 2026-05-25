@@ -13,7 +13,7 @@ const birthDateSchema = z.string().trim().min(8).transform((value) => normalizeB
 const birthTimeSchema = z.string().trim().min(4).transform((value) => normalizeBirthTime(value));
 
 const schema = z.object({
-  kind: z.enum(["dasha", "nakshatra"]),
+  kind: z.enum(["dasha", "nakshatra", "moon-sign", "lagna", "manglik", "yoga"]),
   name: z.string().trim().min(2).max(80),
   gender: z.string().trim().min(1),
   dateOfBirth: birthDateSchema,
@@ -48,13 +48,34 @@ export async function POST(request: NextRequest) {
         yoni: enriched.avakhada.yoni,
         nadi: enriched.avakhada.nadi
       },
+      moon: pickPlanet(enriched, "Moon"),
+      mars: pickPlanet(enriched, "Mars"),
+      venus: pickPlanet(enriched, "Venus"),
       dasha: enriched.calculatedDasha,
       dashaTimeline: enriched.vimshottariDasha.slice(0, 9),
+      doshaAnalysis: enriched.doshaAnalysis,
+      yogaAnalysis: enriched.yogaAnalysis,
+      calculationMeta: enriched.calculationMeta,
       nakshatraAnalysis: enriched.nakshatraAnalysis,
+      lagnaAnalysis: enriched.lagnaAnalysis,
       generatedAt: new Date().toISOString()
     });
   } catch (error) {
     if (error instanceof AstrologyProviderUnavailableError) return fail(translatedApiMessage(readLanguageFromRequest(request), "serviceUnavailable"), 503);
     return handleApiError(error);
   }
+}
+
+function pickPlanet(chart: BirthChartData, planet: string) {
+  const match = chart.planetPositions.find((item) => item.planet.toLowerCase() === planet.toLowerCase());
+  if (!match) return undefined;
+  return {
+    planet: match.planet,
+    sign: match.sign,
+    degree: match.degree,
+    house: match.house,
+    nakshatra: match.nakshatra,
+    pada: match.pada,
+    absoluteLongitude: match.absoluteLongitude
+  };
 }
