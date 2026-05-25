@@ -1,0 +1,34 @@
+{
+  "id": "panchang-your-id",
+  "name": "Externally verified Panchang fixture",
+  "purpose": "Location-aware Panchang validation for all required public activation fields.",
+  "source": "Trusted source name or export reference",
+  "source_note": "Include source, reviewer, date checked, location, timezone, and tolerance notes.",
+  "verified_level": "needs_external_validation",
+  "input": {
+    "date": "YYYY-MM-DD",
+    "timezone": "+05:30",
+    "latitude": 0,
+    "longitude": 0,
+    "place": "City, Country"
+  },
+  "expected": {
+    "Date": null,
+    "Location": null,
+    "Timezone": null,
+    "Sunrise": null,
+    "Sunset": null,
+    "Moonrise": null,
+    "Moonset": null,
+    "Tithi": null,
+    "Nakshatra": null,
+    "Yoga": null,
+    "Karana": null,
+    "Vaar": null,
+    "Rahu Kaal": null,
+    "Yamaganda": null,
+    "Gulika Kaal": null,
+    "Abhijit Muhurat": null,
+    "toleranceMinutes": 2
+  }
+}

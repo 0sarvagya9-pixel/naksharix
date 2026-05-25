@@ -22,10 +22,11 @@ export default function robots(): MetadataRoute.Robots {
         "/kundli",
         "/numerology",
         "/tarot",
+        "/panchang",
         "/zodiac",
         "/blog"
       ],
-      disallow: ["/admin", "/dashboard", "/api", "/auth", "/panchang", "/ai-astrologer", "/shop", "/consultation"]
+      disallow: ["/admin", "/dashboard", "/api", "/auth", "/ai-astrologer", "/shop", "/consultation"]
     },
     host: env.NEXT_PUBLIC_APP_URL,
     sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`

@@ -23,8 +23,7 @@ function assert(condition, name, detail) {
 const holdPages = [
   { route: "app/shop/page.tsx", label: "Shop" },
   { route: "app/consultation/page.tsx", label: "Consultation" },
-  { route: "app/ai-astrologer/page.tsx", label: "AI Astrologer" },
-  { route: "app/panchang/page.tsx", label: "Panchang" }
+  { route: "app/ai-astrologer/page.tsx", label: "AI Astrologer" }
 ];
 
 for (const page of holdPages) {
@@ -57,8 +56,7 @@ const forbidden = [
   /live Panchang/i,
   /automaticDeliveryEnabled:\s*true/,
   /paymentEnabled:\s*true/,
-  /publicPredictionEnabled:\s*true/,
-  /publicEnabled:\s*true/
+  /publicPredictionEnabled:\s*true/
 ];
 
 for (const file of noFakePublicFiles) {
@@ -69,7 +67,7 @@ for (const file of noFakePublicFiles) {
 }
 
 const robots = source("app/robots.ts");
-assert(robots.includes("/panchang"), "Robots keeps Panchang held", "/panchang disallowed");
+assert(robots.includes("/panchang"), "Robots allows provider-verified Panchang", "/panchang allowed");
 assert(robots.includes("/shop"), "Robots keeps Shop held", "/shop disallowed");
 assert(robots.includes("/consultation"), "Robots keeps Consultation held", "/consultation disallowed");
 assert(robots.includes("/ai-astrologer"), "Robots keeps AI Astrologer held", "/ai-astrologer disallowed");

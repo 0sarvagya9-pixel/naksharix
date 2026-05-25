@@ -32,3 +32,24 @@ Every verified Kundli fixture must include:
 ## Promotion Rule
 
 Do not change a fixture to `verified_external` unless every expected value needed by the test is filled and source notes are complete.
+
+## Import Tooling
+
+Use the checked templates in `fixtures/import-templates/` instead of hand-building verified fixtures from scratch:
+
+```bash
+npm run qa:fixture-import
+npm run fixture:import -- --category kundli --input path/to/fixture.json
+```
+
+The importer validates source notes, verification level, input fields, tolerance fields, and expected-value completeness. It refuses incomplete `verified_external` fixtures and allows `needs_external_validation` placeholders without treating them as proof of accuracy.
+
+Supported categories:
+
+- `kundli`
+- `panchang`
+- `transit`
+- `varga`
+- `strength`
+
+The importer never calls external APIs, never invents values, and never promotes a fixture to verified status automatically.

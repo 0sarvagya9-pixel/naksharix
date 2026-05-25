@@ -178,11 +178,12 @@ function testPanchangGate() {
   const api = source("app/api/panchang/route.ts");
   const page = source("app/panchang/page.tsx");
   for (const item of fixture("fixtures/safety/panchang-gate.json")) {
-    assert(api.includes(String(item.expected.apiStatus)), `${item.name}: API returns disabled status`, String(item.expected.apiStatus));
+    assert(api.includes("calculatePremiumPanchang"), `${item.name}: API uses provider-verified Panchang service`, "calculation path");
+    assert(api.includes("querySchema"), `${item.name}: API validates date/location/timezone`, "validation path");
     for (const phrase of item.expected.mustNotCall) {
       assert(!api.includes(phrase), `${item.name}: API does not call ${phrase}`, "guarded");
     }
-    assert(page.includes(item.expected.pageStatus), `${item.name}: page remains ${item.expected.pageStatus}`, "public hold");
+    assert(page.includes("Provider Verified"), `${item.name}: page is provider-verified active`, "public provider-verified");
     for (const field of item.expected.requiredFutureFields) {
       assert(page.toLowerCase().includes(field.toLowerCase()), `${item.name}: documents ${field}`, field);
     }

@@ -6,7 +6,7 @@
 - Lo Shu missing/repeated number extraction.
 - Standard nakshatra index mapping.
 - Matching koot total max score is 36.
-- Public Panchang does not return seeded/fake production output.
+- Public Panchang uses provider-verified calculation output and does not return seeded/fake production output.
 - Reports pages do not expose WhatsApp/payment/instant-delivery language.
 - Hold pages are removed from sitemap or marked noindex.
 
@@ -16,10 +16,19 @@ Run:
 npm run qa:foundation
 npm run qa:engine
 npm run qa:ephemeris
+npm run fixtures:generate
+npm run qa:provider-kundli
+npm run qa:provider-panchang
+npm run qa:provider-transit
+npm run qa:provider-varga
 npm run qa:panchang
 npm run qa:transit
 npm run qa:varga
 npm run qa:strength
+npm run qa:fixture-import
+npm run qa:reports-workflow
+npm run qa:payments
+npm run qa:pdf-generation
 npm run qa:production-safety
 ```
 
@@ -40,18 +49,18 @@ Current deterministic coverage:
 - Moon sign/rashi degree boundaries.
 - Vimshottari lord order and 120-year cycle.
 - Ashtakoot max-score and matching structure contracts.
-- Panchang disabled gate and required future activation fields.
-- Transit route/sitemap gate.
+- Panchang provider-verified API/UI gate and required fields.
+- Transit route/sitemap gate and provider snapshot fixtures.
 - Public claim safety scan for core report/calculator/Panchang files.
 
 Current skipped coverage:
 
-- Full Kundli benchmark assertion.
-- Exact Mahadasha/Antardasha date transitions.
-- Panchang date/location/timezone result accuracy.
+- External Kundli benchmark assertion.
+- External Mahadasha/Antardasha date transitions.
+- External Panchang date/location/timezone result accuracy.
 - Transit ingress and retrograde date accuracy.
 
-These are skipped because they require independently verified ephemeris fixtures and provider-stable runtime calculations. They must not be treated as production-ready until promoted from skipped fixtures to deterministic assertions.
+These are skipped because they require independently verified ephemeris fixtures beyond Naksharix provider-regression fixtures. Provider-verified output is acceptable for internal regression and limited Panchang activation, but it must not be called external or Swiss-verified.
 
 ## External Ephemeris QA
 
@@ -66,7 +75,18 @@ Current behavior:
 - Ayanamsa options are checked so unimplemented options are not marked active or public selectable.
 - Panchang accuracy fixture slots are checked for all required future fields and skipped until trusted values exist.
 
-This protects Naksharix from accidentally treating placeholder chart data as verified precision.
+This protects Naksharix from accidentally treating placeholder chart data as external verified precision.
+
+## Provider Fixture QA
+
+`npm run fixtures:generate` generates deterministic provider-regression fixtures from the selected local provider (`astronomy-engine` plus Naksharix sidereal/Lahiri adapter). Generated fixtures are written under `fixtures/generated/` and do not overwrite trusted external fixtures.
+
+- `npm run qa:provider-kundli` compares chart, planets, Moon/Nakshatra, ascendant, and Dasha fields against generated provider fixtures.
+- `npm run qa:provider-panchang` compares core Panchang fields against generated provider fixtures.
+- `npm run qa:provider-transit` compares fixed-date transit planet positions against generated provider fixtures.
+- `npm run qa:provider-varga` compares D1/D2/D3/D9/D10/D12 placements generated from provider longitudes.
+
+Provider verification means deterministic regression against the selected Naksharix provider. It is not external verification.
 
 ## Advanced Engine QA
 
@@ -78,11 +98,21 @@ This protects Naksharix from accidentally treating placeholder chart data as ver
 
 `npm run qa:advanced-engine` runs the transit, Varga, and strength checks together.
 
-`npm run qa:panchang` verifies Panchang stays guarded and documents required future fields.
+`npm run qa:panchang` verifies Panchang uses the provider-verified calculation path, validates date/location/timezone, and keeps external-verification limitations visible.
 
 `npm run qa:production-safety` verifies hold modules remain held and scans critical public files for activation flags or unsafe claims.
 
-`npm run qa:all` now includes foundation, engine, ephemeris, Panchang, transit, Varga, strength, and production-safety QA. Skipped fixtures are acceptable only when marked with a clear blocked or needs-validation status.
+`npm run qa:fixture-import` validates import templates and ensures incomplete `verified_external` astrology fixtures cannot be promoted.
+
+`npm run qa:reports-workflow` verifies the current report flow remains honest: public pages stay request-intent only, the existing API remains authenticated/payment-aware, and workflow readiness stays blocked until no-payment persistence is intentionally designed.
+
+`npm run qa:payments` verifies payment routes fail closed when providers are not configured and public report pages do not expose pay/buy language.
+
+`npm run qa:pdf-generation` verifies premium report generation remains a blocked foundation unless a real PDF file can be generated.
+
+`npm run qa:premium-engine` verifies the internal chart, Dasha, Panchang, transit, Varga, strength, interpretation, remedies, report content, and activation-matrix surfaces. The activation matrix may expose Panchang as `public_active_provider_verified`; other unverified premium modules must stay out of public UI, sitemap eligibility, and public delivery.
+
+`npm run qa:all` now includes foundation, engine, ephemeris, Panchang, transit, Varga, strength, premium engine, interpretation, remedies, premium report content, fixture import, reports workflow, payment, PDF generation, and production-safety QA. Skipped fixtures are acceptable only when marked with a clear blocked or needs-validation status.
 
 ## Required Engine Fixtures
 

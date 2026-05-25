@@ -1,4 +1,4 @@
-export type PanchangPrecisionLevel = "verified_external" | "needs_external_validation" | "blocked_until_provider_ready";
+export type PanchangPrecisionLevel = "verified_external" | "provider_verified" | "needs_external_validation" | "blocked_until_provider_ready";
 
 export const REQUIRED_PANCHANG_FIELDS = [
   "Date",

@@ -28,11 +28,15 @@ function assert(condition, name, detail) {
 const api = source("app/api/panchang/route.ts");
 const page = source("app/panchang/page.tsx");
 const types = source("lib/astrology/ephemeris/panchang-types.ts");
+const premiumPanchang = source("lib/astrology/premium-engine/panchang.ts");
 const samples = readJson("fixtures/astrology/panchang-accuracy-samples.json");
 
-assert(api.includes("503"), "Panchang API remains guarded", "disabled until verified");
-assert(!api.includes("getPanchang("), "Panchang API does not call calculation engine", "no seeded/static output");
-assert(page.toLowerCase().includes("coming soon"), "Panchang public page remains Coming Soon", "public hold");
+assert(api.includes("calculatePremiumPanchang"), "Panchang API uses premium Panchang service", "provider-verified calculation path");
+assert(api.includes("querySchema") && api.includes("latitude") && api.includes("longitude"), "Panchang API validates location/date/timezone", "no unvalidated fallback");
+assert(!api.includes("getPanchang("), "Panchang API does not call seeded/fallback getPanchang", "no seeded/static output");
+assert(page.includes("Provider Verified"), "Panchang public page is provider-verified active", "public provider-verified");
+assert(premiumPanchang.includes("calculatePremiumPanchang"), "Internal Panchang service exists", "real internal calculation foundation");
+assert(premiumPanchang.includes("metadata") && premiumPanchang.includes("verificationLevel: \"provider_verified\""), "Internal Panchang is provider-verified", "not external verified");
 
 for (const field of requiredFields) {
   assert(types.toLowerCase().includes(field.toLowerCase().replaceAll(" ", "")) || page.toLowerCase().includes(field.toLowerCase()), `Panchang future field documented: ${field}`, field);
@@ -42,7 +46,9 @@ for (const sample of samples) {
   if (sample.verified_level === "verified_external") {
     const missing = requiredFields.filter((field) => !isFilled(sample.expected?.[field]));
     if (missing.length) record("FAILED", sample.name, `verified fixture missing ${missing.join(", ")}`);
-    else record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "Panchang comparison adapter is not wired yet.");
+    else record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "External Panchang comparison adapter is not wired yet.");
+  } else if (sample.verified_level === "provider_verified") {
+    record("PASSED", sample.name, "Provider-generated Panchang fixture handled by qa:provider-panchang.");
   } else {
     record("SKIPPED_NEEDS_EXTERNAL_VALIDATION", sample.name, sample.source_note);
   }

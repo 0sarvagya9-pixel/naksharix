@@ -40,3 +40,15 @@ Premium PDF automation requires:
 ## Public Claim Boundary
 
 Do not claim instant premium report generation, delivery, payment success, or downloadable paid PDF until the workflow is implemented end to end.
+
+## Current Guarded Service Boundary
+
+`lib/reports/premium-report-generation-service.ts` can now generate a real internal PDF buffer from assembled report content when an admin-reviewed flag is supplied. It deliberately returns no PDF URL, enables no public delivery, and labels the output as internal/unverified until verified chart data, storage, and workflow status transitions are available.
+
+Run:
+
+```bash
+npm run qa:pdf-generation
+```
+
+The QA check confirms that the service can render internal bytes while still blocking public URL/delivery behavior.

@@ -53,11 +53,13 @@ assert(Object.values(kootMax).reduce((sum, value) => sum + value, 0) === 36, "As
 // Source-level safety gates.
 const panchangApi = read("app/api/panchang/route.ts");
 assert(!panchangApi.includes("getPanchang("), "Panchang API must not call seeded/fallback getPanchang");
-assert(panchangApi.includes("503"), "Panchang API should remain disabled with 503 until verified");
+assert(panchangApi.includes("calculatePremiumPanchang"), "Panchang API should use the real premium Panchang service");
+assert(panchangApi.includes("querySchema"), "Panchang API should validate query fields");
 
 const panchangPage = read("app/panchang/page.tsx");
-assert(panchangPage.includes("Coming Soon"), "Panchang page should remain Coming Soon");
-assert(panchangPage.includes("location-aware"), "Panchang page should explain location-aware accuracy requirement");
+assert(panchangPage.includes("Provider Verified"), "Panchang page should clearly show provider-verified status");
+assert(panchangPage.toLowerCase().includes("location-aware"), "Panchang page should explain location-aware calculation");
+assert(panchangPage.includes("cross-check for critical"), "Panchang page should keep critical Muhurat limitation wording");
 
 const reportsContent = read("components/reports-content.tsx");
 const reportDetail = read("app/reports/[slug]/page.tsx");
@@ -66,14 +68,16 @@ for (const [file, content] of [["components/reports-content.tsx", reportsContent
 }
 
 const sitemap = read("app/sitemap.ts");
-for (const route of ["/panchang", "/ai-astrologer", "/shop", "/consultation"]) {
+for (const route of ["/ai-astrologer", "/shop", "/consultation"]) {
   assert(!sitemap.includes(`"${route}"`), `Hold route ${route} should not be promoted in sitemap staticRoutes`);
 }
+assert(sitemap.includes("\"/panchang\""), "Provider-verified Panchang should be promoted in sitemap staticRoutes");
 
 const robots = read("app/robots.ts");
-for (const route of ["/panchang", "/ai-astrologer", "/shop", "/consultation"]) {
+for (const route of ["/ai-astrologer", "/shop", "/consultation"]) {
   assert(robots.includes(`"${route}"`), `Hold route ${route} should be disallowed/noindex protected in robots`);
 }
+assert(robots.includes("\"/panchang\"") && !robots.includes("\"/panchang\", \"/ai-astrologer\""), "Provider-verified Panchang should be allowed in robots");
 
 if (failures.length) {
   console.error("QA foundation failed:");
@@ -81,4 +85,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("QA foundation passed: numerology, Lo Shu, nakshatra, matching max score, Panchang gate, report safety, sitemap/robots guards.");
+console.log("QA foundation passed: numerology, Lo Shu, nakshatra, matching max score, provider-verified Panchang gate, report safety, sitemap/robots guards.");

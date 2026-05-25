@@ -4,6 +4,7 @@ export type AyanamsaKey = "lahiri" | "raman" | "kp" | "fagan_bradley";
 
 export type PrecisionLevel =
   | "verified_external"
+  | "provider_verified"
   | "deterministic_mapping"
   | "limited_internal"
   | "needs_external_validation"

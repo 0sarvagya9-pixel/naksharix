@@ -99,9 +99,12 @@ The typed provider foundation lives in:
 lib/astrology/ephemeris/types.ts
 lib/astrology/ephemeris/provider.ts
 lib/astrology/ephemeris/current-provider-adapter.ts
+lib/astrology/testing/chart-adapter.mjs
 ```
 
-The current adapter is intentionally blocked/unverified. It defines the canonical output shape but does not claim production precision.
+The current CI-safe testing adapter is intentionally blocked/unverified. It returns the canonical output shape and capability metadata, but unsupported chart fields remain `null` and `metadata.verified` remains `false`. This lets `qa:ephemeris` run safely in Node while preventing placeholder chart values from becoming public precision claims.
+
+Verified external fixtures will fail if the adapter cannot provide comparable values. Placeholder fixtures remain skipped with `SKIPPED_NEEDS_EXTERNAL_VALIDATION`.
 
 ## Ayanamsa Status
 

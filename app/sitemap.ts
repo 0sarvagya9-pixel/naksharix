@@ -46,6 +46,7 @@ const staticRoutes = [
   "/yearly-horoscope-2026",
   "/chinese-horoscope-2026",
   "/numerology-monthly-horoscope",
+  "/panchang",
   "/love-compatibility",
   "/career-astrology",
   "/marriage-astrology",

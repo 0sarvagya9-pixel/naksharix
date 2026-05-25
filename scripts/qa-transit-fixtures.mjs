@@ -78,7 +78,6 @@ function validateTransitFixtures() {
 
 function validatePublicTransitSafety() {
   const sitemap = source("app/sitemap.ts").toLowerCase();
-  const robots = source("app/robots.ts").toLowerCase();
   const files = listFiles("app").map((file) => file.toLowerCase());
   const blockedFragments = ["sun-transit", "moon-transit", "mars-transit", "mercury-transit", "jupiter-transit", "venus-transit", "saturn-transit", "rahu-transit", "ketu-transit"];
   for (const fragment of blockedFragments) {
@@ -86,7 +85,7 @@ function validatePublicTransitSafety() {
     const routeFiles = files.filter((file) => file.includes(fragment));
     assert(routeFiles.length === 0, `Transit route safety: ${fragment}`, routeFiles.length ? routeFiles.join(", ") : "no route file");
   }
-  assert(robots.includes("/panchang"), "Hold-page robots safety still present", "/panchang disallowed");
+  assert(!/publicPredictionEnabled:\s*true/.test(source("lib/astrology/transit/engine.ts")), "Transit public prediction safety still present", "no public transit prediction activation");
 }
 
 validateTransitFoundation();

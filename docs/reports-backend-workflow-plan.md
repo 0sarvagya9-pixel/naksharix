@@ -24,3 +24,17 @@
 ## Public Boundary
 
 Do not show order confirmed, payment confirmed, report delivered, or instant PDF language until the matching backend workflow is real.
+
+## Current Activation Decision
+
+The public report flow stays request-intent only in this phase. Real no-payment persistence was not activated because the current API is intentionally tied to authenticated users and payment/admin bypass. Activating anonymous or no-payment requests needs an explicit business decision, migration-safe fields, spam controls, privacy review, and user/admin status surfaces that show only real persisted data.
+
+## QA Guardrail
+
+Run:
+
+```bash
+npm run qa:reports-workflow
+```
+
+This verifies that report request persistence is not silently presented as active unless the workflow readiness flag is intentionally changed and backed by real schema/API/UI behavior.

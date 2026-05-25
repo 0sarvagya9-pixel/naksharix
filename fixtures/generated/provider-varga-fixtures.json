@@ -1,0 +1,2362 @@
+[
+  {
+    "id": "provider-varga-delhi-1990",
+    "source": "astronomy-engine",
+    "provider_metadata": {
+      "providerName": "astronomy-engine",
+      "providerVersion": "2.1.19",
+      "calculationMode": "naksharix_internal_astronomy_engine_geocentric_sidereal_lahiri",
+      "ayanamsaMethod": "Naksharix Lahiri / Chitra Paksha approximation",
+      "precisionLevel": "deterministic_provider_regression",
+      "verificationLevel": "provider_verified",
+      "externalVerification": false
+    },
+    "source_note": "Generated from provider Kundli sidereal planet longitudes using Naksharix Varga formulas. Provider regression only.",
+    "verification_level": "provider_verified",
+    "external_verification": false,
+    "input": {
+      "kundliFixtureId": "provider-kundli-delhi-1990",
+      "planets": [
+        {
+          "planet": "Sun",
+          "sign": "Sagittarius",
+          "degree": 16.863883,
+          "absoluteLongitude": 256.863883,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Moon",
+          "sign": "Aquarius",
+          "degree": 6.469124,
+          "absoluteLongitude": 306.469124,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mars",
+          "sign": "Scorpio",
+          "degree": 16.122076,
+          "absoluteLongitude": 226.122076,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mercury",
+          "sign": "Capricorn",
+          "degree": 2.016916,
+          "absoluteLongitude": 272.016916,
+          "retrograde": true,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Jupiter",
+          "sign": "Gemini",
+          "degree": 11.462806,
+          "absoluteLongitude": 71.462806,
+          "retrograde": true,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Venus",
+          "sign": "Capricorn",
+          "degree": 12.533226,
+          "absoluteLongitude": 282.533226,
+          "retrograde": true,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Saturn",
+          "sign": "Sagittarius",
+          "degree": 21.913509,
+          "absoluteLongitude": 261.913509,
+          "retrograde": false,
+          "combust": true,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Rahu",
+          "sign": "Capricorn",
+          "degree": 24.727096,
+          "absoluteLongitude": 294.727096,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Ketu",
+          "sign": "Cancer",
+          "degree": 24.727096,
+          "absoluteLongitude": 114.727096,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        }
+      ]
+    },
+    "expected": {
+      "charts": [
+        {
+          "chart": "D1",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 256.863883,
+              "sign": "Sagittarius",
+              "degree": 16.863883
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 306.469124,
+              "sign": "Aquarius",
+              "degree": 6.469124
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 226.122076,
+              "sign": "Scorpio",
+              "degree": 16.122076
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 272.016916,
+              "sign": "Capricorn",
+              "degree": 2.016916
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 71.462806,
+              "sign": "Gemini",
+              "degree": 11.462806
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 282.533226,
+              "sign": "Capricorn",
+              "degree": 12.533226
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 261.913509,
+              "sign": "Sagittarius",
+              "degree": 21.913509
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 294.727096,
+              "sign": "Capricorn",
+              "degree": 24.727096
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 114.727096,
+              "sign": "Cancer",
+              "degree": 24.727096
+            }
+          ]
+        },
+        {
+          "chart": "D2",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 256.863883,
+              "sign": "Cancer",
+              "degree": 3.727766
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 306.469124,
+              "sign": "Leo",
+              "degree": 12.938248
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 226.122076,
+              "sign": "Leo",
+              "degree": 2.244152
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 272.016916,
+              "sign": "Cancer",
+              "degree": 4.033832
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 71.462806,
+              "sign": "Leo",
+              "degree": 22.925612
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 282.533226,
+              "sign": "Cancer",
+              "degree": 25.066452
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 261.913509,
+              "sign": "Cancer",
+              "degree": 13.827018
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 294.727096,
+              "sign": "Leo",
+              "degree": 19.454192
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 114.727096,
+              "sign": "Leo",
+              "degree": 19.454192
+            }
+          ]
+        },
+        {
+          "chart": "D3",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 256.863883,
+              "sign": "Aries",
+              "degree": 20.591649
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 306.469124,
+              "sign": "Aquarius",
+              "degree": 19.407372
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 226.122076,
+              "sign": "Pisces",
+              "degree": 18.366228
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 272.016916,
+              "sign": "Capricorn",
+              "degree": 6.050748
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 71.462806,
+              "sign": "Libra",
+              "degree": 4.388418
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 282.533226,
+              "sign": "Taurus",
+              "degree": 7.599678
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 261.913509,
+              "sign": "Leo",
+              "degree": 5.740527
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 294.727096,
+              "sign": "Virgo",
+              "degree": 14.181288
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 114.727096,
+              "sign": "Pisces",
+              "degree": 14.181288
+            }
+          ]
+        },
+        {
+          "chart": "D9",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 256.863883,
+              "sign": "Virgo",
+              "degree": 1.774947
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 306.469124,
+              "sign": "Scorpio",
+              "degree": 28.222116
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 226.122076,
+              "sign": "Scorpio",
+              "degree": 25.098684
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 272.016916,
+              "sign": "Capricorn",
+              "degree": 18.152244
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 71.462806,
+              "sign": "Capricorn",
+              "degree": 13.165254
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 282.533226,
+              "sign": "Aries",
+              "degree": 22.799034
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 261.913509,
+              "sign": "Libra",
+              "degree": 17.221581
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 294.727096,
+              "sign": "Leo",
+              "degree": 12.543864
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 114.727096,
+              "sign": "Aquarius",
+              "degree": 12.543864
+            }
+          ]
+        },
+        {
+          "chart": "D10",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 256.863883,
+              "sign": "Taurus",
+              "degree": 18.63883
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 306.469124,
+              "sign": "Aries",
+              "degree": 4.69124
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 226.122076,
+              "sign": "Sagittarius",
+              "degree": 11.22076
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 272.016916,
+              "sign": "Virgo",
+              "degree": 20.16916
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 71.462806,
+              "sign": "Virgo",
+              "degree": 24.62806
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 282.533226,
+              "sign": "Capricorn",
+              "degree": 5.33226
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 261.913509,
+              "sign": "Cancer",
+              "degree": 9.13509
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 294.727096,
+              "sign": "Taurus",
+              "degree": 7.27096
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 114.727096,
+              "sign": "Scorpio",
+              "degree": 7.27096
+            }
+          ]
+        },
+        {
+          "chart": "D12",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 256.863883,
+              "sign": "Gemini",
+              "degree": 22.366596
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 306.469124,
+              "sign": "Aries",
+              "degree": 17.629488
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 226.122076,
+              "sign": "Taurus",
+              "degree": 13.464912
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 272.016916,
+              "sign": "Capricorn",
+              "degree": 24.202992
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 71.462806,
+              "sign": "Libra",
+              "degree": 17.553672
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 282.533226,
+              "sign": "Gemini",
+              "degree": 0.398712
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 261.913509,
+              "sign": "Leo",
+              "degree": 22.962108
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 294.727096,
+              "sign": "Libra",
+              "degree": 26.725152
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 114.727096,
+              "sign": "Aries",
+              "degree": 26.725152
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "provider-varga-mumbai-2001",
+    "source": "astronomy-engine",
+    "provider_metadata": {
+      "providerName": "astronomy-engine",
+      "providerVersion": "2.1.19",
+      "calculationMode": "naksharix_internal_astronomy_engine_geocentric_sidereal_lahiri",
+      "ayanamsaMethod": "Naksharix Lahiri / Chitra Paksha approximation",
+      "precisionLevel": "deterministic_provider_regression",
+      "verificationLevel": "provider_verified",
+      "externalVerification": false
+    },
+    "source_note": "Generated from provider Kundli sidereal planet longitudes using Naksharix Varga formulas. Provider regression only.",
+    "verification_level": "provider_verified",
+    "external_verification": false,
+    "input": {
+      "kundliFixtureId": "provider-kundli-mumbai-2001",
+      "planets": [
+        {
+          "planet": "Sun",
+          "sign": "Pisces",
+          "degree": 7.31588,
+          "absoluteLongitude": 337.31588,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Moon",
+          "sign": "Aquarius",
+          "degree": 0.556556,
+          "absoluteLongitude": 300.556556,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mars",
+          "sign": "Scorpio",
+          "degree": 22.790602,
+          "absoluteLongitude": 232.790602,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mercury",
+          "sign": "Aquarius",
+          "degree": 11.969768,
+          "absoluteLongitude": 311.969768,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Jupiter",
+          "sign": "Taurus",
+          "degree": 12.041203,
+          "absoluteLongitude": 42.041203,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Venus",
+          "sign": "Pisces",
+          "degree": 20.571309,
+          "absoluteLongitude": 350.571309,
+          "retrograde": true,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Saturn",
+          "sign": "Taurus",
+          "degree": 2.919112,
+          "absoluteLongitude": 32.919112,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Rahu",
+          "sign": "Gemini",
+          "degree": 17.592865,
+          "absoluteLongitude": 77.592865,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Ketu",
+          "sign": "Sagittarius",
+          "degree": 17.592865,
+          "absoluteLongitude": 257.592865,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        }
+      ]
+    },
+    "expected": {
+      "charts": [
+        {
+          "chart": "D1",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 337.31588,
+              "sign": "Pisces",
+              "degree": 7.31588
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 300.556556,
+              "sign": "Aquarius",
+              "degree": 0.556556
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 232.790602,
+              "sign": "Scorpio",
+              "degree": 22.790602
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 311.969768,
+              "sign": "Aquarius",
+              "degree": 11.969768
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.041203,
+              "sign": "Taurus",
+              "degree": 12.041203
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 350.571309,
+              "sign": "Pisces",
+              "degree": 20.571309
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 32.919112,
+              "sign": "Taurus",
+              "degree": 2.919112
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 77.592865,
+              "sign": "Gemini",
+              "degree": 17.592865
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 257.592865,
+              "sign": "Sagittarius",
+              "degree": 17.592865
+            }
+          ]
+        },
+        {
+          "chart": "D2",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 337.31588,
+              "sign": "Cancer",
+              "degree": 14.63176
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 300.556556,
+              "sign": "Leo",
+              "degree": 1.113112
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 232.790602,
+              "sign": "Leo",
+              "degree": 15.581204
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 311.969768,
+              "sign": "Leo",
+              "degree": 23.939536
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.041203,
+              "sign": "Cancer",
+              "degree": 24.082406
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 350.571309,
+              "sign": "Leo",
+              "degree": 11.142618
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 32.919112,
+              "sign": "Cancer",
+              "degree": 5.838224
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 77.592865,
+              "sign": "Cancer",
+              "degree": 5.18573
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 257.592865,
+              "sign": "Cancer",
+              "degree": 5.18573
+            }
+          ]
+        },
+        {
+          "chart": "D3",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 337.31588,
+              "sign": "Pisces",
+              "degree": 21.94764
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 300.556556,
+              "sign": "Aquarius",
+              "degree": 1.669668
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 232.790602,
+              "sign": "Cancer",
+              "degree": 8.371806
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 311.969768,
+              "sign": "Gemini",
+              "degree": 5.909304
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.041203,
+              "sign": "Virgo",
+              "degree": 6.123609
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 350.571309,
+              "sign": "Scorpio",
+              "degree": 1.713927
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 32.919112,
+              "sign": "Taurus",
+              "degree": 8.757336
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 77.592865,
+              "sign": "Libra",
+              "degree": 22.778595
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 257.592865,
+              "sign": "Aries",
+              "degree": 22.778595
+            }
+          ]
+        },
+        {
+          "chart": "D9",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 337.31588,
+              "sign": "Virgo",
+              "degree": 5.84292
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 300.556556,
+              "sign": "Libra",
+              "degree": 5.009004
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 232.790602,
+              "sign": "Capricorn",
+              "degree": 25.115418
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 311.969768,
+              "sign": "Capricorn",
+              "degree": 17.727912
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.041203,
+              "sign": "Aries",
+              "degree": 18.370827
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 350.571309,
+              "sign": "Capricorn",
+              "degree": 5.141781
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 32.919112,
+              "sign": "Capricorn",
+              "degree": 26.272008
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 77.592865,
+              "sign": "Pisces",
+              "degree": 8.335785
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 257.592865,
+              "sign": "Virgo",
+              "degree": 8.335785
+            }
+          ]
+        },
+        {
+          "chart": "D10",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 337.31588,
+              "sign": "Capricorn",
+              "degree": 13.1588
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 300.556556,
+              "sign": "Aquarius",
+              "degree": 5.56556
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 232.790602,
+              "sign": "Aquarius",
+              "degree": 17.90602
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 311.969768,
+              "sign": "Taurus",
+              "degree": 29.69768
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.041203,
+              "sign": "Taurus",
+              "degree": 0.41203
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 350.571309,
+              "sign": "Taurus",
+              "degree": 25.71309
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 32.919112,
+              "sign": "Capricorn",
+              "degree": 29.19112
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 77.592865,
+              "sign": "Scorpio",
+              "degree": 25.92865
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 257.592865,
+              "sign": "Taurus",
+              "degree": 25.92865
+            }
+          ]
+        },
+        {
+          "chart": "D12",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 337.31588,
+              "sign": "Taurus",
+              "degree": 27.79056
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 300.556556,
+              "sign": "Aquarius",
+              "degree": 6.678672
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 232.790602,
+              "sign": "Leo",
+              "degree": 3.487224
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 311.969768,
+              "sign": "Gemini",
+              "degree": 23.637216
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.041203,
+              "sign": "Virgo",
+              "degree": 24.494436
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 350.571309,
+              "sign": "Scorpio",
+              "degree": 6.855708
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 32.919112,
+              "sign": "Gemini",
+              "degree": 5.029344
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 77.592865,
+              "sign": "Capricorn",
+              "degree": 1.11438
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 257.592865,
+              "sign": "Cancer",
+              "degree": 1.11438
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "provider-varga-new-york-1999",
+    "source": "astronomy-engine",
+    "provider_metadata": {
+      "providerName": "astronomy-engine",
+      "providerVersion": "2.1.19",
+      "calculationMode": "naksharix_internal_astronomy_engine_geocentric_sidereal_lahiri",
+      "ayanamsaMethod": "Naksharix Lahiri / Chitra Paksha approximation",
+      "precisionLevel": "deterministic_provider_regression",
+      "verificationLevel": "provider_verified",
+      "externalVerification": false
+    },
+    "source_note": "Generated from provider Kundli sidereal planet longitudes using Naksharix Varga formulas. Provider regression only.",
+    "verification_level": "provider_verified",
+    "external_verification": false,
+    "input": {
+      "kundliFixtureId": "provider-kundli-new-york-1999",
+      "planets": [
+        {
+          "planet": "Sun",
+          "sign": "Scorpio",
+          "degree": 14.441773,
+          "absoluteLongitude": 224.441773,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Moon",
+          "sign": "Leo",
+          "degree": 26.442881,
+          "absoluteLongitude": 146.442881,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mars",
+          "sign": "Capricorn",
+          "degree": 9.729532,
+          "absoluteLongitude": 279.729532,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mercury",
+          "sign": "Libra",
+          "degree": 24.392573,
+          "absoluteLongitude": 204.392573,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Jupiter",
+          "sign": "Aries",
+          "degree": 1.823117,
+          "absoluteLongitude": 1.823117,
+          "retrograde": true,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Venus",
+          "sign": "Libra",
+          "degree": 0.389961,
+          "absoluteLongitude": 180.389961,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Saturn",
+          "sign": "Aries",
+          "degree": 17.98295,
+          "absoluteLongitude": 17.98295,
+          "retrograde": true,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Rahu",
+          "sign": "Cancer",
+          "degree": 12.859013,
+          "absoluteLongitude": 102.859013,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Ketu",
+          "sign": "Capricorn",
+          "degree": 12.859013,
+          "absoluteLongitude": 282.859013,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        }
+      ]
+    },
+    "expected": {
+      "charts": [
+        {
+          "chart": "D1",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 224.441773,
+              "sign": "Scorpio",
+              "degree": 14.441773
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 146.442881,
+              "sign": "Leo",
+              "degree": 26.442881
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 279.729532,
+              "sign": "Capricorn",
+              "degree": 9.729532
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 204.392573,
+              "sign": "Libra",
+              "degree": 24.392573
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 1.823117,
+              "sign": "Aries",
+              "degree": 1.823117
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 180.389961,
+              "sign": "Libra",
+              "degree": 0.389961
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 17.98295,
+              "sign": "Aries",
+              "degree": 17.98295
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 102.859013,
+              "sign": "Cancer",
+              "degree": 12.859013
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 282.859013,
+              "sign": "Capricorn",
+              "degree": 12.859013
+            }
+          ]
+        },
+        {
+          "chart": "D2",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 224.441773,
+              "sign": "Cancer",
+              "degree": 28.883546
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 146.442881,
+              "sign": "Cancer",
+              "degree": 22.885762
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 279.729532,
+              "sign": "Cancer",
+              "degree": 19.459064
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 204.392573,
+              "sign": "Cancer",
+              "degree": 18.785146
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 1.823117,
+              "sign": "Leo",
+              "degree": 3.646234
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 180.389961,
+              "sign": "Leo",
+              "degree": 0.779922
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 17.98295,
+              "sign": "Cancer",
+              "degree": 5.9659
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 102.859013,
+              "sign": "Cancer",
+              "degree": 25.718026
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 282.859013,
+              "sign": "Cancer",
+              "degree": 25.718026
+            }
+          ]
+        },
+        {
+          "chart": "D3",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 224.441773,
+              "sign": "Pisces",
+              "degree": 13.325319
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 146.442881,
+              "sign": "Aries",
+              "degree": 19.328643
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 279.729532,
+              "sign": "Capricorn",
+              "degree": 29.188596
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 204.392573,
+              "sign": "Gemini",
+              "degree": 13.177719
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 1.823117,
+              "sign": "Aries",
+              "degree": 5.469351
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 180.389961,
+              "sign": "Libra",
+              "degree": 1.169883
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 17.98295,
+              "sign": "Leo",
+              "degree": 23.94885
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 102.859013,
+              "sign": "Scorpio",
+              "degree": 8.577039
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 282.859013,
+              "sign": "Taurus",
+              "degree": 8.577039
+            }
+          ]
+        },
+        {
+          "chart": "D9",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 224.441773,
+              "sign": "Scorpio",
+              "degree": 9.975957
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 146.442881,
+              "sign": "Scorpio",
+              "degree": 27.985929
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 279.729532,
+              "sign": "Pisces",
+              "degree": 27.565788
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 204.392573,
+              "sign": "Taurus",
+              "degree": 9.533157
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 1.823117,
+              "sign": "Aries",
+              "degree": 16.408053
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 180.389961,
+              "sign": "Libra",
+              "degree": 3.509649
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 17.98295,
+              "sign": "Virgo",
+              "degree": 11.84655
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 102.859013,
+              "sign": "Libra",
+              "degree": 25.731117
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 282.859013,
+              "sign": "Aries",
+              "degree": 25.731117
+            }
+          ]
+        },
+        {
+          "chart": "D10",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 224.441773,
+              "sign": "Scorpio",
+              "degree": 24.41773
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 146.442881,
+              "sign": "Aries",
+              "degree": 24.42881
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 279.729532,
+              "sign": "Sagittarius",
+              "degree": 7.29532
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 204.392573,
+              "sign": "Gemini",
+              "degree": 3.92573
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 1.823117,
+              "sign": "Aries",
+              "degree": 18.23117
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 180.389961,
+              "sign": "Libra",
+              "degree": 3.89961
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 17.98295,
+              "sign": "Virgo",
+              "degree": 29.8295
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 102.859013,
+              "sign": "Cancer",
+              "degree": 8.59013
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 282.859013,
+              "sign": "Capricorn",
+              "degree": 8.59013
+            }
+          ]
+        },
+        {
+          "chart": "D12",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 224.441773,
+              "sign": "Aries",
+              "degree": 23.301276
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 146.442881,
+              "sign": "Gemini",
+              "degree": 17.314572
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 279.729532,
+              "sign": "Aries",
+              "degree": 26.754384
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 204.392573,
+              "sign": "Cancer",
+              "degree": 22.710876
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 1.823117,
+              "sign": "Aries",
+              "degree": 21.877404
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 180.389961,
+              "sign": "Libra",
+              "degree": 4.679532
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 17.98295,
+              "sign": "Scorpio",
+              "degree": 5.7954
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 102.859013,
+              "sign": "Sagittarius",
+              "degree": 4.308156
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 282.859013,
+              "sign": "Gemini",
+              "degree": 4.308156
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "provider-varga-london-1988",
+    "source": "astronomy-engine",
+    "provider_metadata": {
+      "providerName": "astronomy-engine",
+      "providerVersion": "2.1.19",
+      "calculationMode": "naksharix_internal_astronomy_engine_geocentric_sidereal_lahiri",
+      "ayanamsaMethod": "Naksharix Lahiri / Chitra Paksha approximation",
+      "precisionLevel": "deterministic_provider_regression",
+      "verificationLevel": "provider_verified",
+      "externalVerification": false
+    },
+    "source_note": "Generated from provider Kundli sidereal planet longitudes using Naksharix Varga formulas. Provider regression only.",
+    "verification_level": "provider_verified",
+    "external_verification": false,
+    "input": {
+      "kundliFixtureId": "provider-kundli-london-1988",
+      "planets": [
+        {
+          "planet": "Sun",
+          "sign": "Leo",
+          "degree": 26.087262,
+          "absoluteLongitude": 146.087262,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Moon",
+          "sign": "Virgo",
+          "degree": 8.512703,
+          "absoluteLongitude": 158.512703,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mars",
+          "sign": "Pisces",
+          "degree": 15.843617,
+          "absoluteLongitude": 345.843617,
+          "retrograde": true,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mercury",
+          "sign": "Virgo",
+          "degree": 22.398884,
+          "absoluteLongitude": 172.398884,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Jupiter",
+          "sign": "Taurus",
+          "degree": 12.18312,
+          "absoluteLongitude": 42.18312,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Venus",
+          "sign": "Cancer",
+          "degree": 11.489292,
+          "absoluteLongitude": 101.489292,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Saturn",
+          "sign": "Sagittarius",
+          "degree": 2.367258,
+          "absoluteLongitude": 242.367258,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Rahu",
+          "sign": "Aquarius",
+          "degree": 19.947251,
+          "absoluteLongitude": 319.947251,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Ketu",
+          "sign": "Leo",
+          "degree": 19.947251,
+          "absoluteLongitude": 139.947251,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        }
+      ]
+    },
+    "expected": {
+      "charts": [
+        {
+          "chart": "D1",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 146.087262,
+              "sign": "Leo",
+              "degree": 26.087262
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 158.512703,
+              "sign": "Virgo",
+              "degree": 8.512703
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 345.843617,
+              "sign": "Pisces",
+              "degree": 15.843617
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 172.398884,
+              "sign": "Virgo",
+              "degree": 22.398884
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.18312,
+              "sign": "Taurus",
+              "degree": 12.18312
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 101.489292,
+              "sign": "Cancer",
+              "degree": 11.489292
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 242.367258,
+              "sign": "Sagittarius",
+              "degree": 2.367258
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 319.947251,
+              "sign": "Aquarius",
+              "degree": 19.947251
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 139.947251,
+              "sign": "Leo",
+              "degree": 19.947251
+            }
+          ]
+        },
+        {
+          "chart": "D2",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 146.087262,
+              "sign": "Cancer",
+              "degree": 22.174524
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 158.512703,
+              "sign": "Cancer",
+              "degree": 17.025406
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 345.843617,
+              "sign": "Leo",
+              "degree": 1.687234
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 172.398884,
+              "sign": "Leo",
+              "degree": 14.797768
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.18312,
+              "sign": "Cancer",
+              "degree": 24.36624
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 101.489292,
+              "sign": "Cancer",
+              "degree": 22.978584
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 242.367258,
+              "sign": "Leo",
+              "degree": 4.734516
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 319.947251,
+              "sign": "Cancer",
+              "degree": 9.894502
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 139.947251,
+              "sign": "Cancer",
+              "degree": 9.894502
+            }
+          ]
+        },
+        {
+          "chart": "D3",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 146.087262,
+              "sign": "Aries",
+              "degree": 18.261786
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 158.512703,
+              "sign": "Virgo",
+              "degree": 25.538109
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 345.843617,
+              "sign": "Cancer",
+              "degree": 17.530851
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 172.398884,
+              "sign": "Taurus",
+              "degree": 7.196652
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.18312,
+              "sign": "Virgo",
+              "degree": 6.54936
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 101.489292,
+              "sign": "Scorpio",
+              "degree": 4.467876
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 242.367258,
+              "sign": "Sagittarius",
+              "degree": 7.101774
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 319.947251,
+              "sign": "Gemini",
+              "degree": 29.841753
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 139.947251,
+              "sign": "Sagittarius",
+              "degree": 29.841753
+            }
+          ]
+        },
+        {
+          "chart": "D9",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 146.087262,
+              "sign": "Scorpio",
+              "degree": 24.785358
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 158.512703,
+              "sign": "Pisces",
+              "degree": 16.614327
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 345.843617,
+              "sign": "Scorpio",
+              "degree": 22.592553
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 172.398884,
+              "sign": "Cancer",
+              "degree": 21.589956
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.18312,
+              "sign": "Aries",
+              "degree": 19.64808
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 101.489292,
+              "sign": "Libra",
+              "degree": 13.403628
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 242.367258,
+              "sign": "Aries",
+              "degree": 21.305322
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 319.947251,
+              "sign": "Pisces",
+              "degree": 29.525259
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 139.947251,
+              "sign": "Virgo",
+              "degree": 29.525259
+            }
+          ]
+        },
+        {
+          "chart": "D10",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 146.087262,
+              "sign": "Aries",
+              "degree": 20.87262
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 158.512703,
+              "sign": "Cancer",
+              "degree": 25.12703
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 345.843617,
+              "sign": "Aries",
+              "degree": 8.43617
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 172.398884,
+              "sign": "Sagittarius",
+              "degree": 13.98884
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.18312,
+              "sign": "Taurus",
+              "degree": 1.8312
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 101.489292,
+              "sign": "Gemini",
+              "degree": 24.89292
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 242.367258,
+              "sign": "Sagittarius",
+              "degree": 23.67258
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 319.947251,
+              "sign": "Leo",
+              "degree": 19.47251
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 139.947251,
+              "sign": "Aquarius",
+              "degree": 19.47251
+            }
+          ]
+        },
+        {
+          "chart": "D12",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 146.087262,
+              "sign": "Gemini",
+              "degree": 13.047144
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 158.512703,
+              "sign": "Sagittarius",
+              "degree": 12.152436
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 345.843617,
+              "sign": "Virgo",
+              "degree": 10.123404
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 172.398884,
+              "sign": "Taurus",
+              "degree": 28.786608
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 42.18312,
+              "sign": "Virgo",
+              "degree": 26.19744
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 101.489292,
+              "sign": "Scorpio",
+              "degree": 17.871504
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 242.367258,
+              "sign": "Sagittarius",
+              "degree": 28.407096
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 319.947251,
+              "sign": "Virgo",
+              "degree": 29.367012
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 139.947251,
+              "sign": "Pisces",
+              "degree": 29.367012
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "provider-varga-sydney-1976",
+    "source": "astronomy-engine",
+    "provider_metadata": {
+      "providerName": "astronomy-engine",
+      "providerVersion": "2.1.19",
+      "calculationMode": "naksharix_internal_astronomy_engine_geocentric_sidereal_lahiri",
+      "ayanamsaMethod": "Naksharix Lahiri / Chitra Paksha approximation",
+      "precisionLevel": "deterministic_provider_regression",
+      "verificationLevel": "provider_verified",
+      "externalVerification": false
+    },
+    "source_note": "Generated from provider Kundli sidereal planet longitudes using Naksharix Varga formulas. Provider regression only.",
+    "verification_level": "provider_verified",
+    "external_verification": false,
+    "input": {
+      "kundliFixtureId": "provider-kundli-sydney-1976",
+      "planets": [
+        {
+          "planet": "Sun",
+          "sign": "Aries",
+          "degree": 20.822179,
+          "absoluteLongitude": 20.822179,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Moon",
+          "sign": "Gemini",
+          "degree": 20.249255,
+          "absoluteLongitude": 80.249255,
+          "retrograde": false,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mars",
+          "sign": "Gemini",
+          "degree": 29.999762,
+          "absoluteLongitude": 89.999762,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Mercury",
+          "sign": "Taurus",
+          "degree": 9.334243,
+          "absoluteLongitude": 39.334243,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Jupiter",
+          "sign": "Aries",
+          "degree": 15.777352,
+          "absoluteLongitude": 15.777352,
+          "retrograde": false,
+          "combust": true,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Venus",
+          "sign": "Aries",
+          "degree": 8.896991,
+          "absoluteLongitude": 8.896991,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Saturn",
+          "sign": "Cancer",
+          "degree": 3.774627,
+          "absoluteLongitude": 93.774627,
+          "retrograde": false,
+          "combust": false,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Rahu",
+          "sign": "Libra",
+          "degree": 19.133956,
+          "absoluteLongitude": 199.133956,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        },
+        {
+          "planet": "Ketu",
+          "sign": "Aries",
+          "degree": 19.133956,
+          "absoluteLongitude": 19.133956,
+          "retrograde": true,
+          "combust": null,
+          "toleranceDegrees": 0.000001
+        }
+      ]
+    },
+    "expected": {
+      "charts": [
+        {
+          "chart": "D1",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 20.822179,
+              "sign": "Aries",
+              "degree": 20.822179
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 80.249255,
+              "sign": "Gemini",
+              "degree": 20.249255
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 89.999762,
+              "sign": "Gemini",
+              "degree": 29.999762
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 39.334243,
+              "sign": "Taurus",
+              "degree": 9.334243
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 15.777352,
+              "sign": "Aries",
+              "degree": 15.777352
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 8.896991,
+              "sign": "Aries",
+              "degree": 8.896991
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 93.774627,
+              "sign": "Cancer",
+              "degree": 3.774627
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 199.133956,
+              "sign": "Libra",
+              "degree": 19.133956
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 19.133956,
+              "sign": "Aries",
+              "degree": 19.133956
+            }
+          ]
+        },
+        {
+          "chart": "D2",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 20.822179,
+              "sign": "Cancer",
+              "degree": 11.644358
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 80.249255,
+              "sign": "Cancer",
+              "degree": 10.49851
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 89.999762,
+              "sign": "Cancer",
+              "degree": 29.999524
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 39.334243,
+              "sign": "Cancer",
+              "degree": 18.668486
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 15.777352,
+              "sign": "Cancer",
+              "degree": 1.554704
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 8.896991,
+              "sign": "Leo",
+              "degree": 17.793982
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 93.774627,
+              "sign": "Cancer",
+              "degree": 7.549254
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 199.133956,
+              "sign": "Cancer",
+              "degree": 8.267912
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 19.133956,
+              "sign": "Cancer",
+              "degree": 8.267912
+            }
+          ]
+        },
+        {
+          "chart": "D3",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 20.822179,
+              "sign": "Sagittarius",
+              "degree": 2.466537
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 80.249255,
+              "sign": "Aquarius",
+              "degree": 0.747765
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 89.999762,
+              "sign": "Aquarius",
+              "degree": 29.999286
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 39.334243,
+              "sign": "Taurus",
+              "degree": 28.002729
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 15.777352,
+              "sign": "Leo",
+              "degree": 17.332056
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 8.896991,
+              "sign": "Aries",
+              "degree": 26.690973
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 93.774627,
+              "sign": "Cancer",
+              "degree": 11.323881
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 199.133956,
+              "sign": "Aquarius",
+              "degree": 27.401868
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 19.133956,
+              "sign": "Leo",
+              "degree": 27.401868
+            }
+          ]
+        },
+        {
+          "chart": "D9",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 20.822179,
+              "sign": "Libra",
+              "degree": 7.399611
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 80.249255,
+              "sign": "Aries",
+              "degree": 2.243295
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 89.999762,
+              "sign": "Gemini",
+              "degree": 29.997858
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 39.334243,
+              "sign": "Pisces",
+              "degree": 24.008187
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 15.777352,
+              "sign": "Leo",
+              "degree": 21.996168
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 8.896991,
+              "sign": "Gemini",
+              "degree": 20.072919
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 93.774627,
+              "sign": "Leo",
+              "degree": 3.971643
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 199.133956,
+              "sign": "Pisces",
+              "degree": 22.205604
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 19.133956,
+              "sign": "Virgo",
+              "degree": 22.205604
+            }
+          ]
+        },
+        {
+          "chart": "D10",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 20.822179,
+              "sign": "Libra",
+              "degree": 28.22179
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 80.249255,
+              "sign": "Sagittarius",
+              "degree": 22.49255
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 89.999762,
+              "sign": "Pisces",
+              "degree": 29.99762
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 39.334243,
+              "sign": "Aries",
+              "degree": 3.34243
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 15.777352,
+              "sign": "Virgo",
+              "degree": 7.77352
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 8.896991,
+              "sign": "Gemini",
+              "degree": 28.96991
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 93.774627,
+              "sign": "Aries",
+              "degree": 7.74627
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 199.133956,
+              "sign": "Aries",
+              "degree": 11.33956
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 19.133956,
+              "sign": "Libra",
+              "degree": 11.33956
+            }
+          ]
+        },
+        {
+          "chart": "D12",
+          "verificationLevel": "provider_verified",
+          "publicEnabled": false,
+          "placements": [
+            {
+              "planet": "Sun",
+              "sourceLongitude": 20.822179,
+              "sign": "Sagittarius",
+              "degree": 9.866148
+            },
+            {
+              "planet": "Moon",
+              "sourceLongitude": 80.249255,
+              "sign": "Aquarius",
+              "degree": 2.99106
+            },
+            {
+              "planet": "Mars",
+              "sourceLongitude": 89.999762,
+              "sign": "Taurus",
+              "degree": 29.997144
+            },
+            {
+              "planet": "Mercury",
+              "sourceLongitude": 39.334243,
+              "sign": "Leo",
+              "degree": 22.010916
+            },
+            {
+              "planet": "Jupiter",
+              "sourceLongitude": 15.777352,
+              "sign": "Libra",
+              "degree": 9.328224
+            },
+            {
+              "planet": "Venus",
+              "sourceLongitude": 8.896991,
+              "sign": "Cancer",
+              "degree": 16.763892
+            },
+            {
+              "planet": "Saturn",
+              "sourceLongitude": 93.774627,
+              "sign": "Leo",
+              "degree": 15.295524
+            },
+            {
+              "planet": "Rahu",
+              "sourceLongitude": 199.133956,
+              "sign": "Taurus",
+              "degree": 19.607472
+            },
+            {
+              "planet": "Ketu",
+              "sourceLongitude": 19.133956,
+              "sign": "Scorpio",
+              "degree": 19.607472
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

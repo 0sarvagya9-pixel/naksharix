@@ -1,0 +1,34 @@
+{
+  "id": "ext-kundli-your-id",
+  "name": "Externally verified Kundli fixture",
+  "purpose": "Strict chart precision validation for ascendant, Moon, planets, nakshatra, and Dasha balance.",
+  "source": "Trusted source name or export reference",
+  "source_note": "Include reviewer, source, date checked, ayanamsa, house system, timezone, latitude, longitude, and any caveats.",
+  "verified_level": "needs_external_validation",
+  "input": {
+    "date": "YYYY-MM-DD",
+    "time": "HH:mm:ss",
+    "timezone": "+05:30",
+    "latitude": 0,
+    "longitude": 0,
+    "place": "City, Country",
+    "ayanamsa": "Lahiri / Chitra Paksha",
+    "house_system": "Vedic Whole Sign"
+  },
+  "expected": {
+    "ascendant": { "sign": null, "degree": null, "toleranceDegrees": 0.25 },
+    "moon": { "sign": null, "degree": null, "nakshatra": null, "pada": null, "toleranceDegrees": 0.25 },
+    "planets": {
+      "Sun": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+      "Moon": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+      "Mars": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+      "Mercury": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+      "Jupiter": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+      "Venus": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+      "Saturn": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+      "Rahu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+      "Ketu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 }
+    },
+    "dasha": { "startingMahadashaLord": null, "balanceAtBirth": null, "toleranceDays": 1, "toleranceYears": null, "expectedTransitions": [] }
+  }
+}

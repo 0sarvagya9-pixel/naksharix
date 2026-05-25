@@ -21,3 +21,34 @@ export type InterpretationEngineStatus = {
   verifiedRulesCount: number;
   requiredBeforeActivation: string[];
 };
+
+export type InterpretationFactSet = {
+  planets?: Array<{ planet: string; sign?: string | null; house?: number | null; nakshatra?: string | null }>;
+  moon?: { sign?: string | null; nakshatra?: string | null; pada?: number | null };
+  ascendant?: { sign?: string | null };
+  dasha?: { mahadashaLord?: string | null; antardashaLord?: string | null };
+  transit?: { planet?: string; sign?: string | null }[];
+  varga?: { chart: string; available: boolean }[];
+};
+
+export type InterpretationSectionKey = "overview" | "career" | "relationship" | "finance" | "health_tendency" | "spiritual_guidance";
+
+export type InterpretationSection = {
+  key: InterpretationSectionKey;
+  title: string;
+  text: string;
+  confidence: InterpretationConfidence;
+  claimBoundary: string;
+  sourceRuleIds: string[];
+};
+
+export type InterpretationResult = {
+  sections: InterpretationSection[];
+  metadata: {
+    ruleset: "starter_rules";
+    verified: false;
+    publicPersonalizedPredictionEnabled: false;
+    missingInputs: string[];
+    limitations: string[];
+  };
+};

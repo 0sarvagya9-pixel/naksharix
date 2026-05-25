@@ -1,0 +1,28 @@
+{
+  "id": "transit-your-id",
+  "name": "Externally verified transit fixture",
+  "purpose": "Ingress and retrograde/direct validation for a transit planet.",
+  "source": "Trusted source name or export reference",
+  "source_note": "Include source, reviewer, ayanamsa, timezone, and date range.",
+  "verified_level": "needs_external_validation",
+  "input": {
+    "planet": "Jupiter",
+    "fromSign": null,
+    "toSign": null,
+    "startDate": "YYYY-MM-DD",
+    "endDate": "YYYY-MM-DD",
+    "timezone": "Asia/Kolkata",
+    "ayanamsa": "lahiri"
+  },
+  "expected": {
+    "ingressAt": null,
+    "retrogradeStart": null,
+    "retrogradeEnd": null,
+    "directAt": null,
+    "positionBeforeIngress": null,
+    "positionAfterIngress": null,
+    "natalOverlayRequired": true,
+    "rashiWiseContentAllowed": false,
+    "toleranceHours": null
+  }
+}

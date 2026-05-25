@@ -18,3 +18,27 @@ export type RemediesEngineStatus = {
   verifiedRulesCount: number;
   claimBoundaries: string[];
 };
+
+export type RemedyInputCondition = {
+  trigger: RemedyTrigger;
+  present: boolean;
+  severity?: "mild" | "moderate" | "strong" | "needs_review";
+};
+
+export type RemedySuggestion = {
+  trigger: RemedyTrigger;
+  category: RemedyCategory;
+  recommendation: string;
+  caution: string;
+  verified: false;
+};
+
+export type RemediesResult = {
+  suggestions: RemedySuggestion[];
+  metadata: {
+    ruleset: "safe_starter_remedies";
+    verified: false;
+    publicRemediesEnabled: false;
+    limitations: string[];
+  };
+};

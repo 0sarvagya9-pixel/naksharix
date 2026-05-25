@@ -337,7 +337,7 @@ function HoroscopeMegaDropdown({ locale, active }: { locale: Locale; active: boo
             <div key={group.title} className="rounded-xl border border-[#263957]/70 bg-[#0a1224]/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <p className="font-cinzel text-sm font-bold text-[#f3d382]">{group.title}</p>
               <div className="mt-3 grid gap-1.5">
-                {group.items.map((item) => item.href ? (
+                {group.items.map((item) => ("href" in item && item.href) ? (
                   <Link key={item.label} href={item.href} className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#ffffff] transition hover:bg-[#dca956]/10 hover:text-[#f3d382]">
                     <span>{item.label}</span>
                     <span className="shrink-0 rounded-full border border-[#00f5a0]/30 bg-[#00f5a0]/10 px-2 py-0.5 text-[0.6rem] text-[#00f5a0]">{labels.active}</span>
@@ -447,7 +447,7 @@ function MobileHoroscopeAccordion({ locale, open, setOpen }: { locale: Locale; o
             <div key={group.title} className="rounded-lg border border-[#263957] bg-[#020612]/70 p-3">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#dca956]">{group.title}</p>
               <div className="mt-2 grid gap-1.5">
-                {group.items.map((item) => item.href ? (
+                {group.items.map((item) => ("href" in item && item.href) ? (
                   <Link key={item.label} href={item.href} className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-white hover:bg-[#dca956]/10">
                     <span>{item.label}</span><span className="text-[0.65rem] text-[#00f5a0]">{labels.active}</span>
                   </Link>
@@ -658,7 +658,7 @@ function calculatorDropdownLabels(locale: Locale) {
         items: [
           { label: "Tarot Reading", href: "/tarot" },
           { label: "Horoscope" },
-          { label: "Panchang" },
+          { label: "Panchang", href: "/panchang" },
           { label: "Muhurat" },
           { label: "Sade Sati" }
         ]
@@ -684,7 +684,7 @@ function horoscopeDropdownLabels(locale: Locale) {
             { label: "चीनी राशिफल 2026", href: "/chinese-horoscope-2026" },
             { label: "वार्षिक राशिफल 2026", href: "/yearly-horoscope-2026" },
             { label: "अंक ज्योतिष मासिक राशिफल", href: "/numerology-monthly-horoscope" },
-            { label: "आज का पंचांग" }
+            { label: "आज का पंचांग", href: "/panchang" }
           ]
         },
         {
@@ -720,7 +720,7 @@ function horoscopeDropdownLabels(locale: Locale) {
             { label: "Chinese Horoscope 2026", href: "/chinese-horoscope-2026" },
             { label: "Yearly Horoscope 2026", href: "/yearly-horoscope-2026" },
             { label: "Numerology Monthly Horoscope", href: "/numerology-monthly-horoscope" },
-            { label: "Today’s Panchang" }
+            { label: "Today’s Panchang", href: "/panchang" }
           ]
         },
         {
@@ -755,7 +755,7 @@ function horoscopeDropdownLabels(locale: Locale) {
           { label: "Chinese Horoscope 2026", href: "/chinese-horoscope-2026" },
           { label: "Yearly Horoscope 2026", href: "/yearly-horoscope-2026" },
           { label: "Numerology Monthly Horoscope", href: "/numerology-monthly-horoscope" },
-          { label: "Today’s Panchang" }
+          { label: "Today’s Panchang", href: "/panchang" }
         ]
       },
       {

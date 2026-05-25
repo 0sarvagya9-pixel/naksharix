@@ -8,6 +8,7 @@ const requiredPlanets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "
 const requiredPanchangFields = ["Date", "Location", "Timezone", "Sunrise", "Sunset", "Moonrise", "Moonset", "Tithi", "Nakshatra", "Yoga", "Karana", "Vaar", "Rahu Kaal", "Yamaganda", "Gulika Kaal", "Abhijit Muhurat"];
 const allowedLevels = new Set(["verified_external", "needs_external_validation", "approximate", "blocked_until_provider_ready"]);
 const results = [];
+let chartAdapter = null;
 
 function record(status, name, detail) {
   results.push({ status, name, detail });
@@ -63,6 +64,14 @@ function hasCompleteExpectedValues(sample) {
 }
 
 function providerAdapterStatus() {
+  const fixtureAdapter = sourceExists("lib/astrology/testing/chart-adapter.mjs");
+  if (fixtureAdapter) {
+    return {
+      availableForStrictRuntime: true,
+      detail: "CI-safe chart fixture adapter exists and returns real internal astronomy-engine chart output with unverified metadata.",
+      suggestedAdapter: "Promote precision only after verified_external fixtures compare within tolerance."
+    };
+  }
   const ownEngine = sourceExists("lib/astrology/own-engine/index.ts");
   const provider = sourceExists("lib/astrology/provider.ts");
   const swiss = sourceExists("lib/astrology/swiss-kundli.ts");
@@ -109,12 +118,25 @@ function compareVerifiedFixture(sample, adapter) {
     record("ENGINE_FUNCTION_NOT_EXPORTED", sample.name, adapter.detail);
     return;
   }
-  // Future path: call adapter.calculateChart(sample.input) and compare with tolerances.
-  record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "Runtime comparison adapter is not wired yet.");
+  if (!chartAdapter) {
+    record("ENGINE_FUNCTION_NOT_EXPORTED", sample.name, "CI-safe chart adapter could not be loaded.");
+    return;
+  }
+  return chartAdapter.calculateChartForFixture(sample.input).then((actual) => {
+    if (!actual?.metadata?.verified) {
+      record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, actual?.metadata?.unsupportedFields?.join(", ") || "Adapter returned unverified metadata.");
+      return;
+    }
+    // Future strict comparisons happen here once the adapter returns verified fields.
+    record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "Verified comparison path is reserved but current adapter is not verified.");
+  });
 }
 
 const samples = readJson(fixturePath);
 const adapter = providerAdapterStatus();
+if (adapter.availableForStrictRuntime) {
+  chartAdapter = await import(`file://${path.join(root, "lib/astrology/testing/chart-adapter.mjs").replaceAll("\\", "/")}`);
+}
 
 if (!Array.isArray(samples)) {
   fail("external ephemeris fixture file", "fixture root must be an array");
@@ -123,7 +145,7 @@ if (!Array.isArray(samples)) {
   for (const sample of samples) {
     validateFixtureShape(sample);
     if (sample.verified_level === "verified_external") {
-      compareVerifiedFixture(sample, adapter);
+      await compareVerifiedFixture(sample, adapter);
     } else if (sample.verified_level === "needs_external_validation") {
       record("SKIPPED_NEEDS_EXTERNAL_VALIDATION", sample.name, sample.source_note);
     } else if (sample.verified_level === "approximate") {
@@ -134,7 +156,7 @@ if (!Array.isArray(samples)) {
   }
 }
 
-record("ENGINE_FUNCTION_NOT_EXPORTED", "runtime adapter status", adapter.detail);
+record(adapter.availableForStrictRuntime ? "PASSED" : "ENGINE_FUNCTION_NOT_EXPORTED", "runtime adapter status", adapter.detail);
 
 function validateAyanamsaSupport() {
   const provider = source("lib/astrology/ephemeris/provider.ts");
@@ -151,10 +173,10 @@ function validateAyanamsaSupport() {
     const pattern = new RegExp(`key:\\s*"${key}"[\\s\\S]*?implemented:\\s*false[\\s\\S]*?verified:\\s*false[\\s\\S]*?publicSelectable:\\s*false`);
     if (!pattern.test(provider)) fail("ayanamsa support schema", `${key} must remain unimplemented/unverified/not public selectable`);
   }
-  if (provider.includes('precisionLevel: "blocked_until_provider_ready"') && provider.includes("verified: false") && adapterSource.includes("currentEphemerisMetadata()")) {
-    pass("ephemeris adapter metadata", "current adapter reports blocked/unverified status");
+  if (provider.includes("verified: false") && adapterSource.includes("calculateInternalChart")) {
+    pass("ephemeris adapter metadata", "current adapter uses real internal chart calculation while keeping verification metadata false");
   } else {
-    fail("ephemeris adapter metadata", "current adapter must report blocked/unverified status");
+    fail("ephemeris adapter metadata", "current adapter must use the internal chart engine and keep verification metadata false");
   }
 }
 
@@ -199,6 +221,10 @@ for (const result of results) {
 }
 console.log(`\nExternal ephemeris QA summary: ${JSON.stringify(counts)}`);
 
-if (counts.FAILED || samples.some((sample) => sample.verified_level === "verified_external") && counts.ENGINE_FUNCTION_NOT_EXPORTED) {
+if (
+  counts.FAILED ||
+  samples.some((sample) => sample.verified_level === "verified_external") &&
+    (counts.ENGINE_FUNCTION_NOT_EXPORTED || counts.BLOCKED_UNTIL_PROVIDER_READY)
+) {
   process.exit(1);
 }

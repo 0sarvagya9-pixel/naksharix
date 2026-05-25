@@ -2,14 +2,17 @@ import type { AyanamsaKey, CanonicalChartInput, CanonicalPlanet } from "@/lib/as
 
 export type TransitVerificationLevel =
   | "verified_external"
+  | "provider_verified"
   | "needs_external_validation"
-  | "blocked_until_provider_ready";
+  | "blocked_until_provider_ready"
+  | "limited_internal";
 
 export type TransitActivationStatus =
   | "coming_soon"
   | "educational_only"
   | "blocked_until_provider_ready"
   | "blocked_until_verified_fixtures"
+  | "provider_verified_internal_only"
   | "verified_internal_only";
 
 export type TransitPlanetName = CanonicalPlanet["planet"];
@@ -18,6 +21,9 @@ export type TransitCalculationInput = {
   date: string;
   timezone: string;
   ayanamsa: AyanamsaKey;
+  latitude?: number;
+  longitude?: number;
+  place?: string;
   natalChart?: CanonicalChartInput;
 };
 
@@ -27,6 +33,7 @@ export type TransitPosition = {
   degree: number | null;
   absoluteLongitude: number | null;
   retrograde: boolean | null;
+  verified: boolean;
 };
 
 export type TransitIngressWindow = {
@@ -41,7 +48,7 @@ export type TransitIngressWindow = {
 
 export type TransitEngineStatus = {
   status: TransitActivationStatus;
-  verified: false;
+  verified: boolean;
   publicPredictionEnabled: false;
   reason: string;
   requiredBeforeActivation: string[];
@@ -51,6 +58,10 @@ export type TransitFoundationResult = {
   input: TransitCalculationInput | null;
   positions: TransitPosition[];
   ingressWindows: TransitIngressWindow[];
+  natalOverlay?: {
+    enabled: false;
+    reason: string;
+  };
   metadata: {
     provider: string;
     verificationLevel: TransitVerificationLevel;

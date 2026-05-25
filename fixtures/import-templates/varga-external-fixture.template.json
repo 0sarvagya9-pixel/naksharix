@@ -1,0 +1,17 @@
+{
+  "id": "varga-your-id",
+  "name": "Externally verified Varga fixture",
+  "purpose": "Verified divisional chart placement comparison.",
+  "source": "Trusted source name or export reference",
+  "source_note": "Include source planet longitudes, formula reference, and expected placements.",
+  "verified_level": "needs_external_validation",
+  "input": {
+    "chart": "D9",
+    "ayanamsa": "lahiri",
+    "planets": []
+  },
+  "expected": {
+    "placements": [],
+    "toleranceDegrees": 0.25
+  }
+}

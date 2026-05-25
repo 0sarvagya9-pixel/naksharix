@@ -22,3 +22,15 @@ Payment routes and dependencies exist, but this phase does not activate public p
 - Payment success pages must not be used by non-payment flows.
 - No cart/checkout for Shop.
 - No Consultation marketplace payment in this phase.
+
+## Current Activation Decision
+
+Payment remains disabled for public reports, Shop, Consultation, and AI flows. Razorpay/Stripe routes may exist as infrastructure, but they must fail closed when providers are not configured and must not be linked from request-intent report pages.
+
+Run:
+
+```bash
+npm run qa:payments
+```
+
+This checks provider fallback behavior and scans public report UI for premature payment language.

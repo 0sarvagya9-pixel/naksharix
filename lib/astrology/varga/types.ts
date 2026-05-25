@@ -2,8 +2,10 @@ import type { CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
 
 export type VargaVerificationLevel =
   | "verified_external"
+  | "provider_verified"
   | "needs_external_validation"
-  | "blocked_until_verified_formula";
+  | "blocked_until_verified_formula"
+  | "implemented_unverified";
 
 export type VargaChartKey =
   | "D1"
@@ -26,6 +28,7 @@ export type VargaChartKey =
 
 export type VargaImplementationStatus =
   | "implemented_verified"
+  | "provider_verified"
   | "implemented_unverified"
   | "planned"
   | "blocked_until_fixture";
