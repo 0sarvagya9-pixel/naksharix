@@ -1,0 +1,48 @@
+[
+  {
+    "id": "transit-ingress-sample-001",
+    "name": "Transit ingress fixture slot",
+    "purpose": "Reserve schema for externally verified planet ingress dates before public gochar activation.",
+    "source": null,
+    "source_note": "Expected values must be filled from Swiss Ephemeris or another trusted ephemeris source before this fixture can be marked verified_external.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "planet": "Jupiter",
+      "fromSign": null,
+      "toSign": null,
+      "startDate": "2026-01-01",
+      "endDate": "2026-12-31",
+      "timezone": "Asia/Kolkata",
+      "ayanamsa": "lahiri"
+    },
+    "expected": {
+      "ingressAt": null,
+      "retrogradeStart": null,
+      "retrogradeEnd": null,
+      "toleranceHours": null
+    }
+  },
+  {
+    "id": "transit-retrograde-sample-001",
+    "name": "Transit retrograde fixture slot",
+    "purpose": "Reserve schema for externally verified retrograde/direct windows.",
+    "source": null,
+    "source_note": "Do not use this as a public transit result. It is intentionally skipped until expected values are sourced.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "planet": "Saturn",
+      "fromSign": null,
+      "toSign": null,
+      "startDate": "2026-01-01",
+      "endDate": "2026-12-31",
+      "timezone": "Asia/Kolkata",
+      "ayanamsa": "lahiri"
+    },
+    "expected": {
+      "ingressAt": null,
+      "retrogradeStart": null,
+      "retrogradeEnd": null,
+      "toleranceHours": null
+    }
+  }
+]

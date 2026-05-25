@@ -1,0 +1,30 @@
+[
+  {
+    "id": "shadbala-score-slot-001",
+    "name": "Shadbala verified score fixture slot",
+    "purpose": "Reserve schema for external Shadbala component and total score comparison.",
+    "source": null,
+    "source_note": "No numeric score is asserted until formulas and trusted expected values are available.",
+    "verified_level": "blocked_until_provider_ready",
+    "input": {
+      "date": "2026-01-01",
+      "time": "12:00",
+      "timezone": "Asia/Kolkata",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "ayanamsa": "lahiri"
+    },
+    "expected": {
+      "planets": {
+        "Sun": { "sthanaBala": null, "digBala": null, "kalaBala": null, "cheshtaBala": null, "naisargikaBala": null, "drikBala": null, "total": null },
+        "Moon": { "sthanaBala": null, "digBala": null, "kalaBala": null, "cheshtaBala": null, "naisargikaBala": null, "drikBala": null, "total": null },
+        "Mars": { "sthanaBala": null, "digBala": null, "kalaBala": null, "cheshtaBala": null, "naisargikaBala": null, "drikBala": null, "total": null },
+        "Mercury": { "sthanaBala": null, "digBala": null, "kalaBala": null, "cheshtaBala": null, "naisargikaBala": null, "drikBala": null, "total": null },
+        "Jupiter": { "sthanaBala": null, "digBala": null, "kalaBala": null, "cheshtaBala": null, "naisargikaBala": null, "drikBala": null, "total": null },
+        "Venus": { "sthanaBala": null, "digBala": null, "kalaBala": null, "cheshtaBala": null, "naisargikaBala": null, "drikBala": null, "total": null },
+        "Saturn": { "sthanaBala": null, "digBala": null, "kalaBala": null, "cheshtaBala": null, "naisargikaBala": null, "drikBala": null, "total": null }
+      },
+      "toleranceVirupas": null
+    }
+  }
+]

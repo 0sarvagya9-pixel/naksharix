@@ -1,0 +1,36 @@
+[
+  {
+    "id": "varga-d9-slot-001",
+    "name": "D9 Navamsha fixture slot",
+    "purpose": "Reserve schema for verified D9 placement comparisons.",
+    "source": null,
+    "source_note": "Requires trusted source planet longitudes and expected Navamsha signs before strict assertions.",
+    "verified_level": "blocked_until_verified_formula",
+    "input": {
+      "chart": "D9",
+      "ayanamsa": "lahiri",
+      "planets": []
+    },
+    "expected": {
+      "placements": [],
+      "toleranceDegrees": null
+    }
+  },
+  {
+    "id": "varga-d10-slot-001",
+    "name": "D10 Dashamsha fixture slot",
+    "purpose": "Reserve schema for verified D10 placement comparisons.",
+    "source": null,
+    "source_note": "Requires formula validation and external expected placements.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "chart": "D10",
+      "ayanamsa": "lahiri",
+      "planets": []
+    },
+    "expected": {
+      "placements": [],
+      "toleranceDegrees": null
+    }
+  }
+]

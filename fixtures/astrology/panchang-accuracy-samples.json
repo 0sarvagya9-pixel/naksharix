@@ -1,0 +1,70 @@
+[
+  {
+    "id": "panchang-accuracy-001",
+    "name": "Panchang external accuracy sample slot 1",
+    "purpose": "Future verified location-aware Panchang fixture for date, timezone, sunrise/sunset, lunar fields, and muhurat windows.",
+    "source": null,
+    "source_note": "Pending trusted source such as Drik Panchang, Swiss Ephemeris-backed calculation, or manually verified Panchang with exact location and timezone.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "date": "2026-01-15",
+      "timezone": "+05:30",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "place": "New Delhi, India"
+    },
+    "expected": {
+      "Date": null,
+      "Location": null,
+      "Timezone": null,
+      "Sunrise": null,
+      "Sunset": null,
+      "Moonrise": null,
+      "Moonset": null,
+      "Tithi": null,
+      "Nakshatra": null,
+      "Yoga": null,
+      "Karana": null,
+      "Vaar": null,
+      "Rahu Kaal": null,
+      "Yamaganda": null,
+      "Gulika Kaal": null,
+      "Abhijit Muhurat": null,
+      "toleranceMinutes": 2
+    }
+  },
+  {
+    "id": "panchang-accuracy-002",
+    "name": "Panchang external accuracy sample slot 2",
+    "purpose": "Future verified Panchang fixture for a non-Delhi Indian location.",
+    "source": null,
+    "source_note": "Expected values intentionally null until exact external source data is inserted.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "date": "2026-08-10",
+      "timezone": "+05:30",
+      "latitude": 13.0827,
+      "longitude": 80.2707,
+      "place": "Chennai, India"
+    },
+    "expected": {
+      "Date": null,
+      "Location": null,
+      "Timezone": null,
+      "Sunrise": null,
+      "Sunset": null,
+      "Moonrise": null,
+      "Moonset": null,
+      "Tithi": null,
+      "Nakshatra": null,
+      "Yoga": null,
+      "Karana": null,
+      "Vaar": null,
+      "Rahu Kaal": null,
+      "Yamaganda": null,
+      "Gulika Kaal": null,
+      "Abhijit Muhurat": null,
+      "toleranceMinutes": 2
+    }
+  }
+]

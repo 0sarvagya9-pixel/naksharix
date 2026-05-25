@@ -106,8 +106,13 @@ This document is a product and engineering boundary map. It prevents Naksharix f
 
 - Added fixture directories for astrology, numerology, matching, and safety gates.
 - Added `npm run qa:engine` for deterministic contracts and honest skipped fixtures.
+- Added `npm run qa:ephemeris` for external Kundli precision fixture schema and future verified chart comparisons.
+- Added `npm run qa:transit`, `npm run qa:varga`, `npm run qa:strength`, and `npm run qa:advanced-engine` for advanced engine foundation gates.
+- Added a typed ephemeris provider interface and blocked current-provider adapter for future canonical chart validation.
+- Added Panchang accuracy fixture schema and activation requirements.
+- Added transit, Varga, Shadbala, Ashtakvarga, and premium PDF automation foundation schemas.
 - Verified today: numerology formula contracts, Lo Shu counts, nakshatra degree boundaries, rashi degree boundaries, Vimshottari order/120-year cycle, Ashtakoot max-score contract, Panchang hold gate, transit hold gate, and selected public claim safety checks.
-- Skipped by design: full Kundli benchmark assertion, exact Dasha transition dates, Panchang result accuracy, and transit date accuracy.
+- Skipped by design: external Kundli ephemeris samples, full Kundli benchmark assertion, exact Dasha transition dates, Panchang result accuracy, and transit date accuracy.
 - Activation rule: skipped fixtures must become deterministic assertions before the related public feature can be upgraded from Coming Soon to active.
 
 ## Next Fixture Sources Needed
@@ -117,6 +122,11 @@ This document is a product and engineering boundary map. It prevents Naksharix f
 - Vimshottari Mahadasha/Antardasha transition samples with verified Moon longitude and balance.
 - Panchang samples for multiple locations/timezones with tithi, nakshatra, yoga, karana, Vaar, sunrise/sunset, Rahu Kaal, Yamaganda, Gulika, and Abhijit.
 - Transit ingress and retrograde samples for Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, and Ketu.
+- CI-safe `calculateChart(input)` adapter returning canonical ascendant, planets, Moon, nakshatra, dasha, provider metadata, ayanamsa, and house system.
+- CI-safe Panchang adapter returning Date, Location, Timezone, Sunrise, Sunset, Moonrise, Moonset, Tithi, Nakshatra, Yoga, Karana, Vaar, Rahu Kaal, Yamaganda, Gulika, and Abhijit.
+- Verified Varga formula references and expected placements for D9 and D10 before expanding to other divisional charts.
+- Verified Shadbala and Ashtakvarga numeric score fixtures from trusted software/manual review.
+- Reviewed premium PDF template renderer with Devanagari shaping, chart visuals, storage, and admin review workflow.
 
 ## Phase Order
 

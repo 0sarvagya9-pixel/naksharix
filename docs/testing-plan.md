@@ -15,6 +15,10 @@ Run:
 ```bash
 npm run qa:foundation
 npm run qa:engine
+npm run qa:ephemeris
+npm run qa:transit
+npm run qa:varga
+npm run qa:strength
 ```
 
 ## Engine Fixture Runner
@@ -47,6 +51,33 @@ Current skipped coverage:
 
 These are skipped because they require independently verified ephemeris fixtures and provider-stable runtime calculations. They must not be treated as production-ready until promoted from skipped fixtures to deterministic assertions.
 
+## External Ephemeris QA
+
+`npm run qa:ephemeris` loads `fixtures/astrology/external-ephemeris-kundli-samples.json`.
+
+Current behavior:
+
+- Fixture schema is validated.
+- `needs_external_validation` samples are reported as `SKIPPED_NEEDS_EXTERNAL_VALIDATION`.
+- `verified_external` samples must have complete expected values.
+- If a sample is marked `verified_external` before a CI-safe chart adapter exists, the runner reports `ENGINE_FUNCTION_NOT_EXPORTED` and exits non-zero.
+- Ayanamsa options are checked so unimplemented options are not marked active or public selectable.
+- Panchang accuracy fixture slots are checked for all required future fields and skipped until trusted values exist.
+
+This protects Naksharix from accidentally treating placeholder chart data as verified precision.
+
+## Advanced Engine QA
+
+`npm run qa:transit` verifies that transit foundations exist, public prediction remains disabled, fixture slots are skipped until external data is available, and unverified transit pages are not promoted in sitemap.
+
+`npm run qa:varga` verifies Varga chart definitions and fixture schemas while ensuring no Varga formula or public output is marked verified.
+
+`npm run qa:strength` verifies Shadbala and Ashtakvarga foundation files and fixture schemas while guarding against fake numeric scores or public-enabled flags.
+
+`npm run qa:advanced-engine` runs the transit, Varga, and strength checks together.
+
+`npm run qa:all` now includes foundation, engine, ephemeris, transit, Varga, and strength QA. Skipped fixtures are acceptable only when marked with a clear blocked or needs-validation status.
+
 ## Required Engine Fixtures
 
 - Kundli basic sample: known DOB/time/place with expected ascendant, Moon sign, nakshatra, and planet positions within tolerances.
@@ -58,6 +89,11 @@ These are skipped because they require independently verified ephemeris fixtures
 - Lo Shu samples: present, missing, repeated numbers.
 - Panchang samples: date/location/timezone expected tithi, nakshatra, yoga, karana, sunrise, sunset, Rahu Kaal, Yamaganda, Gulika, Abhijit.
 - Transit samples: exact ingress dates and retrograde windows from verified ephemeris data.
+- Varga samples: source planet longitudes and expected divisional placements for D9, D10, and later charts.
+- Shadbala samples: external component scores and total score by planet.
+- Ashtakvarga samples: Bhinna and Sarva bindu scores from a trusted source.
+- External Kundli samples: ascendant, Moon, all planets, retrograde where supported, Dasha balance, and transitions from a trusted source.
+- Panchang samples: date, location, timezone, sunrise, sunset, moonrise, moonset, tithi, nakshatra, yoga, karana, vaar, Rahu Kaal, Yamaganda, Gulika, and Abhijit.
 
 ## Fixture Source Rules
 
@@ -65,6 +101,8 @@ These are skipped because they require independently verified ephemeris fixtures
 - Pure degree boundary fixtures can be authored internally because they validate mapping math only.
 - Full Kundli, Panchang, Dasha date, and transit fixtures need external references such as a trusted ephemeris, Swiss Ephemeris comparison, AstroSage/Drik Panchang benchmark, or manual astrologer validation.
 - No fixture should be marked deterministic unless its expected values are independently explainable and reproducible.
+- No external chart fixture should be marked `verified_external` until the expected values are sourced and complete.
+- No Panchang fixture should be marked `verified_external` until every required output field has trusted expected values or a documented unavailable rule.
 
 ## UI/Route QA
 

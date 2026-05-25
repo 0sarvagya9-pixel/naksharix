@@ -1,0 +1,35 @@
+{
+  "id": "premium-kundli-report-template-v0",
+  "name": "Premium report automation foundation schema",
+  "purpose": "Define future reviewed premium PDF template structure without claiming generation, payment, or delivery is active.",
+  "status": "foundation_only",
+  "paymentEnabled": false,
+  "automaticGenerationEnabled": false,
+  "automaticDeliveryEnabled": false,
+  "requiresAdminReview": true,
+  "renderer": "future_html_to_pdf_chromium",
+  "sections": [
+    {
+      "key": "birth-summary",
+      "title": "Birth Details Summary",
+      "requiredData": ["name", "dateOfBirth", "timeOfBirth", "birthPlace", "timezone"],
+      "generatedAutomatically": false,
+      "requiresAdminReview": true
+    },
+    {
+      "key": "chart-analysis",
+      "title": "Chart Analysis",
+      "requiredData": ["verifiedChart", "planetPositions", "houses", "nakshatra"],
+      "generatedAutomatically": false,
+      "requiresAdminReview": true
+    },
+    {
+      "key": "dasha-guidance",
+      "title": "Dasha Guidance",
+      "requiredData": ["verifiedDashaTransitions"],
+      "generatedAutomatically": false,
+      "requiresAdminReview": true
+    }
+  ],
+  "claimBoundary": "Do not claim instant premium PDF generation or delivery until real generation, review, and delivery workflows are implemented."
+}

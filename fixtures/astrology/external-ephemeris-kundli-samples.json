@@ -1,0 +1,178 @@
+[
+  {
+    "id": "ext-kundli-001",
+    "name": "External ephemeris sample slot 1",
+    "purpose": "Future verified Kundli precision fixture for ascendant, Moon, planets, and Dasha comparison.",
+    "source": null,
+    "source_note": "Pending trusted external source. Do not mark verified until exact values are cross-checked with source date, time, timezone, latitude, longitude, ayanamsa, and house system.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "date": "1990-01-01",
+      "time": "12:00:00",
+      "timezone": "+05:30",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "place": "New Delhi, India",
+      "ayanamsa": "Lahiri / Chitra Paksha",
+      "house_system": "Vedic Whole Sign"
+    },
+    "expected": {
+      "ascendant": { "sign": null, "degree": null, "toleranceDegrees": 0.25 },
+      "moon": { "sign": null, "degree": null, "nakshatra": null, "pada": null, "toleranceDegrees": 0.25 },
+      "planets": {
+        "Sun": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Moon": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mars": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mercury": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Jupiter": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Venus": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Saturn": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Rahu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Ketu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 }
+      },
+      "dasha": {
+        "startingMahadashaLord": null,
+        "balanceAtBirth": null,
+        "toleranceDays": 1,
+        "toleranceYears": null,
+        "expectedTransitions": []
+      }
+    }
+  },
+  {
+    "id": "ext-kundli-002",
+    "name": "External ephemeris sample slot 2",
+    "purpose": "Future verified Kundli precision fixture for a southern India location/timezone case.",
+    "source": null,
+    "source_note": "Pending trusted external source. Values are intentionally null until externally verified.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "date": "1985-07-15",
+      "time": "06:30:00",
+      "timezone": "+05:30",
+      "latitude": 13.0827,
+      "longitude": 80.2707,
+      "place": "Chennai, India",
+      "ayanamsa": "Lahiri / Chitra Paksha",
+      "house_system": "Vedic Whole Sign"
+    },
+    "expected": {
+      "ascendant": { "sign": null, "degree": null, "toleranceDegrees": 0.25 },
+      "moon": { "sign": null, "degree": null, "nakshatra": null, "pada": null, "toleranceDegrees": 0.25 },
+      "planets": {
+        "Sun": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Moon": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mars": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mercury": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Jupiter": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Venus": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Saturn": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Rahu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Ketu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 }
+      },
+      "dasha": { "startingMahadashaLord": null, "balanceAtBirth": null, "toleranceDays": 1, "toleranceYears": null, "expectedTransitions": [] }
+    }
+  },
+  {
+    "id": "ext-kundli-003",
+    "name": "External ephemeris sample slot 3",
+    "purpose": "Future verified Kundli precision fixture for a western India location/timezone case.",
+    "source": null,
+    "source_note": "Pending trusted external source. Values are intentionally null until externally verified.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "date": "2001-03-21",
+      "time": "23:45:00",
+      "timezone": "+05:30",
+      "latitude": 19.076,
+      "longitude": 72.8777,
+      "place": "Mumbai, India",
+      "ayanamsa": "Lahiri / Chitra Paksha",
+      "house_system": "Vedic Whole Sign"
+    },
+    "expected": {
+      "ascendant": { "sign": null, "degree": null, "toleranceDegrees": 0.25 },
+      "moon": { "sign": null, "degree": null, "nakshatra": null, "pada": null, "toleranceDegrees": 0.25 },
+      "planets": {
+        "Sun": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Moon": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mars": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mercury": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Jupiter": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Venus": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Saturn": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Rahu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Ketu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 }
+      },
+      "dasha": { "startingMahadashaLord": null, "balanceAtBirth": null, "toleranceDays": 1, "toleranceYears": null, "expectedTransitions": [] }
+    }
+  },
+  {
+    "id": "ext-kundli-004",
+    "name": "External ephemeris sample slot 4",
+    "purpose": "Future verified Kundli precision fixture for a non-India timezone case.",
+    "source": null,
+    "source_note": "Pending trusted external source. Values are intentionally null until externally verified.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "date": "1999-11-30",
+      "time": "18:15:00",
+      "timezone": "-05:00",
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "place": "New York, United States",
+      "ayanamsa": "Lahiri / Chitra Paksha",
+      "house_system": "Vedic Whole Sign"
+    },
+    "expected": {
+      "ascendant": { "sign": null, "degree": null, "toleranceDegrees": 0.25 },
+      "moon": { "sign": null, "degree": null, "nakshatra": null, "pada": null, "toleranceDegrees": 0.25 },
+      "planets": {
+        "Sun": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Moon": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mars": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mercury": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Jupiter": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Venus": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Saturn": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Rahu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Ketu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 }
+      },
+      "dasha": { "startingMahadashaLord": null, "balanceAtBirth": null, "toleranceDays": 1, "toleranceYears": null, "expectedTransitions": [] }
+    }
+  },
+  {
+    "id": "ext-kundli-005",
+    "name": "External ephemeris sample slot 5",
+    "purpose": "Future verified Kundli precision fixture for a southern hemisphere timezone case.",
+    "source": null,
+    "source_note": "Pending trusted external source. Values are intentionally null until externally verified.",
+    "verified_level": "needs_external_validation",
+    "input": {
+      "date": "1976-05-05",
+      "time": "03:05:00",
+      "timezone": "+10:00",
+      "latitude": -33.8688,
+      "longitude": 151.2093,
+      "place": "Sydney, Australia",
+      "ayanamsa": "Lahiri / Chitra Paksha",
+      "house_system": "Vedic Whole Sign"
+    },
+    "expected": {
+      "ascendant": { "sign": null, "degree": null, "toleranceDegrees": 0.25 },
+      "moon": { "sign": null, "degree": null, "nakshatra": null, "pada": null, "toleranceDegrees": 0.25 },
+      "planets": {
+        "Sun": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Moon": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mars": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Mercury": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Jupiter": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Venus": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Saturn": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Rahu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 },
+        "Ketu": { "sign": null, "degree": null, "retrograde": null, "combust": null, "toleranceDegrees": 0.25 }
+      },
+      "dasha": { "startingMahadashaLord": null, "balanceAtBirth": null, "toleranceDays": 1, "toleranceYears": null, "expectedTransitions": [] }
+    }
+  }
+]

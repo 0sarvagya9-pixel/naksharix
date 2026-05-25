@@ -16,6 +16,8 @@
         "Timezone",
         "Sunrise",
         "Sunset",
+        "Moonrise",
+        "Moonset",
         "Tithi",
         "Nakshatra",
         "Yoga",

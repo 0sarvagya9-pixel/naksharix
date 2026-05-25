@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ashtakvarga-score-slot-001",
+    "name": "Ashtakvarga verified bindu fixture slot",
+    "purpose": "Reserve schema for Bhinna and Sarva Ashtakvarga score comparison.",
+    "source": null,
+    "source_note": "No bindu score is asserted until formula and external expected values are verified.",
+    "verified_level": "blocked_until_verified_formula",
+    "input": {
+      "date": "2026-01-01",
+      "time": "12:00",
+      "timezone": "Asia/Kolkata",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "ayanamsa": "lahiri"
+    },
+    "expected": {
+      "bhinna": {},
+      "sarva": [],
+      "totalBindus": null
+    }
+  }
+]
