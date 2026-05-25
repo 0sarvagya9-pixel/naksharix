@@ -339,7 +339,7 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
             <Button variant="ghost" className="w-full sm:w-auto" onClick={() => window.print()}>{tr("printReport")}</Button>
             <Button variant="secondary" className="w-full sm:w-auto" onClick={onRegenerate}>{tr("generateAgain")}</Button>
             {result.saved && result.reportId ? <Button variant="outline" asChild className="w-full sm:w-auto"><Link href={`/kundli/report/${result.reportId}`}>{tr("viewReport")}</Link></Button> : null}
-            <Button asChild className="w-full sm:w-auto"><Link href="/reports/kundli-pro">{tr("unlockPremiumReport")}</Link></Button>
+            <Button asChild className="w-full sm:w-auto"><Link href="/reports/premium-kundli">{tr("unlockPremiumReport")}</Link></Button>
             <Button variant="outline" asChild className="w-full sm:w-auto"><Link href="/astrologers">{tr("talkToAstrologer")}</Link></Button>
           </div>
         </div>
@@ -385,7 +385,7 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
         <h3 className="font-cinzel text-xl font-bold text-[#f3d382]">{tr("premiumKundliUpsell")}</h3>
         <p className="mt-2 text-sm leading-6 naksh-muted-text">{tr("premiumKundliUpsellCopy")}</p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <Button asChild><Link href="/reports/kundli-pro">{tr("unlockPremiumReport")}</Link></Button>
+          <Button asChild><Link href="/reports/premium-kundli">{tr("unlockPremiumReport")}</Link></Button>
           <Button variant="outline" asChild><Link href="/astrologers">{tr("talkToAstrologer")}</Link></Button>
         </div>
       </div>

@@ -19,7 +19,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Free Kundli Generator",
     h2: "Create a birth chart summary before choosing a premium report",
     intro: "Enter your name, date of birth, birth time, and birth place to generate a free Kundli summary on Naksharix.",
-    ctas: [{ label: "Generate Free Kundli", href: "/kundli" }, { label: "Ask AI Astrologer", href: "/chatbot" }],
+    ctas: [{ label: "Generate Free Kundli", href: "/kundli" }, { label: "AI Astrologer Coming Soon", href: "/ai-astrologer" }],
     faqs: [
       { question: "Is the free Kundli enough to start?", answer: "Yes. It gives a readable summary first, then offers a premium report for deeper detail." },
       { question: "What birth details are required?", answer: "Name, gender, date, time, place, latitude, longitude, timezone, and optional contact details." }
@@ -33,7 +33,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Kundli Matching Online",
     h2: "Compare compatibility with a clean match report",
     intro: "Use Naksharix kundli matching for Guna Milan, Manglik context, relationship patterns, and practical marriage recommendations.",
-    ctas: [{ label: "Generate Match", href: "/matchmaking" }, { label: "Buy Marriage Report", href: "/reports/marriage-report" }],
+    ctas: [{ label: "Generate Match", href: "/matchmaking" }, { label: "View Couple Report", href: "/reports/couple-kundli" }],
     faqs: [
       { question: "Does matching include Manglik review?", answer: "Yes. The match result includes Manglik compatibility context and remedies." },
       { question: "Can AI explain the result?", answer: "Yes. Gemini can generate a human-readable relationship interpretation when configured." }
@@ -61,7 +61,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Weekly Horoscope",
     h2: "Plan your week with calmer astrological context",
     intro: "Weekly horoscope helps you understand themes, timing, and practical choices across love, work, family, travel, and finance.",
-    ctas: [{ label: "Generate Weekly Horoscope", href: "/horoscope" }, { label: "Ask AI About This Week", href: "/chatbot" }],
+    ctas: [{ label: "Horoscope Coming Soon", href: "/horoscope" }, { label: "AI Astrologer Coming Soon", href: "/ai-astrologer" }],
     faqs: [
       { question: "Is weekly horoscope personalized?", answer: "It can use zodiac and birth context when available." },
       { question: "Can I upgrade after reading?", answer: "Yes. Premium yearly and career reports are available." }
@@ -75,7 +75,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Monthly Horoscope",
     h2: "Understand the larger themes of your month",
     intro: "Monthly horoscope gives a wider planning view with practical signals for routines, decisions, and relationships.",
-    ctas: [{ label: "Generate Monthly Horoscope", href: "/horoscope" }, { label: "Buy Yearly Report", href: "/reports/yearly-ai" }],
+    ctas: [{ label: "Horoscope Coming Soon", href: "/horoscope" }, { label: "View Yearly Report", href: "/reports/yearly-horoscope-report" }],
     faqs: [
       { question: "Does it include remedies?", answer: "Yes. The generated guidance includes a gentle practical remedy." },
       { question: "Does it show lucky details?", answer: "Yes. Horoscope results include lucky number, color, and gemstone." }
@@ -89,7 +89,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Yearly Horoscope 2026",
     h2: "A broader planning view for the year ahead",
     intro: "Use the yearly horoscope route for annual themes and upgrade to a personalized 2026 prediction report when you need depth.",
-    ctas: [{ label: "Generate Yearly Horoscope", href: "/horoscope" }, { label: "Buy 2026 Report", href: "/reports/yearly-ai" }],
+    ctas: [{ label: "Horoscope Coming Soon", href: "/horoscope" }, { label: "View Yearly Report", href: "/reports/yearly-horoscope-report" }],
     faqs: [
       { question: "Is this for all signs?", answer: "Yes. You can choose your zodiac sign in the horoscope tool." },
       { question: "Can I get a detailed yearly PDF?", answer: "Yes. The Yearly Prediction Report includes structured sections and sample preview." }
@@ -103,7 +103,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Love Compatibility Astrology",
     h2: "Understand connection, timing, and communication patterns",
     intro: "Naksharix blends compatibility scoring with human-readable guidance so relationships can be approached with clarity, not fear.",
-    ctas: [{ label: "Check Compatibility", href: "/matchmaking" }, { label: "Buy Marriage Report", href: "/reports/marriage-report" }],
+    ctas: [{ label: "Check Compatibility", href: "/matchmaking" }, { label: "View Couple Report", href: "/reports/couple-kundli" }],
     faqs: [
       { question: "Does astrology decide a relationship?", answer: "No. It offers reflection and context. Real compatibility needs communication and consent." },
       { question: "Can I ask AI about love?", answer: "Yes. Use the AI astrologer for follow-up questions." }
@@ -117,7 +117,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Career Astrology",
     h2: "Use your chart as a planning mirror for work",
     intro: "Career astrology can highlight working style, decision timing, communication patterns, and areas for conscious effort.",
-    ctas: [{ label: "Ask Career Question", href: "/chatbot" }, { label: "Buy Career Report", href: "/reports/career-report" }],
+    ctas: [{ label: "AI Astrologer Coming Soon", href: "/ai-astrologer" }, { label: "View Career Report", href: "/reports/career-report" }],
     faqs: [
       { question: "Can astrology guarantee a job?", answer: "No. Naksharix avoids deterministic claims and focuses on reflection and planning." },
       { question: "Does career report include remedies?", answer: "Yes. It includes practical and spiritual habit suggestions." }
@@ -131,7 +131,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Marriage Astrology",
     h2: "Approach marriage questions with clarity and care",
     intro: "Marriage astrology on Naksharix helps frame compatibility, timing, family themes, communication patterns, and remedies.",
-    ctas: [{ label: "Start Matching", href: "/matchmaking" }, { label: "View Marriage Report", href: "/reports/marriage-report" }],
+    ctas: [{ label: "Start Matching", href: "/matchmaking" }, { label: "View Couple Report", href: "/reports/couple-kundli" }],
     faqs: [
       { question: "Does this include Guna Milan?", answer: "Yes. The matchmaking module includes Guna Milan score and compatibility themes." },
       { question: "Is human consultation available?", answer: "Astrologer profiles and booking CTAs are ready for consultation workflows." }

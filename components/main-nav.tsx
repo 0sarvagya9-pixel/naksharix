@@ -33,7 +33,6 @@ import { cn } from "@/lib/utils";
 const desktopLinks = [
   { id: "home", labelKey: "navHome", href: "/", activePaths: ["/"] },
   { id: "kundli", labelKey: "navKundli", href: "/kundli", activePaths: ["/kundli", "/free-kundli"] },
-  { id: "matchmaking", labelKey: "navMatchMaking", href: "/matchmaking", activePaths: ["/match", "/match-making", "/matchmaking", "/kundli-matching", "/love-compatibility"] },
   { id: "numerology", labelKey: "navNumerology", href: "/numerology", activePaths: ["/numerology"] },
   { id: "tarot", labelKey: "navTarot", href: "/tarot", activePaths: ["/tarot"] },
   { id: "reports", labelKey: "navReports", href: "/reports", activePaths: ["/reports"] }
@@ -48,7 +47,6 @@ const moreGroups: NavDropdownGroup[] = [
     items: [
       { id: "ai-astrologer", labelKey: "navAiAstrologerComingSoon", href: "/ai-astrologer", activePaths: ["/ai-astrologer", "/ai-chat", "/talk-to-kundli", "/chatbot"] },
       { id: "shop", labelKey: "navShopComingSoon", href: "/shop", activePaths: ["/shop"] },
-      { id: "horoscope", labelKey: "navHoroscopeComingSoon", href: "/horoscope", activePaths: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope-2026"] },
       { id: "consultation", labelKey: "navConsultationComingSoon", href: "/consultation", activePaths: ["/consultation", "/consult"] }
     ]
   },
@@ -82,14 +80,6 @@ const sidebarGroups: SidebarGroup[] = [
       { labelKey: "myProfile", href: "/dashboard", activePaths: ["/dashboard"] },
       { labelKey: "myReadings", href: "/dashboard", activePaths: ["/dashboard"] },
       { labelKey: "savedReports", href: "/reports", activePaths: ["/reports"] }
-    ]
-  },
-  {
-    titleKey: "dailyHoroscopeGroup",
-    icon: MoonStar,
-    items: [
-      { labelKey: "navHoroscopeComingSoon", href: "/horoscope", activePaths: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope-2026"] },
-      { labelKey: "zodiac", href: "/zodiac", activePaths: ["/zodiac"] }
     ]
   },
   {
@@ -163,6 +153,7 @@ export function MainNav() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const moreActive = moreLinks.some((item) => isActiveRoute(pathname, item.href, item.activePaths));
   const calculatorsActive = isActiveRoute(pathname, "/free-calculators", ["/free-calculators", "/calculators"]);
+  const horoscopeActive = isActiveRoute(pathname, "/horoscope", ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope-2026"]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -192,7 +183,12 @@ export function MainNav() {
             const active = isActiveRoute(pathname, item.href, item.activePaths);
             return (
             <div key={`${item.id}-nav-slot`} className="contents">
-            {item.id === "tarot" ? <CalculatorMegaDropdown key="free-calculators-mega" locale={locale} tr={tr} active={calculatorsActive} /> : null}
+            {item.id === "tarot" ? (
+              <>
+                <CalculatorMegaDropdown key="free-calculators-mega" locale={locale} tr={tr} active={calculatorsActive} />
+                <HoroscopeMegaDropdown key="horoscope-mega" locale={locale} active={horoscopeActive} />
+              </>
+            ) : null}
             <Link
               href={item.href}
               aria-current={active ? "page" : undefined}
@@ -318,10 +314,49 @@ function CalculatorMegaDropdown({ locale, tr, active }: { locale: Locale; tr: (k
   );
 }
 
+function HoroscopeMegaDropdown({ locale, active }: { locale: Locale; active: boolean }) {
+  const labels = horoscopeDropdownLabels(locale);
+  return (
+    <div className="group relative flex-shrink-0">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={active}
+        className={cn(
+          "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-2.5 2xl:text-[0.8rem]",
+          active
+            ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
+            : "text-[#ffffff]"
+        )}
+      >
+        {labels.title}
+      </button>
+      <div className="invisible absolute left-1/2 top-full z-[80] mt-3 w-[min(94vw,780px)] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#dca956]/30 bg-[#050b18]/95 p-4 opacity-0 shadow-2xl shadow-black/70 ring-1 ring-white/5 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+        <div className="grid gap-4 md:grid-cols-2">
+          {labels.groups.map((group) => (
+            <div key={group.title} className="rounded-xl border border-[#263957]/70 bg-[#0a1224]/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <p className="font-cinzel text-sm font-bold text-[#f3d382]">{group.title}</p>
+              <div className="mt-3 grid gap-1.5">
+                {group.items.map((item) => (
+                  <div key={item} aria-disabled="true" className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#d7deec]">
+                    <span>{item}</span>
+                    <span className="shrink-0 rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-2 py-0.5 text-[0.6rem] text-[#f3d382]">{labels.comingSoon}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: () => void; pathname: string }) {
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const { tr, locale } = useLanguage();
   const [calculatorsOpen, setCalculatorsOpen] = useState(false);
+  const [horoscopeOpen, setHoroscopeOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -369,6 +404,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
             <div className="star-field flex-1 overflow-y-auto p-4">
               <div className="grid gap-4 pb-6">
                 <MobileCalculatorAccordion locale={locale} tr={tr} open={calculatorsOpen} setOpen={setCalculatorsOpen} onClose={onClose} />
+                <MobileHoroscopeAccordion locale={locale} open={horoscopeOpen} setOpen={setHoroscopeOpen} />
                 {sidebarGroups.map((group, groupIndex) => (
                   <SidebarMenuGroup
                     key={group.titleKey}
@@ -389,6 +425,34 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
         </>
       ) : null}
     </AnimatePresence>
+  );
+}
+
+function MobileHoroscopeAccordion({ locale, open, setOpen }: { locale: Locale; open: boolean; setOpen: (value: boolean) => void }) {
+  const labels = horoscopeDropdownLabels(locale);
+  return (
+    <section className="rounded-lg border border-[#dca956]/18 bg-[#0f1c3a]/70 p-3">
+      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left font-cinzel text-sm font-bold text-[#f3d382]">
+        <span className="flex items-center gap-2"><MoonStar className="h-4 w-4" />{labels.title}</span>
+        <span className="text-xs text-[#dca956]">{open ? "−" : "+"}</span>
+      </button>
+      {open ? (
+        <div className="mt-3 grid gap-3">
+          {labels.groups.map((group) => (
+            <div key={group.title} className="rounded-lg border border-[#263957] bg-[#020612]/70 p-3">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#dca956]">{group.title}</p>
+              <div className="mt-2 grid gap-1.5">
+                {group.items.map((item) => (
+                  <div key={item} aria-disabled="true" className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-[#d7deec]">
+                    <span>{item}</span><span className="text-[0.65rem] text-[#f3d382]">{labels.comingSoon}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -484,7 +548,7 @@ function normalizePath(path: string) {
 }
 
 function calculatorDropdownLabels(locale: Locale) {
-  const active = locale === "hi" ? "Active" : "Active";
+  const active = locale === "hi" ? "सक्रिय" : "Active";
   const comingSoon = locale === "hi" ? "जल्द" : "Soon";
   const viewAll = locale === "hi" ? "सभी मुफ़्त कैलकुलेटर देखें" : locale === "hinglish" ? "View All Free Calculators" : "View All Free Calculators";
   if (locale === "hi") {
@@ -588,6 +652,112 @@ function calculatorDropdownLabels(locale: Locale) {
           { label: "Panchang" },
           { label: "Muhurat" },
           { label: "Sade Sati" }
+        ]
+      }
+    ]
+  };
+}
+
+function horoscopeDropdownLabels(locale: Locale) {
+  if (locale === "hi") {
+    return {
+      title: "राशिफल",
+      comingSoon: "जल्द",
+      groups: [
+        {
+          title: "राशिफल",
+          items: [
+            "दैनिक राशिफल",
+            "साप्ताहिक राशिफल",
+            "मासिक राशिफल",
+            "साप्ताहिक प्रेम राशिफल",
+            "चीनी राशिफल 2026",
+            "वार्षिक राशिफल 2026",
+            "अंक ज्योतिष मासिक राशिफल",
+            "आज का पंचांग"
+          ]
+        },
+        {
+          title: "गोचर 2026",
+          items: [
+            "सूर्य गोचर",
+            "चंद्र गोचर",
+            "मंगल गोचर",
+            "बुध गोचर",
+            "गुरु गोचर",
+            "शुक्र गोचर",
+            "जन्म कुंडली में शनि",
+            "राहु गोचर",
+            "केतु गोचर"
+          ]
+        }
+      ]
+    };
+  }
+  if (locale === "hinglish") {
+    return {
+      title: "Horoscope",
+      comingSoon: "Soon",
+      groups: [
+        {
+          title: "Horoscope",
+          items: [
+            "Daily Horoscope",
+            "Weekly Horoscope",
+            "Monthly Horoscope",
+            "Weekly Love Horoscope",
+            "Chinese Horoscope 2026",
+            "Yearly Horoscope 2026",
+            "Numerology Monthly Horoscope",
+            "Today’s Panchang"
+          ]
+        },
+        {
+          title: "Transit 2026",
+          items: [
+            "Sun Transits",
+            "Moon Transits",
+            "Mars Transits",
+            "Mercury Transits",
+            "Jupiter Transits",
+            "Venus Transits",
+            "Saturn in Your Birth Chart",
+            "Rahu Transits",
+            "Ketu Transits"
+          ]
+        }
+      ]
+    };
+  }
+  return {
+    title: "Horoscope",
+    comingSoon: "Coming Soon",
+    groups: [
+      {
+        title: "Horoscope",
+        items: [
+          "Daily Horoscope",
+          "Weekly Horoscope",
+          "Monthly Horoscope",
+          "Weekly Love Horoscope",
+          "Chinese Horoscope 2026",
+          "Yearly Horoscope 2026",
+          "Numerology Monthly Horoscope",
+          "Today’s Panchang"
+        ]
+      },
+      {
+        title: "Transit 2026",
+        items: [
+          "Sun Transits",
+          "Moon Transits",
+          "Mars Transits",
+          "Mercury Transits",
+          "Jupiter Transits",
+          "Venus Transits",
+          "Saturn in Your Birth Chart",
+          "Rahu Transits",
+          "Ketu Transits"
         ]
       }
     ]

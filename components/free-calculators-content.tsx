@@ -180,12 +180,12 @@ function calculatorLabels(locale: Locale) {
       eyebrow: "Free Tools Hub",
       title: "मुफ़्त ज्योतिष कैलकुलेटर",
       subtitle: "कुंडली, मिलान, अंक ज्योतिष, लो शू, नामांक, मोबाइल नंबर, वाहन नंबर, टैरो और अन्य कैलकुलेटर देखें।",
-      active: "Active",
+      active: "सक्रिय",
       comingSoon: "जल्द आ रहा है",
       requiredDetails: "आवश्यक विवरण",
-      openCalculator: "Calculator खोलें",
-      engine: "Engine",
-      filters: { all: "All", active: "Active", soon: "Coming Soon", kundli: "Kundli", numerology: "Numerology", matching: "Matching", tarot: "Tarot", horoscope: "Horoscope" },
+      openCalculator: "कैलकुलेटर खोलें",
+      engine: "इंजन",
+      filters: { all: "सभी", active: "सक्रिय", soon: "जल्द आ रहा है", kundli: "कुंडली", numerology: "अंक ज्योतिष", matching: "मिलान", tarot: "टैरो", horoscope: "राशिफल" },
       groups: { kundli: "कुंडली कैलकुलेटर", numerology: "अंक ज्योतिष कैलकुलेटर", matching: "मिलान कैलकुलेटर", tarot: "टैरो और आध्यात्मिक टूल्स", horoscope: "राशिफल और समय — जल्द आ रहा है" }
     };
   }

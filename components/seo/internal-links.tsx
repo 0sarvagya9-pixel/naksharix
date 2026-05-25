@@ -6,8 +6,8 @@ const links = [
   { href: "/kundli", label: "Free kundli" },
   { href: "/matchmaking", label: "Kundli matching" },
   { href: "/reports", label: "Premium reports" },
-  { href: "/chatbot", label: "AI astrology chat" },
-  { href: "/consultation", label: "Book astrologer" }
+  { href: "/ai-astrologer", label: "AI astrologer coming soon" },
+  { href: "/consultation", label: "Consultation coming soon" }
 ];
 
 export function SeoInternalLinks({ title = "Explore Naksharix" }: { title?: string }) {

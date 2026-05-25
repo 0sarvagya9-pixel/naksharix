@@ -45,8 +45,8 @@ export default async function YearlySignPage({ params }: { params: Params }) {
           2026 asks {zodiac.name} natives to combine ambition with steadiness. Use this yearly horoscope for broad planning, then generate a personalized kundli or yearly report for deeper timing.
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
-          <Button asChild><Link href="/horoscope">Generate Horoscope</Link></Button>
-          <Button variant="outline" asChild><Link href="/reports/yearly-ai">Buy 2026 Report</Link></Button>
+          <Button asChild><Link href="/horoscope">Horoscope Coming Soon</Link></Button>
+          <Button variant="outline" asChild><Link href="/reports/yearly-horoscope-report">View Yearly Report</Link></Button>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {["Career", "Love", "Finance", "Health"].map((topic) => (
