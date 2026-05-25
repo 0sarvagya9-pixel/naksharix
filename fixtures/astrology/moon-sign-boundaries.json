@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Moon sign degree boundary contract",
+    "purpose": "Verify pure longitude-to-rashi mapping at 30-degree boundaries.",
+    "input": {
+      "cases": [
+        { "longitude": 0, "expectedRashi": "Aries", "expectedRashiNumber": 1 },
+        { "longitude": 29.999999, "expectedRashi": "Aries", "expectedRashiNumber": 1 },
+        { "longitude": 30, "expectedRashi": "Taurus", "expectedRashiNumber": 2 },
+        { "longitude": 89.999999, "expectedRashi": "Gemini", "expectedRashiNumber": 3 },
+        { "longitude": 90, "expectedRashi": "Cancer", "expectedRashiNumber": 4 },
+        { "longitude": 330, "expectedRashi": "Pisces", "expectedRashiNumber": 12 },
+        { "longitude": 359.999999, "expectedRashi": "Pisces", "expectedRashiNumber": 12 }
+      ]
+    },
+    "expected": {
+      "rashiCount": 12,
+      "degreesPerRashi": 30
+    },
+    "precision": { "degreeTolerance": 0.000001 },
+    "source_note": "Mathematical sign mapping only. This does not verify real Moon longitude from an ephemeris.",
+    "verified_level": "deterministic"
+  }
+]

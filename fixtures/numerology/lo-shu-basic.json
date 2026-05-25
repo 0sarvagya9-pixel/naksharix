@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Lo Shu repeated and missing numbers",
+    "purpose": "Verify Lo Shu counts from DOB digits.",
+    "input": {
+      "dateOfBirth": "2001-02-03"
+    },
+    "expected": {
+      "presentNumbers": [1, 2, 3],
+      "missingNumbers": [4, 5, 6, 7, 8, 9],
+      "repeatedNumbers": [{ "number": 2, "count": 2 }],
+      "gridCounts": { "1": 1, "2": 2, "3": 1, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0 }
+    },
+    "precision": null,
+    "source_note": "Deterministic Lo Shu DOB digit-count contract. Zero is ignored.",
+    "verified_level": "deterministic"
+  }
+]

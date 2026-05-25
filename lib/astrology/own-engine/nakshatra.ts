@@ -9,7 +9,8 @@ export const nakshatras = [
 export function nakshatraFromLongitude(longitude: number) {
   const normalized = normalizeDegrees(longitude);
   const span = 360 / 27;
-  const index = Math.min(26, Math.floor(normalized / span));
-  const pada = Math.floor((normalized % span) / (span / 4)) + 1;
+  const epsilon = 1e-9;
+  const index = Math.min(26, Math.floor((normalized + epsilon) / span));
+  const pada = Math.min(4, Math.floor(((normalized + epsilon) % span) / (span / 4)) + 1);
   return { name: nakshatras[index], pada };
 }

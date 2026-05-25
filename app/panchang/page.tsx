@@ -27,7 +27,7 @@ export default function PanchangComingSoonPage() {
           <p className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-[#00f5a0]">Coming Soon</p>
           <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">Today&apos;s Panchang Coming Soon</h1>
           <p className="mx-auto mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">
-            Accurate Panchang depends on date, location, timezone, sunrise, sunset, lunar position, tithi, nakshatra, yoga, karana, Rahu Kaal, Yamaganda, Gulika Kaal, and Abhijit Muhurat.
+            Accurate Panchang depends on date, location, timezone, sunrise, sunset, lunar position, tithi, nakshatra, yoga, karana, Vaar, Rahu Kaal, Yamaganda, Gulika Kaal, and Abhijit Muhurat.
           </p>
           <Card className="inner-card mx-auto mt-8 max-w-3xl text-left">
             <CardContent className="p-6">

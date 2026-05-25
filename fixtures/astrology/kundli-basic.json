@@ -1,0 +1,29 @@
+[
+  {
+    "name": "AstroSage Sarvagya Pandey benchmark",
+    "purpose": "External benchmark fixture for future full Kundli engine accuracy checks.",
+    "input": {
+      "name": "Sarvagya Pandey",
+      "gender": "Male",
+      "dateOfBirth": "1992-10-19",
+      "timeOfBirth": "04:20:00",
+      "birthPlace": "Tikamgarh, Madhya Pradesh, India",
+      "latitude": 24.75,
+      "longitude": 79,
+      "timezone": "+5.5"
+    },
+    "expected": {
+      "ascendant": { "sign": "Virgo", "degree": 5.481944 },
+      "moonSign": "Gemini",
+      "nakshatra": "Punarvasu",
+      "pada": 3,
+      "ayanamsa": 23.755833
+    },
+    "precision": {
+      "degreeTolerance": 1,
+      "ayanamsaTolerance": 0.05
+    },
+    "source_note": "Existing benchmark in lib/astrology/test-cases/astrosage-sarvagya-pandey.ts. Full runtime assertion is blocked until the production provider and ephemeris are stable in CI.",
+    "verified_level": "needs_external_validation"
+  }
+]

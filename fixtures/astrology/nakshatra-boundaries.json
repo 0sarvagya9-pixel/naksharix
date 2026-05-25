@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Nakshatra degree boundary contract",
+    "purpose": "Verify pure longitude-to-nakshatra indexing and pada boundaries.",
+    "input": {
+      "spanDegrees": 13.333333333333334,
+      "cases": [
+        { "longitude": 0, "expectedName": "Ashwini", "expectedPada": 1 },
+        { "longitude": 3.3333333333333335, "expectedName": "Ashwini", "expectedPada": 2 },
+        { "longitude": 13.333333333333334, "expectedName": "Bharani", "expectedPada": 1 },
+        { "longitude": 26.666666666666668, "expectedName": "Krittika", "expectedPada": 1 },
+        { "longitude": 79.999999, "expectedName": "Ardra", "expectedPada": 4 },
+        { "longitude": 80, "expectedName": "Punarvasu", "expectedPada": 1 },
+        { "longitude": 90, "expectedName": "Punarvasu", "expectedPada": 4 },
+        { "longitude": 359.999999, "expectedName": "Revati", "expectedPada": 4 }
+      ]
+    },
+    "expected": {
+      "nakshatraCount": 27,
+      "padaCount": 4
+    },
+    "precision": { "degreeTolerance": 0.000001 },
+    "source_note": "Mathematical boundary contract for lib/astrology/own-engine/nakshatra.ts; not an ephemeris accuracy claim.",
+    "verified_level": "deterministic"
+  }
+]

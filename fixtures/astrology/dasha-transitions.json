@@ -1,0 +1,31 @@
+[
+  {
+    "name": "Vimshottari sequence contract",
+    "purpose": "Verify Dasha lord order and total cycle duration.",
+    "input": {
+      "lords": ["Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Saturn", "Mercury"],
+      "years": [7, 20, 6, 10, 7, 18, 16, 19, 17]
+    },
+    "expected": {
+      "totalYears": 120,
+      "firstLord": "Ketu",
+      "lastLord": "Mercury"
+    },
+    "precision": null,
+    "source_note": "Traditional Vimshottari cycle contract. Exact birth Dasha date boundaries still need verified Moon longitude fixtures.",
+    "verified_level": "deterministic"
+  },
+  {
+    "name": "Exact birth Dasha transition fixture placeholder",
+    "purpose": "Future runtime fixture for Mahadasha/Antardasha date boundaries.",
+    "input": {
+      "requires": ["verified moon longitude", "birth date", "timezone", "nakshatra balance"]
+    },
+    "expected": {},
+    "precision": {
+      "dateToleranceDays": 1
+    },
+    "source_note": "Blocked until externally verified Dasha boundary samples are approved.",
+    "verified_level": "needs_external_validation"
+  }
+]

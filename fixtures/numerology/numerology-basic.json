@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Ravi deterministic numerology",
+    "purpose": "Verify deterministic DOB and name-number contracts used by the numerology engine.",
+    "input": {
+      "name": "RAVI",
+      "dateOfBirth": "1990-01-01"
+    },
+    "expected": {
+      "birthNumber": 1,
+      "lifePath": 3,
+      "nameNumber": 5,
+      "soulUrge": 1,
+      "personalityNumber": 4
+    },
+    "precision": null,
+    "source_note": "Pythagorean A=1..I=9 cycle and DDMMYYYY digit reduction contract.",
+    "verified_level": "deterministic"
+  },
+  {
+    "name": "Master number preservation",
+    "purpose": "Verify master numbers are not reduced when the engine uses 11/22/33 preservation.",
+    "input": {
+      "name": "KARAN",
+      "dateOfBirth": "1995-09-29"
+    },
+    "expected": {
+      "birthNumber": 11,
+      "lifePath": 8,
+      "nameNumber": 9
+    },
+    "precision": null,
+    "source_note": "Birth day 29 reduces to 11 and is preserved by the current engine contract.",
+    "verified_level": "deterministic"
+  }
+]

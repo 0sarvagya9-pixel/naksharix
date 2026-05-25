@@ -1,0 +1,43 @@
+[
+  {
+    "name": "Ashtakoot max score contract",
+    "purpose": "Verify the fixed 36-point maximum and canonical koot order.",
+    "input": {
+      "factors": [
+        { "koot": "Varna", "score": 1, "maxScore": 1 },
+        { "koot": "Vashya", "score": 2, "maxScore": 2 },
+        { "koot": "Tara", "score": 3, "maxScore": 3 },
+        { "koot": "Yoni", "score": 4, "maxScore": 4 },
+        { "koot": "Graha Maitri", "score": 5, "maxScore": 5 },
+        { "koot": "Gana", "score": 6, "maxScore": 6 },
+        { "koot": "Bhakoot", "score": 7, "maxScore": 7 },
+        { "koot": "Nadi", "score": 8, "maxScore": 8 }
+      ]
+    },
+    "expected": {
+      "totalMax": 36,
+      "factorCount": 8,
+      "noNegativeScores": true,
+      "noScoreAboveMax": true
+    },
+    "precision": null,
+    "source_note": "Structural Ashtakoot contract. Pair-specific exact scores require independently verified chart fixtures.",
+    "verified_level": "deterministic"
+  },
+  {
+    "name": "Nakshatra reference normalization",
+    "purpose": "Verify key matching nakshatra references remain stable.",
+    "input": {
+      "cases": [
+        { "name": "Bharani", "expectedIndex": 2, "expectedNadi": "Madhya" },
+        { "name": "Punarvasu", "expectedIndex": 7, "expectedNadi": "Adi" }
+      ]
+    },
+    "expected": {
+      "stableIndexes": true
+    },
+    "precision": null,
+    "source_note": "Protects historical matching trust fixes for Bharani/Punarvasu indexing.",
+    "verified_level": "deterministic"
+  }
+]

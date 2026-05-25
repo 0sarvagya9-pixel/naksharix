@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Transit prediction activation gate",
+    "purpose": "Ensure transit prediction pages are not promoted until exact transit data and interpretation rules are verified.",
+    "input": {
+      "blockedRouteFragments": ["sun-transit", "moon-transit", "mars-transit", "mercury-transit", "jupiter-transit", "venus-transit", "rahu-transit", "ketu-transit", "saturn-transit", "gochar"]
+    },
+    "expected": {
+      "activePredictionRoutes": 0,
+      "sitemapPromotion": false,
+      "fakeDateClaims": false
+    },
+    "precision": null,
+    "source_note": "Public truth gate. Educational transit pages may be added later only with clear non-personalized labeling.",
+    "verified_level": "blocked_until_engine_ready"
+  }
+]

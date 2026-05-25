@@ -102,6 +102,22 @@ This document is a product and engineering boundary map. It prevents Naksharix f
 - Panchang and transit must include location/timezone fixtures before public activation.
 - Matching must keep koot max scores fixed at 36 and verify Nadi/Bhakoot edge cases.
 
+## Phase B Fixture Infrastructure Status
+
+- Added fixture directories for astrology, numerology, matching, and safety gates.
+- Added `npm run qa:engine` for deterministic contracts and honest skipped fixtures.
+- Verified today: numerology formula contracts, Lo Shu counts, nakshatra degree boundaries, rashi degree boundaries, Vimshottari order/120-year cycle, Ashtakoot max-score contract, Panchang hold gate, transit hold gate, and selected public claim safety checks.
+- Skipped by design: full Kundli benchmark assertion, exact Dasha transition dates, Panchang result accuracy, and transit date accuracy.
+- Activation rule: skipped fixtures must become deterministic assertions before the related public feature can be upgraded from Coming Soon to active.
+
+## Next Fixture Sources Needed
+
+- Verified planet positions and ascendant from a trusted ephemeris for at least five DOB/time/place samples.
+- Nakshatra and rashi boundary samples around exact segment edges.
+- Vimshottari Mahadasha/Antardasha transition samples with verified Moon longitude and balance.
+- Panchang samples for multiple locations/timezones with tithi, nakshatra, yoga, karana, Vaar, sunrise/sunset, Rahu Kaal, Yamaganda, Gulika, and Abhijit.
+- Transit ingress and retrograde samples for Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, and Ketu.
+
 ## Phase Order
 
 1. Phase A: QA foundation, truth gates, safe CTAs, legal/SEO cleanup.

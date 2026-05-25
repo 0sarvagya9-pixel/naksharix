@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Panchang activation gate",
+    "purpose": "Ensure public Panchang remains disabled until verified location-aware calculation exists.",
+    "input": {
+      "route": "/panchang",
+      "api": "/api/panchang"
+    },
+    "expected": {
+      "apiStatus": 503,
+      "pageStatus": "Coming Soon",
+      "mustNotCall": ["getPanchang("],
+      "requiredFutureFields": [
+        "Date",
+        "Location",
+        "Timezone",
+        "Sunrise",
+        "Sunset",
+        "Tithi",
+        "Nakshatra",
+        "Yoga",
+        "Karana",
+        "Vaar",
+        "Rahu Kaal",
+        "Yamaganda",
+        "Gulika Kaal",
+        "Abhijit Muhurat"
+      ]
+    },
+    "precision": null,
+    "source_note": "Public truth gate. This does not verify Panchang calculation accuracy.",
+    "verified_level": "blocked_until_engine_ready"
+  }
+]
