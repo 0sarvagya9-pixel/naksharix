@@ -153,7 +153,7 @@ export function MainNav() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const moreActive = moreLinks.some((item) => isActiveRoute(pathname, item.href, item.activePaths));
   const calculatorsActive = isActiveRoute(pathname, "/free-calculators", ["/free-calculators", "/calculators"]);
-  const horoscopeActive = isActiveRoute(pathname, "/horoscope", ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope-2026"]);
+  const horoscopeActive = isActiveRoute(pathname, "/horoscope", ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/weekly-love-horoscope", "/yearly-horoscope-2026", "/chinese-horoscope-2026", "/numerology-monthly-horoscope", "/panchang"]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -337,9 +337,14 @@ function HoroscopeMegaDropdown({ locale, active }: { locale: Locale; active: boo
             <div key={group.title} className="rounded-xl border border-[#263957]/70 bg-[#0a1224]/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <p className="font-cinzel text-sm font-bold text-[#f3d382]">{group.title}</p>
               <div className="mt-3 grid gap-1.5">
-                {group.items.map((item) => (
-                  <div key={item} aria-disabled="true" className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#d7deec]">
-                    <span>{item}</span>
+                {group.items.map((item) => item.href ? (
+                  <Link key={item.label} href={item.href} className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#ffffff] transition hover:bg-[#dca956]/10 hover:text-[#f3d382]">
+                    <span>{item.label}</span>
+                    <span className="shrink-0 rounded-full border border-[#00f5a0]/30 bg-[#00f5a0]/10 px-2 py-0.5 text-[0.6rem] text-[#00f5a0]">{labels.active}</span>
+                  </Link>
+                ) : (
+                  <div key={item.label} aria-disabled="true" className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#d7deec]">
+                    <span>{item.label}</span>
                     <span className="shrink-0 rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-2 py-0.5 text-[0.6rem] text-[#f3d382]">{labels.comingSoon}</span>
                   </div>
                 ))}
@@ -442,9 +447,13 @@ function MobileHoroscopeAccordion({ locale, open, setOpen }: { locale: Locale; o
             <div key={group.title} className="rounded-lg border border-[#263957] bg-[#020612]/70 p-3">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#dca956]">{group.title}</p>
               <div className="mt-2 grid gap-1.5">
-                {group.items.map((item) => (
-                  <div key={item} aria-disabled="true" className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-[#d7deec]">
-                    <span>{item}</span><span className="text-[0.65rem] text-[#f3d382]">{labels.comingSoon}</span>
+                {group.items.map((item) => item.href ? (
+                  <Link key={item.label} href={item.href} className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-white hover:bg-[#dca956]/10">
+                    <span>{item.label}</span><span className="text-[0.65rem] text-[#00f5a0]">{labels.active}</span>
+                  </Link>
+                ) : (
+                  <div key={item.label} aria-disabled="true" className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-[#d7deec]">
+                    <span>{item.label}</span><span className="text-[0.65rem] text-[#f3d382]">{labels.comingSoon}</span>
                   </div>
                 ))}
               </div>
@@ -662,33 +671,34 @@ function horoscopeDropdownLabels(locale: Locale) {
   if (locale === "hi") {
     return {
       title: "राशिफल",
+      active: "सक्रिय",
       comingSoon: "जल्द",
       groups: [
         {
           title: "राशिफल",
           items: [
-            "दैनिक राशिफल",
-            "साप्ताहिक राशिफल",
-            "मासिक राशिफल",
-            "साप्ताहिक प्रेम राशिफल",
-            "चीनी राशिफल 2026",
-            "वार्षिक राशिफल 2026",
-            "अंक ज्योतिष मासिक राशिफल",
-            "आज का पंचांग"
+            { label: "दैनिक राशिफल", href: "/daily-horoscope" },
+            { label: "साप्ताहिक राशिफल", href: "/weekly-horoscope" },
+            { label: "मासिक राशिफल", href: "/monthly-horoscope" },
+            { label: "साप्ताहिक प्रेम राशिफल", href: "/weekly-love-horoscope" },
+            { label: "चीनी राशिफल 2026", href: "/chinese-horoscope-2026" },
+            { label: "वार्षिक राशिफल 2026", href: "/yearly-horoscope-2026" },
+            { label: "अंक ज्योतिष मासिक राशिफल", href: "/numerology-monthly-horoscope" },
+            { label: "आज का पंचांग" }
           ]
         },
         {
           title: "गोचर 2026",
           items: [
-            "सूर्य गोचर",
-            "चंद्र गोचर",
-            "मंगल गोचर",
-            "बुध गोचर",
-            "गुरु गोचर",
-            "शुक्र गोचर",
-            "जन्म कुंडली में शनि",
-            "राहु गोचर",
-            "केतु गोचर"
+            { label: "सूर्य गोचर" },
+            { label: "चंद्र गोचर" },
+            { label: "मंगल गोचर" },
+            { label: "बुध गोचर" },
+            { label: "गुरु गोचर" },
+            { label: "शुक्र गोचर" },
+            { label: "जन्म कुंडली में शनि" },
+            { label: "राहु गोचर" },
+            { label: "केतु गोचर" }
           ]
         }
       ]
@@ -697,33 +707,34 @@ function horoscopeDropdownLabels(locale: Locale) {
   if (locale === "hinglish") {
     return {
       title: "Horoscope",
+      active: "Active",
       comingSoon: "Soon",
       groups: [
         {
           title: "Horoscope",
           items: [
-            "Daily Horoscope",
-            "Weekly Horoscope",
-            "Monthly Horoscope",
-            "Weekly Love Horoscope",
-            "Chinese Horoscope 2026",
-            "Yearly Horoscope 2026",
-            "Numerology Monthly Horoscope",
-            "Today’s Panchang"
+            { label: "Daily Horoscope", href: "/daily-horoscope" },
+            { label: "Weekly Horoscope", href: "/weekly-horoscope" },
+            { label: "Monthly Horoscope", href: "/monthly-horoscope" },
+            { label: "Weekly Love Horoscope", href: "/weekly-love-horoscope" },
+            { label: "Chinese Horoscope 2026", href: "/chinese-horoscope-2026" },
+            { label: "Yearly Horoscope 2026", href: "/yearly-horoscope-2026" },
+            { label: "Numerology Monthly Horoscope", href: "/numerology-monthly-horoscope" },
+            { label: "Today’s Panchang" }
           ]
         },
         {
           title: "Transit 2026",
           items: [
-            "Sun Transits",
-            "Moon Transits",
-            "Mars Transits",
-            "Mercury Transits",
-            "Jupiter Transits",
-            "Venus Transits",
-            "Saturn in Your Birth Chart",
-            "Rahu Transits",
-            "Ketu Transits"
+            { label: "Sun Transits" },
+            { label: "Moon Transits" },
+            { label: "Mars Transits" },
+            { label: "Mercury Transits" },
+            { label: "Jupiter Transits" },
+            { label: "Venus Transits" },
+            { label: "Saturn in Your Birth Chart" },
+            { label: "Rahu Transits" },
+            { label: "Ketu Transits" }
           ]
         }
       ]
@@ -731,33 +742,34 @@ function horoscopeDropdownLabels(locale: Locale) {
   }
   return {
     title: "Horoscope",
+    active: "Active",
     comingSoon: "Coming Soon",
     groups: [
       {
         title: "Horoscope",
         items: [
-          "Daily Horoscope",
-          "Weekly Horoscope",
-          "Monthly Horoscope",
-          "Weekly Love Horoscope",
-          "Chinese Horoscope 2026",
-          "Yearly Horoscope 2026",
-          "Numerology Monthly Horoscope",
-          "Today’s Panchang"
+          { label: "Daily Horoscope", href: "/daily-horoscope" },
+          { label: "Weekly Horoscope", href: "/weekly-horoscope" },
+          { label: "Monthly Horoscope", href: "/monthly-horoscope" },
+          { label: "Weekly Love Horoscope", href: "/weekly-love-horoscope" },
+          { label: "Chinese Horoscope 2026", href: "/chinese-horoscope-2026" },
+          { label: "Yearly Horoscope 2026", href: "/yearly-horoscope-2026" },
+          { label: "Numerology Monthly Horoscope", href: "/numerology-monthly-horoscope" },
+          { label: "Today’s Panchang" }
         ]
       },
       {
         title: "Transit 2026",
         items: [
-          "Sun Transits",
-          "Moon Transits",
-          "Mars Transits",
-          "Mercury Transits",
-          "Jupiter Transits",
-          "Venus Transits",
-          "Saturn in Your Birth Chart",
-          "Rahu Transits",
-          "Ketu Transits"
+          { label: "Sun Transits" },
+          { label: "Moon Transits" },
+          { label: "Mars Transits" },
+          { label: "Mercury Transits" },
+          { label: "Jupiter Transits" },
+          { label: "Venus Transits" },
+          { label: "Saturn in Your Birth Chart" },
+          { label: "Rahu Transits" },
+          { label: "Ketu Transits" }
         ]
       }
     ]

@@ -8,12 +8,15 @@ import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
 import { zodiacSigns } from "@/lib/zodiac";
 
-export const metadata: Metadata = seo({
+export const metadata: Metadata = {
+  ...seo({
   title: "Today Horoscope for All Zodiac Signs - Naksharix",
   description: "Read today's horoscope for Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, and Pisces on Naksharix.",
   path: "/horoscope/all-signs/today",
   keywords: ["Today Horoscope", "All Zodiac Signs", "Daily Horoscope", "Aaj Ka Rashifal"]
-});
+  }),
+  robots: { index: false, follow: true }
+};
 
 export default function AllSignsTodayHoroscopePage() {
   const schema = {

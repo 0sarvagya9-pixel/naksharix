@@ -8,8 +8,13 @@ export default function robots(): MetadataRoute.Robots {
       allow: [
         "/",
         "/astrology",
-        "/horoscope",
-        "/horoscope/all-signs/today",
+        "/daily-horoscope",
+        "/weekly-horoscope",
+        "/monthly-horoscope",
+        "/weekly-love-horoscope",
+        "/yearly-horoscope-2026",
+        "/chinese-horoscope-2026",
+        "/numerology-monthly-horoscope",
         "/hi",
         "/hi/aaj-ka-rashifal",
         "/hi/kundli-milan",
@@ -17,11 +22,10 @@ export default function robots(): MetadataRoute.Robots {
         "/kundli",
         "/numerology",
         "/tarot",
-        "/panchang",
         "/zodiac",
         "/blog"
       ],
-      disallow: ["/admin", "/dashboard", "/api", "/auth"]
+      disallow: ["/admin", "/dashboard", "/api", "/auth", "/panchang", "/ai-astrologer", "/shop", "/consultation"]
     },
     host: env.NEXT_PUBLIC_APP_URL,
     sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`

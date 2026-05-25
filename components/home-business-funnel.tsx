@@ -267,7 +267,7 @@ function faqItems(locale: Locale) {
       { q: "क्या astrology result guarantee करती है?", a: "नहीं। Astrology, numerology और tarot reflective guidance tools हैं, guarantee नहीं।" },
       { q: "क्या premium reports automatic हैं?", a: "अभी reports manual/contact-based process से handled हैं।" },
       { q: "कौन सी languages supported हैं?", a: "English, Hindi और Hinglish supported हैं।" },
-      { q: "Report कैसे request करें?", a: "Reports catalogue या detail page से contact/WhatsApp process follow करें।" }
+      { q: "Report कैसे request करें?", a: "Reports catalogue या detail page से request details review करें। Online submission/payment अभी active नहीं है।" }
     ];
   }
   if (locale === "hinglish") {
@@ -277,7 +277,7 @@ function faqItems(locale: Locale) {
       { q: "Kya astrology result guarantee karti hai?", a: "Nahi. Astrology, numerology aur tarot reflective guidance tools hain, guarantee nahi." },
       { q: "Kya premium reports automatic hain?", a: "Abhi reports manual/contact-based process se handled hain." },
       { q: "Kaunsi languages supported hain?", a: "English, Hindi aur Hinglish supported hain." },
-      { q: "Report kaise request karein?", a: "Reports catalogue ya detail page se contact/WhatsApp process follow karein." }
+      { q: "Report kaise request karein?", a: "Reports catalogue ya detail page se request details review karein. Online submission/payment abhi active nahi hai." }
     ];
   }
   return [
@@ -286,6 +286,6 @@ function faqItems(locale: Locale) {
     { q: "Does astrology guarantee results?", a: "No. Astrology, numerology, and tarot are reflective guidance tools, not guarantees." },
     { q: "Are premium reports automatic?", a: "Reports are manual/contact-based for now." },
     { q: "Which languages are supported?", a: "English, Hindi, and Hinglish are supported." },
-    { q: "How do I request a report?", a: "Use the reports catalogue or detail pages and follow the contact/WhatsApp process." }
+    { q: "How do I request a report?", a: "Use the reports catalogue or detail pages to review request details. Online submission and payment are not active yet." }
   ];
 }

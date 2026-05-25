@@ -18,12 +18,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { sign } = await params;
   const zodiac = zodiacSigns.find((item) => item.slug === sign);
   if (!zodiac) return {};
-  return seo({
+  return {
+    ...seo({
     title: `${zodiac.name} Yearly Horoscope 2026 - Naksharix`,
     description: `${zodiac.name} yearly horoscope 2026 for career, love, finance, health, family, remedies, lucky dates, and premium report guidance.`,
     path: `/yearly-horoscope-2026/${zodiac.slug}`,
     keywords: [`${zodiac.name} Yearly Horoscope 2026`, "Yearly Horoscope 2026"]
-  });
+    }),
+    robots: { index: false, follow: true }
+  };
 }
 
 export default async function YearlySignPage({ params }: { params: Params }) {
@@ -45,7 +48,7 @@ export default async function YearlySignPage({ params }: { params: Params }) {
           2026 asks {zodiac.name} natives to combine ambition with steadiness. Use this yearly horoscope for broad planning, then generate a personalized kundli or yearly report for deeper timing.
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
-          <Button asChild><Link href="/horoscope">Horoscope Coming Soon</Link></Button>
+          <Button asChild><Link href="/yearly-horoscope-2026">Yearly Horoscope Selector</Link></Button>
           <Button variant="outline" asChild><Link href="/reports/yearly-horoscope-report">View Yearly Report</Link></Button>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">

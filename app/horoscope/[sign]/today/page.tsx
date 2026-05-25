@@ -21,12 +21,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { sign: slug } = await params;
   const sign = getZodiacSign(slug);
   if (!sign) return {};
-  return seo({
+  return {
+    ...seo({
     title: `${sign.name} Today Horoscope - Love, Career, Finance and Health`,
     description: `Read ${sign.name} today horoscope on Naksharix with love, career, finance, health, lucky color, lucky number, and personalized astrology guidance.`,
     path: `/horoscope/${sign.slug}/today`,
     keywords: [`${sign.name} Today Horoscope`, `${sign.name} Horoscope`, "Daily Horoscope", "Astrology"]
-  });
+    }),
+    robots: { index: false, follow: true }
+  };
 }
 
 export default async function TodayHoroscopePage({ params }: PageProps) {

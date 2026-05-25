@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { CheckCircle2, FileText, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
+import { CheckCircle2, ClipboardList, FileText, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
-import { contactHref, requestCta } from "@/lib/contact-cta";
+import { contactHref } from "@/lib/contact-cta";
 import { getManualReport, manualReports } from "@/lib/manual-catalogue";
 import { normalizeLocale } from "@/lib/i18n";
 import { seo } from "@/lib/seo";
@@ -35,7 +35,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   if (!report) notFound();
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
   const labels = detailLabels(locale);
-  const cta = requestCta(report.name[locale], locale);
+  const requestHref = `/reports#report-request-intent`;
 
   return (
     <main className="inner-page-shell star-field">
@@ -47,7 +47,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{report.description[locale]}</p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
-                <a href={cta.href} target={cta.external ? "_blank" : undefined} rel={cta.external ? "noreferrer" : undefined}><MessageCircle className="h-4 w-4" />{labels.request}</a>
+                <Link href={requestHref}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
               </Button>
               <Button variant="outline" asChild><Link href="/contact">{labels.contactSupport}</Link></Button>
             </div>
@@ -96,7 +96,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{labels.disclaimerCopy}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
-                <a href={cta.href} target={cta.external ? "_blank" : undefined} rel={cta.external ? "noreferrer" : undefined}><MessageCircle className="h-4 w-4" />{labels.request}</a>
+                <Link href={requestHref}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
               </Button>
               <Button variant="outline" asChild><a href={contactHref()}>{labels.emailSupport}</a></Button>
             </div>
@@ -123,12 +123,12 @@ function InfoSection({ title, items }: { title: string; items: string[] }) {
 function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") {
     return {
-      request: "WhatsApp/Contact अनुरोध",
+      request: "Request details तैयार करें",
       contactSupport: "सपोर्ट से संपर्क करें",
       emailSupport: "ईमेल सपोर्ट",
       price: "Report fee",
       priceOnRequest: "Price on request",
-      manualNote: "Payment automation active नहीं है। Team अलग से confirmation करेगी।",
+      manualNote: "Online payment automation active नहीं है। Report workflow अभी manual/review-based है।",
       included: "क्या शामिल है",
       whoShouldRequest: "किसे request करनी चाहिए",
       requiredDetails: "आवश्यक विवरण",
@@ -136,19 +136,19 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       languages: ["English", "Hindi", "Hinglish"],
       samplePreview: "Sample preview",
       deliveryProcess: "Delivery process",
-      steps: ["जानकारी साझा करें", "टीम अनुरोध की पुष्टि करेगी", "भुगतान अलग से पुष्टि किया जाएगा", "रिपोर्ट मैन्युअल रूप से तैयार की जाएगी", "PDF ईमेल/WhatsApp पर भेजी जाएगी"],
+      steps: ["Details review करें", "Online request workflow active होने का इंतजार करें", "Team manual processing terms अलग से share करेगी", "Payment/order confirmation अभी इस page पर active नहीं है", "Report delivery workflow बाद में activate होगा"],
       disclaimer: "अस्वीकरण",
       disclaimerCopy: "ज्योतिष रिपोर्ट चिंतनात्मक मार्गदर्शन के साधन हैं। ये परिणामों की गारंटी नहीं देतीं और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।"
     };
   }
   if (locale === "hinglish") {
     return {
-      request: "Request on WhatsApp",
+      request: "Prepare Request",
       contactSupport: "Contact Support",
       emailSupport: "Email Support",
       price: "Report fee",
       priceOnRequest: "Price on request",
-      manualNote: "Payment automation active nahi hai. Team separately confirmation karegi.",
+      manualNote: "Online payment automation active nahi hai. Report workflow abhi manual/review-based hai.",
       included: "What is included",
       whoShouldRequest: "Who should request this report",
       requiredDetails: "Required details",
@@ -156,18 +156,18 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       languages: ["English", "Hindi", "Hinglish"],
       samplePreview: "Sample preview",
       deliveryProcess: "Delivery process",
-      steps: ["Details share karein", "Team request confirm karegi", "Payment separately confirm hoga", "Report manually prepare hogi", "PDF email/WhatsApp par deliver hogi"],
+      steps: ["Details review karein", "Online request workflow active hone ka wait karein", "Team manual processing terms separately share karegi", "Payment/order confirmation is page par active nahi hai", "Report delivery workflow baad mein activate hoga"],
       disclaimer: "Disclaimer",
       disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
     };
   }
   return {
-    request: "Request on WhatsApp",
+    request: "Prepare Request",
     contactSupport: "Contact Support",
     emailSupport: "Email Support",
     price: "Report fee",
     priceOnRequest: "Price on request",
-    manualNote: "Payment automation is not active. The team confirms request and payment separately.",
+    manualNote: "Online payment automation is not active. The report workflow is currently manual/review-based.",
     included: "What is included",
     whoShouldRequest: "Who should request this report",
     requiredDetails: "Required details",
@@ -175,7 +175,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
     languages: ["English", "Hindi", "Hinglish"],
     samplePreview: "Sample preview",
     deliveryProcess: "Delivery process",
-    steps: ["Share details", "Team confirms request", "Payment is confirmed separately", "Report is prepared manually", "PDF is delivered by email/WhatsApp"],
+    steps: ["Review required details", "Wait for online request workflow activation", "Manual processing terms will be shared separately", "Payment/order confirmation is not active on this page", "Report delivery workflow will be activated later"],
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."
   };

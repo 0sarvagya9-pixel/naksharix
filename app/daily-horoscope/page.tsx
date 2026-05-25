@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { SeoGrowthPage } from "@/components/seo-growth-page";
-import { growthPages } from "@/lib/growth-pages";
+import { HoroscopePageShell } from "@/components/horoscope/horoscope-page-shell";
+import { horoscopePageConfig } from "@/lib/horoscope/constants";
 import { seo } from "@/lib/seo";
 
-const page = growthPages["daily-horoscope"];
-export const metadata: Metadata = seo({ title: page.title, description: page.description, path: page.path, keywords: ["Daily Horoscope", "Today Horoscope"] });
-export default function DailyHoroscopeSeoPage() { return <SeoGrowthPage page={page} />; }
+const page = horoscopePageConfig.daily;
+export const metadata: Metadata = seo({ title: page.metadata.title, description: page.metadata.description, path: page.path, keywords: page.metadata.keywords });
+export default function DailyHoroscopePage() { return <HoroscopePageShell kind="daily" />; }

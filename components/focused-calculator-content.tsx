@@ -364,8 +364,9 @@ function sentence(locale: Locale, topic: string) { if (locale === "hi") return `
 
 function ReportCta({ kind, locale }: { kind: FocusedCalculatorKind; locale: Locale }) {
   const href = kind === "manglik" ? "/reports/manglik-kaal-sarp-report" : kind === "name-number" ? "/reports/name-correction-report" : matchKinds.includes(kind as MatchKind) ? "/reports/couple-kundli" : numberKinds.includes(kind as NumberKind) ? "/reports/numerology-lo-shu-report" : "/reports/premium-kundli";
-  const label = locale === "hi" ? "गहरी व्यक्तिगत मार्गदर्शन के लिए संबंधित प्रीमियम रिपोर्ट देखें।" : locale === "hinglish" ? "Deeper personalized guidance ke liye related premium report explore karein." : "For deeper personalized guidance, explore the related premium report.";
-  return <div className="mt-8 rounded-3xl border border-[#dca956]/30 bg-[#dca956]/10 p-6"><h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{locale === "hi" ? "संबंधित रिपोर्ट" : "Related Report"}</h2><p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{label}</p><Button asChild className="mt-5 bg-[#009b72] text-white hover:bg-[#008766]"><Link href={href}>{locale === "hi" ? "रिपोर्ट देखें" : "View Report"}</Link></Button></div>;
+  const label = locale === "hi" ? "व्यक्तिगत डिटेल्ड रीडिंग चाहिए? संबंधित रिपोर्ट्स देखें।" : locale === "hinglish" ? "Personal detailed reading chahiye? Related reports explore karein." : "Want a personalized detailed reading? Explore related reports.";
+  const note = locale === "hi" ? "यह CTA भुगतान, instant PDF या automatic report delivery का दावा नहीं करता।" : locale === "hinglish" ? "Ye CTA payment, instant PDF ya automatic report delivery claim nahi karta." : "This CTA does not start payment, instant PDF generation, or automatic report delivery.";
+  return <div className="mt-8 rounded-3xl border border-[#dca956]/30 bg-[#dca956]/10 p-6"><h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{locale === "hi" ? "संबंधित रिपोर्ट" : locale === "hinglish" ? "Related Report" : "Related Report"}</h2><p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{label}</p><p className="mt-2 text-xs leading-5 text-[#94a3b8]">{note}</p><Button asChild className="mt-5 bg-[#009b72] text-white hover:bg-[#008766]"><Link href={href}>{locale === "hi" ? "रिपोर्ट देखें" : "View Report"}</Link></Button></div>;
 }
 
 type PageCopy = ReturnType<typeof copy>;

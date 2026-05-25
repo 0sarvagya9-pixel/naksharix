@@ -1,14 +1,8 @@
-import { NextRequest } from "next/server";
-import { ok, handleApiError } from "@/lib/api";
-import { getPanchang } from "@/lib/astrology/engine";
+import { fail, handleApiError } from "@/lib/api";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const search = request.nextUrl.searchParams;
-    const date = search.get("date") ? new Date(search.get("date")!) : new Date();
-    const lat = Number(search.get("lat") ?? 28.6139);
-    const lng = Number(search.get("lng") ?? 77.209);
-    return ok({ panchang: getPanchang(date, lat, lng) });
+    return fail("Accurate Panchang is coming soon. Location-aware Panchang output is disabled until verified.", 503);
   } catch (error) {
     return handleApiError(error);
   }

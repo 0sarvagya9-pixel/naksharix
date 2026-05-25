@@ -8,7 +8,6 @@ import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
 import { PwaRegister } from "@/components/pwa-register";
 import { SchemaMarkup } from "@/components/schema-markup";
-import { WhatsAppButton } from "@/components/whatsapp-button";
 import { LanguageProvider } from "@/components/language-provider";
 import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo";
@@ -57,7 +56,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <MainNav />
           {children}
           <Footer />
-          <WhatsAppButton />
         </LanguageProvider>
         <PwaRegister />
         <SchemaMarkup />

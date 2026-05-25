@@ -1,78 +1,49 @@
-import { getPanchang } from "@/lib/astrology/engine";
-import { Section } from "@/components/section";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Clock, Moon, Sparkles, Sun, TimerReset } from "lucide-react";
-import Link from "next/link";
 import type { Metadata } from "next";
-import type React from "react";
-import { seo } from "@/lib/seo";
+import Link from "next/link";
+import { CalendarDays, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Section } from "@/components/section";
+import { seo } from "@/lib/seo";
 
-export const metadata: Metadata = seo({
-  title: "Panchang - Tithi, Nakshatra, Rahu Kaal and Muhurat",
-  description: "View Naksharix Panchang details including tithi, nakshatra, rahu kaal, choghadiya, sunrise, sunset, festivals, and muhurat.",
-  path: "/panchang",
-  keywords: ["Panchang", "Tithi", "Nakshatra", "Rahu Kaal", "Muhurat"]
-});
+export const metadata: Metadata = {
+  ...seo({
+    title: "Today Panchang Coming Soon | Naksharix",
+    description: "Naksharix is holding Today Panchang until location-aware tithi, nakshatra, yoga, karana, rahu kaal, and muhurat calculations are fully verified.",
+    path: "/panchang",
+    keywords: ["Panchang", "Today Panchang", "Tithi", "Rahu Kaal"]
+  }),
+  robots: { index: false, follow: true }
+};
 
-export default function PanchangPage() {
-  const panchang = getPanchang();
-  const highlights = [
-    { label: "Tithi", value: panchang.tithi, icon: Moon },
-    { label: "Nakshatra", value: panchang.nakshatra, icon: Sparkles },
-    { label: "Rahu Kaal", value: panchang.rahuKaal, icon: TimerReset },
-    { label: "Muhurat", value: panchang.muhurat, icon: Clock }
-  ];
-
+export default function PanchangComingSoonPage() {
   return (
-    <main className="star-field">
+    <main className="inner-page-shell star-field min-h-screen">
       <Section>
-        <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Daily Panchang</p>
-          <h1 className="mt-3 font-cinzel text-4xl font-black sm:text-5xl">Today&apos;s Panchang</h1>
-          <p className="mt-4 naksh-muted-text">A clean daily view of tithi, nakshatra, rahu kaal, choghadiya, sunrise, sunset, festivals, and auspicious timing.</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button asChild><Link href="/festival-calendar">Festival Calendar</Link></Button>
-            <Button variant="outline" asChild><Link href="/shubh-muhurat">Shubh Muhurat</Link></Button>
+        <div className="inner-section rounded-3xl border border-[#263957] p-6 text-center md:p-10">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-[#dca956]/35 bg-[#142647] text-[#f3d382] shadow-[0_0_34px_rgba(0,245,160,0.14)]">
+            <CalendarDays className="h-8 w-8" />
           </div>
-        </div>
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {highlights.map(({ label, value, icon: Icon }) => (
-            <Card key={label} className="glass">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base"><Icon className="h-5 w-5 text-[#FFD700]" />{label}</CardTitle>
-              </CardHeader>
-              <CardContent><p className="font-cinzel text-2xl font-bold">{value}</p></CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <Card className="glass">
-            <CardHeader><CardTitle className="font-cinzel text-2xl">Auspicious Day Planner</CardTitle></CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2">
-              <PanchangRow label="Date" value={panchang.date} />
-              <PanchangRow label="Choghadiya" value={panchang.choghadiya} />
-              <PanchangRow label="Sunrise" value={panchang.sunrise} icon={<Sun className="h-4 w-4" />} />
-              <PanchangRow label="Sunset" value={panchang.sunset} icon={<Sun className="h-4 w-4" />} />
+          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-[#00f5a0]">Coming Soon</p>
+          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">Today&apos;s Panchang Coming Soon</h1>
+          <p className="mx-auto mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">
+            Accurate Panchang depends on date, location, timezone, sunrise, sunset, lunar position, tithi, nakshatra, yoga, karana, Rahu Kaal, Yamaganda, Gulika Kaal, and Abhijit Muhurat.
+          </p>
+          <Card className="inner-card mx-auto mt-8 max-w-3xl text-left">
+            <CardContent className="p-6">
+              <ShieldCheck className="h-6 w-6 text-[#00f5a0]" />
+              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">Why this is on hold</h2>
+              <p className="mt-3 text-sm leading-7 text-[#a8b3c7]">
+                Naksharix will not show approximate or static Panchang as a live result. This page will be activated only after the calculation engine is verified with deterministic location-aware test cases.
+              </p>
             </CardContent>
           </Card>
-          <Card className="glass">
-            <CardHeader><CardTitle className="font-cinzel text-2xl">Festival Note</CardTitle></CardHeader>
-            <CardContent>
-              <div className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4">
-                <CalendarDays className="mb-3 h-5 w-5 text-[#FFD700]" />
-                <p className="leading-7 naksh-muted-text">{panchang.festival ?? "No major festival is highlighted for this generated panchang. Use the muhurat window for focused planning and devotional routines."}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]"><Link href="/kundli">Use Kundli Generator</Link></Button>
+            <Button variant="outline" asChild><Link href="/free-calculators">Explore Free Calculators</Link></Button>
+          </div>
         </div>
       </Section>
     </main>
   );
-}
-
-function PanchangRow({ label, value, icon }: { label: string; value?: string | null; icon?: React.ReactNode }) {
-  return <div className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><p className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] naksh-muted-text">{icon}{label}</p><p className="mt-2 font-semibold">{value ?? "None"}</p></div>;
 }
