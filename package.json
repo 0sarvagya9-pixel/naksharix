@@ -15,6 +15,7 @@
         "start:prod": "npm run db:deploy && npm run start:standalone",
         "lint": "eslint .",
         "typecheck": "tsc --noEmit",
+        "qa:foundation": "node scripts/qa-foundation.mjs",
         "verify": "npm run lint && npm run typecheck && npm run build",
         "db:generate": "prisma generate",
         "db:migrate": "prisma migrate dev",
