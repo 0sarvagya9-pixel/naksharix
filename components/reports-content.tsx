@@ -65,7 +65,7 @@ export function ReportsContent() {
                   <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
                     <Button variant="outline" asChild><Link href={`/reports/${report.slug}`}>{labels.viewDetails}</Link></Button>
                     <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
-                      <a href="#report-request-intent" onClick={() => setIntent((current) => ({ ...current, report: report.slug }))}><ClipboardList className="h-4 w-4" />{labels.request}</a>
+                      <Link href={`/report-request/new?plan=PREMIUM&reportSlug=${report.slug}`}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -105,6 +105,7 @@ export function ReportsContent() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Button type="button" className="bg-[#009b72] text-white hover:bg-[#008766]" onClick={() => setReview(true)}>{labels.prepareRequest}</Button>
+                  <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]"><Link href={`/report-request/new?plan=PREMIUM&reportSlug=${intent.report}`}>{labels.submitRealRequest}</Link></Button>
                   <Button variant="outline" asChild><Link href="/contact">{labels.contactSupport}</Link></Button>
                 </div>
                 {review ? (
@@ -154,8 +155,8 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
       viewDetails: "विवरण देखें",
       request: "Request details तैयार करें",
       intentTitle: "Report request intent",
-      intentCopy: "अपनी details review करने के लिए यह form उपयोग करें। अभी online submission/payment active नहीं है।",
-      intentSafety: "Online request submission coming soon. No payment, order confirmation, or report delivery is created from this form.",
+      intentCopy: "अपनी details review करें, फिर secure login form से real request submit करें। Payment request stage पर required नहीं है।",
+      intentSafety: "Real submission logged-in users के लिए DB में pending review request बनाता है। No unsupported payment, order confirmation, or delivery claim.",
       name: "नाम",
       email: "ईमेल",
       phoneOptional: "फोन (optional)",
@@ -166,9 +167,10 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
       preferredLanguage: "भाषा",
       concern: "प्रश्न / concern",
       prepareRequest: "Request तैयार करें",
+      submitRealRequest: "Real request submit करें",
       reviewDetails: "Review details",
-      onlineComingSoon: "Online request submission जल्द आएगा। अभी यह review-only intent है।",
-      reviewHint: "Report workflow active होने पर details submit करने से पहले user confirmation लिया जाएगा।",
+      onlineComingSoon: "Online request अब logged-in pending-review workflow में save होती है।",
+      reviewHint: "Final form में accurate birth place select करना जरूरी है ताकि report real provider calculation पर बने।",
       disclaimer: "अस्वीकरण",
       disclaimerCopy: "ज्योतिष रिपोर्ट चिंतनात्मक मार्गदर्शन के साधन हैं। ये परिणामों की गारंटी नहीं देतीं और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।"
     };
@@ -187,8 +189,8 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
       viewDetails: "View Details",
       request: "Prepare Request",
       intentTitle: "Report Request Intent",
-      intentCopy: "Apni details review karne ke liye ye form use karein. Online submission/payment abhi active nahi hai.",
-      intentSafety: "Online request submission coming soon. Is form se payment, order confirmation ya report delivery create nahi hoti.",
+      intentCopy: "Apni details review karein, phir secure login form se real request submit karein. Request stage par payment required nahi hai.",
+      intentSafety: "Real submission logged-in users ke liye DB me pending review request banata hai. No unsupported payment, order confirmation ya delivery claim.",
       name: "Name",
       email: "Email",
       phoneOptional: "Phone (optional)",
@@ -199,9 +201,10 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
       preferredLanguage: "Preferred language",
       concern: "Question / concern",
       prepareRequest: "Prepare Request",
+      submitRealRequest: "Submit Real Request",
       reviewDetails: "Review Details",
-      onlineComingSoon: "Online request submission jaldi aayega. Abhi ye review-only intent hai.",
-      reviewHint: "Report workflow active hone par details submit karne se pehle user confirmation liya jayega.",
+      onlineComingSoon: "Online request ab logged-in pending-review workflow me save hoti hai.",
+      reviewHint: "Final form me accurate birth place select karna zaroori hai taaki report real provider calculation par bane.",
       disclaimer: "Disclaimer",
       disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
     };
@@ -219,8 +222,8 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     viewDetails: "View Details",
     request: "Prepare Request",
     intentTitle: "Report Request Intent",
-    intentCopy: "Use this form to review the details needed for a report request. Online submission and payment are not active in this phase.",
-    intentSafety: "Online request submission is coming soon. This form does not create payment, order confirmation, or report delivery.",
+    intentCopy: "Use this panel to review the details needed for a report request, then submit through the secure logged-in form. Payment is not required at request stage.",
+    intentSafety: "Real submission creates a pending-review DB request for logged-in users. It does not create unsupported payment, order confirmation, or delivery.",
     name: "Name",
     email: "Email",
     phoneOptional: "Phone (optional)",
@@ -231,9 +234,10 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     preferredLanguage: "Preferred language",
     concern: "Question / concern",
     prepareRequest: "Prepare Request",
+    submitRealRequest: "Submit Real Request",
     reviewDetails: "Review Details",
-    onlineComingSoon: "Online request submission is coming soon. For now, this is a review-only intent flow.",
-    reviewHint: "When report workflow is active, Naksharix will ask for confirmation before submitting details.",
+    onlineComingSoon: "Online request submission now saves to a logged-in pending-review workflow.",
+    reviewHint: "The final form requires an accurate selected birth place so the report can use real provider calculations.",
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."
   };

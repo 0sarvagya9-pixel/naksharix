@@ -15,12 +15,13 @@ type Props = {
   userEmail: string;
   orderId?: string;
   plan: "PREMIUM" | "VIP";
+  reportSlug?: string;
   adminBypass?: boolean;
 };
 
-type Errors = Partial<Record<"fullName" | "dateOfBirth" | "birthPlace", string>>;
+type Errors = Partial<Record<"fullName" | "dateOfBirth" | "timeOfBirth" | "birthPlace" | "concern", string>>;
 
-export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = false }: Props) {
+export function ReportRequestForm({ userEmail, orderId, plan, reportSlug = "premium-kundli", adminBypass = false }: Props) {
   const router = useRouter();
   const { tr, apiLocale, requiredMessage } = useLanguage();
   const [fullName, setFullName] = useState("");
@@ -40,7 +41,9 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
     const next: Errors = {};
     if (!fullName.trim()) next.fullName = requiredMessage;
     if (!dateOfBirth) next.dateOfBirth = requiredMessage;
+    if (!timeOfBirth) next.timeOfBirth = requiredMessage;
     if (!birthPlace.trim() || !location) next.birthPlace = birthPlace.trim() ? tr("selectLocationFromSuggestions") : requiredMessage;
+    if (!concern.trim()) next.concern = requiredMessage;
     setErrors(next);
     if (Object.keys(next).length) scrollToFirstError(next);
     return Object.keys(next).length === 0;
@@ -57,6 +60,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
       body: JSON.stringify({
         orderId,
         planType: plan,
+        reportSlug,
         adminBypass,
         deliveryEmail: userEmail,
         fullName,
@@ -69,6 +73,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
         timezone: location?.timezoneOffset,
         phone,
         concern,
+        questionOrConcern: concern,
         language
       })
     });
@@ -85,6 +90,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
     <form onSubmit={submit} className="space-y-5">
       <div className="rounded-lg border border-[#D4AF37]/25 bg-[#D4AF37]/10 p-4 text-sm text-[#FFFFFF]">
         {tr("reportDeliveryEmailNotice")}: <span className="font-semibold">{userEmail}</span>
+        <span className="mt-2 block text-[#CBD5E1]">No online payment is required to submit this request. Payment, if enabled later, is handled only after real review and secure checkout.</span>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label={tr("fullName")} error={errors.fullName}>
@@ -101,8 +107,8 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
         <Field label={tr("dateOfBirth")} error={errors.dateOfBirth}>
           <Input data-field="dateOfBirth" type="date" value={dateOfBirth} onChange={(event) => { setDateOfBirth(event.target.value); setErrors((e) => ({ ...e, dateOfBirth: undefined })); }} className={cn(errorClass(Boolean(errors.dateOfBirth)))} />
         </Field>
-        <Field label={tr("timeOfBirth")}>
-          <Input type="time" value={timeOfBirth} onChange={(event) => setTimeOfBirth(event.target.value)} />
+        <Field label={tr("timeOfBirth")} error={errors.timeOfBirth}>
+          <Input data-field="timeOfBirth" type="time" value={timeOfBirth} onChange={(event) => { setTimeOfBirth(event.target.value); setErrors((e) => ({ ...e, timeOfBirth: undefined })); }} className={cn(errorClass(Boolean(errors.timeOfBirth)))} />
         </Field>
         <div className="md:col-span-2">
           <LocationAutocomplete
@@ -130,7 +136,8 @@ export function ReportRequestForm({ userEmail, orderId, plan, adminBypass = fals
         </Field>
         <div className="space-y-2 md:col-span-2">
           <Label>{tr("mainQuestionConcern")}</Label>
-          <textarea value={concern} onChange={(event) => setConcern(event.target.value)} rows={4} className="cosmic-textarea" />
+          <textarea data-field="concern" value={concern} onChange={(event) => { setConcern(event.target.value); setErrors((e) => ({ ...e, concern: undefined })); }} rows={4} className={cn("cosmic-textarea", errorClass(Boolean(errors.concern)))} />
+          {errors.concern ? <p className="text-sm text-destructive">{errors.concern}</p> : null}
         </div>
       </div>
       {adminBypass ? <p className="text-sm text-[#FFD700]">{tr("adminTestingModePaymentBypassed")}</p> : null}

@@ -25,7 +25,7 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
       <Card className="glass border-[#D4AF37]/30 text-center">
         <CardHeader>
           <CardTitle className="font-cinzel text-3xl text-[#FFFFFF]">{t(locale, "reportRequestReceived")}</CardTitle>
-          <p className="naksh-muted-text">{t(locale, "yourPaymentSuccessful")}</p>
+          <p className="naksh-muted-text">Your request has been saved for manual review.</p>
         </CardHeader>
         <CardContent className="space-y-4 naksh-muted-text">
           {showAdminBypass ? (
@@ -34,9 +34,8 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
               {t(locale, "adminTestingModePaymentBypassed")}
             </div>
           ) : null}
-          <p>{t(locale, "reportSentWithin24Hours")}</p>
-          <p>{t(locale, "reportWillBeSentTo")}: <span className="text-foreground">{report.deliveryEmail}</span></p>
-          {report.planType === "VIP" ? <p>{t(locale, "consultingCredits1000")}</p> : null}
+          <p>No online payment is required at this stage. The workflow is review-based, and generated files appear only after an admin creates a real report PDF.</p>
+          <p>Request email: <span className="text-foreground">{report.deliveryEmail}</span></p>
           <p>{t(locale, "needHelpCare")}</p>
         </CardContent>
       </Card>

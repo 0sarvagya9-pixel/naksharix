@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
+import { ReportRequestActions } from "@/components/admin/report-request-actions";
 import { requireAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 
@@ -32,6 +33,9 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
           <Detail label="Plan" value={request.planType} />
           <Detail label="Payment status" value={request.paymentStatus} />
           <Detail label="Report status" value={request.status} />
+          <Detail label="Report slug" value={request.reportSlug} />
+          <Detail label="PDF file" value={request.generatedPdfFileName ?? "Not generated"} />
+          <Detail label="PDF size" value={request.generatedPdfSize ? `${request.generatedPdfSize} bytes` : "-"} />
           <Detail label="Payment ID" value={request.payment?.id ?? "Admin bypass / not applicable"} />
           <Detail label="Razorpay order ID" value={request.payment?.providerOrderId ?? "-"} />
           <Detail label="Razorpay payment ID" value={request.payment?.providerPaymentId ?? "-"} />
@@ -47,6 +51,14 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
           <div className="md:col-span-2 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
             <p className="text-[#FFD700]">Concern</p>
             <p className="mt-2 naksh-muted-text">{request.concern ?? "-"}</p>
+          </div>
+          <div className="md:col-span-2">
+            <ReportRequestActions
+              requestId={request.id}
+              initialStatus={request.status}
+              initialNotes={request.adminNotes}
+              hasPdf={Boolean(request.generatedPdfBytes && request.generatedPdfSize)}
+            />
           </div>
         </CardContent>
       </Card>

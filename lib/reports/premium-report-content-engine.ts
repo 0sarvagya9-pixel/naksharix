@@ -4,12 +4,13 @@ import { generateSafeRemedies } from "@/lib/astrology/remedies/rules";
 import { calculatePartialShadbala } from "@/lib/astrology/strength/shadbala";
 import { createAshtakvargaDependencyResult } from "@/lib/astrology/strength/ashtakvarga";
 import { calculateSupportedVargaCharts } from "@/lib/astrology/varga/engine";
+import { calculateNumerologyReport } from "@/lib/numerology";
 import type { CanonicalChartResult } from "@/lib/astrology/ephemeris/types";
 
 export type PremiumReportContentSection = {
   key: string;
   title: string;
-  status: "provider_verified" | "available_unverified" | "partial_internal" | "unavailable";
+  status: "provider_verified" | "external_verified" | "available_unverified" | "partial_internal" | "unavailable" | "blocked";
   data: unknown;
   limitations: string[];
 };
@@ -30,8 +31,18 @@ export function assemblePremiumReportContent(input: {
   chart: CanonicalChartResult;
   includePanchang?: unknown;
   includeTransit?: unknown;
+  reportRequest?: {
+    questionOrConcern?: string | null;
+    preferredLanguage?: string | null;
+  };
 }): PremiumReportContentResult {
   const chart = input.chart;
+  const numerology = calculateNumerologyReport({
+    name: chart.normalizedInput.name ?? "Naksharix Native",
+    dateOfBirth: chart.normalizedInput.dateOfBirth,
+    gender: chart.normalizedInput.gender,
+    locale: "en"
+  });
   const activation = {
     chart: getPremiumEngineActivationStatus("chart_precision"),
     dasha: getPremiumEngineActivationStatus("dasha"),
@@ -53,6 +64,22 @@ export function assemblePremiumReportContent(input: {
   const unavailableSections: string[] = [];
   const sections: PremiumReportContentSection[] = [
     {
+      key: "cover",
+      title: "Cover & Provider Metadata",
+      status: "provider_verified",
+      data: {
+        reportTitle: "Naksharix Kundli Report",
+        nativeName: chart.normalizedInput.name,
+        generatedAt: new Date().toISOString(),
+        provider: chart.metadata.provider,
+        precisionLevel: chart.metadata.precisionLevel,
+        verificationLevel: chart.metadata.precisionLevel,
+        ayanamsa: chart.ayanamsa,
+        houseSystem: chart.normalizedInput.houseSystem
+      },
+      limitations: ["Provider-verified means deterministic Naksharix provider regression tests, not external Swiss/Jagannatha Hora verification."]
+    },
+    {
       key: "birth-details-summary",
       title: "Birth Details Summary",
       status: "provider_verified",
@@ -60,14 +87,17 @@ export function assemblePremiumReportContent(input: {
       limitations: ["Birth details are user-provided and should be reviewed before premium delivery.", activation.chart.reason]
     },
     {
-      key: "chart-summary",
-      title: "Chart Summary",
+      key: "core-kundli-summary",
+      title: "Core Kundli Summary",
       status: "provider_verified",
       data: {
         ascendant: chart.ascendant,
+        sunSign: chart.planets.find((planet) => planet.planet === "Sun")?.sign,
         moon: chart.moon,
         nakshatra: chart.nakshatra,
-        ayanamsa: chart.ayanamsa
+        nakshatraLord: chart.dasha?.startingMahadashaLord,
+        ayanamsa: chart.ayanamsa,
+        birthPanchang: input.includePanchang ?? null
       },
       limitations: chart.metadata.limitations
     },
@@ -79,11 +109,58 @@ export function assemblePremiumReportContent(input: {
       limitations: ["Planet positions are provider-regression tested against generated fixtures and still need external fixture validation.", activation.chart.nextRequirement]
     },
     {
+      key: "main-chart",
+      title: "D1 Lagna Chart & House Summary",
+      status: "provider_verified",
+      data: {
+        ascendant: chart.ascendant,
+        houses: chart.houses ?? [],
+        houseSummary: (chart.houses ?? []).map((house) => ({
+          house: house.house,
+          sign: house.sign,
+          planets: chart.planets.filter((planet) => planet.house === house.house).map((planet) => planet.planet)
+        }))
+      },
+      limitations: ["D1 is produced from the Naksharix internal provider and whole-sign house mapping."]
+    },
+    {
       key: "dasha-section",
       title: "Dasha Section",
       status: chart.dasha ? "provider_verified" : "unavailable",
       data: chart.dasha ?? null,
       limitations: ["Dasha timing depends on Moon longitude and is provider-regression tested, not externally verified.", activation.dasha.nextRequirement]
+    },
+    {
+      key: "numerology-section",
+      title: "Numerology Section",
+      status: "provider_verified",
+      data: {
+        moolank: numerology.moolank,
+        bhagyank: numerology.lifePath,
+        nameNumber: numerology.nameNumber,
+        soulUrge: numerology.soulUrge,
+        personality: numerology.personality
+      },
+      limitations: [numerology.disclaimer]
+    },
+    {
+      key: "lo-shu-section",
+      title: "Lo Shu Grid Section",
+      status: "provider_verified",
+      data: {
+        grid: numerology.loShuGrid,
+        missingNumbers: numerology.missingNumbers,
+        repeatedNumbers: numerology.repeatedNumbers,
+        presentNumbers: numerology.loShuGrid.filter((cell) => cell.present).map((cell) => cell.number)
+      },
+      limitations: [numerology.disclaimer]
+    },
+    {
+      key: "chinese-zodiac-section",
+      title: "Chinese Zodiac Section",
+      status: "provider_verified",
+      data: chineseZodiacFromDate(String(chart.normalizedInput.dateOfBirth)),
+      limitations: ["Chinese zodiac is derived deterministically from birth year and is included as general cultural symbolism, not a personalized prediction."]
     },
     {
       key: "varga-section",
@@ -134,8 +211,20 @@ export function assemblePremiumReportContent(input: {
       key: "limitations-trust-note",
       title: "Limitations & Trust Note",
       status: "provider_verified",
-      data: "This internal report content is not a complete premium report. It must be reviewed before PDF generation or delivery.",
-      limitations: ["No automatic premium report claim is active."]
+      data: "This PDF-ready report content uses Naksharix provider-calculated data and must be reviewed before delivery. Values may vary slightly by source.",
+      limitations: ["No external accuracy claim is active.", "Astrology and numerology guidance is for reflection and spiritual insight, not medical, legal, financial, or mental-health advice."]
+    },
+    {
+      key: "final-summary",
+      title: "Final Summary",
+      status: "provider_verified",
+      data: {
+        strengths: interpretation.sections.find((section) => section.key === "overview")?.text ? [interpretation.sections.find((section) => section.key === "overview")?.text] : [],
+        challenges: interpretation.metadata.missingInputs.length ? interpretation.metadata.missingInputs : ["Use the detailed sections as reflection prompts, not fixed outcomes."],
+        bestDirection: "Use chart, Dasha, numerology, and remedies sections together for review-based planning.",
+        keyFocusAreas: ["accurate birth details", "current Dasha review", "relationship and career reflection", "spiritual practice without fear-selling"]
+      },
+      limitations: ["Final summary is assembled from safe starter rules and provider-calculated facts. It is not a guaranteed prediction."]
     }
   ];
 
@@ -158,5 +247,19 @@ export function assemblePremiumReportContent(input: {
         "This is not an automated deliverable premium PDF."
       ]
     }
+  };
+}
+
+function chineseZodiacFromDate(dateText: string) {
+  const year = new Date(`${String(dateText).slice(0, 10)}T00:00:00.000Z`).getUTCFullYear();
+  const animals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"];
+  const elements = ["Wood", "Fire", "Earth", "Metal", "Water"];
+  const animal = animals[(year - 1900) % 12];
+  const element = elements[Math.floor(((year - 4) % 10) / 2)];
+  return {
+    year,
+    animal,
+    element,
+    summary: `${element} ${animal} symbolism is included as a broad yearly archetype.`
   };
 }

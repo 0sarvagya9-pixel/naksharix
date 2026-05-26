@@ -35,7 +35,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   if (!report) notFound();
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
   const labels = detailLabels(locale);
-  const requestHref = `/reports#report-request-intent`;
+  const requestHref = `/report-request/new?plan=PREMIUM&reportSlug=${report.slug}`;
 
   return (
     <main className="inner-page-shell star-field">
@@ -123,12 +123,12 @@ function InfoSection({ title, items }: { title: string; items: string[] }) {
 function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") {
     return {
-      request: "Request details तैयार करें",
+      request: "Report request submit करें",
       contactSupport: "सपोर्ट से संपर्क करें",
       emailSupport: "ईमेल सपोर्ट",
       price: "Report fee",
       priceOnRequest: "Price on request",
-      manualNote: "Online payment automation active नहीं है। Report workflow अभी manual/review-based है।",
+      manualNote: "Request DB में pending review के रूप में save होती है। Payment request stage पर required नहीं है।",
       included: "क्या शामिल है",
       whoShouldRequest: "किसे request करनी चाहिए",
       requiredDetails: "आवश्यक विवरण",
@@ -136,19 +136,19 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       languages: ["English", "Hindi", "Hinglish"],
       samplePreview: "Sample preview",
       deliveryProcess: "Delivery process",
-      steps: ["Details review करें", "Online request workflow active होने का इंतजार करें", "Team manual processing terms अलग से share करेगी", "Payment/order confirmation अभी इस page पर active नहीं है", "Report delivery workflow बाद में activate होगा"],
+      steps: ["Secure form में accurate birth details submit करें", "Request DB में pending review status के साथ save होगी", "Admin review के बाद real PDF generation हो सकता है", "Download सिर्फ actual generated file पर दिखेगा", "Payment केवल secure checkout ready होने पर अलग से enable होगा"],
       disclaimer: "अस्वीकरण",
       disclaimerCopy: "ज्योतिष रिपोर्ट चिंतनात्मक मार्गदर्शन के साधन हैं। ये परिणामों की गारंटी नहीं देतीं और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।"
     };
   }
   if (locale === "hinglish") {
     return {
-      request: "Prepare Request",
+      request: "Submit Request",
       contactSupport: "Contact Support",
       emailSupport: "Email Support",
       price: "Report fee",
       priceOnRequest: "Price on request",
-      manualNote: "Online payment automation active nahi hai. Report workflow abhi manual/review-based hai.",
+      manualNote: "Request DB me pending review ke roop me save hoti hai. Request stage par payment required nahi hai.",
       included: "What is included",
       whoShouldRequest: "Who should request this report",
       requiredDetails: "Required details",
@@ -156,18 +156,18 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       languages: ["English", "Hindi", "Hinglish"],
       samplePreview: "Sample preview",
       deliveryProcess: "Delivery process",
-      steps: ["Details review karein", "Online request workflow active hone ka wait karein", "Team manual processing terms separately share karegi", "Payment/order confirmation is page par active nahi hai", "Report delivery workflow baad mein activate hoga"],
+      steps: ["Secure form me accurate birth details submit karein", "Request DB me pending review status ke saath save hogi", "Admin review ke baad real PDF generation ho sakta hai", "Download sirf actual generated file par dikhega", "Payment secure checkout ready hone par alag se enable hoga"],
       disclaimer: "Disclaimer",
       disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
     };
   }
   return {
-    request: "Prepare Request",
+    request: "Submit Request",
     contactSupport: "Contact Support",
     emailSupport: "Email Support",
     price: "Report fee",
     priceOnRequest: "Price on request",
-    manualNote: "Online payment automation is not active. The report workflow is currently manual/review-based.",
+    manualNote: "Requests are saved to the database as pending review. Payment is not required at request stage.",
     included: "What is included",
     whoShouldRequest: "Who should request this report",
     requiredDetails: "Required details",
@@ -175,7 +175,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
     languages: ["English", "Hindi", "Hinglish"],
     samplePreview: "Sample preview",
     deliveryProcess: "Delivery process",
-    steps: ["Review required details", "Wait for online request workflow activation", "Manual processing terms will be shared separately", "Payment/order confirmation is not active on this page", "Report delivery workflow will be activated later"],
+    steps: ["Submit accurate birth details through the secure form", "Request is saved with pending review status", "Admin can generate a real PDF after review", "Download appears only when an actual file exists", "Payment can be enabled later through secure checkout only"],
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."
   };

@@ -9,7 +9,7 @@ import { prisma } from "@/lib/db";
 import { normalizeLocale, t, type Locale } from "@/lib/i18n";
 import { cookies } from "next/headers";
 
-type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string }>;
+type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string; reportSlug?: string }>;
 
 export default async function NewReportRequestPage({ searchParams }: { searchParams: SearchParams }) {
   const user = await getCurrentUser();
@@ -23,10 +23,10 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
 
   let plan: "PREMIUM" | "VIP" = params.plan?.toLowerCase() === "vip" ? "VIP" : "PREMIUM";
 
-  if (!adminMode) {
-    if (!params.orderId) redirect("/pricing");
+  if (!adminMode && params.orderId) {
     const payment = await prisma.payment.findUnique({ where: { id: params.orderId } });
-    if (!payment || payment.userId !== user.id || payment.status !== PaymentStatus.PAID || payment.purpose !== PaymentPurpose.SUBSCRIPTION) redirect("/pricing");
+    const allowedPurposes: PaymentPurpose[] = [PaymentPurpose.SUBSCRIPTION, PaymentPurpose.KUNDLI_REPORT, PaymentPurpose.YEARLY_REPORT, PaymentPurpose.MATCH_REPORT];
+    if (!payment || payment.userId !== user.id || payment.status !== PaymentStatus.PAID || !allowedPurposes.includes(payment.purpose)) redirect("/pricing");
     const metadata = (payment.metadata as Record<string, unknown> | null) ?? {};
     plan = String(metadata.plan ?? plan).toUpperCase() === "VIP" ? "VIP" : "PREMIUM";
   }
@@ -36,10 +36,10 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
       <Card className="glass overflow-visible border-[#D4AF37]/25">
         <CardHeader>
           <CardTitle className="font-cinzel text-3xl">{t(locale, "reportRequestDetails")}</CardTitle>
-          <p className="text-sm naksh-muted-text">{t(locale, "reportSentWithin24Hours")}</p>
+          <p className="text-sm naksh-muted-text">Submit accurate birth details for manual review. Online payment is not required at request stage, and delivery appears only after a real PDF is generated.</p>
         </CardHeader>
         <CardContent className="overflow-visible">
-          <ReportRequestForm userEmail={user.email} orderId={params.orderId} plan={plan} adminBypass={adminMode && isAdmin} />
+          <ReportRequestForm userEmail={user.email} orderId={params.orderId} plan={plan} reportSlug={params.reportSlug} adminBypass={adminMode && isAdmin} />
         </CardContent>
       </Card>
     </Section>

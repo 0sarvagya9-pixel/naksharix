@@ -85,6 +85,11 @@ function validatePublicTransitSafety() {
     const routeFiles = files.filter((file) => file.includes(fragment));
     assert(routeFiles.length === 0, `Transit route safety: ${fragment}`, routeFiles.length ? routeFiles.join(", ") : "no route file");
   }
+  assert(exists("app/transits/page.tsx"), "Current transit snapshot page exists", "provider-calculated snapshot only");
+  assert(sitemap.includes("/transits"), "Current transit snapshot is sitemap eligible", "active general snapshot route");
+  const transitsPage = source("app/transits/page.tsx");
+  assert(transitsPage.includes("not a personalized birth-chart transit prediction"), "Transit page claim boundary", "no personalized fake prediction");
+  assert(transitsPage.includes("Ingress dates, retrograde windows") && transitsPage.includes("Coming Soon"), "Transit page blocks prediction dates", "no fake ingress dates");
   assert(!/publicPredictionEnabled:\s*true/.test(source("lib/astrology/transit/engine.ts")), "Transit public prediction safety still present", "no public transit prediction activation");
 }
 

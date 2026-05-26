@@ -116,7 +116,8 @@ for (const moduleName of [
   assert(matrix.includes(`${moduleName}:`), `Activation matrix includes ${moduleName}`, "public gate is explicit");
 }
 assert(matrix.includes("panchang") && matrix.includes("public_active_provider_verified"), "Panchang provider-verified public activation is explicit", "not external verified");
-assert(!/transit:\s*{[\s\S]*?publicEnabled:\s*true/.test(matrix), "Transit remains publicly disabled", "ingress/retrograde fixtures still required");
+assert(/transit:\s*{[\s\S]*?publicEnabled:\s*false/.test(matrix), "Transit prediction remains publicly disabled", "ingress/retrograde fixtures still required");
+assert(/transit_snapshot:\s*{[\s\S]*?publicEnabled:\s*true/.test(matrix), "Transit snapshot public activation is explicit", "general positions only");
 assert(!/varga:\s*{[\s\S]*?publicEnabled:\s*true/.test(matrix), "Varga remains publicly disabled", "external chart fixtures still required");
 assert(!/shadbala:\s*{[\s\S]*?publicEnabled:\s*true/.test(matrix), "Full Shadbala remains publicly disabled", "formula fixtures still required");
 

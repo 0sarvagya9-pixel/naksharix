@@ -15,7 +15,9 @@ type DashboardUser = { role?: string | null; effectiveRole?: string | null; name
 const activeTools = [
   { title: "Generate Kundli", href: "/kundli", copy: "Create a free Kundli using complete birth details.", icon: MoonStar },
   { title: "Use Numerology", href: "/numerology", copy: "Explore deterministic numerology and Lo Shu tools.", icon: Sparkles },
-  { title: "Browse Reports", href: "/reports", copy: "Review manual report options without payment automation.", icon: ClipboardList },
+  { title: "Browse Reports", href: "/reports", copy: "Submit real pending-review report requests without payment at request stage.", icon: ClipboardList },
+  { title: "Today Panchang", href: "/panchang", copy: "Open provider-calculated Panchang with location and timezone notes.", icon: MoonStar },
+  { title: "Transit Snapshot", href: "/transits", copy: "View provider-calculated current Gochar positions without prediction claims.", icon: Sparkles },
   { title: "Free Calculators", href: "/free-calculators", copy: "Open focused calculators that reuse existing engines.", icon: FileText }
 ];
 
@@ -94,11 +96,11 @@ export default function DashboardPage() {
 
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         <StatusCard title="Saved Kundli History" copy="Saved Kundli history should show only real generated records. If no saved records exist yet, this section stays as an honest empty state." />
-        <StatusCard title="Report Requests" copy="Report request history will appear only after a real backend request is submitted and persisted." />
-        <StatusCard title="Premium PDF Reports" copy="Automated premium PDF generation is not active yet. No fake downloads or delivery promises are shown here." />
+        <StatusCard title="Report Requests" copy="Report requests are saved as real pending-review records and visible in your profile history." />
+        <StatusCard title="Premium PDF Reports" copy="Admin-reviewed PDF generation is available for real report requests. Downloads appear only when a file exists." />
       </div>
 
-      <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {activeTools.map(({ title, href, copy, icon: Icon }) => (
           <Card key={title} className="border-[#D4AF37]/20 bg-[#061D3C]/80">
             <CardContent className="p-5">
@@ -115,7 +117,7 @@ export default function DashboardPage() {
         <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Future Modules</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {["AI Astrologer", "Shop", "Consultation marketplace", "Panchang", "Transit predictions", "Premium PDF automation"].map((item) => (
+            {["AI Astrologer", "Shop", "Consultation marketplace", "Transit predictions", "Report payment checkout"].map((item) => (
               <div key={item} className="flex items-center justify-between rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm">
                 <span>{item}</span>
                 <span className="rounded-full border border-[#D4AF37]/30 px-2 py-1 text-xs text-[#FFD700]">Coming Soon</span>

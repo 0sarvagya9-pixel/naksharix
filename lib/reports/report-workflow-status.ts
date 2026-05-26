@@ -1,5 +1,5 @@
 export type ReportWorkflowReadiness = {
-  publicDbPersistenceEnabled: false;
+  publicDbPersistenceEnabled: boolean;
   reason: string;
   existingSafeSurfaces: string[];
   blockers: string[];
@@ -7,20 +7,19 @@ export type ReportWorkflowReadiness = {
 
 export function getReportWorkflowReadiness(): ReportWorkflowReadiness {
   return {
-    publicDbPersistenceEnabled: false,
-    reason: "The existing ReportRequest API is authenticated and payment/admin-bypass oriented, while the public reports page is intentionally no-payment request-intent.",
+    publicDbPersistenceEnabled: true,
+    reason: "Authenticated report requests now persist as pending-review records without requiring payment at request stage.",
     existingSafeSurfaces: [
       "Prisma ReportRequest model exists.",
-      "Admin report request read API exists.",
+      "ReportRequest stores reportSlug, admin notes, generated PDF metadata, and workflow status.",
+      "Admin report request read/update API exists.",
       "Admin report request detail page exists.",
-      "Public report catalogue uses request-intent without fake submission."
+      "User profile shows real report request history and generated PDF downloads only when a real file exists."
     ],
     blockers: [
-      "ReportRequest model does not store reportSlug/reportType from the manual catalogue.",
-      "Current ReportRequestStatus enum does not include pending_review, needs_info, ready_for_generation, generated, or delivered.",
-      "No admin notes field exists.",
-      "No no-payment public request policy has been approved.",
-      "No user report request history page is wired to real persisted data yet."
+      "Database migration must be applied in production before the new fields are available.",
+      "Public payment remains optional/disabled unless Razorpay environment variables are configured.",
+      "External email delivery and object storage are not configured; generated PDF bytes are stored in the database for secure authenticated download."
     ]
   };
 }

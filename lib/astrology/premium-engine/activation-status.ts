@@ -83,11 +83,11 @@ export const premiumEngineActivationMatrix: Record<PremiumEngineModule, PremiumE
   },
   transit_snapshot: {
     module: "transit_snapshot",
-    status: "provider_verified",
-    publicEnabled: false,
-    sitemapEligible: false,
-    navBadge: "Internal",
-    reason: "Fixed-date transit planet positions pass provider-generated fixture regression tests.",
+    status: "public_active_provider_verified",
+    publicEnabled: true,
+    sitemapEligible: true,
+    navBadge: "Active",
+    reason: "General current transit snapshot positions pass provider-generated fixture regression tests. Personalized transit prediction remains disabled.",
     nextRequirement: "Add ingress and retrograde window fixtures before public transit prediction pages."
   },
   varga: {

@@ -23,6 +23,7 @@ export default function robots(): MetadataRoute.Robots {
         "/numerology",
         "/tarot",
         "/panchang",
+        "/transits",
         "/zodiac",
         "/blog"
       ],

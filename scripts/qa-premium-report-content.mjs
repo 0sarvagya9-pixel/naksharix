@@ -13,7 +13,8 @@ assert(source.includes("assemblePremiumReportContent"), "Report content assemble
 assert(source.includes("premiumComplete: false"), "Premium completion stays false", "no fake complete report");
 assert(source.includes("unavailableSections"), "Unavailable sections are tracked", "no fake sections");
 assert(source.includes("available_unverified") && source.includes("partial_internal") && source.includes("unavailable"), "Section statuses exist", "truthful section metadata");
-assert(source.includes("not a complete premium report"), "Trust note exists", "no premium delivery claim");
+assert(source.includes("core-kundli-summary") && source.includes("lo-shu-section") && source.includes("chinese-zodiac-section") && source.includes("final-summary"), "Offline Kundli report sections exist", "full report structure");
+assert(source.includes("must be reviewed before delivery"), "Trust note exists", "no automatic delivery claim");
 assert(!/automatic delivery|payment successful|download now|premiumComplete:\s*true/i.test(source), "No fake delivery/payment language", "safe wording scan");
 
 const counts = results.reduce((acc, result) => {

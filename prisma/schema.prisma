@@ -92,8 +92,13 @@ enum ReportPaymentStatus {
 
 enum ReportRequestStatus {
   RECEIVED
+  PENDING_REVIEW
   IN_PROGRESS
+  NEEDS_INFO
+  READY_FOR_GENERATION
+  GENERATED
   SENT
+  DELIVERED
   CANCELLED
 }
 
@@ -428,25 +433,32 @@ model ReportRequest {
   payment       Payment?            @relation(fields: [paymentId], references: [id], onDelete: SetNull)
   planType      ReportPlanType
   paymentStatus ReportPaymentStatus @default(PENDING)
-  status        ReportRequestStatus @default(RECEIVED)
+  status        ReportRequestStatus @default(PENDING_REVIEW)
+  reportSlug    String              @default("premium-kundli")
   deliveryEmail String
   fullName      String
   gender        String?
   dateOfBirth   String
-  timeOfBirth   String?
-  birthPlace    String?
+  timeOfBirth   String
+  birthPlace    String
   latitude      Float?
   longitude     Float?
   timezone      Float?
   phone         String?
   concern       String?
   language      String              @default("en")
+  adminNotes    String?
+  generatedPdfBytes    Bytes?
+  generatedPdfFileName String?
+  generatedPdfSize     Int?
+  generatedAt          DateTime?
   adminBypass   Boolean             @default(false)
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
   @@index([userId, createdAt])
   @@index([planType, status])
+  @@index([reportSlug])
   @@index([paymentStatus])
 }
 model Coupon {

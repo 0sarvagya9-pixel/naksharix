@@ -153,7 +153,7 @@ export function MainNav() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const moreActive = moreLinks.some((item) => isActiveRoute(pathname, item.href, item.activePaths));
   const calculatorsActive = isActiveRoute(pathname, "/free-calculators", ["/free-calculators", "/calculators"]);
-  const horoscopeActive = isActiveRoute(pathname, "/horoscope", ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/weekly-love-horoscope", "/yearly-horoscope-2026", "/chinese-horoscope-2026", "/numerology-monthly-horoscope", "/panchang"]);
+  const horoscopeActive = isActiveRoute(pathname, "/horoscope", ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/weekly-love-horoscope", "/yearly-horoscope-2026", "/chinese-horoscope-2026", "/numerology-monthly-horoscope", "/panchang", "/transits"]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -690,6 +690,7 @@ function horoscopeDropdownLabels(locale: Locale) {
         {
           title: "गोचर 2026",
           items: [
+            { label: "वर्तमान गोचर स्नैपशॉट", href: "/transits" },
             { label: "सूर्य गोचर" },
             { label: "चंद्र गोचर" },
             { label: "मंगल गोचर" },
@@ -726,6 +727,7 @@ function horoscopeDropdownLabels(locale: Locale) {
         {
           title: "Transit 2026",
           items: [
+            { label: "Current Gochar Snapshot", href: "/transits" },
             { label: "Sun Transits" },
             { label: "Moon Transits" },
             { label: "Mars Transits" },
@@ -761,6 +763,7 @@ function horoscopeDropdownLabels(locale: Locale) {
       {
         title: "Transit 2026",
         items: [
+          { label: "Current Gochar Snapshot", href: "/transits" },
           { label: "Sun Transits" },
           { label: "Moon Transits" },
           { label: "Mars Transits" },
