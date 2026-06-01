@@ -36,6 +36,21 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
+  EMAIL_PROVIDER: z.enum(["disabled", "smtp", "ses"]).default("disabled"),
+  AWS_SES_REGION: z.string().optional(),
+  AWS_SES_FROM: z.string().optional(),
+  REPORT_STORAGE_DRIVER: z.enum(["database", "r2", "s3"]).default("database"),
+  CLOUDFLARE_R2_ACCOUNT_ID: z.string().optional(),
+  CLOUDFLARE_R2_ACCESS_KEY_ID: z.string().optional(),
+  CLOUDFLARE_R2_SECRET_ACCESS_KEY: z.string().optional(),
+  CLOUDFLARE_R2_BUCKET: z.string().optional(),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  AWS_REGION: z.string().optional(),
+  AWS_S3_BUCKET: z.string().optional(),
+  SENTRY_DSN: z.string().optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_GA_ID: z.string().optional()
 });
 

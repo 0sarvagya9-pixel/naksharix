@@ -29,36 +29,119 @@ const naisargikaBala: Record<ShadbalaPlanetScore["planet"], number> = {
 export function calculatePartialShadbala(planets: CanonicalPlanet[]): PartialShadbalaResult {
   const scores = planets
     .filter((planet): planet is CanonicalPlanet & { planet: ShadbalaPlanetScore["planet"] } => planet.planet !== "Rahu" && planet.planet !== "Ketu")
-    .map((planet) => ({
-      planet: planet.planet,
-      components: {
-        sthanaBala: null,
-        digBala: null,
-        kalaBala: null,
-        cheshtaBala: null,
-        naisargikaBala: naisargikaBala[planet.planet],
-        drikBala: null
-      },
-      total: null,
-      verified: false
-    }));
+    .map((planet) => {
+      const sthanaBala = dignityIndicator(planet.planet, planet.sign);
+      const digBala = directionalStrengthIndicator(planet.planet, planet.house);
+      const cheshtaBala = typeof planet.retrograde === "boolean" ? (planet.retrograde ? 60 : 15) : null;
+      return {
+        planet: planet.planet,
+        components: {
+          sthanaBala,
+          digBala,
+          kalaBala: null,
+          cheshtaBala,
+          naisargikaBala: naisargikaBala[planet.planet],
+          drikBala: null
+        },
+        componentStatus: {
+          sthanaBala: sthanaBala == null
+            ? unavailable("Planet sign is unavailable.")
+            : calculated("Dignity-based Sthana indicator from provider sign placement; not the complete classical Sthana Bala stack."),
+          digBala: digBala == null
+            ? unavailable("Planet house is unavailable.")
+            : calculated("Directional strength indicator from whole-sign house placement."),
+          kalaBala: unavailable("Kala Bala requires full temporal subcomponents and verified day/night, paksha, hora, and seasonal formula fixtures."),
+          cheshtaBala: cheshtaBala == null
+            ? unavailable("Retrograde/motion status is unavailable.")
+            : calculated("Motion indicator based on provider retrograde status; exact Cheshta Bala speed sub-formula remains pending."),
+          naisargikaBala: calculated("Fixed traditional Naisargika Bala constant."),
+          drikBala: unavailable("Drik Bala requires a verified aspect model and aspect strength fixtures.")
+        },
+        total: null,
+        verified: false
+      };
+    });
 
   return {
     scores,
     verificationLevel: "provider_verified",
     publicEnabled: false,
     missingDependencies: [
-      "Verified dignity and varga data for Sthana Bala.",
-      "Verified house cusp/reference data for Dig Bala.",
+      "Complete Sthana Bala subcomponents beyond dignity indicator.",
+      "Exact Dig Bala degree-distance formula beyond house indicator.",
       "Verified temporal formula inputs for Kala Bala.",
-      "Verified speed/retrograde model for Cheshta Bala.",
+      "Verified speed model for full Cheshta Bala.",
       "Verified aspects for Drik Bala.",
       "External Shadbala score fixtures."
     ],
     limitations: [
-      "Only Naisargika Bala constants are populated and provider-regression verified because they are fixed traditional constants.",
+      "Sthana, Dig, Cheshta, and Naisargika indicators are populated from available provider data where possible.",
+      "Kala Bala and Drik Bala remain unavailable with explicit reasons.",
       "Total Shadbala is intentionally null until all components are implemented and fixture-verified.",
       "No public Shadbala score should be shown from this partial result."
     ]
   };
+}
+
+function calculated(reason: string) {
+  return { status: "calculated" as const, reason };
+}
+
+function unavailable(reason: string) {
+  return { status: "unavailable" as const, reason };
+}
+
+const exaltationSigns: Record<ShadbalaPlanetScore["planet"], string> = {
+  Sun: "Aries",
+  Moon: "Taurus",
+  Mars: "Capricorn",
+  Mercury: "Virgo",
+  Jupiter: "Cancer",
+  Venus: "Pisces",
+  Saturn: "Libra"
+};
+
+const debilitationSigns: Record<ShadbalaPlanetScore["planet"], string> = {
+  Sun: "Libra",
+  Moon: "Scorpio",
+  Mars: "Cancer",
+  Mercury: "Pisces",
+  Jupiter: "Capricorn",
+  Venus: "Virgo",
+  Saturn: "Aries"
+};
+
+const ownSigns: Record<ShadbalaPlanetScore["planet"], string[]> = {
+  Sun: ["Leo"],
+  Moon: ["Cancer"],
+  Mars: ["Aries", "Scorpio"],
+  Mercury: ["Gemini", "Virgo"],
+  Jupiter: ["Sagittarius", "Pisces"],
+  Venus: ["Taurus", "Libra"],
+  Saturn: ["Capricorn", "Aquarius"]
+};
+
+function dignityIndicator(planet: ShadbalaPlanetScore["planet"], sign: string | null) {
+  if (!sign) return null;
+  if (sign === exaltationSigns[planet]) return 60;
+  if (sign === debilitationSigns[planet]) return 0;
+  if (ownSigns[planet].includes(sign)) return 45;
+  return 22.5;
+}
+
+const directionalStrengthHouse: Record<ShadbalaPlanetScore["planet"], number> = {
+  Sun: 10,
+  Mars: 10,
+  Moon: 4,
+  Venus: 4,
+  Jupiter: 1,
+  Mercury: 1,
+  Saturn: 7
+};
+
+function directionalStrengthIndicator(planet: ShadbalaPlanetScore["planet"], house: number | null | undefined) {
+  if (!house) return null;
+  const strongest = directionalStrengthHouse[planet];
+  const distance = Math.min(Math.abs(house - strongest), 12 - Math.abs(house - strongest));
+  return Number(Math.max(0, 60 - distance * 10).toFixed(2));
 }

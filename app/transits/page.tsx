@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Section } from "@/components/section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { calculateInternalTransitSnapshot } from "@/lib/astrology/transit/engine";
+import { calculateInternalTransitSnapshot, calculateUpcomingTransitTimeline } from "@/lib/astrology/transit/engine";
 
 export const metadata: Metadata = {
   title: "Current Gochar Snapshot | Naksharix",
@@ -38,6 +38,7 @@ export default function TransitsPage() {
     place: "Delhi, India",
     ayanamsa: "lahiri"
   });
+  const timeline = calculateUpcomingTransitTimeline(snapshot.input!, 45);
 
   return (
     <Section className="space-y-8">
@@ -71,11 +72,33 @@ export default function TransitsPage() {
 
       <Card className="border-[#dca956]/25 bg-[#0a1224]">
         <CardHeader>
+          <CardTitle className="text-white">Upcoming Provider-Scanned Timeline</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm text-slate-300">
+          {timeline.length ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {timeline.slice(0, 8).map((event) => (
+                <div key={`${event.planet}-${event.eventType}-${event.date}`} className="rounded-lg border border-[#1e293b] bg-[#020612]/60 p-4">
+                  <p className="font-semibold text-white">{event.planet} {event.eventType.replaceAll("_", " ")}</p>
+                  <p className="text-[#f3d382]">{event.date}</p>
+                  <p>{String(event.from ?? "Unavailable")} → {String(event.to ?? "Unavailable")}</p>
+                  <p className="mt-2 text-xs text-slate-400">{event.note}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No provider-scanned sign or retrograde changes were detected in the next 45 days for this reference snapshot.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-[#dca956]/25 bg-[#0a1224]">
+        <CardHeader>
           <CardTitle className="text-white">Source & Limits</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-slate-300">
           <p>Source: {snapshot.metadata.provider}. Verification level: {snapshot.metadata.verificationLevel}.</p>
-          <p>Ingress dates, retrograde windows, and personalized transit impact remain Coming Soon until stricter fixtures and natal overlay rules pass QA.</p>
+          <p>The timeline is detected by daily provider scans, so exact ingress or station minutes still require external transit fixtures. Personalized transit impact remains Coming Soon until natal overlay rules pass QA.</p>
           <p>Values may vary slightly by source. Use this for spiritual reflection and cross-check critical decisions with a qualified professional.</p>
           <Link href="/reports" className="inline-flex text-[#f3d382] hover:underline">Explore detailed reports</Link>
         </CardContent>

@@ -1,8 +1,10 @@
 import { ReportRequestStatus } from "@prisma/client";
 import { z } from "zod";
-import { handleApiError, ok } from "@/lib/api";
+import { fail, handleApiError, ok } from "@/lib/api";
 import { requireAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
+import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
+import { assertAllowedReportStatusTransition } from "@/lib/reports/report-status-transitions";
 
 export async function GET() {
   try {
@@ -45,14 +47,42 @@ const patchSchema = z.object({
 
 export async function PATCH(request: Request) {
   try {
-    await requireAdminRole();
+    const admin = await requireAdminRole();
     const body = patchSchema.parse(await request.json());
+    const current = await prisma.reportRequest.findUnique({ where: { id: body.id } });
+    if (!current) return fail("Report request not found", 404);
+    try {
+      assertAllowedReportStatusTransition(current.status, body.status, {
+        hasPdf: Boolean(current.generatedPdfBytes && current.generatedPdfSize),
+        paymentStatus: current.paymentStatus,
+        adminBypass: current.adminBypass
+      });
+    } catch (error) {
+      return fail(error instanceof Error ? error.message : "Invalid status transition", 422);
+    }
     const reportRequest = await prisma.reportRequest.update({
       where: { id: body.id },
       data: {
         status: body.status,
         adminNotes: body.adminNotes
       }
+    });
+    if (current.status !== reportRequest.status) {
+      await writeReportStatusHistory({
+        reportRequestId: reportRequest.id,
+        oldStatus: current.status,
+        newStatus: reportRequest.status,
+        actor: admin,
+        note: body.adminNotes,
+        metadata: { source: "admin_patch" }
+      });
+    }
+    await writeAuditLog({
+      actor: admin,
+      action: "report_request.status_updated",
+      targetType: "ReportRequest",
+      targetId: reportRequest.id,
+      metadata: { from: current.status, to: reportRequest.status }
     });
     return ok({ reportRequest });
   } catch (error) {

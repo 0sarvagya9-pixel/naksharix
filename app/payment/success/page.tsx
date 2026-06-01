@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { isAdmin as canUseAdminMode } from "@/lib/auth/permissions";
+import { prisma } from "@/lib/db";
 import { normalizeLocale, t, type Locale } from "@/lib/i18n";
 
-type SearchParams = Promise<{ plan?: string; mode?: string }>;
+type SearchParams = Promise<{ plan?: string; mode?: string; paymentId?: string }>;
 
 export default async function PaymentSuccessPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
@@ -20,11 +21,24 @@ export default async function PaymentSuccessPage({ searchParams }: { searchParam
   const isAdmin = canUseAdminMode(user);
 
   if (isAdminMode && !isAdmin) redirect("/pricing");
+  if (!user) redirect("/login");
+
+  const payment = params.paymentId
+    ? await prisma.payment.findUnique({
+        where: { id: params.paymentId },
+        select: { id: true, userId: true, status: true, purpose: true, amount: true, currency: true, providerPaymentId: true }
+      })
+    : null;
+
+  const verifiedPaid = Boolean(payment && payment.userId === user.id && payment.status === "PAID" && payment.providerPaymentId);
+  if (!isAdminMode && !verifiedPaid) redirect("/dashboard");
 
   const isVip = plan === "vip";
   const title = isAdminMode ? t(locale, "adminAccess") : isVip ? "VIP" : "Premium";
   const thankYou = isVip ? t(locale, "vipSuccessMessage") : t(locale, "premiumSuccessMessage");
-  const reportMessage = isVip ? t(locale, "vipReportPreparedEmail24Hours") : t(locale, "reportPreparedEmail24Hours");
+  const reportMessage = verifiedPaid
+    ? "Payment is verified in Naksharix records. Continue to the report request form to submit accurate birth details for manual review."
+    : "Admin mode does not create a payment.";
 
   return (
     <Section className="max-w-3xl">
@@ -46,12 +60,12 @@ export default async function PaymentSuccessPage({ searchParams }: { searchParam
           <div className="space-y-3 text-base leading-8 naksh-muted-text">
             <p className="text-lg font-semibold text-[#FFFFFF]">{thankYou}</p>
             <p>{reportMessage}</p>
-            {isVip ? <p>{t(locale, "consultingCredits1000")}</p> : null}
+            {payment ? <p>Verified payment: {payment.currency} {String(payment.amount)} for {payment.purpose}</p> : null}
             <p>{t(locale, "contactSupportCare")}</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button asChild>
-              <Link href="/dashboard">{t(locale, "goToDashboard")}</Link>
+              <Link href={payment ? `/report-request/new?orderId=${payment.id}&plan=${isVip ? "VIP" : "PREMIUM"}` : "/dashboard"}>{payment ? "Submit Report Details" : t(locale, "goToDashboard")}</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href="/pricing">{t(locale, "backToPricing")}</Link>

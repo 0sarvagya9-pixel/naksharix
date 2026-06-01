@@ -93,10 +93,13 @@ enum ReportPaymentStatus {
 enum ReportRequestStatus {
   RECEIVED
   PENDING_REVIEW
+  PAYMENT_PENDING
+  PAID
   IN_PROGRESS
   NEEDS_INFO
   READY_FOR_GENERATION
   GENERATED
+  READY_FOR_DELIVERY
   SENT
   DELIVERED
   CANCELLED
@@ -169,6 +172,7 @@ model User {
   invoices                     Invoice[]
   purchasedReports             PurchasedReport[]
   reportRequests               ReportRequest[]
+  auditLogs                    AuditLog[]             @relation("AuditActor")
   comments                     Comment[]
   blogPosts                    BlogPost[]
   notifications                Notification[]
@@ -450,9 +454,17 @@ model ReportRequest {
   adminNotes    String?
   generatedPdfBytes    Bytes?
   generatedPdfFileName String?
+  generatedPdfMimeType String?
+  generatedPdfStorageKey String?
+  generatedPdfChecksum String?
+  generatedPdfStorageDriver String?
   generatedPdfSize     Int?
   generatedAt          DateTime?
+  deliveryStatus       String              @default("not_ready")
+  emailSentAt          DateTime?
+  deliveryError        String?
   adminBypass   Boolean             @default(false)
+  statusHistory ReportStatusHistory[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
@@ -460,6 +472,38 @@ model ReportRequest {
   @@index([planType, status])
   @@index([reportSlug])
   @@index([paymentStatus])
+}
+
+model ReportStatusHistory {
+  id              String              @id @default(cuid())
+  reportRequestId String
+  oldStatus       ReportRequestStatus?
+  newStatus       ReportRequestStatus
+  actorId         String?
+  actorRole       String?
+  note            String?
+  metadata        Json?
+  reportRequest   ReportRequest       @relation(fields: [reportRequestId], references: [id], onDelete: Cascade)
+  createdAt       DateTime            @default(now())
+
+  @@index([reportRequestId, createdAt])
+  @@index([actorId, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorRole  String?
+  action     String
+  targetType String
+  targetId   String
+  metadata   Json?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+  @@index([action, createdAt])
 }
 model Coupon {
   id             String    @id @default(cuid())

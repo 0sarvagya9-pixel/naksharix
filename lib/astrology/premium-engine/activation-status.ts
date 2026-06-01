@@ -111,8 +111,8 @@ export const premiumEngineActivationMatrix: Record<PremiumEngineModule, PremiumE
     publicEnabled: false,
     sitemapEligible: false,
     navBadge: "Internal",
-    reason: "Naisargika Bala constants are deterministic and dependency-safe.",
-    nextRequirement: "Implement and verify remaining Bala components before total Shadbala output."
+    reason: "Naisargika Bala plus provider-backed Sthana, Dig, and Cheshta indicators are calculated where source data exists.",
+    nextRequirement: "Implement Kala and Drik Bala with verified formula fixtures before total Shadbala output."
   },
   shadbala: {
     module: "shadbala",
@@ -120,8 +120,8 @@ export const premiumEngineActivationMatrix: Record<PremiumEngineModule, PremiumE
     publicEnabled: false,
     sitemapEligible: false,
     navBadge: "Blocked",
-    reason: "Only dependency-safe partial strength data exists; full Shadbala needs verified house, aspect, dignity, and motion inputs.",
-    nextRequirement: "Implement and verify Sthana, Dig, Kala, Cheshta, Naisargika, and Drik Bala fixtures."
+    reason: "Partial indicators exist, but full Shadbala cannot be totaled until Kala Bala and Drik Bala are implemented with reviewed fixtures.",
+    nextRequirement: "Implement and verify Kala Bala, Drik Bala, and full component aggregation fixtures."
   },
   ashtakvarga: {
     module: "ashtakvarga",

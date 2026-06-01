@@ -5,6 +5,8 @@ import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { canBypassPayment } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db";
+import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
+import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 
 const schema = z.object({
   orderId: z.string().optional(),
@@ -30,6 +32,8 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthenticated", 401);
+    const rateLimited = rateLimitResponse("report-request-create", user.id || getRequestIp(request), 5, 60_000);
+    if (rateLimited) return rateLimited;
     const body = await validateJson(request, schema);
     const adminBypass = Boolean(body.adminBypass && canBypassPayment(user));
 
@@ -84,6 +88,21 @@ export async function POST(request: NextRequest) {
         language: body.language,
         adminBypass
       }
+    });
+    await writeReportStatusHistory({
+      reportRequestId: reportRequest.id,
+      oldStatus: null,
+      newStatus: reportRequest.status,
+      actor: user,
+      note: "Report request created.",
+      metadata: { paymentStatus: reportRequest.paymentStatus, reportSlug: reportRequest.reportSlug }
+    });
+    await writeAuditLog({
+      actor: user,
+      action: "report_request.created",
+      targetType: "ReportRequest",
+      targetId: reportRequest.id,
+      metadata: { reportSlug: reportRequest.reportSlug, paymentStatus: reportRequest.paymentStatus }
     });
 
     return ok({ reportRequest });

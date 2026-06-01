@@ -1,5 +1,7 @@
-import type { TransitEngineStatus, TransitFoundationResult, TransitCalculationInput } from "@/lib/astrology/transit/types";
+import type { TransitEngineStatus, TransitFoundationResult, TransitCalculationInput, TransitTimelineEvent } from "@/lib/astrology/transit/types";
 import { calculateInternalChart } from "@/lib/astrology/premium-engine/chart";
+
+const PROVIDER = "naksharix_astronomy_engine_lahiri_internal";
 
 export function getTransitEngineStatus(): TransitEngineStatus {
   return {
@@ -57,19 +59,76 @@ export function calculateInternalTransitSnapshot(input: TransitCalculationInput)
       verified: true
     })),
     ingressWindows: [],
+    timeline: [],
     natalOverlay: {
       enabled: false,
       reason: "Natal overlay is not active until verified birth chart fixtures and transit rules are available."
     },
     metadata: {
-      provider: "naksharix_astronomy_engine_lahiri_internal",
+      provider: PROVIDER,
       verificationLevel: "provider_verified",
       publicPredictionEnabled: false,
       limitations: [
         "Transit positions are provider-regression-tested for fixed dates.",
-        "Ingress windows and retrograde periods are not generated until external fixtures are verified.",
-        "No public transit prediction should be activated from this internal snapshot alone."
+        "Ingress and station timeline dates use a daily provider scan, not exact ingress minutes.",
+        "No personalized transit prediction should be activated from this internal snapshot alone."
       ]
     }
   };
+}
+
+export function calculateUpcomingTransitTimeline(input: TransitCalculationInput, days = 45): TransitTimelineEvent[] {
+  const normalizedDays = Math.max(1, Math.min(days, 180));
+  const events: TransitTimelineEvent[] = [];
+  let previous = calculateInternalTransitSnapshot(input);
+
+  for (let offset = 1; offset <= normalizedDays; offset += 1) {
+    const date = addDays(input.date, offset);
+    const current = calculateInternalTransitSnapshot({ ...input, date });
+
+    for (const currentPosition of current.positions) {
+      const previousPosition = previous.positions.find((position) => position.planet === currentPosition.planet);
+      if (!previousPosition) continue;
+
+      if (previousPosition.sign !== currentPosition.sign) {
+        events.push({
+          planet: currentPosition.planet,
+          eventType: "sign_ingress",
+          date,
+          from: previousPosition.sign,
+          to: currentPosition.sign,
+          degree: currentPosition.degree,
+          source: PROVIDER,
+          verificationLevel: "provider_verified",
+          precision: "daily_provider_scan",
+          note: "Detected by comparing daily local-noon provider snapshots; exact ingress minute requires external fixture validation."
+        });
+      }
+
+      if (typeof previousPosition.retrograde === "boolean" && typeof currentPosition.retrograde === "boolean" && previousPosition.retrograde !== currentPosition.retrograde) {
+        events.push({
+          planet: currentPosition.planet,
+          eventType: currentPosition.retrograde ? "station_retrograde" : "station_direct",
+          date,
+          from: previousPosition.retrograde,
+          to: currentPosition.retrograde,
+          degree: currentPosition.degree,
+          source: PROVIDER,
+          verificationLevel: "provider_verified",
+          precision: "daily_provider_scan",
+          note: "Detected by provider retrograde flag changes between daily snapshots; exact station time requires external fixture validation."
+        });
+      }
+    }
+
+    previous = current;
+  }
+
+  return events;
+}
+
+function addDays(dateText: string, days: number) {
+  const date = new Date(`${dateText}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
 }

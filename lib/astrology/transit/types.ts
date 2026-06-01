@@ -46,6 +46,19 @@ export type TransitIngressWindow = {
   verified: boolean;
 };
 
+export type TransitTimelineEvent = {
+  planet: TransitPlanetName;
+  eventType: "sign_ingress" | "station_retrograde" | "station_direct";
+  date: string;
+  from: string | boolean | null;
+  to: string | boolean | null;
+  degree: number | null;
+  source: string;
+  verificationLevel: TransitVerificationLevel;
+  precision: "daily_provider_scan";
+  note: string;
+};
+
 export type TransitEngineStatus = {
   status: TransitActivationStatus;
   verified: boolean;
@@ -58,6 +71,7 @@ export type TransitFoundationResult = {
   input: TransitCalculationInput | null;
   positions: TransitPosition[];
   ingressWindows: TransitIngressWindow[];
+  timeline?: TransitTimelineEvent[];
   natalOverlay?: {
     enabled: false;
     reason: string;

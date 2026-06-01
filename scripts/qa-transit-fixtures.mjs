@@ -45,6 +45,8 @@ function validateTransitFoundation() {
   const engine = source("lib/astrology/transit/engine.ts");
   assert(engine.includes("publicPredictionEnabled: false"), "Transit public prediction disabled", "foundation status is blocked");
   assert(!/ingressAt:\s*['"][0-9]/.test(engine), "Transit engine does not hardcode ingress dates", "no fake dates");
+  assert(engine.includes("calculateUpcomingTransitTimeline"), "Transit daily timeline scanner exists", "provider-backed sign/station scan");
+  assert(engine.includes("daily_provider_scan"), "Transit timeline labels scan precision", "no exact-minute fake claim");
 }
 
 function validateTransitFixtures() {
@@ -89,7 +91,8 @@ function validatePublicTransitSafety() {
   assert(sitemap.includes("/transits"), "Current transit snapshot is sitemap eligible", "active general snapshot route");
   const transitsPage = source("app/transits/page.tsx");
   assert(transitsPage.includes("not a personalized birth-chart transit prediction"), "Transit page claim boundary", "no personalized fake prediction");
-  assert(transitsPage.includes("Ingress dates, retrograde windows") && transitsPage.includes("Coming Soon"), "Transit page blocks prediction dates", "no fake ingress dates");
+  assert(transitsPage.includes("daily provider scans") || transitsPage.includes("daily provider scan"), "Transit page labels scanned timeline", "no exact ingress-minute claim");
+  assert(transitsPage.includes("exact ingress or station minutes still require external transit fixtures"), "Transit page blocks exact prediction dates", "no fake ingress precision");
   assert(!/publicPredictionEnabled:\s*true/.test(source("lib/astrology/transit/engine.ts")), "Transit public prediction safety still present", "no public transit prediction activation");
 }
 

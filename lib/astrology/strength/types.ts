@@ -19,6 +19,7 @@ export type ShadbalaComponent =
 export type ShadbalaPlanetScore = {
   planet: Exclude<CanonicalPlanet["planet"], "Rahu" | "Ketu">;
   components: Record<ShadbalaComponent, number | null>;
+  componentStatus: Record<ShadbalaComponent, { status: "calculated" | "unavailable"; reason: string }>;
   total: number | null;
   verified: boolean;
 };

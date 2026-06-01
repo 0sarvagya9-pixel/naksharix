@@ -7,10 +7,13 @@ import { secureFetch } from "@/lib/security/csrf";
 
 const statuses = [
   "PENDING_REVIEW",
+  "PAYMENT_PENDING",
+  "PAID",
   "IN_PROGRESS",
   "NEEDS_INFO",
   "READY_FOR_GENERATION",
   "GENERATED",
+  "READY_FOR_DELIVERY",
   "DELIVERED",
   "CANCELLED"
 ] as const;
@@ -61,6 +64,19 @@ export function ReportRequestActions({
     setMessage("PDF generated. Refresh the page to see the stored file metadata.");
   }
 
+  async function deliver() {
+    setLoading("pdf");
+    setMessage(null);
+    const response = await secureFetch(`/api/admin/report-requests/${requestId}/deliver`, { method: "POST" });
+    setLoading(null);
+    if (!response.ok) {
+      const json = await response.json().catch(() => null);
+      setMessage(json?.error ?? "Email delivery is not configured. The generated PDF remains available for secure download.");
+      return;
+    }
+    setMessage("Delivery email sent and request marked delivered.");
+  }
+
   return (
     <div className="space-y-4 rounded-2xl border border-[#D4AF37]/20 bg-[#0f1c3a]/70 p-5">
       <div className="grid gap-4 md:grid-cols-2">
@@ -80,12 +96,17 @@ export function ReportRequestActions({
               {loading === "pdf" ? "Generating..." : "Generate PDF"}
             </Button>
             {hasPdf ? (
-              <Button type="button" asChild variant="outline">
-                <a href={`/api/report-requests/${requestId}/download`}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
-                </a>
-              </Button>
+              <>
+                <Button type="button" asChild variant="outline">
+                  <a href={`/api/report-requests/${requestId}/download`}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </a>
+                </Button>
+                <Button type="button" onClick={deliver} disabled={loading === "pdf"} variant="outline">
+                  Send Email
+                </Button>
+              </>
             ) : null}
           </div>
         </div>

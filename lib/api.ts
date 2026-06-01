@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z, ZodError } from "zod";
+import { logger } from "@/lib/monitoring/logger";
 import { sanitizeInput } from "@/lib/security/sanitize";
 
 export type ApiResult<T> = { data: T } | { error: string; details?: unknown };
@@ -37,6 +38,6 @@ export function handleApiError(error: unknown) {
   if (error instanceof ZodError) {
     return fail("Validation failed", 422, error.flatten());
   }
-  console.error(error);
+  logger.error("api_error", { name: error instanceof Error ? error.name : "unknown" });
   return fail("We could not complete that request right now. Please try again shortly.", 500);
 }

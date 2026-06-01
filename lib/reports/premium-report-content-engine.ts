@@ -171,13 +171,13 @@ export function assemblePremiumReportContent(input: {
     },
     {
       key: "strength-section",
-      title: "Strength Section",
+      title: "Partial Strength Indicators",
       status: "partial_internal",
       data: {
         shadbala: calculatePartialShadbala(chart.planets),
         ashtakvarga: createAshtakvargaDependencyResult(chart.planets)
       },
-      limitations: ["Only dependency-safe partial strength data is available. No total Shadbala or bindu scores are produced.", activation.strength.reason]
+      limitations: ["Sthana, Dig, Cheshta, and Naisargika indicators are calculated where provider data supports them. No total Shadbala or Ashtakvarga bindu scores are produced.", activation.strength.reason]
     },
     {
       key: "panchang-section",

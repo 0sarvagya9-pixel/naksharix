@@ -14,7 +14,8 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
     where: { id },
     include: {
       user: { select: { email: true, name: true, role: true } },
-      payment: { select: { id: true, amount: true, currency: true, providerOrderId: true, providerPaymentId: true, status: true, createdAt: true } }
+      payment: { select: { id: true, amount: true, currency: true, providerOrderId: true, providerPaymentId: true, status: true, createdAt: true } },
+      statusHistory: { orderBy: { createdAt: "desc" }, take: 12 }
     }
   });
   if (!request) notFound();
@@ -35,6 +36,8 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
           <Detail label="Report status" value={request.status} />
           <Detail label="Report slug" value={request.reportSlug} />
           <Detail label="PDF file" value={request.generatedPdfFileName ?? "Not generated"} />
+          <Detail label="PDF storage" value={request.generatedPdfStorageDriver ? `${request.generatedPdfStorageDriver}: ${request.generatedPdfStorageKey ?? "-"}` : "-"} />
+          <Detail label="Delivery status" value={request.deliveryStatus} />
           <Detail label="PDF size" value={request.generatedPdfSize ? `${request.generatedPdfSize} bytes` : "-"} />
           <Detail label="Payment ID" value={request.payment?.id ?? "Admin bypass / not applicable"} />
           <Detail label="Razorpay order ID" value={request.payment?.providerOrderId ?? "-"} />
@@ -59,6 +62,18 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
               initialNotes={request.adminNotes}
               hasPdf={Boolean(request.generatedPdfBytes && request.generatedPdfSize)}
             />
+          </div>
+          <div className="md:col-span-2 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
+            <p className="text-[#FFD700]">Status history</p>
+            <div className="mt-3 space-y-2">
+              {request.statusHistory.length ? request.statusHistory.map((item) => (
+                <div key={item.id} className="rounded-md border border-[#D4AF37]/10 bg-[#020612]/60 p-3">
+                  <p className="text-sm text-foreground">{item.oldStatus ?? "START"} → {item.newStatus}</p>
+                  <p className="text-xs naksh-muted-text">{item.createdAt.toLocaleString()} {item.actorRole ? `by ${item.actorRole}` : ""}</p>
+                  {item.note ? <p className="mt-1 text-xs naksh-muted-text">{item.note}</p> : null}
+                </div>
+              )) : <p className="text-sm naksh-muted-text">No status history recorded yet.</p>}
+            </div>
           </div>
         </CardContent>
       </Card>
