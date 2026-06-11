@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import { FeatureGrid, HomeHero, StickyMobileCTA, TrustBar } from "@/components/home-sections";
+import { Theme10ProductionHome } from "@/components/theme10-production-home";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Naksharix - Premium Astrology, Horoscope, Kundli and Tarot Reading",
-  description: "Unlock Your Cosmic Destiny with Naksharix, a premium astrology platform for Horoscope, Kundli, Numerology, Tarot Reading, Panchang, and AI astrologer guidance.",
+  title: "Naksharix - Kundli, Panchang, Horoscope and Premium Reports",
+  description: "Premium astrology tools, daily Panchang, Kundli insights and review-based personalized reports using the Naksharix internal astrology workflow.",
   path: "/",
-  keywords: ["Astrology SaaS", "AI Astrologer", "Cosmic Destiny"]
+  keywords: ["Naksharix", "Kundli", "Panchang", "Horoscope", "Astrology Reports"]
 });
 
 export default function HomePage() {
   return (
-    <main className="nx-night-sky overflow-hidden bg-[#020612]">
-      <HomeHero />
-      <FeatureGrid />
-      <TrustBar />
-      <StickyMobileCTA />
+    <main className="overflow-hidden bg-[#fbf6ea] text-[#172536]">
+      <Theme10ProductionHome />
     </main>
   );
 }
