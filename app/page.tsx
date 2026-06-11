@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Theme10ProductionHome } from "@/components/theme10-production-home";
+import { Theme10SafeReferenceHome } from "@/components/theme10-safe-reference-home";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
@@ -10,9 +10,5 @@ export const metadata: Metadata = seo({
 });
 
 export default function HomePage() {
-  return (
-    <main className="overflow-hidden bg-[#fbf6ea] text-[#172536]">
-      <Theme10ProductionHome />
-    </main>
-  );
+  return <Theme10SafeReferenceHome />;
 }
