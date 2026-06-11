@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, FileText, Grid3X3, HeartHandshake, MoonStar, ShieldCheck, Sparkles, Star, SunMedium } from "lucide-react";
+import { ArrowRight, CalendarDays, FileText, Grid3X3, HeartHandshake, MoonStar, ShieldCheck, Sparkles, SunMedium } from "lucide-react";
 
 const tools = [
   { label: "Kundli", copy: "Birth Chart", href: "/kundli", icon: MoonStar },
