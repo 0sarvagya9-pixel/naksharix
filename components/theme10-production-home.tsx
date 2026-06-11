@@ -21,29 +21,26 @@ export function Theme10ProductionHome() {
     <main className="theme10-home relative isolate overflow-hidden bg-[#fbf6ea] text-[#172536]">
       <Theme10Styles />
       <section className="relative overflow-hidden px-4 pb-6 pt-7 sm:px-6 lg:px-10 lg:pb-7 lg:pt-10">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_62%_26%,rgba(255,160,63,.30),transparent_16rem),radial-gradient(circle_at_72%_36%,rgba(216,175,102,.44),transparent_24rem),radial-gradient(circle_at_86%_44%,rgba(72,128,183,.32),transparent_31rem),linear-gradient(135deg,#fffaf1_0%,#fbf6ea_42%,#eef5fb_100%)]" />
-        <div className="mx-auto grid max-w-[1520px] grid-cols-1 items-center gap-8 lg:min-h-[calc(100vh-116px)] lg:grid-cols-[minmax(0,0.39fr)_minmax(0,0.61fr)] lg:gap-8 xl:gap-10">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_63%_32%,rgba(216,175,102,.34),transparent_22rem),radial-gradient(circle_at_80%_44%,rgba(137,169,197,.32),transparent_31rem),linear-gradient(135deg,#fffaf1_0%,#fbf6ea_48%,#eef5fb_100%)]" />
+        <div className="mx-auto grid max-w-[1520px] grid-cols-1 items-center gap-8 lg:min-h-[calc(100vh-116px)] lg:grid-cols-[minmax(0,0.41fr)_minmax(0,0.59fr)] lg:gap-10 xl:gap-14">
           <div className="relative z-10 max-w-[42rem] overflow-visible py-2">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#d8af66]/55 bg-white/72 px-4 py-2 text-[.72rem] font-extrabold uppercase tracking-[.28em] text-[#b8862e] shadow-[0_10px_28px_rgba(184,134,46,.12)] backdrop-blur">
               <Sparkles className="h-4 w-4" /> Your Cosmic Blueprint
             </div>
-            <h1 className="theme10-title font-decorative text-[clamp(3.15rem,4.55vw,5.8rem)] font-black uppercase leading-[.92] tracking-[-.038em] text-[#172536]">
+            <h1 className="theme10-title font-decorative text-[clamp(3.35rem,5.15vw,6.35rem)] font-black uppercase leading-[.9] tracking-[-.035em] text-[#172536]">
               <span className="block">Master the</span>
               <span className="block text-[#bd8627]">Cosmos.</span>
               <span className="block">Live Your Destiny.</span>
             </h1>
-            <p className="mt-6 max-w-[34rem] text-base leading-8 text-[#566575] sm:text-lg">
+            <p className="mt-6 max-w-[36rem] text-base leading-8 text-[#566575] sm:text-lg">
               Premium astrology tools, daily Panchang, Kundli insights and review-based personalized reports crafted through the Naksharix workflow.
             </p>
             <div className="mt-7 flex flex-wrap gap-4">
               <ThemeButton href="/kundli" primary>Get My Kundli</ThemeButton>
               <ThemeButton href="/free-calculators">Explore Tools</ThemeButton>
             </div>
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm font-bold text-[#172536]">
-              <span className="flex -space-x-2">{["A", "S", "N"].map((item) => <i key={item} className="grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-[#fff4df] not-italic text-[.65rem] text-[#b8862e] shadow-sm">{item}</i>)}</span>
-              <span>Trusted by seekers</span>
-              <span className="text-[#bd8627]">★★★★★</span>
-              <span>4.9/5</span>
+            <div className="mt-7 grid max-w-[42rem] grid-cols-1 gap-3 sm:grid-cols-3">
+              {["Provider calculated", "Secure workflow", "Review-based reports"].map((item) => <div key={item} className="rounded-2xl border border-[#e7d8be] bg-white/66 px-4 py-3 text-sm font-bold text-[#172536] shadow-[0_12px_32px_rgba(31,41,51,.06)] backdrop-blur">{item}</div>)}
             </div>
           </div>
           <CosmicScene />
@@ -52,7 +49,6 @@ export function Theme10ProductionHome() {
       </section>
       <ToolStrip />
       <InfoSections />
-      <TrustStrip />
     </main>
   );
 }
@@ -64,12 +60,11 @@ function ThemeButton({ href, children, primary }: { href: string; children: Reac
 
 function CosmicScene() {
   return (
-    <div className="relative mx-auto hidden w-full max-w-[920px] lg:block" aria-hidden="true">
+    <div className="relative mx-auto hidden w-full max-w-[850px] lg:block" aria-hidden="true">
       <div className="absolute inset-x-[-2rem] bottom-[4%] z-20 h-36 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,.94)_0%,rgba(246,239,217,.70)_44%,transparent_76%)] blur-xl" />
-      <div className="relative mx-auto aspect-[1.23/1] w-[min(52vw,920px)] max-h-[74vh]">
-        <div className="absolute inset-[0%_-4%_0%_1%] rounded-[48%] bg-[radial-gradient(circle_at_50%_48%,rgba(255,196,91,.42)_0%,rgba(255,126,57,.22)_19%,rgba(13,36,56,.30)_42%,rgba(137,169,197,.22)_70%,transparent_82%)] blur-2xl" />
-        <div className="absolute inset-[17%_0%_5%_5%] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,.55),rgba(245,231,196,.30)_38%,transparent_72%)] blur-md" />
-        <div className="theme10-wheel absolute inset-[7%_10%_6%_2%] rounded-[45%] border border-[#d8af66]/35 bg-[radial-gradient(circle_at_center,#fff8dc_0%,#ffe3a1_8%,#173653_17%,#0d2438_36%,rgba(13,36,56,.90)_55%,rgba(220,234,247,.52)_78%,transparent_100%)] shadow-[0_28px_90px_rgba(13,36,56,.22),inset_0_0_0_2px_rgba(255,255,255,.30)]">
+      <div className="relative mx-auto aspect-[1.18/1] w-[min(49vw,850px)] max-h-[73vh]">
+        <div className="absolute inset-[3%_0%_0%_5%] rounded-[46%] bg-[radial-gradient(circle_at_52%_52%,rgba(255,231,154,.48)_0%,rgba(137,169,197,.26)_38%,transparent_72%)] blur-3xl" />
+        <div className="theme10-wheel absolute inset-[8%_7%_6%_4%] rounded-[45%] border border-[#d8af66]/35 bg-[radial-gradient(circle_at_center,#fff8dc_0%,#ffe3a1_8%,#173653_17%,#0d2438_36%,rgba(13,36,56,.90)_55%,rgba(220,234,247,.52)_78%,transparent_100%)] shadow-[0_28px_90px_rgba(13,36,56,.22),inset_0_0_0_2px_rgba(255,255,255,.30)]">
           <div className="absolute inset-[7%] rounded-full border border-[#d8af66]/70" />
           <div className="theme10-reverse absolute inset-[15%] rounded-full border border-white/55" />
           <div className="absolute inset-[23%] rounded-full border border-[#d8af66]/35" />
@@ -84,12 +79,11 @@ function CosmicScene() {
           </div>
         </div>
         <Planet className="theme10-orbit-a left-[19%] top-[4%] h-16 w-16 from-[#0b8092] via-[#2ab0c8] to-[#07344d]" />
-        <Planet className="theme10-orbit-b right-[24%] top-[3%] h-24 w-24 from-[#fff1c9] via-[#d58a43] to-[#7d4217]" />
-        <Planet className="theme10-orbit-c bottom-[19%] left-[10%] h-20 w-20 from-[#fff1c9] via-[#d9a64d] to-[#7b5417] ringed" />
-        <Planet className="theme10-orbit-d bottom-[19%] right-[15%] h-24 w-24 from-[#e9f7ff] via-[#2c86c3] to-[#0a3d63]" />
+        <Planet className="theme10-orbit-b right-[9%] top-[4%] h-24 w-24 from-[#fff1c9] via-[#d58a43] to-[#7d4217]" />
+        <Planet className="theme10-orbit-c bottom-[20%] left-[12%] h-20 w-20 from-[#fff1c9] via-[#d9a64d] to-[#7b5417] ringed" />
+        <Planet className="theme10-orbit-d bottom-[21%] right-[8%] h-24 w-24 from-[#e9f7ff] via-[#2c86c3] to-[#0a3d63]" />
         <Planet className="theme10-orbit-e left-[3%] top-[53%] h-12 w-12 from-[#c8fff0] via-[#22a598] to-[#07545a]" />
-        <Planet className="theme10-orbit-f right-[38%] top-[40%] h-10 w-10 from-[#ffd98f] via-[#e86b27] to-[#8e2f12]" />
-        <DesktopPhonePreview />
+        <Planet className="theme10-orbit-f right-[34%] top-[38%] h-10 w-10 from-[#ffd98f] via-[#e86b27] to-[#8e2f12]" />
       </div>
     </div>
   );
@@ -98,10 +92,6 @@ function CosmicScene() {
 function Planet({ className }: { className: string }) {
   const ringed = className.includes("ringed");
   return <div className={`absolute z-40 ${className.replace(" ringed", "")}`}><span className="relative block h-full w-full rounded-full bg-gradient-to-br shadow-[inset_-14px_-14px_24px_rgba(0,0,0,.28),0_18px_38px_rgba(13,36,56,.28)]">{ringed ? <span className="absolute left-1/2 top-1/2 h-[42%] w-[150%] -translate-x-1/2 -translate-y-1/2 -rotate-12 rounded-full border-[5px] border-[#f0d18b]/80" /> : null}</span></div>;
-}
-
-function DesktopPhonePreview() {
-  return <div className="absolute right-[-1.5rem] top-[-.6rem] z-50 hidden w-[230px] rounded-[2.1rem] border-[8px] border-[#141414] bg-[#fffaf1] p-4 shadow-[0_24px_70px_rgba(31,41,51,.28)] 2xl:block"><div className="flex items-center justify-between text-[.65rem] font-black text-[#172536]"><span>9:41</span><span className="h-4 w-14 rounded-full bg-[#111]" /></div><div className="mt-3 flex items-center justify-between text-xs font-black"><span>☰</span><span className="font-cinzel tracking-[.16em] text-[#7d4217]">NAKSHARIX</span><span className="text-[#c2410c]">●</span></div><p className="mt-3 text-[.68rem] font-semibold text-[#566575]">Namaste, Arjun 👋</p><div className="mt-2 grid grid-cols-[1fr_76px] gap-2 rounded-2xl border border-[#e7d8be] bg-[#fff9f0] p-3"><div><small className="text-[.48rem] font-black uppercase tracking-[.13em] text-[#b8862e]">Your Cosmic Blueprint</small><strong className="mt-1 block font-cinzel text-[1.05rem] leading-none text-[#172536]">Understand.<br />Align. Elevate.</strong><p className="mt-1 text-[.52rem] text-[#566575]">Explore premium astrology tools.</p></div><div className="grid aspect-square place-items-center rounded-full bg-[radial-gradient(circle,#fff6cc,#d8af66_35%,#0d2438_58%,#dce8f7_78%)] text-3xl text-[#8f5b10]">ॐ</div></div><div className="mt-3 grid grid-cols-4 gap-1.5">{tools.map(({ label, icon: Icon }) => <span key={label} className="rounded-xl border border-[#e7d8be] bg-white p-1.5 text-center text-[.48rem] font-black text-[#172536]"><Icon className="mx-auto mb-1 h-3.5 w-3.5 text-[#b8862e]" />{label.split(' ')[0]}</span>)}</div><div className="mt-3 rounded-2xl border border-[#e7d8be] bg-white p-3 text-[.6rem]"><b>Today's Panchang</b><p className="mt-1 text-[#566575]">Tithi · Nakshatra · Yoga · Karana</p></div><div className="mt-3 grid grid-cols-3 gap-1.5">{reports.map((report) => <span key={report} className="rounded-xl border border-[#e7d8be] bg-white p-2 text-center text-[.46rem] font-black"><FileText className="mx-auto mb-1 h-3.5 w-3.5 text-[#b8862e]" />{report}</span>)}</div></div>;
 }
 
 function MobileHero() {
@@ -113,17 +103,13 @@ function ToolStrip() {
 }
 
 function InfoSections() {
-  return <section className="px-4 pb-5 sm:px-6 lg:px-10"><div className="mx-auto grid max-w-[1500px] gap-5 xl:grid-cols-[1.1fr_1.1fr_.8fr]"><InfoCard title="Today’s Panchang" href="/panchang"><div className="grid grid-cols-2 gap-4 sm:grid-cols-4">{[['Tithi','Shukla Paksha'],['Nakshatra','Provider calculated'],['Yoga','Daily guide'],['Karana','Values may vary']].map(([a,b]) => <div key={a} className="rounded-2xl bg-[#fff9f0] p-4"><p className="text-xs font-bold uppercase tracking-[.18em] text-[#b8862e]">{a}</p><p className="mt-2 text-sm font-bold text-[#172536]">{b}</p></div>)}</div></InfoCard><InfoCard title="Premium Reports" href="/reports"><div className="grid grid-cols-3 gap-3">{reports.map((report) => <Link key={report} href="/reports" className="rounded-2xl border border-[#e7d8be] bg-[#fff9f0] p-4 text-center transition hover:-translate-y-.5"><FileText className="mx-auto h-8 w-8 text-[#b8862e]" /><p className="mt-3 text-sm font-extrabold text-[#172536]">{report}</p><p className="text-xs text-[#6b7280]">Premium report</p></Link>)}</div></InfoCard><InfoCard title="Why Naksharix?" href="/disclaimer"><div className="space-y-3">{["Calculated using Naksharix internal astrology engine", "Secure owner/admin report workflow", "Spiritual guidance, not guaranteed outcome"].map((item) => <div key={item} className="flex gap-3 rounded-2xl bg-[#fff9f0] p-3 text-sm font-bold text-[#172536]"><ShieldCheck className="h-5 w-5 flex-shrink-0 text-[#b8862e]" />{item}</div>)}</div></InfoCard></div></section>;
+  return <section className="px-4 pb-10 sm:px-6 lg:px-10"><div className="mx-auto grid max-w-[1500px] gap-5 xl:grid-cols-[1.1fr_1.1fr_.8fr]"><InfoCard title="Today’s Panchang" href="/panchang"><div className="grid grid-cols-2 gap-4 sm:grid-cols-4">{[['Tithi','Shukla Paksha'],['Nakshatra','Provider calculated'],['Yoga','Daily guide'],['Karana','Values may vary']].map(([a,b]) => <div key={a} className="rounded-2xl bg-[#fff9f0] p-4"><p className="text-xs font-bold uppercase tracking-[.18em] text-[#b8862e]">{a}</p><p className="mt-2 text-sm font-bold text-[#172536]">{b}</p></div>)}</div></InfoCard><InfoCard title="Premium Reports" href="/reports"><div className="grid grid-cols-3 gap-3">{reports.map((report) => <Link key={report} href="/reports" className="rounded-2xl border border-[#e7d8be] bg-[#fff9f0] p-4 text-center transition hover:-translate-y-.5"><FileText className="mx-auto h-8 w-8 text-[#b8862e]" /><p className="mt-3 text-sm font-extrabold text-[#172536]">{report}</p><p className="text-xs text-[#6b7280]">Premium report</p></Link>)}</div></InfoCard><InfoCard title="Why Naksharix?" href="/disclaimer"><div className="space-y-3">{["Calculated using Naksharix internal astrology engine", "Secure owner/admin report workflow", "Spiritual guidance, not guaranteed outcome"].map((item) => <div key={item} className="flex gap-3 rounded-2xl bg-[#fff9f0] p-3 text-sm font-bold text-[#172536]"><ShieldCheck className="h-5 w-5 flex-shrink-0 text-[#b8862e]" />{item}</div>)}</div></InfoCard></div></section>;
 }
 
 function InfoCard({ title, href, children }: { title: string; href: string; children: ReactNode }) {
   return <div className="rounded-3xl border border-[#e7d8be] bg-white/78 p-5 shadow-[0_18px_58px_rgba(31,41,51,.08)] backdrop-blur"><div className="mb-5 flex items-center justify-between"><h2 className="font-cinzel text-xl font-black text-[#172536]">{title}</h2><Link href={href} className="text-xs font-extrabold uppercase tracking-[.12em] text-[#b8862e]">View →</Link></div>{children}</div>;
 }
 
-function TrustStrip() {
-  return <section className="px-4 pb-10 sm:px-6 lg:px-10"><div className="mx-auto grid max-w-[1500px] gap-3 rounded-3xl border border-[#e7d8be] bg-white/78 p-4 shadow-[0_18px_58px_rgba(31,41,51,.08)] sm:grid-cols-3 xl:grid-cols-6">{["Trusted workflow", "Secure", "Provider calculated", "Review based", "Privacy aware", "Web + app ready"].map((item) => <span key={item} className="flex items-center justify-center gap-2 text-xs font-black text-[#172536]"><ShieldCheck className="h-4 w-4 text-[#b8862e]" />{item}</span>)}</div></section>;
-}
-
 function Theme10Styles() {
-  return <style>{`body:has(.theme10-home){background:#fbf6ea!important}body:has(.theme10-home) header.sticky{border-color:rgba(231,216,190,.9)!important;background:rgba(255,250,241,.86)!important;box-shadow:0 18px 55px rgba(31,41,51,.08)!important;backdrop-filter:blur(18px)}body:has(.theme10-home) header.sticky a,body:has(.theme10-home) header.sticky button{color:#172536!important}.theme10-title{text-wrap:balance}.theme10-wheel{animation:theme10-spin 130s linear infinite}.theme10-reverse{animation:theme10-spin-rev 170s linear infinite}.theme10-sun{animation:theme10-sun 5s ease-in-out infinite}.theme10-zodiac{font-family:serif}.theme10-orbit-a{animation:theme10-orbit 62s linear infinite;transform-origin:335px 335px}.theme10-orbit-b{animation:theme10-orbit-rev 95s linear infinite;transform-origin:-250px 310px}.theme10-orbit-c{animation:theme10-orbit 78s linear infinite;transform-origin:250px -160px}.theme10-orbit-d{animation:theme10-orbit-rev 120s linear infinite;transform-origin:-230px -120px}.theme10-orbit-e{animation:theme10-orbit 48s linear infinite;transform-origin:390px 0}.theme10-orbit-f{animation:theme10-orbit-rev 35s linear infinite;transform-origin:-120px 170px}@keyframes theme10-spin{to{transform:rotate(360deg)}}@keyframes theme10-spin-rev{to{transform:rotate(-360deg)}}@keyframes theme10-orbit{to{transform:rotate(360deg)}}@keyframes theme10-orbit-rev{to{transform:rotate(-360deg)}}@keyframes theme10-sun{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.025)}}@media(prefers-reduced-motion:reduce){.theme10-home *{animation:none!important;scroll-behavior:auto!important}}@media(max-width:1200px){.theme10-title{font-size:clamp(3rem,4.5vw,5.2rem)!important}}`}</style>;
+  return <style>{`body:has(.theme10-home){background:#fbf6ea!important}body:has(.theme10-home) header.sticky{border-color:rgba(231,216,190,.9)!important;background:rgba(255,250,241,.86)!important;box-shadow:0 18px 55px rgba(31,41,51,.08)!important;backdrop-filter:blur(18px)}body:has(.theme10-home) header.sticky a,body:has(.theme10-home) header.sticky button{color:#172536!important}.theme10-title{text-wrap:balance}.theme10-wheel{animation:theme10-spin 130s linear infinite}.theme10-reverse{animation:theme10-spin-rev 170s linear infinite}.theme10-sun{animation:theme10-sun 5s ease-in-out infinite}.theme10-zodiac{font-family:serif}.theme10-orbit-a{animation:theme10-orbit 62s linear infinite;transform-origin:335px 335px}.theme10-orbit-b{animation:theme10-orbit-rev 95s linear infinite;transform-origin:-250px 310px}.theme10-orbit-c{animation:theme10-orbit 78s linear infinite;transform-origin:250px -160px}.theme10-orbit-d{animation:theme10-orbit-rev 120s linear infinite;transform-origin:-230px -120px}.theme10-orbit-e{animation:theme10-orbit 48s linear infinite;transform-origin:390px 0}.theme10-orbit-f{animation:theme10-orbit-rev 35s linear infinite;transform-origin:-120px 170px}@keyframes theme10-spin{to{transform:rotate(360deg)}}@keyframes theme10-spin-rev{to{transform:rotate(-360deg)}}@keyframes theme10-orbit{to{transform:rotate(360deg)}}@keyframes theme10-orbit-rev{to{transform:rotate(-360deg)}}@keyframes theme10-sun{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.025)}}@media(prefers-reduced-motion:reduce){.theme10-home *{animation:none!important;scroll-behavior:auto!important}}@media(max-width:1200px){.theme10-title{font-size:clamp(3.1rem,4.8vw,5.45rem)!important}}`}</style>;
 }
