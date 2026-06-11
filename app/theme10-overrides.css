@@ -1,0 +1,156 @@
+/* Theme 10 production-wide visual overrides.
+   Keeps backend/routes untouched while removing the old dark shell from public UI. */
+
+:root {
+  --theme10-cream: #fbf6ea;
+  --theme10-ivory: #fffaf1;
+  --theme10-gold: #bd8627;
+  --theme10-gold-soft: #d8af66;
+  --theme10-ink: #172536;
+  --theme10-muted: #566575;
+  --theme10-border: #e7d8be;
+  --theme10-blue: #0d2438;
+}
+
+html,
+body {
+  background: var(--theme10-cream) !important;
+  color: var(--theme10-ink) !important;
+}
+
+body::before,
+body::after {
+  opacity: 0 !important;
+  display: none !important;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+header.sticky {
+  border-bottom: 1px solid rgba(231, 216, 190, 0.9) !important;
+  background: rgba(255, 250, 241, 0.92) !important;
+  box-shadow: 0 18px 55px rgba(31, 41, 51, 0.08) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+header.sticky a,
+header.sticky button,
+header.sticky svg {
+  color: var(--theme10-ink) !important;
+}
+
+header.sticky a[aria-current="page"],
+header.sticky button[aria-expanded="true"] {
+  color: var(--theme10-gold) !important;
+  background: rgba(216, 175, 102, 0.14) !important;
+}
+
+header.sticky .group > div {
+  border-color: rgba(216, 175, 102, 0.35) !important;
+  background: rgba(255, 250, 241, 0.96) !important;
+  box-shadow: 0 24px 70px rgba(31, 41, 51, 0.15) !important;
+}
+
+header.sticky .group > div > div:first-child {
+  display: none !important;
+}
+
+header.sticky .group > div a,
+header.sticky .group > div p {
+  color: var(--theme10-ink) !important;
+}
+
+header.sticky .group > div p {
+  color: var(--theme10-gold) !important;
+}
+
+.inner-page-shell,
+.nx-night-sky,
+.star-field {
+  background:
+    radial-gradient(circle at 72% 10%, rgba(216, 175, 102, 0.22), transparent 32rem),
+    radial-gradient(circle at 18% 18%, rgba(137, 169, 197, 0.18), transparent 28rem),
+    linear-gradient(135deg, #fffaf1 0%, #fbf6ea 48%, #eef5fb 100%) !important;
+  color: var(--theme10-ink) !important;
+}
+
+.inner-section,
+.inner-card,
+.glass,
+.luxury-panel {
+  border-color: var(--theme10-border) !important;
+  background:
+    radial-gradient(circle at top left, rgba(216, 175, 102, 0.13), transparent 16rem),
+    rgba(255, 255, 255, 0.76) !important;
+  box-shadow: 0 18px 58px rgba(31, 41, 51, 0.08) !important;
+  color: var(--theme10-ink) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.inner-page-shell h1,
+.inner-page-shell h2,
+.inner-page-shell h3,
+.inner-page-shell h4,
+.inner-page-shell p,
+.inner-page-shell li,
+.inner-page-shell label,
+.inner-page-shell span,
+.inner-page-shell div {
+  color: inherit;
+}
+
+.inner-page-shell h1,
+.inner-page-shell h2,
+.inner-page-shell h3,
+.inner-page-shell .font-cinzel {
+  color: var(--theme10-ink) !important;
+}
+
+.inner-page-shell p,
+.inner-page-shell .inner-muted-text {
+  color: var(--theme10-muted) !important;
+}
+
+.inner-page-shell .text-\[\#f3d382\],
+.inner-page-shell .text-\[\#fbc02d\],
+.inner-page-shell .text-\[\#dca956\],
+.inner-page-shell .text-\[\#00f5a0\] {
+  color: var(--theme10-gold) !important;
+}
+
+.inner-page-shell .text-white,
+.inner-page-shell .text-\[\#ffffff\] {
+  color: var(--theme10-ink) !important;
+}
+
+.inner-page-shell input,
+.inner-page-shell select,
+.inner-page-shell textarea {
+  border-color: var(--theme10-border) !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  color: var(--theme10-ink) !important;
+}
+
+.inner-page-shell .bg-\[\#07111f\],
+.inner-page-shell .bg-\[\#0a1224\]\/88,
+.inner-page-shell .bg-\[\#142647\]\/75 {
+  background: rgba(255, 249, 240, 0.88) !important;
+}
+
+.inner-page-shell .border-\[\#263957\] {
+  border-color: var(--theme10-border) !important;
+}
+
+.inner-page-shell button,
+.inner-page-shell a[role="button"] {
+  border-color: rgba(216, 175, 102, 0.55) !important;
+}
+
+@media (max-width: 768px) {
+  header.sticky > div {
+    height: 5rem !important;
+  }
+}
