@@ -3,6 +3,7 @@ import Script from "next/script";
 import { cookies } from "next/headers";
 import { Cinzel, Cinzel_Decorative, Inter, Poppins } from "next/font/google";
 import "@/app/globals.css";
+import "@/app/theme10-overrides.css";
 import { env } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
@@ -21,9 +22,9 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 export const metadata: Metadata = {
   ...seo({
     title: "Naksharix - Unlock Your Cosmic Destiny",
-    description: "Naksharix is a premium astrology SaaS platform for Astrology, Horoscope, Kundli, Numerology, Tarot Reading, Panchang, AI guidance, and luxury cosmic reports.",
+    description: "Naksharix is a premium astrology platform for Horoscope, Kundli, Numerology, Tarot Reading, Panchang, and review-based cosmic reports.",
     path: "/",
-    keywords: ["AI Astrology", "Vedic Astrology", "Daily Horoscope", "Kundli Matching"]
+    keywords: ["Vedic Astrology", "Daily Horoscope", "Kundli Matching", "Panchang", "Astrology Reports"]
   }),
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   title: {
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#02112C",
+  themeColor: "#fbf6ea",
   width: "device-width",
   initialScale: 1
 };
@@ -50,7 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const htmlLang = initialLocale === "hi" ? "hi" : initialLocale === "hinglish" ? "hi-Latn" : "en";
 
   return (
-    <html lang={htmlLang} className="dark" suppressHydrationWarning>
+    <html lang={htmlLang} suppressHydrationWarning>
       <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
         <LanguageProvider initialLocale={initialLocale}>
           <MainNav />
