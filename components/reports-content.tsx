@@ -21,67 +21,66 @@ export function ReportsContent() {
   const [review, setReview] = useState(false);
 
   return (
-    <main className="inner-page-shell star-field">
+    <main className="min-h-screen bg-[#fbf6ea] text-[#172536]">
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_18%_10%,rgba(216,175,102,0.22),transparent_26rem),radial-gradient(circle_at_86%_18%,rgba(137,169,197,0.24),transparent_30rem),linear-gradient(135deg,#fffaf1_0%,#fbf6ea_52%,#eef5fb_100%)]" />
       <Section>
-        <div className="inner-section grid gap-8 rounded-3xl border border-[#263957] p-6 md:p-8 lg:grid-cols-[1fr_0.72fr]">
+        <div className="rounded-[2rem] border border-[#e7d8be] bg-white/78 p-6 shadow-[0_24px_80px_rgba(31,41,51,0.08)] backdrop-blur md:p-8 lg:grid lg:grid-cols-[1fr_0.72fr] lg:gap-8">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{labels.eyebrow}</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{labels.title}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{labels.subtitle}</p>
+            <p className="text-sm font-extrabold uppercase tracking-[0.24em] text-[#b8862e]">{labels.eyebrow}</p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#172536] sm:text-5xl">{labels.title}</h1>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#566575]">{labels.subtitle}</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]"><a href="#report-catalogue">{labels.exploreReports}</a></Button>
-              <Button variant="outline" asChild><Link href="/contact">{labels.contactSupport}</Link></Button>
+              <Button asChild className="bg-[#b8862e] text-white hover:bg-[#9f721f]"><a href="#report-catalogue">{labels.exploreReports}</a></Button>
+              <Button variant="outline" asChild className="border-[#d8af66] bg-white/70 text-[#172536]"><Link href="/contact">{labels.contactSupport}</Link></Button>
             </div>
           </div>
-          <Card className="inner-card">
+          <Card className="mt-6 border-[#e7d8be] bg-[#fff9f0]/80 shadow-[0_18px_55px_rgba(31,41,51,0.06)] lg:mt-0">
             <CardContent className="p-6">
-              <ShieldCheck className="h-6 w-6 text-[#00f5a0]" />
-              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.manualDelivery}</h2>
-              <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{labels.manualDeliveryCopy}</p>
+              <ShieldCheck className="h-6 w-6 text-[#b8862e]" />
+              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#172536]">{labels.manualDelivery}</h2>
+              <p className="mt-3 text-sm leading-6 text-[#566575]">{labels.manualDeliveryCopy}</p>
             </CardContent>
           </Card>
         </div>
 
         <div id="report-catalogue" className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {manualReports.map((report) => {
-            return (
-              <Card key={report.slug} className="inner-card flex flex-col">
-                <CardContent className="flex flex-1 flex-col p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-[#00f5a0]">{report.category}</p>
-                      <h2 className="mt-2 font-cinzel text-2xl font-bold text-[#f3d382]">{report.name[locale]}</h2>
-                    </div>
-                    <FileText className="h-5 w-5 shrink-0 text-[#dca956]" />
+          {manualReports.map((report) => (
+            <Card key={report.slug} className="flex flex-col border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
+              <CardContent className="flex flex-1 flex-col p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#b8862e]">{report.category}</p>
+                    <h2 className="mt-2 font-cinzel text-2xl font-bold text-[#172536]">{report.name[locale]}</h2>
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{report.description[locale]}</p>
-                  <ul className="mt-4 space-y-2 text-sm text-white">
-                    {report.includes[locale].slice(0, 3).map((item) => (
-                      <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-[#00f5a0]" />{item}</li>
-                    ))}
-                  </ul>
-                  <p className="mt-4 rounded-lg border border-[#263957] bg-[#142647]/75 px-3 py-2 text-sm font-semibold text-[#fbc02d]">{labels.priceOnRequest}</p>
-                  <p className="mt-2 text-xs text-[#94a3b8]">{labels.deliveryLabel}</p>
-                  <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
-                    <Button variant="outline" asChild><Link href={`/reports/${report.slug}`}>{labels.viewDetails}</Link></Button>
-                    <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
-                      <Link href={`/report-request/new?plan=PREMIUM&reportSlug=${report.slug}`}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  <FileText className="h-5 w-5 shrink-0 text-[#b8862e]" />
+                </div>
+                <p className="mt-4 text-sm leading-6 text-[#566575]">{report.description[locale]}</p>
+                <ul className="mt-4 space-y-2 text-sm font-semibold text-[#172536]">
+                  {report.includes[locale].slice(0, 3).map((item) => (
+                    <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-[#0d9b74]" />{item}</li>
+                  ))}
+                </ul>
+                <p className="mt-4 rounded-lg border border-[#e7d8be] bg-[#fff9f0] px-3 py-2 text-sm font-bold text-[#b8862e]">{labels.priceOnRequest}</p>
+                <p className="mt-2 text-xs text-[#6b7280]">{labels.deliveryLabel}</p>
+                <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
+                  <Button variant="outline" asChild className="border-[#d8af66] bg-white text-[#172536]"><Link href={`/reports/${report.slug}`}>{labels.viewDetails}</Link></Button>
+                  <Button asChild className="bg-[#0d9b74] text-white hover:bg-[#087f60]">
+                    <Link href={`/report-request/new?plan=PREMIUM&reportSlug=${report.slug}`}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <Card id="report-request-intent" className="inner-card mt-10">
+        <Card id="report-request-intent" className="mt-10 border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
           <CardContent className="p-6">
             <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr]">
               <div>
-                <ClipboardList className="h-6 w-6 text-[#00f5a0]" />
-                <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.intentTitle}</h2>
-                <p className="mt-3 text-sm leading-7 text-[#a8b3c7]">{labels.intentCopy}</p>
-                <p className="mt-4 rounded-xl border border-[#dca956]/25 bg-[#142647]/75 p-4 text-sm leading-6 text-[#fbc02d]">{labels.intentSafety}</p>
+                <ClipboardList className="h-6 w-6 text-[#b8862e]" />
+                <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#172536]">{labels.intentTitle}</h2>
+                <p className="mt-3 text-sm leading-7 text-[#566575]">{labels.intentCopy}</p>
+                <p className="mt-4 rounded-xl border border-[#e7d8be] bg-[#fff9f0] p-4 text-sm leading-6 text-[#8a631b]">{labels.intentSafety}</p>
               </div>
               <div className="grid gap-4">
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -89,8 +88,8 @@ export function ReportsContent() {
                   <IntentField label={labels.email} value={intent.email} onChange={(value) => setIntent((current) => ({ ...current, email: value }))} />
                   <IntentField label={labels.phoneOptional} value={intent.phone} onChange={(value) => setIntent((current) => ({ ...current, phone: value }))} />
                   <div>
-                    <Label className="text-[#f3d382]">{labels.reportType}</Label>
-                    <select value={intent.report} onChange={(event) => setIntent((current) => ({ ...current, report: event.target.value }))} className="mt-2 w-full rounded-xl border border-[#263957] bg-[#07111f] px-3 py-2.5 text-sm text-white outline-none focus:border-[#00f5a0]">
+                    <Label className="text-[#172536]">{labels.reportType}</Label>
+                    <select value={intent.report} onChange={(event) => setIntent((current) => ({ ...current, report: event.target.value }))} className="mt-2 w-full rounded-xl border border-[#e7d8be] bg-white px-3 py-2.5 text-sm text-[#172536] outline-none focus:border-[#b8862e]">
                       {manualReports.map((report) => <option key={report.slug} value={report.slug}>{report.name[locale]}</option>)}
                     </select>
                   </div>
@@ -100,19 +99,19 @@ export function ReportsContent() {
                   <IntentField label={labels.preferredLanguage} value={intent.language} onChange={(value) => setIntent((current) => ({ ...current, language: value }))} />
                 </div>
                 <div>
-                  <Label className="text-[#f3d382]">{labels.concern}</Label>
-                  <Textarea value={intent.concern} onChange={(event) => setIntent((current) => ({ ...current, concern: event.target.value }))} className="mt-2 min-h-24 border-[#263957] bg-[#07111f] text-white" />
+                  <Label className="text-[#172536]">{labels.concern}</Label>
+                  <Textarea value={intent.concern} onChange={(event) => setIntent((current) => ({ ...current, concern: event.target.value }))} className="mt-2 min-h-24 border-[#e7d8be] bg-white text-[#172536]" />
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <Button type="button" className="bg-[#009b72] text-white hover:bg-[#008766]" onClick={() => setReview(true)}>{labels.prepareRequest}</Button>
-                  <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]"><Link href={`/report-request/new?plan=PREMIUM&reportSlug=${intent.report}`}>{labels.submitRealRequest}</Link></Button>
-                  <Button variant="outline" asChild><Link href="/contact">{labels.contactSupport}</Link></Button>
+                  <Button type="button" className="bg-[#0d9b74] text-white hover:bg-[#087f60]" onClick={() => setReview(true)}>{labels.prepareRequest}</Button>
+                  <Button asChild className="bg-[#0d9b74] text-white hover:bg-[#087f60]"><Link href={`/report-request/new?plan=PREMIUM&reportSlug=${intent.report}`}>{labels.submitRealRequest}</Link></Button>
+                  <Button variant="outline" asChild className="border-[#d8af66] bg-white text-[#172536]"><Link href="/contact">{labels.contactSupport}</Link></Button>
                 </div>
                 {review ? (
-                  <div className="rounded-2xl border border-[#263957] bg-[#0a1224]/88 p-4 text-sm leading-7 text-[#dbeafe]">
-                    <p className="font-semibold text-[#f3d382]">{labels.reviewDetails}</p>
+                  <div className="rounded-2xl border border-[#e7d8be] bg-[#fff9f0] p-4 text-sm leading-7 text-[#566575]">
+                    <p className="font-semibold text-[#172536]">{labels.reviewDetails}</p>
                     <p>{labels.onlineComingSoon}</p>
-                    <p className="mt-2 text-[#94a3b8]">{labels.reviewHint}</p>
+                    <p className="mt-2 text-[#6b7280]">{labels.reviewHint}</p>
                   </div>
                 ) : null}
               </div>
@@ -120,10 +119,10 @@ export function ReportsContent() {
           </CardContent>
         </Card>
 
-        <Card className="inner-card mt-10">
+        <Card className="mt-10 border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
           <CardContent className="p-6">
-            <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{labels.disclaimer}</h2>
-            <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{labels.disclaimerCopy}</p>
+            <h2 className="font-cinzel text-2xl font-bold text-[#172536]">{labels.disclaimer}</h2>
+            <p className="mt-3 text-sm leading-6 text-[#566575]">{labels.disclaimerCopy}</p>
           </CardContent>
         </Card>
       </Section>
@@ -134,8 +133,8 @@ export function ReportsContent() {
 function IntentField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <div>
-      <Label className="text-[#f3d382]">{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 border-[#263957] bg-[#07111f] text-white" />
+      <Label className="text-[#172536]">{label}</Label>
+      <Input value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 border-[#e7d8be] bg-white text-[#172536]" />
     </div>
   );
 }
