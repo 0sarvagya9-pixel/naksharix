@@ -84,7 +84,7 @@ function chineseContent(slug: string): HoroscopeContent {
   return {
     title: `${option.value} Chinese Horoscope 2026`,
     subtitle: `General 2026 guidance for the ${option.value}.`,
-    overview: `For ${option.value}, 2026 favors patient planning, practical networking, and steady personal improvement. Treat this as cultural and reflective guidance, not a guaranteed prediction.`,
+    overview: `For ${option.value}, 2026 favors patient planning, practical networking, and steady personal improvement. Treat this as cultural and reflective guidance, not a promised prediction.`,
     sections: [
       { title: "Career & Opportunities", body: "Growth is supported by consistent skill-building and clear professional boundaries. Avoid taking every opportunity before checking capacity." },
       { title: "Wealth & Finance", body: "Money choices benefit from discipline, savings structure, and careful review before large commitments." },

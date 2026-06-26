@@ -15,6 +15,15 @@ const nextConfig = {
       { protocol: "https", hostname: "cdn.pixabay.com" }
     ]
   },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      resourceQuery: /component/,
+      use: ["@svgr/webpack"]
+    });
+    return config;
+  },
   async headers() {
     return [
       {

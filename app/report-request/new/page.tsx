@@ -32,17 +32,19 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
   }
 
   return (
+    <main className="inner-page-shell min-h-screen">
     <Section className="max-w-4xl">
-      <Card className="glass overflow-visible border-[#D4AF37]/25">
+      <Card className="glass overflow-visible border-[#E7D8BE]">
         <CardHeader>
-          <CardTitle className="font-cinzel text-3xl">{t(locale, "reportRequestDetails")}</CardTitle>
-          <p className="text-sm naksh-muted-text">Submit accurate birth details for manual review. Online payment is not required at request stage, and delivery appears only after a real PDF is generated.</p>
+          <CardTitle className="font-cinzel text-3xl text-[#1F2933]">{t(locale, "reportRequestDetails")}</CardTitle>
+          <p className="text-sm text-[#6B7280]">Submit accurate birth details for manual review. Online payment is not required at request stage, and delivery appears only after a real PDF is generated.</p>
         </CardHeader>
         <CardContent className="overflow-visible">
           <ReportRequestForm userEmail={user.email} orderId={params.orderId} plan={plan} reportSlug={params.reportSlug} adminBypass={adminMode && isAdmin} />
         </CardContent>
       </Card>
     </Section>
+    </main>
   );
 }
 

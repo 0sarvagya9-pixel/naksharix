@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420" fill="none">
+  <defs>
+    <linearGradient id="gold" x1="54" y1="40" x2="366" y2="380">
+      <stop stop-color="#FFF9F0"/><stop offset=".48" stop-color="#D8AF66"/><stop offset="1" stop-color="#A86D24"/>
+    </linearGradient>
+    <radialGradient id="mist" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#FFF9F0" stop-opacity=".18"/>
+      <stop offset=".7" stop-color="#0D2438" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#0D2438" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="210" cy="210" r="198" fill="url(#mist)" stroke="url(#gold)" stroke-width="2.5" stroke-opacity=".72"/>
+  <circle cx="210" cy="210" r="150" stroke="#F7EAD3" stroke-opacity=".42"/>
+  <circle cx="210" cy="210" r="94" stroke="#D8AF66" stroke-opacity=".58"/>
+  <g stroke="#D8AF66" stroke-opacity=".42" stroke-width="1">
+    <path d="M210 24v372M24 210h372M78.5 78.5l263 263M341.5 78.5l-263 263"/>
+  </g>
+  <g fill="#F7EAD3" fill-opacity=".82">
+    <circle cx="210" cy="44" r="3"/><circle cx="327" cy="93" r="2.6"/><circle cx="376" cy="210" r="3"/>
+    <circle cx="327" cy="327" r="2.6"/><circle cx="210" cy="376" r="3"/><circle cx="93" cy="327" r="2.6"/>
+    <circle cx="44" cy="210" r="3"/><circle cx="93" cy="93" r="2.6"/>
+  </g>
+</svg>

@@ -21,15 +21,16 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
   const showAdminBypass = report.adminBypass && isAdmin(user);
 
   return (
-    <Section className="max-w-3xl">
-      <Card className="glass border-[#D4AF37]/30 text-center">
+    <main className="inner-page-shell">
+      <Section className="max-w-3xl">
+      <Card className="border-[#E7D8BE] bg-white/90 text-center shadow-[0_18px_54px_rgba(86,64,31,0.10)]">
         <CardHeader>
-          <CardTitle className="font-cinzel text-3xl text-[#FFFFFF]">{t(locale, "reportRequestReceived")}</CardTitle>
+          <CardTitle className="font-cinzel text-3xl text-[#1F2933]">{t(locale, "reportRequestReceived")}</CardTitle>
           <p className="naksh-muted-text">Your request has been saved for manual review.</p>
         </CardHeader>
         <CardContent className="space-y-4 naksh-muted-text">
           {showAdminBypass ? (
-            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-4 py-2 text-sm text-[#FFD700]">
+            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-[#D8AF66]/35 bg-[#F7EAD3]/70 px-4 py-2 text-sm text-[#B8862E]">
               <ShieldCheck className="h-4 w-4" />
               {t(locale, "adminTestingModePaymentBypassed")}
             </div>
@@ -40,6 +41,7 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
         </CardContent>
       </Card>
     </Section>
+    </main>
   );
 }
 

@@ -23,11 +23,11 @@ export function ReportsContent() {
   return (
     <main className="inner-page-shell star-field">
       <Section>
-        <div className="inner-section grid gap-8 rounded-3xl border border-[#263957] p-6 md:p-8 lg:grid-cols-[1fr_0.72fr]">
+        <div className="inner-section grid gap-8 rounded-3xl border border-[#E7D8BE] p-6 md:p-8 lg:grid-cols-[1fr_0.72fr]">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{labels.eyebrow}</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{labels.title}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{labels.subtitle}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#B8862E]">{labels.eyebrow}</p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#1F2933] sm:text-5xl">{labels.title}</h1>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#6B7280]">{labels.subtitle}</p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]"><a href="#report-catalogue">{labels.exploreReports}</a></Button>
               <Button variant="outline" asChild><Link href="/contact">{labels.contactSupport}</Link></Button>
@@ -35,9 +35,9 @@ export function ReportsContent() {
           </div>
           <Card className="inner-card">
             <CardContent className="p-6">
-              <ShieldCheck className="h-6 w-6 text-[#00f5a0]" />
-              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.manualDelivery}</h2>
-              <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{labels.manualDeliveryCopy}</p>
+              <ShieldCheck className="h-6 w-6 text-[#0f8f6f]" />
+              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#1F2933]">{labels.manualDelivery}</h2>
+              <p className="mt-3 text-sm leading-6 text-[#6B7280]">{labels.manualDeliveryCopy}</p>
             </CardContent>
           </Card>
         </div>
@@ -49,22 +49,22 @@ export function ReportsContent() {
                 <CardContent className="flex flex-1 flex-col p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-[#00f5a0]">{report.category}</p>
-                      <h2 className="mt-2 font-cinzel text-2xl font-bold text-[#f3d382]">{report.name[locale]}</h2>
+                      <p className="text-xs uppercase tracking-[0.18em] text-[#0f8f6f]">{report.category}</p>
+                      <h2 className="mt-2 font-cinzel text-2xl font-bold text-[#1F2933]">{report.name[locale]}</h2>
                     </div>
-                    <FileText className="h-5 w-5 shrink-0 text-[#dca956]" />
+                    <FileText className="h-5 w-5 shrink-0 text-[#B8862E]" />
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{report.description[locale]}</p>
-                  <ul className="mt-4 space-y-2 text-sm text-white">
+                  <p className="mt-4 text-sm leading-6 text-[#6B7280]">{report.description[locale]}</p>
+                  <ul className="mt-4 space-y-2 text-sm text-[#1F2933]">
                     {report.includes[locale].slice(0, 3).map((item) => (
-                      <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-[#00f5a0]" />{item}</li>
+                      <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-[#0f8f6f]" />{item}</li>
                     ))}
                   </ul>
-                  <p className="mt-4 rounded-lg border border-[#263957] bg-[#142647]/75 px-3 py-2 text-sm font-semibold text-[#fbc02d]">{labels.priceOnRequest}</p>
-                  <p className="mt-2 text-xs text-[#94a3b8]">{labels.deliveryLabel}</p>
+                  <p className="mt-4 rounded-lg border border-[#E7D8BE] bg-[#FFF9F0]/75 px-3 py-2 text-sm font-semibold text-[#B8862E]">{labels.priceOnRequest}</p>
+                  <p className="mt-2 text-xs text-[#6B7280]">{labels.deliveryLabel}</p>
                   <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
                     <Button variant="outline" asChild><Link href={`/reports/${report.slug}`}>{labels.viewDetails}</Link></Button>
-                    <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
+                    <Button asChild>
                       <Link href={`/report-request/new?plan=PREMIUM&reportSlug=${report.slug}`}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
                     </Button>
                   </div>
@@ -78,10 +78,10 @@ export function ReportsContent() {
           <CardContent className="p-6">
             <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr]">
               <div>
-                <ClipboardList className="h-6 w-6 text-[#00f5a0]" />
-                <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.intentTitle}</h2>
-                <p className="mt-3 text-sm leading-7 text-[#a8b3c7]">{labels.intentCopy}</p>
-                <p className="mt-4 rounded-xl border border-[#dca956]/25 bg-[#142647]/75 p-4 text-sm leading-6 text-[#fbc02d]">{labels.intentSafety}</p>
+                <ClipboardList className="h-6 w-6 text-[#0f8f6f]" />
+                <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#1F2933]">{labels.intentTitle}</h2>
+                <p className="mt-3 text-sm leading-7 text-[#6B7280]">{labels.intentCopy}</p>
+                <p className="mt-4 rounded-xl border border-[#D8AF66]/30 bg-[#FFF9F0]/80 p-4 text-sm leading-6 text-[#B8862E]">{labels.intentSafety}</p>
               </div>
               <div className="grid gap-4">
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -89,8 +89,8 @@ export function ReportsContent() {
                   <IntentField label={labels.email} value={intent.email} onChange={(value) => setIntent((current) => ({ ...current, email: value }))} />
                   <IntentField label={labels.phoneOptional} value={intent.phone} onChange={(value) => setIntent((current) => ({ ...current, phone: value }))} />
                   <div>
-                    <Label className="text-[#f3d382]">{labels.reportType}</Label>
-                    <select value={intent.report} onChange={(event) => setIntent((current) => ({ ...current, report: event.target.value }))} className="mt-2 w-full rounded-xl border border-[#263957] bg-[#07111f] px-3 py-2.5 text-sm text-white outline-none focus:border-[#00f5a0]">
+                    <Label className="text-[#1F2933]">{labels.reportType}</Label>
+                    <select value={intent.report} onChange={(event) => setIntent((current) => ({ ...current, report: event.target.value }))} className="mt-2 w-full rounded-xl border border-[#E7D8BE] bg-white px-3 py-2.5 text-sm text-[#1F2933] outline-none focus:border-[#D8AF66]">
                       {manualReports.map((report) => <option key={report.slug} value={report.slug}>{report.name[locale]}</option>)}
                     </select>
                   </div>
@@ -100,19 +100,19 @@ export function ReportsContent() {
                   <IntentField label={labels.preferredLanguage} value={intent.language} onChange={(value) => setIntent((current) => ({ ...current, language: value }))} />
                 </div>
                 <div>
-                  <Label className="text-[#f3d382]">{labels.concern}</Label>
-                  <Textarea value={intent.concern} onChange={(event) => setIntent((current) => ({ ...current, concern: event.target.value }))} className="mt-2 min-h-24 border-[#263957] bg-[#07111f] text-white" />
+                  <Label className="text-[#1F2933]">{labels.concern}</Label>
+                  <Textarea value={intent.concern} onChange={(event) => setIntent((current) => ({ ...current, concern: event.target.value }))} className="mt-2 min-h-24 border-[#E7D8BE] bg-white text-[#1F2933]" />
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <Button type="button" className="bg-[#009b72] text-white hover:bg-[#008766]" onClick={() => setReview(true)}>{labels.prepareRequest}</Button>
-                  <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]"><Link href={`/report-request/new?plan=PREMIUM&reportSlug=${intent.report}`}>{labels.submitRealRequest}</Link></Button>
+                  <Button type="button" onClick={() => setReview(true)}>{labels.prepareRequest}</Button>
+                  <Button asChild><Link href={`/report-request/new?plan=PREMIUM&reportSlug=${intent.report}`}>{labels.submitRealRequest}</Link></Button>
                   <Button variant="outline" asChild><Link href="/contact">{labels.contactSupport}</Link></Button>
                 </div>
                 {review ? (
-                  <div className="rounded-2xl border border-[#263957] bg-[#0a1224]/88 p-4 text-sm leading-7 text-[#dbeafe]">
-                    <p className="font-semibold text-[#f3d382]">{labels.reviewDetails}</p>
+                  <div className="rounded-2xl border border-[#E7D8BE] bg-[#FFF9F0]/88 p-4 text-sm leading-7 text-[#1F2933]">
+                    <p className="font-semibold text-[#B8862E]">{labels.reviewDetails}</p>
                     <p>{labels.onlineComingSoon}</p>
-                    <p className="mt-2 text-[#94a3b8]">{labels.reviewHint}</p>
+                    <p className="mt-2 text-[#6B7280]">{labels.reviewHint}</p>
                   </div>
                 ) : null}
               </div>
@@ -122,8 +122,8 @@ export function ReportsContent() {
 
         <Card className="inner-card mt-10">
           <CardContent className="p-6">
-            <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{labels.disclaimer}</h2>
-            <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{labels.disclaimerCopy}</p>
+            <h2 className="font-cinzel text-2xl font-bold text-[#1F2933]">{labels.disclaimer}</h2>
+            <p className="mt-3 text-sm leading-6 text-[#6B7280]">{labels.disclaimerCopy}</p>
           </CardContent>
         </Card>
       </Section>
@@ -134,8 +134,8 @@ export function ReportsContent() {
 function IntentField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <div>
-      <Label className="text-[#f3d382]">{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 border-[#263957] bg-[#07111f] text-white" />
+      <Label className="text-[#1F2933]">{label}</Label>
+      <Input value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 border-[#E7D8BE] bg-white text-[#1F2933]" />
     </div>
   );
 }
@@ -206,7 +206,7 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
       onlineComingSoon: "Online request ab logged-in pending-review workflow me save hoti hai.",
       reviewHint: "Final form me accurate birth place select karna zaroori hai taaki report real provider calculation par bane.",
       disclaimer: "Disclaimer",
-      disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
+      disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye promised outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
     };
   }
   return {

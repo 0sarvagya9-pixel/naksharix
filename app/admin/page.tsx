@@ -65,7 +65,7 @@ const operations = [
   { title: "Report Orders", copy: "Track paid kundli, career, marriage, finance, health, yearly, and numerology reports.", icon: Wallet },
   { title: "Astrologer Queue", copy: "Approve profiles, consultation pricing, ratings, and language coverage.", icon: ShieldCheck },
   { title: "Revenue Ops", copy: "Track subscriptions, paid reports, wallet credits, coupons, and refunds.", icon: Wallet },
-  { title: "Shop Catalogue", copy: "Manage spiritual products, images, active status, featured items, and WhatsApp request readiness.", icon: PackageSearch },
+  { title: "Shop Catalogue", copy: "Manage spiritual products, images, active status, featured items, and contact request readiness.", icon: PackageSearch },
   { title: "Consultations", copy: "Monitor bookings, missed sessions, escalations, and customer feedback.", icon: CalendarClock },
   { title: "Testimonials", copy: "Moderate homepage reviews, video placeholders, ratings, and social proof cards.", icon: Ticket },
   { title: "Blog CMS", copy: "Publish SEO articles and moderate astrology content workflows.", icon: Newspaper },

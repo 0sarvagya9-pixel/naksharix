@@ -88,9 +88,9 @@ export function ReportRequestForm({ userEmail, orderId, plan, reportSlug = "prem
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      <div className="rounded-lg border border-[#D4AF37]/25 bg-[#D4AF37]/10 p-4 text-sm text-[#FFFFFF]">
+      <div className="rounded-lg border border-[#D8AF66]/35 bg-[#F7EAD3]/55 p-4 text-sm text-[#1F2933]">
         {tr("reportDeliveryEmailNotice")}: <span className="font-semibold">{userEmail}</span>
-        <span className="mt-2 block text-[#CBD5E1]">No online payment is required to submit this request. Payment, if enabled later, is handled only after real review and secure checkout.</span>
+        <span className="mt-2 block text-[#6B7280]">No online payment is required to submit this request. Payment, if enabled later, is handled only after real review and secure checkout.</span>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label={tr("fullName")} error={errors.fullName}>
@@ -140,7 +140,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, reportSlug = "prem
           {errors.concern ? <p className="text-sm text-destructive">{errors.concern}</p> : null}
         </div>
       </div>
-      {adminBypass ? <p className="text-sm text-[#FFD700]">{tr("adminTestingModePaymentBypassed")}</p> : null}
+      {adminBypass ? <p className="text-sm text-[#B8862E]">{tr("adminTestingModePaymentBypassed")}</p> : null}
       {status ? <p className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">{status}</p> : null}
       <Button type="submit" disabled={loading} className="w-full md:w-auto">
         {loading ? tr("submittingReportRequest") : tr("submitReportRequest")}

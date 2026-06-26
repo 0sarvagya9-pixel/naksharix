@@ -68,46 +68,46 @@ export default async function PanchangPage({
   return (
     <main className="inner-page-shell star-field min-h-screen">
       <Section>
-        <div className="inner-section rounded-3xl border border-[#263957] p-6 md:p-10">
+        <div className="inner-section rounded-3xl border border-[#E7D8BE] p-6 md:p-10">
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
             <div>
-              <span className="inline-flex rounded-full border border-[#00f5a0]/35 bg-[#00f5a0]/10 px-3 py-1 text-xs font-semibold text-[#00f5a0]">Provider Verified</span>
-              <h1 className="mt-4 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">Today&apos;s Panchang</h1>
-              <p className="mt-4 max-w-3xl text-base leading-8 text-[#a8b3c7]">
+              <span className="inline-flex rounded-full border border-[#0f8f6f]/25 bg-[#0f8f6f]/10 px-3 py-1 text-xs font-semibold text-[#0f8f6f]">Provider Verified</span>
+              <h1 className="mt-4 font-cinzel text-4xl font-black text-[#1F2933] sm:text-5xl">Today&apos;s Panchang</h1>
+              <p className="mt-4 max-w-3xl text-base leading-8 text-[#6B7280]">
                 Calculate core Panchang fields using Naksharix&apos;s deterministic internal ephemeris provider. Values may vary slightly by source, so cross-check for critical Muhurat decisions.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3 text-sm text-[#d7deec]">
-                <span className="inline-flex items-center gap-2 rounded-full border border-[#263957] bg-[#0a1224]/80 px-4 py-2"><MapPin className="h-4 w-4 text-[#f3d382]" />Location-aware</span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-[#263957] bg-[#0a1224]/80 px-4 py-2"><Clock3 className="h-4 w-4 text-[#f3d382]" />Timezone-based</span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-[#263957] bg-[#0a1224]/80 px-4 py-2"><SunMedium className="h-4 w-4 text-[#f3d382]" />Sunrise anchored</span>
+              <div className="mt-6 flex flex-wrap gap-3 text-sm text-[#1F2933]">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#E7D8BE] bg-white/80 px-4 py-2"><MapPin className="h-4 w-4 text-[#B8862E]" />Location-aware</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#E7D8BE] bg-white/80 px-4 py-2"><Clock3 className="h-4 w-4 text-[#B8862E]" />Timezone-based</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#E7D8BE] bg-white/80 px-4 py-2"><SunMedium className="h-4 w-4 text-[#B8862E]" />Sunrise anchored</span>
               </div>
             </div>
 
             <Card className="inner-card">
               <CardContent className="p-5">
                 <form className="grid gap-4" action="/panchang">
-                  <label className="grid gap-2 text-sm font-semibold text-white">
+                  <label className="grid gap-2 text-sm font-semibold text-[#1F2933]">
                     Date
                     <input
                       type="date"
                       name="date"
                       defaultValue={selectedDate}
-                      className="h-11 rounded-lg border border-[#263957] bg-[#020612] px-3 text-white outline-none focus:border-[#dca956]"
+                      className="h-11 rounded-lg border border-[#E7D8BE] bg-white px-3 text-[#1F2933] outline-none focus:border-[#D8AF66] focus:ring-2 focus:ring-[#DCE8F7]"
                     />
                   </label>
-                  <label className="grid gap-2 text-sm font-semibold text-white">
+                  <label className="grid gap-2 text-sm font-semibold text-[#1F2933]">
                     Location preset
                     <select
                       name="city"
                       defaultValue={selectedCity}
-                      className="h-11 rounded-lg border border-[#263957] bg-[#020612] px-3 text-white outline-none focus:border-[#dca956]"
+                      className="h-11 rounded-lg border border-[#E7D8BE] bg-white px-3 text-[#1F2933] outline-none focus:border-[#D8AF66] focus:ring-2 focus:ring-[#DCE8F7]"
                     >
                       {Object.entries(cityPresets).map(([key, preset]) => (
                         <option key={key} value={key}>{preset.label} ({preset.timezone})</option>
                       ))}
                     </select>
                   </label>
-                  <Button type="submit" className="bg-[#009b72] text-white hover:bg-[#008766]">
+                  <Button type="submit">
                     <CalendarDays className="h-4 w-4" />Calculate Panchang
                   </Button>
                 </form>
@@ -121,13 +121,13 @@ export default async function PanchangPage({
             <PanchangCard title="Day Windows" icon={<Sparkles className="h-5 w-5" />} rows={muhuratRows} />
           </div>
 
-          <Card className="inner-card mt-8 border-[#dca956]/25">
+          <Card className="inner-card mt-8 border-[#D8AF66]/35">
             <CardContent className="p-5">
               <div className="flex gap-3">
-                <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#00f5a0]" />
+                <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#0f8f6f]" />
                 <div>
-                  <h2 className="font-cinzel text-xl font-bold text-[#f3d382]">Trust note</h2>
-                  <p className="mt-2 text-sm leading-7 text-[#a8b3c7]">
+                  <h2 className="font-cinzel text-xl font-bold text-[#1F2933]">Trust note</h2>
+                  <p className="mt-2 text-sm leading-7 text-[#6B7280]">
                     Calculations are generated by Naksharix&apos;s internal ephemeris provider and may vary slightly by source. Use for spiritual guidance and cross-check for critical muhurat. This is provider-verified regression, not external Swiss/Jagannatha Hora verification.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-3">
@@ -148,14 +148,14 @@ function PanchangCard({ title, icon, rows }: { title: string; icon: ReactNode; r
   return (
     <Card className="inner-card h-full">
       <CardContent className="p-5">
-        <h2 className="flex items-center gap-2 font-cinzel text-xl font-bold text-[#f3d382]">
-          <span className="text-[#00f5a0]">{icon}</span>{title}
+        <h2 className="flex items-center gap-2 font-cinzel text-xl font-bold text-[#1F2933]">
+          <span className="text-[#B8862E]">{icon}</span>{title}
         </h2>
         <div className="mt-4 grid gap-3">
           {rows.map(([label, value]) => (
-            <div key={label} className="rounded-lg border border-[#263957] bg-[#020612]/50 p-3">
-              <p className="text-xs uppercase tracking-[0.16em] text-[#94a3b8]">{label}</p>
-              <p className="mt-1 text-sm font-semibold text-white">{value ?? "Unavailable"}</p>
+            <div key={label} className="rounded-lg border border-[#E7D8BE] bg-[#FFF9F0]/75 p-3">
+              <p className="text-xs uppercase tracking-[0.16em] text-[#6B7280]">{label}</p>
+              <p className="mt-1 text-sm font-semibold text-[#1F2933]">{value ?? "Unavailable"}</p>
             </div>
           ))}
         </div>

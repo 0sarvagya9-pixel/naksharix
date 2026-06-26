@@ -65,7 +65,7 @@ const en: Record<string, string> = {
   homeFeatureTarotReading: "Tarot Reading",
   homeFeatureConsultationExperts: "Consultation with Experts",
   homeCosmicIntelligencePlatform: "Cosmic Intelligence Platform",
-  homeCosmicIntelligenceSubtitle: "AI-powered insights with ancient Vedic wisdom",
+  homeCosmicIntelligenceSubtitle: "Provider-calculated insights with ancient Vedic wisdom",
   homeDashboardTitle: "Your Cosmic Dashboard",
   homeDashboardSubtitle: "Visual preview of personalized guidance",
   homePremiumReportPreview: "Premium Report Preview",

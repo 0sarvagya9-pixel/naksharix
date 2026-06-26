@@ -8,7 +8,7 @@ import { env } from "@/lib/env";
 
 export const metadata: Metadata = seo({
   title: "Sign in to Naksharix",
-  description: "Sign in to your Naksharix account for horoscope, kundli, numerology, tarot reading, panchang, and AI astrology dashboard.",
+  description: "Sign in to your Naksharix account for horoscope, Kundli, numerology, tarot reflection, Panchang, reports, and dashboard access.",
   path: "/auth/login"
 });
 

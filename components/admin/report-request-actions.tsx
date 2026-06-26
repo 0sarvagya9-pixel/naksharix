@@ -78,9 +78,9 @@ export function ReportRequestActions({
   }
 
   return (
-    <div className="space-y-4 rounded-2xl border border-[#D4AF37]/20 bg-[#0f1c3a]/70 p-5">
+    <div className="space-y-4 rounded-2xl border border-[#E7D8BE] bg-white/76 p-5">
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="space-y-2 text-sm text-slate-200">
+        <label className="space-y-2 text-sm text-[#1F2933]">
           <span>Workflow status</span>
           <select value={status} onChange={(event) => setStatus(event.target.value)} className="cosmic-select">
             {statuses.map((item) => (
@@ -88,7 +88,7 @@ export function ReportRequestActions({
             ))}
           </select>
         </label>
-        <div className="space-y-2 text-sm text-slate-200">
+        <div className="space-y-2 text-sm text-[#1F2933]">
           <span>PDF actions</span>
           <div className="flex flex-wrap gap-2">
             <Button type="button" onClick={generatePdf} disabled={loading === "pdf"} variant="secondary">
@@ -111,7 +111,7 @@ export function ReportRequestActions({
           </div>
         </div>
       </div>
-      <label className="block space-y-2 text-sm text-slate-200">
+      <label className="block space-y-2 text-sm text-[#1F2933]">
         <span>Admin notes</span>
         <textarea value={adminNotes} onChange={(event) => setAdminNotes(event.target.value)} rows={4} className="cosmic-textarea" />
       </label>
@@ -119,7 +119,7 @@ export function ReportRequestActions({
         <Save className="mr-2 h-4 w-4" />
         {loading === "save" ? "Saving..." : "Save workflow"}
       </Button>
-      {message ? <p className="rounded-md border border-[#D4AF37]/20 bg-[#020612]/70 p-3 text-sm text-slate-200">{message}</p> : null}
+      {message ? <p className="rounded-md border border-[#E7D8BE] bg-[#FFF9F0]/80 p-3 text-sm text-[#1F2933]">{message}</p> : null}
     </div>
   );
 }

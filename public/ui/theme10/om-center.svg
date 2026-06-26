@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <defs>
+    <radialGradient id="core" cx="50%" cy="46%" r="58%">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset=".48" stop-color="#FFF9F0"/>
+      <stop offset=".84" stop-color="#F3D382"/>
+      <stop offset="1" stop-color="#D8AF66"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="110" cy="110" r="101" fill="url(#core)" opacity=".96"/>
+  <circle cx="110" cy="110" r="86" fill="none" stroke="#B8862E" stroke-width="3" opacity=".78"/>
+  <text x="110" y="137" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="92" font-weight="700" fill="#8A5A18" filter="url(#glow)">ॐ</text>
+</svg>

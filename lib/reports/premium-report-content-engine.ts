@@ -224,7 +224,7 @@ export function assemblePremiumReportContent(input: {
         bestDirection: "Use chart, Dasha, numerology, and remedies sections together for review-based planning.",
         keyFocusAreas: ["accurate birth details", "current Dasha review", "relationship and career reflection", "spiritual practice without fear-selling"]
       },
-      limitations: ["Final summary is assembled from safe starter rules and provider-calculated facts. It is not a guaranteed prediction."]
+      limitations: ["Final summary is assembled from safe starter rules and provider-calculated facts. It is not a promised prediction."]
     }
   ];
 

@@ -4,9 +4,9 @@ import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
   title: "Disclaimer - Naksharix",
-  description: "Naksharix astrology, numerology, tarot, and AI guidance are for reflection and general guidance, not professional advice.",
+  description: "Naksharix astrology, numerology, tarot, and report guidance are for reflection and general guidance, not professional advice.",
   path: "/disclaimer",
-  keywords: ["Naksharix Disclaimer", "Astrology Disclaimer", "AI Astrology Safety"]
+  keywords: ["Naksharix Disclaimer", "Astrology Disclaimer"]
 });
 
 export default function DisclaimerPage() {

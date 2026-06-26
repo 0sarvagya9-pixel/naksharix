@@ -60,10 +60,10 @@ export default function DashboardPage() {
   if (role === "CONSULTANT") {
     return (
       <Section className="star-field">
-        <Card className="glass">
+        <Card className="border-[#E7D8BE] bg-white/90 shadow-[0_18px_54px_rgba(86,64,31,0.10)]">
           <CardContent className="p-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Consultant Portal</p>
-            <h1 className="mt-3 font-cinzel text-3xl font-black">Consultation Is On Hold</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#B8862E]">Consultant Portal</p>
+            <h1 className="mt-3 font-cinzel text-3xl font-black text-[#1F2933]">Consultation Is On Hold</h1>
             <p className="mt-3 naksh-muted-text">The consultation marketplace is not active in this phase. Profile and booking workflows will be completed in a later release.</p>
           </CardContent>
         </Card>
@@ -73,12 +73,12 @@ export default function DashboardPage() {
 
   return (
     <Section className="star-field">
-      <div className="relative overflow-hidden rounded-lg border border-[#D4AF37]/25 bg-[linear-gradient(135deg,rgba(72,36,128,0.78),rgba(18,9,31,0.94)_58%,rgba(166,119,42,0.48))] p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-3xl border border-[#E7D8BE] bg-[linear-gradient(135deg,#FFFFFF,#FFF9F0_58%,#DCE8F7)] p-6 shadow-[0_18px_54px_rgba(86,64,31,0.10)] sm:p-8">
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix Dashboard</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black">Your Account Workspace</h1>
-            <p className="mt-3 max-w-2xl naksh-muted-text">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#B8862E]">Naksharix Dashboard</p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#1F2933]">Your Account Workspace</h1>
+            <p className="mt-3 max-w-2xl text-[#6B7280]">
               Use active Naksharix tools and review real account activity as backend workflows become available. Future modules stay clearly marked until they are production-ready.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -88,8 +88,8 @@ export default function DashboardPage() {
               {showBecomeAstrologer ? <BecomeAstrologerButton /> : null}
             </div>
           </div>
-          <div className="grid h-20 w-20 place-items-center rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/10">
-            <LayoutDashboard className="h-9 w-9 text-[#FFD700]" />
+          <div className="grid h-20 w-20 place-items-center rounded-2xl border border-[#D8AF66]/35 bg-[#F7EAD3]/70">
+            <LayoutDashboard className="h-9 w-9 text-[#B8862E]" />
           </div>
         </div>
       </div>
@@ -102,11 +102,11 @@ export default function DashboardPage() {
 
       <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {activeTools.map(({ title, href, copy, icon: Icon }) => (
-          <Card key={title} className="border-[#D4AF37]/20 bg-[#061D3C]/80">
+          <Card key={title} className="border-[#E7D8BE] bg-white/88">
             <CardContent className="p-5">
-              <Icon className="h-5 w-5 text-[#FFD700]" />
-              <h2 className="mt-4 font-cinzel text-lg font-bold">{title}</h2>
-              <p className="mt-2 text-sm leading-6 naksh-muted-text">{copy}</p>
+              <Icon className="h-5 w-5 text-[#B8862E]" />
+              <h2 className="mt-4 font-cinzel text-lg font-bold text-[#1F2933]">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-[#6B7280]">{copy}</p>
               <Button className="mt-4 w-full" variant="outline" asChild><Link href={href}>Open</Link></Button>
             </CardContent>
           </Card>
@@ -114,22 +114,22 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
+        <Card className="border-[#E7D8BE] bg-white/88">
           <CardHeader><CardTitle className="font-cinzel">Future Modules</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {["AI Astrologer", "Shop", "Consultation marketplace", "Transit predictions", "Report payment checkout"].map((item) => (
-              <div key={item} className="flex items-center justify-between rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm">
+              <div key={item} className="flex items-center justify-between rounded-md border border-[#E7D8BE] bg-[#FFF9F0]/75 p-3 text-sm text-[#1F2933]">
                 <span>{item}</span>
-                <span className="rounded-full border border-[#D4AF37]/30 px-2 py-1 text-xs text-[#FFD700]">Coming Soon</span>
+                <span className="rounded-full border border-[#D8AF66]/35 bg-[#F7EAD3]/70 px-2 py-1 text-xs text-[#B8862E]">Coming Soon</span>
               </div>
             ))}
           </CardContent>
         </Card>
-        <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
+        <Card className="border-[#E7D8BE] bg-white/88">
           <CardHeader><CardTitle className="font-cinzel">Trust Notes</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm leading-6 naksh-muted-text">
-            <p className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3"><ShieldCheck className="mr-2 inline h-4 w-4 text-[#00f5a0]" />Guidance on Naksharix is for reflection and spiritual insight, not guaranteed outcomes.</p>
-            <p className="rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3"><History className="mr-2 inline h-4 w-4 text-[#00f5a0]" />History and downloads should appear only from real saved data as workflows are completed.</p>
+          <CardContent className="space-y-3 text-sm leading-6 text-[#6B7280]">
+            <p className="rounded-md border border-[#E7D8BE] bg-[#FFF9F0]/75 p-3"><ShieldCheck className="mr-2 inline h-4 w-4 text-[#0f8f6f]" />Guidance on Naksharix is for reflection and spiritual insight, not promised outcomes.</p>
+            <p className="rounded-md border border-[#E7D8BE] bg-[#FFF9F0]/75 p-3"><History className="mr-2 inline h-4 w-4 text-[#0f8f6f]" />History and downloads should appear only from real saved data as workflows are completed.</p>
           </CardContent>
         </Card>
       </div>
@@ -143,11 +143,11 @@ export default function DashboardPage() {
 
 function StatusCard({ title, copy }: { title: string; copy: string }) {
   return (
-    <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
+    <Card className="border-[#E7D8BE] bg-white/88">
       <CardContent className="p-5">
-        <FileText className="h-5 w-5 text-[#FFD700]" />
-        <h2 className="mt-4 font-cinzel text-lg font-bold">{title}</h2>
-        <p className="mt-2 text-sm leading-6 naksh-muted-text">{copy}</p>
+        <FileText className="h-5 w-5 text-[#B8862E]" />
+        <h2 className="mt-4 font-cinzel text-lg font-bold text-[#1F2933]">{title}</h2>
+        <p className="mt-2 text-sm leading-6 text-[#6B7280]">{copy}</p>
       </CardContent>
     </Card>
   );

@@ -158,7 +158,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       deliveryProcess: "Delivery process",
       steps: ["Secure form me accurate birth details submit karein", "Request DB me pending review status ke saath save hogi", "Admin review ke baad real PDF generation ho sakta hai", "Download sirf actual generated file par dikhega", "Payment secure checkout ready hone par alag se enable hoga"],
       disclaimer: "Disclaimer",
-      disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
+      disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye promised outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
     };
   }
   return {

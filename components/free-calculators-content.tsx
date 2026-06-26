@@ -30,7 +30,7 @@ const calculators: CalculatorItem[] = [
   active("lo-shu", "numerology", "/free-calculators/lo-shu-grid-calculator", Grid3X3, "Lo Shu Grid Calculator", "लो शू ग्रिड कैलकुलेटर", "Lo Shu Grid Calculator", "Understand missing, repeated, and present numbers in the Lo Shu grid.", "लो शू grid में उपस्थित, अनुपस्थित और दोहराए गए अंक समझें।", "Lo Shu grid mein present, missing aur repeated numbers samjhein.", "Date of birth.", "जन्म तिथि।", "DOB.", "Numerology / Lo Shu"),
   active("name-number", "numerology", "/free-calculators/name-number-calculator", Sparkles, "Name Number Calculator", "नामांक कैलकुलेटर", "Name Number Calculator", "Review name number and name compatibility guidance.", "नामांक और नाम compatibility guidance देखें।", "Naamank aur name compatibility guidance dekhein.", "Full name and date of birth.", "पूरा नाम और जन्म तिथि।", "Full name aur DOB.", "Numerology"),
   active("mobile-number", "numerology", "/free-calculators/mobile-number-calculator", Search, "Mobile Number Calculator", "मोबाइल नंबर कैलकुलेटर", "Mobile Number Calculator", "Reflect on mobile number total and Lo Shu support.", "मोबाइल नंबर total और Lo Shu support समझें।", "Mobile number total aur Lo Shu support samjhein.", "Full name, date of birth, mobile number.", "पूरा नाम, जन्म तिथि, मोबाइल नंबर।", "Full name, DOB, mobile number.", "Numerology"),
-  active("vehicle-number", "numerology", "/free-calculators/vehicle-number-calculator", Clock3, "Vehicle Number Calculator", "वाहन नंबर कैलकुलेटर", "Vehicle Number Calculator", "Review vehicle number compatibility without guaranteed claims.", "वाहन नंबर compatibility को बिना guarantee claims के समझें।", "Vehicle number compatibility bina guarantee claims ke dekhein.", "Full name, date of birth, vehicle number.", "पूरा नाम, जन्म तिथि, वाहन नंबर।", "Full name, DOB, vehicle number.", "Numerology"),
+  active("vehicle-number", "numerology", "/free-calculators/vehicle-number-calculator", Clock3, "Vehicle Number Calculator", "वाहन नंबर कैलकुलेटर", "Vehicle Number Calculator", "Review vehicle number compatibility without promised-result claims.", "वाहन नंबर compatibility को बिना promised-result claims के समझें।", "Vehicle number compatibility bina promised-result claims ke dekhein.", "Full name, date of birth, vehicle number.", "पूरा नाम, जन्म तिथि, वाहन नंबर।", "Full name, DOB, vehicle number.", "Numerology"),
   active("tarot", "tarot", "/tarot", BookOpen, "Tarot Reading", "टैरो रीडिंग", "Tarot Reading", "Ask a focused question and receive reflective tarot guidance.", "एक focused question पूछें और reflective tarot guidance पाएं।", "Focused question poochein aur reflective tarot guidance paayen.", "Question or selected category.", "प्रश्न या चुनी हुई category।", "Question ya selected category.", "Tarot"),
   active("dasha", "kundli", "/free-calculators/dasha-calculator", CalendarDays, "Dasha Calculator", "दशा कैलकुलेटर", "Dasha Calculator", "Calculate current Vimshottari Mahadasha and Antardasha from complete birth details.", "पूर्ण जन्म विवरण से वर्तमान Vimshottari महादशा और अंतर्दशा देखें।", "Complete birth details se current Vimshottari Mahadasha aur Antardasha dekhein.", "Name, gender, date of birth, time of birth, birth place.", "नाम, लिंग, जन्म तिथि, जन्म समय, जन्म स्थान।", "Name, gender, DOB, time, birth place.", "Kundli / Dasha"),
   active("nakshatra", "kundli", "/free-calculators/nakshatra-calculator", MoonStar, "Nakshatra Calculator", "नक्षत्र कैलकुलेटर", "Nakshatra Calculator", "Find birth Nakshatra, Pada, Moon sign, and focused guidance.", "जन्म नक्षत्र, पाद, चंद्र राशि और focused guidance देखें।", "Birth Nakshatra, Pada, Moon sign aur focused guidance dekhein.", "Name, gender, date of birth, time of birth, birth place.", "नाम, लिंग, जन्म तिथि, जन्म समय, जन्म स्थान।", "Name, gender, DOB, time, birth place.", "Kundli / Nakshatra"),
@@ -81,13 +81,13 @@ export function FreeCalculatorsContent() {
   return (
     <main className="inner-page-shell star-field min-h-screen">
       <Section>
-        <div className="inner-section rounded-3xl border border-[#263957] p-6 md:p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{labels.eyebrow}</p>
-          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{labels.title}</h1>
-          <p className="mt-4 max-w-4xl text-lg leading-8 text-[#a8b3c7]">{labels.subtitle}</p>
+        <div className="inner-section rounded-3xl border border-[#E7D8BE] p-6 md:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#B8862E]">{labels.eyebrow}</p>
+          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#1F2933] sm:text-5xl">{labels.title}</h1>
+          <p className="mt-4 max-w-4xl text-lg leading-8 text-[#6B7280]">{labels.subtitle}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {filters.map((item) => (
-              <button key={item} type="button" onClick={() => setFilter(item)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${filter === item ? "border-[#dca956] bg-[#dca956]/15 text-[#f3d382]" : "border-[#263957] bg-[#111f3a] text-[#a8b3c7] hover:border-[#dca956]/50 hover:text-white"}`}>
+              <button key={item} type="button" onClick={() => setFilter(item)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${filter === item ? "border-[#B8862E] bg-[#F7EAD3]/75 text-[#B8862E]" : "border-[#E7D8BE] bg-white/75 text-[#6B7280] hover:border-[#D8AF66] hover:text-[#1F2933]"}`}>
                 {labels.filters[item]}
               </button>
             ))}
@@ -101,8 +101,8 @@ export function FreeCalculatorsContent() {
             return (
               <section key={group}>
                 <div className="mb-4 flex items-center justify-between gap-4">
-                  <h2 className="font-cinzel text-2xl font-black text-[#f3d382]">{title}</h2>
-                  {group === "horoscope" ? <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-3 py-1 text-xs text-[#f3d382]">{labels.comingSoon}</span> : null}
+                  <h2 className="font-cinzel text-2xl font-black text-[#1F2933]">{title}</h2>
+                  {group === "horoscope" ? <span className="rounded-full border border-[#D8AF66]/35 bg-[#F7EAD3]/70 px-3 py-1 text-xs text-[#B8862E]">{labels.comingSoon}</span> : null}
                 </div>
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                   {items.map((item) => <CalculatorCard key={item.id} item={item} labels={labels} locale={locale} />)}
@@ -122,23 +122,23 @@ function CalculatorCard({ item, labels, locale }: { item: CalculatorItem; labels
     <Card className={`inner-card h-full transition ${item.status === "active" ? "hover:-translate-y-1 hover:border-[#00f5a0]/45" : "opacity-82"}`}>
       <CardContent className="flex h-full flex-col p-5">
         <div className="flex items-start justify-between gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-xl border border-[#dca956]/25 bg-[#dca956]/10 text-[#f3d382]">
+          <span className="grid h-11 w-11 place-items-center rounded-xl border border-[#D8AF66]/35 bg-[#F7EAD3]/70 text-[#B8862E]">
             <Icon className="h-5 w-5" />
           </span>
-          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${item.status === "active" ? "border-[#00f5a0]/35 bg-[#00f5a0]/10 text-[#00f5a0]" : "border-[#dca956]/30 bg-[#dca956]/10 text-[#f3d382]"}`}>
+          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${item.status === "active" ? "border-[#0f8f6f]/25 bg-[#0f8f6f]/10 text-[#0f8f6f]" : "border-[#D8AF66]/35 bg-[#F7EAD3]/70 text-[#B8862E]"}`}>
             {item.status === "active" ? labels.active : labels.comingSoon}
           </span>
         </div>
-        <h3 className="mt-4 font-cinzel text-xl font-bold text-white">{item.title[locale]}</h3>
-        <p className="mt-2 text-sm leading-6 text-[#a8b3c7]">{item.copy[locale]}</p>
-        <div className="mt-4 rounded-xl border border-[#263957] bg-[#142647]/60 p-3 text-xs leading-5 text-[#a8b3c7]">
-          <p className="font-semibold text-[#f3d382]">{labels.requiredDetails}</p>
+        <h3 className="mt-4 font-cinzel text-xl font-bold text-[#1F2933]">{item.title[locale]}</h3>
+        <p className="mt-2 text-sm leading-6 text-[#6B7280]">{item.copy[locale]}</p>
+        <div className="mt-4 rounded-xl border border-[#E7D8BE] bg-[#FFF9F0]/75 p-3 text-xs leading-5 text-[#6B7280]">
+          <p className="font-semibold text-[#B8862E]">{labels.requiredDetails}</p>
           <p className="mt-1">{item.required[locale]}</p>
         </div>
-        <p className="mt-3 text-xs text-[#94a3b8]">{labels.engine}: {item.engine}</p>
+        <p className="mt-3 text-xs text-[#6B7280]">{labels.engine}: {item.engine}</p>
         <div className="mt-auto pt-5">
           {item.status === "active" && item.href ? (
-            <Button className="w-full bg-[#009b72] text-white hover:bg-[#008766]" asChild><Link href={item.href}>{labels.openCalculator}</Link></Button>
+            <Button className="w-full" asChild><Link href={item.href}>{labels.openCalculator}</Link></Button>
           ) : (
             <Button className="w-full cursor-not-allowed" variant="outline" disabled>{labels.comingSoon}</Button>
           )}

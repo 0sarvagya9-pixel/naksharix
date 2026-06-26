@@ -173,9 +173,9 @@ export function MainNav() {
   if (isAstrologerPortal) return null;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/[0.04] bg-[#020612]/72 shadow-[0_14px_48px_rgba(0,0,0,0.42)] backdrop-blur-md">
-      <div className="mx-auto flex h-24 w-full max-w-[1440px] items-center gap-2 px-4 lg:gap-2 xl:h-24 xl:px-4 2xl:gap-4 2xl:px-8">
-        <div className="flex min-w-[10rem] flex-shrink-0 items-center md:min-w-[11rem] xl:basis-[11.25rem] 2xl:basis-[13rem]">
+    <header className="sticky top-0 z-50 w-full bg-[#FAF7F0]/78 px-3 py-3 backdrop-blur-md">
+      <div className="mx-auto flex h-[4.75rem] w-full max-w-[1500px] items-center gap-2 rounded-[1.55rem] border border-[#E7D8BE] bg-white/90 px-4 shadow-[0_18px_58px_rgba(86,64,31,0.13)] ring-1 ring-white/70 lg:gap-2 xl:px-5 2xl:gap-4 2xl:px-7">
+        <div className="flex min-w-[13rem] flex-shrink-0 items-center md:min-w-[13.5rem] xl:basis-[14rem] 2xl:basis-[15.5rem]">
           <BrandLogo className="max-w-full" />
         </div>
         <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex 2xl:gap-1.5" aria-label="Primary navigation">
@@ -193,10 +193,10 @@ export function MainNav() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-1.5 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-2.5 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] hover:drop-shadow-[0_0_10px_rgba(0,155,114,0.38)] 2xl:px-2.5 2xl:text-[0.8rem]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-full px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-1 after:h-px after:origin-center after:scale-x-0 after:bg-[#B8862E] after:shadow-[0_0_12px_rgba(216,175,102,0.45)] after:transition-transform hover:bg-[#F7EAD3]/70 hover:text-[#B8862E] 2xl:px-3 2xl:text-[0.78rem]",
                 active
-                  ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
-                  : "text-[#ffffff]"
+                  ? "bg-[linear-gradient(135deg,rgba(247,234,211,0.88),rgba(220,232,247,0.66))] text-[#B8862E] shadow-[0_8px_22px_rgba(216,175,102,0.15)] after:scale-x-100"
+                  : "text-[#1F2933]"
               )}
             >
               {tr(item.labelKey)}
@@ -210,18 +210,18 @@ export function MainNav() {
               aria-haspopup="menu"
               aria-expanded={moreActive}
               className={cn(
-                "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-3 2xl:text-[0.8rem]",
+                "relative flex-shrink-0 whitespace-nowrap rounded-full px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-1 after:h-px after:origin-center after:scale-x-0 after:bg-[#B8862E] after:shadow-[0_0_12px_rgba(216,175,102,0.45)] after:transition-transform hover:bg-[#F7EAD3]/70 hover:text-[#B8862E] 2xl:px-3 2xl:text-[0.78rem]",
                 moreActive
-                  ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
-                  : "text-[#ffffff]"
+                  ? "bg-[linear-gradient(135deg,rgba(247,234,211,0.88),rgba(220,232,247,0.66))] text-[#B8862E] shadow-[0_8px_22px_rgba(216,175,102,0.15)] after:scale-x-100"
+                  : "text-[#1F2933]"
               )}
             >
               {tr("navMore")}
             </button>
-            <div className="invisible absolute right-0 top-full z-[80] mt-3 w-72 translate-y-2 rounded-xl border border-[#dca956]/30 bg-[#050b18]/95 p-3 opacity-0 shadow-2xl shadow-black/70 ring-1 ring-white/5 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+            <div className="invisible absolute right-0 top-full z-[80] mt-3 w-72 translate-y-2 rounded-xl border border-[#E7D8BE] bg-white/95 p-3 opacity-0 shadow-2xl shadow-[#b8862e]/15 ring-1 ring-[#E7D8BE]/60 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {moreGroups.map((group) => (
-                <div key={group.titleKey} className="border-b border-[#263957]/70 py-2 first:pt-0 last:border-b-0 last:pb-0">
-                  <p className="px-3 pb-1 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#dca956]">{tr(group.titleKey)}</p>
+                <div key={group.titleKey} className="border-b border-[#E7D8BE]/80 py-2 first:pt-0 last:border-b-0 last:pb-0">
+                  <p className="px-3 pb-1 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#B8862E]">{tr(group.titleKey)}</p>
                   {group.items.map((item, index) => {
                     const active = isActiveRoute(pathname, item.href, item.activePaths);
                     return (
@@ -230,8 +230,8 @@ export function MainNav() {
                         href={item.href}
                         aria-current={active ? "page" : undefined}
                         className={cn(
-                          "block rounded-md px-3 py-2 text-sm font-semibold text-[#ffffff] outline-none transition hover:bg-[#0f1c3a] hover:text-[#f3d382] focus:bg-[#0f1c3a] focus:text-[#f3d382]",
-                          active ? "bg-[#dca956]/10 text-[#f3d382] shadow-[inset_3px_0_0_rgba(220,169,86,0.8)]" : "text-[#ffffff]"
+                          "block rounded-md px-3 py-2 text-sm font-semibold text-[#1F2933] outline-none transition hover:bg-[#F7EAD3]/70 hover:text-[#B8862E] focus:bg-[#F7EAD3]/70 focus:text-[#B8862E]",
+                          active ? "bg-[#F7EAD3]/80 text-[#B8862E] shadow-[inset_3px_0_0_rgba(184,134,46,0.8)]" : "text-[#1F2933]"
                         )}
                       >
                         {tr(item.labelKey)}
@@ -243,7 +243,7 @@ export function MainNav() {
             </div>
           </div>
         </nav>
-        <div className="ml-auto flex flex-shrink-0 items-center gap-1.5 border-l border-white/[0.08] pl-2 lg:gap-2 2xl:gap-2.5 2xl:pl-4">
+        <div className="ml-auto flex flex-shrink-0 items-center gap-1.5 border-l border-[#E7D8BE] pl-2 lg:gap-2 2xl:gap-2.5 2xl:pl-4">
           <LanguageSwitcher className="w-auto min-w-12" />
           <ThemeToggle />
           <AuthProfileMenu />
@@ -275,37 +275,37 @@ function CalculatorMegaDropdown({ locale, tr, active }: { locale: Locale; tr: (k
         aria-haspopup="menu"
         aria-expanded={active}
         className={cn(
-          "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-2.5 2xl:text-[0.8rem]",
+          "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#B8862E] after:shadow-[0_0_12px_rgba(216,175,102,0.45)] after:transition-transform hover:bg-[#F7EAD3]/70 hover:text-[#B8862E] 2xl:px-2.5 2xl:text-[0.8rem]",
           active
-            ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
-            : "text-[#ffffff]"
+            ? "bg-[linear-gradient(135deg,rgba(247,234,211,0.88),rgba(220,232,247,0.66))] text-[#B8862E] shadow-[0_8px_22px_rgba(216,175,102,0.15)] after:scale-x-100"
+            : "text-[#1F2933]"
         )}
       >
         {tr("navFreeCalculators")}
       </button>
-      <div className="invisible absolute left-1/2 top-full z-[80] mt-3 w-[min(94vw,1100px)] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#dca956]/30 bg-[#050b18]/95 p-4 opacity-0 shadow-2xl shadow-black/70 ring-1 ring-white/5 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+      <div className="invisible absolute left-1/2 top-full z-[80] mt-3 w-[min(94vw,1100px)] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#E7D8BE] bg-white/95 p-4 opacity-0 shadow-2xl shadow-[#b8862e]/15 ring-1 ring-[#E7D8BE]/60 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {labels.groups.map((group) => (
-            <div key={group.title} className="rounded-xl border border-[#263957]/70 bg-[#0a1224]/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-              <p className="font-cinzel text-sm font-bold text-[#f3d382]">{group.title}</p>
+            <div key={group.title} className="rounded-xl border border-[#E7D8BE] bg-[#FFF9F0]/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <p className="font-cinzel text-sm font-bold text-[#B8862E]">{group.title}</p>
               <div className="mt-3 grid gap-1.5">
                 {group.items.map((item) => item.href ? (
-                  <Link key={item.label} href={item.href} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#dca956]/10 hover:text-[#f3d382]">
+                  <Link key={item.label} href={item.href} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-semibold text-[#1F2933] transition hover:bg-[#F7EAD3]/70 hover:text-[#B8862E]">
                     <span>{item.label}</span>
-                    <span className="rounded-full border border-[#00f5a0]/35 bg-[#00f5a0]/10 px-2 py-0.5 text-[0.6rem] text-[#00f5a0]">{labels.active}</span>
+                    <span className="rounded-full border border-[#0f8f6f]/25 bg-[#0f8f6f]/10 px-2 py-0.5 text-[0.6rem] text-[#0f8f6f]">{labels.active}</span>
                   </Link>
                 ) : (
-                  <div key={item.label} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#a8b3c7]">
+                  <div key={item.label} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#6B7280]">
                     <span>{item.label}</span>
-                    <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-2 py-0.5 text-[0.6rem] text-[#f3d382]">{labels.comingSoon}</span>
+                    <span className="rounded-full border border-[#D8AF66]/35 bg-[#F7EAD3]/70 px-2 py-0.5 text-[0.6rem] text-[#B8862E]">{labels.comingSoon}</span>
                   </div>
                 ))}
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-4 flex justify-end border-t border-[#263957] pt-4">
-          <Link href="/free-calculators" className="rounded-full bg-[#009b72] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#008766]">
+        <div className="mt-4 flex justify-end border-t border-[#E7D8BE] pt-4">
+          <Link href="/free-calculators" className="rounded-full bg-[#B8862E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#9f7324]">
             {labels.viewAll}
           </Link>
         </div>
@@ -323,29 +323,29 @@ function HoroscopeMegaDropdown({ locale, active }: { locale: Locale; active: boo
         aria-haspopup="menu"
         aria-expanded={active}
         className={cn(
-          "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#dca956] after:shadow-[0_0_12px_rgba(220,169,86,0.68)] after:transition-transform hover:bg-[#dca956]/10 hover:text-[#f3d382] 2xl:px-2.5 2xl:text-[0.8rem]",
+          "relative flex-shrink-0 whitespace-nowrap rounded-md px-2 py-2 text-[0.67rem] font-semibold leading-none transition duration-200 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:origin-center after:scale-x-0 after:bg-[#B8862E] after:shadow-[0_0_12px_rgba(216,175,102,0.45)] after:transition-transform hover:bg-[#F7EAD3]/70 hover:text-[#B8862E] 2xl:px-2.5 2xl:text-[0.8rem]",
           active
-            ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.14),rgba(0,155,114,0.12))] text-[#f3d382] shadow-[0_0_24px_rgba(0,155,114,0.16)] after:scale-x-100"
-            : "text-[#ffffff]"
+            ? "bg-[linear-gradient(135deg,rgba(247,234,211,0.88),rgba(220,232,247,0.66))] text-[#B8862E] shadow-[0_8px_22px_rgba(216,175,102,0.15)] after:scale-x-100"
+            : "text-[#1F2933]"
         )}
       >
         {labels.title}
       </button>
-      <div className="invisible absolute left-1/2 top-full z-[80] mt-3 w-[min(94vw,780px)] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#dca956]/30 bg-[#050b18]/95 p-4 opacity-0 shadow-2xl shadow-black/70 ring-1 ring-white/5 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+      <div className="invisible absolute left-1/2 top-full z-[80] mt-3 w-[min(94vw,780px)] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#E7D8BE] bg-white/95 p-4 opacity-0 shadow-2xl shadow-[#b8862e]/15 ring-1 ring-[#E7D8BE]/60 backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
         <div className="grid gap-4 md:grid-cols-2">
           {labels.groups.map((group) => (
-            <div key={group.title} className="rounded-xl border border-[#263957]/70 bg-[#0a1224]/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-              <p className="font-cinzel text-sm font-bold text-[#f3d382]">{group.title}</p>
+            <div key={group.title} className="rounded-xl border border-[#E7D8BE] bg-[#FFF9F0]/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <p className="font-cinzel text-sm font-bold text-[#B8862E]">{group.title}</p>
               <div className="mt-3 grid gap-1.5">
                 {group.items.map((item) => ("href" in item && item.href) ? (
-                  <Link key={item.label} href={item.href} className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#ffffff] transition hover:bg-[#dca956]/10 hover:text-[#f3d382]">
+                  <Link key={item.label} href={item.href} className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#1F2933] transition hover:bg-[#F7EAD3]/70 hover:text-[#B8862E]">
                     <span>{item.label}</span>
-                    <span className="shrink-0 rounded-full border border-[#00f5a0]/30 bg-[#00f5a0]/10 px-2 py-0.5 text-[0.6rem] text-[#00f5a0]">{labels.active}</span>
+                    <span className="shrink-0 rounded-full border border-[#0f8f6f]/25 bg-[#0f8f6f]/10 px-2 py-0.5 text-[0.6rem] text-[#0f8f6f]">{labels.active}</span>
                   </Link>
                 ) : (
-                  <div key={item.label} aria-disabled="true" className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#d7deec]">
+                  <div key={item.label} aria-disabled="true" className="flex min-h-9 items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs text-[#6B7280]">
                     <span>{item.label}</span>
-                    <span className="shrink-0 rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-2 py-0.5 text-[0.6rem] text-[#f3d382]">{labels.comingSoon}</span>
+                    <span className="shrink-0 rounded-full border border-[#D8AF66]/35 bg-[#F7EAD3]/70 px-2 py-0.5 text-[0.6rem] text-[#B8862E]">{labels.comingSoon}</span>
                   </div>
                 ))}
               </div>
@@ -377,7 +377,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
           <motion.button
             type="button"
             aria-label="Close navigation overlay"
-            className="fixed inset-0 z-40 bg-[radial-gradient(circle_at_20%_20%,rgba(88,28,135,0.28),transparent_28rem),rgba(5,2,14,0.76)] backdrop-blur-sm xl:hidden"
+            className="fixed inset-0 z-40 bg-[radial-gradient(circle_at_20%_20%,rgba(220,232,247,0.48),transparent_28rem),rgba(250,247,240,0.72)] backdrop-blur-sm xl:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -388,13 +388,13 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
             role="dialog"
             aria-modal="true"
             aria-label="Naksharix navigation menu"
-            className="fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-[24rem] flex-col overflow-hidden border-l border-[#dca956]/20 bg-[linear-gradient(180deg,rgba(88,28,135,0.96),rgba(2,6,18,0.99)_58%,rgba(59,7,100,0.96))] shadow-[0_0_80px_rgba(88,28,135,0.22)] xl:hidden"
+            className="fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-[24rem] flex-col overflow-hidden border-l border-[#E7D8BE] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,249,240,0.98)_58%,rgba(246,239,217,0.98))] shadow-[0_0_80px_rgba(184,134,46,0.18)] xl:hidden"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 32 }}
           >
-            <div className="border-b border-[#dca956]/15 p-4">
+            <div className="border-b border-[#E7D8BE] p-4">
               <div className="flex items-center justify-between gap-3">
                 <BrandLogo />
                 <Button variant="ghost" size="icon" aria-label="Close navigation menu" onClick={onClose}>
@@ -421,7 +421,7 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
                 ))}
               </div>
             </div>
-            <div className="border-t border-[#dca956]/15 bg-[#020612]/80 p-4">
+            <div className="border-t border-[#E7D8BE] bg-white/80 p-4">
               <Button className="w-full" asChild onClick={onClose}>
                 <Link href="/signup"><Sparkles className="h-4 w-4" />{tr("startReading")}</Link>
               </Button>
@@ -436,24 +436,24 @@ function MobileSidebar({ open, onClose, pathname }: { open: boolean; onClose: ()
 function MobileHoroscopeAccordion({ locale, open, setOpen }: { locale: Locale; open: boolean; setOpen: (value: boolean) => void }) {
   const labels = horoscopeDropdownLabels(locale);
   return (
-    <section className="rounded-lg border border-[#dca956]/18 bg-[#0f1c3a]/70 p-3">
-      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left font-cinzel text-sm font-bold text-[#f3d382]">
+    <section className="rounded-lg border border-[#E7D8BE] bg-white/70 p-3">
+      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left font-cinzel text-sm font-bold text-[#B8862E]">
         <span className="flex items-center gap-2"><MoonStar className="h-4 w-4" />{labels.title}</span>
-        <span className="text-xs text-[#dca956]">{open ? "−" : "+"}</span>
+        <span className="text-xs text-[#B8862E]">{open ? "−" : "+"}</span>
       </button>
       {open ? (
         <div className="mt-3 grid gap-3">
           {labels.groups.map((group) => (
-            <div key={group.title} className="rounded-lg border border-[#263957] bg-[#020612]/70 p-3">
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#dca956]">{group.title}</p>
+            <div key={group.title} className="rounded-lg border border-[#E7D8BE] bg-[#FFF9F0]/80 p-3">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#B8862E]">{group.title}</p>
               <div className="mt-2 grid gap-1.5">
                 {group.items.map((item) => ("href" in item && item.href) ? (
-                  <Link key={item.label} href={item.href} className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-white hover:bg-[#dca956]/10">
-                    <span>{item.label}</span><span className="text-[0.65rem] text-[#00f5a0]">{labels.active}</span>
+                  <Link key={item.label} href={item.href} className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-[#1F2933] hover:bg-[#F7EAD3]/70">
+                    <span>{item.label}</span><span className="text-[0.65rem] text-[#0f8f6f]">{labels.active}</span>
                   </Link>
                 ) : (
-                  <div key={item.label} aria-disabled="true" className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-[#d7deec]">
-                    <span>{item.label}</span><span className="text-[0.65rem] text-[#f3d382]">{labels.comingSoon}</span>
+                  <div key={item.label} aria-disabled="true" className="flex min-h-10 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-[#6B7280]">
+                    <span>{item.label}</span><span className="text-[0.65rem] text-[#B8862E]">{labels.comingSoon}</span>
                   </div>
                 ))}
               </div>
@@ -468,30 +468,30 @@ function MobileHoroscopeAccordion({ locale, open, setOpen }: { locale: Locale; o
 function MobileCalculatorAccordion({ locale, tr, open, setOpen, onClose }: { locale: Locale; tr: (key: TranslationKey) => string; open: boolean; setOpen: (value: boolean) => void; onClose: () => void }) {
   const labels = calculatorDropdownLabels(locale);
   return (
-    <section className="rounded-lg border border-[#dca956]/18 bg-[#0f1c3a]/70 p-3">
-      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left font-cinzel text-sm font-bold text-[#f3d382]">
+    <section className="rounded-lg border border-[#E7D8BE] bg-white/70 p-3">
+      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left font-cinzel text-sm font-bold text-[#B8862E]">
         <span className="flex items-center gap-2"><Calculator className="h-4 w-4" />{tr("navFreeCalculators")}</span>
-        <span className="text-xs text-[#dca956]">{open ? "−" : "+"}</span>
+        <span className="text-xs text-[#B8862E]">{open ? "−" : "+"}</span>
       </button>
       {open ? (
         <div className="mt-3 grid gap-3">
           {labels.groups.map((group) => (
-            <div key={group.title} className="rounded-lg border border-[#263957] bg-[#020612]/42 p-3">
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#dca956]">{group.title}</p>
+            <div key={group.title} className="rounded-lg border border-[#E7D8BE] bg-[#FFF9F0]/80 p-3">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#B8862E]">{group.title}</p>
               <div className="mt-2 grid gap-1.5">
                 {group.items.map((item) => item.href ? (
-                  <Link key={item.label} href={item.href} onClick={onClose} className="flex min-h-10 items-center justify-between rounded-md px-3 py-2 text-sm text-white hover:bg-[#dca956]/10">
-                    <span>{item.label}</span><span className="text-[0.65rem] text-[#00f5a0]">{labels.active}</span>
+                  <Link key={item.label} href={item.href} onClick={onClose} className="flex min-h-10 items-center justify-between rounded-md px-3 py-2 text-sm text-[#1F2933] hover:bg-[#F7EAD3]/70">
+                    <span>{item.label}</span><span className="text-[0.65rem] text-[#0f8f6f]">{labels.active}</span>
                   </Link>
                 ) : (
                   <div key={item.label} className="flex min-h-10 items-center justify-between rounded-md px-3 py-2 text-sm text-[#94a3b8]">
-                    <span>{item.label}</span><span className="text-[0.65rem] text-[#f3d382]">{labels.comingSoon}</span>
+                    <span>{item.label}</span><span className="text-[0.65rem] text-[#B8862E]">{labels.comingSoon}</span>
                   </div>
                 ))}
               </div>
             </div>
           ))}
-          <Link href="/free-calculators" onClick={onClose} className="rounded-md bg-[#009b72] px-3 py-2 text-center text-sm font-semibold text-white">{labels.viewAll}</Link>
+          <Link href="/free-calculators" onClick={onClose} className="rounded-md bg-[#B8862E] px-3 py-2 text-center text-sm font-semibold text-white">{labels.viewAll}</Link>
         </div>
       ) : null}
     </section>
@@ -505,12 +505,12 @@ function SidebarMenuGroup({ group, onClose, pathname, firstLinkRef }: { group: S
   return (
     <section
       className={cn(
-        "rounded-lg border bg-[#0f1c3a]/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition",
-        groupActive ? "border-[#dca956]/40 shadow-[inset_3px_0_0_rgba(220,169,86,0.75),0_0_24px_rgba(88,28,135,0.13)]" : "border-[#dca956]/15"
+        "rounded-lg border bg-white/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition",
+        groupActive ? "border-[#D8AF66]/60 shadow-[inset_3px_0_0_rgba(184,134,46,0.75),0_10px_24px_rgba(216,175,102,0.13)]" : "border-[#E7D8BE]"
       )}
     >
-      <h2 className={cn("flex items-center gap-2 font-cinzel text-sm font-bold", groupActive ? "text-[#f3d382]" : "text-[#f3d382]")}>
-        <span className={cn("grid h-8 w-8 place-items-center rounded-md text-[#f3d382]", groupActive ? "bg-[#dca956]/18 shadow-[0_0_16px_rgba(220,169,86,0.22)]" : "bg-[#dca956]/10")}>
+      <h2 className={cn("flex items-center gap-2 font-cinzel text-sm font-bold", groupActive ? "text-[#B8862E]" : "text-[#B8862E]")}>
+        <span className={cn("grid h-8 w-8 place-items-center rounded-md text-[#B8862E]", groupActive ? "bg-[#F7EAD3] shadow-[0_8px_16px_rgba(216,175,102,0.18)]" : "bg-[#F7EAD3]/70")}>
           <GroupIcon className="h-4 w-4" />
         </span>
         {tr(group.titleKey)}
@@ -526,14 +526,14 @@ function SidebarMenuGroup({ group, onClose, pathname, firstLinkRef }: { group: S
             onClick={onClose}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-sm outline-none transition hover:bg-[#dca956]/10 hover:text-foreground focus:bg-[#dca956]/10 focus:text-foreground",
+              "flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-sm outline-none transition hover:bg-[#F7EAD3]/70 hover:text-[#B8862E] focus:bg-[#F7EAD3]/70 focus:text-[#B8862E]",
               active
-                ? "bg-[linear-gradient(135deg,rgba(220,169,86,0.16),rgba(88,28,135,0.14))] text-[#f3d382] shadow-[inset_3px_0_0_rgba(220,169,86,0.85),0_0_18px_rgba(88,28,135,0.14)]"
-                : "text-[#ffffff]"
+                ? "bg-[linear-gradient(135deg,rgba(247,234,211,0.9),rgba(220,232,247,0.58))] text-[#B8862E] shadow-[inset_3px_0_0_rgba(184,134,46,0.85),0_10px_18px_rgba(216,175,102,0.12)]"
+                : "text-[#1F2933]"
             )}
           >
             <span className="whitespace-nowrap">{tr(item.labelKey)}</span>
-            {item.labelKey === "callAstrologers" ? <PhoneCall className="h-4 w-4 text-[#f3d382]/80" /> : item.labelKey.toLowerCase().includes("report") ? <FileText className="h-4 w-4 text-[#f3d382]/80" /> : <ScrollText className="h-4 w-4 text-[#f3d382]/60" />}
+            {item.labelKey === "callAstrologers" ? <PhoneCall className="h-4 w-4 text-[#B8862E]/80" /> : item.labelKey.toLowerCase().includes("report") ? <FileText className="h-4 w-4 text-[#B8862E]/80" /> : <ScrollText className="h-4 w-4 text-[#B8862E]/60" />}
           </Link>
           );
         })}

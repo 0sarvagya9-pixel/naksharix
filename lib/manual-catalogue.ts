@@ -202,7 +202,7 @@ function productDisclaimer(): CatalogueText {
   return {
     en: "Spiritual products are faith-based and reflective support tools. They do not guarantee outcomes and do not replace medical, legal, financial, or professional advice.",
     hi: "आध्यात्मिक उत्पाद आस्था-आधारित और चिंतनात्मक सहयोग के साधन हैं। ये परिणामों की गारंटी नहीं देते और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।",
-    hinglish: "Spiritual products faith-based aur reflective support tools hain. Ye guaranteed outcomes nahi dete aur medical, legal, financial ya professional advice ka replacement nahi hain."
+    hinglish: "Spiritual products faith-based aur reflective support tools hain. Ye promised outcomes nahi dete aur medical, legal, financial ya professional advice ka replacement nahi hain."
   };
 }
 
