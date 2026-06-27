@@ -10,7 +10,7 @@ export function Footer() {
   const groups = footerGroups(locale);
 
   return (
-    <footer className="border-t border-[#1e293b] bg-[linear-gradient(180deg,rgba(10,18,36,0.78),rgba(2,6,18,0.96))]">
+    <footer className="border-t border-[rgba(212,160,55,0.35)] bg-[linear-gradient(180deg,rgba(255,252,245,0.98),rgba(255,248,234,1.0))]">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm naksh-muted-text lg:grid-cols-[1.35fr_2fr]">
         <div className="max-w-md">
           <BrandLogo />
@@ -18,11 +18,11 @@ export function Footer() {
         </div>
         <nav aria-label="Footer navigation" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
           {groups.map((group) => (
-            <div key={group.title} className="rounded-xl border border-[#1e293b] bg-[#0f1c3a]/65 p-4">
-              <p className="font-cinzel text-sm font-bold text-[#f3d382]">{group.title}</p>
+            <div key={group.title} className="rounded-xl border border-[rgba(212,160,55,0.25)] bg-[rgba(255,252,245,0.65)] p-4">
+              <p className="font-cinzel text-sm font-bold text-[#D97706]">{group.title}</p>
               <div className="mt-3 grid gap-2">
                 {group.links.map((link) => (
-                  <Link key={`${group.title}-${link.href}`} href={link.href} className="text-xs text-[#ffffff] transition hover:text-[#f3d382]">
+                  <Link key={`${group.title}-${link.href}`} href={link.href} className="text-xs text-[#7A6145] transition hover:text-[#D97706]">
                     {link.label}
                   </Link>
                 ))}

@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { Theme10ProductionHome } from "@/components/theme10-production-home";
+import { NxHome } from "@/components/nx-home";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Naksharix - Kundli, Panchang, Horoscope and Premium Reports",
-  description: "Premium astrology tools, daily Panchang, Kundli insights and review-based personalized reports using the Naksharix internal astrology workflow.",
+  title: "Naksharix - Your Destiny. Your Dharma. | Vedic Astrology",
+  description:
+    "Naksharix is your cosmic guide to self-discovery, clarity and a life aligned with your purpose. Kundli, Panchang, Daily Horoscope, Numerology, Tarot and premium reports.",
   path: "/",
-  keywords: ["Naksharix", "Kundli", "Panchang", "Horoscope", "Astrology Reports"]
+  keywords: ["Naksharix", "Kundli", "Panchang", "Horoscope", "Vedic Astrology", "Numerology", "Tarot"],
 });
 
 export default function HomePage() {
   return (
-    <main className="overflow-hidden bg-[#fbf6ea] text-[#172536]">
-      <Theme10ProductionHome />
+    <main className="overflow-hidden" style={{ background: "#FFF8EA", color: "#2F2418" }}>
+      <NxHome />
     </main>
   );
 }

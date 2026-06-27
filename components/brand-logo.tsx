@@ -19,7 +19,7 @@ export function BrandLogo({ className, compact = false }: { className?: string; 
       {!compact ? (
         <span className="min-w-0 leading-none">
           <span className="block bg-gradient-to-r from-[#f3d382] via-[#f3d382] to-[#dca956] bg-clip-text font-cinzel text-lg font-black tracking-[0.16em] text-transparent md:text-xl">NAKSHARIX</span>
-          <span className="hidden text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-[#94a3b8] lg:block">Cosmic Destiny</span>
+          <span className="hidden text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-[#D97706] lg:block">Vedic Astrology</span>
         </span>
       ) : null}
     </Link>

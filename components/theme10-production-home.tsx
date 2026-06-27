@@ -54,7 +54,7 @@ function ToolStrip() {
 }
 
 function InfoGrid() {
-  return <div className="infoGrid"><section><h2>Today's Panchang</h2><div className="miniGrid">{["Tithi", "Nakshatra", "Yoga", "Karana", "Sunrise", "Sunset"].map((item) => <p key={item}><small>{item}</small><b>Provider calculated</b></p>)}</div></section><section><h2>Premium Reports</h2><div className="reports">{reports.map((item) => <Link href="/reports" key={item}><FileText size={24} /><b>{item}</b><small>Detailed insights</small></Link>)}</div></section><section><h2>Why Naksharix?</h2>{["Secure workflow", "Provider calculated", "Review-based reports"].map((item) => <p className="why" key={item}><ShieldCheck size={16} />{item}</p>)}</section></div>;
+  return <div className="infoGrid"><section><h2>Today&apos;s Panchang</h2><div className="miniGrid">{["Tithi", "Nakshatra", "Yoga", "Karana", "Sunrise", "Sunset"].map((item) => <p key={item}><small>{item}</small><b>Provider calculated</b></p>)}</div></section><section><h2>Premium Reports</h2><div className="reports">{reports.map((item) => <Link href="/reports" key={item}><FileText size={24} /><b>{item}</b><small>Detailed insights</small></Link>)}</div></section><section><h2>Why Naksharix?</h2>{["Secure workflow", "Provider calculated", "Review-based reports"].map((item) => <p className="why" key={item}><ShieldCheck size={16} />{item}</p>)}</section></div>;
 }
 
 function Theme10Styles() {

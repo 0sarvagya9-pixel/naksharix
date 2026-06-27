@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#02112C",
+  themeColor: "#FFF8EA",
   width: "device-width",
   initialScale: 1
 };
@@ -50,7 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const htmlLang = initialLocale === "hi" ? "hi" : initialLocale === "hinglish" ? "hi-Latn" : "en";
 
   return (
-    <html lang={htmlLang} className="dark" suppressHydrationWarning>
+    <html lang={htmlLang} suppressHydrationWarning>
       <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
         <LanguageProvider initialLocale={initialLocale}>
           <MainNav />

@@ -12,13 +12,13 @@ import { AuthProfileMenu } from "@/components/auth-profile-menu";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { label: "Home", href: "/", active: ["/"] },
-  { label: "Kundli", href: "/kundli", active: ["/kundli", "/free-kundli"] },
-  { label: "Numerology", href: "/numerology", active: ["/numerology"] },
-  { label: "Free Calculators", href: "/free-calculators", active: ["/free-calculators", "/calculators"] },
-  { label: "Horoscope", href: "/daily-horoscope", active: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/panchang", "/transits"] },
-  { label: "Tarot", href: "/tarot", active: ["/tarot"] },
-  { label: "Reports", href: "/reports", active: ["/reports"] }
+  { label: "Home",        href: "/",                active: ["/"] },
+  { label: "Kundli",      href: "/kundli",           active: ["/kundli", "/free-kundli"] },
+  { label: "Horoscope",   href: "/daily-horoscope",  active: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope"] },
+  { label: "Panchang",    href: "/panchang",         active: ["/panchang"] },
+  { label: "Numerology",  href: "/numerology",       active: ["/numerology"] },
+  { label: "Tarot",       href: "/tarot",            active: ["/tarot"] },
+  { label: "Remedies",    href: "/free-calculators", active: ["/free-calculators", "/calculators"] },
 ];
 
 const moreLinks = [
@@ -83,11 +83,22 @@ export function MainNav() {
           </div>
         </nav>
 
-        <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[#e7d8be] pl-3">
+        <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[rgba(212,160,55,0.30)] pl-3">
           <LanguageSwitcher className="w-auto min-w-12" />
           <ThemeToggle />
           <AuthProfileMenu />
-          <Button ref={menuButtonRef} variant="outline" size="icon" className="border-[#e7d8be] bg-white text-[#172536] xl:hidden" aria-label="Open navigation menu" aria-expanded={open} aria-controls="naksharix-mobile-sidebar" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></Button>
+          <Link
+            href="/kundli"
+            className="hidden xl:inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-extrabold text-white"
+            style={{
+              background: "linear-gradient(135deg, #D97706 0%, #F59E0B 70%, #D4A037 100%)",
+              boxShadow: "0 4px 16px rgba(217,119,6,0.30)",
+              textDecoration: "none",
+            }}
+          >
+            Get Started →
+          </Link>
+          <Button ref={menuButtonRef} variant="outline" size="icon" className="border-[rgba(212,160,55,0.40)] bg-white text-[#172536] xl:hidden" aria-label="Open navigation menu" aria-expanded={open} aria-controls="naksharix-mobile-sidebar" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></Button>
         </div>
       </div>
 
