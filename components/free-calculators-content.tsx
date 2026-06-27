@@ -80,14 +80,14 @@ export function FreeCalculatorsContent() {
 
   return (
     <main className="inner-page-shell star-field min-h-screen">
-      <Section>
-        <div className="inner-section rounded-3xl border border-[#263957] p-6 md:p-8">
+      <Section first>
+        <div className="inner-section rounded-3xl border border-[rgba(212,160,55,0.30)] p-6 md:p-8">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{labels.eyebrow}</p>
-          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{labels.title}</h1>
-          <p className="mt-4 max-w-4xl text-lg leading-8 text-[#a8b3c7]">{labels.subtitle}</p>
+          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#2F2418] sm:text-5xl">{labels.title}</h1>
+          <p className="mt-4 max-w-4xl text-lg leading-8 text-[#5C4530]">{labels.subtitle}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {filters.map((item) => (
-              <button key={item} type="button" onClick={() => setFilter(item)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${filter === item ? "border-[#dca956] bg-[#dca956]/15 text-[#f3d382]" : "border-[#263957] bg-[#111f3a] text-[#a8b3c7] hover:border-[#dca956]/50 hover:text-white"}`}>
+              <button key={item} type="button" onClick={() => setFilter(item)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${filter === item ? "border-[#dca956] bg-[#dca956]/15 text-[#2F2418]" : "border-[rgba(212,160,55,0.30)] bg-[rgba(255,252,245,0.70)] text-[#5C4530] hover:border-[#dca956]/50 hover:bg-[rgba(255,252,245,0.90)]"}`}>
                 {labels.filters[item]}
               </button>
             ))}
@@ -101,8 +101,8 @@ export function FreeCalculatorsContent() {
             return (
               <section key={group}>
                 <div className="mb-4 flex items-center justify-between gap-4">
-                  <h2 className="font-cinzel text-2xl font-black text-[#f3d382]">{title}</h2>
-                  {group === "horoscope" ? <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-3 py-1 text-xs text-[#f3d382]">{labels.comingSoon}</span> : null}
+                  <h2 className="font-cinzel text-2xl font-black text-[#2F2418]">{title}</h2>
+                  {group === "horoscope" ? <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-3 py-1 text-xs text-[#2F2418]">{labels.comingSoon}</span> : null}
                 </div>
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                   {items.map((item) => <CalculatorCard key={item.id} item={item} labels={labels} locale={locale} />)}
@@ -122,17 +122,17 @@ function CalculatorCard({ item, labels, locale }: { item: CalculatorItem; labels
     <Card className={`inner-card h-full transition ${item.status === "active" ? "hover:-translate-y-1 hover:border-[#00f5a0]/45" : "opacity-82"}`}>
       <CardContent className="flex h-full flex-col p-5">
         <div className="flex items-start justify-between gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-xl border border-[#dca956]/25 bg-[#dca956]/10 text-[#f3d382]">
+          <span className="grid h-11 w-11 place-items-center rounded-xl border border-[#dca956]/25 bg-[#dca956]/10 text-[#2F2418]">
             <Icon className="h-5 w-5" />
           </span>
-          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${item.status === "active" ? "border-[#00f5a0]/35 bg-[#00f5a0]/10 text-[#00f5a0]" : "border-[#dca956]/30 bg-[#dca956]/10 text-[#f3d382]"}`}>
+          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${item.status === "active" ? "border-[#D97706]/40 bg-[#D97706]/10 text-[#D97706]" : "border-[#dca956]/30 bg-[#dca956]/10 text-[#2F2418]"}`}>
             {item.status === "active" ? labels.active : labels.comingSoon}
           </span>
         </div>
-        <h3 className="mt-4 font-cinzel text-xl font-bold text-white">{item.title[locale]}</h3>
-        <p className="mt-2 text-sm leading-6 text-[#a8b3c7]">{item.copy[locale]}</p>
-        <div className="mt-4 rounded-xl border border-[#263957] bg-[#142647]/60 p-3 text-xs leading-5 text-[#a8b3c7]">
-          <p className="font-semibold text-[#f3d382]">{labels.requiredDetails}</p>
+        <h3 className="mt-4 font-cinzel text-xl font-bold text-[#2F2418]">{item.title[locale]}</h3>
+        <p className="mt-2 text-sm leading-6 text-[#5C4530]">{item.copy[locale]}</p>
+        <div className="mt-4 rounded-xl p-3 text-xs leading-5" style={{ background: "rgba(255,252,245,0.70)", border: "1px solid rgba(212,160,55,0.28)", color: "#5C4530" }}>
+          <p className="font-semibold text-[#2F2418]">{labels.requiredDetails}</p>
           <p className="mt-1">{item.required[locale]}</p>
         </div>
         <p className="mt-3 text-xs text-[#94a3b8]">{labels.engine}: {item.engine}</p>

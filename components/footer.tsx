@@ -10,26 +10,63 @@ export function Footer() {
   const groups = footerGroups(locale);
 
   return (
-    <footer className="border-t border-[rgba(212,160,55,0.35)] bg-[linear-gradient(180deg,rgba(255,252,245,0.98),rgba(255,248,234,1.0))]">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm naksh-muted-text lg:grid-cols-[1.35fr_2fr]">
-        <div className="max-w-md">
-          <BrandLogo />
-          <p className="mt-4 leading-6">{tr("footerCopy")}</p>
-        </div>
-        <nav aria-label="Footer navigation" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
-          {groups.map((group) => (
-            <div key={group.title} className="rounded-xl border border-[rgba(212,160,55,0.25)] bg-[rgba(255,252,245,0.65)] p-4">
-              <p className="font-cinzel text-sm font-bold text-[#D97706]">{group.title}</p>
-              <div className="mt-3 grid gap-2">
-                {group.links.map((link) => (
-                  <Link key={`${group.title}-${link.href}`} href={link.href} className="text-xs text-[#7A6145] transition hover:text-[#D97706]">
-                    {link.label}
-                  </Link>
-                ))}
+    <footer
+      style={{
+        borderTop: "1px solid rgba(212,160,55,0.35)",
+        background: "linear-gradient(180deg, rgba(255,252,245,0.98) 0%, rgba(255,248,234,1.0) 100%)",
+      }}
+    >
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:py-12">
+        <div className="grid gap-8 lg:grid-cols-[1.4fr_2.6fr]">
+
+          {/* Brand block */}
+          <div className="max-w-sm">
+            <BrandLogo />
+            <p className="mt-4 text-sm leading-7" style={{ color: "#7A6145" }}>
+              {tr("footerCopy")}
+            </p>
+          </div>
+
+          {/* Link groups */}
+          <nav aria-label="Footer navigation" className="grid gap-4 sm:grid-cols-3 xl:grid-cols-5">
+            {groups.map((group) => (
+              <div key={group.title}>
+                <p
+                  className="font-cinzel font-bold mb-3"
+                  style={{ fontSize: 12, color: "#2F2418", letterSpacing: "0.08em", textTransform: "uppercase" }}
+                >
+                  {group.title}
+                </p>
+                <div className="flex flex-col gap-2">
+                  {group.links.map((link) => (
+                    <Link
+                      key={`${group.title}-${link.href}`}
+                      href={link.href}
+                      className="text-xs transition-colors hover:text-[#D97706]"
+                      style={{ color: "#7A6145", fontWeight: 500 }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </nav>
+            ))}
+          </nav>
+
+        </div>
+
+        {/* Bottom bar */}
+        <div
+          className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-10 pt-6"
+          style={{ borderTop: "1px solid rgba(212,160,55,0.22)" }}
+        >
+          <p style={{ fontSize: 11, color: "#7A6145" }}>
+            © {new Date().getFullYear()} Naksharix. All rights reserved.
+          </p>
+          <p style={{ fontSize: 11, color: "#7A6145" }}>
+            Made with 🙏 for Vedic Astrology enthusiasts
+          </p>
+        </div>
       </div>
     </footer>
   );
@@ -38,28 +75,28 @@ export function Footer() {
 function footerGroups(locale: Locale) {
   if (locale === "hi") {
     return [
-      { title: "टूल्स", links: [["कुंडली", "/kundli"], ["मिलान", "/matchmaking"], ["अंक ज्योतिष", "/numerology"], ["मुफ़्त कैलकुलेटर", "/free-calculators"], ["टैरो", "/tarot"]] },
-      { title: "रिपोर्ट", links: [["रिपोर्ट", "/reports"], ["प्रीमियम कुंडली रिपोर्ट", "/reports/premium-kundli"], ["कपल कुंडली रिपोर्ट", "/reports/couple-kundli"], ["करियर रिपोर्ट", "/reports/career-report"], ["अंक ज्योतिष + लो शू रिपोर्ट", "/reports/numerology-lo-shu-report"]] },
-      { title: "जल्द आ रहा है", links: [["AI ज्योतिषी", "/ai-astrologer"], ["शॉप", "/shop"], ["राशिफल", "/horoscope"], ["कंसल्टेशन", "/consultation"]] },
-      { title: "सहायता", links: [["About Us", "/about"], ["Contact", "/contact"]] },
-      { title: "कानूनी", links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] }
+      { title: "टूल्स",       links: [["कुंडली", "/kundli"], ["मिलान", "/matchmaking"], ["अंक ज्योतिष", "/numerology"], ["मुफ़्त कैलकुलेटर", "/free-calculators"], ["टैरो", "/tarot"]] },
+      { title: "रिपोर्ट",     links: [["रिपोर्ट", "/reports"], ["प्रीमियम कुंडली", "/reports/premium-kundli"], ["कपल कुंडली", "/reports/couple-kundli"], ["करियर रिपोर्ट", "/reports/career-report"]] },
+      { title: "जल्द आ रहा", links: [["AI ज्योतिषी", "/ai-astrologer"], ["शॉप", "/shop"], ["कंसल्टेशन", "/consultation"]] },
+      { title: "सहायता",      links: [["About Us", "/about"], ["Contact", "/contact"]] },
+      { title: "कानूनी",      links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
     ].map(normalizeGroup);
   }
   if (locale === "hinglish") {
     return [
-      { title: "Tools", links: [["Kundli", "/kundli"], ["Match Making", "/matchmaking"], ["Numerology", "/numerology"], ["Free Calculators", "/free-calculators"], ["Tarot", "/tarot"]] },
-      { title: "Reports", links: [["Reports", "/reports"], ["Premium Kundli Report", "/reports/premium-kundli"], ["Couple Kundli Report", "/reports/couple-kundli"], ["Career Report", "/reports/career-report"], ["Numerology + Lo Shu Report", "/reports/numerology-lo-shu-report"]] },
-      { title: "Coming Soon", links: [["AI Astrologer", "/ai-astrologer"], ["Shop", "/shop"], ["Horoscope", "/horoscope"], ["Consultation", "/consultation"]] },
-      { title: "Support", links: [["About Us", "/about"], ["Contact", "/contact"]] },
-      { title: "Legal", links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] }
+      { title: "Tools",       links: [["Kundli", "/kundli"], ["Match Making", "/matchmaking"], ["Numerology", "/numerology"], ["Free Calculators", "/free-calculators"], ["Tarot", "/tarot"]] },
+      { title: "Reports",     links: [["Reports", "/reports"], ["Premium Kundli", "/reports/premium-kundli"], ["Couple Kundli", "/reports/couple-kundli"], ["Career Report", "/reports/career-report"]] },
+      { title: "Coming Soon", links: [["AI Astrologer", "/ai-astrologer"], ["Shop", "/shop"], ["Consultation", "/consultation"]] },
+      { title: "Support",     links: [["About Us", "/about"], ["Contact", "/contact"]] },
+      { title: "Legal",       links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
     ].map(normalizeGroup);
   }
   return [
-    { title: "Tools", links: [["Kundli", "/kundli"], ["Match Making", "/matchmaking"], ["Numerology", "/numerology"], ["Free Calculators", "/free-calculators"], ["Tarot", "/tarot"]] },
-    { title: "Reports", links: [["Reports", "/reports"], ["Premium Kundli Report", "/reports/premium-kundli"], ["Couple Kundli Report", "/reports/couple-kundli"], ["Career Report", "/reports/career-report"], ["Numerology + Lo Shu Report", "/reports/numerology-lo-shu-report"]] },
-    { title: "Coming Soon", links: [["AI Astrologer", "/ai-astrologer"], ["Shop", "/shop"], ["Horoscope", "/horoscope"], ["Consultation", "/consultation"]] },
-    { title: "Support", links: [["About Us", "/about"], ["Contact", "/contact"]] },
-    { title: "Legal", links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] }
+    { title: "Tools",       links: [["Kundli", "/kundli"], ["Match Making", "/matchmaking"], ["Numerology", "/numerology"], ["Free Calculators", "/free-calculators"], ["Tarot", "/tarot"]] },
+    { title: "Reports",     links: [["Reports", "/reports"], ["Premium Kundli", "/reports/premium-kundli"], ["Couple Kundli", "/reports/couple-kundli"], ["Career Report", "/reports/career-report"]] },
+    { title: "Coming Soon", links: [["AI Astrologer", "/ai-astrologer"], ["Shop", "/shop"], ["Consultation", "/consultation"]] },
+    { title: "Support",     links: [["About Us", "/about"], ["Contact", "/contact"]] },
+    { title: "Legal",       links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
   ].map(normalizeGroup);
 }
 

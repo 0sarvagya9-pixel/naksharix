@@ -16,17 +16,17 @@ export const metadata: Metadata = seo({
 });
 
 const cityPresets = {
-  delhi: { label: "Delhi, India", latitude: 28.6139, longitude: 77.209, timezone: "+05:30" },
-  mumbai: { label: "Mumbai, India", latitude: 19.076, longitude: 72.8777, timezone: "+05:30" },
-  newyork: { label: "New York, USA", latitude: 40.7128, longitude: -74.006, timezone: "-04:00" },
-  london: { label: "London, UK", latitude: 51.5074, longitude: -0.1278, timezone: "+01:00" },
-  sydney: { label: "Sydney, Australia", latitude: -33.8688, longitude: 151.2093, timezone: "+10:00" }
+  delhi:   { label: "Delhi, India",        latitude: 28.6139,  longitude: 77.209,   timezone: "+05:30" },
+  mumbai:  { label: "Mumbai, India",        latitude: 19.076,   longitude: 72.8777,  timezone: "+05:30" },
+  newyork: { label: "New York, USA",        latitude: 40.7128,  longitude: -74.006,  timezone: "-04:00" },
+  london:  { label: "London, UK",           latitude: 51.5074,  longitude: -0.1278,  timezone: "+01:00" },
+  sydney:  { label: "Sydney, Australia",    latitude: -33.8688, longitude: 151.2093, timezone: "+10:00" },
 } as const;
 
 type CityKey = keyof typeof cityPresets;
 
 export default async function PanchangPage({
-  searchParams
+  searchParams,
 }: {
   searchParams?: Promise<{ date?: string; city?: string }>;
 }) {
@@ -39,106 +39,157 @@ export default async function PanchangPage({
     latitude: city.latitude,
     longitude: city.longitude,
     timezone: city.timezone,
-    place: city.label
+    place: city.label,
   });
 
   const coreRows: Array<[string, string | null]> = [
-    ["Date", panchang.date],
+    ["Date",     panchang.date],
     ["Location", panchang.location],
     ["Timezone", panchang.timezone],
-    ["Vaar", panchang.vaar],
-    ["Sunrise", panchang.sunrise],
-    ["Sunset", panchang.sunset]
+    ["Vaar",     panchang.vaar],
+    ["Sunrise",  panchang.sunrise],
+    ["Sunset",   panchang.sunset],
   ];
   const lunarRows: Array<[string, string | null]> = [
-    ["Tithi", `${panchang.tithi} (${panchang.paksha})`],
+    ["Tithi",     `${panchang.tithi} (${panchang.paksha})`],
     ["Nakshatra", `${panchang.nakshatra} Pada ${panchang.nakshatraPada}`],
-    ["Yoga", panchang.yoga],
-    ["Karana", panchang.karana],
-    ["Moonrise", panchang.moonrise],
-    ["Moonset", panchang.moonset]
+    ["Yoga",      panchang.yoga],
+    ["Karana",    panchang.karana],
+    ["Moonrise",  panchang.moonrise],
+    ["Moonset",   panchang.moonset],
   ];
   const muhuratRows: Array<[string, string | null]> = [
-    ["Rahu Kaal", panchang.rahuKaal],
-    ["Yamaganda", panchang.yamaganda],
-    ["Gulika Kaal", panchang.gulikaKaal],
-    ["Abhijit Muhurat", panchang.abhijitMuhurat]
+    ["Rahu Kaal",       panchang.rahuKaal],
+    ["Yamaganda",       panchang.yamaganda],
+    ["Gulika Kaal",     panchang.gulikaKaal],
+    ["Abhijit Muhurat", panchang.abhijitMuhurat],
   ];
 
   return (
-    <main className="inner-page-shell star-field min-h-screen">
-      <Section>
-        <div className="inner-section rounded-3xl border border-[#263957] p-6 md:p-10">
+    <main className="inner-page-shell min-h-screen">
+      <Section first>
+        {/* Hero header */}
+        <div className="glass-panel rounded-3xl p-6 md:p-10 mb-8">
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
             <div>
-              <span className="inline-flex rounded-full border border-[#00f5a0]/35 bg-[#00f5a0]/10 px-3 py-1 text-xs font-semibold text-[#00f5a0]">Provider Verified</span>
-              <h1 className="mt-4 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">Today&apos;s Panchang</h1>
-              <p className="mt-4 max-w-3xl text-base leading-8 text-[#a8b3c7]">
-                Calculate core Panchang fields using Naksharix&apos;s deterministic internal ephemeris provider. Values may vary slightly by source, so cross-check for critical Muhurat decisions.
+              <span
+                className="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
+                style={{
+                  background: "rgba(245,158,11,0.12)",
+                  border: "1px solid rgba(212,160,55,0.35)",
+                  color: "#D97706",
+                }}
+              >
+                Provider Verified
+              </span>
+              <h1 className="mt-4 font-cinzel text-4xl font-black text-[#2F2418] sm:text-5xl">
+                Today&apos;s Panchang
+              </h1>
+              <p className="mt-4 max-w-3xl text-base leading-8" style={{ color: "#5C4530" }}>
+                Calculate core Panchang fields using Naksharix&apos;s deterministic internal ephemeris
+                provider. Values may vary slightly by source, so cross-check for critical Muhurat decisions.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3 text-sm text-[#d7deec]">
-                <span className="inline-flex items-center gap-2 rounded-full border border-[#263957] bg-[#0a1224]/80 px-4 py-2"><MapPin className="h-4 w-4 text-[#f3d382]" />Location-aware</span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-[#263957] bg-[#0a1224]/80 px-4 py-2"><Clock3 className="h-4 w-4 text-[#f3d382]" />Timezone-based</span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-[#263957] bg-[#0a1224]/80 px-4 py-2"><SunMedium className="h-4 w-4 text-[#f3d382]" />Sunrise anchored</span>
+              <div className="mt-6 flex flex-wrap gap-3 text-sm">
+                {[
+                  { icon: <MapPin className="h-4 w-4" style={{ color: "#D97706" }} />,   label: "Location-aware" },
+                  { icon: <Clock3 className="h-4 w-4" style={{ color: "#D97706" }} />,   label: "Timezone-based" },
+                  { icon: <SunMedium className="h-4 w-4" style={{ color: "#D97706" }} />, label: "Sunrise anchored" },
+                ].map(({ icon, label }) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-2"
+                    style={{
+                      background: "rgba(255,252,245,0.70)",
+                      border: "1px solid rgba(212,160,55,0.30)",
+                      color: "#5C4530",
+                    }}
+                  >
+                    {icon}{label}
+                  </span>
+                ))}
               </div>
             </div>
 
-            <Card className="inner-card">
+            {/* Date / city form card */}
+            <Card>
               <CardContent className="p-5">
                 <form className="grid gap-4" action="/panchang">
-                  <label className="grid gap-2 text-sm font-semibold text-white">
+                  <label className="grid gap-2 text-sm font-semibold" style={{ color: "#2F2418" }}>
                     Date
                     <input
                       type="date"
                       name="date"
                       defaultValue={selectedDate}
-                      className="h-11 rounded-lg border border-[#263957] bg-[#020612] px-3 text-white outline-none focus:border-[#dca956]"
+                      className="h-11 w-full rounded-xl px-3 text-sm outline-none transition"
+                      style={{
+                        background: "rgba(255,252,245,0.90)",
+                        border: "1.5px solid rgba(212,160,55,0.45)",
+                        color: "#2F2418",
+                      }}
                     />
                   </label>
-                  <label className="grid gap-2 text-sm font-semibold text-white">
+                  <label className="grid gap-2 text-sm font-semibold" style={{ color: "#2F2418" }}>
                     Location preset
                     <select
                       name="city"
                       defaultValue={selectedCity}
-                      className="h-11 rounded-lg border border-[#263957] bg-[#020612] px-3 text-white outline-none focus:border-[#dca956]"
+                      className="h-11 w-full rounded-xl px-3 text-sm outline-none transition"
+                      style={{
+                        background: "rgba(255,252,245,0.90)",
+                        border: "1.5px solid rgba(212,160,55,0.45)",
+                        color: "#2F2418",
+                      }}
                     >
                       {Object.entries(cityPresets).map(([key, preset]) => (
-                        <option key={key} value={key}>{preset.label} ({preset.timezone})</option>
+                        <option key={key} value={key}>
+                          {preset.label} ({preset.timezone})
+                        </option>
                       ))}
                     </select>
                   </label>
-                  <Button type="submit" className="bg-[#009b72] text-white hover:bg-[#008766]">
-                    <CalendarDays className="h-4 w-4" />Calculate Panchang
+                  <Button type="submit" className="h-12">
+                    <CalendarDays className="h-4 w-4" />
+                    Calculate Panchang
                   </Button>
                 </form>
               </CardContent>
             </Card>
           </div>
+        </div>
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
-            <PanchangCard title="Core Day" icon={<CalendarDays className="h-5 w-5" />} rows={coreRows} />
-            <PanchangCard title="Lunar Details" icon={<MoonStar className="h-5 w-5" />} rows={lunarRows} />
-            <PanchangCard title="Day Windows" icon={<Sparkles className="h-5 w-5" />} rows={muhuratRows} />
-          </div>
+        {/* Panchang data cards */}
+        <div className="grid gap-5 lg:grid-cols-3">
+          <PanchangCard title="Core Day"      icon={<CalendarDays className="h-5 w-5" />} rows={coreRows} />
+          <PanchangCard title="Lunar Details" icon={<MoonStar className="h-5 w-5" />}     rows={lunarRows} />
+          <PanchangCard title="Day Windows"   icon={<Sparkles className="h-5 w-5" />}     rows={muhuratRows} />
+        </div>
 
-          <Card className="inner-card mt-8 border-[#dca956]/25">
-            <CardContent className="p-5">
-              <div className="flex gap-3">
-                <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#00f5a0]" />
-                <div>
-                  <h2 className="font-cinzel text-xl font-bold text-[#f3d382]">Trust note</h2>
-                  <p className="mt-2 text-sm leading-7 text-[#a8b3c7]">
-                    Calculations are generated by Naksharix&apos;s internal ephemeris provider and may vary slightly by source. Use for spiritual guidance and cross-check for critical muhurat. This is provider-verified regression, not external Swiss/Jagannatha Hora verification.
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <Button asChild variant="outline"><Link href="/kundli">Use Kundli Generator</Link></Button>
-                    <Button asChild variant="outline"><Link href="/reports/premium-kundli">Explore Detailed Reports</Link></Button>
-                  </div>
+        {/* Trust note */}
+        <Card className="mt-8">
+          <CardContent className="p-5">
+            <div className="flex gap-3">
+              <ShieldCheck className="mt-1 h-5 w-5 shrink-0" style={{ color: "#D97706" }} />
+              <div>
+                <h2 className="font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>
+                  Trust note
+                </h2>
+                <p className="mt-2 text-sm leading-7" style={{ color: "#5C4530" }}>
+                  Calculations are generated by Naksharix&apos;s internal ephemeris provider and may vary
+                  slightly by source. Use for spiritual guidance and cross-check for critical muhurat.
+                  This is provider-verified regression, not external Swiss/Jagannatha Hora verification.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Button asChild variant="outline">
+                    <Link href="/kundli">Use Kundli Generator</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/reports/premium-kundli">Explore Detailed Reports</Link>
+                  </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </Section>
     </main>
   );
@@ -146,16 +197,31 @@ export default async function PanchangPage({
 
 function PanchangCard({ title, icon, rows }: { title: string; icon: ReactNode; rows: Array<[string, string | null]> }) {
   return (
-    <Card className="inner-card h-full">
+    <Card className="h-full">
       <CardContent className="p-5">
-        <h2 className="flex items-center gap-2 font-cinzel text-xl font-bold text-[#f3d382]">
-          <span className="text-[#00f5a0]">{icon}</span>{title}
+        <h2
+          className="flex items-center gap-2 font-cinzel text-xl font-bold"
+          style={{ color: "#2F2418" }}
+        >
+          <span style={{ color: "#D97706" }}>{icon}</span>
+          {title}
         </h2>
         <div className="mt-4 grid gap-3">
           {rows.map(([label, value]) => (
-            <div key={label} className="rounded-lg border border-[#263957] bg-[#020612]/50 p-3">
-              <p className="text-xs uppercase tracking-[0.16em] text-[#94a3b8]">{label}</p>
-              <p className="mt-1 text-sm font-semibold text-white">{value ?? "Unavailable"}</p>
+            <div
+              key={label}
+              className="rounded-xl p-3"
+              style={{
+                background: "rgba(255,252,245,0.60)",
+                border: "1px solid rgba(212,160,55,0.25)",
+              }}
+            >
+              <p className="text-xs uppercase tracking-[0.16em]" style={{ color: "#7A6145" }}>
+                {label}
+              </p>
+              <p className="mt-1 text-sm font-semibold" style={{ color: "#2F2418" }}>
+                {value ?? "Unavailable"}
+              </p>
             </div>
           ))}
         </div>

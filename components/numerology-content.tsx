@@ -287,17 +287,17 @@ export function NumerologyContent() {
   }
 
   const inputClass = (field: keyof FormState) => [
-    "mt-2 w-full rounded-xl border bg-[#0f1c3a] px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#64748b]",
-    errors[field] ? "border-red-500 focus:border-red-500" : "border-[#1e293b] focus:border-[#dca956]"
+    "mt-2 w-full rounded-xl border bg-[rgba(255,252,245,0.85)] px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#64748b]",
+    errors[field] ? "border-red-500 focus:border-red-500" : "border-[rgba(212,160,55,0.35)] focus:border-[#dca956]"
   ].join(" ");
 
   return (
     <main className="inner-page-shell star-field">
-      <Section>
-        <div className="relative overflow-hidden rounded-3xl border border-[#1e293b] bg-[radial-gradient(circle_at_78%_16%,rgba(0,245,160,0.12),transparent_24rem),radial-gradient(circle_at_10%_10%,rgba(220,169,86,0.14),transparent_22rem),linear-gradient(135deg,#0a1224,#020612_82%)] p-6 shadow-[0_24px_80px_rgba(2,6,18,0.48)] sm:p-8">
+      <Section first>
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8" style={{ background: "linear-gradient(135deg, rgba(255,248,234,0.96) 0%, rgba(255,243,220,0.92) 100%)", border: "1.5px solid rgba(212,160,55,0.45)", boxShadow: "0 12px 48px rgba(180,120,20,0.16)" }}>
           <div className="max-w-3xl">
-            <p className="font-cinzel text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{tr("navNumerology")}</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{tr("numerologyTitle")}</h1>
+            <p className="font-cinzel text-sm font-semibold uppercase tracking-[0.22em] text-[#D97706]">{tr("navNumerology")}</p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#2F2418] sm:text-5xl">{tr("numerologyTitle")}</h1>
             <p className="mt-4 max-w-2xl text-base leading-7 naksh-muted-text">{tr("numerologyDescription")}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild variant="secondary">
@@ -309,13 +309,13 @@ export function NumerologyContent() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 rounded-2xl border border-[#1e293b] bg-[#0a1224]/94 p-5 shadow-[0_18px_60px_rgba(2,6,18,0.35)] sm:p-6" noValidate>
+          <form onSubmit={handleSubmit} className="mt-8 rounded-2xl border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-5 shadow-[0_18px_60px_rgba(2,6,18,0.35)] sm:p-6" noValidate>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{lang.formTitle}</h2>
-                <p className="mt-2 text-sm leading-6 text-[#94a3b8]">{lang.formCopy}</p>
+                <h2 className="font-cinzel text-2xl font-bold text-[#2F2418]">{lang.formTitle}</h2>
+                <p className="mt-2 text-sm leading-6 text-[#7A6145]">{lang.formCopy}</p>
               </div>
-              <Button type="submit" disabled={status === "loading"} className="bg-[#009b72] text-white hover:bg-[#00f5a0] hover:text-[#020612]">
+              <Button type="submit" disabled={status === "loading"} className="bg-[#D97706] text-white hover:bg-[#00f5a0] hover:text-[#020612]">
                 {status === "loading" ? lang.calculating : lang.calculate}
               </Button>
             </div>
@@ -348,12 +348,12 @@ export function NumerologyContent() {
                   [lang.suggestionsAnchor, "#numerology-suggestions"],
                   [lang.dailyAnchor, "#numerology-daily"]
                 ].map(([label, href]) => (
-                  <a key={href} href={href} className="rounded-full border border-[#1e293b] bg-[#0a1224] px-3 py-1.5 text-xs font-semibold text-[#f3d382] transition hover:border-[#dca956] hover:text-white">{label}</a>
+                  <a key={href} href={href} className="rounded-full px-3 py-1.5 text-xs font-semibold transition" style={{ background: "rgba(255,252,245,0.80)", border: "1px solid rgba(212,160,55,0.35)", color: "#2F2418" }}>{label}</a>
                 ))}
               </div>
 
-              <section id="numerology-summary" className="rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_top_right,rgba(0,245,160,0.12),transparent_18rem),#0a1224] p-5">
-                <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{lang.summary}</h2>
+              <section id="numerology-summary" className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(255,248,234,0.96), rgba(255,243,220,0.92))", border: "1.5px solid rgba(212,160,55,0.40)" }}>
+                <h2 className="font-cinzel text-2xl font-bold text-[#2F2418]">{lang.summary}</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   <SummaryCard label={lang.overallCompatibility} value={verdictLabel(overallNumerologyVerdict(report), locale, lang)} tone={overallNumerologyVerdict(report)} />
                   <SummaryCard label={lang.bestSupportiveNumbers} value={supportiveNumbers(report).join(", ")} tone="supportive" />
@@ -367,16 +367,16 @@ export function NumerologyContent() {
               </section>
 
               <section id="numerology-core">
-                <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{lang.coreNumbers}</h2>
+                <h2 className="font-cinzel text-2xl font-bold text-[#2F2418]">{lang.coreNumbers}</h2>
                 <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {coreNumbers.map((item) => <NumberCard key={item.key} item={item} labels={lang} locale={locale} />)}
                 </div>
               </section>
 
               <section id="numerology-loshu" className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-                <Card className="border-[#1e293b] bg-[#0f1c3a]/90">
+                <Card className="border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)]">
                   <CardContent className="p-5">
-                    <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]"><span className="notranslate" translate="no">{lang.loShu}</span></h2>
+                    <h2 className="font-cinzel text-2xl font-bold text-[#2F2418]"><span className="notranslate" translate="no">{lang.loShu}</span></h2>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
                       <LegendDot tone="present" label={lang.present} />
                       <LegendDot tone="missing" label={lang.missingLegend} />
@@ -386,9 +386,9 @@ export function NumerologyContent() {
                       {report.loShuGrid.map((cell) => (
                         <div key={cell.number} className={`relative min-h-28 rounded-xl border p-3 text-center ${loShuCellClass(cell)}`}>
                           {cell.count > 1 ? <span className="absolute right-2 top-2 rounded-full bg-[#00f5a0] px-2 py-0.5 text-[10px] font-black text-[#020612]">x{cell.count}</span> : null}
-                          <div className={`text-3xl font-black ${cell.present ? "text-[#fbc02d]" : "text-[#64748b]"}`}>{cell.number}</div>
+                          <div className={`text-3xl font-black ${cell.present ? "text-[#D97706]" : "text-[#64748b]"}`}>{cell.number}</div>
                           <div className="mt-1 text-xs font-semibold text-white">{cell.present ? lang.present : lang.missingLegend}</div>
-                          <p className="mt-2 text-xs leading-5 text-[#94a3b8]">{loShuNumberMeaning(cell.number, locale)}</p>
+                          <p className="mt-2 text-xs leading-5 text-[#7A6145]">{loShuNumberMeaning(cell.number, locale)}</p>
                         </div>
                       ))}
                     </div>
@@ -411,7 +411,7 @@ export function NumerologyContent() {
               </section>
 
               <section id="numerology-compatibility">
-                <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{lang.numerologyCompatibility}</h2>
+                <h2 className="font-cinzel text-2xl font-bold text-[#2F2418]">{lang.numerologyCompatibility}</h2>
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   <CompatibilityCard title={lang.nameCompatibility} verdict={nameVerdict(report)} items={nameCompatibility(report, locale)} lang={lang} locale={locale} />
                   <CompatibilityCard title={lang.phoneCompatibility} verdict={numberVerdict(report, report.mobileAnalysis?.value)} items={phoneCompatibility(report, locale)} lang={lang} locale={locale} />
@@ -424,27 +424,27 @@ export function NumerologyContent() {
               <section id="numerology-daily" className="grid gap-4 md:grid-cols-2">
                 {report.mobileAnalysis ? <NumberCard item={{ key: "mobile", value: report.mobileAnalysis.value }} labels={lang} locale={locale} /> : null}
                 {report.vehicleAnalysis ? <NumberCard item={{ key: "vehicle", value: report.vehicleAnalysis.value }} labels={lang} locale={locale} /> : null}
-                <Card className="border-[#1e293b] bg-[#0f1c3a]/90 md:col-span-2">
+                <Card className="border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] md:col-span-2">
                   <CardContent className="p-5">
-                    <h2 className="font-cinzel text-xl font-bold text-[#f3d382]">{lang.daily}: {report.dailyPrediction.personalDayNumber}</h2>
+                    <h2 className="font-cinzel text-xl font-bold text-[#2F2418]">{lang.daily}: {report.dailyPrediction.personalDayNumber}</h2>
                     <p className="mt-3 text-sm leading-6 text-white">{report.dailyPrediction.summary}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {numberProfile(reduceDisplayNumber(report.lifePath.value + new Date(report.dailyPrediction.date).getDate()), locale).strengths.map((item) => <span key={item} className="rounded-full border border-[#1e293b] bg-[#0a1224] px-3 py-1 text-xs font-semibold text-[#00f5a0]">{item}</span>)}
+                      {numberProfile(reduceDisplayNumber(report.lifePath.value + new Date(report.dailyPrediction.date).getDate()), locale).strengths.map((item) => <span key={item} className="rounded-full border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] px-3 py-1 text-xs font-semibold text-[#D97706]">{item}</span>)}
                     </div>
                   </CardContent>
                 </Card>
                 <InsightList title={lang.remedies} items={numerologyRemedies(locale)} />
               </section>
 
-              <p className="rounded-2xl border border-[#1e293b] bg-[#0a1224]/86 p-4 text-sm leading-6 text-[#94a3b8]">{numerologyDisclaimer(locale)} {lang.loShuDisclaimer}</p>
+              <p className="rounded-2xl border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-4 text-sm leading-6 text-[#7A6145]">{numerologyDisclaimer(locale)} {lang.loShuDisclaimer}</p>
             </div>
           ) : null}
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featureCards.map(({ titleKey, copyKey, icon: Icon }) => (
-              <Card key={titleKey} className="border-[#1e293b] bg-[#0f1c3a]/88 shadow-[0_18px_60px_rgba(2,6,18,0.32)]">
+              <Card key={titleKey} className="border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] shadow-[0_18px_60px_rgba(2,6,18,0.32)]">
                 <CardContent className="p-5">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#dca956]/10 text-[#dca956] shadow-[0_0_22px_rgba(220,169,86,0.12)]">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#dca956]/10 text-[#D97706] shadow-[0_0_22px_rgba(220,169,86,0.12)]">
                     <Icon className="h-5 w-5" />
                   </span>
                   <h2 className="mt-5 font-cinzel text-xl font-bold text-[#ffffff]">{tr(titleKey)}</h2>
@@ -472,14 +472,14 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 function NumberCard({ item, labels, locale }: { item: { key: string; value: number }; labels: Record<string, string>; locale: Locale }) {
   const profile = numberProfile(item.value, locale);
   return (
-    <Card className="border-[#1e293b] bg-[#0f1c3a]/90">
+    <Card className="border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)]">
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
           <h3 className="font-cinzel text-lg font-bold text-white"><span className="notranslate" translate="no">{numberLabel(item.key, locale)}</span></h3>
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#dca956] text-xl font-black text-[#020612]">{item.value}</span>
         </div>
-        <p className="mt-4 text-sm leading-6 text-[#94a3b8]">{profile.meaning}</p>
-        <p className="mt-4 text-sm font-semibold text-[#f3d382]">{labels.guidance}</p>
+        <p className="mt-4 text-sm leading-6 text-[#7A6145]">{profile.meaning}</p>
+        <p className="mt-4 text-sm font-semibold text-[#2F2418]">{labels.guidance}</p>
         <p className="mt-2 text-sm leading-6 text-white">{profile.guidance}</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <TagGroup title={labels.strengths} items={profile.strengths} tone="mint" />
@@ -493,9 +493,9 @@ function NumberCard({ item, labels, locale }: { item: { key: string; value: numb
 function TagGroup({ title, items, tone }: { title: string; items: string[]; tone: "mint" | "gold" }) {
   return (
     <div>
-      <p className={`text-xs font-bold uppercase ${tone === "mint" ? "text-[#00f5a0]" : "text-[#dca956]"}`}>{title}</p>
+      <p className={`text-xs font-bold uppercase ${tone === "mint" ? "text-[#D97706]" : "text-[#D97706]"}`}>{title}</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        {items.map((item) => <span key={item} className="rounded-full border border-[#1e293b] bg-[#0a1224] px-2.5 py-1 text-xs text-white">{item}</span>)}
+        {items.map((item) => <span key={item} className="rounded-full border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] px-2.5 py-1 text-xs text-white">{item}</span>)}
       </div>
     </div>
   );
@@ -503,11 +503,11 @@ function TagGroup({ title, items, tone }: { title: string; items: string[]; tone
 
 function InsightList({ title, items, empty }: { title: string; items: string[]; empty?: string }) {
   return (
-    <Card className="border-[#1e293b] bg-[#0f1c3a]/90">
+    <Card className="border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)]">
       <CardContent className="p-5">
-        <h2 className="font-cinzel text-xl font-bold text-[#f3d382]">{title}</h2>
+        <h2 className="font-cinzel text-xl font-bold text-[#2F2418]">{title}</h2>
         <div className="mt-4 space-y-3">
-          {items.length ? items.map((item) => <p key={item} className="rounded-xl border border-[#1e293b] bg-[#0a1224] p-3 text-sm leading-6 text-white">{item}</p>) : <p className="text-sm leading-6 text-[#94a3b8]">{empty}</p>}
+          {items.length ? items.map((item) => <p key={item} className="rounded-xl border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-3 text-sm leading-6 text-white">{item}</p>) : <p className="text-sm leading-6 text-[#7A6145]">{empty}</p>}
         </div>
       </CardContent>
     </Card>
@@ -519,7 +519,7 @@ type Verdict = "supportive" | "neutral" | "needsBalance" | "strong" | "reviewSug
 function SummaryCard({ label, value, tone }: { label: string; value: string; tone: Verdict }) {
   return (
     <div className={`rounded-xl border p-4 ${toneClass(tone)}`}>
-      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#94a3b8]">{label}</p>
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#7A6145]">{label}</p>
       <p className="mt-2 text-xl font-black text-white">{value}</p>
     </div>
   );
@@ -527,14 +527,14 @@ function SummaryCard({ label, value, tone }: { label: string; value: string; ton
 
 function CompatibilityCard({ title, verdict, items, lang, locale }: { title: string; verdict: Verdict; items: string[]; lang: Record<string, string>; locale: Locale }) {
   return (
-    <Card className="border-[#1e293b] bg-[#0f1c3a]/90">
+    <Card className="border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)]">
       <CardContent className="p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <h2 className="font-cinzel text-xl font-bold text-[#f3d382]">{title}</h2>
+          <h2 className="font-cinzel text-xl font-bold text-[#2F2418]">{title}</h2>
           <span className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${toneClass(verdict)}`}>{verdictLabel(verdict, locale, lang)}</span>
         </div>
         <div className="mt-4 space-y-3">
-          {items.map((item) => <p key={item} className="rounded-xl border border-[#1e293b] bg-[#0a1224] p-3 text-sm leading-6 text-white">{item}</p>)}
+          {items.map((item) => <p key={item} className="rounded-xl border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-3 text-sm leading-6 text-white">{item}</p>)}
         </div>
       </CardContent>
     </Card>
@@ -543,21 +543,21 @@ function CompatibilityCard({ title, verdict, items, lang, locale }: { title: str
 
 function LegendDot({ tone, label }: { tone: "present" | "missing" | "repeated"; label: string }) {
   const cls = tone === "present" ? "bg-[#fbc02d]" : tone === "repeated" ? "bg-[#00f5a0]" : "bg-[#64748b]";
-  return <span className="inline-flex items-center gap-2 rounded-full border border-[#1e293b] bg-[#0a1224] px-3 py-1 text-[#94a3b8]"><span className={`h-2.5 w-2.5 rounded-full ${cls}`} />{label}</span>;
+  return <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] px-3 py-1 text-[#7A6145]"><span className={`h-2.5 w-2.5 rounded-full ${cls}`} />{label}</span>;
 }
 
 function loShuCellClass(cell: { present: boolean; count: number }) {
-  if (!cell.present) return "border-dashed border-[#334155] bg-[#020612]/78";
+  if (!cell.present) return "border-dashed border-[#334155] bg-[rgba(255,252,245,0.85)]";
   if (cell.count > 1) return "border-[#00f5a0]/55 bg-[radial-gradient(circle_at_top,rgba(0,245,160,0.12),transparent_7rem),#0a1224]";
   return "border-[#dca956]/65 bg-[radial-gradient(circle_at_top,rgba(251,192,45,0.12),transparent_7rem),#0a1224]";
 }
 
 function toneClass(tone: Verdict) {
-  if (tone === "strong") return "border-[#00f5a0]/45 bg-[#00f5a0]/12 text-[#00f5a0]";
-  if (tone === "supportive") return "border-[#009b72]/45 bg-[#009b72]/14 text-[#00f5a0]";
-  if (tone === "neutral") return "border-[#dca956]/40 bg-[#dca956]/12 text-[#f3d382]";
-  if (tone === "reviewSuggested") return "border-[#ea580c]/45 bg-[#ea580c]/12 text-[#f3d382]";
-  return "border-[#fbc02d]/45 bg-[#fbc02d]/12 text-[#fbc02d]";
+  if (tone === "strong") return "border-[#00f5a0]/45 bg-[#00f5a0]/12 text-[#D97706]";
+  if (tone === "supportive") return "border-[#009b72]/45 bg-[#009b72]/14 text-[#D97706]";
+  if (tone === "neutral") return "border-[#dca956]/40 bg-[#dca956]/12 text-[#2F2418]";
+  if (tone === "reviewSuggested") return "border-[#ea580c]/45 bg-[#ea580c]/12 text-[#2F2418]";
+  return "border-[#fbc02d]/45 bg-[#fbc02d]/12 text-[#D97706]";
 }
 
 function verdictLabel(verdict: Verdict, locale: Locale, lang: Record<string, string>) {

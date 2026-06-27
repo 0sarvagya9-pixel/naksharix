@@ -198,9 +198,9 @@ export function AiChatbot() {
   }
 
   return (
-    <Card className="glass border-[#1e293b] bg-[#0a1224]/80">
+    <Card className="glass border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)]">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-cinzel text-[#f3d382]">
+        <CardTitle className="flex items-center gap-2 font-cinzel text-[#2F2418]">
           <Bot className="h-5 w-5 text-[#dca956]" />
           {labels.title}
         </CardTitle>
@@ -218,28 +218,28 @@ export function AiChatbot() {
           />
           <div className="grid gap-4 md:grid-cols-3">
             {labels.benefits.map((benefit) => (
-              <div key={benefit.title} className="rounded-xl border border-[#1e293b] bg-[#0f1c3a]/78 p-5">
+              <div key={benefit.title} className="rounded-xl border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-5">
                 <Sparkles className="h-5 w-5 text-[#00f5a0]" />
-                <h3 className="mt-4 font-cinzel text-lg font-bold text-[#f3d382]">{benefit.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-[#94a3b8]">{benefit.copy}</p>
+                <h3 className="mt-4 font-cinzel text-lg font-bold text-[#2F2418]">{benefit.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#7A6145]">{benefit.copy}</p>
               </div>
             ))}
           </div>
-          <div className="rounded-xl border border-dashed border-[#1e293b] bg-[#020612]/60 p-5 text-sm leading-6 text-[#94a3b8]">
+          <div className="rounded-xl border border-dashed border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.90)] p-5 text-sm leading-6 text-[#7A6145]">
             <LockKeyhole className="mb-3 h-5 w-5 text-[#dca956]" />
             {labels.lockedMessage}
           </div>
-          {notice ? <p className="rounded-md border border-[#1e293b] bg-[#0f1c3a]/78 p-3 text-sm naksh-muted-text">{notice}</p> : null}
+          {notice ? <p className="rounded-md border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-3 text-sm naksh-muted-text">{notice}</p> : null}
         </CardContent>
       ) : (
         <CardContent className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-          <aside className="space-y-4 rounded-lg border border-[#1e293b] bg-[#0a1224]/70 p-4">
+          <aside className="space-y-4 rounded-lg border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-4">
             <SavedDetailsCard labels={labels} profile={birthProfile} onEdit={editBirthDetails} onClear={clearMemory} />
             <div className="space-y-2">
               <Label>{labels.contextChips}</Label>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {contextSignals.map((signal) => (
-                  <span key={signal.label} className={`inline-flex items-center gap-2 rounded-md border px-2 py-2 ${signal.active ? "border-[#009b72]/45 bg-[#009b72]/12 text-[#00f5a0]" : "border-[#1e293b] bg-[#0f1c3a]/60 text-[#94a3b8]"}`}>
+                  <span key={signal.label} className={`inline-flex items-center gap-2 rounded-md border px-2 py-2 ${signal.active ? "border-[#009b72]/45 bg-[#009b72]/12 text-[#00f5a0]" : "border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] text-[#7A6145]"}`}>
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     {signal.label}
                   </span>
@@ -250,7 +250,7 @@ export function AiChatbot() {
               <Label>{tr("suggestedQuestions")}</Label>
               <div className="grid gap-2">
                 {suggestedQuestions.map((question) => (
-                  <button key={question} type="button" onClick={() => send(question)} className="rounded-md border border-[#1e293b] bg-[#0f1c3a]/78 p-3 text-left text-sm text-[#ffffff] transition hover:border-[#dca956]/55 hover:text-[#f3d382]">
+                  <button key={question} type="button" onClick={() => send(question)} className="rounded-md border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-3 text-left text-sm text-[#ffffff] transition hover:border-[#dca956]/55 hover:text-[#2F2418]">
                     {question}
                   </button>
                 ))}
@@ -259,10 +259,10 @@ export function AiChatbot() {
             {recentLimitReached ? <div className="rounded-md border border-[#dca956]/25 bg-[#dca956]/10 p-3 text-sm naksh-muted-text">{tr("freeAiLimitNotice")}</div> : null}
           </aside>
           <div className="space-y-4">
-            <div className="max-h-[560px] space-y-3 overflow-y-auto rounded-lg border border-[#1e293b] bg-[#020612]/70 p-3">
+            <div className="max-h-[560px] space-y-3 overflow-y-auto rounded-lg border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.90)] p-3">
               {messages.map((message, index) => (
                 <div key={`${message.role}-${index}`} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 ${message.role === "user" ? "bg-[#009b72] text-[#ffffff] shadow-[0_0_24px_rgba(0,245,160,0.14)]" : "bg-[#0f1c3a] text-[#ffffff]"}`}>
+                  <div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 ${message.role === "user" ? "bg-[#009b72] text-[#ffffff] shadow-[0_0_24px_rgba(0,245,160,0.14)]" : "bg-[rgba(255,252,245,0.85)] text-[#ffffff]"}`}>
                     <div className="mb-1 flex items-center gap-2 text-xs opacity-80">{message.role === "user" ? <UserRound className="h-3 w-3" /> : <Bot className="h-3 w-3" />}{message.role === "user" ? tr("you") : "Naksharix"}</div>
                     {message.content}
                   </div>
@@ -270,7 +270,7 @@ export function AiChatbot() {
               ))}
               {loading ? <p className="flex items-center gap-2 text-sm naksh-muted-text"><Sparkles className="h-4 w-4 animate-pulse text-[#dca956]" /> {tr("aiThinking")}</p> : null}
             </div>
-            {notice ? <p className="rounded-md border border-[#1e293b] bg-[#0f1c3a]/78 p-3 text-sm naksh-muted-text">{notice}</p> : null}
+            {notice ? <p className="rounded-md border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-3 text-sm naksh-muted-text">{notice}</p> : null}
             <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
               <div>
                 <Input data-field="message" value={input} onChange={(event) => { setInput(event.target.value); setMessageError(null); }} placeholder={tr("chatPlaceholder")} className={errorClass(Boolean(messageError))} />
@@ -310,7 +310,7 @@ function SetupPanel({
   onSave: () => void;
 }) {
   return (
-    <div className="rounded-2xl border border-[#1e293b] bg-[#0f1c3a]/78 p-5">
+    <div className="rounded-2xl border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] p-5">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label={labels.name} error={errors.name}><Input ref={refs.nameRef} value={profile.name} onChange={(event) => onChange("name", event.target.value)} className={fieldClass(errors.name)} /></Field>
         <Field label={labels.gender} error={errors.gender}><Input ref={refs.genderRef} value={profile.gender} onChange={(event) => onChange("gender", event.target.value)} placeholder={labels.genderPlaceholder} className={fieldClass(errors.gender)} /></Field>
@@ -318,7 +318,7 @@ function SetupPanel({
         <Field label={labels.birthTime} error={errors.timeOfBirth}><Input ref={refs.timeRef} type="time" value={profile.timeOfBirth} onChange={(event) => onChange("timeOfBirth", event.target.value)} className={fieldClass(errors.timeOfBirth)} /></Field>
         <Field label={labels.birthPlace} error={errors.birthPlace}><Input ref={refs.placeRef} value={profile.birthPlace} onChange={(event) => onChange("birthPlace", event.target.value)} placeholder={labels.placePlaceholder} className={fieldClass(errors.birthPlace)} /></Field>
         <Field label={labels.category} error={errors.category}>
-          <select value={profile.category} onChange={(event) => onChange("category", event.target.value)} className="h-10 w-full rounded-md border border-[#1e293b] bg-[#0f1c3a] px-3 text-sm text-white">
+          <select value={profile.category} onChange={(event) => onChange("category", event.target.value)} className="h-10 w-full rounded-md border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] px-3 text-sm text-white">
             <option value="">{labels.categoryPlaceholder}</option>
             {labels.categories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
           </select>
@@ -339,17 +339,17 @@ function SavedDetailsCard({ labels, profile, onEdit, onClear }: { labels: Return
     [labels.category, labels.categories.find((item) => item.value === profile.category)?.label || labels.general]
   ];
   return (
-    <div className="rounded-lg border border-[#1e293b] bg-[#020612]/45 p-4">
+    <div className="rounded-lg border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.90)] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-cinzel text-lg font-bold text-[#f3d382]">{labels.savedDetails}</p>
+          <p className="font-cinzel text-lg font-bold text-[#2F2418]">{labels.savedDetails}</p>
           <p className="mt-1 text-xs naksh-muted-text">{labels.savedDetailsNote}</p>
         </div>
       </div>
       <div className="mt-4 grid gap-2 text-sm">
         {rows.map(([label, value]) => (
-          <div key={label} className="flex justify-between gap-4 rounded-md border border-[#1e293b] bg-[#0f1c3a]/70 px-3 py-2">
-            <span className="text-[#94a3b8]">{label}</span>
+          <div key={label} className="flex justify-between gap-4 rounded-md border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] px-3 py-2">
+            <span className="text-[#7A6145]">{label}</span>
             <span className="text-right text-white">{value}</span>
           </div>
         ))}
@@ -373,7 +373,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 }
 
 function fieldClass(error?: string) {
-  return `border-[#1e293b] bg-[#0f1c3a] ${error ? "border-destructive focus-visible:ring-destructive" : ""}`;
+  return `border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.85)] ${error ? "border-destructive focus-visible:ring-destructive" : ""}`;
 }
 
 function validateProfile(profile: BirthProfile, message: string): FieldErrors {

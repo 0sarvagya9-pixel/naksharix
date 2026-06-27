@@ -25,77 +25,172 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
   const numerologyPage = kind === "numerology-monthly";
 
   return (
-    <main className="inner-page-shell star-field min-h-screen">
-      <Section>
-        <div className="inner-section grid gap-8 rounded-3xl border border-[#263957] p-6 md:p-8 lg:grid-cols-[1fr_0.55fr]">
+    <main className="inner-page-shell min-h-screen">
+      <Section first>
+        {/* Hero panel */}
+        <div
+          className="glass-panel grid gap-8 rounded-3xl p-6 md:p-8 lg:grid-cols-[1fr_0.55fr]"
+        >
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#00f5a0]">{labels.eyebrow}</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{config.titles[locale]}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{config.subtitles[locale]}</p>
+            <p
+              className="text-sm font-semibold uppercase tracking-[0.22em]"
+              style={{ color: "#D97706" }}
+            >
+              {labels.eyebrow}
+            </p>
+            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#2F2418] sm:text-5xl">
+              {config.titles[locale]}
+            </h1>
+            <p className="mt-4 max-w-3xl text-lg leading-8" style={{ color: "#5C4530" }}>
+              {config.subtitles[locale]}
+            </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]"><a href="#horoscope-result">{labels.readResult}</a></Button>
-              <Button variant="outline" asChild><Link href={config.reportHref}>{labels.relatedReport}</Link></Button>
+              <Button asChild>
+                <a href="#horoscope-result">{labels.readResult}</a>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href={config.reportHref}>{labels.relatedReport}</Link>
+              </Button>
             </div>
           </div>
-          <Card className="inner-card h-fit">
+
+          {/* Selector card */}
+          <Card className="h-fit">
             <CardContent className="p-5">
-              <CalendarDays className="h-6 w-6 text-[#dca956]" />
-              <label htmlFor="horoscope-selector" className="mt-4 block text-sm font-semibold text-[#f3d382]">{config.selectorLabel[locale]}</label>
+              <CalendarDays className="h-6 w-6" style={{ color: "#D97706" }} />
+              <label
+                htmlFor="horoscope-selector"
+                className="mt-4 block text-sm font-semibold"
+                style={{ color: "#2F2418" }}
+              >
+                {config.selectorLabel[locale]}
+              </label>
               <select
                 id="horoscope-selector"
                 value={selected}
                 onChange={(event) => setSelected(event.target.value)}
-                className="mt-3 w-full rounded-xl border border-[#263957] bg-[#07111f] px-4 py-3 text-sm font-semibold text-white outline-none ring-[#00f5a0]/30 focus:border-[#00f5a0] focus:ring-4"
+                className="mt-3 w-full rounded-xl px-4 py-3 text-sm font-semibold outline-none transition"
+                style={{
+                  background: "rgba(255,252,245,0.90)",
+                  border: "1.5px solid rgba(212,160,55,0.45)",
+                  color: "#2F2418",
+                }}
               >
                 {options.map((option) => (
-                  <option key={option.slug} value={option.slug}>{option.labels[locale]}</option>
+                  <option key={option.slug} value={option.slug}>
+                    {option.labels[locale]}
+                  </option>
                 ))}
               </select>
-              <p className="mt-4 rounded-xl border border-[#263957] bg-[#142647]/70 p-3 text-xs leading-5 text-[#a8b3c7]">
+              <p
+                className="mt-4 rounded-xl p-3 text-xs leading-5"
+                style={{
+                  background: "rgba(255,252,245,0.70)",
+                  border: "1px solid rgba(212,160,55,0.28)",
+                  color: "#7A6145",
+                }}
+              >
                 {chinesePage ? labels.chineseNote : numerologyPage ? labels.numberNote : labels.zodiacNote}
               </p>
             </CardContent>
           </Card>
         </div>
 
-        <Card id="horoscope-result" className="inner-card mt-10 overflow-hidden">
+        {/* Result card */}
+        <Card id="horoscope-result" className="mt-10 overflow-hidden">
           <CardContent className="p-0">
-            <div className="border-b border-[#263957] bg-[radial-gradient(circle_at_top_right,rgba(220,169,86,0.14),transparent_28rem),#0c1830] p-6 md:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#00f5a0]">{selectedOption.labels[locale]}</p>
-              <h2 className="mt-2 font-cinzel text-3xl font-black text-[#f3d382]">{content.title}</h2>
-              <p className="mt-3 max-w-4xl text-sm leading-7 text-[#dbeafe]">{content.overview}</p>
+            {/* Result header */}
+            <div
+              className="p-6 md:p-8"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,248,234,0.96) 0%, rgba(255,243,220,0.90) 100%)",
+                borderBottom: "1px solid rgba(212,160,55,0.30)",
+              }}
+            >
+              <p
+                className="text-xs font-semibold uppercase tracking-[0.2em]"
+                style={{ color: "#D97706" }}
+              >
+                {selectedOption.labels[locale]}
+              </p>
+              <h2 className="mt-2 font-cinzel text-3xl font-black" style={{ color: "#2F2418" }}>
+                {content.title}
+              </h2>
+              <p className="mt-3 max-w-4xl text-sm leading-7" style={{ color: "#5C4530" }}>
+                {content.overview}
+              </p>
             </div>
 
+            {/* Section cards */}
             <div className="grid gap-5 p-6 md:p-8 lg:grid-cols-2">
               {content.sections.map((section) => (
-                <div key={section.title} className="rounded-2xl border border-[#263957] bg-[#111f3a]/80 p-5">
-                  <h3 className="font-cinzel text-xl font-bold text-[#f3d382]">{localSectionTitle(section.title, locale)}</h3>
-                  <p className="mt-3 text-sm leading-7 text-[#a8b3c7]">{section.body}</p>
+                <div
+                  key={section.title}
+                  className="rounded-2xl p-5"
+                  style={{
+                    background: "rgba(255,252,245,0.75)",
+                    border: "1px solid rgba(212,160,55,0.30)",
+                  }}
+                >
+                  <h3 className="font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>
+                    {localSectionTitle(section.title, locale)}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7" style={{ color: "#5C4530" }}>
+                    {section.body}
+                  </p>
                 </div>
               ))}
             </div>
 
-            <div className="grid gap-4 border-t border-[#263957] p-6 md:grid-cols-3 md:p-8">
-              <MiniFact label={labels.luckyColor} value={content.luckyColor} />
+            {/* Lucky facts */}
+            <div
+              className="grid gap-4 p-6 md:grid-cols-3 md:p-8"
+              style={{ borderTop: "1px solid rgba(212,160,55,0.25)" }}
+            >
+              <MiniFact label={labels.luckyColor}  value={content.luckyColor} />
               <MiniFact label={labels.luckyNumber} value={content.luckyNumber} />
-              {!lovePage && !chinesePage && !numerologyPage ? <MiniFact label={labels.luckyTime} value={content.luckyTime ?? "-"} /> : <MiniFact label={labels.remedy} value={content.remedy} />}
+              {!lovePage && !chinesePage && !numerologyPage
+                ? <MiniFact label={labels.luckyTime} value={content.luckyTime ?? "-"} />
+                : <MiniFact label={labels.remedy}    value={content.remedy} />}
             </div>
 
-            <div className="grid gap-5 border-t border-[#263957] p-6 md:grid-cols-2 md:p-8">
-              <ListBlock title={labels.dos} items={content.dos} positive />
+            {/* Dos & Don'ts */}
+            <div
+              className="grid gap-5 p-6 md:grid-cols-2 md:p-8"
+              style={{ borderTop: "1px solid rgba(212,160,55,0.25)" }}
+            >
+              <ListBlock title={labels.dos}   items={content.dos}   positive />
               <ListBlock title={labels.donts} items={content.donts} />
             </div>
 
-            <div className="border-t border-[#263957] p-6 md:p-8">
-              <div className="rounded-2xl border border-[#dca956]/25 bg-[#0a1224]/88 p-5">
+            {/* Trust note */}
+            <div
+              className="p-6 md:p-8"
+              style={{ borderTop: "1px solid rgba(212,160,55,0.25)" }}
+            >
+              <div
+                className="rounded-2xl p-5"
+                style={{
+                  background: "rgba(255,252,245,0.70)",
+                  border: "1px solid rgba(212,160,55,0.30)",
+                }}
+              >
                 <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#00f5a0]" />
+                  <ShieldCheck className="mt-1 h-5 w-5 shrink-0" style={{ color: "#D97706" }} />
                   <div>
-                    <h3 className="font-cinzel text-xl font-bold text-[#f3d382]">{labels.trustTitle}</h3>
-                    <p className="mt-2 text-sm leading-7 text-[#a8b3c7]">{labels.trustNote}</p>
+                    <h3 className="font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>
+                      {labels.trustTitle}
+                    </h3>
+                    <p className="mt-2 text-sm leading-7" style={{ color: "#5C4530" }}>
+                      {labels.trustNote}
+                    </p>
                     <div className="mt-4 flex flex-wrap gap-3">
-                      <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]"><Link href={config.reportHref}>{labels.relatedReport}</Link></Button>
-                      <Button variant="outline" asChild><Link href="/kundli">{labels.kundliTools}</Link></Button>
+                      <Button asChild>
+                        <Link href={config.reportHref}>{labels.relatedReport}</Link>
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <Link href="/kundli">{labels.kundliTools}</Link>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -110,20 +205,32 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
 
 function MiniFact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[#263957] bg-[#142647]/80 p-4">
-      <p className="text-xs uppercase tracking-[0.18em] text-[#94a3b8]">{label}</p>
-      <p className="mt-2 font-cinzel text-xl font-bold text-[#fbc02d]">{value}</p>
+    <div
+      className="rounded-2xl p-4"
+      style={{ background: "rgba(255,252,245,0.75)", border: "1px solid rgba(212,160,55,0.30)" }}
+    >
+      <p className="text-xs uppercase tracking-[0.18em]" style={{ color: "#7A6145" }}>{label}</p>
+      <p className="mt-2 font-cinzel text-xl font-bold" style={{ color: "#D97706" }}>{value}</p>
     </div>
   );
 }
 
 function ListBlock({ title, items, positive = false }: { title: string; items: string[]; positive?: boolean }) {
   return (
-    <div className="rounded-2xl border border-[#263957] bg-[#111f3a]/80 p-5">
-      <h3 className="font-cinzel text-xl font-bold text-[#f3d382]">{title}</h3>
-      <ul className="mt-4 grid gap-3 text-sm text-[#dbeafe]">
+    <div
+      className="rounded-2xl p-5"
+      style={{ background: "rgba(255,252,245,0.75)", border: "1px solid rgba(212,160,55,0.28)" }}
+    >
+      <h3 className="font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>{title}</h3>
+      <ul className="mt-4 grid gap-3 text-sm" style={{ color: "#5C4530" }}>
         {items.map((item) => (
-          <li key={item} className="flex gap-2"><CheckCircle2 className={`mt-0.5 h-4 w-4 ${positive ? "text-[#00f5a0]" : "text-[#dca956]"}`} />{item}</li>
+          <li key={item} className="flex gap-2">
+            <CheckCircle2
+              className="mt-0.5 h-4 w-4 shrink-0"
+              style={{ color: positive ? "#16a34a" : "#D97706" }}
+            />
+            {item}
+          </li>
         ))}
       </ul>
     </div>
