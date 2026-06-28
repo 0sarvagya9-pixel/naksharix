@@ -15,6 +15,11 @@ import {
   CheckCircle,
   Clock3,
   Users,
+  HeartHandshake,
+  Briefcase,
+  Coins,
+  Eye,
+  HelpCircle,
 } from "lucide-react";
 
 /* ============================================================
@@ -32,12 +37,12 @@ const CORE_SERVICES = [
 ];
 
 const SIGNATURE_TOOLS = [
-  { label: "Kundli Matching",    sub: "Check compatibility",          href: "/matchmaking",      emoji: "💑" },
-  { label: "Career Guidance",    sub: "Align your path with stars",   href: "/career-astrology", emoji: "⛰️" },
-  { label: "Finance & Wealth",   sub: "Unlock abundance",             href: "/free-calculators", emoji: "🌳" },
-  { label: "Love & Relations",   sub: "Strengthen cosmic bonds",      href: "/matchmaking",      emoji: "🌅" },
-  { label: "Spiritual Growth",   sub: "Elevate consciousness",        href: "/free-calculators", emoji: "🧘" },
-  { label: "Ask a Question",     sub: "Expert astrologer answers",    href: "/consultation",     emoji: "🔮" },
+  { label: "Kundli Matching",    sub: "Check compatibility",          href: "/matchmaking",      icon: HeartHandshake },
+  { label: "Career Guidance",    sub: "Align your path with stars",   href: "/career-astrology", icon: Briefcase },
+  { label: "Finance & Wealth",   sub: "Unlock abundance",             href: "/free-calculators", icon: Coins },
+  { label: "Love & Relations",   sub: "Strengthen cosmic bonds",      href: "/matchmaking",      icon: Heart },
+  { label: "Spiritual Growth",   sub: "Elevate consciousness",        href: "/free-calculators", icon: Eye },
+  { label: "Ask a Question",     sub: "Expert astrologer answers",    href: "/consultation",     icon: HelpCircle },
 ];
 
 const PREMIUM_FEATURES = [
@@ -69,9 +74,9 @@ export function NxHome() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.20em] text-[#d89a2b] bg-[rgba(216,154,43,0.08)] border border-[rgba(216,154,43,0.18)]">
                 <Sparkles size={11} className="animate-pulse" /> Timeless Vedic Wisdom
               </span>
-              <h1 className="mt-4 font-cinzel text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
-                Timeless Wisdom.<br />
-                <span className="bg-gradient-to-r from-[#d89a2b] to-[#b97810] bg-clip-text text-transparent">Infinite Possibilities.</span>
+              <h1 className="mt-4 font-cinzel text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15]">
+                Decode Your Destiny.<br />
+                <span className="bg-gradient-to-r from-[#d89a2b] to-[#b97810] bg-clip-text text-transparent">Design Your Future.</span>
               </h1>
               <p className="mt-4 text-base md:text-lg text-slate-300 font-medium leading-relaxed max-w-xl">
                 Align your career, relationships, and life path with sub-second accurate planetary calculations and certified Vedic insights.
@@ -163,10 +168,10 @@ export function NxHome() {
         <div className="mx-auto max-w-[1440px]">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Happy Users", value: "Verified Seekers", icon: <Users className="h-5 w-5 text-[#d89a2b]" /> },
-              { label: "Accuracy Rate", value: "99.9% Reliable", icon: <Compass className="h-5 w-5 text-[#d89a2b]" /> },
-              { label: "Avg App Rating", value: "4.95 Stars", icon: <Star className="h-5 w-5 text-[#d89a2b]" /> },
-              { label: "Expert Support", value: "24/7 Consultation", icon: <Shield className="h-5 w-5 text-[#d89a2b]" /> }
+              { label: "Happy Users", value: "1M+ Happy Seekers", icon: <Users className="h-5 w-5 text-[#d89a2b]" /> },
+              { label: "Accuracy Rate", value: "98% Accuracy Rate", icon: <Compass className="h-5 w-5 text-[#d89a2b]" /> },
+              { label: "Avg App Rating", value: "4.9+ Avg Rating", icon: <Star className="h-5 w-5 text-[#d89a2b]" /> },
+              { label: "Expert Support", value: "24/7 Expert Support", icon: <Shield className="h-5 w-5 text-[#d89a2b]" /> }
             ].map(({ label, value, icon }) => (
               <div
                 key={label}
@@ -254,15 +259,15 @@ export function NxHome() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
-            {SIGNATURE_TOOLS.map(({ label, sub, href, emoji }) => (
+            {SIGNATURE_TOOLS.map(({ label, sub, href, icon: Icon }) => (
               <Link
                 key={label}
                 href={href}
                 className="group rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] p-4 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[rgba(255,255,255,0.88)]"
                 style={{ textDecoration: "none" }}
               >
-                <div className="h-16 w-full rounded-lg bg-[rgba(216,154,43,0.05)] border border-[rgba(216,154,43,0.12)] flex items-center justify-center text-3xl flex-shrink-0">
-                  {emoji}
+                <div className="h-16 w-full rounded-lg bg-[rgba(216,154,43,0.05)] border border-[rgba(216,154,43,0.12)] flex items-center justify-center flex-shrink-0 text-[#d89a2b] transition-transform duration-300 group-hover:scale-105">
+                  <Icon size={24} />
                 </div>
                 <h3 className="mt-3 text-xs font-bold text-[#1b1c22] leading-snug">{label}</h3>
                 <p className="mt-1 text-[10px] text-[#5c6170] leading-normal">{sub}</p>
