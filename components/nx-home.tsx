@@ -74,9 +74,9 @@ export function NxHome() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.20em] text-[#d89a2b] bg-[rgba(216,154,43,0.08)] border border-[rgba(216,154,43,0.18)]">
                 <Sparkles size={11} className="animate-pulse" /> Timeless Vedic Wisdom
               </span>
-              <h1 className="mt-4 font-cinzel text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15]">
+              <h1 className="mt-4 font-cinzel text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.2]">
                 Decode Your Destiny.<br />
-                <span className="bg-gradient-to-r from-[#d89a2b] to-[#b97810] bg-clip-text text-transparent">Design Your Future.</span>
+                <span className="bg-gradient-to-r from-[#f2c56b] via-[#e6a83c] to-[#c98924] bg-clip-text text-transparent italic font-semibold">Design Your Future.</span>
               </h1>
               <p className="mt-4 text-base md:text-lg text-slate-300 font-medium leading-relaxed max-w-xl">
                 Align your career, relationships, and life path with sub-second accurate planetary calculations and certified Vedic insights.
@@ -86,14 +86,14 @@ export function NxHome() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/kundli"
-                className="rounded-lg bg-gradient-to-r from-[#d89a2b] to-[#b97810] px-6 py-3 text-sm font-bold text-white shadow-[0_4px_14px_rgba(216,154,43,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(216,154,43,0.35)]"
+                className="rounded-lg bg-gradient-to-r from-[#f2c56b] to-[#c98924] px-6 py-3 text-sm font-bold text-slate-950 shadow-[0_4px_14px_rgba(242,197,107,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(242,197,107,0.35)]"
                 style={{ textDecoration: "none" }}
               >
                 Create Free Kundli
               </Link>
               <Link
                 href="/daily-horoscope"
-                className="rounded-lg border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] px-6 py-3 text-sm font-bold text-[#1b1c22] shadow-[0_4px_14px_rgba(15,18,30,0.05)] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(255,255,255,0.85)]"
+                className="rounded-lg border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.24)] px-6 py-3 text-sm font-bold text-white shadow-[0_4px_14px_rgba(15,18,30,0.05)] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/30"
                 style={{ textDecoration: "none" }}
               >
                 Daily Horoscope
@@ -103,11 +103,11 @@ export function NxHome() {
             {/* Trust / Features Row */}
             <div className="flex flex-wrap items-center gap-6 border-t border-[rgba(255,255,255,0.18)] pt-6 mt-2">
               <div className="flex items-center gap-2">
-                <CheckCircle size={15} className="text-[#d89a2b]" />
+                <CheckCircle size={15} className="text-[#f2c56b]" />
                 <span className="text-xs font-semibold text-slate-300">100% Secure Calculations</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle size={15} className="text-[#d89a2b]" />
+                <CheckCircle size={15} className="text-[#f2c56b]" />
                 <span className="text-xs font-semibold text-slate-300">Certified Vedic Astrologers</span>
               </div>
             </div>
@@ -117,7 +117,7 @@ export function NxHome() {
           <div className="relative flex justify-center lg:justify-end">
             <div className="absolute inset-0 -m-10 bg-[radial-gradient(circle_at_center,rgba(216,154,43,0.08)_0%,transparent_60%)] blur-2xl pointer-events-none" />
 
-            <div className="relative w-full max-w-md rounded-2xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] p-6 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.01]">
+            <div className="relative w-full max-w-md rounded-2xl border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.64)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-[28px] saturate-[135%] transition-all duration-300 hover:scale-[1.01]">
               <div className="flex items-center justify-between border-b border-[rgba(20,20,20,0.06)] pb-4 mb-4">
                 <div className="flex items-center gap-2">
                   <Sun size={16} className="text-[#d89a2b] animate-spin-slow" />
@@ -127,23 +127,23 @@ export function NxHome() {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between rounded-xl bg-[rgba(216,154,43,0.05)] border border-[rgba(216,154,43,0.12)] p-3">
+                <div className="flex items-center justify-between rounded-xl bg-[rgba(255,255,255,0.45)] border border-[rgba(255,255,255,0.65)] p-3">
                   <span className="text-xs font-bold text-[#5c6170] uppercase">Planetary Host</span>
                   <span className="text-sm font-bold text-[#1b1c22] flex items-center gap-1">Moon in Scorpio ♏</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-[rgba(20,20,20,0.06)] bg-white/40 p-3 text-center">
+                  <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-white/45 p-3 text-center shadow-sm">
                     <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Sunrise</span>
                     <span className="block text-sm font-black text-[#1b1c22] mt-1">05:42 AM</span>
                   </div>
-                  <div className="rounded-xl border border-[rgba(20,20,20,0.06)] bg-white/40 p-3 text-center">
+                  <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-white/45 p-3 text-center shadow-sm">
                     <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Sunset</span>
                     <span className="block text-sm font-black text-[#1b1c22] mt-1">07:08 PM</span>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-[rgba(20,20,20,0.06)] bg-white/50 p-3">
+                <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-white/45 p-3 shadow-sm">
                   <span className="block text-[10px] uppercase font-bold text-[#5c6170] mb-1">Rahu Kaal Alert</span>
                   <p className="text-xs font-semibold text-[#5c6170] leading-relaxed">
                     Auspicious tasks should be deferred between <strong className="text-[#1b1c22]">04:19 PM – 06:00 PM</strong> due to Rahu presence.
@@ -153,7 +153,7 @@ export function NxHome() {
 
               <Link
                 href="/panchang"
-                className="w-full mt-5 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[rgba(216,154,43,0.08)] border border-[rgba(216,154,43,0.18)] py-2.5 text-xs font-bold text-[#d89a2b] transition-all hover:bg-[rgba(216,154,43,0.12)]"
+                className="w-full mt-5 inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-[#f2c56b] to-[#c98924] py-2.5 text-xs font-bold text-slate-950 shadow-[0_2px_8px_rgba(242,197,107,0.18)] transition-all hover:opacity-90"
                 style={{ textDecoration: "none" }}
               >
                 View Full Panchang →
@@ -166,7 +166,7 @@ export function NxHome() {
       {/* 2. METRIC STRIP */}
       <section className="px-4 sm:px-8 xl:px-12">
         <div className="mx-auto max-w-[1440px]">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex flex-col md:flex-row md:items-center w-full rounded-2xl md:rounded-full border border-[rgba(255,255,255,0.48)] bg-[rgba(255,255,255,0.36)] backdrop-blur-[24px] p-2 md:p-3 shadow-[0_15px_50px_rgba(0,0,0,0.15)]">
             {[
               { label: "Happy Users", value: "1M+ Happy Seekers", icon: <Users className="h-5 w-5 text-[#d89a2b]" /> },
               { label: "Accuracy Rate", value: "98% Accuracy Rate", icon: <Compass className="h-5 w-5 text-[#d89a2b]" /> },
@@ -175,9 +175,9 @@ export function NxHome() {
             ].map(({ label, value, icon }) => (
               <div
                 key={label}
-                className="rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] p-4 flex items-center gap-3 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-md"
+                className="flex-1 flex items-center gap-3 px-4 py-3 md:py-2 border-b md:border-b-0 md:border-r border-[rgba(255,255,255,0.22)] last:border-b-0 last:border-r-0"
               >
-                <span className="grid h-10 w-10 place-items-center rounded-lg bg-[rgba(216,154,43,0.08)]">{icon}</span>
+                <span className="grid h-10 w-10 place-items-center rounded-lg bg-white/40 border border-white/50">{icon}</span>
                 <div>
                   <span className="block text-[10px] font-bold uppercase tracking-wider text-[#5c6170]">{label}</span>
                   <span className="block text-sm font-black text-[#1b1c22] mt-0.5">{value}</span>
@@ -208,7 +208,7 @@ export function NxHome() {
               <Link
                 key={label}
                 href={href}
-                className="group rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] p-5 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[rgba(255,255,255,0.88)]"
+                className="group rounded-xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.45)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-1 hover:border-[#f2c56b]/60 hover:shadow-[0_12px_36px_rgba(216,154,43,0.12)]"
                 style={{ textDecoration: "none" }}
               >
                 <span className="grid h-11 w-11 place-items-center rounded-xl bg-[rgba(216,154,43,0.08)] text-[#d89a2b] transition-transform duration-300 group-hover:scale-105">
@@ -228,15 +228,15 @@ export function NxHome() {
       {/* Alignment Status Strip */}
       <section className="px-4 sm:px-8 xl:px-12 my-2">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left bg-[#141620]/90 border border-white/10 shadow-[0_12px_40px_rgba(15,18,30,0.2)] backdrop-blur-xl">
+          <div className="rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left bg-[rgba(20,24,34,0.6)] border border-[rgba(255,255,255,0.15)] shadow-[0_12px_40px_rgba(0,0,0,0.25)] backdrop-blur-xl">
             <div className="flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-[#d89a2b] animate-pulse" />
-              <span style={{ color: "#ffffff", fontSize: 13, fontWeight: 700, letterSpacing: "0.05em" }}>Cosmic Alignment Status: Active</span>
+              <span className="w-2 h-2 rounded-full bg-[#f2c56b] animate-pulse" />
+              <span className="text-white text-xs md:text-sm font-bold tracking-[0.05em]">Cosmic Alignment Status: Active</span>
             </div>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, margin: 0, fontWeight: 500 }}>
+            <p className="text-slate-300 text-xs md:text-sm font-medium m-0">
               Calculations certified in coordination with planetary ephemeris datasets.
             </p>
-            <Link href="/reports" style={{ color: "#d89a2b", fontSize: 12, fontWeight: 800, textDecoration: "none" }}>
+            <Link href="/reports" className="text-[#f2c56b] hover:text-[#c98924] text-xs font-bold transition-all" style={{ textDecoration: "none" }}>
               Explore Transit Reports →
             </Link>
           </div>
@@ -263,7 +263,7 @@ export function NxHome() {
               <Link
                 key={label}
                 href={href}
-                className="group rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] p-4 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[rgba(255,255,255,0.88)]"
+                className="group rounded-xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.45)] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-1 hover:border-[#f2c56b]/60 hover:shadow-[0_12px_36px_rgba(216,154,43,0.12)]"
                 style={{ textDecoration: "none" }}
               >
                 <div className="h-16 w-full rounded-lg bg-[rgba(216,154,43,0.05)] border border-[rgba(216,154,43,0.12)] flex items-center justify-center flex-shrink-0 text-[#d89a2b] transition-transform duration-300 group-hover:scale-105">
@@ -280,7 +280,7 @@ export function NxHome() {
       {/* 5. PREMIUM MEMBERSHIP ROW */}
       <section className="px-4 sm:px-8 xl:px-12 py-4">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-2xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] p-8 sm:p-10 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl">
+          <div className="rounded-2xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.52)] p-8 sm:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.05)] backdrop-blur-[22px]">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_auto] gap-8 items-center">
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#d89a2b]">
@@ -307,7 +307,7 @@ export function NxHome() {
               <div className="flex flex-col items-center gap-2 text-center border-t lg:border-t-0 lg:border-l border-[rgba(20,20,20,0.06)] pt-6 lg:pt-0 lg:pl-8">
                 <span className="text-xs font-bold text-[#1b1c22]">Unlock Premium</span>
                 <span className="text-[10px] text-[#5c6170]">Plans from ₹199/month</span>
-                <Link href="/pricing" className="rounded-lg bg-gradient-to-r from-[#d89a2b] to-[#b97810] px-4 py-2 text-xs font-bold text-white shadow-[0_2px_8px_rgba(216,154,43,0.18)] mt-2 hover:-translate-y-0.5 transition-all">
+                <Link href="/pricing" className="rounded-lg bg-gradient-to-r from-[#f2c56b] to-[#c98924] px-4 py-2 text-xs font-bold text-slate-950 shadow-[0_2px_8px_rgba(242,197,107,0.18)] mt-2 hover:-translate-y-0.5 transition-all">
                   Upgrade Now
                 </Link>
               </div>
@@ -332,7 +332,7 @@ export function NxHome() {
             {TESTIMONIALS.map(({ name, text, avatar, rating }) => (
               <div
                 key={name}
-                className="rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] p-6 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(255,255,255,0.88)]"
+                className="rounded-xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.45)] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f2c56b]/60"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <span className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-white text-xs bg-gradient-to-br from-[#d89a2b] to-[#b97810] shadow-[0_2px_8px_rgba(216,154,43,0.22)]">
@@ -357,7 +357,7 @@ export function NxHome() {
       {/* 7. FINAL CTA BAND */}
       <section className="px-4 sm:px-8 xl:px-12 py-6">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-2xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] p-8 sm:p-12 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl">
+          <div className="rounded-2xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.52)] p-8 sm:p-12 shadow-[0_12px_40px_rgba(0,0,0,0.05)] backdrop-blur-[22px]">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
               <div className="max-w-xl">
                 <h2 className="font-cinzel text-3xl font-black text-[#1b1c22] leading-tight">
@@ -371,10 +371,10 @@ export function NxHome() {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="rounded-lg px-4 py-2.5 text-xs outline-none border border-[rgba(20,20,20,0.08)] bg-white/70 text-[#1b1c22] placeholder:text-[#5c6170]/60 focus:border-[#d89a2b]"
+                  className="rounded-lg px-4 py-2.5 text-xs outline-none border border-[rgba(255,255,255,0.58)] bg-white/70 text-[#1b1c22] placeholder:text-[#5c6170]/60 focus:border-[#c98924] shadow-sm"
                   style={{ minWidth: 220 }}
                 />
-                <Link href="/signup" className="rounded-lg bg-gradient-to-r from-[#d89a2b] to-[#b97810] px-5 py-2.5 text-xs font-bold text-white shadow-[0_2px_8px_rgba(216,154,43,0.18)] inline-flex items-center gap-1.5 justify-center hover:-translate-y-0.5 transition-all">
+                <Link href="/signup" className="rounded-lg bg-gradient-to-r from-[#f2c56b] to-[#c98924] px-5 py-2.5 text-xs font-bold text-slate-950 shadow-[0_2px_8px_rgba(242,197,107,0.18)] inline-flex items-center gap-1.5 justify-center hover:-translate-y-0.5 transition-all">
                   Get Started <ArrowRight size={13} />
                 </Link>
               </div>

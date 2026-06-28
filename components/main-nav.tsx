@@ -57,8 +57,8 @@ export function MainNav() {
   if (pathname.startsWith("/astrologer")) return null;
 
   return (
-    <div className="sticky top-3 z-50 mx-4 max-w-[1440px] xl:mx-auto">
-      <header className="w-full rounded-2xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] shadow-[0_12px_40px_rgba(15,18,30,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[24px] transition-all duration-300">
+    <div className="sticky top-0 z-50 w-full">
+      <header className="w-full border-b border-[rgba(255,255,255,0.22)] bg-[rgba(20,24,34,0.42)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_15px_45px_rgba(0,0,0,0.2)] backdrop-blur-[28px] saturate-[150%] transition-all duration-300">
         <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
           <div className="flex min-w-[14rem] flex-shrink-0 items-center">
             <BrandLogo className="max-w-full" />
@@ -73,8 +73,8 @@ export function MainNav() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-lg px-3 py-1.5 text-sm font-semibold text-[#2d313f] transition hover:bg-[rgba(255,255,255,0.6)] hover:text-[#1b1c22]",
-                    active ? "bg-[rgba(216,154,43,0.08)] text-[#d89a2b] font-bold border border-[rgba(216,154,43,0.25)]" : ""
+                    "rounded-lg px-3 py-1.5 text-sm font-semibold text-[#e2e8f0] transition hover:bg-white/10 hover:text-white",
+                    active ? "bg-[rgba(216,154,43,0.12)] text-[#f2c56b] font-bold border border-[rgba(216,154,43,0.35)]" : ""
                   )}
                 >
                   {item.label}
@@ -84,18 +84,18 @@ export function MainNav() {
             <div className="group relative">
               <button
                 type="button"
-                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#2d313f] transition hover:bg-[rgba(255,255,255,0.6)] hover:text-[#1b1c22]"
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#e2e8f0] transition hover:bg-white/10 hover:text-white"
               >
                 More
               </button>
-              <div className="invisible absolute right-0 top-[110%] z-[80] w-64 translate-y-2 rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.96)] p-3 opacity-0 shadow-[0_12px_40px_rgba(15,18,30,0.12)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+              <div className="invisible absolute right-0 top-[110%] z-[80] w-64 translate-y-2 rounded-xl border border-[rgba(255,255,255,0.32)] bg-[rgba(20,24,34,0.92)] p-3 opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                 <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#d89a2b]">Explore</p>
                 <div className="grid gap-0.5">
                   {moreLinks.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#2d313f] transition hover:bg-[rgba(255,255,255,0.6)] hover:text-[#1b1c22]"
+                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#e2e8f0] transition hover:bg-white/10 hover:text-white"
                     >
                       {item.label}
                     </Link>
@@ -105,13 +105,13 @@ export function MainNav() {
             </div>
           </nav>
 
-          <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[rgba(20,20,20,0.08)] pl-3">
+          <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[rgba(255,255,255,0.15)] pl-3">
             <LanguageSwitcher className="w-auto min-w-12" />
             <ThemeToggle />
             <AuthProfileMenu />
             <Link
               href="/kundli"
-              className="hidden xl:inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-[#d89a2b] to-[#b97810] px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_2px_8px_rgba(216,154,43,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(216,154,43,0.28)]"
+              className="hidden xl:inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#f2c56b] to-[#c98924] px-4 py-2 text-xs font-bold text-slate-950 shadow-[0_2px_8px_rgba(242,197,107,0.18)] hover:shadow-[0_4px_12px_rgba(242,197,107,0.3)] hover:-translate-y-0.5 transition-all duration-200"
               style={{ textDecoration: "none" }}
             >
               Get Started
@@ -120,7 +120,7 @@ export function MainNav() {
               ref={menuButtonRef}
               variant="outline"
               size="icon"
-              className="border-[rgba(20,20,20,0.08)] bg-white/80 text-[#3a3a3c] xl:hidden"
+              className="border-[rgba(255,255,255,0.22)] bg-white/10 text-white hover:bg-white/20 xl:hidden"
               aria-label="Open navigation menu"
               aria-expanded={open}
               aria-controls="naksharix-mobile-sidebar"

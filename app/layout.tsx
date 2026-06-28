@@ -56,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
         <LanguageProvider initialLocale={initialLocale}>
           <AppBackgroundScene />
-          <div className="relative z-10 min-h-screen flex flex-col">
+          <div className="relative z-10 w-full max-w-[1420px] mx-auto my-0 sm:my-6 md:my-10 rounded-none sm:rounded-[38px] border-x-0 border-y-0 sm:border border-[rgba(255,255,255,0.42)] bg-gradient-to-br from-white/12 to-white/4 backdrop-blur-[30px] saturate-[145%] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_30px_100px_rgba(0,0,0,0.36),0_0_80px_rgba(216,154,43,0.10)] overflow-hidden flex flex-col min-h-screen sm:min-h-[calc(100vh-80px)]">
             <MainNav />
             <main className="flex-grow">
               {children}
