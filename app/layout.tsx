@@ -44,6 +44,8 @@ export const viewport: Viewport = {
   initialScale: 1
 };
 
+import { AppBackgroundScene } from "@/components/background/app-background-scene";
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const initialLocale = normalizeLocale(cookieStore.get("naksharix-language")?.value);
@@ -53,9 +55,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={htmlLang} suppressHydrationWarning>
       <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
         <LanguageProvider initialLocale={initialLocale}>
-          <MainNav />
-          {children}
-          <Footer />
+          <AppBackgroundScene />
+          <div className="relative z-10 min-h-screen flex flex-col">
+            <MainNav />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </div>
         </LanguageProvider>
         <PwaRegister />
         <SchemaMarkup />

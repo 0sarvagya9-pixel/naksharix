@@ -8,18 +8,18 @@
    ============================================================ */
 :root {
   /* Core palette */
-  --nx-bg:             #f7f7f8;
-  --nx-bg-soft:        #fbfbfc;
+  --nx-bg:             transparent;
+  --nx-bg-soft:        rgba(255, 255, 255, 0.42);
   --nx-glass:          rgba(255, 255, 255, 0.72);
-  --nx-glass-strong:   rgba(255, 255, 255, 0.86);
-  --nx-border:         rgba(20, 20, 20, 0.06);
+  --nx-glass-strong:   rgba(255, 255, 255, 0.84);
+  --nx-border:         rgba(255, 255, 255, 0.42);
   --nx-border-solid:   #f0f0f2;
-  --nx-shadow:         0 8px 32px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.01);
-  --nx-shadow-md:      0 16px 48px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.02);
-  --nx-text:           #1e1e1f;
-  --nx-muted:          #66666b;
-  --nx-accent:         #e6941a;
-  --nx-accent-deep:    #c97308;
+  --nx-shadow:         0 12px 40px rgba(18, 22, 35, 0.08);
+  --nx-shadow-md:      0 20px 70px rgba(15, 18, 30, 0.16);
+  --nx-text:           #1b1c22;
+  --nx-muted:          #5c6170;
+  --nx-accent:         #d89a2b;
+  --nx-accent-deep:    #b97810;
   --nx-charcoal-glass: rgba(20, 20, 24, 0.78);
   --nx-charcoal-text:  #ffffff;
 

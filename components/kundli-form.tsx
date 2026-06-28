@@ -220,7 +220,7 @@ export function KundliForm() {
           <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="grid gap-4 sm:grid-cols-2">
             <Field label={tr("name")} error={fieldError("name")}><Input data-field="name" className={errorClass(Boolean(fieldError("name")))} {...form.register("name", { onChange: () => form.clearErrors("name") })} /></Field>
             <Field label={tr("gender")}>
-              <select {...form.register("gender")} className="h-10 w-full rounded-xl px-3 text-sm outline-none transition" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#2F2418" }}>
+              <select {...form.register("gender")} className="h-10 w-full rounded-xl px-3 text-sm outline-none transition" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#1b1c22" }}>
                 <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
                 <option value="Female">{tr("genderFemale")}</option>
                 <option value="Male">{tr("genderMale")}</option>
@@ -233,7 +233,7 @@ export function KundliForm() {
                 value={form.watch("locale") ?? apiLocale}
                 onChange={(event) => updateLanguage(event.target.value as Locale)}
                 className={`h-10 w-full rounded-xl px-3 text-sm outline-none transition ${errorClass(Boolean(fieldError("locale")))}`}
-                style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#2F2418" }}
+                style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#1b1c22" }}
               >
                 <option value="en">{languageOptionLabel("en", apiLocale)}</option>
                 <option value="hi">{languageOptionLabel("hi", apiLocale)}</option>
@@ -254,7 +254,7 @@ export function KundliForm() {
               placeholder={tr("searchLocationPlaceholder")}
             />
             <div className="flex items-end">
-              <p className="rounded-xl p-3 text-xs leading-5 naksh-muted-text" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><MapPin className="mr-1 inline h-3 w-3" style={{ color: "#D97706" }} />{placeStatus}</p>
+              <p className="rounded-xl p-3 text-xs leading-5 naksh-muted-text" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><MapPin className="mr-1 inline h-3 w-3" style={{ color: "#d89a2b" }} />{placeStatus}</p>
             </div>
             <Button className="h-12 sm:col-span-2" disabled={form.formState.isSubmitting || generating} size="lg">
               <Sparkles className="h-4 w-4" />
@@ -283,7 +283,7 @@ function Meta({ label, value }: { label: string; value?: string }) {
   return (
     <div className="rounded-xl p-3" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}>
       <p className="text-[11px] uppercase tracking-[0.16em] naksh-muted-text">{label}</p>
-      <p className="mt-1 break-words font-cinzel text-sm font-bold" style={{ color: "#2F2418" }}>{value || "-"}</p>
+      <p className="mt-1 break-words font-cinzel text-sm font-bold" style={{ color: "#1b1c22" }}>{value || "-"}</p>
     </div>
   );
 }
@@ -324,8 +324,8 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
       <section className="relative overflow-hidden rounded-2xl p-5 sm:p-6" style={{ background: "linear-gradient(135deg, rgba(255,248,234,0.96) 0%, rgba(255,243,220,0.92) 100%)", border: "1.5px solid rgba(20, 20, 20, 0.08)", boxShadow: "0 12px 48px rgba(180,120,20,0.16)" }}>
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="font-cinzel text-xs uppercase tracking-[0.28em]" style={{ color: "#D97706" }}>Naksharix</p>
-            <h2 className="mt-2 font-cinzel text-3xl font-black" style={{ color: "#2F2418" }}>{tr("generatedKundliReport")}</h2>
+            <p className="font-cinzel text-xs uppercase tracking-[0.28em]" style={{ color: "#d89a2b" }}>Naksharix</p>
+            <h2 className="mt-2 font-cinzel text-3xl font-black" style={{ color: "#1b1c22" }}>{tr("generatedKundliReport")}</h2>
             <div className="mt-4 grid gap-2 text-sm naksh-muted-text sm:grid-cols-2 lg:grid-cols-3">
               <Meta label={tr("name")} value={result.profile?.name} />
               <Meta label={tr("dateOfBirth")} value={result.birthDetails?.dateOfBirth} />
@@ -345,10 +345,10 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
           </div>
         </div>
         {pdfError ? <p className="mt-4 rounded-lg border border-[#FF4D4F]/30 bg-[#FF4D4F]/10 p-3 text-sm text-[#FF4D4F]">{pdfError}</p> : null}
-        {!result.saved ? <div className="mt-4 rounded-xl p-4 text-sm" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p style={{ color: "#2F2418" }}>{tr("loginToSaveReport")}</p><Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button></div> : null}
+        {!result.saved ? <div className="mt-4 rounded-xl p-4 text-sm" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p style={{ color: "#1b1c22" }}>{tr("loginToSaveReport")}</p><Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button></div> : null}
       </section>
       {result.language && result.language !== selectedLanguage ? (
-        <div className="rounded-xl p-4 text-sm" style={{ background: "rgba(245,158,11,0.10)", border: "1px solid rgba(20, 20, 20, 0.08)", color: "#2F2418" }}>
+        <div className="rounded-xl p-4 text-sm" style={{ background: "rgba(245,158,11,0.10)", border: "1px solid rgba(20, 20, 20, 0.08)", color: "#1b1c22" }}>
           <p>{tr("reportLanguageMismatch")}</p>
           <Button className="mt-3" size="sm" variant="outline" onClick={onRegenerate}>
             {tr("regenerateReportSelectedLanguage")}
@@ -383,7 +383,7 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
       </div>
       <VimshottariDashaTimeline mahadashas={result.vimshottariDasha} language={selectedLanguage} />
       <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(255,248,234,0.96), rgba(255,243,220,0.92))", border: "1.5px solid rgba(20, 20, 20, 0.08)" }}>
-        <h3 className="font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>{tr("premiumKundliUpsell")}</h3>
+        <h3 className="font-cinzel text-xl font-bold" style={{ color: "#1b1c22" }}>{tr("premiumKundliUpsell")}</h3>
         <p className="mt-2 text-sm leading-6 naksh-muted-text">{tr("premiumKundliUpsellCopy")}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Button asChild><Link href="/reports/premium-kundli">{tr("unlockPremiumReport")}</Link></Button>
@@ -588,15 +588,15 @@ function localizedSadeSati(sadeSati: KundliResult["sadeSati"], language: Locale,
 
 function GeneratingKundli() {
   const { tr } = useLanguage();
-  return <div className="mt-4 rounded-xl p-4" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p className="font-cinzel font-bold" style={{ color: "#2F2418" }}><CalendarDays className="mr-2 inline h-4 w-4" style={{ color: "#D97706" }} />{tr("generatingKundli")}</p><p className="mt-1 text-sm naksh-muted-text">{tr("kundliIntro")}</p></div>;
+  return <div className="mt-4 rounded-xl p-4" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p className="font-cinzel font-bold" style={{ color: "#1b1c22" }}><CalendarDays className="mr-2 inline h-4 w-4" style={{ color: "#d89a2b" }} />{tr("generatingKundli")}</p><p className="mt-1 text-sm naksh-muted-text">{tr("kundliIntro")}</p></div>;
 }
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-xl p-4" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold" style={{ color: "#2F2418" }}>{value}</p></div>;
+  return <div className="rounded-xl p-4" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold" style={{ color: "#1b1c22" }}>{value}</p></div>;
 }
 
 function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="rounded-xl p-4 text-sm leading-7 naksh-muted-text" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><h3 className="mb-3 font-semibold" style={{ color: "#2F2418" }}>{title}</h3>{children}</section>;
+  return <section className="rounded-xl p-4 text-sm leading-7 naksh-muted-text" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><h3 className="mb-3 font-semibold" style={{ color: "#1b1c22" }}>{title}</h3>{children}</section>;
 }
 
 function round(value: number) {
