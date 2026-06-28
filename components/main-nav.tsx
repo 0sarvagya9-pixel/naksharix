@@ -58,7 +58,16 @@ export function MainNav() {
 
   return (
     <div className="sticky top-0 z-50 w-full">
-      <header className="w-full border-b border-[rgba(255,255,255,0.24)] bg-[rgba(25,27,38,0.34)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_15px_45px_rgba(0,0,0,0.2)] backdrop-blur-[24px] saturate-[145%] transition-all duration-300">
+      <header
+        className="w-full transition-all duration-300"
+        style={{
+          background: "rgba(18,20,30,0.40)",
+          backdropFilter: "blur(26px)",
+          WebkitBackdropFilter: "blur(26px)",
+          borderBottom: "1px solid rgba(255,255,255,0.28)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.22)"
+        }}
+      >
         <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
           <div className="flex min-w-[14rem] flex-shrink-0 items-center">
             <BrandLogo className="max-w-full" />
@@ -73,7 +82,7 @@ export function MainNav() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "px-3 py-1 text-sm font-semibold text-[rgba(255,255,255,0.82)] transition hover:text-white",
+                    "px-3 py-1 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white",
                     active ? "text-[#f2c56b] font-bold border-b-2 border-[#f2c56b] rounded-none px-1 py-0.5" : ""
                   )}
                 >
@@ -84,7 +93,7 @@ export function MainNav() {
             <div className="group relative">
               <button
                 type="button"
-                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[rgba(255,255,255,0.82)] transition hover:text-white"
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white"
               >
                 More
               </button>
@@ -95,7 +104,7 @@ export function MainNav() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#e2e8f0] transition hover:bg-white/10 hover:text-white"
+                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#fffff0]/90 transition hover:bg-white/10 hover:text-white"
                     >
                       {item.label}
                     </Link>

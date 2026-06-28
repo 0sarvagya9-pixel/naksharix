@@ -126,11 +126,12 @@ export function NxHome() {
             <div
               className="relative w-full max-w-md p-6 transition-all duration-300 hover:scale-[1.01]"
               style={{
-                background: "rgba(255,255,255,0.68)",
-                backdropFilter: "blur(26px) saturate(145%)",
-                border: "1px solid rgba(255,255,255,0.62)",
+                background: "rgba(255,255,255,0.64)",
+                backdropFilter: "blur(24px) saturate(145%)",
+                WebkitBackdropFilter: "blur(24px) saturate(145%)",
+                border: "1px solid rgba(255,255,255,0.58)",
                 borderRadius: "24px",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 24px 70px rgba(0,0,0,0.22)"
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78), 0 18px 55px rgba(20,12,8,0.16)"
               }}
             >
               <div className="flex items-center justify-between border-b border-[rgba(20,20,20,0.06)] pb-4 mb-4">
@@ -260,7 +261,7 @@ export function NxHome() {
               <Link
                 key={label}
                 href={href}
-                className="group rounded-[20px] border border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.58)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_14px_42px_rgba(0,0,0,0.12)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
+                className="group rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.64)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_18px_55px_rgba(20,12,8,0.16)] backdrop-blur-[24px] saturate-[145%] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
                 style={{ textDecoration: "none" }}
               >
                 <span className="grid h-11 w-11 place-items-center rounded-xl bg-[rgba(216,154,43,0.08)] text-[#c98924] transition-transform duration-300 group-hover:scale-105">
@@ -315,7 +316,7 @@ export function NxHome() {
               <Link
                 key={label}
                 href={href}
-                className="group rounded-[20px] border border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.58)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_14px_42px_rgba(0,0,0,0.12)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
+                className="group rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.64)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_18px_55px_rgba(20,12,8,0.16)] backdrop-blur-[24px] saturate-[145%] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
                 style={{ textDecoration: "none" }}
               >
                 <div className="h-16 w-full rounded-lg bg-[rgba(216,154,43,0.05)] border border-[rgba(216,154,43,0.12)] flex items-center justify-center flex-shrink-0 text-[#c98924] transition-transform duration-300 group-hover:scale-105">
@@ -332,7 +333,7 @@ export function NxHome() {
       {/* 5. PREMIUM MEMBERSHIP ROW */}
       <section className="px-4 sm:px-8 xl:px-12 py-4">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-[20px] border border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.58)] p-8 sm:p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_14px_42px_rgba(0,0,0,0.12)] backdrop-blur-[22px]">
+          <div className="rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.64)] p-8 sm:p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_18px_55px_rgba(20,12,8,0.16)] backdrop-blur-[24px] saturate-[145%]">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_auto] gap-8 items-center">
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#c98924]">
@@ -384,7 +385,7 @@ export function NxHome() {
             {TESTIMONIALS.map(({ name, text, avatar, rating }) => (
               <div
                 key={name}
-                className="rounded-[20px] border border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.58)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_14px_42px_rgba(0,0,0,0.12)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
+                className="rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.64)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_18px_55px_rgba(20,12,8,0.16)] backdrop-blur-[24px] saturate-[145%] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <span className="flex items-center justify-center w-10 h-10 rounded-full font-black text-[#17181d] text-xs bg-gradient-to-br from-[#f7d17a] to-[#c98924] shadow-[0_2px_8px_rgba(201,137,36,0.22)]">
@@ -409,7 +410,7 @@ export function NxHome() {
       {/* 7. FINAL CTA BAND */}
       <section className="px-4 sm:px-8 xl:px-12 py-6">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-[20px] border border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.58)] p-8 sm:p-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_14px_42px_rgba(0,0,0,0.12)] backdrop-blur-[22px]">
+          <div className="rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.64)] p-8 sm:p-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_18px_55px_rgba(20,12,8,0.16)] backdrop-blur-[24px] saturate-[145%]">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
               <div className="max-w-xl">
                 <h2 className="font-cinzel text-3xl font-black text-[#17181d] leading-tight">

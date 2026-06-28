@@ -45,6 +45,7 @@ export const viewport: Viewport = {
 };
 
 import { AppBackgroundScene } from "@/components/background/app-background-scene";
+import { PremiumGlassShell } from "@/components/layout/premium-glass-shell";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -56,22 +57,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
         <LanguageProvider initialLocale={initialLocale}>
           <AppBackgroundScene />
-          <div
-            className="relative z-10 w-full max-w-[1420px] mx-auto my-0 sm:my-6 md:my-10 rounded-none sm:rounded-[38px] overflow-hidden flex flex-col min-h-screen sm:min-h-[calc(100vh-80px)]"
-            style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.20), rgba(255,255,255,0.08))",
-              backdropFilter: "blur(18px) saturate(140%)",
-              WebkitBackdropFilter: "blur(18px) saturate(140%)",
-              border: "1px solid rgba(255,255,255,0.42)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.45), 0 28px 90px rgba(0,0,0,0.32), 0 0 80px rgba(216,154,43,0.12)"
-            }}
-          >
+          <PremiumGlassShell>
             <MainNav />
             <main className="flex-grow">
               {children}
             </main>
             <Footer />
-          </div>
+          </PremiumGlassShell>
         </LanguageProvider>
         <PwaRegister />
         <SchemaMarkup />

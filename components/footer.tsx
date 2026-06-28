@@ -12,8 +12,10 @@ export function Footer() {
   return (
     <footer
       style={{
-        borderTop: "1px solid rgba(20, 20, 20, 0.08)",
-        background: "linear-gradient(180deg, rgba(255, 255, 255, 0.68) 0%, rgba(255,248,234,1.0) 100%)",
+        borderTop: "1px solid rgba(255, 255, 255, 0.58)",
+        background: "rgba(255, 255, 255, 0.64)",
+        backdropFilter: "blur(24px) saturate(145%)",
+        WebkitBackdropFilter: "blur(24px) saturate(145%)"
       }}
     >
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-12">
@@ -22,7 +24,7 @@ export function Footer() {
           {/* Brand block */}
           <div className="max-w-sm">
             <BrandLogo />
-            <p className="mt-4 text-sm leading-7" style={{ color: "#7A6145" }}>
+            <p className="mt-4 text-sm leading-7" style={{ color: "#525866" }}>
               {tr("footerCopy")}
             </p>
           </div>
@@ -33,7 +35,7 @@ export function Footer() {
               <div key={group.title}>
                 <p
                   className="font-cinzel font-bold mb-3"
-                  style={{ fontSize: 12, color: "#2F2418", letterSpacing: "0.08em", textTransform: "uppercase" }}
+                  style={{ fontSize: 12, color: "#17181d", letterSpacing: "0.08em", textTransform: "uppercase" }}
                 >
                   {group.title}
                 </p>
@@ -42,8 +44,8 @@ export function Footer() {
                     <Link
                       key={`${group.title}-${link.href}`}
                       href={link.href}
-                      className="text-xs transition-colors hover:text-[#D97706]"
-                      style={{ color: "#7A6145", fontWeight: 500 }}
+                      className="text-xs transition-colors hover:text-[#c98924]"
+                      style={{ color: "#525866", fontWeight: 500 }}
                     >
                       {link.label}
                     </Link>
@@ -58,12 +60,12 @@ export function Footer() {
         {/* Bottom bar */}
         <div
           className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-10 pt-6"
-          style={{ borderTop: "1px solid rgba(20, 20, 20, 0.08)" }}
+          style={{ borderTop: "1px solid rgba(255, 255, 255, 0.35)" }}
         >
-          <p style={{ fontSize: 11, color: "#7A6145" }}>
+          <p style={{ fontSize: 11, color: "#525866" }}>
             © {new Date().getFullYear()} Naksharix. All rights reserved.
           </p>
-          <p style={{ fontSize: 11, color: "#7A6145" }}>
+          <p style={{ fontSize: 11, color: "#525866" }}>
             Made with 🙏 for Vedic Astrology enthusiasts
           </p>
         </div>

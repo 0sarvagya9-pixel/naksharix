@@ -5,10 +5,16 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        "rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] backdrop-blur-[24px] text-[#1b1c22] transition-all duration-300",
-        "shadow-[0_8px_32px_rgba(20,12,8,0.04),inset_0_1px_0_rgba(255,255,255,0.85)]",
+        "rounded-xl text-[#17181d] transition-all duration-300",
         className
       )}
+      style={{
+        background: "rgba(255,255,255,0.64)",
+        backdropFilter: "blur(24px) saturate(145%)",
+        WebkitBackdropFilter: "blur(24px) saturate(145%)",
+        border: "1px solid rgba(255,255,255,0.58)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78), 0 18px 55px rgba(20,12,8,0.16)"
+      }}
       {...props}
     />
   );
@@ -22,7 +28,7 @@ export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHead
   return (
     <h3
       className={cn(
-        "font-cinzel text-lg font-bold leading-none tracking-normal text-[#1b1c22]",
+        "font-cinzel text-lg font-bold leading-none tracking-normal text-[#17181d]",
         className
       )}
       {...props}
