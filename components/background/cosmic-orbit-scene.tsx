@@ -5,79 +5,80 @@ import React from "react";
 export function CosmicOrbitScene() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Ambient background clouds / nebula haze */}
-      <div className="absolute bottom-0 left-[20%] w-[60%] h-[40%] bg-[radial-gradient(ellipse_at_bottom,rgba(110,130,200,0.08)_0%,transparent_70%)] blur-2xl opacity-70" />
-      <div className="absolute top-[20%] right-[10%] w-[50%] h-[50%] bg-[radial-gradient(circle,rgba(216,154,43,0.05)_0%,transparent_60%)] blur-3xl opacity-60" />
+      {/* Ambient background clouds / nebula haze - Warm golden & sunset saffron */}
+      <div className="absolute bottom-[-10%] left-[20%] w-[65%] h-[50%] bg-[radial-gradient(ellipse_at_bottom,rgba(216,154,43,0.16)_0%,rgba(185,120,16,0.06)_60%,transparent_100%)] blur-3xl opacity-80" />
+      <div className="absolute top-[15%] right-[5%] w-[55%] h-[55%] bg-[radial-gradient(circle,rgba(242,197,107,0.12)_0%,rgba(216,154,43,0.04)_50%,transparent_100%)] blur-3xl opacity-75" />
+      <div className="absolute top-[30%] left-[5%] w-[45%] h-[45%] bg-[radial-gradient(circle,rgba(110,130,200,0.14)_0%,transparent_70%)] blur-3xl opacity-60" />
 
       {/* 3D Celestial Orbit System at Top Right (rotated for perspective) */}
       <div
-        className="absolute top-[5%] right-[-10%] w-[650px] h-[650px] md:w-[950px] md:h-[950px] rounded-full border border-dashed border-[#e6941a]/12 flex items-center justify-center animate-[spin_160s_linear_infinite]"
+        className="absolute top-[2%] right-[-15%] w-[700px] h-[700px] md:w-[1050px] md:h-[1050px] rounded-full border border-dashed border-[#f2c56b]/22 flex items-center justify-center animate-[spin_180s_linear_infinite]"
         style={{
-          transform: "rotateX(72deg) rotateY(-18deg)",
+          transform: "rotateX(70deg) rotateY(-20deg)",
           transformStyle: "preserve-3d",
         }}
       >
         {/* Concentric Orbit Paths */}
-        <div className="absolute w-[80%] h-[80%] rounded-full border border-dotted border-[#e6941a]/8" />
-        <div className="absolute w-[60%] h-[60%] rounded-full border border-[#6e82c8]/6" />
-        <div className="absolute w-[40%] h-[40%] rounded-full border border-dashed border-[#e6941a]/10" />
+        <div className="absolute w-[82%] h-[82%] rounded-full border border-dotted border-[#f2c56b]/16" />
+        <div className="absolute w-[62%] h-[62%] rounded-full border border-[#f2c56b]/14" />
+        <div className="absolute w-[42%] h-[42%] rounded-full border border-dashed border-[#ebd8b1]/18" />
 
         {/* Outer orbital planet 1 */}
         <div
-          className="absolute w-5 h-5 rounded-full bg-gradient-to-br from-[#e6941a] to-[#2a1b02] shadow-[0_0_12px_rgba(216,154,43,0.2),inset_-2px_-2px_6px_rgba(0,0,0,0.8)]"
+          className="absolute w-5 h-5 rounded-full bg-gradient-to-br from-[#f2c56b] to-[#402a06] shadow-[0_0_15px_rgba(242,197,107,0.35),inset_-2px_-2px_6px_rgba(0,0,0,0.85)]"
           style={{
-            transform: "translate3d(360px, 180px, 0)",
+            transform: "translate3d(400px, 200px, 0)",
           }}
         />
 
         {/* Orbit path node lights */}
-        <div className="absolute w-1.5 h-1.5 rounded-full bg-white/40" style={{ transform: "translate3d(0, -325px, 0)" }} />
-        <div className="absolute w-1 h-1 rounded-full bg-[#d89a2b]/60" style={{ transform: "translate3d(240px, -240px, 0)" }} />
+        <div className="absolute w-2 h-2 rounded-full bg-white/60 shadow-[0_0_8px_white]" style={{ transform: "translate3d(0, -350px, 0)" }} />
+        <div className="absolute w-1.5 h-1.5 rounded-full bg-[#f2c56b]/80 shadow-[0_0_6px_#f2c56b]" style={{ transform: "translate3d(280px, -280px, 0)" }} />
       </div>
 
       {/* Large Saturn-style Planet with Ring (focal point near top right / hero side) */}
-      <div className="absolute top-[18%] right-[8%] md:right-[15%] w-20 h-20 md:w-32 md:h-32 flex items-center justify-center">
+      <div className="absolute top-[16%] right-[10%] md:right-[16%] w-24 h-24 md:w-36 md:h-36 flex items-center justify-center">
         {/* Glow Behind */}
-        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(216,154,43,0.22)_0%,transparent_70%)] blur-md scale-125" />
+        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(242,197,107,0.28)_0%,transparent_70%)] blur-lg scale-135 pointer-events-none" />
         {/* Planet Sphere */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ebd8b1] via-[#bf923b] to-[#1a150c] shadow-[inset_-8px_-8px_24px_rgba(0,0,0,0.85),0_0_16px_rgba(216,154,43,0.2)]" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ebd8b1] via-[#c98924] to-[#120d06] shadow-[inset_-10px_-10px_28px_rgba(0,0,0,0.9),0_0_20px_rgba(242,197,107,0.25)]" />
         {/* Planet Ring Shadow & Highlight Layer */}
         <div
-          className="absolute w-[170%] h-[35%] rounded-full border border-[#ebd8b1]/35"
+          className="absolute w-[185%] h-[38%] rounded-full border border-[#f2c56b]/45"
           style={{
-            transform: "rotateX(75deg) rotateY(-12deg)",
-            boxShadow: "0 0 10px rgba(216,154,43,0.12), inset 0 0 10px rgba(216,154,43,0.12)"
+            transform: "rotateX(72deg) rotateY(-14deg)",
+            boxShadow: "0 0 15px rgba(242,197,107,0.2), inset 0 0 15px rgba(242,197,107,0.2)"
           }}
         />
       </div>
 
       {/* Another Orbit System at Bottom Left */}
       <div
-        className="absolute bottom-[-10%] left-[-8%] w-[500px] h-[500px] md:w-[750px] md:h-[750px] rounded-full border border-dashed border-neutral-700/20 flex items-center justify-center animate-[spin_200s_linear_infinite_reverse]"
+        className="absolute bottom-[-15%] left-[-10%] w-[550px] h-[550px] md:w-[800px] md:h-[800px] rounded-full border border-dashed border-[#f2c56b]/14 flex items-center justify-center animate-[spin_220s_linear_infinite_reverse]"
         style={{
-          transform: "rotateX(68deg) rotateY(12deg)",
+          transform: "rotateX(66deg) rotateY(15deg)",
           transformStyle: "preserve-3d",
         }}
       >
-        <div className="absolute w-[70%] h-[70%] rounded-full border border-[#6e82c8]/8" />
+        <div className="absolute w-[72%] h-[72%] rounded-full border border-[#f2c56b]/12" />
 
         {/* Floating Planet 2 */}
         <div
-          className="absolute w-10 h-10 rounded-full bg-gradient-to-br from-[#6e82c8] to-[#0b0e17] shadow-[0_0_24px_rgba(110,130,200,0.2),inset_-4px_-4px_12px_rgba(0,0,0,0.7)]"
+          className="absolute w-10 h-10 rounded-full bg-gradient-to-br from-[#6e82c8] to-[#080b12] shadow-[0_0_28px_rgba(110,130,200,0.35),inset_-4px_-4px_12px_rgba(0,0,0,0.75)]"
           style={{
-            transform: "translate3d(-220px, 70px, 0)",
+            transform: "translate3d(-240px, 80px, 0)",
           }}
         />
       </div>
 
       {/* Tiny floating golden moon near left edge */}
-      <div className="absolute top-[28%] left-[10%] w-5 h-5 flex items-center justify-center">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#f2c56b] to-[#2d1e07] shadow-[inset_-2px_-2px_6px_rgba(0,0,0,0.85),0_0_6px_rgba(216,154,43,0.15)]" />
+      <div className="absolute top-[26%] left-[12%] w-5 h-5 flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#f2c56b] to-[#3a2807] shadow-[inset_-2px_-2px_6px_rgba(0,0,0,0.85),0_0_10px_rgba(242,197,107,0.3)]" />
       </div>
 
       {/* Star Dust Overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:44px_44px] opacity-60" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.045)_1.2px,transparent_1.2px)] bg-[size:72px_72px] opacity-40" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04)_1.2px,transparent_1.2px)] bg-[size:44px_44px] opacity-70" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06)_1.5px,transparent_1.5px)] bg-[size:72px_72px] opacity-50" />
     </div>
   );
 }

@@ -78,7 +78,7 @@ export function NxHome() {
                 Decode Your Destiny.<br />
                 <span className="bg-gradient-to-r from-[#f2c56b] via-[#e6a83c] to-[#c98924] bg-clip-text text-transparent italic font-semibold">Design Your Future.</span>
               </h1>
-              <p className="mt-4 text-base md:text-lg text-slate-300 font-medium leading-relaxed max-w-xl">
+              <p className="mt-4 text-base md:text-lg text-[#f1f3f5] font-medium leading-relaxed max-w-xl">
                 Align your career, relationships, and life path with sub-second accurate planetary calculations and certified Vedic insights.
               </p>
             </div>
@@ -104,20 +104,20 @@ export function NxHome() {
             <div className="flex flex-wrap items-center gap-6 border-t border-[rgba(255,255,255,0.18)] pt-6 mt-2">
               <div className="flex items-center gap-2">
                 <CheckCircle size={15} className="text-[#f2c56b]" />
-                <span className="text-xs font-semibold text-slate-300">100% Secure Calculations</span>
+                <span className="text-xs font-semibold text-[#f1f3f5]">100% Secure Calculations</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle size={15} className="text-[#f2c56b]" />
-                <span className="text-xs font-semibold text-slate-300">Certified Vedic Astrologers</span>
+                <span className="text-xs font-semibold text-[#f1f3f5]">Certified Vedic Astrologers</span>
               </div>
             </div>
           </div>
 
           {/* Right Side - Outlook Widget */}
           <div className="relative flex justify-center lg:justify-end">
-            <div className="absolute inset-0 -m-10 bg-[radial-gradient(circle_at_center,rgba(216,154,43,0.08)_0%,transparent_60%)] blur-2xl pointer-events-none" />
+            <div className="absolute inset-0 -m-10 bg-[radial-gradient(circle_at_center,rgba(216,154,43,0.18)_0%,transparent_60%)] blur-2xl pointer-events-none" />
 
-            <div className="relative w-full max-w-md rounded-2xl border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.64)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-[28px] saturate-[135%] transition-all duration-300 hover:scale-[1.01]">
+            <div className="relative w-full max-w-md rounded-2xl border border-[rgba(255,255,255,0.62)] bg-[rgba(255,255,255,0.72)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_24px_70px_rgba(20,12,8,0.22)] backdrop-blur-[28px] transition-all duration-300 hover:scale-[1.01]">
               <div className="flex items-center justify-between border-b border-[rgba(20,20,20,0.06)] pb-4 mb-4">
                 <div className="flex items-center gap-2">
                   <Sun size={16} className="text-[#d89a2b] animate-spin-slow" />
@@ -127,23 +127,23 @@ export function NxHome() {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between rounded-xl bg-[rgba(255,255,255,0.45)] border border-[rgba(255,255,255,0.65)] p-3">
+                <div className="flex items-center justify-between rounded-xl bg-[rgba(255,255,255,0.48)] border border-[rgba(255,255,255,0.65)] p-3">
                   <span className="text-xs font-bold text-[#5c6170] uppercase">Planetary Host</span>
                   <span className="text-sm font-bold text-[#1b1c22] flex items-center gap-1">Moon in Scorpio ♏</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-white/45 p-3 text-center shadow-sm">
+                  <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-[rgba(255,255,255,0.48)] p-3 text-center shadow-sm">
                     <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Sunrise</span>
                     <span className="block text-sm font-black text-[#1b1c22] mt-1">05:42 AM</span>
                   </div>
-                  <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-white/45 p-3 text-center shadow-sm">
+                  <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-[rgba(255,255,255,0.48)] p-3 text-center shadow-sm">
                     <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Sunset</span>
                     <span className="block text-sm font-black text-[#1b1c22] mt-1">07:08 PM</span>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-white/45 p-3 shadow-sm">
+                <div className="rounded-xl border border-[rgba(255,255,255,0.65)] bg-[rgba(255,255,255,0.48)] p-3 shadow-sm">
                   <span className="block text-[10px] uppercase font-bold text-[#5c6170] mb-1">Rahu Kaal Alert</span>
                   <p className="text-xs font-semibold text-[#5c6170] leading-relaxed">
                     Auspicious tasks should be deferred between <strong className="text-[#1b1c22]">04:19 PM – 06:00 PM</strong> due to Rahu presence.
@@ -166,7 +166,7 @@ export function NxHome() {
       {/* 2. METRIC STRIP */}
       <section className="px-4 sm:px-8 xl:px-12">
         <div className="mx-auto max-w-[1440px]">
-          <div className="flex flex-col md:flex-row md:items-center w-full rounded-2xl md:rounded-full border border-[rgba(255,255,255,0.48)] bg-[rgba(255,255,255,0.36)] backdrop-blur-[24px] p-2 md:p-3 shadow-[0_15px_50px_rgba(0,0,0,0.15)]">
+          <div className="flex flex-col md:flex-row md:items-center w-full rounded-2xl md:rounded-full border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.34)] backdrop-blur-[24px] p-2 md:p-3 shadow-[0_15px_50px_rgba(20,12,8,0.15)]">
             {[
               { label: "Happy Users", value: "1M+ Happy Seekers", icon: <Users className="h-5 w-5 text-[#d89a2b]" /> },
               { label: "Accuracy Rate", value: "98% Accuracy Rate", icon: <Compass className="h-5 w-5 text-[#d89a2b]" /> },
@@ -208,7 +208,7 @@ export function NxHome() {
               <Link
                 key={label}
                 href={href}
-                className="group rounded-xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.45)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-1 hover:border-[#f2c56b]/60 hover:shadow-[0_12px_36px_rgba(216,154,43,0.12)]"
+                className="group rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.68)] p-5 shadow-[0_10px_30px_rgba(20,12,8,0.04)] backdrop-blur-[24px] transition-all duration-300 hover:-translate-y-1 hover:border-[#f2c56b]/60 hover:shadow-[0_12px_36px_rgba(216,154,43,0.12)]"
                 style={{ textDecoration: "none" }}
               >
                 <span className="grid h-11 w-11 place-items-center rounded-xl bg-[rgba(216,154,43,0.08)] text-[#d89a2b] transition-transform duration-300 group-hover:scale-105">
@@ -263,7 +263,7 @@ export function NxHome() {
               <Link
                 key={label}
                 href={href}
-                className="group rounded-xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.45)] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-1 hover:border-[#f2c56b]/60 hover:shadow-[0_12px_36px_rgba(216,154,43,0.12)]"
+                className="group rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.68)] p-4 shadow-[0_10px_30px_rgba(20,12,8,0.04)] backdrop-blur-[24px] transition-all duration-300 hover:-translate-y-1 hover:border-[#f2c56b]/60 hover:shadow-[0_12px_36px_rgba(216,154,43,0.12)]"
                 style={{ textDecoration: "none" }}
               >
                 <div className="h-16 w-full rounded-lg bg-[rgba(216,154,43,0.05)] border border-[rgba(216,154,43,0.12)] flex items-center justify-center flex-shrink-0 text-[#d89a2b] transition-transform duration-300 group-hover:scale-105">
@@ -280,7 +280,7 @@ export function NxHome() {
       {/* 5. PREMIUM MEMBERSHIP ROW */}
       <section className="px-4 sm:px-8 xl:px-12 py-4">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-2xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.52)] p-8 sm:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.05)] backdrop-blur-[22px]">
+          <div className="rounded-2xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.68)] p-8 sm:p-10 shadow-[0_12px_40px_rgba(20,12,8,0.05)] backdrop-blur-[24px]">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_auto] gap-8 items-center">
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#d89a2b]">
@@ -332,7 +332,7 @@ export function NxHome() {
             {TESTIMONIALS.map(({ name, text, avatar, rating }) => (
               <div
                 key={name}
-                className="rounded-xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.45)] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-[22px] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f2c56b]/60"
+                className="rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.68)] p-6 shadow-[0_10px_30px_rgba(20,12,8,0.04)] backdrop-blur-[24px] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f2c56b]/60"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <span className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-white text-xs bg-gradient-to-br from-[#d89a2b] to-[#b97810] shadow-[0_2px_8px_rgba(216,154,43,0.22)]">
@@ -357,7 +357,7 @@ export function NxHome() {
       {/* 7. FINAL CTA BAND */}
       <section className="px-4 sm:px-8 xl:px-12 py-6">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-2xl border border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.52)] p-8 sm:p-12 shadow-[0_12px_40px_rgba(0,0,0,0.05)] backdrop-blur-[22px]">
+          <div className="rounded-2xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.68)] p-8 sm:p-12 shadow-[0_12px_40px_rgba(20,12,8,0.05)] backdrop-blur-[24px]">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
               <div className="max-w-xl">
                 <h2 className="font-cinzel text-3xl font-black text-[#1b1c22] leading-tight">

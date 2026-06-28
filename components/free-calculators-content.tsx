@@ -81,7 +81,7 @@ export function FreeCalculatorsContent() {
   return (
     <main className="inner-page-shell star-field min-h-screen">
       <Section first>
-        <div className="inner-section rounded-3xl border border-[rgba(255,255,255,0.55)] p-6 md:p-8 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
+        <div className="inner-section rounded-3xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] backdrop-blur-[24px] p-6 md:p-8 shadow-[0_12px_40px_rgba(20,12,8,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{labels.eyebrow}</p>
           <h1 className="mt-3 font-cinzel text-4xl font-black text-neutral-800 sm:text-5xl">{labels.title}</h1>
           <p className="mt-4 max-w-4xl text-base leading-8 text-neutral-600">{labels.subtitle}</p>

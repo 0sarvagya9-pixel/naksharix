@@ -58,7 +58,7 @@ export function MainNav() {
 
   return (
     <div className="sticky top-0 z-50 w-full">
-      <header className="w-full border-b border-[rgba(255,255,255,0.22)] bg-[rgba(20,24,34,0.42)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_15px_45px_rgba(0,0,0,0.2)] backdrop-blur-[28px] saturate-[150%] transition-all duration-300">
+      <header className="w-full border-b border-[rgba(255,255,255,0.30)] bg-[rgba(18,20,30,0.40)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_15px_45px_rgba(0,0,0,0.2)] backdrop-blur-[28px] transition-all duration-300">
         <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
           <div className="flex min-w-[14rem] flex-shrink-0 items-center">
             <BrandLogo className="max-w-full" />
