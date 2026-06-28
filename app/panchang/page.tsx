@@ -73,36 +73,26 @@ export default async function PanchangPage({
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
             <div>
               <span
-                className="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
-                style={{
-                  background: "rgba(230,148,26,0.06)",
-                  border: "1px solid rgba(20, 20, 20, 0.08)",
-                  color: "#e6941a",
-                }}
+                className="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-[rgba(216,154,43,0.08)] border border-[rgba(216,154,43,0.18)] text-[#d89a2b]"
               >
                 Provider Verified
               </span>
-              <h1 className="mt-4 font-cinzel text-4xl font-black text-neutral-800 sm:text-5xl">
+              <h1 className="mt-4 font-cinzel text-4xl font-black text-[#1b1c22] sm:text-5xl">
                 Today&apos;s Panchang
               </h1>
-              <p className="mt-4 max-w-3xl text-base leading-8" style={{ color: "#66666b" }}>
+              <p className="mt-4 max-w-3xl text-base leading-8 text-[#5c6170]">
                 Calculate core Panchang fields using Naksharix&apos;s deterministic internal ephemeris
                 provider. Values may vary slightly by source, so cross-check for critical Muhurat decisions.
               </p>
               <div className="mt-6 flex flex-wrap gap-3 text-sm">
                 {[
-                  { icon: <MapPin className="h-4 w-4" style={{ color: "#e6941a" }} />,   label: "Location-aware" },
-                  { icon: <Clock3 className="h-4 w-4" style={{ color: "#e6941a" }} />,   label: "Timezone-based" },
-                  { icon: <SunMedium className="h-4 w-4" style={{ color: "#e6941a" }} />, label: "Sunrise anchored" },
+                  { icon: <MapPin className="h-4 w-4 text-[#d89a2b]" />,   label: "Location-aware" },
+                  { icon: <Clock3 className="h-4 w-4 text-[#d89a2b]" />,   label: "Timezone-based" },
+                  { icon: <SunMedium className="h-4 w-4 text-[#d89a2b]" />, label: "Sunrise anchored" },
                 ].map(({ icon, label }) => (
                   <span
                     key={label}
-                    className="inline-flex items-center gap-2 rounded-full px-4 py-2"
-                    style={{
-                      background: "rgba(255, 255, 255, 0.68)",
-                      border: "1px solid rgba(20, 20, 20, 0.08)",
-                      color: "#66666b",
-                    }}
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-2 border border-white/60 bg-white/40 text-[#5c6170] shadow-sm"
                   >
                     {icon}{label}
                   </span>
@@ -114,31 +104,21 @@ export default async function PanchangPage({
             <Card>
               <CardContent className="p-5">
                 <form className="grid gap-4" action="/panchang">
-                  <label className="grid gap-2 text-sm font-semibold" style={{ color: "#1e1e1f" }}>
+                  <label className="grid gap-2 text-sm font-semibold text-[#1b1c22]">
                     Date
                     <input
                       type="date"
                       name="date"
                       defaultValue={selectedDate}
-                      className="h-11 w-full rounded-xl px-3 text-sm outline-none transition"
-                      style={{
-                        background: "rgba(255, 255, 255, 0.68)",
-                        border: "1.5px solid rgba(20, 20, 20, 0.08)",
-                        color: "#1e1e1f",
-                      }}
+                      className="naksh-input"
                     />
                   </label>
-                  <label className="grid gap-2 text-sm font-semibold" style={{ color: "#1e1e1f" }}>
+                  <label className="grid gap-2 text-sm font-semibold text-[#1b1c22]">
                     Location preset
                     <select
                       name="city"
                       defaultValue={selectedCity}
-                      className="h-11 w-full rounded-xl px-3 text-sm outline-none transition"
-                      style={{
-                        background: "rgba(255, 255, 255, 0.68)",
-                        border: "1.5px solid rgba(20, 20, 20, 0.08)",
-                        color: "#1e1e1f",
-                      }}
+                      className="naksh-input"
                     >
                       {Object.entries(cityPresets).map(([key, preset]) => (
                         <option key={key} value={key}>
@@ -168,12 +148,12 @@ export default async function PanchangPage({
         <Card className="mt-8">
           <CardContent className="p-5">
             <div className="flex gap-3">
-              <ShieldCheck className="mt-1 h-5 w-5 shrink-0" style={{ color: "#e6941a" }} />
+              <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#d89a2b]" />
               <div>
-                <h2 className="font-cinzel text-xl font-bold" style={{ color: "#1e1e1f" }}>
+                <h2 className="font-cinzel text-xl font-bold text-[#1b1c22]">
                   Trust note
                 </h2>
-                <p className="mt-2 text-sm leading-7" style={{ color: "#66666b" }}>
+                <p className="mt-2 text-sm leading-7 text-[#5c6170]">
                   Calculations are generated by Naksharix&apos;s internal ephemeris provider and may vary
                   slightly by source. Use for spiritual guidance and cross-check for critical muhurat.
                   This is provider-verified regression, not external Swiss/Jagannatha Hora verification.
@@ -199,27 +179,20 @@ function PanchangCard({ title, icon, rows }: { title: string; icon: ReactNode; r
   return (
     <Card className="h-full">
       <CardContent className="p-5">
-        <h2
-          className="flex items-center gap-2 font-cinzel text-xl font-bold"
-          style={{ color: "#1e1e1f" }}
-        >
-          <span style={{ color: "#e6941a" }}>{icon}</span>
+        <h2 className="flex items-center gap-2 font-cinzel text-xl font-bold text-[#1b1c22]">
+          <span className="text-[#d89a2b]">{icon}</span>
           {title}
         </h2>
         <div className="mt-4 grid gap-3">
           {rows.map(([label, value]) => (
             <div
               key={label}
-              className="rounded-xl p-3"
-              style={{
-                background: "rgba(255, 255, 255, 0.68)",
-                border: "1px solid rgba(20, 20, 20, 0.08)",
-              }}
+              className="rounded-xl p-3 border border-white/60 bg-white/40 shadow-sm"
             >
-              <p className="text-xs uppercase tracking-[0.16em]" style={{ color: "#7A6145" }}>
+              <p className="text-xs uppercase tracking-[0.16em] text-[#5c6170]">
                 {label}
               </p>
-              <p className="mt-1 text-sm font-semibold" style={{ color: "#1e1e1f" }}>
+              <p className="mt-1 text-sm font-semibold text-[#1b1c22]">
                 {value ?? "Unavailable"}
               </p>
             </div>

@@ -81,13 +81,13 @@ export function FreeCalculatorsContent() {
   return (
     <main className="inner-page-shell star-field min-h-screen">
       <Section first>
-        <div className="inner-section rounded-3xl border border-[rgba(20, 20, 20, 0.08)] p-6 md:p-8">
+        <div className="inner-section rounded-3xl border border-[rgba(255,255,255,0.55)] p-6 md:p-8 shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{labels.eyebrow}</p>
           <h1 className="mt-3 font-cinzel text-4xl font-black text-neutral-800 sm:text-5xl">{labels.title}</h1>
-          <p className="mt-4 max-w-4xl text-lg leading-8 text-neutral-600">{labels.subtitle}</p>
+          <p className="mt-4 max-w-4xl text-base leading-8 text-neutral-600">{labels.subtitle}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {filters.map((item) => (
-              <button key={item} type="button" onClick={() => setFilter(item)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${filter === item ? "border-[#dca956] bg-[#dca956]/15 text-neutral-800" : "border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] text-neutral-600 hover:border-[#dca956]/50 hover:bg-[rgba(255, 255, 255, 0.68)]"}`}>
+              <button key={item} type="button" onClick={() => setFilter(item)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${filter === item ? "border-[#dca956] bg-[#dca956]/15 text-neutral-800" : "border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] text-[#2d313f] hover:border-[#dca956]/50 hover:bg-white/80"}`}>
                 {labels.filters[item]}
               </button>
             ))}
@@ -101,8 +101,8 @@ export function FreeCalculatorsContent() {
             return (
               <section key={group}>
                 <div className="mb-4 flex items-center justify-between gap-4">
-                  <h2 className="font-cinzel text-2xl font-black text-neutral-800">{title}</h2>
-                  {group === "horoscope" ? <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-3 py-1 text-xs text-neutral-800">{labels.comingSoon}</span> : null}
+                  <h2 className="font-cinzel text-2xl font-black text-white">{title}</h2>
+                  {group === "horoscope" ? <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-3 py-1 text-xs text-slate-300">{labels.comingSoon}</span> : null}
                 </div>
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                   {items.map((item) => <CalculatorCard key={item.id} item={item} labels={labels} locale={locale} />)}

@@ -287,8 +287,8 @@ export function NumerologyContent() {
   }
 
   const inputClass = (field: keyof FormState) => [
-    "mt-2 w-full rounded-xl border bg-[rgba(255, 255, 255, 0.68)] px-4 py-3 text-sm text-[#1e1e1f] outline-none transition placeholder:text-[#64748b]",
-    errors[field] ? "border-red-500 focus:border-red-500" : "border-[rgba(20, 20, 20, 0.08)] focus:border-[#dca956]"
+    "mt-2 w-full rounded-xl border bg-[rgba(255,255,255,0.78)] px-4 py-3 text-sm text-[#1e1e1f] outline-none transition placeholder:text-[#64748b]",
+    errors[field] ? "border-red-500 focus:border-red-500" : "border-[rgba(255,255,255,0.55)] focus:border-[#dca956]"
   ].join(" ");
 
   return (
@@ -296,7 +296,7 @@ export function NumerologyContent() {
       <Section first>
         <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8" style={{ background: "linear-gradient(135deg, rgba(255,248,234,0.96) 0%, rgba(255,243,220,0.92) 100%)", border: "1.5px solid rgba(20, 20, 20, 0.08)", boxShadow: "0 12px 48px rgba(180,120,20,0.16)" }}>
           <div className="max-w-3xl">
-            <p className="font-cinzel text-sm font-semibold uppercase tracking-[0.22em] text-[#D97706]">{tr("navNumerology")}</p>
+            <p className="font-cinzel text-sm font-semibold uppercase tracking-[0.22em] text-[#d89a2b]">{tr("navNumerology")}</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black text-neutral-800 sm:text-5xl">{tr("numerologyTitle")}</h1>
             <p className="mt-4 max-w-2xl text-base leading-7 naksh-muted-text">{tr("numerologyDescription")}</p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -309,13 +309,13 @@ export function NumerologyContent() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 rounded-2xl border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] p-5 shadow-[0_18px_60px_rgba(2,6,18,0.35)] sm:p-6" noValidate>
+          <form onSubmit={handleSubmit} className="mt-8 rounded-2xl border border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] p-5 shadow-[0_18px_60px_rgba(2,6,18,0.35)] sm:p-6" noValidate>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 className="font-cinzel text-2xl font-bold text-neutral-800">{lang.formTitle}</h2>
                 <p className="mt-2 text-sm leading-6 text-neutral-500">{lang.formCopy}</p>
               </div>
-              <Button type="submit" disabled={status === "loading"} className="bg-[#D97706] text-white hover:bg-[#00f5a0] hover:text-[#020612]">
+              <Button type="submit" disabled={status === "loading"} className="bg-[#d89a2b] text-white hover:bg-[#00f5a0] hover:text-[#020612]">
                 {status === "loading" ? lang.calculating : lang.calculate}
               </Button>
             </div>
@@ -348,11 +348,11 @@ export function NumerologyContent() {
                   [lang.suggestionsAnchor, "#numerology-suggestions"],
                   [lang.dailyAnchor, "#numerology-daily"]
                 ].map(([label, href]) => (
-                  <a key={href} href={href} className="rounded-full px-3 py-1.5 text-xs font-semibold transition" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)", color: "#2F2418" }}>{label}</a>
+                  <a key={href} href={href} className="rounded-full px-3 py-1.5 text-xs font-semibold border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] text-[#1b1c22] hover:-translate-y-0.5 hover:bg-white transition-all shadow-sm">{label}</a>
                 ))}
               </div>
 
-              <section id="numerology-summary" className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(255,248,234,0.96), rgba(255,243,220,0.92))", border: "1.5px solid rgba(20, 20, 20, 0.08)" }}>
+              <section id="numerology-summary" className="rounded-2xl p-5 border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
                 <h2 className="font-cinzel text-2xl font-bold text-neutral-800">{lang.summary}</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   <SummaryCard label={lang.overallCompatibility} value={verdictLabel(overallNumerologyVerdict(report), locale, lang)} tone={overallNumerologyVerdict(report)} />
@@ -374,7 +374,7 @@ export function NumerologyContent() {
               </section>
 
               <section id="numerology-loshu" className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-                <Card className="border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)]">
+                <Card className="border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
                   <CardContent className="p-5">
                     <h2 className="font-cinzel text-2xl font-bold text-neutral-800"><span className="notranslate" translate="no">{lang.loShu}</span></h2>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
@@ -424,27 +424,27 @@ export function NumerologyContent() {
               <section id="numerology-daily" className="grid gap-4 md:grid-cols-2">
                 {report.mobileAnalysis ? <NumberCard item={{ key: "mobile", value: report.mobileAnalysis.value }} labels={lang} locale={locale} /> : null}
                 {report.vehicleAnalysis ? <NumberCard item={{ key: "vehicle", value: report.vehicleAnalysis.value }} labels={lang} locale={locale} /> : null}
-                <Card className="border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] md:col-span-2">
+                <Card className="border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] md:col-span-2">
                   <CardContent className="p-5">
                     <h2 className="font-cinzel text-xl font-bold text-neutral-800">{lang.daily}: {report.dailyPrediction.personalDayNumber}</h2>
                     <p className="mt-3 text-sm leading-6 text-neutral-600">{report.dailyPrediction.summary}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {numberProfile(reduceDisplayNumber(report.lifePath.value + new Date(report.dailyPrediction.date).getDate()), locale).strengths.map((item) => <span key={item} className="rounded-full border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] px-3 py-1 text-xs font-semibold text-[#e6941a]">{item}</span>)}
+                      {numberProfile(reduceDisplayNumber(report.lifePath.value + new Date(report.dailyPrediction.date).getDate()), locale).strengths.map((item) => <span key={item} className="rounded-full border border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] px-3 py-1 text-xs font-semibold text-[#e6941a]">{item}</span>)}
                     </div>
                   </CardContent>
                 </Card>
                 <InsightList title={lang.remedies} items={numerologyRemedies(locale)} />
               </section>
 
-              <p className="rounded-2xl border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] p-4 text-sm leading-6 text-neutral-500">{numerologyDisclaimer(locale)} {lang.loShuDisclaimer}</p>
+              <p className="rounded-2xl border border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] p-4 text-sm leading-6 text-neutral-500">{numerologyDisclaimer(locale)} {lang.loShuDisclaimer}</p>
             </div>
           ) : null}
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featureCards.map(({ titleKey, copyKey, icon: Icon }) => (
-              <Card key={titleKey} className="border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] shadow-[0_18px_60px_rgba(2,6,18,0.32)]">
+              <Card key={titleKey} className="border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] shadow-[0_18px_60px_rgba(2,6,18,0.32)]">
                 <CardContent className="p-5">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#dca956]/10 text-[#D97706] shadow-[0_0_22px_rgba(220,169,86,0.12)]">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#dca956]/10 text-[#d89a2b] shadow-[0_0_22px_rgba(220,169,86,0.12)]">
                     <Icon className="h-5 w-5" />
                   </span>
                   <h2 className="mt-5 font-cinzel text-xl font-bold text-neutral-800">{tr(titleKey)}</h2>
@@ -472,7 +472,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 function NumberCard({ item, labels, locale }: { item: { key: string; value: number }; labels: Record<string, string>; locale: Locale }) {
   const profile = numberProfile(item.value, locale);
   return (
-    <Card className="border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)]">
+    <Card className="border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
           <h3 className="font-cinzel text-lg font-bold text-neutral-800"><span className="notranslate" translate="no">{numberLabel(item.key, locale)}</span></h3>
@@ -493,9 +493,9 @@ function NumberCard({ item, labels, locale }: { item: { key: string; value: numb
 function TagGroup({ title, items, tone }: { title: string; items: string[]; tone: "mint" | "gold" }) {
   return (
     <div>
-      <p className={`text-xs font-bold uppercase ${tone === "mint" ? "text-[#D97706]" : "text-[#D97706]"}`}>{title}</p>
+      <p className={`text-xs font-bold uppercase ${tone === "mint" ? "text-[#d89a2b]" : "text-[#d89a2b]"}`}>{title}</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        {items.map((item) => <span key={item} className="rounded-full border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] px-2.5 py-1 text-xs text-neutral-600">{item}</span>)}
+        {items.map((item) => <span key={item} className="rounded-full border border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] px-2.5 py-1 text-xs text-neutral-600">{item}</span>)}
       </div>
     </div>
   );
@@ -503,11 +503,11 @@ function TagGroup({ title, items, tone }: { title: string; items: string[]; tone
 
 function InsightList({ title, items, empty }: { title: string; items: string[]; empty?: string }) {
   return (
-    <Card className="border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)]">
+    <Card className="border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
       <CardContent className="p-5">
         <h2 className="font-cinzel text-xl font-bold text-neutral-800">{title}</h2>
         <div className="mt-4 space-y-3">
-          {items.length ? items.map((item) => <p key={item} className="rounded-xl border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] p-3 text-sm leading-6 text-neutral-600">{item}</p>) : <p className="text-sm leading-6 text-neutral-500">{empty}</p>}
+          {items.length ? items.map((item) => <p key={item} className="rounded-xl border border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] p-3 text-sm leading-6 text-neutral-600">{item}</p>) : <p className="text-sm leading-6 text-neutral-500">{empty}</p>}
         </div>
       </CardContent>
     </Card>
@@ -527,14 +527,14 @@ function SummaryCard({ label, value, tone }: { label: string; value: string; ton
 
 function CompatibilityCard({ title, verdict, items, lang, locale }: { title: string; verdict: Verdict; items: string[]; lang: Record<string, string>; locale: Locale }) {
   return (
-    <Card className="border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)]">
+    <Card className="border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
       <CardContent className="p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <h2 className="font-cinzel text-xl font-bold text-neutral-800">{title}</h2>
           <span className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${toneClass(verdict)}`}>{verdictLabel(verdict, locale, lang)}</span>
         </div>
         <div className="mt-4 space-y-3">
-          {items.map((item) => <p key={item} className="rounded-xl border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] p-3 text-sm leading-6 text-neutral-600">{item}</p>)}
+          {items.map((item) => <p key={item} className="rounded-xl border border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] p-3 text-sm leading-6 text-neutral-600">{item}</p>)}
         </div>
       </CardContent>
     </Card>
@@ -543,7 +543,7 @@ function CompatibilityCard({ title, verdict, items, lang, locale }: { title: str
 
 function LegendDot({ tone, label }: { tone: "present" | "missing" | "repeated"; label: string }) {
   const cls = tone === "present" ? "bg-[#fbc02d]" : tone === "repeated" ? "bg-[#00f5a0]" : "bg-[#64748b]";
-  return <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] px-3 py-1 text-neutral-500"><span className={`h-2.5 w-2.5 rounded-full ${cls}`} />{label}</span>;
+  return <span className="inline-flex items-center gap-2 rounded-full border border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] px-3 py-1 text-neutral-500"><span className={`h-2.5 w-2.5 rounded-full ${cls}`} />{label}</span>;
 }
 
 function loShuCellClass(cell: { present: boolean; count: number }) {
@@ -553,11 +553,11 @@ function loShuCellClass(cell: { present: boolean; count: number }) {
 }
 
 function toneClass(tone: Verdict) {
-  if (tone === "strong") return "border-[#00f5a0]/45 bg-[#00f5a0]/12 text-[#D97706]";
-  if (tone === "supportive") return "border-[#009b72]/45 bg-[#009b72]/14 text-[#D97706]";
+  if (tone === "strong") return "border-[#00f5a0]/45 bg-[#00f5a0]/12 text-[#d89a2b]";
+  if (tone === "supportive") return "border-[#009b72]/45 bg-[#009b72]/14 text-[#d89a2b]";
   if (tone === "neutral") return "border-[#dca956]/40 bg-[#dca956]/12 text-neutral-800";
   if (tone === "reviewSuggested") return "border-[#ea580c]/45 bg-[#ea580c]/12 text-neutral-800";
-  return "border-[#fbc02d]/45 bg-[#fbc02d]/12 text-[#D97706]";
+  return "border-[#fbc02d]/45 bg-[#fbc02d]/12 text-[#d89a2b]";
 }
 
 function verdictLabel(verdict: Verdict, locale: Locale, lang: Record<string, string>) {

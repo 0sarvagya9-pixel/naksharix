@@ -58,7 +58,7 @@ export function MainNav() {
 
   return (
     <div className="sticky top-3 z-50 mx-4 max-w-[1440px] xl:mx-auto">
-      <header className="w-full rounded-2xl border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] shadow-[0_12px_40px_rgba(15,18,30,0.12)] backdrop-blur-xl transition-all duration-300">
+      <header className="w-full rounded-2xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] shadow-[0_12px_40px_rgba(15,18,30,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[24px] transition-all duration-300">
         <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
           <div className="flex min-w-[14rem] flex-shrink-0 items-center">
             <BrandLogo className="max-w-full" />
@@ -73,8 +73,8 @@ export function MainNav() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-lg px-3 py-1.5 text-sm font-semibold text-[#5c6170] transition hover:bg-[rgba(255,255,255,0.42)] hover:text-[#1b1c22]",
-                    active ? "bg-[rgba(216,154,43,0.08)] text-[#d89a2b] font-bold border border-[rgba(216,154,43,0.18)]" : ""
+                    "rounded-lg px-3 py-1.5 text-sm font-semibold text-[#2d313f] transition hover:bg-[rgba(255,255,255,0.6)] hover:text-[#1b1c22]",
+                    active ? "bg-[rgba(216,154,43,0.08)] text-[#d89a2b] font-bold border border-[rgba(216,154,43,0.25)]" : ""
                   )}
                 >
                   {item.label}
@@ -84,18 +84,18 @@ export function MainNav() {
             <div className="group relative">
               <button
                 type="button"
-                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#5c6170] transition hover:bg-[rgba(255,255,255,0.42)] hover:text-[#1b1c22]"
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#2d313f] transition hover:bg-[rgba(255,255,255,0.6)] hover:text-[#1b1c22]"
               >
                 More
               </button>
-              <div className="invisible absolute right-0 top-[110%] z-[80] w-64 translate-y-2 rounded-xl border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.94)] p-3 opacity-0 shadow-[0_12px_40px_rgba(15,18,30,0.12)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+              <div className="invisible absolute right-0 top-[110%] z-[80] w-64 translate-y-2 rounded-xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.96)] p-3 opacity-0 shadow-[0_12px_40px_rgba(15,18,30,0.12)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                 <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#d89a2b]">Explore</p>
                 <div className="grid gap-0.5">
                   {moreLinks.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#5c6170] transition hover:bg-[rgba(255,255,255,0.42)] hover:text-[#1b1c22]"
+                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#2d313f] transition hover:bg-[rgba(255,255,255,0.6)] hover:text-[#1b1c22]"
                     >
                       {item.label}
                     </Link>

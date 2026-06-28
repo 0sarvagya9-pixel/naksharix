@@ -175,13 +175,13 @@ export function FocusedCalculatorContent({ kind }: { kind: FocusedCalculatorKind
 
   return (
     <main className="inner-page-shell star-field min-h-screen">
-      <Section>
-        <div className="inner-section rounded-3xl border border-[#263957] p-6 md:p-8">
+      <Section first>
+        <div className="inner-section rounded-3xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.78)] shadow-[0_12px_40px_rgba(18,22,35,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] p-6 md:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]"><Calculator className="h-4 w-4" />{labels.eyebrow}</p>
-              <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{labels.title}</h1>
-              <p className="mt-4 max-w-4xl text-lg leading-8 text-[#a8b3c7]">{labels.subtitle}</p>
+              <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-[#d89a2b]"><Calculator className="h-4 w-4" />{labels.eyebrow}</p>
+              <h1 className="mt-3 font-cinzel text-4xl font-black text-[#1b1c22] sm:text-5xl">{labels.title}</h1>
+              <p className="mt-4 max-w-4xl text-base leading-8 text-[#5c6170]">{labels.subtitle}</p>
             </div>
             <Button variant="outline" asChild className="w-fit"><Link href="/free-calculators"><ArrowLeft className="mr-2 h-4 w-4" />{labels.back}</Link></Button>
           </div>
@@ -189,19 +189,19 @@ export function FocusedCalculatorContent({ kind }: { kind: FocusedCalculatorKind
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <Card className="inner-card"><CardContent className="p-6">
-            <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{labels.whatShows}</h2>
-            <ul className="mt-4 grid gap-3 text-sm leading-6 text-[#a8b3c7]">{labels.highlights.map((item) => <li key={item} className="flex gap-3"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#00f5a0]" /><span>{item}</span></li>)}</ul>
-            <div className="mt-5 rounded-2xl border border-[#263957] bg-[#142647]/60 p-4"><p className="text-sm font-semibold text-[#f3d382]">{labels.requiredDetails}</p><p className="mt-2 text-sm leading-6 text-[#a8b3c7]">{labels.requiredCopy}</p></div>
+            <h2 className="font-cinzel text-2xl font-bold text-[#1b1c22]">{labels.whatShows}</h2>
+            <ul className="mt-4 grid gap-3 text-sm leading-6 text-[#5c6170]">{labels.highlights.map((item) => <li key={item} className="flex gap-3"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#d89a2b]" /><span>{item}</span></li>)}</ul>
+            <div className="mt-5 rounded-2xl border border-[rgba(216,154,43,0.15)] bg-[rgba(216,154,43,0.05)] p-4"><p className="text-sm font-semibold text-[#1b1c22]">{labels.requiredDetails}</p><p className="mt-2 text-sm leading-6 text-[#5c6170]">{labels.requiredCopy}</p></div>
           </CardContent></Card>
 
           <Card className="inner-card"><CardContent className="p-6">
-            <h2 className="font-cinzel text-2xl font-bold text-[#f3d382]">{labels.formTitle}</h2>
+            <h2 className="font-cinzel text-2xl font-bold text-[#1b1c22]">{labels.formTitle}</h2>
             <form ref={formRef} onSubmit={submit} className="mt-5 grid gap-4">
               {family === "astro" ? <AstroFields values={astro} errors={errors} labels={labels} set={(field, value) => { setAstro((current) => ({ ...current, [field]: value })); if (field === "birthPlace") setLocations((current) => ({ ...current, astro: null })); setErrors((e) => ({ ...e, [field]: undefined })); }} resolve={(location) => setLocations((current) => ({ ...current, astro: location }))} /> : null}
               {family === "number" ? <NumberFields kind={kind as NumberKind} values={number} errors={errors} labels={labels} set={(field, value) => { setNumber((current) => ({ ...current, [field]: value })); setErrors((e) => ({ ...e, [field]: undefined })); }} /> : null}
               {family === "match" ? <MatchFields bride={bride} groom={groom} errors={errors} labels={labels} setBride={(field, value) => { setBride((current) => ({ ...current, [field]: value })); if (field === "birthPlace") setLocations((current) => ({ ...current, bride: null })); setErrors((e) => ({ ...e, [`bride.${field}`]: undefined })); }} setGroom={(field, value) => { setGroom((current) => ({ ...current, [field]: value })); if (field === "birthPlace") setLocations((current) => ({ ...current, groom: null })); setErrors((e) => ({ ...e, [`groom.${field}`]: undefined })); }} resolve={(key, location) => setLocations((current) => ({ ...current, [key]: location }))} /> : null}
-              {message ? <p className="rounded-xl border border-[#ef4444]/35 bg-[#ef4444]/10 p-3 text-sm text-[#fecaca]">{message}</p> : null}
-              <Button type="submit" disabled={loading} className="bg-[#009b72] text-white hover:bg-[#008766]">{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}{labels.calculate}</Button>
+              {message ? <p className="rounded-xl border border-[#ef4444]/35 bg-[#ef4444]/10 p-3 text-sm text-[#ef4444]">{message}</p> : null}
+              <Button type="submit" disabled={loading} className="bg-gradient-to-r from-[#d89a2b] to-[#b97810] text-white shadow-[0_2px_8px_rgba(216,154,43,0.18)] hover:-translate-y-0.5 transition-all">{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}{labels.calculate}</Button>
             </form>
           </CardContent></Card>
         </div>

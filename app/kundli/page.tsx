@@ -14,8 +14,8 @@ export default function KundliPage() {
   return (
     <main className="inner-page-shell star-field">
       <Section first>
-        <h1 className="font-cinzel text-4xl font-black">Kundli Generator</h1>
-        <p className="mt-3 max-w-2xl naksh-muted-text">Generate planets, houses, lagna, navamsa, dashas, yogas, doshas, manglik analysis, panchang details, and PDF-ready report data.</p>
+        <h1 className="font-cinzel text-4xl font-black text-white">Kundli Generator</h1>
+        <p className="mt-3 max-w-2xl text-slate-300">Generate planets, houses, lagna, navamsa, dashas, yogas, doshas, manglik analysis, panchang details, and PDF-ready report data.</p>
         <div className="mt-8">
           <KundliForm />
         </div>
