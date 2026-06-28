@@ -8,9 +8,11 @@ export function AppBackgroundScene() {
     <div
       className="fixed inset-0 w-full h-full pointer-events-none select-none z-0"
       style={{
-        background: "radial-gradient(circle at 50% 40%, #17132e 0%, #0d0918 50%, #040206 100%)",
+        background: "radial-gradient(circle at 12% 18%, rgba(242,197,107,0.22), transparent 24%), radial-gradient(circle at 72% 26%, rgba(216,154,43,0.24), transparent 28%), radial-gradient(circle at 50% 75%, rgba(255,220,170,0.14), transparent 38%), linear-gradient(135deg, #181827 0%, #2d2835 42%, #120f18 100%)",
       }}
     >
+      {/* Layer 2 — Soft Atmosphere Veil */}
+      <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-[2px] pointer-events-none z-10" />
       {/* Concentric subtle background orbits for luxury visual depth */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
         <div className="w-[320px] h-[320px] rounded-full border border-white/5" />

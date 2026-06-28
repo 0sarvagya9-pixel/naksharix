@@ -58,7 +58,7 @@ export function MainNav() {
 
   return (
     <div className="sticky top-0 z-50 w-full">
-      <header className="w-full border-b border-[rgba(255,255,255,0.30)] bg-[rgba(18,20,30,0.40)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_15px_45px_rgba(0,0,0,0.2)] backdrop-blur-[28px] transition-all duration-300">
+      <header className="w-full border-b border-[rgba(255,255,255,0.24)] bg-[rgba(25,27,38,0.34)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_15px_45px_rgba(0,0,0,0.2)] backdrop-blur-[24px] saturate-[145%] transition-all duration-300">
         <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
           <div className="flex min-w-[14rem] flex-shrink-0 items-center">
             <BrandLogo className="max-w-full" />
@@ -73,8 +73,8 @@ export function MainNav() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-lg px-3 py-1.5 text-sm font-semibold text-[#e2e8f0] transition hover:bg-white/10 hover:text-white",
-                    active ? "bg-[rgba(216,154,43,0.12)] text-[#f2c56b] font-bold border border-[rgba(216,154,43,0.35)]" : ""
+                    "px-3 py-1 text-sm font-semibold text-[rgba(255,255,255,0.82)] transition hover:text-white",
+                    active ? "text-[#f2c56b] font-bold border-b-2 border-[#f2c56b] rounded-none px-1 py-0.5" : ""
                   )}
                 >
                   {item.label}
@@ -84,7 +84,7 @@ export function MainNav() {
             <div className="group relative">
               <button
                 type="button"
-                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#e2e8f0] transition hover:bg-white/10 hover:text-white"
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[rgba(255,255,255,0.82)] transition hover:text-white"
               >
                 More
               </button>
@@ -111,8 +111,15 @@ export function MainNav() {
             <AuthProfileMenu />
             <Link
               href="/kundli"
-              className="hidden xl:inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#f2c56b] to-[#c98924] px-4 py-2 text-xs font-bold text-slate-950 shadow-[0_2px_8px_rgba(242,197,107,0.18)] hover:shadow-[0_4px_12px_rgba(242,197,107,0.3)] hover:-translate-y-0.5 transition-all duration-200"
-              style={{ textDecoration: "none" }}
+              className="hidden xl:inline-flex items-center justify-center px-4 font-bold text-xs hover:-translate-y-0.5 transition-all duration-200"
+              style={{
+                background: "linear-gradient(135deg, #f7d17a, #c98924)",
+                color: "#17181d",
+                height: "38px",
+                borderRadius: "14px",
+                boxShadow: "0 10px 28px rgba(201,137,36,0.28)",
+                textDecoration: "none"
+              }}
             >
               Get Started
             </Link>
