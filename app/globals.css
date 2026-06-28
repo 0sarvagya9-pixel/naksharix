@@ -10,12 +10,12 @@
   /* Core palette */
   --nx-bg:             #f7f7f8;
   --nx-bg-soft:        #fbfbfc;
-  --nx-glass:          rgba(255, 255, 255, 0.68);
-  --nx-glass-strong:   rgba(255, 255, 255, 0.82);
-  --nx-border:         rgba(20, 20, 20, 0.08);
-  --nx-border-solid:   #e2e2e4;
-  --nx-shadow:         0 8px 30px rgba(0, 0, 0, 0.04);
-  --nx-shadow-md:      0 16px 40px rgba(0, 0, 0, 0.06);
+  --nx-glass:          rgba(255, 255, 255, 0.72);
+  --nx-glass-strong:   rgba(255, 255, 255, 0.86);
+  --nx-border:         rgba(20, 20, 20, 0.06);
+  --nx-border-solid:   #f0f0f2;
+  --nx-shadow:         0 8px 32px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.01);
+  --nx-shadow-md:      0 16px 48px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.02);
   --nx-text:           #1e1e1f;
   --nx-muted:          #66666b;
   --nx-accent:         #e6941a;
@@ -164,22 +164,31 @@ body > * { position: relative; z-index: 1; }
 .inner-card,
 .naksh-card {
   background: var(--nx-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--nx-border);
-  box-shadow: var(--nx-shadow), inset 0 1px 0 rgba(255,255,255,0.7);
-  border-radius: 16px;
+  box-shadow: var(--nx-shadow), inset 0 1px 0 rgba(255,255,255,0.9);
+  border-radius: 12px;
   color: var(--nx-text);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass:hover,
+.glass-card:hover,
+.luxury-panel:hover,
+.naksh-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255,255,255,0.95);
 }
 
 .glass-strong,
 .glass-panel {
   background: var(--nx-glass-strong);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
   border: 1px solid var(--nx-border);
-  box-shadow: var(--nx-shadow-md), inset 0 1px 0 rgba(255,255,255,0.8);
-  border-radius: 20px;
+  box-shadow: var(--nx-shadow-md), inset 0 1px 0 rgba(255,255,255,0.95);
+  border-radius: 16px;
 }
 
 /* ============================================================

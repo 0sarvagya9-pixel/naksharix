@@ -110,10 +110,10 @@ export function MainNav() {
           <AuthProfileMenu />
           <Link
             href="/kundli"
-            className="hidden xl:inline-flex items-center gap-1.5 rounded-lg bg-[#e6941a] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#c97308]"
+            className="hidden xl:inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-[#e6941a] to-[#d48c15] px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_2px_8px_rgba(230,148,26,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(230,148,26,0.28)]"
             style={{ textDecoration: "none" }}
           >
-            Get Started →
+            Get Started
           </Link>
           <Button
             ref={menuButtonRef}

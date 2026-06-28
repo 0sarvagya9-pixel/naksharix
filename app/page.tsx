@@ -12,7 +12,7 @@ export const metadata: Metadata = seo({
 
 export default function HomePage() {
   return (
-    <main className="overflow-hidden" style={{ background: "#FFF8EA", color: "#2F2418" }}>
+    <main className="overflow-hidden bg-[var(--nx-bg)] text-[var(--nx-text)]">
       <NxHome />
     </main>
   );

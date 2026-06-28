@@ -5,9 +5,8 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        // Light saffron glassmorphism card
-        "rounded-xl border border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.68)] backdrop-blur-[20px] text-[#1e1e1f]",
-        "shadow-[0_8px_30px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.7)]",
+        "rounded-xl border border-[rgba(20,20,20,0.06)] bg-[rgba(255,255,255,0.72)] backdrop-blur-[24px] text-[#1e1e1f] transition-all duration-300",
+        "shadow-[0_8px_32px_rgba(0,0,0,0.04),0_1.5px_2px_rgba(0,0,0,0.01),inset_0_1px_0_rgba(255,255,255,0.9)]",
         className
       )}
       {...props}

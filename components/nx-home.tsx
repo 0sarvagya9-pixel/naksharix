@@ -64,118 +64,120 @@ export function NxHome() {
     <div className="min-h-screen py-6 bg-[#f7f7f8] flex flex-col gap-6">
 
       {/* 1. First Fold Functional Section (not hero) */}
-      <section className="px-4 sm:px-8 xl:px-12 pt-6">
+      <section className="px-4 sm:px-8 xl:px-12 pt-8">
         <div className="mx-auto max-w-[1440px]">
-          <div className="mb-6">
-            <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#e6941a] bg-[rgba(230,148,26,0.06)] px-2.5 py-1 rounded">
-              Cosmic Dashboard
+          <div className="mb-8 max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.20em] text-[#e6941a] bg-[rgba(230,148,26,0.06)] border border-[rgba(230,148,26,0.12)]">
+              <Sparkles size={11} className="animate-pulse" /> Cosmic Dashboard
             </span>
-            <h1 className="mt-2 font-cinzel text-3xl font-bold tracking-tight text-[#1e1e1f] sm:text-4xl">
-              Ancient Wisdom. Modern Clarity.
+            <h1 className="mt-4 font-cinzel text-3xl font-black tracking-tight text-[#1e1e1f] sm:text-4xl leading-tight">
+              Ancient Wisdom. <span className="bg-gradient-to-r from-[#e6941a] to-[#d48c15] bg-clip-text text-transparent">Modern Clarity.</span>
             </h1>
-            <p className="mt-1 text-sm text-[#66666b]">
-              Naksharix cosmic coordinates — calculated with sub-second accuracy.
+            <p className="mt-2 text-sm text-[#66666b] font-medium leading-relaxed">
+              Naksharix cosmic coordinates — calculated with sub-second accuracy using Vedic AstroEngine 2.0.
             </p>
           </div>
 
-          {/* DASHBOARD PREVIEW CARDS */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* TODAY'S HIGHLIGHTS */}
-            <div className="glass-card p-6 flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <Moon size={15} style={{ color: "#e6941a" }} />
-                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.20em", color: "#e6941a", textTransform: "uppercase" }}>
-                  Today&apos;s Highlights
-                </span>
-              </div>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "#1e1e1f" }}>Sunday · Shukla Paksha</p>
-              {[
-                { icon: "🌙", label: "Moon in Scorpio" },
-                { icon: "⚡", label: "Ravana Nakshatra" },
-                { icon: "🌟", label: "Panchami Tithi" },
-                { icon: "🔴", label: "Rahu Kaal: 04:19 – 06:00 PM" },
-              ].map(({ icon, label }) => (
-                <div key={label} className="flex items-center gap-2">
-                  <span className="text-sm">{icon}</span>
-                  <span style={{ fontSize: 13, color: "#1e1e1f", fontWeight: 600 }}>{label}</span>
+          {/* DASHBOARD PREVIEW CARDS CONTAINER */}
+          <div className="rounded-2xl border border-[rgba(20,20,20,0.05)] bg-[rgba(255,255,255,0.32)] p-6 backdrop-blur-md">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* TODAY'S HIGHLIGHTS */}
+              <div className="glass-card p-6 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <Moon size={15} style={{ color: "#e6941a" }} />
+                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.20em", color: "#e6941a", textTransform: "uppercase" }}>
+                    Today&apos;s Highlights
+                  </span>
                 </div>
-              ))}
-              <Link
-                href="/panchang"
-                className="saffron-button mt-1"
-                style={{ fontSize: 13, padding: "9px 18px", borderRadius: 10 }}
-              >
-                View Full Panchang
-              </Link>
-            </div>
-
-            {/* YOUR COSMIC BLUEPRINT */}
-            <div className="glass-card p-6 flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <Star size={15} style={{ color: "#e6941a" }} />
-                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.20em", color: "#e6941a", textTransform: "uppercase" }}>
-                  Cosmic Blueprint
-                </span>
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 900, color: "#1e1e1f", fontFamily: "var(--font-cinzel), serif" }}>
-                Namaste, Ananya ✨
-              </span>
-              <div className="grid grid-cols-3 gap-2">
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#1e1e1f" }}>Sunday · Shukla Paksha</p>
                 {[
-                  { sign: "♈", name: "Aries",   label: "Sun" },
-                  { sign: "♏", name: "Scorpio", label: "Moon" },
-                  { sign: "♌", name: "Leo",     label: "Ascendant" },
-                ].map(({ sign, name, label }) => (
-                  <div
-                    key={label}
-                    className="flex flex-col items-center gap-1 p-2 rounded-xl"
-                    style={{ background: "rgba(230,148,26,0.06)", border: "1px solid rgba(20,20,20,0.06)" }}
-                  >
-                    <span style={{ fontSize: 20, color: "#e6941a" }}>{sign}</span>
-                    <span style={{ fontSize: 10, fontWeight: 800, color: "#1e1e1f" }}>{name}</span>
-                    <span style={{ fontSize: 9, color: "#66666b", textTransform: "uppercase", letterSpacing: "0.10em" }}>{label}</span>
+                  { icon: "🌙", label: "Moon in Scorpio" },
+                  { icon: "⚡", label: "Ravana Nakshatra" },
+                  { icon: "🌟", label: "Panchami Tithi" },
+                  { icon: "🔴", label: "Rahu Kaal: 04:19 – 06:00 PM" },
+                ].map(({ icon, label }) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <span className="text-sm">{icon}</span>
+                    <span style={{ fontSize: 13, color: "#1e1e1f", fontWeight: 600 }}>{label}</span>
                   </div>
                 ))}
-              </div>
-              <p className="font-cinzel text-center italic" style={{ fontSize: 11, color: "#66666b" }}>
-                &ldquo;The stars incline, they do not bind.&rdquo;
-              </p>
-              <Link
-                href="/kundli"
-                className="saffron-button mt-1"
-                style={{ fontSize: 13, padding: "9px 18px", borderRadius: 10 }}
-              >
-                View My Kundli <ArrowRight size={13} />
-              </Link>
-            </div>
-
-            {/* DAILY HOROSCOPE */}
-            <div className="glass-card p-6 flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <Sun size={15} style={{ color: "#e6941a" }} />
-                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.20em", color: "#e6941a", textTransform: "uppercase" }}>
-                  Daily Horoscope
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span style={{ fontSize: 32, color: "#e6941a" }}>♈</span>
-                <span style={{ fontSize: 22, fontWeight: 900, color: "#1e1e1f", fontFamily: "var(--font-cinzel), serif" }}>Aries</span>
-              </div>
-              <p style={{ fontSize: 13, color: "#66666b", lineHeight: 1.75, fontWeight: 500 }}>
-                Today is filled with motivation and positive energy. Focus on your
-                goals and trust your instincts for best results.
-              </p>
-              <div className="flex items-center justify-between mt-1">
                 <Link
-                  href="/daily-horoscope"
-                  style={{ fontSize: 13, fontWeight: 800, color: "#e6941a", textDecoration: "none" }}
+                  href="/panchang"
+                  className="saffron-button mt-1"
+                  style={{ fontSize: 13, padding: "9px 18px", borderRadius: 10 }}
                 >
-                  Read Full →
+                  View Full Panchang
                 </Link>
-                <div className="flex items-center gap-1" style={{ fontSize: 11, color: "#66666b" }}>
-                  <ChevronLeft size={13} />
-                  <span>1 / 12</span>
-                  <ChevronRight size={13} />
+              </div>
+
+              {/* YOUR COSMIC BLUEPRINT */}
+              <div className="glass-card p-6 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <Star size={15} style={{ color: "#e6941a" }} />
+                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.20em", color: "#e6941a", textTransform: "uppercase" }}>
+                    Cosmic Blueprint
+                  </span>
+                </div>
+                <span style={{ fontSize: 18, fontWeight: 900, color: "#1e1e1f", fontFamily: "var(--font-cinzel), serif" }}>
+                  Namaste, Ananya ✨
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { sign: "♈", name: "Aries",   label: "Sun" },
+                    { sign: "♏", name: "Scorpio", label: "Moon" },
+                    { sign: "♌", name: "Leo",     label: "Ascendant" },
+                  ].map(({ sign, name, label }) => (
+                    <div
+                      key={label}
+                      className="flex flex-col items-center gap-1 p-2 rounded-xl"
+                      style={{ background: "rgba(230,148,26,0.06)", border: "1px solid rgba(20,20,20,0.06)" }}
+                    >
+                      <span style={{ fontSize: 20, color: "#e6941a" }}>{sign}</span>
+                      <span style={{ fontSize: 10, fontWeight: 800, color: "#1e1e1f" }}>{name}</span>
+                      <span style={{ fontSize: 9, color: "#66666b", textTransform: "uppercase", letterSpacing: "0.10em" }}>{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="font-cinzel text-center italic" style={{ fontSize: 11, color: "#66666b" }}>
+                  &ldquo;The stars incline, they do not bind.&rdquo;
+                </p>
+                <Link
+                  href="/kundli"
+                  className="saffron-button mt-1"
+                  style={{ fontSize: 13, padding: "9px 18px", borderRadius: 10 }}
+                >
+                  View My Kundli <ArrowRight size={13} />
+                </Link>
+              </div>
+
+              {/* DAILY HOROSCOPE */}
+              <div className="glass-card p-6 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <Sun size={15} style={{ color: "#e6941a" }} />
+                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.20em", color: "#e6941a", textTransform: "uppercase" }}>
+                    Daily Horoscope
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span style={{ fontSize: 32, color: "#e6941a" }}>♈</span>
+                  <span style={{ fontSize: 22, fontWeight: 900, color: "#1e1e1f", fontFamily: "var(--font-cinzel), serif" }}>Aries</span>
+                </div>
+                <p style={{ fontSize: 13, color: "#66666b", lineHeight: 1.75, fontWeight: 500 }}>
+                  Today is filled with motivation and positive energy. Focus on your
+                  goals and trust your instincts for best results.
+                </p>
+                <div className="flex items-center justify-between mt-1">
+                  <Link
+                    href="/daily-horoscope"
+                    style={{ fontSize: 13, fontWeight: 800, color: "#e6941a", textDecoration: "none" }}
+                  >
+                    Read Full →
+                  </Link>
+                  <div className="flex items-center gap-1" style={{ fontSize: 11, color: "#66666b" }}>
+                    <ChevronLeft size={13} />
+                    <span>1 / 12</span>
+                    <ChevronRight size={13} />
+                  </div>
                 </div>
               </div>
             </div>

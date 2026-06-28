@@ -250,7 +250,7 @@ export function AiChatbot() {
               <Label>{tr("suggestedQuestions")}</Label>
               <div className="grid gap-2">
                 {suggestedQuestions.map((question) => (
-                  <button key={question} type="button" onClick={() => send(question)} className="rounded-md border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] p-3 text-left text-sm text-[#ffffff] transition hover:border-[#dca956]/55 hover:text-neutral-800">
+                  <button key={question} type="button" onClick={() => send(question)} className="rounded-md border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] p-3 text-left text-sm text-neutral-800 transition hover:border-[#dca956]/55 hover:bg-[rgba(255,255,255,0.9)]">
                     {question}
                   </button>
                 ))}
@@ -262,7 +262,7 @@ export function AiChatbot() {
             <div className="max-h-[560px] space-y-3 overflow-y-auto rounded-lg border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] p-3">
               {messages.map((message, index) => (
                 <div key={`${message.role}-${index}`} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 ${message.role === "user" ? "bg-[#009b72] text-[#ffffff] shadow-[0_0_24px_rgba(0,245,160,0.14)]" : "bg-[rgba(255, 255, 255, 0.68)] text-[#ffffff]"}`}>
+                  <div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 ${message.role === "user" ? "bg-[#009b72] text-[#ffffff] shadow-[0_0_24px_rgba(0,245,160,0.14)]" : "bg-[rgba(255, 255, 255, 0.68)] text-neutral-800 border border-[rgba(20,20,20,0.06)]"}`}>
                     <div className="mb-1 flex items-center gap-2 text-xs opacity-80">{message.role === "user" ? <UserRound className="h-3 w-3" /> : <Bot className="h-3 w-3" />}{message.role === "user" ? tr("you") : "Naksharix"}</div>
                     {message.content}
                   </div>
@@ -318,7 +318,7 @@ function SetupPanel({
         <Field label={labels.birthTime} error={errors.timeOfBirth}><Input ref={refs.timeRef} type="time" value={profile.timeOfBirth} onChange={(event) => onChange("timeOfBirth", event.target.value)} className={fieldClass(errors.timeOfBirth)} /></Field>
         <Field label={labels.birthPlace} error={errors.birthPlace}><Input ref={refs.placeRef} value={profile.birthPlace} onChange={(event) => onChange("birthPlace", event.target.value)} placeholder={labels.placePlaceholder} className={fieldClass(errors.birthPlace)} /></Field>
         <Field label={labels.category} error={errors.category}>
-          <select value={profile.category} onChange={(event) => onChange("category", event.target.value)} className="h-10 w-full rounded-md border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] px-3 text-sm text-white">
+          <select value={profile.category} onChange={(event) => onChange("category", event.target.value)} className="h-10 w-full rounded-md border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] px-3 text-sm text-[#1e1e1f] outline-none">
             <option value="">{labels.categoryPlaceholder}</option>
             {labels.categories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
           </select>
@@ -350,7 +350,7 @@ function SavedDetailsCard({ labels, profile, onEdit, onClear }: { labels: Return
         {rows.map(([label, value]) => (
           <div key={label} className="flex justify-between gap-4 rounded-md border border-[rgba(20, 20, 20, 0.08)] bg-[rgba(255, 255, 255, 0.68)] px-3 py-2">
             <span className="text-neutral-500">{label}</span>
-            <span className="text-right text-white">{value}</span>
+            <span className="text-right text-[#1e1e1f] font-semibold">{value}</span>
           </div>
         ))}
       </div>
