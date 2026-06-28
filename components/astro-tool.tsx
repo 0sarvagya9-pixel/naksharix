@@ -70,7 +70,7 @@ export function AstroTool({ type }: { type: ToolType }) {
     <Card className="glass overflow-hidden">
       <CardHeader
         className="border-b"
-        style={{ borderColor: "rgba(212,160,55,0.30)", background: "rgba(245,158,11,0.06)" }}
+        style={{ borderColor: "rgba(20, 20, 20, 0.08)", background: "rgba(245,158,11,0.06)" }}
       >
         <CardTitle className="flex items-center gap-2 font-cinzel text-xl sm:text-2xl">
           <Sparkles className="h-5 w-5" style={{ color: "#D97706" }} />
@@ -80,7 +80,7 @@ export function AstroTool({ type }: { type: ToolType }) {
       <CardContent className="p-4 sm:p-6">
         <div
           className="mb-5 grid gap-2 rounded-xl p-1 sm:grid-cols-2"
-          style={{ background: "rgba(255,252,245,0.60)", border: "1px solid rgba(212,160,55,0.28)" }}
+          style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
         >
           <button type="button" onClick={() => setMode("general")} className={`rounded-lg px-4 py-3 font-cinzel text-sm transition ${mode === "general" ? "text-white" : "naksh-muted-text"}`} style={mode === "general" ? { background: "linear-gradient(135deg, #C2410C, #D97706, #F59E0B)" } : {}}>{tr("generalHoroscope")}</button>
           <button type="button" onClick={() => setMode("personalized")} className={`rounded-lg px-4 py-3 font-cinzel text-sm transition ${mode === "personalized" ? "text-white" : "naksh-muted-text"}`} style={mode === "personalized" ? { background: "linear-gradient(135deg, #C2410C, #D97706, #F59E0B)" } : {}}>{tr("personalizedHoroscope")}</button>
@@ -161,7 +161,7 @@ function SelectField({ label, name, options, defaultValue, error }: { label: str
         data-field={name}
         defaultValue={defaultValue}
         className={`h-12 w-full rounded-xl px-3 text-sm font-medium outline-none transition ${errorClass(Boolean(error))}`}
-        style={{ background: "rgba(255,252,245,0.90)", border: "1.5px solid rgba(212,160,55,0.45)", color: "#2F2418" }}
+        style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#2F2418" }}
       >
         {options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
       </select>
@@ -187,7 +187,7 @@ function HoroscopeResultView({ data }: { data: HoroscopeResult }) {
         <MiniCard icon={<Palette />} label={tr("luckyColor")} value={data.luckyColor ?? (isHindi ? "राजसी सुनहरा" : "Royal Gold")} />
         <article
           className="rounded-xl p-5 leading-7 naksh-muted-text"
-          style={{ background: "rgba(255,252,245,0.70)", border: "1px solid rgba(212,160,55,0.28)" }}
+          style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
         >
           <p>{data.content ?? fallbackHoroscope(data.zodiac, data.category, data.locale)}</p>
         </article>
@@ -200,7 +200,7 @@ function MiniCard({ icon, label, value }: { icon: React.ReactElement; label: str
   return (
     <div
       className="rounded-xl p-4"
-      style={{ background: "rgba(255,252,245,0.75)", border: "1px solid rgba(212,160,55,0.30)" }}
+      style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
     >
       <div className="mb-3" style={{ color: "#D97706" }}>{icon}</div>
       <p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p>
@@ -221,7 +221,7 @@ function PersonalizedHoroscopeForm({ values, setValues, resolvedLocation, setRes
           value={values.gender}
           onChange={(event) => update({ gender: event.target.value })}
           className={`h-12 w-full rounded-xl px-3 text-sm outline-none transition ${errorClass(Boolean(errors.gender))}`}
-          style={{ background: "rgba(255,252,245,0.90)", border: "1.5px solid rgba(212,160,55,0.45)", color: "#2F2418" }}
+          style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#2F2418" }}
         >
           <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
           <option value="Female">{tr("genderFemale")}</option>
@@ -237,7 +237,7 @@ function PersonalizedHoroscopeForm({ values, setValues, resolvedLocation, setRes
           value={values.period}
           onChange={(event) => update({ period: event.target.value })}
           className={`h-12 w-full rounded-xl px-3 text-sm outline-none transition ${errorClass(Boolean(errors.period))}`}
-          style={{ background: "rgba(255,252,245,0.90)", border: "1.5px solid rgba(212,160,55,0.45)", color: "#2F2418" }}
+          style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#2F2418" }}
         >
           {periodOptions.map((period) => <option key={period} value={period}>{tr(period)}</option>)}
         </select>
@@ -282,7 +282,7 @@ function PersonalizedHoroscopeView({ data }: { data: PersonalizedResult }) {
       </div>
       <article
         className="rounded-xl p-5 leading-7 naksh-muted-text"
-        style={{ background: "rgba(255,252,245,0.70)", border: "1px solid rgba(212,160,55,0.28)" }}
+        style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
       >
         <h3 className="mb-3 font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>AI Summary</h3>
         <p>{data.aiSummary}</p>
@@ -292,14 +292,14 @@ function PersonalizedHoroscopeView({ data }: { data: PersonalizedResult }) {
           <div
             key={title}
             className="rounded-xl p-4"
-            style={{ background: "rgba(255,252,245,0.70)", border: "1px solid rgba(212,160,55,0.28)" }}
+            style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
           >
             <h3 className="font-semibold" style={{ color: "#D97706" }}>{title}</h3>
             <p className="mt-2 text-sm leading-7 naksh-muted-text">{Array.isArray(value) ? value.join(", ") : value}</p>
           </div>
         ))}
       </div>
-      {data.lockedSections?.length ? <p className="rounded-xl p-4 text-sm" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(212,160,55,0.30)", color: "#D97706" }}>Premium preview: {data.lockedSections.join(", ")}</p> : null}
+      {data.lockedSections?.length ? <p className="rounded-xl p-4 text-sm" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(20, 20, 20, 0.08)", color: "#D97706" }}>Premium preview: {data.lockedSections.join(", ")}</p> : null}
       <p className="text-xs naksh-muted-text">{data.disclaimer}</p>
     </div>
   );

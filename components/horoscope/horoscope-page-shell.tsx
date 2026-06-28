@@ -57,11 +57,11 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
           {/* Selector card */}
           <Card className="h-fit">
             <CardContent className="p-5">
-              <CalendarDays className="h-6 w-6" style={{ color: "#D97706" }} />
+              <CalendarDays className="h-6 w-6" style={{ color: "#e6941a" }} />
               <label
                 htmlFor="horoscope-selector"
                 className="mt-4 block text-sm font-semibold"
-                style={{ color: "#2F2418" }}
+                style={{ color: "#1e1e1f" }}
               >
                 {config.selectorLabel[locale]}
               </label>
@@ -69,12 +69,7 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
                 id="horoscope-selector"
                 value={selected}
                 onChange={(event) => setSelected(event.target.value)}
-                className="mt-3 w-full rounded-xl px-4 py-3 text-sm font-semibold outline-none transition"
-                style={{
-                  background: "rgba(255,252,245,0.90)",
-                  border: "1.5px solid rgba(212,160,55,0.45)",
-                  color: "#2F2418",
-                }}
+                className="mt-3 w-full rounded-lg px-4 py-3 text-sm font-semibold outline-none transition border border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.75)] text-[#1e1e1f]"
               >
                 {options.map((option) => (
                   <option key={option.slug} value={option.slug}>
@@ -85,9 +80,9 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
               <p
                 className="mt-4 rounded-xl p-3 text-xs leading-5"
                 style={{
-                  background: "rgba(255,252,245,0.70)",
-                  border: "1px solid rgba(212,160,55,0.28)",
-                  color: "#7A6145",
+                  background: "rgba(20, 20, 20, 0.03)",
+                  border: "1px solid rgba(20, 20, 20, 0.08)",
+                  color: "#66666b",
                 }}
               >
                 {chinesePage ? labels.chineseNote : numerologyPage ? labels.numberNote : labels.zodiacNote}
@@ -103,20 +98,20 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
             <div
               className="p-6 md:p-8"
               style={{
-                background: "linear-gradient(135deg, rgba(255,248,234,0.96) 0%, rgba(255,243,220,0.90) 100%)",
-                borderBottom: "1px solid rgba(212,160,55,0.30)",
+                background: "linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(247,247,248,0.80) 100%)",
+                borderBottom: "1px solid rgba(20, 20, 20, 0.08)",
               }}
             >
               <p
                 className="text-xs font-semibold uppercase tracking-[0.2em]"
-                style={{ color: "#D97706" }}
+                style={{ color: "#e6941a" }}
               >
                 {selectedOption.labels[locale]}
               </p>
-              <h2 className="mt-2 font-cinzel text-3xl font-black" style={{ color: "#2F2418" }}>
+              <h2 className="mt-2 font-cinzel text-3xl font-black" style={{ color: "#1e1e1f" }}>
                 {content.title}
               </h2>
-              <p className="mt-3 max-w-4xl text-sm leading-7" style={{ color: "#5C4530" }}>
+              <p className="mt-3 max-w-4xl text-sm leading-7" style={{ color: "#66666b" }}>
                 {content.overview}
               </p>
             </div>
@@ -126,16 +121,16 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
               {content.sections.map((section) => (
                 <div
                   key={section.title}
-                  className="rounded-2xl p-5"
+                  className="rounded-xl p-5"
                   style={{
-                    background: "rgba(255,252,245,0.75)",
-                    border: "1px solid rgba(212,160,55,0.30)",
+                    background: "rgba(255,255,255,0.68)",
+                    border: "1px solid rgba(20, 20, 20, 0.08)",
                   }}
                 >
-                  <h3 className="font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>
+                  <h3 className="font-cinzel text-xl font-bold" style={{ color: "#1e1e1f" }}>
                     {localSectionTitle(section.title, locale)}
                   </h3>
-                  <p className="mt-3 text-sm leading-7" style={{ color: "#5C4530" }}>
+                  <p className="mt-3 text-sm leading-7" style={{ color: "#66666b" }}>
                     {section.body}
                   </p>
                 </div>
@@ -145,7 +140,7 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
             {/* Lucky facts */}
             <div
               className="grid gap-4 p-6 md:grid-cols-3 md:p-8"
-              style={{ borderTop: "1px solid rgba(212,160,55,0.25)" }}
+              style={{ borderTop: "1px solid rgba(20, 20, 20, 0.08)" }}
             >
               <MiniFact label={labels.luckyColor}  value={content.luckyColor} />
               <MiniFact label={labels.luckyNumber} value={content.luckyNumber} />
@@ -157,7 +152,7 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
             {/* Dos & Don'ts */}
             <div
               className="grid gap-5 p-6 md:grid-cols-2 md:p-8"
-              style={{ borderTop: "1px solid rgba(212,160,55,0.25)" }}
+              style={{ borderTop: "1px solid rgba(20, 20, 20, 0.08)" }}
             >
               <ListBlock title={labels.dos}   items={content.dos}   positive />
               <ListBlock title={labels.donts} items={content.donts} />
@@ -166,31 +161,31 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
             {/* Trust note */}
             <div
               className="p-6 md:p-8"
-              style={{ borderTop: "1px solid rgba(212,160,55,0.25)" }}
+              style={{ borderTop: "1px solid rgba(20, 20, 20, 0.08)" }}
             >
               <div
-                className="rounded-2xl p-5"
+                className="rounded-xl p-5"
                 style={{
-                  background: "rgba(255,252,245,0.70)",
-                  border: "1px solid rgba(212,160,55,0.30)",
+                  background: "rgba(255,255,255,0.68)",
+                  border: "1px solid rgba(20, 20, 20, 0.08)",
                 }}
               >
                 <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-1 h-5 w-5 shrink-0" style={{ color: "#D97706" }} />
+                  <ShieldCheck className="mt-1 h-5 w-5 shrink-0" style={{ color: "#e6941a" }} />
                   <div>
-                    <h3 className="font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>
+                    <h3 className="font-cinzel text-xl font-bold" style={{ color: "#1e1e1f" }}>
                       {labels.trustTitle}
                     </h3>
-                    <p className="mt-2 text-sm leading-7" style={{ color: "#5C4530" }}>
+                    <p className="mt-2 text-sm leading-7" style={{ color: "#66666b" }}>
                       {labels.trustNote}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-3">
-                      <Button asChild>
-                        <Link href={config.reportHref}>{labels.relatedReport}</Link>
-                      </Button>
-                      <Button variant="outline" asChild>
-                        <Link href="/kundli">{labels.kundliTools}</Link>
-                      </Button>
+                      <Link href={config.reportHref} className="saffron-button" style={{ borderRadius: 10 }}>
+                        {labels.relatedReport}
+                      </Link>
+                      <Link href="/kundli" className="outline-saffron-button" style={{ borderRadius: 10 }}>
+                        {labels.kundliTools}
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -206,11 +201,11 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
 function MiniFact({ label, value }: { label: string; value: string }) {
   return (
     <div
-      className="rounded-2xl p-4"
-      style={{ background: "rgba(255,252,245,0.75)", border: "1px solid rgba(212,160,55,0.30)" }}
+      className="rounded-xl p-4"
+      style={{ background: "rgba(255,255,255,0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
     >
-      <p className="text-xs uppercase tracking-[0.18em]" style={{ color: "#7A6145" }}>{label}</p>
-      <p className="mt-2 font-cinzel text-xl font-bold" style={{ color: "#D97706" }}>{value}</p>
+      <p className="text-xs uppercase tracking-[0.18em]" style={{ color: "#66666b" }}>{label}</p>
+      <p className="mt-2 font-cinzel text-xl font-bold" style={{ color: "#e6941a" }}>{value}</p>
     </div>
   );
 }
@@ -218,11 +213,11 @@ function MiniFact({ label, value }: { label: string; value: string }) {
 function ListBlock({ title, items, positive = false }: { title: string; items: string[]; positive?: boolean }) {
   return (
     <div
-      className="rounded-2xl p-5"
-      style={{ background: "rgba(255,252,245,0.75)", border: "1px solid rgba(212,160,55,0.28)" }}
+      className="rounded-xl p-5"
+      style={{ background: "rgba(255,255,255,0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
     >
-      <h3 className="font-cinzel text-xl font-bold" style={{ color: "#2F2418" }}>{title}</h3>
-      <ul className="mt-4 grid gap-3 text-sm" style={{ color: "#5C4530" }}>
+      <h3 className="font-cinzel text-xl font-bold" style={{ color: "#1e1e1f" }}>{title}</h3>
+      <ul className="mt-4 grid gap-3 text-sm" style={{ color: "#66666b" }}>
         {items.map((item) => (
           <li key={item} className="flex gap-2">
             <CheckCircle2

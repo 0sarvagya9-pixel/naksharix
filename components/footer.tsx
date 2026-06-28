@@ -12,8 +12,8 @@ export function Footer() {
   return (
     <footer
       style={{
-        borderTop: "1px solid rgba(212,160,55,0.35)",
-        background: "linear-gradient(180deg, rgba(255,252,245,0.98) 0%, rgba(255,248,234,1.0) 100%)",
+        borderTop: "1px solid rgba(20, 20, 20, 0.08)",
+        background: "linear-gradient(180deg, rgba(255, 255, 255, 0.68) 0%, rgba(255,248,234,1.0) 100%)",
       }}
     >
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-12">
@@ -58,7 +58,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div
           className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-10 pt-6"
-          style={{ borderTop: "1px solid rgba(212,160,55,0.22)" }}
+          style={{ borderTop: "1px solid rgba(20, 20, 20, 0.08)" }}
         >
           <p style={{ fontSize: 11, color: "#7A6145" }}>
             © {new Date().getFullYear()} Naksharix. All rights reserved.

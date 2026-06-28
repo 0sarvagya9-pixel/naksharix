@@ -76,13 +76,13 @@ export default async function PanchangPage({
                 className="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
                 style={{
                   background: "rgba(245,158,11,0.12)",
-                  border: "1px solid rgba(212,160,55,0.35)",
+                  border: "1px solid rgba(20, 20, 20, 0.08)",
                   color: "#D97706",
                 }}
               >
                 Provider Verified
               </span>
-              <h1 className="mt-4 font-cinzel text-4xl font-black text-[#2F2418] sm:text-5xl">
+              <h1 className="mt-4 font-cinzel text-4xl font-black text-neutral-800 sm:text-5xl">
                 Today&apos;s Panchang
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-8" style={{ color: "#5C4530" }}>
@@ -99,8 +99,8 @@ export default async function PanchangPage({
                     key={label}
                     className="inline-flex items-center gap-2 rounded-full px-4 py-2"
                     style={{
-                      background: "rgba(255,252,245,0.70)",
-                      border: "1px solid rgba(212,160,55,0.30)",
+                      background: "rgba(255, 255, 255, 0.68)",
+                      border: "1px solid rgba(20, 20, 20, 0.08)",
                       color: "#5C4530",
                     }}
                   >
@@ -122,8 +122,8 @@ export default async function PanchangPage({
                       defaultValue={selectedDate}
                       className="h-11 w-full rounded-xl px-3 text-sm outline-none transition"
                       style={{
-                        background: "rgba(255,252,245,0.90)",
-                        border: "1.5px solid rgba(212,160,55,0.45)",
+                        background: "rgba(255, 255, 255, 0.68)",
+                        border: "1.5px solid rgba(20, 20, 20, 0.08)",
                         color: "#2F2418",
                       }}
                     />
@@ -135,8 +135,8 @@ export default async function PanchangPage({
                       defaultValue={selectedCity}
                       className="h-11 w-full rounded-xl px-3 text-sm outline-none transition"
                       style={{
-                        background: "rgba(255,252,245,0.90)",
-                        border: "1.5px solid rgba(212,160,55,0.45)",
+                        background: "rgba(255, 255, 255, 0.68)",
+                        border: "1.5px solid rgba(20, 20, 20, 0.08)",
                         color: "#2F2418",
                       }}
                     >
@@ -212,8 +212,8 @@ function PanchangCard({ title, icon, rows }: { title: string; icon: ReactNode; r
               key={label}
               className="rounded-xl p-3"
               style={{
-                background: "rgba(255,252,245,0.60)",
-                border: "1px solid rgba(212,160,55,0.25)",
+                background: "rgba(255, 255, 255, 0.68)",
+                border: "1px solid rgba(20, 20, 20, 0.08)",
               }}
             >
               <p className="text-xs uppercase tracking-[0.16em]" style={{ color: "#7A6145" }}>

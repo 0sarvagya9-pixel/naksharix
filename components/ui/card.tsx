@@ -6,8 +6,8 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
     <div
       className={cn(
         // Light saffron glassmorphism card
-        "rounded-2xl border border-[rgba(212,160,55,0.35)] bg-[rgba(255,252,245,0.75)] backdrop-blur-[20px] text-[#2F2418]",
-        "shadow-[0_8px_40px_rgba(180,120,20,0.12),inset_0_1px_0_rgba(255,255,255,0.6)]",
+        "rounded-xl border border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.68)] backdrop-blur-[20px] text-[#1e1e1f]",
+        "shadow-[0_8px_30px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.7)]",
         className
       )}
       {...props}
@@ -23,7 +23,7 @@ export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHead
   return (
     <h3
       className={cn(
-        "font-cinzel text-lg font-semibold leading-none tracking-normal text-[#2F2418]",
+        "font-cinzel text-lg font-semibold leading-none tracking-normal text-[#1e1e1f]",
         className
       )}
       {...props}

@@ -8,102 +8,106 @@
    ============================================================ */
 :root {
   /* Core palette */
-  --nx-ivory:          #FFF8EA;
-  --nx-cream:          #FFF3DC;
-  --nx-warm-white:     #FFFCF5;
-  --nx-saffron:        #F59E0B;
-  --nx-dark-saffron:   #D97706;
-  --nx-deep-saffron:   #C2410C;
-  --nx-gold:           #D4A037;
-  --nx-soft-gold:      #F8D98B;
-  --nx-text:           #2F2418;
-  --nx-muted:          #7A6145;
-  --nx-border:         rgba(212, 160, 55, 0.35);
-  --nx-border-solid:   #e7c97a;
-  --nx-glass:          rgba(255, 252, 245, 0.75);
-  --nx-glass-strong:   rgba(255, 248, 234, 0.92);
-  --nx-shadow:         0 8px 40px rgba(180, 120, 20, 0.12);
-  --nx-shadow-md:      0 20px 60px rgba(180, 120, 20, 0.16);
-  --nx-glow:           0 0 40px rgba(245, 158, 11, 0.22);
-  --nx-glow-btn:       0 0 24px rgba(217, 119, 6, 0.45);
-  --nx-header-height:  64px;
+  --nx-bg:             #f7f7f8;
+  --nx-bg-soft:        #fbfbfc;
+  --nx-glass:          rgba(255, 255, 255, 0.68);
+  --nx-glass-strong:   rgba(255, 255, 255, 0.82);
+  --nx-border:         rgba(20, 20, 20, 0.08);
+  --nx-border-solid:   #e2e2e4;
+  --nx-shadow:         0 8px 30px rgba(0, 0, 0, 0.04);
+  --nx-shadow-md:      0 16px 40px rgba(0, 0, 0, 0.06);
+  --nx-text:           #1e1e1f;
+  --nx-muted:          #66666b;
+  --nx-accent:         #e6941a;
+  --nx-accent-deep:    #c97308;
+  --nx-charcoal-glass: rgba(20, 20, 24, 0.78);
+  --nx-charcoal-text:  #ffffff;
 
-  /* Legacy aliases — keep for existing component compatibility */
-  --nx-bg-main:        var(--nx-ivory);
-  --nx-bg-panel:       var(--nx-cream);
-  --nx-bg-card:        var(--nx-warm-white);
-  --nx-border-legacy:  #e7d8be;
+  /* Accent aliases mapping to saffron/gold accents */
+  --nx-saffron:        #e6941a;
+  --nx-dark-saffron:   #c97308;
+  --nx-deep-saffron:   #b86200;
+  --nx-gold:           #c5973c;
+  --nx-soft-gold:      #eddcb4;
+
+  --nx-header-height:  60px;
+
+  /* Legacy compatibility maps */
+  --nx-bg-main:        var(--nx-bg);
+  --nx-bg-panel:       var(--nx-bg-soft);
+  --nx-bg-card:        var(--nx-glass);
+  --nx-border-legacy:  var(--nx-border);
   --nx-gold-hero:      var(--nx-soft-gold);
   --nx-star-gold:      var(--nx-gold);
-  --nx-emerald:        #D97706;
-  --nx-mint:           #F8D98B;
+  --nx-emerald:        var(--nx-accent);
+  --nx-mint:           var(--nx-soft-gold);
   --nx-text-legacy:    var(--nx-text);
   --nx-muted-legacy:   var(--nx-muted);
 
-  /* ShadCN tokens mapped to saffron palette */
-  --background:         42 100% 96%;
-  --foreground:         28 40% 14%;
-  --card:               40 100% 99%;
-  --card-foreground:    28 40% 14%;
-  --primary:            38 91% 45%;
+  /* ShadCN tokens mapped to pure-glass palette */
+  --background:         240 5% 97%;
+  --foreground:         240 3% 12%;
+  --card:               0 0% 100%;
+  --card-foreground:    240 3% 12%;
+  --primary:            38 82% 50%;
   --primary-foreground: 0 0% 100%;
-  --secondary:          35 65% 52%;
-  --secondary-foreground: 0 0% 100%;
-  --muted:              40 80% 94%;
-  --muted-foreground:   30 30% 45%;
-  --accent:             38 91% 45%;
+  --secondary:          240 5% 94%;
+  --secondary-foreground: 240 3% 12%;
+  --muted:              240 5% 96%;
+  --muted-foreground:   240 3% 40%;
+  --accent:             38 82% 50%;
   --accent-foreground:  0 0% 100%;
   --destructive:        359 85% 56%;
   --destructive-foreground: 0 0% 100%;
   --success:            142 71% 38%;
   --success-foreground: 0 0% 100%;
-  --border:             38 52% 78%;
-  --input:              38 52% 78%;
-  --ring:               38 91% 45%;
+  --border:             240 5% 90%;
+  --input:              240 5% 90%;
+  --ring:               38 82% 50%;
   --radius:             0.75rem;
 
   /* Cosmic variables (backwards compat) */
-  --cosmic-950:         var(--nx-ivory);
-  --cosmic-900:         var(--nx-cream);
-  --cosmic-850:         #ffffff;
-  --cosmic-800:         #ffffff;
-  --cosmic-750:         #fff9f0;
-  --cosmic-700:         var(--nx-dark-saffron);
-  --cosmic-purple:      var(--nx-gold);
+  --cosmic-950:         var(--nx-bg);
+  --cosmic-900:         var(--nx-bg-soft);
+  --cosmic-850:         var(--nx-glass);
+  --cosmic-800:         var(--nx-glass-strong);
+  --cosmic-750:         var(--nx-bg-soft);
+  --cosmic-700:         var(--nx-accent);
+  --cosmic-purple:      var(--nx-accent);
   --cosmic-purple-soft: var(--nx-soft-gold);
   --cosmic-gold:        var(--nx-gold);
   --cosmic-gold-soft:   var(--nx-soft-gold);
 
   /* Alias for old code */
-  --color-bg:           var(--nx-ivory);
+  --color-bg:           var(--nx-bg);
   --color-gold:         var(--nx-gold);
   --color-gold-glow:    var(--nx-soft-gold);
-  --color-emerald:      var(--nx-dark-saffron);
-  --color-emerald-dark: #C2410C;
+  --color-emerald:      var(--nx-accent);
+  --color-emerald-dark: var(--nx-accent-deep);
   --color-text:         var(--nx-text);
 }
 
 /* Force light theme — override any dark mode */
 .dark {
-  --background:         42 100% 96%;
-  --foreground:         28 40% 14%;
-  --card:               40 100% 99%;
-  --card-foreground:    28 40% 14%;
-  --primary:            38 91% 45%;
+  --background:         240 5% 97%;
+  --foreground:         240 3% 12%;
+  --card:               0 0% 100%;
+  --card-foreground:    240 3% 12%;
+  --primary:            38 82% 50%;
   --primary-foreground: 0 0% 100%;
-  --secondary:          35 65% 52%;
-  --secondary-foreground: 0 0% 100%;
-  --muted:              40 80% 94%;
-  --muted-foreground:   30 30% 45%;
-  --accent:             38 91% 45%;
+  --secondary:          240 5% 94%;
+  --secondary-foreground: 240 3% 12%;
+  --muted:              240 5% 96%;
+  --muted-foreground:   240 3% 40%;
+  --accent:             38 82% 50%;
   --accent-foreground:  0 0% 100%;
   --destructive:        359 85% 56%;
   --destructive-foreground: 0 0% 100%;
   --success:            142 71% 38%;
   --success-foreground: 0 0% 100%;
-  --border:             38 52% 78%;
-  --input:              38 52% 78%;
-  --ring:               38 91% 45%;
+  --border:             240 5% 90%;
+  --input:              240 5% 90%;
+  --ring:               38 82% 50%;
 }
 
 /* ============================================================
@@ -112,7 +116,7 @@
 * { border-color: hsl(var(--border)); }
 
 html {
-  background: var(--nx-ivory);
+  background: var(--nx-bg);
   color-scheme: light;
   scroll-behavior: smooth;
 }
@@ -121,11 +125,7 @@ body {
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
-  background:
-    radial-gradient(ellipse at 15% 0%,  rgba(245, 158, 11, 0.13), transparent 40%),
-    radial-gradient(ellipse at 88% 20%, rgba(212, 160, 55, 0.10), transparent 36%),
-    radial-gradient(ellipse at 50% 100%, rgba(248, 217, 139, 0.12), transparent 40%),
-    linear-gradient(160deg, #FFFCF5 0%, #FFF8EA 45%, #FFF3DC 100%);
+  background: var(--nx-bg);
   color: var(--nx-text);
   font-family: var(--font-poppins), var(--font-inter), system-ui, sans-serif;
 }
@@ -133,7 +133,7 @@ body {
 body > * { position: relative; z-index: 1; }
 
 ::selection {
-  background: rgba(245, 158, 11, 0.28);
+  background: rgba(230, 148, 26, 0.18);
   color: var(--nx-text);
 }
 
@@ -145,12 +145,9 @@ body > * { position: relative; z-index: 1; }
 .text-balance    { text-wrap: balance; }
 
 .nx-gradient-text {
-  background: linear-gradient(135deg, var(--nx-dark-saffron), var(--nx-gold), var(--nx-saffron));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--nx-text);
 }
-.cosmic-gold-text { color: var(--nx-gold); }
+.cosmic-gold-text { color: var(--nx-accent); }
 
 /* Muted text — used across legacy components */
 .nx-muted-text,
@@ -170,8 +167,8 @@ body > * { position: relative; z-index: 1; }
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--nx-border);
-  box-shadow: var(--nx-shadow), inset 0 1px 0 rgba(255,255,255,0.6);
-  border-radius: 20px;
+  box-shadow: var(--nx-shadow), inset 0 1px 0 rgba(255,255,255,0.7);
+  border-radius: 16px;
   color: var(--nx-text);
 }
 
@@ -180,9 +177,9 @@ body > * { position: relative; z-index: 1; }
   background: var(--nx-glass-strong);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(212, 160, 55, 0.45);
-  box-shadow: var(--nx-shadow-md), inset 0 1px 0 rgba(255,255,255,0.7);
-  border-radius: 24px;
+  border: 1px solid var(--nx-border);
+  box-shadow: var(--nx-shadow-md), inset 0 1px 0 rgba(255,255,255,0.8);
+  border-radius: 20px;
 }
 
 /* ============================================================
@@ -192,9 +189,9 @@ body > * { position: relative; z-index: 1; }
 input.naksh-input,
 textarea.naksh-input,
 select.naksh-input {
-  background: rgba(255, 252, 245, 0.90);
-  border: 1.5px solid rgba(212, 160, 55, 0.45);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1.5px solid var(--nx-border);
+  border-radius: 10px;
   color: var(--nx-text);
   font-family: var(--font-poppins), system-ui, sans-serif;
   font-size: 14px;
@@ -207,8 +204,8 @@ select.naksh-input {
 input.naksh-input:focus,
 textarea.naksh-input:focus,
 select.naksh-input:focus {
-  border-color: var(--nx-dark-saffron);
-  box-shadow: 0 0 0 3px rgba(217,119,6,0.12);
+  border-color: var(--nx-accent);
+  box-shadow: 0 0 0 3px rgba(230, 148, 26, 0.12);
 }
 .naksh-input::placeholder { color: var(--nx-muted); }
 
@@ -216,9 +213,9 @@ select.naksh-input:focus {
 input:not([class*="bg-"]):not([type="radio"]):not([type="checkbox"]):not([type="range"]),
 select:not([class*="bg-"]),
 textarea:not([class*="bg-"]) {
-  background-color: rgba(255, 252, 245, 0.90) !important;
+  background-color: rgba(255, 255, 255, 0.75) !important;
   color: var(--nx-text) !important;
-  border-color: rgba(212, 160, 55, 0.45) !important;
+  border-color: var(--nx-border) !important;
 }
 
 /* Override hardcoded dark-navy form elements in kundli-form and similar */
@@ -226,18 +223,15 @@ textarea:not([class*="bg-"]) {
 [class*="bg-[#020612]"],
 [class*="bg-[#07111f]"],
 [class*="bg-[#0a1628]"] {
-  background-color: rgba(255, 252, 245, 0.85) !important;
+  background-color: var(--nx-glass) !important;
   color: var(--nx-text) !important;
 }
 
 /* Override dark navy borders */
 [class*="border-[#1e293b]"] {
-  border-color: rgba(212, 160, 55, 0.40) !important;
+  border-color: var(--nx-border) !important;
 }
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
 .saffron-button {
   display: inline-flex;
   align-items: center;
@@ -245,21 +239,20 @@ textarea:not([class*="bg-"]) {
   gap: 8px;
   background: linear-gradient(135deg, #C2410C 0%, var(--nx-dark-saffron) 50%, var(--nx-saffron) 100%);
   color: #fff;
-  font-weight: 800;
+  font-weight: 700;
   border: none;
-  border-radius: 50px;
-  padding: 14px 28px;
-  font-size: 15px;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.30);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(230, 148, 26, 0.2);
   letter-spacing: 0.01em;
 }
 .saffron-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--nx-glow-btn), 0 8px 32px rgba(217, 119, 6, 0.35);
-  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(230, 148, 26, 0.28);
 }
 
 .outline-saffron-button {
@@ -267,22 +260,21 @@ textarea:not([class*="bg-"]) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255, 252, 245, 0.80);
+  background: var(--nx-glass);
   backdrop-filter: blur(12px);
-  color: var(--nx-dark-saffron);
-  font-weight: 800;
-  border: 1.5px solid var(--nx-dark-saffron);
-  border-radius: 50px;
-  padding: 13px 26px;
-  font-size: 15px;
+  color: var(--nx-text);
+  font-weight: 700;
+  border: 1px solid var(--nx-border);
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-size: 14px;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 .outline-saffron-button:hover {
-  background: rgba(245, 158, 11, 0.10);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.18);
+  background: rgba(20, 20, 20, 0.03);
+  transform: translateY(-1px);
 }
 
 /* ============================================================
@@ -291,16 +283,16 @@ textarea:not([class*="bg-"]) {
 .section-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(245, 158, 11, 0.10);
-  border: 1px solid rgba(212, 160, 55, 0.35);
-  border-radius: 999px;
-  padding: 6px 16px;
-  color: var(--nx-dark-saffron);
+  gap: 6px;
+  background: rgba(20, 20, 20, 0.04);
+  border: 1px solid var(--nx-border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  color: var(--nx-muted);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.1em;
 }
 
 .section-title {
@@ -323,18 +315,18 @@ textarea:not([class*="bg-"]) {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--nx-border);
-  border-radius: 20px;
+  border-radius: 16px;
   text-align: center;
   cursor: pointer;
   text-decoration: none;
   color: var(--nx-text);
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 20px rgba(180, 120, 20, 0.08);
+  transition: all 0.2s ease;
+  box-shadow: var(--nx-shadow);
 }
 .astrology-tool-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--nx-glow), 0 12px 36px rgba(180, 120, 20, 0.14);
-  border-color: rgba(212, 160, 55, 0.6);
+  transform: translateY(-2px);
+  box-shadow: var(--nx-shadow-md);
+  border-color: rgba(230, 148, 26, 0.3);
 }
 
 /* ============================================================
@@ -346,9 +338,9 @@ textarea:not([class*="bg-"]) {
   align-items: center;
   gap: 4px;
   padding: 14px 12px;
-  background: rgba(255, 252, 245, 0.70);
+  background: var(--nx-glass);
   border: 1px solid var(--nx-border);
-  border-radius: 16px;
+  border-radius: 12px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -361,14 +353,14 @@ textarea:not([class*="bg-"]) {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--nx-border);
-  border-radius: 24px;
+  border-radius: 16px;
   padding: 24px;
   box-shadow: var(--nx-shadow);
   color: var(--nx-text);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .testimonial-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--nx-shadow-md);
 }
 
@@ -376,22 +368,22 @@ textarea:not([class*="bg-"]) {
    PREMIUM CARD
    ============================================================ */
 .premium-card {
-  background: linear-gradient(135deg, rgba(255, 248, 234, 0.96) 0%, rgba(255, 243, 220, 0.92) 100%);
+  background: var(--nx-glass-strong);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1.5px solid rgba(212, 160, 55, 0.5);
-  border-radius: 28px;
-  box-shadow: 0 12px 48px rgba(180, 120, 20, 0.16), inset 0 1px 0 rgba(255,255,255,0.8);
+  border: 1.5px solid var(--nx-border);
+  border-radius: 20px;
+  box-shadow: var(--nx-shadow-md);
 }
 
 /* ============================================================
    FINAL CTA CARD
    ============================================================ */
 .final-cta-card {
-  background: linear-gradient(160deg, rgba(255, 243, 220, 0.96), rgba(255, 248, 234, 0.98));
-  border: 1.5px solid rgba(212, 160, 55, 0.45);
-  border-radius: 32px;
-  box-shadow: 0 20px 60px rgba(180, 120, 20, 0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+  background: var(--nx-glass-strong);
+  border: 1.5px solid var(--nx-border);
+  border-radius: 20px;
+  box-shadow: var(--nx-shadow-md);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -404,10 +396,7 @@ textarea:not([class*="bg-"]) {
 .nx-night-sky,
 .naksh-page-bg {
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 15% 5%,  rgba(245, 158, 11, 0.12), transparent 40%),
-    radial-gradient(ellipse at 85% 15%, rgba(212, 160, 55, 0.10), transparent 36%),
-    linear-gradient(160deg, #FFFCF5 0%, #FFF8EA 45%, #FFF3DC 100%);
+  background: var(--nx-bg);
   color: var(--nx-text);
 }
 
@@ -416,8 +405,9 @@ textarea:not([class*="bg-"]) {
 .star-field *,
 .nx-night-sky *,
 .naksh-page-bg * {
-  --tw-ring-color: rgba(217,119,6,0.3);
+  --tw-ring-color: rgba(230, 148, 26, 0.2);
 }
+
 
 /* ============================================================
    HEADER / NAV — reduced height, proper sticky
@@ -427,15 +417,16 @@ header {
 }
 
 header.sticky {
-  border-color: rgba(212, 160, 55, 0.40) !important;
-  background: rgba(255, 252, 245, 0.94) !important;
-  box-shadow: 0 4px 24px rgba(180, 120, 20, 0.10) !important;
+  border-color: var(--nx-border) !important;
+  background: var(--nx-glass-strong) !important;
+  box-shadow: var(--nx-shadow) !important;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
 header.sticky a,
 header.sticky button { color: var(--nx-text) !important; }
-header.sticky [aria-current="page"] { color: var(--nx-dark-saffron) !important; }
+header.sticky [aria-current="page"] { color: var(--nx-accent) !important; }
+
 
 /* ============================================================
    INNER PAGE CONTENT — offset for sticky header
