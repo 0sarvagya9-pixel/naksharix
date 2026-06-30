@@ -37,25 +37,32 @@ export function VimshottariDashaTimeline({
   }
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_16%_8%,rgba(220,169,86,0.13),transparent_24rem),linear-gradient(135deg,#0a1224,#020612_82%)] p-5 shadow-[0_24px_80px_rgba(2,6,18,0.45)]">
-      <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full border border-[#dca956]/20" />
+    <section
+      className="relative overflow-hidden rounded-2xl p-5 shadow-[0_24px_80px_rgba(2,6,18,0.15)]"
+      style={{
+        background: "rgba(255, 255, 255, 0.12)",
+        backdropFilter: "blur(10px) saturate(125%)",
+        border: "1px solid rgba(255, 255, 255, 0.42)",
+      }}
+    >
+      <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full border border-[rgba(255,255,255,0.15)]" />
       <div className="relative mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#dca956]">{labels.engine}</p>
-          <h3 className="font-cinzel text-2xl font-black text-[#f3d382]">{labels.title}</h3>
+          <p className="font-cinzel text-xs uppercase tracking-[0.28em] text-[#f2c56b]">{labels.engine}</p>
+          <h3 className="font-cinzel text-2xl font-black text-[#fffaf0]">{labels.title}</h3>
         </div>
-        <div className="h-px flex-1 bg-gradient-to-r from-[#dca956]/60 via-[#00f5a0]/20 to-transparent sm:max-w-xs" />
+        <div className="h-px flex-1 bg-gradient-to-r from-[#f2c56b]/60 via-[rgba(255,255,255,0.2)] to-transparent sm:max-w-xs" />
       </div>
 
       {periods.length ? (
         <div className="relative grid gap-3">
-          <div className="absolute bottom-2 left-[1.05rem] top-2 w-px bg-gradient-to-b from-[#dca956]/45 via-[#00f5a0]/20 to-transparent" />
+          <div className="absolute bottom-2 left-[1.05rem] top-2 w-px bg-gradient-to-b from-[#c98924]/45 via-[#f2c56b]/20 to-transparent" />
           {periods.map((period) => (
             <DashaRow key={period.id} period={period} labels={labels} open={open} onToggle={toggle} level={0} />
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-[#1e293b] bg-[#0f1c3a]/85 p-5 text-sm naksh-muted-text">
+        <div className="rounded-xl p-5 text-sm" style={{ background: "rgba(255, 255, 255, 0.64)", border: "1px solid rgba(255, 255, 255, 0.56)", color: "#525866" }}>
           {labels.notAvailable}
         </div>
       )}
@@ -83,10 +90,18 @@ function DashaRow({
   return (
     <div className={cn("relative", level > 0 && "ml-8")}>
       <div className="relative z-10 flex gap-3">
-        <span className={cn("mt-3 grid h-9 w-9 shrink-0 place-items-center rounded-full border text-[#dca956] shadow-[0_0_22px_rgba(220,169,86,0.12)]", level === 0 ? "border-[#dca956]/40 bg-[#dca956]/10" : "border-[#00f5a0]/20 bg-[#00f5a0]/10")}>
+        <span className={cn("mt-3 grid h-9 w-9 shrink-0 place-items-center rounded-full border text-[#c98924] shadow-[0_0_22px_rgba(201,137,36,0.12)]", level === 0 ? "border-[#c98924]/40 bg-[#c98924]/10" : "border-[#c98924]/20 bg-[#c98924]/5")}>
           {level === 0 ? <Sparkles className="h-4 w-4" /> : <Clock3 className="h-4 w-4" />}
         </span>
-        <div className="min-w-0 flex-1 rounded-xl border border-[#1e293b] bg-[#0f1c3a]/85 p-4 backdrop-blur transition hover:border-[#dca956]/40 hover:bg-[#102247]">
+        <div
+          className="min-w-0 flex-1 rounded-xl p-4 transition-all duration-300 hover:border-[#c98924]/40"
+          style={{
+            background: "rgba(255, 255, 255, 0.64)",
+            backdropFilter: "blur(10px) saturate(130%)",
+            border: "1px solid rgba(255, 255, 255, 0.56)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 16px 48px rgba(0,0,0,0.14)"
+          }}
+        >
           <button
             type="button"
             onClick={() => hasChildren && onToggle(period.id)}
@@ -94,36 +109,36 @@ function DashaRow({
             aria-expanded={hasChildren ? expanded : undefined}
           >
             <span className="min-w-0">
-              <span className="block font-cinzel text-lg font-bold text-[#f3d382]">
+              <span className="block font-cinzel text-lg font-bold text-[#17181d]">
                 {translatePlanet(period.planet, labels.language) || labels.unknownPlanet}
               </span>
-              <span className="mt-1 block text-xs uppercase tracking-[0.14em] naksh-muted-text">
+              <span className="mt-1 block text-xs uppercase tracking-[0.14em]" style={{ color: "#525866" }}>
                 {level === 0 ? labels.mahadasha : labels.antardasha}
               </span>
             </span>
             {hasChildren ? (
-              <span className="mt-1 rounded-full border border-[#1e293b] bg-[#020612]/55 p-1 text-[#f3d382]">
+              <span className="mt-1 rounded-full border border-[rgba(255,255,255,0.40)] bg-[rgba(255,255,255,0.70)] p-1 text-[#c98924]">
                 {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </span>
             ) : null}
           </button>
           <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
             <div>
-              <p className="text-sm naksh-muted-text">
+              <p className="text-sm font-semibold" style={{ color: "#525866" }}>
                 {formatDate(period.startDate, labels.language)} - {formatDate(period.endDate, labels.language)}
               </p>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#020612]/70">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#009b72] via-[#00f5a0] to-[#dca956]" style={{ width: `${progress}%` }} />
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#e2e8f0]">
+                <div className="h-full rounded-full bg-gradient-to-r from-[#f2c56b] to-[#c98924]" style={{ width: `${progress}%` }} />
               </div>
             </div>
-            <span className="rounded-full border border-[#dca956]/25 bg-[#dca956]/10 px-3 py-1 text-xs font-semibold text-[#f3d382]">
+            <span className="rounded-full border border-[#c98924]/25 bg-[#c98924]/10 px-3 py-1 text-xs font-semibold text-[#c98924]">
               {progress}% {labels.elapsed}
             </span>
           </div>
           {hasChildren && expanded ? (
             <div className="mt-4 grid gap-3">
               {period.children.map((child) => (
-                <DashaRow key={child.id} period={child} labels={labels} open={open} onToggle={onToggle} level={Math.min(level + 1, 4)} />
+                <DashaRow key={child.id} period={child} labels={child.children ? labels : labels} open={open} onToggle={onToggle} level={Math.min(level + 1, 4)} />
               ))}
             </div>
           ) : null}

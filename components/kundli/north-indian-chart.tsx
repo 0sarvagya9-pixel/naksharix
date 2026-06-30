@@ -27,19 +27,24 @@ export function NorthIndianChart({ data, className }: { data: NorthIndianChartDa
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_16%_0%,rgba(220,169,86,0.13),transparent_24rem),linear-gradient(135deg,#0a1224,#020612_82%)] p-4 shadow-[0_22px_70px_rgba(2,6,18,0.44)]",
+        "relative overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.22)] shadow-[0_18px_55px_rgba(0,0,0,0.28)] p-4",
         className
       )}
+      style={{
+        background: "rgba(8,14,30,0.78)",
+        backdropFilter: "blur(10px) saturate(130%)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 18px 55px rgba(0,0,0,0.28)"
+      }}
       onPointerLeave={() => setActiveCell(null)}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="font-cinzel text-xl font-black text-[#ffffff]">{title}</p>
-          <p className="mt-1 text-xs text-[#94a3b8]">
-            {labels.sign}: <span className="font-semibold text-[#f3d382]">{translatedAscendant(data.ascendantSign, data.language)}</span>
+          <p className="font-cinzel text-xl font-black text-[#fffaf0]">{title}</p>
+          <p className="mt-1 text-xs text-[rgba(255,255,255,0.70)]">
+            {labels.sign}: <span className="font-semibold text-[#f2c56b]">{translatedAscendant(data.ascendantSign, data.language)}</span>
           </p>
         </div>
-        <span className="rounded-full border border-[#dca956]/35 bg-[#dca956]/10 px-3 py-1 text-xs font-bold text-[#f3d382]">
+        <span className="rounded-full border border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.06)] px-3 py-1 text-xs font-bold text-[#f2c56b]">
           {data.chartType}
         </span>
       </div>

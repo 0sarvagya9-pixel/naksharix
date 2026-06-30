@@ -69,14 +69,14 @@ export function InteractiveTarot() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#1e293b] bg-[radial-gradient(circle_at_20%_10%,rgba(88,28,135,0.22),transparent_24rem),radial-gradient(circle_at_82%_18%,rgba(0,245,160,0.08),transparent_20rem),linear-gradient(135deg,#0a1224,#020612_88%)] p-4 shadow-[0_24px_80px_rgba(2,6,18,0.45)] sm:p-8">
+    <div className="relative overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.22)] bg-[radial-gradient(circle_at_20%_10%,rgba(88,28,135,0.22),transparent_24rem),radial-gradient(circle_at_82%_18%,rgba(0,245,160,0.08),transparent_20rem),linear-gradient(135deg,#080e1e,#020612_88%)] p-4 shadow-[0_24px_80px_rgba(2,6,18,0.45)] sm:p-8">
       <div className="pointer-events-none absolute inset-0 star-field opacity-40" />
       <div className="relative grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-5">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{tr("interactiveTarot")}</p>
-            <h2 className="mt-3 font-decorative text-4xl font-black text-[#f3d382]">{tr("shuffleCosmicDeck")}</h2>
-            <p className="mt-3 text-sm leading-6 naksh-muted-text">{tr("tarotIntro")}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#f2c56b]">{tr("interactiveTarot")}</p>
+            <h2 className="mt-3 font-decorative text-4xl font-black text-[#fffaf0]">{tr("shuffleCosmicDeck")}</h2>
+            <p className="mt-3 text-sm leading-6 text-[rgba(255,255,255,0.70)]">{tr("tarotIntro")}</p>
           </div>
           <div className="grid gap-3">
             {spreads.map((item) => (
@@ -84,10 +84,14 @@ export function InteractiveTarot() {
                 key={item.id}
                 type="button"
                 onClick={() => { setSpread(item); setStage("setup"); setReading(null); }}
-                className={`rounded-lg border p-4 text-left transition ${spread.id === item.id ? "border-[#dca956]/70 bg-[#dca956]/10 text-[#f3d382]" : "border-[#1e293b] bg-[#0f1c3a]/75 hover:border-[#dca956]/55 hover:bg-[#0f1c3a]"}`}
+                className={`rounded-lg border p-4 text-left transition ${
+                  spread.id === item.id
+                    ? "border-[#f2c56b]/70 bg-[rgba(242,197,107,0.12)] text-[#fffaf0]"
+                    : "border-[rgba(255,255,255,0.18)] bg-[rgba(8,14,30,0.56)] text-[rgba(255,255,255,0.80)] hover:border-[#f2c56b]/55 hover:bg-[rgba(8,14,30,0.78)]"
+                }`}
               >
                 <span className="font-cinzel font-bold">{tr(spreadLabelKey(item.id))}</span>
-                <span className="mt-1 block text-xs naksh-muted-text">{item.positions.map((position) => tr(positionKey(position))).join(" | ")}</span>
+                <span className="mt-1 block text-xs text-[rgba(255,255,255,0.60)]">{item.positions.map((position) => tr(positionKey(position))).join(" | ")}</span>
               </button>
             ))}
           </div>
@@ -96,7 +100,7 @@ export function InteractiveTarot() {
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            <Button onClick={shuffle}><Sparkles className="h-4 w-4" />{tr("shuffle")}</Button>
+            <Button onClick={shuffle} className="bg-[#c98924] text-white hover:bg-[#c98924]/90"><Sparkles className="h-4 w-4" />{tr("shuffle")}</Button>
             <Button variant="outline" disabled={stage === "setup"} onClick={draw}>{tr("drawCards")}</Button>
             <Button variant="secondary" disabled={stage !== "drawn" || loading} onClick={reveal}><WandSparkles className="h-4 w-4" />{loading ? tr("revealing") : tr("reveal")}</Button>
           </div>
@@ -110,10 +114,10 @@ export function InteractiveTarot() {
               return <TarotCardView key={position} position={tr(positionKey(position))} card={card} revealed={stage === "revealed"} index={index} />;
             })}
           </div>
-          <Card className="border-[#1e293b] bg-[#0f1c3a]/85">
+          <Card className="border border-[rgba(255,255,255,0.22)] bg-[rgba(8,14,30,0.88)] shadow-lg">
             <CardContent className="p-5">
-              <p className="font-cinzel text-lg font-bold text-[#f3d382]">{tr("aiInterpretation")}</p>
-              <p className="mt-3 whitespace-pre-line text-sm leading-7 naksh-muted-text">
+              <p className="font-cinzel text-lg font-bold text-[#fffaf0]">{tr("aiInterpretation")}</p>
+              <p className="mt-3 whitespace-pre-line text-sm leading-7 text-[rgba(255,255,255,0.80)]">
                 {reading?.interpretation ?? tr("tarotEmptyInterpretation")}
               </p>
             </CardContent>
@@ -149,20 +153,20 @@ function TarotCardView({ position, card, revealed, index }: { position: string; 
   const { tr } = useLanguage();
   return (
     <motion.div
-      className="min-h-48 rounded-lg border border-[#1e293b] bg-[#0f1c3a]/78 p-4 text-center [transform-style:preserve-3d]"
+      className="min-h-48 rounded-lg border border-[rgba(255,255,255,0.22)] bg-[rgba(8,14,30,0.88)] p-4 text-center [transform-style:preserve-3d]"
       animate={{ rotateY: revealed ? 180 : 0, y: revealed ? 0 : index * 8 }}
       transition={{ duration: 0.7, delay: index * 0.12 }}
     >
       <div className="[backface-visibility:hidden]">
-        <p className="text-xs uppercase tracking-[0.22em] text-[#dca956]">{position}</p>
-        <div className="mx-auto mt-5 grid h-28 w-20 place-items-center rounded-lg border border-[#dca956]/30 bg-[linear-gradient(135deg,rgba(88,28,135,0.76),rgba(220,169,86,0.16))]">
-          <Sparkles className="h-6 w-6 text-[#f3d382]" />
+        <p className="text-xs uppercase tracking-[0.22em] text-[#f2c56b]">{position}</p>
+        <div className="mx-auto mt-5 grid h-28 w-20 place-items-center rounded-lg border border-[rgba(242,197,107,0.30)] bg-[linear-gradient(135deg,rgba(88,28,135,0.76),rgba(242,197,107,0.16))]">
+          <Sparkles className="h-6 w-6 text-[#f2c56b]" />
         </div>
       </div>
       <div className="-mt-40 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-        <p className="text-xs uppercase tracking-[0.22em] text-[#dca956]">{position}</p>
-        <h3 className="mt-10 font-cinzel text-xl font-black text-[#ffffff]">{card?.name ?? tr("mysticCard")}</h3>
-        <p className="mt-2 text-xs naksh-muted-text">{card?.reversed ? tr("reversed") : tr("upright")}</p>
+        <p className="text-xs uppercase tracking-[0.22em] text-[#f2c56b]">{position}</p>
+        <h3 className="mt-10 font-cinzel text-xl font-black text-[#fffaf0]">{card?.name ?? tr("mysticCard")}</h3>
+        <p className="mt-2 text-xs text-[rgba(255,255,255,0.65)]">{card?.reversed ? tr("reversed") : tr("upright")}</p>
       </div>
     </motion.div>
   );

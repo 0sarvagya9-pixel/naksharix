@@ -143,14 +143,29 @@ function PersonPanel({ title, personKey, value, onChange, onResolvedLocation, er
   const { tr } = useLanguage();
   const err = (field: keyof VisiblePerson) => errors[`${personKey}.${field}`];
   return (
-    <Card className="glass overflow-visible">
-      <CardHeader className="border-b border-[#1e293b] bg-[#0a1224]/70">
-        <CardTitle className="font-cinzel text-2xl text-[#f3d382]">{title}</CardTitle>
+    <Card className="overflow-visible">
+      <CardHeader
+        className="border-b"
+        style={{
+          background: "rgba(255, 255, 255, 0.72)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.56)"
+        }}
+      >
+        <CardTitle className="font-cinzel text-2xl text-[#17181d]">{title}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 overflow-visible p-4 sm:grid-cols-2 sm:p-6">
         <Field label={tr("name")} error={err("name")}><Input data-field={`${personKey}.name`} className={errorClass(Boolean(err("name")))} value={value.name} onChange={(event) => onChange({ name: event.target.value })} /></Field>
         <Field label={tr("gender")}>
-          <select value={value.gender} onChange={(event) => onChange({ gender: event.target.value })} className="h-10 w-full rounded-md border border-[#1e293b] bg-[#0f1c3a] px-3 text-sm text-[#ffffff] outline-none transition focus:border-[#dca956] focus:ring-2 focus:ring-[#00f5a0]/20">
+          <select
+            value={value.gender}
+            onChange={(event) => onChange({ gender: event.target.value })}
+            className="h-10 w-full rounded-md border outline-none transition"
+            style={{
+              background: "rgba(255, 255, 255, 0.52)",
+              border: "1px solid rgba(255, 255, 255, 0.50)",
+              color: "#17181d"
+            }}
+          >
             <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
             <option value="Female">{tr("genderFemale")}</option>
             <option value="Male">{tr("genderMale")}</option>
@@ -182,9 +197,15 @@ function MatchResultView({ result }: { result: MatchResult }) {
   const strengths = matchingStrengths(factors, result.gunaMilan?.totalScore ?? result.guna ?? 0, result.manglikComparison?.compatible ?? true, apiLocale);
   const concerns = matchingConcerns(factors, result.gunaMilan?.totalScore ?? result.guna ?? 0, result.manglikComparison?.compatible ?? true, apiLocale);
   return (
-    <Card className="glass overflow-visible">
-      <CardHeader className="border-b border-[#1e293b] bg-[#0a1224]/70">
-        <CardTitle className="font-cinzel text-2xl text-[#f3d382]">{tr("premiumCompatibilityReport")}</CardTitle>
+    <Card className="overflow-visible">
+      <CardHeader
+        className="border-b"
+        style={{
+          background: "rgba(255, 255, 255, 0.72)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.56)"
+        }}
+      >
+        <CardTitle className="font-cinzel text-2xl text-[#17181d]">{tr("premiumCompatibilityReport")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 p-4 sm:p-6">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -193,7 +214,15 @@ function MatchResultView({ result }: { result: MatchResult }) {
           <ScoreCard icon={<ShieldCheck />} label={tr("manglikStatus")} value={result.manglikComparison?.compatible ? tr("balanced") : tr("reviewNeeded")} />
           <ScoreCard icon={<HeartHandshake />} label={tr("overallGuidance")} value={guidanceLabel(result.gunaMilan?.totalScore ?? result.guna ?? 0, apiLocale)} />
         </div>
-        <p className="rounded-xl border border-[#dca956]/25 bg-[#dca956]/10 p-4 text-sm leading-6 text-[#f3d382]">{tr("gunaScoreNote")}</p>
+        <p
+          className="rounded-xl p-4 text-sm leading-6 text-[#c98924]"
+          style={{
+            background: "rgba(255, 255, 255, 0.52)",
+            border: "1px solid rgba(255, 255, 255, 0.50)"
+          }}
+        >
+          {tr("gunaScoreNote")}
+        </p>
         <div className="grid gap-4 lg:grid-cols-2">
           <InsightCard title={tr("brideDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.brideProfile, result.brideChart, tr("notAvailable"), chartSummaryLabels(apiLocale), apiLocale)} />
           <InsightCard title={tr("groomDetails")} icon={<HeartHandshake className="h-4 w-4" />} text={chartSummary(result.groomProfile, result.groomChart, tr("notAvailable"), chartSummaryLabels(apiLocale), apiLocale)} />
@@ -221,28 +250,51 @@ function MatchResultView({ result }: { result: MatchResult }) {
         </div>
         <section>
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="font-semibold text-[#f3d382]">{tr("ashtakootBreakdown")}</h3>
-            <span className="rounded-full border border-[#dca956]/25 bg-[#dca956]/10 px-3 py-1 text-xs text-[#f3d382]">{tr("reportReadyOutput")}</span>
+            <h3 className="font-semibold text-[#17181d]">{tr("ashtakootBreakdown")}</h3>
+            <span
+              className="rounded-full border px-3 py-1 text-xs text-[#c98924]"
+              style={{
+                background: "rgba(255, 255, 255, 0.52)",
+                border: "1px solid rgba(255, 255, 255, 0.50)"
+              }}
+            >
+              {tr("reportReadyOutput")}
+            </span>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {factors.map((factor, index) => (
-              <div key={`${factor.name ?? "factor"}-${index}`} className="rounded-lg border border-[#1e293b] bg-[#0f1c3a]/78 p-4">
+              <div
+                key={`${factor.name ?? "factor"}-${index}`}
+                className="rounded-lg p-4"
+                style={{
+                  background: "rgba(255, 255, 255, 0.52)",
+                  border: "1px solid rgba(255, 255, 255, 0.50)"
+                }}
+              >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="notranslate font-semibold text-[#f3d382]" translate="no">{localizeKootName(factor, apiLocale, tr("notAvailable"))}</p>
+                  <p className="notranslate font-semibold text-[#17181d]" translate="no">{localizeKootName(factor, apiLocale, tr("notAvailable"))}</p>
                   <span className={`rounded-full border px-2 py-1 text-[11px] ${statusPillClass(factor.status)}`}>{localizeStatus(factor.status, apiLocale, safeText(factor.result, tr("notAvailable")))}</span>
                 </div>
-                <p className="mt-2 font-cinzel text-2xl font-black text-[#fbc02d]">{factor.score ?? 0} / {getFactorMax(factor)}</p>
-                <div className="mt-3 grid gap-2 text-xs leading-5 naksh-muted-text">
-                  <p><span className="text-white">{tr("brideDetails")}:</span> {localizeFactorValue(factor, "bride", apiLocale, tr("notAvailable"))}</p>
-                  <p><span className="text-white">{tr("groomDetails")}:</span> {localizeFactorValue(factor, "groom", apiLocale, tr("notAvailable"))}</p>
+                <p className="mt-2 font-cinzel text-2xl font-black text-[#c98924]">{factor.score ?? 0} / {getFactorMax(factor)}</p>
+                <div className="mt-3 grid gap-2 text-xs leading-5 text-[#525866]">
+                  <p><span className="text-[#17181d] font-semibold">{tr("brideDetails")}:</span> {localizeFactorValue(factor, "bride", apiLocale, tr("notAvailable"))}</p>
+                  <p><span className="text-[#17181d] font-semibold">{tr("groomDetails")}:</span> {localizeFactorValue(factor, "groom", apiLocale, tr("notAvailable"))}</p>
                   <p>{localizeMatchingExplanation(factor, apiLocale, tr("notAvailable"))}</p>
-                  <p className="text-[#dca956]">{localizeKootBasis(factor, apiLocale, tr("notAvailable"))}</p>
+                  <p className="text-[#c98924]">{localizeKootBasis(factor, apiLocale, tr("notAvailable"))}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
-        <p className="rounded-xl border border-[#1e293b] bg-[#020612]/72 p-4 text-xs leading-6 text-[#94a3b8]">{safeText(result.disclaimer, tr("notAvailable"))}</p>
+        <p
+          className="rounded-xl p-4 text-xs leading-6 text-[#525866]"
+          style={{
+            background: "rgba(255, 255, 255, 0.52)",
+            border: "1px solid rgba(255, 255, 255, 0.50)"
+          }}
+        >
+          {safeText(result.disclaimer, tr("notAvailable"))}
+        </p>
       </CardContent>
     </Card>
   );

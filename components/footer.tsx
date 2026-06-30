@@ -12,10 +12,10 @@ export function Footer() {
   return (
     <footer
       style={{
-        borderTop: "1px solid rgba(255, 255, 255, 0.58)",
-        background: "rgba(255, 255, 255, 0.64)",
-        backdropFilter: "blur(24px) saturate(145%)",
-        WebkitBackdropFilter: "blur(24px) saturate(145%)"
+        borderTop: "1px solid rgba(255, 255, 255, 0.62)",
+        background: "rgba(255, 255, 255, 0.74)",
+        backdropFilter: "blur(10px) saturate(130%)",
+        WebkitBackdropFilter: "blur(10px) saturate(130%)"
       }}
     >
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-12">

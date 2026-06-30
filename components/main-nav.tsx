@@ -97,14 +97,23 @@ export function MainNav() {
               >
                 More
               </button>
-              <div className="invisible absolute right-0 top-[110%] z-[80] w-64 translate-y-2 rounded-xl border border-[rgba(255,255,255,0.32)] bg-[rgba(20,24,34,0.92)] p-3 opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#d89a2b]">Explore</p>
+              <div
+                className="invisible absolute right-0 top-[120%] z-[100] w-64 translate-y-2 rounded-xl p-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                style={{
+                  background: "rgba(8, 14, 30, 0.94)",
+                  border: "1px solid rgba(255, 255, 255, 0.22)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  boxShadow: "0 20px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12)"
+                }}
+              >
+                <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Explore</p>
                 <div className="grid gap-0.5">
                   {moreLinks.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#fffff0]/90 transition hover:bg-white/10 hover:text-white"
+                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#fffaf0]/80 transition hover:bg-white/10 hover:text-[#fffaf0]"
                     >
                       {item.label}
                     </Link>

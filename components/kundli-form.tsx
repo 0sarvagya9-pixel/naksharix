@@ -220,7 +220,15 @@ export function KundliForm() {
           <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="grid gap-4 sm:grid-cols-2">
             <Field label={tr("name")} error={fieldError("name")}><Input data-field="name" className={errorClass(Boolean(fieldError("name")))} {...form.register("name", { onChange: () => form.clearErrors("name") })} /></Field>
             <Field label={tr("gender")}>
-              <select {...form.register("gender")} className="h-10 w-full rounded-xl px-3 text-sm outline-none transition" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#1b1c22" }}>
+              <select
+                {...form.register("gender")}
+                className="h-10 w-full rounded-xl px-3 text-sm outline-none transition"
+                style={{
+                  background: "rgba(255, 255, 255, 0.52)",
+                  border: "1px solid rgba(255, 255, 255, 0.50)",
+                  color: "#17181d"
+                }}
+              >
                 <option value="Prefer not to say">{tr("genderPreferNotToSay")}</option>
                 <option value="Female">{tr("genderFemale")}</option>
                 <option value="Male">{tr("genderMale")}</option>
@@ -233,7 +241,11 @@ export function KundliForm() {
                 value={form.watch("locale") ?? apiLocale}
                 onChange={(event) => updateLanguage(event.target.value as Locale)}
                 className={`h-10 w-full rounded-xl px-3 text-sm outline-none transition ${errorClass(Boolean(fieldError("locale")))}`}
-                style={{ background: "rgba(255, 255, 255, 0.68)", border: "1.5px solid rgba(20, 20, 20, 0.08)", color: "#1b1c22" }}
+                style={{
+                  background: "rgba(255, 255, 255, 0.52)",
+                  border: "1px solid rgba(255, 255, 255, 0.50)",
+                  color: "#17181d"
+                }}
               >
                 <option value="en">{languageOptionLabel("en", apiLocale)}</option>
                 <option value="hi">{languageOptionLabel("hi", apiLocale)}</option>
@@ -254,7 +266,16 @@ export function KundliForm() {
               placeholder={tr("searchLocationPlaceholder")}
             />
             <div className="flex items-end">
-              <p className="rounded-xl p-3 text-xs leading-5 naksh-muted-text" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><MapPin className="mr-1 inline h-3 w-3" style={{ color: "#d89a2b" }} />{placeStatus}</p>
+              <p
+                className="rounded-xl p-3 text-xs leading-5"
+                style={{
+                  background: "rgba(255, 255, 255, 0.52)",
+                  border: "1px solid rgba(255, 255, 255, 0.50)",
+                  color: "#525866"
+                }}
+              >
+                <MapPin className="mr-1 inline h-3 w-3" style={{ color: "#c98924" }} />{placeStatus}
+              </p>
             </div>
             <Button className="h-12 sm:col-span-2" disabled={form.formState.isSubmitting || generating} size="lg">
               <Sparkles className="h-4 w-4" />
@@ -281,9 +302,15 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 
 function Meta({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="rounded-xl p-3" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}>
-      <p className="text-[11px] uppercase tracking-[0.16em] naksh-muted-text">{label}</p>
-      <p className="mt-1 break-words font-cinzel text-sm font-bold" style={{ color: "#1b1c22" }}>{value || "-"}</p>
+    <div
+      className="rounded-xl p-3"
+      style={{
+        background: "rgba(255, 255, 255, 0.52)",
+        border: "1px solid rgba(255, 255, 255, 0.50)"
+      }}
+    >
+      <p className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "#525866" }}>{label}</p>
+      <p className="mt-1 break-words font-cinzel text-sm font-bold" style={{ color: "#17181d" }}>{value || "-"}</p>
     </div>
   );
 }
@@ -321,12 +348,20 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
   }
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-2xl p-5 sm:p-6" style={{ background: "linear-gradient(135deg, rgba(255,248,234,0.96) 0%, rgba(255,243,220,0.92) 100%)", border: "1.5px solid rgba(20, 20, 20, 0.08)", boxShadow: "0 12px 48px rgba(180,120,20,0.16)" }}>
+      <section
+        className="relative overflow-hidden rounded-2xl p-5 sm:p-6"
+        style={{
+          background: "rgba(255, 255, 255, 0.64)",
+          backdropFilter: "blur(10px) saturate(130%)",
+          border: "1px solid rgba(255, 255, 255, 0.56)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 16px 48px rgba(0,0,0,0.14)"
+        }}
+      >
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="font-cinzel text-xs uppercase tracking-[0.28em]" style={{ color: "#d89a2b" }}>Naksharix</p>
-            <h2 className="mt-2 font-cinzel text-3xl font-black" style={{ color: "#1b1c22" }}>{tr("generatedKundliReport")}</h2>
-            <div className="mt-4 grid gap-2 text-sm naksh-muted-text sm:grid-cols-2 lg:grid-cols-3">
+            <p className="font-cinzel text-xs uppercase tracking-[0.28em]" style={{ color: "#c98924" }}>Naksharix</p>
+            <h2 className="mt-2 font-cinzel text-3xl font-black" style={{ color: "#17181d" }}>{tr("generatedKundliReport")}</h2>
+            <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
               <Meta label={tr("name")} value={result.profile?.name} />
               <Meta label={tr("dateOfBirth")} value={result.birthDetails?.dateOfBirth} />
               <Meta label={tr("timeOfBirth")} value={result.birthDetails?.timeOfBirth} />
@@ -345,10 +380,28 @@ function KundliReport({ result, selectedLanguage, onRegenerate }: { result: Kund
           </div>
         </div>
         {pdfError ? <p className="mt-4 rounded-lg border border-[#FF4D4F]/30 bg-[#FF4D4F]/10 p-3 text-sm text-[#FF4D4F]">{pdfError}</p> : null}
-        {!result.saved ? <div className="mt-4 rounded-xl p-4 text-sm" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p style={{ color: "#1b1c22" }}>{tr("loginToSaveReport")}</p><Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button></div> : null}
+        {!result.saved ? (
+          <div
+            className="mt-4 rounded-xl p-4 text-sm"
+            style={{
+              background: "rgba(255, 255, 255, 0.52)",
+              border: "1px solid rgba(255, 255, 255, 0.50)"
+            }}
+          >
+            <p style={{ color: "#17181d" }}>{tr("loginToSaveReport")}</p>
+            <Button className="mt-3" size="sm" asChild><Link href="/login">{tr("login")}</Link></Button>
+          </div>
+        ) : null}
       </section>
       {result.language && result.language !== selectedLanguage ? (
-        <div className="rounded-xl p-4 text-sm" style={{ background: "rgba(245,158,11,0.10)", border: "1px solid rgba(20, 20, 20, 0.08)", color: "#1b1c22" }}>
+        <div
+          className="rounded-xl p-4 text-sm"
+          style={{
+            background: "rgba(255, 255, 255, 0.52)",
+            border: "1px solid rgba(255, 255, 255, 0.50)",
+            color: "#17181d"
+          }}
+        >
           <p>{tr("reportLanguageMismatch")}</p>
           <Button className="mt-3" size="sm" variant="outline" onClick={onRegenerate}>
             {tr("regenerateReportSelectedLanguage")}
@@ -418,28 +471,28 @@ function CoreAstrologySections({ result, language, fallback }: { result: KundliR
     <div className="grid gap-4 lg:grid-cols-2">
       <InfoPanel title={labels.dasha}>
         {dasha?.available ? (
-          <div className="space-y-2">
-            <p><strong className="text-[#f3d382]">{labels.birthMahadasha}:</strong> {localizedPlanet(dasha.birthMahadasha, language, fallback)}{typeof dasha.birthBalanceYears === "number" ? ` (${dasha.birthBalanceYears.toFixed(2)} ${labels.years})` : ""}</p>
-            <p><strong className="text-[#f3d382]">{labels.currentMahadasha}:</strong> {formatDashaPeriod(currentMaha, language, fallback)}</p>
-            <p><strong className="text-[#f3d382]">{labels.currentAntardasha}:</strong> {formatDashaPeriod(currentAntar, language, fallback)}</p>
+          <div className="space-y-2 text-[#525866]">
+            <p><strong className="text-[#17181d]">{labels.birthMahadasha}:</strong> {localizedPlanet(dasha.birthMahadasha, language, fallback)}{typeof dasha.birthBalanceYears === "number" ? ` (${dasha.birthBalanceYears.toFixed(2)} ${labels.years})` : ""}</p>
+            <p><strong className="text-[#17181d]">{labels.currentMahadasha}:</strong> {formatDashaPeriod(currentMaha, language, fallback)}</p>
+            <p><strong className="text-[#17181d]">{labels.currentAntardasha}:</strong> {formatDashaPeriod(currentAntar, language, fallback)}</p>
           </div>
         ) : <p>{safeText(dasha?.note, labels.dashaMissing)}</p>}
       </InfoPanel>
 
       <InfoPanel title={labels.chalit}>
         {result.chalitChart?.available ? (
-          <div className="space-y-2">
+          <div className="space-y-2 text-[#525866]">
             <p>{result.chalitChart.method}</p>
-            <p><strong className="text-[#f3d382]">{labels.changed}:</strong> {changedPlacements.length ? changedPlacements.map((placement) => `${localizedPlanet(placement.planet, language, fallback)} ${placement.d1House ?? "-"}→${placement.chalitHouse ?? "-"}`).join(", ") : labels.noChanged}</p>
+            <p><strong className="text-[#17181d]">{labels.changed}:</strong> {changedPlacements.length ? changedPlacements.map((placement) => `${localizedPlanet(placement.planet, language, fallback)} ${placement.d1House ?? "-"}→${placement.chalitHouse ?? "-"}`).join(", ") : labels.noChanged}</p>
           </div>
         ) : <p>{safeText(result.chalitChart?.note, labels.chalitMissing)}</p>}
       </InfoPanel>
 
       <InfoPanel title={labels.dosha}>
-        <div className="space-y-2">
-          <p><strong className="text-[#f3d382]">{labels.manglik}:</strong> {safeText(result.doshaAnalysis?.manglik?.severity ?? result.manglikDosha?.severity, fallback)}</p>
+        <div className="space-y-2 text-[#525866]">
+          <p><strong className="text-[#17181d]">{labels.manglik}:</strong> {safeText(result.doshaAnalysis?.manglik?.severity ?? result.manglikDosha?.severity, fallback)}</p>
           <p>{safeText(result.doshaAnalysis?.manglik?.summary ?? result.manglikDosha?.summary, fallback)}</p>
-          <p><strong className="text-[#f3d382]">{labels.kaalSarp}:</strong> {safeText(result.doshaAnalysis?.kaalSarp?.summary ?? result.kaalSarpDosha?.summary, fallback)}</p>
+          <p><strong className="text-[#17181d]">{labels.kaalSarp}:</strong> {safeText(result.doshaAnalysis?.kaalSarp?.summary ?? result.kaalSarpDosha?.summary, fallback)}</p>
         </div>
       </InfoPanel>
 
@@ -447,10 +500,17 @@ function CoreAstrologySections({ result, language, fallback }: { result: KundliR
         {yogas.length ? (
           <div className="space-y-3">
             {yogas.slice(0, 4).map((yoga, index) => (
-              <div key={`${yoga.name ?? "yoga"}-${index}`} className="rounded-lg border border-[#1e293b] bg-[#0a1224] p-3">
-                <p className="font-semibold text-[#f3d382]">{safeText(yoga.name, fallback)}</p>
-                <p>{safeText(yoga.basis, fallback)}</p>
-                <p>{safeText(yoga.interpretation, fallback)}</p>
+              <div
+                key={`${yoga.name ?? "yoga"}-${index}`}
+                className="rounded-lg p-3"
+                style={{
+                  background: "rgba(255, 255, 255, 0.58)",
+                  border: "1px solid rgba(255, 255, 255, 0.62)"
+                }}
+              >
+                <p className="font-semibold text-[#17181d]">{safeText(yoga.name, fallback)}</p>
+                <p className="text-xs text-[#525866] mt-1">{safeText(yoga.basis, fallback)}</p>
+                <p className="text-sm text-[#17181d] mt-1">{safeText(yoga.interpretation, fallback)}</p>
               </div>
             ))}
           </div>
@@ -588,15 +648,58 @@ function localizedSadeSati(sadeSati: KundliResult["sadeSati"], language: Locale,
 
 function GeneratingKundli() {
   const { tr } = useLanguage();
-  return <div className="mt-4 rounded-xl p-4" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p className="font-cinzel font-bold" style={{ color: "#1b1c22" }}><CalendarDays className="mr-2 inline h-4 w-4" style={{ color: "#d89a2b" }} />{tr("generatingKundli")}</p><p className="mt-1 text-sm naksh-muted-text">{tr("kundliIntro")}</p></div>;
+  return (
+    <div
+      className="mt-4 rounded-xl p-4"
+      style={{
+        background: "rgba(255, 255, 255, 0.74)",
+        backdropFilter: "blur(10px) saturate(130%)",
+        border: "1px solid rgba(255, 255, 255, 0.62)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 16px 48px rgba(0,0,0,0.14)"
+      }}
+    >
+      <p className="font-cinzel font-bold" style={{ color: "#17181d" }}>
+        <CalendarDays className="mr-2 inline h-4 w-4" style={{ color: "#c98924" }} />
+        {tr("generatingKundli")}
+      </p>
+      <p className="mt-1 text-sm" style={{ color: "#525866" }}>{tr("kundliIntro")}</p>
+    </div>
+  );
 }
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-xl p-4" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><p className="text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-lg font-bold" style={{ color: "#1b1c22" }}>{value}</p></div>;
+  return (
+    <div
+      className="rounded-xl p-4"
+      style={{
+        background: "rgba(255, 255, 255, 0.74)",
+        backdropFilter: "blur(10px) saturate(130%)",
+        border: "1px solid rgba(255, 255, 255, 0.62)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 16px 48px rgba(0,0,0,0.14)"
+      }}
+    >
+      <p className="text-xs uppercase tracking-[0.18em]" style={{ color: "#525866" }}>{label}</p>
+      <p className="mt-1 font-cinzel text-lg font-bold" style={{ color: "#17181d" }}>{value}</p>
+    </div>
+  );
 }
 
 function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="rounded-xl p-4 text-sm leading-7 naksh-muted-text" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}><h3 className="mb-3 font-semibold" style={{ color: "#1b1c22" }}>{title}</h3>{children}</section>;
+  return (
+    <section
+      className="rounded-xl p-4 text-sm leading-7"
+      style={{
+        background: "rgba(255, 255, 255, 0.74)",
+        backdropFilter: "blur(10px) saturate(130%)",
+        border: "1px solid rgba(255, 255, 255, 0.62)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 16px 48px rgba(0,0,0,0.14)",
+        color: "#525866"
+      }}
+    >
+      <h3 className="mb-3 font-semibold" style={{ color: "#17181d" }}>{title}</h3>
+      {children}
+    </section>
+  );
 }
 
 function round(value: number) {

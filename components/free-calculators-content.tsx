@@ -81,13 +81,30 @@ export function FreeCalculatorsContent() {
   return (
     <main className="inner-page-shell star-field min-h-screen">
       <Section first>
-        <div className="inner-section rounded-3xl border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] backdrop-blur-[24px] p-6 md:p-8 shadow-[0_12px_40px_rgba(20,12,8,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{labels.eyebrow}</p>
-          <h1 className="mt-3 font-cinzel text-4xl font-black text-neutral-800 sm:text-5xl">{labels.title}</h1>
-          <p className="mt-4 max-w-4xl text-base leading-8 text-neutral-600">{labels.subtitle}</p>
+        <div
+          className="inner-section rounded-3xl p-6 md:p-8"
+          style={{
+            background: "rgba(255, 255, 255, 0.74)",
+            backdropFilter: "blur(10px) saturate(130%)",
+            border: "1px solid rgba(255, 255, 255, 0.62)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 16px 48px rgba(0,0,0,0.14)"
+          }}
+        >
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#c98924]">{labels.eyebrow}</p>
+          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#17181d] sm:text-5xl">{labels.title}</h1>
+          <p className="mt-4 max-w-4xl text-base leading-8 text-[#525866]">{labels.subtitle}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {filters.map((item) => (
-              <button key={item} type="button" onClick={() => setFilter(item)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${filter === item ? "border-[#dca956] bg-[#dca956]/15 text-neutral-800" : "border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] text-[#2d313f] hover:border-[#dca956]/50 hover:bg-white/80"}`}>
+              <button
+                key={item}
+                type="button"
+                onClick={() => setFilter(item)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all border ${
+                  filter === item
+                    ? "border-[#c98924] bg-[#c98924]/15 text-[#c98924]"
+                    : "border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.52)] text-[#525866] hover:bg-white/60"
+                }`}
+              >
                 {labels.filters[item]}
               </button>
             ))}
@@ -119,26 +136,33 @@ export function FreeCalculatorsContent() {
 function CalculatorCard({ item, labels, locale }: { item: CalculatorItem; labels: ReturnType<typeof calculatorLabels>; locale: Locale }) {
   const Icon = item.icon;
   const content = (
-    <Card className={`inner-card h-full transition ${item.status === "active" ? "hover:-translate-y-1 hover:border-[#00f5a0]/45" : "opacity-82"}`}>
+    <Card className={`inner-card h-full transition-all duration-300 ${item.status === "active" ? "hover:-translate-y-1 hover:border-[#c98924]/45" : "opacity-80"}`}>
       <CardContent className="flex h-full flex-col p-5">
         <div className="flex items-start justify-between gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-xl border border-[#dca956]/25 bg-[#dca956]/10 text-neutral-800">
+          <span className="grid h-11 w-11 place-items-center rounded-xl border border-[rgba(201,137,36,0.25)] bg-[rgba(201,137,36,0.08)] text-[#c98924]">
             <Icon className="h-5 w-5" />
           </span>
-          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${item.status === "active" ? "border-[#D97706]/40 bg-[#D97706]/10 text-[#D97706]" : "border-[#dca956]/30 bg-[#dca956]/10 text-neutral-800"}`}>
+          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${item.status === "active" ? "border-[rgba(22,163,74,0.35)] bg-[rgba(22,163,74,0.06)] text-[#16a34a]" : "border-[rgba(255,255,255,0.40)] bg-[rgba(255,255,255,0.50)] text-[#525866]"}`}>
             {item.status === "active" ? labels.active : labels.comingSoon}
           </span>
         </div>
-        <h3 className="mt-4 font-cinzel text-xl font-bold text-neutral-800">{item.title[locale]}</h3>
-        <p className="mt-2 text-sm leading-6 text-neutral-600">{item.copy[locale]}</p>
-        <div className="mt-4 rounded-xl p-3 text-xs leading-5" style={{ background: "rgba(255, 255, 255, 0.68)", border: "1px solid rgba(20, 20, 20, 0.08)", color: "#5C4530" }}>
-          <p className="font-semibold text-neutral-800">{labels.requiredDetails}</p>
+        <h3 className="mt-4 font-cinzel text-xl font-bold text-[#17181d]">{item.title[locale]}</h3>
+        <p className="mt-2 text-sm leading-6 text-[#525866]">{item.copy[locale]}</p>
+        <div
+          className="mt-4 rounded-xl p-3 text-xs leading-5"
+          style={{
+            background: "rgba(255, 255, 255, 0.52)",
+            border: "1px solid rgba(255, 255, 255, 0.50)",
+            color: "#525866"
+          }}
+        >
+          <p className="font-semibold text-[#17181d]">{labels.requiredDetails}</p>
           <p className="mt-1">{item.required[locale]}</p>
         </div>
-        <p className="mt-3 text-xs text-[#94a3b8]">{labels.engine}: {item.engine}</p>
+        <p className="mt-3 text-xs text-[#525866]">{labels.engine}: {item.engine}</p>
         <div className="mt-auto pt-5">
           {item.status === "active" && item.href ? (
-            <Button className="w-full bg-[#009b72] text-white hover:bg-[#008766]" asChild><Link href={item.href}>{labels.openCalculator}</Link></Button>
+            <Button className="w-full bg-[#c98924] text-white hover:bg-[#c98924]/90" asChild><Link href={item.href}>{labels.openCalculator}</Link></Button>
           ) : (
             <Button className="w-full cursor-not-allowed" variant="outline" disabled>{labels.comingSoon}</Button>
           )}

@@ -33,14 +33,14 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
         >
           <div>
             <p
-              className="text-sm font-semibold uppercase tracking-[0.22em] text-[#d89a2b]"
+              className="text-sm font-semibold uppercase tracking-[0.22em] text-[#c98924]"
             >
               {labels.eyebrow}
             </p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#1b1c22] sm:text-5xl">
+            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#17181d] sm:text-5xl">
               {config.titles[locale]}
             </h1>
-            <p className="mt-4 max-w-3xl text-base leading-8 text-[#5c6170]">
+            <p className="mt-4 max-w-3xl text-base leading-8 text-[#525866]">
               {config.subtitles[locale]}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -56,10 +56,10 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
           {/* Selector card */}
           <Card className="h-fit">
             <CardContent className="p-5">
-              <CalendarDays className="h-6 w-6 text-[#d89a2b]" />
+              <CalendarDays className="h-6 w-6 text-[#c98924]" />
               <label
                 htmlFor="horoscope-selector"
-                className="mt-4 block text-sm font-semibold text-[#1b1c22]"
+                className="mt-4 block text-sm font-semibold text-[#17181d]"
               >
                 {config.selectorLabel[locale]}
               </label>
@@ -67,7 +67,7 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
                 id="horoscope-selector"
                 value={selected}
                 onChange={(event) => setSelected(event.target.value)}
-                className="mt-3 w-full rounded-lg px-4 py-3 text-sm font-semibold outline-none transition border border-[rgba(255,255,255,0.55)] bg-[rgba(255,255,255,0.72)] text-[#1b1c22] focus:border-[#d89a2b] shadow-sm"
+                className="mt-3 w-full rounded-lg px-4 py-3 text-sm font-semibold outline-none transition border border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.52)] text-[#17181d] focus:border-[#c98924] shadow-sm"
               >
                 {options.map((option) => (
                   <option key={option.slug} value={option.slug}>
@@ -76,7 +76,12 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
                 ))}
               </select>
               <p
-                className="mt-4 rounded-xl p-3 text-xs leading-5 bg-[rgba(216,154,43,0.04)] border border-[rgba(216,154,43,0.12)] text-[#5c6170]"
+                className="mt-4 rounded-xl p-3 text-xs leading-5"
+                style={{
+                  background: "rgba(255, 255, 255, 0.52)",
+                  border: "1px solid rgba(255, 255, 255, 0.50)",
+                  color: "#525866"
+                }}
               >
                 {chinesePage ? labels.chineseNote : numerologyPage ? labels.numberNote : labels.zodiacNote}
               </p>
@@ -89,20 +94,21 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
           <CardContent className="p-0">
             {/* Result header */}
             <div
-              className="p-6 md:p-8 border-b border-[rgba(20,20,20,0.06)]"
+              className="p-6 md:p-8"
               style={{
-                background: "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.84) 100%)",
+                background: "rgba(255, 255, 255, 0.64)",
+                borderBottom: "1px solid rgba(255, 255, 255, 0.56)",
               }}
             >
               <p
-                className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d89a2b]"
+                className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c98924]"
               >
                 {selectedOption.labels[locale]}
               </p>
-              <h2 className="mt-2 font-cinzel text-3xl font-black text-[#1b1c22]">
+              <h2 className="mt-2 font-cinzel text-3xl font-black text-[#17181d]">
                 {content.title}
               </h2>
-              <p className="mt-3 max-w-4xl text-sm leading-7 text-[#5c6170]">
+              <p className="mt-3 max-w-4xl text-sm leading-7 text-[#525866]">
                 {content.overview}
               </p>
             </div>
@@ -112,12 +118,12 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
               {content.sections.map((section) => (
                 <div
                   key={section.title}
-                  className="rounded-xl p-5 border border-white/60 bg-white/40 shadow-sm"
+                  className="rounded-xl p-5 border border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.52)] shadow-sm"
                 >
-                  <h3 className="font-cinzel text-xl font-bold text-[#1b1c22]">
+                  <h3 className="font-cinzel text-xl font-bold text-[#17181d]">
                     {localSectionTitle(section.title, locale)}
                   </h3>
-                  <p className="mt-3 text-sm leading-7 text-[#5c6170]">
+                  <p className="mt-3 text-sm leading-7 text-[#525866]">
                     {section.body}
                   </p>
                 </div>
@@ -126,7 +132,7 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
 
             {/* Lucky facts */}
             <div
-              className="grid gap-4 p-6 md:grid-cols-3 md:p-8 border-t border-[rgba(20,20,20,0.06)]"
+              className="grid gap-4 p-6 md:grid-cols-3 md:p-8 border-t border-[rgba(255,255,255,0.28)]"
             >
               <MiniFact label={labels.luckyColor}  value={content.luckyColor} />
               <MiniFact label={labels.luckyNumber} value={content.luckyNumber} />
@@ -137,7 +143,7 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
 
             {/* Dos & Don'ts */}
             <div
-              className="grid gap-5 p-6 md:grid-cols-2 md:p-8 border-t border-[rgba(20,20,20,0.06)]"
+              className="grid gap-5 p-6 md:grid-cols-2 md:p-8 border-t border-[rgba(255,255,255,0.28)]"
             >
               <ListBlock title={labels.dos}   items={content.dos}   positive />
               <ListBlock title={labels.donts} items={content.donts} />
@@ -145,18 +151,18 @@ export function HoroscopePageShell({ kind }: { kind: HoroscopePageKind }) {
 
             {/* Trust note */}
             <div
-              className="p-6 md:p-8 border-t border-[rgba(20,20,20,0.06)]"
+              className="p-6 md:p-8 border-t border-[rgba(255,255,255,0.28)]"
             >
               <div
-                className="rounded-xl p-5 border border-white/60 bg-white/40 shadow-sm"
+                className="rounded-xl p-5 border border-[rgba(255,255,255,0.50)] bg-[rgba(255,255,255,0.52)] shadow-sm"
               >
                 <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#d89a2b]" />
+                  <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#c98924]" />
                   <div>
-                    <h3 className="font-cinzel text-xl font-bold text-[#1b1c22]">
+                    <h3 className="font-cinzel text-xl font-bold text-[#17181d]">
                       {labels.trustTitle}
                     </h3>
-                    <p className="mt-2 text-sm leading-7 text-[#5c6170]">
+                    <p className="mt-2 text-sm leading-7 text-[#525866]">
                       {labels.trustNote}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-3">
@@ -182,10 +188,13 @@ function MiniFact({ label, value }: { label: string; value: string }) {
   return (
     <div
       className="rounded-xl p-4"
-      style={{ background: "rgba(255,255,255,0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
+      style={{
+        background: "rgba(255,255,255,0.52)",
+        border: "1px solid rgba(255,255,255,0.50)"
+      }}
     >
-      <p className="text-xs uppercase tracking-[0.18em]" style={{ color: "#66666b" }}>{label}</p>
-      <p className="mt-2 font-cinzel text-xl font-bold" style={{ color: "#e6941a" }}>{value}</p>
+      <p className="text-xs uppercase tracking-[0.18em]" style={{ color: "#525866" }}>{label}</p>
+      <p className="mt-2 font-cinzel text-xl font-bold" style={{ color: "#c98924" }}>{value}</p>
     </div>
   );
 }
@@ -194,15 +203,18 @@ function ListBlock({ title, items, positive = false }: { title: string; items: s
   return (
     <div
       className="rounded-xl p-5"
-      style={{ background: "rgba(255,255,255,0.68)", border: "1px solid rgba(20, 20, 20, 0.08)" }}
+      style={{
+        background: "rgba(255,255,255,0.52)",
+        border: "1px solid rgba(255,255,255,0.50)"
+      }}
     >
-      <h3 className="font-cinzel text-xl font-bold" style={{ color: "#1e1e1f" }}>{title}</h3>
-      <ul className="mt-4 grid gap-3 text-sm" style={{ color: "#66666b" }}>
+      <h3 className="font-cinzel text-xl font-bold" style={{ color: "#17181d" }}>{title}</h3>
+      <ul className="mt-4 grid gap-3 text-sm" style={{ color: "#525866" }}>
         {items.map((item) => (
           <li key={item} className="flex gap-2">
             <CheckCircle2
               className="mt-0.5 h-4 w-4 shrink-0"
-              style={{ color: positive ? "#16a34a" : "#D97706" }}
+              style={{ color: positive ? "#16a34a" : "#c98924" }}
             />
             {item}
           </li>
