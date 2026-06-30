@@ -12,8 +12,8 @@ export function Footer() {
   return (
     <footer
       style={{
-        borderTop: "1px solid rgba(255, 255, 255, 0.62)",
-        background: "rgba(255, 255, 255, 0.74)",
+        borderTop: "1px solid rgba(255, 255, 255, 0.35)",
+        background: "rgba(255, 255, 255, 0.42)",
         backdropFilter: "blur(10px) saturate(130%)",
         WebkitBackdropFilter: "blur(10px) saturate(130%)"
       }}

@@ -9,16 +9,25 @@
 :root {
   /* Core palette */
   --nx-bg:             transparent;
-  --nx-bg-soft:        rgba(255, 255, 255, 0.42);
-  --nx-glass:          rgba(255, 255, 255, 0.74);
+  --nx-bg-deep:        #090d18;
+  --nx-gold:           #d89a2b;
+  --nx-gold-soft:      #f2c56b;
+  --nx-text:           #17181d;
+  --nx-muted:          #5c6170;
+  --nx-ivory:          #fffaf0;
+  --nx-glass-pearl:    rgba(255,255,255,0.62);
+  --nx-glass-pearl-strong: rgba(255,255,255,0.74);
+  --nx-glass-border:   rgba(255,255,255,0.58);
+
+  /* Legacy mappings */
+  --nx-bg-soft:        var(--nx-glass-pearl);
+  --nx-glass:          var(--nx-glass-pearl-strong);
   --nx-glass-strong:   rgba(255, 255, 255, 0.86);
-  --nx-border:         rgba(255, 255, 255, 0.62);
+  --nx-border:         var(--nx-glass-border);
   --nx-border-solid:   #f0f0f2;
   --nx-shadow:         0 12px 40px rgba(18, 22, 35, 0.08);
   --nx-shadow-md:      0 20px 70px rgba(15, 18, 30, 0.16);
-  --nx-text:           #17181d;
-  --nx-muted:          #525866;
-  --nx-accent:         #c98924;
+  --nx-accent:         var(--nx-gold);
   --nx-accent-deep:    #b17215;
   --nx-charcoal-glass: rgba(20, 20, 24, 0.78);
   --nx-charcoal-text:  #ffffff;
@@ -27,8 +36,7 @@
   --nx-saffron:        #e6941a;
   --nx-dark-saffron:   #c97308;
   --nx-deep-saffron:   #b86200;
-  --nx-gold:           #c5973c;
-  --nx-soft-gold:      #eddcb4;
+  --nx-soft-gold:      var(--nx-gold-soft);
 
   --nx-header-height:  60px;
 
@@ -37,10 +45,10 @@
   --nx-bg-panel:       var(--nx-bg-soft);
   --nx-bg-card:        var(--nx-glass);
   --nx-border-legacy:  var(--nx-border);
-  --nx-gold-hero:      var(--nx-soft-gold);
+  --nx-gold-hero:      var(--nx-gold-soft);
   --nx-star-gold:      var(--nx-gold);
   --nx-emerald:        var(--nx-accent);
-  --nx-mint:           var(--nx-soft-gold);
+  --nx-mint:           var(--nx-gold-soft);
   --nx-text-legacy:    var(--nx-text);
   --nx-muted-legacy:   var(--nx-muted);
 
@@ -505,6 +513,61 @@ main.star-field > section:first-child {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+}
+
+/* ============================================================
+   PREMIUM CUSTOM DESIGN SYSTEM UTILITIES
+   ============================================================ */
+.nx-glass-shell {
+  background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07));
+  backdrop-filter: blur(8px) saturate(135%);
+  -webkit-backdrop-filter: blur(8px) saturate(135%);
+  border: 1px solid rgba(255,255,255,0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    0 30px 100px rgba(0,0,0,0.35),
+    0 0 90px rgba(216,154,43,0.15);
+}
+
+.nx-glass-card {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(10px) saturate(135%);
+  -webkit-backdrop-filter: blur(10px) saturate(135%);
+  color: #17181d;
+}
+
+.nx-glass-card-strong {
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  box-shadow: 0 22px 60px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.80);
+  color: #17181d;
+}
+
+.nx-gold-button {
+  background: linear-gradient(135deg, #f2c56b, #c98924);
+  color: #17181d;
+  font-weight: 700;
+  box-shadow: 0 10px 28px rgba(201,137,36,0.28);
+}
+
+.nx-section-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.20em;
+  color: #d89a2b;
+  background: rgba(216, 154, 43, 0.08);
+  border: 1px solid rgba(216, 154, 43, 0.18);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+}
+
+.nx-serif-heading {
+  font-family: var(--font-cinzel), Georgia, serif;
 }
 
 @layer base {

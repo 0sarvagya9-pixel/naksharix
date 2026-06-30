@@ -17,11 +17,11 @@ export function PremiumGlassShell({
         className
       )}
       style={{
-        background: "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))",
-        backdropFilter: "blur(6px) saturate(125%)",
-        WebkitBackdropFilter: "blur(6px) saturate(125%)",
-        border: "1px solid rgba(255,255,255,0.42)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.50), inset 0 -1px 0 rgba(255,255,255,0.12), 0 30px 100px rgba(0,0,0,0.32), 0 0 90px rgba(216,154,43,0.16)"
+        background: "linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07))",
+        backdropFilter: "blur(8px) saturate(135%)",
+        WebkitBackdropFilter: "blur(8px) saturate(135%)",
+        border: "1px solid rgba(255,255,255,0.45)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.55), 0 30px 100px rgba(0,0,0,0.35), 0 0 90px rgba(216,154,43,0.15)"
       }}
     >
       {children}
