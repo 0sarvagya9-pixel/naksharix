@@ -23,8 +23,8 @@ export function PremiumCosmicBackground() {
         }}
       />
 
-      {/* Optional blur/noise/haze overlay */}
-      <div className="absolute inset-0 bg-white/[0.01] backdrop-blur-[1px] mix-blend-overlay" />
+      {/* Optional subtle vignette/noise overlay */}
+      <div className="absolute inset-0 bg-black/[0.02]" />
     </div>
   );
 }
