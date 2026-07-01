@@ -68,8 +68,15 @@ export function NxHome() {
       {/* 1. HERO SECTION */}
       <section className="px-4 sm:px-8 xl:px-12 pt-8 md:pt-16">
         <div className="mx-auto max-w-[1440px] grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Side */}
-          <div className="flex flex-col gap-6">
+          {/* Left Side with local text-safe readability gradient */}
+          <div
+            className="flex flex-col gap-6 p-6 sm:p-8 rounded-[24px]"
+            style={{
+              background: "linear-gradient(90deg, rgba(4, 6, 14, 0.32) 0%, rgba(4, 6, 14, 0.12) 65%, transparent 100%)",
+              backdropFilter: "blur(2px)",
+              WebkitBackdropFilter: "blur(2px)"
+            }}
+          >
             <div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.20em] text-[#d89a2b] bg-[rgba(216,154,43,0.08)] border border-[rgba(216,154,43,0.18)]">
                 <Sparkles size={11} className="animate-pulse" /> Timeless Vedic Wisdom
@@ -163,8 +170,8 @@ export function NxHome() {
             <div
               className="relative w-full max-w-md p-6 transition-all duration-300 hover:scale-[1.01] z-10"
               style={{
-                background: "rgba(255, 255, 255, 0.72)",
-                border: "1px solid rgba(255, 255, 255, 0.65)",
+                background: "rgba(255, 255, 255, 0.68)",
+                border: "1px solid rgba(255, 255, 255, 0.55)",
                 backdropFilter: "blur(12px) saturate(140%)",
                 borderRadius: "28px",
                 boxShadow: "0 22px 60px rgba(20, 12, 8, 0.18), inset 0 1px 0 rgba(255,255,255,0.80)",
