@@ -113,10 +113,10 @@ export function MainNav() {
                     <div
                       className="invisible absolute left-1/2 -translate-x-1/2 top-[120%] z-[1000] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 w-[480px]"
                       style={{
-                        background: "rgba(10, 14, 26, 0.94)",
+                        background: "rgba(10, 14, 26, 0.95)",
                         backdropFilter: "blur(18px) saturate(140%)",
                         WebkitBackdropFilter: "blur(18px) saturate(140%)",
-                        border: "1px solid rgba(255, 255, 255, 0.18)",
+                        border: "1px solid rgba(255, 255, 255, 0.20)",
                         boxShadow: "0 22px 60px rgba(0,0,0,0.45)"
                       }}
                     >
@@ -177,13 +177,13 @@ export function MainNav() {
                 More
               </button>
               <div
-                className="invisible absolute right-0 top-[120%] z-[100] w-64 translate-y-2 rounded-xl p-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                className="invisible absolute right-0 top-[120%] z-[1000] w-64 translate-y-2 rounded-xl p-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
                 style={{
-                  background: "rgba(8, 14, 30, 0.94)",
-                  border: "1px solid rgba(255, 255, 255, 0.22)",
-                  backdropFilter: "blur(16px)",
-                  WebkitBackdropFilter: "blur(16px)",
-                  boxShadow: "0 20px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12)"
+                  background: "rgba(10, 14, 26, 0.95)",
+                  border: "1px solid rgba(255, 255, 255, 0.20)",
+                  backdropFilter: "blur(18px) saturate(140%)",
+                  WebkitBackdropFilter: "blur(18px) saturate(140%)",
+                  boxShadow: "0 22px 60px rgba(0,0,0,0.45)"
                 }}
               >
                 <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Explore</p>

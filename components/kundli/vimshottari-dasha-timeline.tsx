@@ -40,8 +40,8 @@ export function VimshottariDashaTimeline({
     <section
       className="relative overflow-hidden rounded-2xl p-5 shadow-[0_24px_80px_rgba(2,6,18,0.15)]"
       style={{
-        background: "rgba(255, 255, 255, 0.12)",
-        backdropFilter: "blur(10px) saturate(125%)",
+        background: "linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.10))",
+        backdropFilter: "blur(12px) saturate(135%)",
         border: "1px solid rgba(255, 255, 255, 0.42)",
       }}
     >

@@ -15,11 +15,11 @@ export function PremiumCosmicBackground() {
         className="object-cover object-top"
       />
 
-      {/* Subtle dark/warm overlay - lighter for transparency and visibility */}
+      {/* Subtle warm/indigo overlay - optimized for sunset cosmic glow and visibility */}
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(180deg, rgba(9, 13, 24, 0.10) 0%, rgba(9, 13, 24, 0.25) 55%, rgba(9, 13, 24, 0.50) 100%)",
+          background: "linear-gradient(180deg, rgba(242, 197, 107, 0.04) 0%, rgba(20, 12, 8, 0.18) 60%, rgba(15, 10, 8, 0.45) 100%)",
         }}
       />
 

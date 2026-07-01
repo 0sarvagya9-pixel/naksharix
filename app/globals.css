@@ -12,12 +12,15 @@
   --nx-bg-deep:        #090d18;
   --nx-gold:           #d89a2b;
   --nx-gold-soft:      #f2c56b;
+  --nx-gold-light:     #f2c56b;
+  --nx-charcoal:       #17181d;
   --nx-text:           #17181d;
-  --nx-muted:          #5c6170;
+  --nx-muted:          #525866;
   --nx-ivory:          #fffaf0;
-  --nx-glass-pearl:    rgba(255,255,255,0.62);
+  --nx-pearl:          rgba(255,255,255,0.66);
+  --nx-glass-pearl:    rgba(255,255,255,0.66);
   --nx-glass-pearl-strong: rgba(255,255,255,0.74);
-  --nx-glass-border:   rgba(255,255,255,0.58);
+  --nx-glass-border:   rgba(255,255,255,0.55);
 
   /* Legacy mappings */
   --nx-bg-soft:        var(--nx-glass-pearl);
@@ -519,22 +522,29 @@ main.star-field > section:first-child {
    PREMIUM CUSTOM DESIGN SYSTEM UTILITIES
    ============================================================ */
 .nx-glass-shell {
-  background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07));
+  background: linear-gradient(135deg, rgba(255,255,255,0.20), rgba(255,255,255,0.08));
   backdrop-filter: blur(8px) saturate(135%);
   -webkit-backdrop-filter: blur(8px) saturate(135%);
-  border: 1px solid rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.42);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.55),
-    0 30px 100px rgba(0,0,0,0.35),
-    0 0 90px rgba(216,154,43,0.15);
+    0 32px 100px rgba(20,12,8,0.30),
+    0 0 70px rgba(216,154,43,0.16);
 }
 
 .nx-glass-card {
   background: rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(10px) saturate(135%);
   -webkit-backdrop-filter: blur(10px) saturate(135%);
   color: #17181d;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nx-glass-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(242, 197, 107, 0.65);
+  box-shadow: 0 20px 60px rgba(201, 137, 36, 0.16);
 }
 
 .nx-glass-card-strong {
@@ -542,6 +552,16 @@ main.star-field > section:first-child {
   border: 1px solid rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(14px) saturate(135%);
   -webkit-backdrop-filter: blur(14px) saturate(135%);
+  box-shadow: 0 22px 60px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.80);
+  color: #17181d;
+}
+
+.nx-glass-panel {
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-radius: 28px;
   box-shadow: 0 22px 60px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.80);
   color: #17181d;
 }

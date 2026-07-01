@@ -163,11 +163,11 @@ export function NxHome() {
             <div
               className="relative w-full max-w-md p-6 transition-all duration-300 hover:scale-[1.01] z-10"
               style={{
-                background: "rgba(255, 255, 255, 0.70)",
-                border: "1px solid rgba(255, 255, 255, 0.68)",
-                backdropFilter: "blur(14px) saturate(135%)",
+                background: "rgba(255, 255, 255, 0.72)",
+                border: "1px solid rgba(255, 255, 255, 0.65)",
+                backdropFilter: "blur(12px) saturate(140%)",
                 borderRadius: "28px",
-                boxShadow: "0 22px 60px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.80)",
+                boxShadow: "0 22px 60px rgba(20, 12, 8, 0.18), inset 0 1px 0 rgba(255,255,255,0.80)",
                 color: "#17181d"
               }}
             >
@@ -176,7 +176,7 @@ export function NxHome() {
                   <Sun size={16} className="text-[#c98924] animate-spin-slow" />
                   <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#c98924]">Today’s Cosmic Overview</span>
                 </div>
-                <span className="text-xs font-bold text-[#5c6170]">Sunday, Shukla Paksha</span>
+                <span className="text-xs font-bold text-[#525866]">Sunday, Shukla Paksha</span>
               </div>
 
               <div className="space-y-4">
@@ -189,7 +189,7 @@ export function NxHome() {
                       borderRadius: "12px"
                     }}
                   >
-                    <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Tithi</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#525866]">Tithi</span>
                     <span className="block text-sm font-black text-[#17181d] mt-1">Dwitiya</span>
                   </div>
                   <div
@@ -200,7 +200,7 @@ export function NxHome() {
                       borderRadius: "12px"
                     }}
                   >
-                    <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Nakshatra</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#525866]">Nakshatra</span>
                     <span className="block text-sm font-black text-[#17181d] mt-1">Anuradha</span>
                   </div>
                 </div>
@@ -214,7 +214,7 @@ export function NxHome() {
                       borderRadius: "12px"
                     }}
                   >
-                    <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Yoga</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#525866]">Yoga</span>
                     <span className="block text-sm font-black text-[#17181d] mt-1">Siddha</span>
                   </div>
                   <div
@@ -225,7 +225,7 @@ export function NxHome() {
                       borderRadius: "12px"
                     }}
                   >
-                    <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Karana</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#525866]">Karana</span>
                     <span className="block text-sm font-black text-[#17181d] mt-1">Balava</span>
                   </div>
                 </div>
@@ -239,7 +239,7 @@ export function NxHome() {
                       borderRadius: "12px"
                     }}
                   >
-                    <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Sunrise</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#525866]">Sunrise</span>
                     <span className="block text-sm font-black text-[#17181d] mt-1">05:42 AM</span>
                   </div>
                   <div
@@ -250,7 +250,7 @@ export function NxHome() {
                       borderRadius: "12px"
                     }}
                   >
-                    <span className="block text-[10px] uppercase font-bold text-[#5c6170]">Sunset</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#525866]">Sunset</span>
                     <span className="block text-sm font-black text-[#17181d] mt-1">07:08 PM</span>
                   </div>
                 </div>
@@ -263,8 +263,8 @@ export function NxHome() {
                     borderRadius: "12px"
                   }}
                 >
-                  <span className="block text-[10px] uppercase font-bold text-[#5c6170] mb-1">Rahu Kaal Alert</span>
-                  <p className="text-xs font-semibold text-[#5c6170] leading-relaxed">
+                  <span className="block text-[10px] uppercase font-bold text-[#525866] mb-1">Rahu Kaal Alert</span>
+                  <p className="text-xs font-semibold text-[#525866] leading-relaxed">
                     Auspicious tasks should be deferred between <strong className="text-[#17181d]">04:19 PM – 06:00 PM</strong>.
                   </p>
                 </div>
@@ -337,14 +337,14 @@ export function NxHome() {
               <Link
                 key={label}
                 href={href}
-                className="group rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.62)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.70),0_14px_42px_rgba(0,0,0,0.10)] backdrop-blur-[10px] saturate-[135%] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
+                className="group nx-glass-card rounded-[20px] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.70),0_14px_42px_rgba(0,0,0,0.10)]"
                 style={{ textDecoration: "none" }}
               >
                 <span className="grid h-11 w-11 place-items-center rounded-xl bg-[rgba(216,154,43,0.08)] text-[#c98924] transition-transform duration-300 group-hover:scale-105">
                   <Icon className="h-5 w-5" />
                 </span>
                 <h3 className="mt-4 font-cinzel text-lg font-bold text-[#17181d]">{label}</h3>
-                <p className="mt-2 text-xs text-[#5c6170] leading-relaxed">{copy}</p>
+                <p className="mt-2 text-xs text-[#525866] leading-relaxed">{copy}</p>
                 <div className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#c98924]">
                   Launch Tool <ArrowRight size={11} className="transition-transform group-hover:translate-x-0.5" />
                 </div>
@@ -387,19 +387,21 @@ export function NxHome() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {SIGNATURE_TOOLS.map(({ label, sub, href, icon: Icon }) => (
               <Link
                 key={label}
                 href={href}
-                className="group rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.62)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70),0_14px_42px_rgba(0,0,0,0.10)] backdrop-blur-[10px] saturate-[135%] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
+                className="group nx-glass-card flex items-center gap-3 p-3.5 rounded-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.70),0_8px_24px_rgba(0,0,0,0.06)]"
                 style={{ textDecoration: "none" }}
               >
-                <div className="h-16 w-full rounded-lg bg-[rgba(216,154,43,0.05)] border border-[rgba(216,154,43,0.12)] flex items-center justify-center flex-shrink-0 text-[#c98924] transition-transform duration-300 group-hover:scale-105">
-                  <Icon size={24} />
+                <div className="h-9 w-9 rounded-lg bg-[rgba(216,154,43,0.06)] border border-[rgba(216,154,43,0.18)] flex items-center justify-center flex-shrink-0 text-[#c98924] transition-transform duration-300 group-hover:scale-105">
+                  <Icon size={18} />
                 </div>
-                <h3 className="mt-3 text-xs font-bold text-[#17181d] leading-snug">{label}</h3>
-                <p className="mt-1 text-[10px] text-[#5c6170] leading-normal">{sub}</p>
+                <div className="min-w-0">
+                  <h3 className="text-xs font-bold text-[#17181d] leading-snug truncate">{label}</h3>
+                  <p className="text-[10px] text-[#525866] leading-normal truncate mt-0.5">{sub}</p>
+                </div>
               </Link>
             ))}
           </div>
@@ -409,7 +411,7 @@ export function NxHome() {
       {/* 5. PREMIUM MEMBERSHIP ROW */}
       <section className="px-4 sm:px-8 xl:px-12 py-4">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.62)] p-8 sm:p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.70),0_14px_42px_rgba(0,0,0,0.10)] backdrop-blur-[10px] saturate-[135%]">
+          <div className="nx-glass-card rounded-[20px] p-8 sm:p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.70),0_14px_42px_rgba(0,0,0,0.08)]">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_auto] gap-8 items-center">
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#c98924]">
@@ -428,14 +430,14 @@ export function NxHome() {
                       <Icon size={16} className="text-[#c98924]" />
                     </span>
                     <span className="text-xs font-bold text-[#17181d]">{label}</span>
-                    <span className="text-[10px] text-[#5c6170] leading-tight">{sub}</span>
+                    <span className="text-[10px] text-[#525866] leading-tight">{sub}</span>
                   </div>
                 ))}
               </div>
 
               <div className="flex flex-col items-center gap-2 text-center border-t lg:border-t-0 lg:border-l border-[rgba(20,20,20,0.06)] pt-6 lg:pt-0 lg:pl-8">
                 <span className="text-xs font-bold text-[#17181d]">Unlock Premium</span>
-                <span className="text-[10px] text-[#5c6170]">Plans from ₹199/month</span>
+                <span className="text-[10px] text-[#525866]">Plans from ₹199/month</span>
                 <Link href="/pricing" className="rounded-lg bg-gradient-to-r from-[#f7d17a] to-[#c98924] px-4 py-2 text-xs font-bold text-[#17181d] shadow-[0_10px_28px_rgba(201,137,36,0.28)] mt-2 hover:-translate-y-0.5 transition-all">
                   Upgrade Now
                 </Link>
@@ -461,7 +463,7 @@ export function NxHome() {
             {TESTIMONIALS.map(({ name, text, avatar, rating }) => (
               <div
                 key={name}
-                className="rounded-[20px] border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.62)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.70),0_14px_42px_rgba(0,0,0,0.10)] backdrop-blur-[10px] saturate-[135%] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(242,197,107,0.65)] hover:shadow-[0_20px_60px_rgba(201,137,36,0.16)]"
+                className="group nx-glass-card rounded-[20px] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.70),0_14px_42px_rgba(0,0,0,0.10)]"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <span className="flex items-center justify-center w-10 h-10 rounded-full font-black text-[#17181d] text-xs bg-gradient-to-br from-[#f7d17a] to-[#c98924] shadow-[0_2px_8px_rgba(201,137,36,0.22)]">
@@ -476,7 +478,7 @@ export function NxHome() {
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-[#5c6170] leading-relaxed italic">&ldquo;{text}&rdquo;</p>
+                <p className="text-xs text-[#525866] leading-relaxed italic">&ldquo;{text}&rdquo;</p>
               </div>
             ))}
           </div>
@@ -486,13 +488,13 @@ export function NxHome() {
       {/* 7. FINAL CTA BAND */}
       <section className="px-4 sm:px-8 xl:px-12 py-6">
         <div className="mx-auto max-w-[1440px]">
-          <div className="rounded-[20px] border border-[rgba(255,255,255,0.68)] bg-[rgba(255,255,255,0.70)] p-8 sm:p-12 shadow-[0_22px_60px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.80)] backdrop-blur-[14px] saturate-[135%]">
+          <div className="nx-glass-card-strong rounded-[20px] p-8 sm:p-12">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
               <div className="max-w-xl">
                 <h2 className="font-cinzel text-3xl font-black text-[#17181d] leading-tight">
                   Begin Your Cosmic Journey
                 </h2>
-                <p className="text-xs text-[#5c6170] leading-relaxed mt-2">
+                <p className="text-xs text-[#525866] leading-relaxed mt-2">
                   Unlock the secrets written in the stars and build a life of absolute clarity, peace &amp; aligned purpose.
                 </p>
               </div>
@@ -500,7 +502,7 @@ export function NxHome() {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="rounded-lg px-4 py-2.5 text-xs outline-none border border-[rgba(255,255,255,0.68)] bg-white/70 text-[#17181d] placeholder:text-[#5c6170]/60 focus:border-[#c98924] shadow-sm"
+                  className="rounded-lg px-4 py-2.5 text-xs outline-none border border-[rgba(255,255,255,0.68)] bg-white/70 text-[#17181d] placeholder:text-[#525866]/60 focus:border-[#c98924] shadow-sm"
                   style={{ minWidth: 220 }}
                 />
                 <Link href="/signup" className="rounded-lg bg-gradient-to-r from-[#f7d17a] to-[#c98924] px-5 py-2.5 text-xs font-bold text-[#17181d] shadow-[0_10px_28px_rgba(201,137,36,0.28)] inline-flex items-center gap-1.5 justify-center hover:-translate-y-0.5 transition-all">

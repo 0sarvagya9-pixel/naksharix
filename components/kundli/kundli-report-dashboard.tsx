@@ -52,10 +52,10 @@ export function KundliReportDashboard({ report, language }: { report: DashboardR
     <section
       className="rounded-3xl p-4 sm:p-6"
       style={{
-        background: "rgba(255, 255, 255, 0.12)",
-        backdropFilter: "blur(10px) saturate(125%)",
+        background: "linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.10))",
+        backdropFilter: "blur(12px) saturate(135%)",
         border: "1px solid rgba(255, 255, 255, 0.42)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.22), 0 18px 55px rgba(0,0,0,0.16)"
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.50), 0 18px 55px rgba(20,12,8,0.18)"
       }}
     >
       <ReportSectionHeader eyebrow={labels.dashboard} title={labels.title} />
