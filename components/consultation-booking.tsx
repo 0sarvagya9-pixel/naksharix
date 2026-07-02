@@ -130,7 +130,7 @@ export function ConsultationBooking({ selectedAstrologerId, profiles = [] }: { s
           </Field>
 
           <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4 text-sm naksh-muted-text">
-            Payment coming soon. Demo bookings are allowed while Razorpay keys are not configured.
+            Bookings are manually reviewed and confirmed.
           </div>
           <Button>
             <CalendarClock className="h-4 w-4" />

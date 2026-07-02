@@ -21,13 +21,33 @@ const navLinks = [
   { label: "Remedies",    href: "/free-calculators", active: ["/free-calculators", "/calculators"] },
 ];
 
-const moreLinks = [
+const exploreLinks = [
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" },
-  { label: "Disclaimer", href: "/disclaimer" },
+  { label: "FAQ", href: "/faq" },
   { label: "Privacy Policy", href: "/privacy-policy" },
-  { label: "Terms", href: "/terms" },
-  { label: "Refund Policy", href: "/refund-policy" }
+  { label: "Terms & Conditions", href: "/terms-and-conditions" },
+  { label: "Refund Policy", href: "/refund-policy" },
+  { label: "Disclaimer", href: "/disclaimer" }
+];
+
+const toolsLinks = [
+  { label: "Free Calculators", href: "/free-calculators" },
+  { label: "Saved Reports", href: "/saved-reports" },
+  { label: "Yearly Horoscope", href: "/yearly-horoscope" },
+  { label: "Daily Horoscope", href: "/horoscope" }
+];
+
+const futureLinks = [
+  { label: "AI Astrologer — Coming Soon", href: "/ai-astrologer" },
+  { label: "Consultation — Coming Soon", href: "/consultation" },
+  { label: "Shop — Coming Soon", href: "/shop" }
+];
+
+const moreLinks = [
+  ...exploreLinks,
+  ...toolsLinks,
+  ...futureLinks
 ];
 
 const zodiacSigns = [
@@ -173,7 +193,7 @@ export function MainNav() {
                 More
               </button>
               <div
-                className="invisible absolute right-0 top-[120%] z-[1000] w-64 translate-y-2 rounded-xl p-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
                 style={{
                   background: "rgba(10, 14, 26, 0.95)",
                   border: "1px solid rgba(255, 255, 255, 0.20)",
@@ -182,17 +202,49 @@ export function MainNav() {
                   boxShadow: "0 22px 60px rgba(0,0,0,0.45)"
                 }}
               >
-                <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Explore</p>
-                <div className="grid gap-0.5">
-                  {moreLinks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#fffaf0]/80 transition hover:bg-white/10 hover:text-[#fffaf0]"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
+                <div className="grid grid-cols-3 gap-4 text-left">
+                  <div>
+                    <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Explore</p>
+                    <div className="grid gap-0.5">
+                      {exploreLinks.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Tools</p>
+                    <div className="grid gap-0.5">
+                      {toolsLinks.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Future</p>
+                    <div className="grid gap-0.5">
+                      {futureLinks.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

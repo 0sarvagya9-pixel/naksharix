@@ -79,23 +79,23 @@ function footerGroups(locale: Locale) {
     return [
       { title: "टूल्स",       links: [["कुंडली", "/kundli"], ["मिलान", "/matchmaking"], ["अंक ज्योतिष", "/numerology"], ["मुफ़्त कैलकुलेटर", "/free-calculators"], ["टैरो", "/tarot"]] },
       { title: "रिपोर्ट",     links: [["रिपोर्ट", "/reports"], ["प्रीमियम कुंडली", "/reports/premium-kundli"], ["कपल कुंडली", "/reports/couple-kundli"], ["करियर रिपोर्ट", "/reports/career-report"]] },
-      { title: "सहायता",      links: [["About Us", "/about"], ["Contact", "/contact"]] },
-      { title: "कानूनी",      links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
+      { title: "सहायता",      links: [["About Us", "/about"], ["Contact", "/contact"], ["FAQ", "/faq"], ["Disclaimer", "/disclaimer"]] },
+      { title: "कानूनी",      links: [["Privacy Policy", "/privacy-policy"], ["Terms & Conditions", "/terms-and-conditions"], ["Refund Policy", "/refund-policy"]] },
     ].map(normalizeGroup);
   }
   if (locale === "hinglish") {
     return [
       { title: "Tools",       links: [["Kundli", "/kundli"], ["Match Making", "/matchmaking"], ["Numerology", "/numerology"], ["Free Calculators", "/free-calculators"], ["Tarot", "/tarot"]] },
       { title: "Reports",     links: [["Reports", "/reports"], ["Premium Kundli", "/reports/premium-kundli"], ["Couple Kundli", "/reports/couple-kundli"], ["Career Report", "/reports/career-report"]] },
-      { title: "Support",     links: [["About Us", "/about"], ["Contact", "/contact"]] },
-      { title: "Legal",       links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
+      { title: "Support",     links: [["About Us", "/about"], ["Contact", "/contact"], ["FAQ", "/faq"], ["Disclaimer", "/disclaimer"]] },
+      { title: "Legal",       links: [["Privacy Policy", "/privacy-policy"], ["Terms & Conditions", "/terms-and-conditions"], ["Refund Policy", "/refund-policy"]] },
     ].map(normalizeGroup);
   }
   return [
     { title: "Tools",       links: [["Kundli", "/kundli"], ["Match Making", "/matchmaking"], ["Numerology", "/numerology"], ["Free Calculators", "/free-calculators"], ["Tarot", "/tarot"]] },
     { title: "Reports",     links: [["Reports", "/reports"], ["Premium Kundli", "/reports/premium-kundli"], ["Couple Kundli", "/reports/couple-kundli"], ["Career Report", "/reports/career-report"]] },
-    { title: "Support",     links: [["About Us", "/about"], ["Contact", "/contact"]] },
-    { title: "Legal",       links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
+    { title: "Support",     links: [["About Us", "/about"], ["Contact", "/contact"], ["FAQ", "/faq"], ["Disclaimer", "/disclaimer"]] },
+    { title: "Legal",       links: [["Privacy Policy", "/privacy-policy"], ["Terms & Conditions", "/terms-and-conditions"], ["Refund Policy", "/refund-policy"]] },
   ].map(normalizeGroup);
 }
 
