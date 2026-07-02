@@ -4,6 +4,7 @@ import { SavedKundliReportView } from "@/components/saved-kundli-report-view";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { normalizeLocale } from "@/lib/i18n";
+import { canBypassPayment } from "@/lib/auth/permissions";
 
 type Params = Promise<{ id: string }>;
 
@@ -16,6 +17,19 @@ export default async function SavedKundliReportPage({ params }: { params: Params
   const saved = await prisma.kundliReport.findFirst({ where: { id, userId: user.id } });
   if (!saved) notFound();
 
+  const isAdmin = canBypassPayment(user);
+  const isUnlocked = isAdmin || Boolean(await prisma.payment.findFirst({
+    where: {
+      userId: user.id,
+      status: "PAID",
+      purpose: "KUNDLI_REPORT",
+      metadata: {
+        path: ["savedReportId"],
+        equals: id
+      }
+    }
+  }));
+
   return (
     <main className="star-field">
       <Section>
@@ -24,6 +38,7 @@ export default async function SavedKundliReportPage({ params }: { params: Params
           reportId={saved.id}
           language={normalizeLocale(saved.language)}
           createdAt={saved.createdAt.toISOString()}
+          isUnlocked={isUnlocked}
         />
       </Section>
     </main>

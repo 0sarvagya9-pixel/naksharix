@@ -5,6 +5,7 @@ import { SavedKundliReportList } from "@/components/saved-kundli-report-list";
 import { requireRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { normalizeLocale, t } from "@/lib/i18n";
+import { canBypassPayment } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,28 @@ export default async function SavedReportsPage() {
     take: 48
   });
 
+  const paidPayments = await prisma.payment.findMany({
+    where: {
+      userId: user.id,
+      status: "PAID",
+      purpose: "KUNDLI_REPORT"
+    },
+    select: { metadata: true }
+  });
+
+  const paidReportIds = new Set(
+    paidPayments
+      .map((p) => (p.metadata as Record<string, unknown> | null)?.savedReportId)
+      .filter(Boolean) as string[]
+  );
+
+  const isAdmin = canBypassPayment(user);
+
+  const reportsWithUnlockStatus = reports.map((report) => ({
+    ...report,
+    isUnlocked: isAdmin || paidReportIds.has(report.id)
+  }));
+
   return (
     <Section>
       <div className="mb-8">
@@ -24,7 +47,7 @@ export default async function SavedReportsPage() {
         <h1 className="mt-3 font-cinzel text-4xl font-black">{t(locale, "savedReports")}</h1>
         <p className="mt-3 max-w-2xl naksh-muted-text">{t(locale, "noSavedReports")}</p>
       </div>
-      <SavedKundliReportList reports={reports} emptyText={t(locale, "noSavedReports")} />
+      <SavedKundliReportList reports={reportsWithUnlockStatus} emptyText={t(locale, "noSavedReports")} />
     </Section>
   );
 }

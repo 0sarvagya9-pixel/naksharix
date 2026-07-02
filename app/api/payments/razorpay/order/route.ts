@@ -16,9 +16,9 @@ import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 
 const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
-  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), reportRequestId: z.string().min(1).optional() }),
-  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), reportRequestId: z.string().min(1).optional() }),
-  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), reportRequestId: z.string().min(1).optional() })
+  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
+  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
+  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() })
 ]);
 
 export async function POST(request: NextRequest) {
@@ -35,6 +35,22 @@ export async function POST(request: NextRequest) {
     const item = resolveCheckoutItem(body);
     if (!item) return fail("Invalid checkout item", 422);
     const reportRequestId = "reportRequestId" in body ? body.reportRequestId : undefined;
+    const savedReportId = "savedReportId" in body ? body.savedReportId : undefined;
+
+    if (savedReportId) {
+      const alreadyPaid = await prisma.payment.findFirst({
+        where: {
+          userId: user.id,
+          status: "PAID",
+          metadata: {
+            path: ["savedReportId"],
+            equals: savedReportId
+          }
+        }
+      });
+      if (alreadyPaid) return fail("This report is already unlocked.", 409);
+    }
+
     let previousReportStatus: ReportRequestStatus | null = null;
     if (reportRequestId) {
       const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
@@ -55,7 +71,7 @@ export async function POST(request: NextRequest) {
         status: "PENDING",
         amount: item.amount,
         currency: "INR",
-        metadata: { ...item.metadata, reportRequestId }
+        metadata: { ...item.metadata, reportRequestId, savedReportId }
       }
     });
 

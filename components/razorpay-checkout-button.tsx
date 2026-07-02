@@ -10,7 +10,7 @@ import { canBypassPayment } from "@/lib/auth/permissions";
 
 type CheckoutPayload =
   | { purpose: "SUBSCRIPTION"; plan: "PREMIUM" | "VIP" }
-  | { purpose: "KUNDLI_REPORT" | "YEARLY_REPORT" | "MATCH_REPORT"; reportId: string };
+  | { purpose: "KUNDLI_REPORT" | "YEARLY_REPORT" | "MATCH_REPORT"; reportId: string; savedReportId?: string };
 
 type RazorpayResponse = {
   razorpay_order_id: string;
