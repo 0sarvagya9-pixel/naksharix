@@ -22,10 +22,6 @@ const navLinks = [
 ];
 
 const moreLinks = [
-  { label: "AI Astrologer", href: "/ai-astrologer" },
-  { label: "Shop", href: "/shop" },
-  { label: "Consultation", href: "/consultation" },
-  { label: "Marketplace", href: "/marketplace" },
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" },
   { label: "Disclaimer", href: "/disclaimer" },
@@ -35,25 +31,25 @@ const moreLinks = [
 ];
 
 const zodiacSigns = [
-  { label: "Aries", href: "/zodiac/aries" },
-  { label: "Taurus", href: "/zodiac/taurus" },
-  { label: "Gemini", href: "/zodiac/gemini" },
-  { label: "Cancer", href: "/zodiac/cancer" },
-  { label: "Leo", href: "/zodiac/leo" },
-  { label: "Virgo", href: "/zodiac/virgo" },
-  { label: "Libra", href: "/zodiac/libra" },
-  { label: "Scorpio", href: "/zodiac/scorpio" },
-  { label: "Sagittarius", href: "/zodiac/sagittarius" },
-  { label: "Capricorn", href: "/zodiac/capricorn" },
-  { label: "Aquarius", href: "/zodiac/aquarius" },
-  { label: "Pisces", href: "/zodiac/pisces" }
+  { label: "Aries", href: "/horoscope/aries" },
+  { label: "Taurus", href: "/horoscope/taurus" },
+  { label: "Gemini", href: "/horoscope/gemini" },
+  { label: "Cancer", href: "/horoscope/cancer" },
+  { label: "Leo", href: "/horoscope/leo" },
+  { label: "Virgo", href: "/horoscope/virgo" },
+  { label: "Libra", href: "/horoscope/libra" },
+  { label: "Scorpio", href: "/horoscope/scorpio" },
+  { label: "Sagittarius", href: "/horoscope/sagittarius" },
+  { label: "Capricorn", href: "/horoscope/capricorn" },
+  { label: "Aquarius", href: "/horoscope/aquarius" },
+  { label: "Pisces", href: "/horoscope/pisces" }
 ];
 
 const horoscopeOptions = [
   { label: "Daily Horoscope", href: "/daily-horoscope" },
   { label: "Weekly Horoscope", href: "/weekly-horoscope" },
   { label: "Weekly Love Horoscope", href: "/weekly-love-horoscope" },
-  { label: "Yearly Horoscope 2026", href: "/yearly-horoscope-2026" }
+  { label: "Yearly Horoscope", href: "/yearly-horoscope" }
 ];
 
 export function MainNav() {

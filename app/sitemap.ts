@@ -43,7 +43,7 @@ const staticRoutes = [
   "/weekly-horoscope",
   "/monthly-horoscope",
   "/weekly-love-horoscope",
-  "/yearly-horoscope-2026",
+  "/yearly-horoscope",
   "/chinese-horoscope-2026",
   "/numerology-monthly-horoscope",
   "/panchang",
@@ -73,7 +73,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes: SitemapEntry[] = [
     ...staticRoutes.map((route): SitemapEntry => ({ route, priority: route === "" ? 1 : 0.8, frequency: route === "" ? "daily" : "weekly" })),
     ...featuredAstrologerRoutes().map((route): SitemapEntry => ({ route, priority: 0.74, frequency: "weekly" })),
-    ...zodiacSigns.map((sign): SitemapEntry => ({ route: `/zodiac/${sign.slug}`, priority: 0.82, frequency: "daily" })),
+    ...zodiacSigns.map((sign): SitemapEntry => ({ route: `/horoscope/${sign.slug}`, priority: 0.82, frequency: "daily" })),
     ...Object.values(growthPages).map((page): SitemapEntry => ({ route: page.path, priority: 0.88, frequency: "weekly" })),
     ...nakshatras.map((slug): SitemapEntry => ({ route: `/nakshatra/${slug}`, priority: 0.76, frequency: "monthly" })),
     ...manualReports.map((report): SitemapEntry => ({ route: `/reports/${report.slug}`, priority: 0.78, frequency: "weekly" })),
@@ -91,5 +91,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
 }
 
 function featuredAstrologerRoutes() {
-  return ["/astrologers/demo-vedic-acharya", "/astrologers/demo-tarot-meera", "/astrologers/demo-panchang-rishi"];
+  return [];
 }

@@ -79,7 +79,6 @@ function footerGroups(locale: Locale) {
     return [
       { title: "टूल्स",       links: [["कुंडली", "/kundli"], ["मिलान", "/matchmaking"], ["अंक ज्योतिष", "/numerology"], ["मुफ़्त कैलकुलेटर", "/free-calculators"], ["टैरो", "/tarot"]] },
       { title: "रिपोर्ट",     links: [["रिपोर्ट", "/reports"], ["प्रीमियम कुंडली", "/reports/premium-kundli"], ["कपल कुंडली", "/reports/couple-kundli"], ["करियर रिपोर्ट", "/reports/career-report"]] },
-      { title: "जल्द आ रहा", links: [["AI ज्योतिषी", "/ai-astrologer"], ["शॉप", "/shop"], ["कंसल्टेशन", "/consultation"]] },
       { title: "सहायता",      links: [["About Us", "/about"], ["Contact", "/contact"]] },
       { title: "कानूनी",      links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
     ].map(normalizeGroup);
@@ -88,7 +87,6 @@ function footerGroups(locale: Locale) {
     return [
       { title: "Tools",       links: [["Kundli", "/kundli"], ["Match Making", "/matchmaking"], ["Numerology", "/numerology"], ["Free Calculators", "/free-calculators"], ["Tarot", "/tarot"]] },
       { title: "Reports",     links: [["Reports", "/reports"], ["Premium Kundli", "/reports/premium-kundli"], ["Couple Kundli", "/reports/couple-kundli"], ["Career Report", "/reports/career-report"]] },
-      { title: "Coming Soon", links: [["AI Astrologer", "/ai-astrologer"], ["Shop", "/shop"], ["Consultation", "/consultation"]] },
       { title: "Support",     links: [["About Us", "/about"], ["Contact", "/contact"]] },
       { title: "Legal",       links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
     ].map(normalizeGroup);
@@ -96,7 +94,6 @@ function footerGroups(locale: Locale) {
   return [
     { title: "Tools",       links: [["Kundli", "/kundli"], ["Match Making", "/matchmaking"], ["Numerology", "/numerology"], ["Free Calculators", "/free-calculators"], ["Tarot", "/tarot"]] },
     { title: "Reports",     links: [["Reports", "/reports"], ["Premium Kundli", "/reports/premium-kundli"], ["Couple Kundli", "/reports/couple-kundli"], ["Career Report", "/reports/career-report"]] },
-    { title: "Coming Soon", links: [["AI Astrologer", "/ai-astrologer"], ["Shop", "/shop"], ["Consultation", "/consultation"]] },
     { title: "Support",     links: [["About Us", "/about"], ["Contact", "/contact"]] },
     { title: "Legal",       links: [["Disclaimer", "/disclaimer"], ["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Refund Policy", "/refund-policy"]] },
   ].map(normalizeGroup);

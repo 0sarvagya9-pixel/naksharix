@@ -117,7 +117,7 @@ export default function DashboardPage() {
         <Card className="border-[#D4AF37]/20 bg-[#061D3C]/80">
           <CardHeader><CardTitle className="font-cinzel">Future Modules</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {["AI Astrologer", "Shop", "Consultation marketplace", "Transit predictions", "Report payment checkout"].map((item) => (
+            {["Shop", "Consultation marketplace", "Transit predictions"].map((item) => (
               <div key={item} className="flex items-center justify-between rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm">
                 <span>{item}</span>
                 <span className="rounded-full border border-[#D4AF37]/30 px-2 py-1 text-xs text-[#FFD700]">Coming Soon</span>

@@ -5,9 +5,7 @@ const links = [
   { href: "/horoscope/all-signs/today", label: "Today horoscope" },
   { href: "/kundli", label: "Free kundli" },
   { href: "/matchmaking", label: "Kundli matching" },
-  { href: "/reports", label: "Premium reports" },
-  { href: "/ai-astrologer", label: "AI astrologer coming soon" },
-  { href: "/consultation", label: "Consultation coming soon" }
+  { href: "/reports", label: "Premium reports" }
 ];
 
 export function SeoInternalLinks({ title = "Explore Naksharix" }: { title?: string }) {

@@ -13,7 +13,7 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 export type ChatLanguage = "English" | "Hindi" | "Hinglish";
 
 export function isGeminiConfigured() {
-  return Boolean(env.GEMINI_API_KEY);
+  return Boolean(env.GEMINI_API_KEY && !env.GEMINI_API_KEY.startsWith("your_"));
 }
 
 export async function completeAstrologyPrompt(system: string, user: string, fallback: string) {

@@ -43,39 +43,22 @@ const calculators: CalculatorItem[] = [
   active("guna", "matching", "/free-calculators/guna-milan-calculator", HeartHandshake, "Guna Milan Calculator", "गुण मिलान कैलकुलेटर", "Guna Milan Calculator", "Calculate focused Ashtakoot score.", "Focused Ashtakoot score देखें।", "Focused Ashtakoot score dekhein.", "Bride and groom full birth details.", "वधू और वर के पूर्ण जन्म विवरण।", "Bride aur groom full birth details.", "Match Making"),
   active("nadi", "matching", "/free-calculators/nadi-dosha-calculator", HeartHandshake, "Nadi Dosha Calculator", "नाड़ी दोष कैलकुलेटर", "Nadi Dosha Calculator", "Check focused Nadi compatibility.", "Focused Nadi compatibility देखें।", "Focused Nadi compatibility dekhein.", "Bride and groom full birth details.", "वधू और वर के पूर्ण जन्म विवरण।", "Bride aur groom full birth details.", "Match Making"),
   active("bhakoot", "matching", "/free-calculators/bhakoot-calculator", HeartHandshake, "Bhakoot Calculator", "भकूट कैलकुलेटर", "Bhakoot Calculator", "Check focused Bhakoot compatibility.", "Focused Bhakoot compatibility देखें।", "Focused Bhakoot compatibility dekhein.", "Bride and groom full birth details.", "वधू और वर के पूर्ण जन्म विवरण।", "Bride aur groom full birth details.", "Match Making"),
-  active("marriage-suitability", "matching", "/free-calculators/marriage-suitability-calculator", HeartHandshake, "Marriage Suitability Calculator", "विवाह उपयुक्तता कैलकुलेटर", "Marriage Suitability Calculator", "Review focused marriage suitability guidance.", "Focused marriage suitability guidance देखें।", "Focused marriage suitability guidance dekhein.", "Bride and groom full birth details.", "वधू और वर के पूर्ण जन्म विवरण।", "Bride aur groom full birth details.", "Match Making"),
-  ...[
-    ["chalit", "kundli", "Chalit Chart Calculator", "चलित चार्ट कैलकुलेटर", "Chalit Chart Calculator"],
-    ["d9", "kundli", "Navamsa / D9 Calculator", "नवांश / D9 कैलकुलेटर", "Navamsa / D9 Calculator"],
-    ["lucky-date", "numerology", "Lucky Date Calculator", "शुभ तिथि कैलकुलेटर", "Lucky Date Calculator"],
-    ["lucky-color", "numerology", "Lucky Color Calculator", "शुभ रंग कैलकुलेटर", "Lucky Color Calculator"],
-    ["baby-name", "numerology", "Baby Name Calculator", "बेबी नाम कैलकुलेटर", "Baby Name Calculator"],
-    ["daily-horoscope", "horoscope", "Daily Horoscope", "दैनिक राशिफल", "Daily Horoscope"],
-    ["weekly-horoscope", "horoscope", "Weekly Horoscope", "साप्ताहिक राशिफल", "Weekly Horoscope"],
-    ["monthly-horoscope", "horoscope", "Monthly Horoscope", "मासिक राशिफल", "Monthly Horoscope"],
-    ["yearly-horoscope", "horoscope", "Yearly Horoscope", "वार्षिक राशिफल", "Yearly Horoscope"],
-    ["panchang", "horoscope", "Panchang", "पंचांग", "Panchang"],
-    ["muhurat", "horoscope", "Muhurat Calculator", "मुहूर्त कैलकुलेटर", "Muhurat Calculator"],
-    ["transit", "horoscope", "Transit Calculator", "गोचर कैलकुलेटर", "Transit Calculator"],
-    ["sade-sati", "horoscope", "Sade Sati Calculator", "साढ़े साती कैलकुलेटर", "Sade Sati Calculator"],
-    ["rahu-ketu", "horoscope", "Rahu Ketu Calculator", "राहु केतु कैलकुलेटर", "Rahu Ketu Calculator"]
-  ].map(([id, group, en, hi, hinglish]) => soon(id, group as CalculatorItem["group"], en, hi, hinglish))
+  active("marriage-suitability", "matching", "/free-calculators/marriage-suitability-calculator", HeartHandshake, "Marriage Suitability Calculator", "विवाह उपयुक्तता कैलकुलेटर", "Marriage Suitability Calculator", "Review focused marriage suitability guidance.", "Focused marriage suitability guidance देखें।", "Focused marriage suitability guidance dekhein.", "Bride and groom full birth details.", "वधू और वर के पूर्ण जन्म विवरण।", "Bride aur groom full birth details.", "Match Making")
 ];
 
-const filters = ["all", "active", "soon", "kundli", "numerology", "matching", "tarot", "horoscope"] as const;
+const filters = ["all", "kundli", "numerology", "matching", "tarot", "horoscope"] as const;
 
 export function FreeCalculatorsContent() {
   const { locale } = useLanguage();
   const labels = calculatorLabels(locale);
   const [filter, setFilter] = useState<(typeof filters)[number]>("all");
 
-  const visible = useMemo(() => calculators.filter((item) => filter === "all" || item.status === filter || item.group === filter), [filter]);
+  const visible = useMemo(() => calculators.filter((item) => filter === "all" || item.group === filter), [filter]);
   const grouped = [
     ["kundli", labels.groups.kundli],
     ["numerology", labels.groups.numerology],
     ["matching", labels.groups.matching],
-    ["tarot", labels.groups.tarot],
-    ["horoscope", labels.groups.horoscope]
+    ["tarot", labels.groups.tarot]
   ] as const;
 
   return (
@@ -119,7 +102,6 @@ export function FreeCalculatorsContent() {
               <section key={group}>
                 <div className="mb-4 flex items-center justify-between gap-4">
                   <h2 className="font-cinzel text-2xl font-black text-white">{title}</h2>
-                  {group === "horoscope" ? <span className="rounded-full border border-[#dca956]/30 bg-[#dca956]/10 px-3 py-1 text-xs text-slate-300">{labels.comingSoon}</span> : null}
                 </div>
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                   {items.map((item) => <CalculatorCard key={item.id} item={item} labels={labels} locale={locale} />)}
@@ -177,26 +159,7 @@ function active(id: string, group: CalculatorItem["group"], href: string, icon: 
   return { id, group, status: "active", href, icon, title: { en, hi, hinglish }, copy: { en: copyEn, hi: copyHi, hinglish: copyHinglish }, required: { en: reqEn, hi: reqHi, hinglish: reqHinglish }, engine };
 }
 
-function soon(id: string, group: CalculatorItem["group"], en: string, hi: string, hinglish: string): CalculatorItem {
-  return {
-    id,
-    group,
-    status: "soon",
-    icon: group === "numerology" ? WandSparkles : group === "matching" ? HeartHandshake : group === "horoscope" ? CalendarDays : MoonStar,
-    title: { en, hi, hinglish },
-    copy: {
-      en: "Focused calculator planned for a future phase using existing engines where accurate data is available.",
-      hi: "Accurate data उपलब्ध होने पर existing engines से future phase में focused calculator planned है।",
-      hinglish: "Accurate data available hone par existing engines ke saath future phase me focused calculator planned hai."
-    },
-    required: {
-      en: "Full input requirements will be shown at launch.",
-      hi: "Launch पर complete input requirements दिखाए जाएंगे।",
-      hinglish: "Launch par complete input requirements dikhaye jayenge."
-    },
-    engine: "Coming Soon"
-  };
-}
+
 
 function calculatorLabels(locale: Locale) {
   if (locale === "hi") {
