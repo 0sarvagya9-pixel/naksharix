@@ -87,7 +87,14 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     }
     window.localStorage.setItem("naksharix-role-intent", roleIntent);
     if (mode === "login") window.localStorage.setItem("naksharix-login-mode", selectedLoginMode);
-    router.push(landingPath(result.data?.user?.effectiveRole));
+
+    const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const redirectTo = searchParams?.get("redirectTo");
+    if (redirectTo) {
+      router.push(redirectTo);
+    } else {
+      router.push(landingPath(result.data?.user?.effectiveRole));
+    }
   }
 
   function onInvalid(errors: FieldErrors<Record<string, string>>) {

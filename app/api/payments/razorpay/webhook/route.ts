@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
         const paid = await finalizePaidPayment(payment.order_id, payment.id, { verifiedBy: "webhook", event: event.event, gatewayStatus: payment.status });
         const metadata = (paid?.metadata as Record<string, unknown> | null) ?? {};
         const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
+        const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
+
         if (paid && reportRequestId) {
           const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
           if (reportRequest) {
@@ -36,6 +38,14 @@ export async function POST(request: NextRequest) {
             });
           }
         }
+
+        if (paid && bookingId) {
+          await prisma.consultationBooking.update({
+            where: { id: bookingId },
+            data: { status: "CONFIRMED", paymentStatus: "PAID" }
+          });
+        }
+
         await writeAuditLog({
           actor: paid ? { id: paid.userId, role: "USER" } : null,
           action: "payment.webhook_paid",
@@ -51,12 +61,22 @@ export async function POST(request: NextRequest) {
         await prisma.payment.update({ where: { id: existingPayment.id }, data: { status: PaymentStatus.FAILED } });
         const metadata = (existingPayment.metadata as Record<string, unknown> | null) ?? {};
         const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
+        const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
+
         if (reportRequestId) {
           await prisma.reportRequest.update({
             where: { id: reportRequestId },
             data: { paymentStatus: ReportPaymentStatus.FAILED }
           });
         }
+
+        if (bookingId) {
+          await prisma.consultationBooking.update({
+            where: { id: bookingId },
+            data: { paymentStatus: "FAILED" }
+          });
+        }
+
         await writeAuditLog({
           actor: { id: existingPayment.userId, role: "USER" },
           action: "payment.webhook_failed",

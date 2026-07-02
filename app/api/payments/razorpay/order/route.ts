@@ -18,7 +18,8 @@ const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
   z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
   z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
-  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() })
+  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
+  z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) })
 ]);
 
 export async function POST(request: NextRequest) {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     const readiness = getRazorpayReadiness();
     if (!readiness.enabled || !razorpay) return fail(readiness.reason, 503);
 
-    const item = resolveCheckoutItem(body);
+    const item = await resolveCheckoutItem(body, user.id);
     if (!item) return fail("Invalid checkout item", 422);
     const reportRequestId = "reportRequestId" in body ? body.reportRequestId : undefined;
     const savedReportId = "savedReportId" in body ? body.savedReportId : undefined;
@@ -120,11 +121,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function resolveCheckoutItem(body: z.infer<typeof schema>) {
+async function resolveCheckoutItem(body: z.infer<typeof schema>, userId: string) {
   if (body.purpose === "SUBSCRIPTION") {
     const plan = getSubscriptionPlan(body.plan);
     if (!plan) return null;
     return { name: `${plan.name} Plan`, amount: plan.amount, metadata: { plan: plan.id, interval: plan.interval } };
+  }
+  if (body.purpose === "CONSULTATION") {
+    const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });
+    if (!booking || booking.userId !== userId) return null;
+    return { name: "Astrology Consultation", amount: Number(booking.amount), metadata: { bookingId: booking.id } };
   }
   const report = getPaidReport(body.reportId);
   if (!report || report.purpose !== body.purpose) return null;

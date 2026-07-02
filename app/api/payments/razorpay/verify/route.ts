@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
     const payment = await finalizePaidPayment(body.razorpay_order_id, body.razorpay_payment_id, { verifiedBy: "client", gatewayStatus: "captured" });
     const metadata = (payment?.metadata as Record<string, unknown> | null) ?? {};
     const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
+    const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
+
     if (payment && reportRequestId) {
       const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
       if (reportRequest && reportRequest.userId === user.id) {
@@ -54,6 +56,14 @@ export async function POST(request: NextRequest) {
         });
       }
     }
+
+    if (payment && bookingId) {
+      await prisma.consultationBooking.update({
+        where: { id: bookingId },
+        data: { status: "CONFIRMED", paymentStatus: "PAID" }
+      });
+    }
+
     if (payment) {
       await writeAuditLog({
         actor: user,

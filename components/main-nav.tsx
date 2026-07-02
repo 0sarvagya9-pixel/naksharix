@@ -32,6 +32,7 @@ const exploreLinks = [
 ];
 
 const toolsLinks = [
+  { label: "Book Consultation", href: "/consultation" },
   { label: "Free Calculators", href: "/free-calculators" },
   { label: "Saved Reports", href: "/saved-reports" },
   { label: "Yearly Horoscope", href: "/yearly-horoscope" },
@@ -40,7 +41,6 @@ const toolsLinks = [
 
 const futureLinks = [
   { label: "AI Astrologer — Coming Soon", href: "/ai-astrologer" },
-  { label: "Consultation — Coming Soon", href: "/consultation" },
   { label: "Shop — Coming Soon", href: "/shop" }
 ];
 
