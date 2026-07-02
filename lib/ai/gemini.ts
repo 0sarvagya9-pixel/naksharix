@@ -1,6 +1,7 @@
 import "server-only";
 
 import { env } from "@/lib/env";
+import { logger } from "@/lib/monitoring/logger";
 
 const geminiModel = "gemini-1.5-flash";
 const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
@@ -17,7 +18,16 @@ export function isGeminiConfigured() {
 }
 
 export async function completeAstrologyPrompt(system: string, user: string, fallback: string) {
-  if (!env.GEMINI_API_KEY) return fallback;
+  const hasKey = Boolean(env.GEMINI_API_KEY);
+  logger.info("Gemini prompt generation request started", {
+    envPresent: hasKey,
+    modelName: geminiModel
+  });
+
+  if (!env.GEMINI_API_KEY) {
+    logger.warn("Gemini prompt generation failed: GEMINI_API_KEY missing");
+    return fallback;
+  }
 
   try {
     const response = await fetch(`${geminiEndpoint}?key=${encodeURIComponent(env.GEMINI_API_KEY)}`, {
@@ -34,10 +44,42 @@ export async function completeAstrologyPrompt(system: string, user: string, fall
       })
     });
 
-    if (!response.ok) return fallback;
+    if (!response.ok) {
+      const errorCode = response.status;
+      let errorStatus = "HTTP_ERROR";
+      try {
+        const errData = await response.json();
+        errorStatus = errData?.error?.status || errData?.error?.message || "UNKNOWN_PROVIDER_ERROR";
+      } catch {
+        // ignore
+      }
+      logger.error("Gemini prompt generation API error response", {
+        statusCode: errorCode,
+        errorCategory: errorStatus,
+        modelName: geminiModel
+      });
+      return fallback;
+    }
+
     const data = (await response.json()) as GeminiResponse;
-    return cleanGeminiText(data.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("\n") || fallback, fallback);
-  } catch {
+    const generatedText = data.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("\n") || "";
+
+    if (!generatedText) {
+      logger.warn("Gemini prompt generation returned empty response candidate");
+      return fallback;
+    }
+
+    logger.info("Gemini prompt generation succeeded", {
+      modelName: geminiModel
+    });
+
+    return cleanGeminiText(generatedText, fallback);
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : "FETCH_FAILED";
+    logger.error("Gemini connection failure", {
+      errorMessage: errorMsg,
+      modelName: geminiModel
+    });
     return fallback;
   }
 }
