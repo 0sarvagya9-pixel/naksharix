@@ -141,6 +141,9 @@ export default async function AstrologerDashboardPage() {
                     <p className="font-cinzel font-bold">{booking.user.name}</p>
                     <p className="text-sm naksh-muted-text">{booking.mode} | {booking.scheduledAt.toLocaleString("en-IN")} | {booking.status}</p>
                     <p className="mt-2 text-sm naksh-muted-text">{booking.question}</p>
+                    <p className="mt-2 text-xs text-amber-200">
+                      Birth Info: {booking.birthName || "-"} | DOB: {booking.birthDate ? booking.birthDate.toLocaleDateString("en-IN") : "-"} | TOB: {booking.birthTime || "-"} | POB: {booking.birthPlace || "-"}
+                    </p>
                   </div>
                   <AstrologerBookingActions bookingId={booking.id} />
                 </div>

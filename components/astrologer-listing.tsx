@@ -6,7 +6,7 @@ import Link from "next/link";
 import { BadgeCheck, Circle, MessageCircle, Phone, Star, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { featuredAstrologers } from "@/lib/astrologers";
+
 import { useLanguage } from "@/components/language-provider";
 
 export type MarketplaceAstrologer = {
@@ -36,8 +36,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
   const [expertise, setExpertise] = useState("All");
   const [price, setPrice] = useState("All");
   const [rating, setRating] = useState("All");
-  const demoAstrologers: MarketplaceAstrologer[] = featuredAstrologers.map((item) => ({ ...item, reviewCount: 0 }));
-  const source = profiles.length ? profiles : demoAstrologers;
+  const source = profiles;
 
   const astrologers = useMemo(() => source.filter((astrologer) => {
     const languageOk = language === "All" || astrologer.languages.includes(language);

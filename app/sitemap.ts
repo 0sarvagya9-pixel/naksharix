@@ -57,6 +57,7 @@ const staticRoutes = [
   "/talk-to-kundli",
   "/kundli",
   "/astrologers",
+  "/consultation",
   "/reports",
   "/zodiac",
   "/matchmaking",
