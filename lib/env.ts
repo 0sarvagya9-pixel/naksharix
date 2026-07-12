@@ -69,10 +69,10 @@ export const env = {
 export function validateProductionEnv() {
   const issues: string[] = [];
   if (!env.DATABASE_URL) issues.push("DATABASE_URL is required in production");
-  if (!env.JWT_SECRET && !env.NEXTAUTH_SECRET) issues.push("JWT_SECRET or NEXTAUTH_SECRET is required in production");
   if (env.JWT_SECRET.includes("replace-with") || env.JWT_SECRET.includes("development-secret")) issues.push("Production auth secret must not use a placeholder value");
   if (!env.NEXT_PUBLIC_APP_URL.startsWith("https://")) issues.push("NEXT_PUBLIC_APP_URL must use HTTPS in production");
+  if (env.ASTROLOGY_PROVIDER === "mock") issues.push("ASTROLOGY_PROVIDER=mock is not allowed in production");
   if (env.AI_ASTROLOGER_ENABLED === "true" && !env.GEMINI_API_KEY) issues.push("GEMINI_API_KEY is required when AI_ASTROLOGER_ENABLED=true");
-  if (env.ALLOW_AI_DIAGNOSTICS === "true" && env.NODE_ENV === "production") issues.push("ALLOW_AI_DIAGNOSTICS must remain false in production");
+  if (env.ALLOW_AI_DIAGNOSTICS === "true") issues.push("ALLOW_AI_DIAGNOSTICS must remain false in production");
   if (issues.length) throw new Error(`Invalid production environment:\n${issues.join("\n")}`);
 }
