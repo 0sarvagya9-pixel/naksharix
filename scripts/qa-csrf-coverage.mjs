@@ -19,6 +19,51 @@ function walk(relativeDir) {
   });
 }
 
+function directFetchCalls(text) {
+  const calls = [];
+  const pattern = /\bfetch\s*\(/g;
+  for (const match of text.matchAll(pattern)) {
+    const start = match.index;
+    const openParen = text.indexOf("(", start);
+    if (openParen < 0) continue;
+    let depth = 0;
+    let quote = "";
+    let escaped = false;
+    let end = -1;
+
+    for (let index = openParen; index < text.length; index += 1) {
+      const char = text[index];
+      if (quote) {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (char === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (char === quote) quote = "";
+        continue;
+      }
+      if (char === '"' || char === "'" || char === "`") {
+        quote = char;
+        continue;
+      }
+      if (char === "(") depth += 1;
+      if (char === ")") {
+        depth -= 1;
+        if (depth === 0) {
+          end = index + 1;
+          break;
+        }
+      }
+    }
+
+    if (end > start) calls.push({ start, text: text.slice(start, end) });
+  }
+  return calls;
+}
+
 for (const file of scanRoots.flatMap(walk)) {
   if (ignored.has(file)) continue;
   const text = fs.readFileSync(path.join(root, file), "utf8");
@@ -26,9 +71,9 @@ for (const file of scanRoots.flatMap(walk)) {
   clientFiles += 1;
   if (text.includes("secureFetch(")) secureFetchFiles += 1;
 
-  const directMutationFetch = /(?<![\w])fetch\s*\([\s\S]{0,700}?method\s*:\s*["'](?:POST|PUT|PATCH|DELETE)["']/gi;
-  for (const match of text.matchAll(directMutationFetch)) {
-    const line = text.slice(0, match.index).split("\n").length;
+  for (const call of directFetchCalls(text)) {
+    if (!/\bmethod\s*:\s*["'](?:POST|PUT|PATCH|DELETE)["']/i.test(call.text)) continue;
+    const line = text.slice(0, call.start).split("\n").length;
     failures.push(`${file}:${line} uses direct fetch for a state-changing request; use secureFetch instead`);
   }
 }
