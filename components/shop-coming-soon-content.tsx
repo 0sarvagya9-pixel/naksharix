@@ -29,7 +29,7 @@ export function ShopComingSoonContent() {
               <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{labels.title}</h1>
               <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{labels.subtitle}</p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
+                <Button asChild className="bg-[#006b50] text-white hover:bg-[#00583f]">
                   <Link href="/free-calculators">{labels.freeTools}</Link>
                 </Button>
                 <Button variant="outline" asChild>

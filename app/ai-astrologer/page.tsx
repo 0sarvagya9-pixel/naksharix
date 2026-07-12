@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true }
 };
 
+const ctaClassName = "mt-auto w-full bg-[#006b50] text-white hover:bg-[#00583f]";
+
 export default function AiAstrologerPage() {
   return (
     <main className="inner-page-shell star-field min-h-screen">
@@ -37,7 +39,7 @@ export default function AiAstrologerPage() {
               <MoonStar className="h-6 w-6 text-[#00f5a0]" />
               <h2 className="mt-4 font-cinzel text-xl font-bold text-[#f3d382]">Explore Kundli</h2>
               <p className="mt-2 text-sm leading-6 text-[#cbd5e1] mb-5">Start with a free Kundli experience from complete birth details.</p>
-              <Button className="mt-auto w-full bg-[#009b72] text-white hover:bg-[#008766]" asChild>
+              <Button className={ctaClassName} asChild>
                 <Link href="/kundli">Open Kundli</Link>
               </Button>
             </CardContent>
@@ -48,7 +50,7 @@ export default function AiAstrologerPage() {
               <HeartHandshake className="h-6 w-6 text-[#00f5a0]" />
               <h2 className="mt-4 font-cinzel text-xl font-bold text-[#f3d382]">Try Match Making</h2>
               <p className="mt-2 text-sm leading-6 text-[#cbd5e1] mb-5">Review compatibility guidance from bride and groom details.</p>
-              <Button className="mt-auto w-full bg-[#009b72] text-white hover:bg-[#008766]" asChild>
+              <Button className={ctaClassName} asChild>
                 <Link href="/matchmaking">Open Matching</Link>
               </Button>
             </CardContent>
@@ -59,7 +61,7 @@ export default function AiAstrologerPage() {
               <Sparkles className="h-6 w-6 text-[#00f5a0]" />
               <h2 className="mt-4 font-cinzel text-xl font-bold text-[#f3d382]">Explore Numerology</h2>
               <p className="mt-2 text-sm leading-6 text-[#cbd5e1] mb-5">Review name, DOB, mobile, vehicle, and Lo Shu insights.</p>
-              <Button className="mt-auto w-full bg-[#009b72] text-white hover:bg-[#008766]" asChild>
+              <Button className={ctaClassName} asChild>
                 <Link href="/numerology">Open Numerology</Link>
               </Button>
             </CardContent>
@@ -70,7 +72,7 @@ export default function AiAstrologerPage() {
               <ScrollText className="h-6 w-6 text-[#00f5a0]" />
               <h2 className="mt-4 font-cinzel text-xl font-bold text-[#f3d382]">View Reports</h2>
               <p className="mt-2 text-sm leading-6 text-[#cbd5e1] mb-5">Explore available digital reports and save completed Kundli reports to your account.</p>
-              <Button className="mt-auto w-full bg-[#009b72] text-white hover:bg-[#008766]" asChild>
+              <Button className={ctaClassName} asChild>
                 <Link href="/reports">Open Reports</Link>
               </Button>
             </CardContent>

@@ -30,6 +30,8 @@ export type MarketplaceAstrologer = {
   availableForVideo?: boolean;
 };
 
+const filterClassName = "h-10 rounded-md border border-[#dca956]/45 bg-[#02112c] px-3 text-sm text-[#f8fafc] [color-scheme:dark] focus-visible:border-[#f3d382] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d382]/40";
+
 export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAstrologer[] }) {
   const { tr } = useLanguage();
   const [language, setLanguage] = useState("All");
@@ -48,17 +50,17 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
 
   return (
     <>
-      <div className="mt-8 grid gap-3 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/60 p-4 md:grid-cols-4">
-        <select value={language} onChange={(event) => setLanguage(event.target.value)} className="h-10 rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm">
+      <div className="mt-8 grid gap-3 rounded-lg border border-[#dca956]/25 bg-[#061d3c]/75 p-4 md:grid-cols-4" aria-label="Astrologer filters">
+        <select aria-label="Filter astrologers by language" value={language} onChange={(event) => setLanguage(event.target.value)} className={filterClassName}>
           <option value="All">{tr("all")}</option><option value="English">{tr("english")}</option><option value="Hindi">{tr("hindi")}</option><option value="Hinglish">Hinglish</option>
         </select>
-        <select value={expertise} onChange={(event) => setExpertise(event.target.value)} className="h-10 rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm">
+        <select aria-label="Filter astrologers by expertise" value={expertise} onChange={(event) => setExpertise(event.target.value)} className={filterClassName}>
           <option value="All">{tr("all")}</option><option value="Vedic">{tr("vedic")}</option><option value="Tarot">{tr("tarotWord")}</option><option value="Numerology">{tr("numerologyWord")}</option><option value="Kundli">Kundli</option>
         </select>
-        <select value={price} onChange={(event) => setPrice(event.target.value)} className="h-10 rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm">
+        <select aria-label="Filter astrologers by maximum price" value={price} onChange={(event) => setPrice(event.target.value)} className={filterClassName}>
           <option value="All">{tr("all")}</option><option value="40">{tr("upToInr40")}</option><option value="50">{tr("upToInr50")}</option><option value="60">{tr("upToInr60")}</option>
         </select>
-        <select value={rating} onChange={(event) => setRating(event.target.value)} className="h-10 rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm">
+        <select aria-label="Filter astrologers by minimum rating" value={rating} onChange={(event) => setRating(event.target.value)} className={filterClassName}>
           <option value="All">{tr("all")}</option><option value="4">4+ {tr("rating")}</option><option value="4.5">4.5+ {tr("rating")}</option><option value="4.8">4.8+ {tr("rating")}</option>
         </select>
       </div>

@@ -21,8 +21,10 @@ jobs:
           CSRF_EXIT=$?
           node scripts/qa-i18n-safety.mjs >> static-audit.log 2>&1
           I18N_EXIT=$?
+          node scripts/qa-source-hygiene.mjs >> static-audit.log 2>&1
+          HYGIENE_EXIT=$?
           cat static-audit.log
-          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ]; then
+          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ]; then
             exit 1
           fi
       - name: Upload static audit log
@@ -126,3 +128,76 @@ jobs:
       - name: Audit production dependencies for critical vulnerabilities
         continue-on-error: true
         run: npm audit --omit=dev --audit-level=critical
+
+  browser-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naksharix
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      JWT_SECRET: browser-ci-secret-browser-ci-secret-browser-ci-secret
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      ASTROLOGY_PROVIDER: own_engine
+      AI_ASTROLOGER_ENABLED: "false"
+      ALLOW_AI_DIAGNOSTICS: "false"
+      SUBSCRIPTIONS_ENABLED: "false"
+      EMAIL_PROVIDER: disabled
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx prisma generate
+      - run: npm run build
+      - name: Run browser release QA
+        shell: bash
+        run: |
+          set +e
+          npm run start -- -p 3000 > /tmp/naksharix-browser-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:3000/api/health > /dev/null; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$READY" -ne 1 ]; then
+            cat /tmp/naksharix-browser-server.log > browser-qa.log
+            exit 1
+          fi
+          npx playwright test --config=tests/e2e/playwright.config.ts --workers=1 > browser-qa.log 2>&1
+          BROWSER_EXIT=$?
+          cat browser-qa.log
+          exit "$BROWSER_EXIT"
+      - name: Upload browser QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-release-qa
+          path: |
+            browser-qa.log
+            test-results
+          if-no-files-found: warn
