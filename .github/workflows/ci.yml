@@ -129,7 +129,7 @@ jobs:
 
   browser-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 50
     services:
       postgres:
         image: postgres:16-alpine
@@ -163,8 +163,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1
-      - run: npx playwright install --with-deps chromium
+      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: npx prisma generate
       - run: npm run build
       - name: Run browser release QA
@@ -186,7 +186,7 @@ jobs:
             cat /tmp/naksharix-browser-server.log > browser-qa.log
             exit 1
           fi
-          npx playwright test tests/e2e/release.spec.ts --workers=1 --reporter=line --trace=retain-on-failure > browser-qa.log 2>&1
+          npx playwright test --config=tests/e2e/playwright.config.ts --workers=1 > browser-qa.log 2>&1
           BROWSER_EXIT=$?
           cat browser-qa.log
           exit "$BROWSER_EXIT"
