@@ -32,13 +32,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm install
+      - run: npm ci
       - run: npx prisma generate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
           JWT_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
           NEXT_PUBLIC_APP_URL: http://localhost:3000
+      - run: git diff --check
