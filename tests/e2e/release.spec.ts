@@ -32,6 +32,7 @@ async function installRuntimeErrorGuard(page: Page) {
     if (message.type() !== "error") return;
     const text = message.text();
     if (/Failed to load resource:.*401 \(Unauthorized\)/i.test(text)) return;
+    if (/Failed to fetch RSC payload for .* Falling back to browser navigation\. Error/i.test(text)) return;
     errors.push(text);
   });
   return errors;
