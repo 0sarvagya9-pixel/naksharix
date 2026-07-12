@@ -41,6 +41,7 @@
         "qa:premium-report-content": "node scripts/qa-premium-report-content.mjs",
         "qa:advanced-engine": "npm run qa:transit && npm run qa:varga && npm run qa:strength",
         "qa:all": "npm run qa:foundation && npm run qa:engine && npm run qa:provider-kundli && npm run qa:provider-panchang && npm run qa:provider-transit && npm run qa:provider-varga && npm run qa:ephemeris && npm run qa:panchang && npm run qa:transit && npm run qa:varga && npm run qa:strength && npm run qa:premium-engine && npm run qa:interpretation && npm run qa:remedies && npm run qa:premium-report-content && npm run qa:fixture-import && npm run qa:reports-workflow && npm run qa:payments && npm run qa:pdf-generation && npm run qa:storage && npm run qa:delivery && npm run qa:audit-security && npm run qa:automation && npm run qa:production-safety",
+        "qa:release": "npm run qa:reports-workflow && npm run qa:payments && npm run qa:pdf-generation && npm run qa:storage && npm run qa:delivery && npm run qa:audit-security && npm run qa:automation && npm run qa:production-safety",
         "fixtures:generate": "node scripts/generate-provider-fixtures.mjs",
         "fixture:import": "node scripts/import-verified-fixture.mjs",
         "verify": "npm run lint && npm run typecheck && npm run build",
@@ -84,7 +85,7 @@
         "sharp": "^0.33.5",
         "stripe": "^18.1.0",
         "tailwind-merge": "^3.2.0",
-        "tailwindcss-animate": "^1.0.7",
+        "tailwindcss-animate": "^1.0.0",
         "ws": "^8.18.2",
         "zod": "^3.24.3",
         "zustand": "^5.0.3"
