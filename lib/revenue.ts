@@ -37,6 +37,7 @@ export async function verifyRazorpayCapturedPayment(orderId: string, paymentId: 
     return { ok: false, reason: "Unable to verify payment with Razorpay" };
   }
 }
+
 export function verifyRazorpayWebhookSignature(payload: string, signature: string | null) {
   if (!env.RAZORPAY_WEBHOOK_SECRET || !signature) return false;
   const expected = createHmac("sha256", env.RAZORPAY_WEBHOOK_SECRET).update(payload).digest("hex");
@@ -56,19 +57,25 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
 
   const invoiceNumber = `NXR-${new Date().getFullYear()}-${payment.id.slice(-8).toUpperCase()}`;
   const taxAmount = Number(payment.amount) * 0.18;
-
   const existingMetadata = (payment.metadata as Record<string, unknown> | null) ?? {};
   const mergedMetadata = { ...existingMetadata, ...metadata } as Prisma.InputJsonObject;
 
-  const updated = await prisma.$transaction(async (tx) => {
-    const paid = await tx.payment.update({
-      where: { id: payment.id },
+  return prisma.$transaction(async (tx) => {
+    const claimed = await tx.payment.updateMany({
+      where: { id: payment.id, status: { not: PaymentStatus.PAID } },
       data: {
         status: PaymentStatus.PAID,
         providerPaymentId,
         metadata: mergedMetadata
       }
     });
+
+    if (claimed.count === 0) {
+      return tx.payment.findUnique({ where: { id: payment.id } });
+    }
+
+    const paid = await tx.payment.findUnique({ where: { id: payment.id } });
+    if (!paid) throw new Error("Payment disappeared during finalization");
 
     await tx.invoice.upsert({
       where: { paymentId: paid.id },
@@ -116,13 +123,11 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
     }
 
     return paid;
-  });
-
-  return updated;
+  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 }
 
 function reportTitle(purpose: PaymentPurpose) {
-  if (purpose === PaymentPurpose.YEARLY_REPORT) return "AI Yearly Prediction";
+  if (purpose === PaymentPurpose.YEARLY_REPORT) return "Yearly Astrology Report";
   if (purpose === PaymentPurpose.MATCH_REPORT) return "Premium Match Report";
   return "Kundli Pro Report";
 }
@@ -130,7 +135,3 @@ function reportTitle(purpose: PaymentPurpose) {
 function buildInvoiceHtml(number: string, amount: number, currency: string, purpose: PaymentPurpose) {
   return `<h1>Naksharix Invoice ${number}</h1><p>Purpose: ${purpose}</p><p>Amount: ${currency} ${amount.toFixed(2)}</p><p>GST estimate: ${currency} ${(amount * 0.18).toFixed(2)}</p>`;
 }
-
-
-
-
