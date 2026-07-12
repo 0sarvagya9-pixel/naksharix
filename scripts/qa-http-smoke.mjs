@@ -33,6 +33,7 @@ const publicPages = [
   ["/", "Vedic Astrology Tools"],
   ["/about", "About Naksharix"],
   ["/consultation", "Astrology Consultations"],
+  ["/pricing", "Services and Pricing"],
   ["/shop", "Shop Coming Soon"],
   ["/ai-astrologer", "AI Astrologer"]
 ];
@@ -43,8 +44,11 @@ for (const [path, titleMarker] of publicPages) {
   const html = await response.text();
   if (!html.includes(titleMarker)) fail(`title marker ${path}`, `missing ${titleMarker}`);
   else pass(`title marker ${path}`, titleMarker);
-  for (const forbidden of ["1M+", "10k+", "98%", "Trusted by Millions", "AI-Powered Accuracy", "Gemini-powered"]) {
+  for (const forbidden of ["1M+", "10k+", "98%", "Trusted by Millions", "AI-Powered Accuracy", "Gemini-powered", "placeholder payments"]) {
     if (html.toLowerCase().includes(forbidden.toLowerCase())) fail(`claim safety ${path}`, `found ${forbidden}`);
+  }
+  if (path === "/pricing" && /subscribe to|INR 499\/mo|INR 1499\/mo/i.test(html)) {
+    fail("pricing safety", "unsupported public subscription checkout is visible");
   }
 }
 
@@ -125,6 +129,7 @@ if (csrfResponse) {
 }
 
 await expectStatus("/api/admin/diagnose-gemini", 404, undefined, "Gemini diagnostics hidden from public");
+await expectStatus("/api/admin/readiness", 404, undefined, "system readiness hidden from public");
 await expectStatus(
   "/api/payments/razorpay/webhook",
   400,
