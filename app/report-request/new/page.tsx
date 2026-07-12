@@ -6,7 +6,8 @@ import { ReportRequestForm } from "@/components/report-request/report-request-fo
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { canBypassPayment } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db";
-import { normalizeLocale, t, type Locale } from "@/lib/i18n";
+import { normalizeLocale, type Locale } from "@/lib/i18n";
+import { safeServerTranslation } from "@/lib/i18n-server";
 import { cookies } from "next/headers";
 
 type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string; reportSlug?: string }>;
@@ -35,7 +36,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     <Section className="max-w-4xl">
       <Card className="glass overflow-visible border-[#D4AF37]/25">
         <CardHeader>
-          <CardTitle className="font-cinzel text-3xl">{t(locale, "reportRequestDetails")}</CardTitle>
+          <CardTitle className="font-cinzel text-3xl">{safeServerTranslation(locale, "reportRequestDetails")}</CardTitle>
           <p className="text-sm naksh-muted-text">Submit accurate birth details for manual review. Online payment is not required at request stage, and delivery appears only after a real PDF is generated.</p>
         </CardHeader>
         <CardContent className="overflow-visible">
