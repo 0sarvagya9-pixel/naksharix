@@ -74,17 +74,17 @@ function shopHoldLabels(locale: Locale) {
     return {
       eyebrow: "Coming Soon",
       title: "शॉप जल्द आ रही है",
-      subtitle: "हम रुद्राक्ष, रत्न, यंत्र, माला, ब्रेसलेट और उपाय-आधारित आध्यात्मिक उत्पादों के साथ Naksharix शॉप तैयार कर रहे हैं।",
+      subtitle: "Naksharix Shop अभी तैयार की जा रही है। Public catalogue, cart, product checkout और physical order service अभी उपलब्ध नहीं हैं।",
       freeTools: "मुफ़्त टूल्स देखें",
       viewReports: "रिपोर्ट देखें",
       holdTitle: "सुरक्षित लॉन्च तैयारी",
-      holdCopy: "Public shop अभी active catalogue, cart या checkout नहीं दिखा रही है। Product experience future storage और operations setup के बाद launch होगा।",
-      items: ["रुद्राक्ष", "रत्न", "यंत्र", "माला", "ब्रेसलेट", "उपाय कॉम्बो"],
+      holdCopy: "हम product review, authenticity process, fulfilment और customer support तैयार करने के बाद ही shop launch करेंगे।",
+      items: ["Product review", "Authenticity checks", "Fulfilment setup", "Customer support"],
       cards: {
         kundli: { title: "कुंडली बनाएं", copy: "जन्म विवरण से अपना मुफ्त कुंडली अनुभव शुरू करें।", cta: "कुंडली खोलें" },
         matching: { title: "मिलान करें", copy: "वधू और वर विवरण से compatibility समझें।", cta: "मिलान खोलें" },
         numerology: { title: "अंक ज्योतिष देखें", copy: "नाम, जन्म तिथि, मोबाइल, वाहन और लो शू insights देखें।", cta: "Numerology खोलें" },
-        reports: { title: "रिपोर्ट देखें", copy: "Manual contact process से premium reports explore करें।", cta: "Reports खोलें" }
+        reports: { title: "रिपोर्ट देखें", copy: "उपलब्ध digital reports और saved Kundli reports देखें।", cta: "Reports खोलें" }
       }
     };
   }
@@ -92,34 +92,34 @@ function shopHoldLabels(locale: Locale) {
     return {
       eyebrow: "Coming Soon",
       title: "Shop Jaldi Aa Raha Hai",
-      subtitle: "Hum rudraksha, gemstones, yantras, malas, bracelets aur remedy-based products ke saath Naksharix shop prepare kar rahe hain.",
+      subtitle: "Naksharix Shop abhi prepare ho raha hai. Public catalogue, cart, product checkout aur physical order service abhi available nahi hain.",
       freeTools: "Free Tools Dekhein",
       viewReports: "View Reports",
       holdTitle: "Safe launch preparation",
-      holdCopy: "Public shop abhi active catalogue, cart ya checkout nahi dikha rahi hai. Product experience future storage aur operations setup ke baad launch hoga.",
-      items: ["Rudraksha", "Gemstones", "Yantras", "Mala", "Bracelets", "Remedy Combo"],
+      holdCopy: "Product review, authenticity process, fulfilment aur customer support ready hone ke baad hi shop launch hoga.",
+      items: ["Product review", "Authenticity checks", "Fulfilment setup", "Customer support"],
       cards: {
         kundli: { title: "Explore Kundli", copy: "Birth details se free Kundli experience start karein.", cta: "Open Kundli" },
         matching: { title: "Try Match Making", copy: "Bride aur groom details se compatibility samjhein.", cta: "Open Matching" },
         numerology: { title: "Explore Numerology", copy: "Name, DOB, mobile, vehicle aur Lo Shu insights dekhein.", cta: "Open Numerology" },
-        reports: { title: "View Reports", copy: "Manual contact process ke saath premium reports explore karein.", cta: "Open Reports" }
+        reports: { title: "View Reports", copy: "Available digital reports aur saved Kundli reports dekhein.", cta: "Open Reports" }
       }
     };
   }
   return {
     eyebrow: "Coming Soon",
     title: "Shop Coming Soon",
-    subtitle: "We are preparing a curated Naksharix spiritual shop with rudraksha, gemstones, yantras, malas, bracelets, and remedy-based products.",
+    subtitle: "The Naksharix Shop is being prepared. No public catalogue, cart, product checkout, or physical-order service is available yet.",
     freeTools: "Explore Free Tools",
     viewReports: "View Reports",
     holdTitle: "Safe launch preparation",
-    holdCopy: "The public shop is not showing an active catalogue, cart, or checkout yet. The product experience will launch after storage and operations are connected.",
-    items: ["Rudraksha", "Gemstones", "Yantras", "Mala", "Bracelets", "Remedy Combo"],
+    holdCopy: "The shop will open only after product review, authenticity processes, fulfilment, and customer support are ready.",
+    items: ["Product review", "Authenticity checks", "Fulfilment setup", "Customer support"],
     cards: {
       kundli: { title: "Explore Kundli", copy: "Start with a free Kundli experience from birth details.", cta: "Open Kundli" },
       matching: { title: "Try Match Making", copy: "Understand compatibility from bride and groom details.", cta: "Open Matching" },
       numerology: { title: "Explore Numerology", copy: "Review name, DOB, mobile, vehicle, and Lo Shu insights.", cta: "Open Numerology" },
-      reports: { title: "View Reports", copy: "Explore premium reports through the manual contact process.", cta: "Open Reports" }
+      reports: { title: "View Reports", copy: "Explore available digital reports and saved Kundli reports.", cta: "Open Reports" }
     }
   };
 }
