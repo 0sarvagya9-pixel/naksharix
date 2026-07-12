@@ -6,11 +6,14 @@ import { Section } from "@/components/section";
 import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
 
-export const metadata: Metadata = seo({
-  title: "Login to Naksharix",
-  description: "Login to Naksharix with Google or email to access your kundli reports, readings, and astrology dashboard.",
-  path: "/login"
-});
+export const metadata: Metadata = {
+  ...seo({
+    title: "Login to Naksharix",
+    description: "Login to Naksharix with Google or email to access saved Kundli reports, readings, bookings, and your account dashboard.",
+    path: "/login"
+  }),
+  robots: { index: false, follow: true }
+};
 
 export default function LoginPage() {
   const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
@@ -26,10 +29,11 @@ export default function LoginPage() {
           <p className="mt-4 text-sm naksh-muted-text">
             New here? <Link href="/signup" className="text-[#01A361]">Create an account</Link>
           </p>
+          <p className="mt-2 text-sm naksh-muted-text">
+            Astrologer or consultant? <Link href="/auth/astrologer-login" className="text-[#01A361]">Use professional login</Link>
+          </p>
         </CardContent>
       </Card>
     </Section>
   );
 }
-
-
