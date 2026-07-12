@@ -47,6 +47,25 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      - name: Run local production HTTP smoke
+        shell: bash
+        run: |
+          npm run start -- -p 3000 > /tmp/naksharix-next.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:3000/api/health > /dev/null; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$READY" -ne 1 ]; then
+            cat /tmp/naksharix-next.log
+            exit 1
+          fi
+          node scripts/qa-http-smoke.mjs
       - run: git diff --check
       - name: Audit production dependencies for critical vulnerabilities
         continue-on-error: true
