@@ -22,6 +22,8 @@ const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) })
 ]);
 
+type CheckoutBody = z.infer<typeof schema>;
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -29,12 +31,13 @@ export async function POST(request: NextRequest) {
     const limited = rateLimitResponse("razorpay-order", user.id || getRequestIp(request), 10, 60_000);
     if (limited) return limited;
     const body = await validateJson(request, schema);
+    if (body.purpose === "SUBSCRIPTION" && env.SUBSCRIPTIONS_ENABLED !== "true") return fail("Not found", 404);
     if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
     const readiness = getRazorpayReadiness();
     if (!readiness.enabled || !razorpay) return fail(readiness.reason, 503);
 
     const item = await resolveCheckoutItem(body, user.id);
-    if (!item) return fail("Invalid checkout item", 422);
+    if (!item) return fail("Invalid or completed checkout item", 422);
     const reportRequestId = "reportRequestId" in body ? body.reportRequestId : undefined;
     const savedReportId = "savedReportId" in body ? body.savedReportId : undefined;
 
@@ -43,11 +46,9 @@ export async function POST(request: NextRequest) {
         where: {
           userId: user.id,
           status: "PAID",
-          metadata: {
-            path: ["savedReportId"],
-            equals: savedReportId
-          }
-        }
+          metadata: { path: ["savedReportId"], equals: savedReportId }
+        },
+        select: { id: true }
       });
       if (alreadyPaid) return fail("This report is already unlocked.", 409);
     }
@@ -64,6 +65,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const reusable = await findReusablePayment(body, user.id);
+    if (reusable?.status === "PAID") return fail("This checkout item is already paid.", 409);
+    if (reusable?.status === "PENDING" && reusable.providerOrderId) {
+      return ok({
+        keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        order: {
+          id: reusable.providerOrderId,
+          amount: Math.round(Number(reusable.amount) * 100),
+          currency: reusable.currency
+        },
+        paymentId: reusable.id,
+        item: { name: item.name, amount: item.amount },
+        reused: true
+      });
+    }
+
     const payment = await prisma.payment.create({
       data: {
         userId: user.id,
@@ -76,12 +93,25 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const order = await razorpay.orders.create({
-      amount: Math.round(item.amount * 100),
-      currency: "INR",
-      receipt: payment.id,
-      notes: { userId: user.id, paymentId: payment.id, purpose: body.purpose }
-    });
+    let order;
+    try {
+      order = await razorpay.orders.create({
+        amount: Math.round(item.amount * 100),
+        currency: "INR",
+        receipt: payment.id,
+        notes: { userId: user.id, paymentId: payment.id, purpose: body.purpose }
+      });
+    } catch (error) {
+      await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } }).catch(() => null);
+      await writeAuditLog({
+        actor: user,
+        action: "payment.razorpay_order_failed",
+        targetType: "Payment",
+        targetId: payment.id,
+        metadata: { purpose: body.purpose, provider: "razorpay" }
+      }).catch(() => null);
+      throw error;
+    }
 
     await prisma.payment.update({ where: { id: payment.id }, data: { providerOrderId: order.id } });
     if (reportRequestId) {
@@ -114,14 +144,38 @@ export async function POST(request: NextRequest) {
       keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       order,
       paymentId: payment.id,
-      item: { name: item.name, amount: item.amount }
+      item: { name: item.name, amount: item.amount },
+      reused: false
     });
   } catch (error) {
     return handleApiError(error);
   }
 }
 
-async function resolveCheckoutItem(body: z.infer<typeof schema>, userId: string) {
+async function findReusablePayment(body: CheckoutBody, userId: string) {
+  const identity = checkoutIdentity(body);
+  if (!identity) return null;
+
+  return prisma.payment.findFirst({
+    where: {
+      userId,
+      status: { in: ["PENDING", "PAID"] },
+      metadata: { path: [identity.key], equals: identity.value }
+    },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, status: true, providerOrderId: true, amount: true, currency: true }
+  });
+}
+
+function checkoutIdentity(body: CheckoutBody) {
+  if (body.purpose === "CONSULTATION") return { key: "bookingId", value: body.bookingId };
+  if (body.purpose === "SUBSCRIPTION") return null;
+  if (body.reportRequestId) return { key: "reportRequestId", value: body.reportRequestId };
+  if (body.savedReportId) return { key: "savedReportId", value: body.savedReportId };
+  return null;
+}
+
+async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
   if (body.purpose === "SUBSCRIPTION") {
     const plan = getSubscriptionPlan(body.plan);
     if (!plan) return null;
@@ -130,15 +184,11 @@ async function resolveCheckoutItem(body: z.infer<typeof schema>, userId: string)
   if (body.purpose === "CONSULTATION") {
     const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });
     if (!booking || booking.userId !== userId) return null;
+    if (["PAID", "ADMIN_BYPASS", "REFUNDED"].includes(booking.paymentStatus)) return null;
+    if (["CANCELED", "COMPLETED", "REJECTED"].includes(booking.status)) return null;
     return { name: "Astrology Consultation", amount: Number(booking.amount), metadata: { bookingId: booking.id } };
   }
   const report = getPaidReport(body.reportId);
   if (!report || report.purpose !== body.purpose) return null;
   return { name: report.name, amount: report.amount, metadata: { reportId: report.id, reportName: report.name } };
 }
-
-
-
-
-
-

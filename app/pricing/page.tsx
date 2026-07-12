@@ -3,10 +3,10 @@ import { seo } from "@/lib/seo";
 import { PricingContent } from "@/components/pricing-content";
 
 export const metadata: Metadata = seo({
-  title: "Pricing - Premium Astrology Plans",
-  description: "Choose Naksharix Free, Premium, or VIP plans for horoscope, kundli, numerology, tarot reading, panchang, AI reports, and consultations.",
+  title: "Naksharix Services and Pricing",
+  description: "Review available Naksharix free tools, premium digital reports, and astrologer consultation options. Prices are shown on the relevant report or approved astrologer page.",
   path: "/pricing",
-  keywords: ["Astrology Subscription", "Premium Horoscope", "Paid Kundli Reports"]
+  keywords: ["Naksharix Services", "Kundli Report Price", "Astrology Consultation Price"]
 });
 
 export default function PricingPage() {

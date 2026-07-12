@@ -57,7 +57,6 @@ const staticRoutes = [
   "/nakshatra",
   "/festival-calendar",
   "/shubh-muhurat",
-  "/talk-to-kundli",
   "/kundli",
   "/astrologers",
   "/consultation",

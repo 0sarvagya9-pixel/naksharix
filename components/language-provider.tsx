@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { normalizeLocale, requiredMessages, t, type Locale, type TranslationKey } from "@/lib/i18n";
+import { safeTranslation } from "@/lib/i18n-safe-overrides";
 
 type LanguageContextValue = {
   locale: Locale;
@@ -46,7 +47,7 @@ export function LanguageProvider({ children, initialLocale = "en" }: { children:
   const value = useMemo<LanguageContextValue>(() => ({
     locale,
     setLocale: (nextLocale) => updateLocale(nextLocale),
-    tr: (key) => t(locale, key),
+    tr: (key) => safeTranslation(locale, key, t(locale, key)),
     requiredMessage: requiredMessages[locale],
     apiLocale: locale
   }), [locale]);

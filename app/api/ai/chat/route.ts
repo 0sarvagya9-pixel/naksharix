@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { fail, ok, handleApiError, validateJson } from "@/lib/api";
 import { buildMemory, chatWithAstrologerAI, isGeminiConfigured, parseAstrologyChat } from "@/lib/ai/gemini";
+import { aiFeatureParkedResponse, isAiAstrologerEnabled } from "@/lib/ai/feature-status";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { readLanguageFromRequest, toAiLanguage, translatedApiMessage } from "@/lib/server-language";
 
@@ -12,6 +13,8 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  if (!isAiAstrologerEnabled()) return aiFeatureParkedResponse();
+
   try {
     const body = await validateJson(request, schema);
     const language = readLanguageFromRequest(request, body.language);

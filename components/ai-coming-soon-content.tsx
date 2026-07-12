@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bot, HeartHandshake, PackageSearch, ScrollText, Sparkles } from "lucide-react";
+import { Bot, CalendarDays, HeartHandshake, ScrollText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
@@ -14,7 +14,7 @@ export function AiComingSoonContent() {
     { title: labels.kundli, href: "/kundli", icon: Sparkles },
     { title: labels.matching, href: "/matchmaking", icon: HeartHandshake },
     { title: labels.numerology, href: "/numerology", icon: ScrollText },
-    { title: labels.shop, href: "/shop", icon: PackageSearch },
+    { title: labels.consultation, href: "/consultation", icon: CalendarDays },
     { title: labels.reports, href: "/reports", icon: ScrollText }
   ];
 
@@ -53,11 +53,11 @@ function aiSoonLabels(locale: "en" | "hi" | "hinglish") {
     return {
       badge: "Beta Hold",
       title: "AI ज्योतिषी जल्द आ रहा है",
-      subtitle: "हम Naksharix AI ज्योतिषी को अधिक सुरक्षित और व्यक्तिगत कुंडली, दशा, अंक ज्योतिष और आध्यात्मिक मार्गदर्शन के लिए बेहतर बना रहे हैं।",
+      subtitle: "हम Naksharix AI ज्योतिषी की विश्वसनीयता और सुरक्षा बेहतर कर रहे हैं। तब तक उपलब्ध कुंडली, मिलान, अंक ज्योतिष, रिपोर्ट और consultation tools का उपयोग करें।",
       kundli: "Kundli Generator उपयोग करें",
       matching: "Match Making आज़माएँ",
       numerology: "Numerology देखें",
-      shop: "Shop देखें",
+      consultation: "Consultation बुक करें",
       reports: "Reports देखें",
       open: "खोलें"
     };
@@ -66,11 +66,11 @@ function aiSoonLabels(locale: "en" | "hi" | "hinglish") {
     return {
       badge: "Beta Hold",
       title: "AI Astrologer Jaldi Aa Raha Hai",
-      subtitle: "Hum Naksharix AI Astrologer ko safer aur zyada personalized Kundli, Dasha, Numerology aur spiritual guidance ke liye improve kar rahe hain.",
+      subtitle: "Hum Naksharix AI Astrologer ki reliability aur safety improve kar rahe hain. Tab tak available Kundli, Matching, Numerology, Reports aur Consultation tools use karein.",
       kundli: "Use Kundli Generator",
       matching: "Try Match Making",
       numerology: "Explore Numerology",
-      shop: "Browse Shop",
+      consultation: "Book Consultation",
       reports: "View Reports",
       open: "Open"
     };
@@ -78,11 +78,11 @@ function aiSoonLabels(locale: "en" | "hi" | "hinglish") {
   return {
     badge: "Beta Hold",
     title: "AI Astrologer Coming Soon",
-    subtitle: "We are refining Naksharix AI Astrologer to provide safer, more personalized Kundli, Dasha, Numerology, and spiritual guidance.",
+    subtitle: "We are improving the reliability and safety of Naksharix AI Astrologer. Until then, use the available Kundli, matching, numerology, report, and consultation tools.",
     kundli: "Use Kundli Generator",
     matching: "Try Match Making",
     numerology: "Explore Numerology",
-    shop: "Browse Shop",
+    consultation: "Book Consultation",
     reports: "View Reports",
     open: "Open"
   };

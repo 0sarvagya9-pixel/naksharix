@@ -2,10 +2,37 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, complete-production-polish]
   pull_request:
 
 jobs:
+  static-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Run static safety audits
+        id: static-audits
+        shell: bash
+        run: |
+          set +e
+          node scripts/qa-csrf-coverage.mjs > static-audit.log 2>&1
+          CSRF_EXIT=$?
+          node scripts/qa-i18n-safety.mjs >> static-audit.log 2>&1
+          I18N_EXIT=$?
+          cat static-audit.log
+          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ]; then
+            exit 1
+          fi
+      - name: Upload static audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-audit-log
+          path: static-audit.log
+          if-no-files-found: warn
+
   quality:
     runs-on: ubuntu-latest
     services:
@@ -26,21 +53,76 @@ jobs:
         image: redis:7-alpine
         ports:
           - 6379:6379
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      JWT_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      ASTROLOGY_PROVIDER: own_engine
+      AI_ASTROLOGER_ENABLED: "false"
+      ALLOW_AI_DIAGNOSTICS: "false"
+      SUBSCRIPTIONS_ENABLED: "false"
+      EMAIL_PROVIDER: disabled
     steps:
       - uses: actions/checkout@v4
+        with:
+          show-progress: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - run: npx prisma generate
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      - name: Run complete QA suite
+        shell: bash
+        run: |
+          set +e
+          npm run qa:all > quality-qa.log 2>&1
+          QA_EXIT=$?
+          cat quality-qa.log
+          exit "$QA_EXIT"
+      - name: Upload complete QA log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-qa-log
+          path: quality-qa.log
+          if-no-files-found: warn
+      - run: node scripts/qa-csrf-coverage.mjs
+      - run: node scripts/qa-i18n-safety.mjs
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
-          JWT_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
+      - name: Run local production HTTP smoke
+        shell: bash
+        run: |
+          set +e
+          npm run start -- -p 3000 > /tmp/naksharix-next.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:3000/api/health > /dev/null; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$READY" -ne 1 ]; then
+            cat /tmp/naksharix-next.log > http-smoke.log
+            exit 1
+          fi
+          node scripts/qa-http-smoke.mjs > http-smoke.log 2>&1
+          SMOKE_EXIT=$?
+          cat http-smoke.log
+          exit "$SMOKE_EXIT"
+      - name: Upload HTTP smoke log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: http-smoke-log
+          path: http-smoke.log
+          if-no-files-found: warn
       - run: git diff --check
+      - name: Audit production dependencies for critical vulnerabilities
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=critical

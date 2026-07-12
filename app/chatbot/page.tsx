@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { AiComingSoonContent } from "@/components/ai-coming-soon-content";
+import { permanentRedirect } from "next/navigation";
 import { seo } from "@/lib/seo";
 
-export const metadata: Metadata = seo({
-  title: "AI Astrology Chatbot - Naksharix",
-  description: "Chat with Naksharix AI astrologer for horoscope, kundli, numerology, tarot reading, panchang timing, and personalized remedies.",
-  path: "/chatbot",
-  keywords: ["AI Astrology Chatbot", "Astrology AI", "Horoscope Chat", "Kundli AI"]
-});
+export const metadata: Metadata = {
+  ...seo({
+    title: "AI Astrologer - Upgrading",
+    description: "Naksharix AI Astrologer is temporarily unavailable while reliability and safety improvements are completed.",
+    path: "/ai-astrologer",
+    keywords: ["AI Astrologer Coming Soon", "Kundli Tools", "Astrology Tools"]
+  }),
+  robots: { index: false, follow: true }
+};
 
 export default function ChatbotPage() {
-  return <AiComingSoonContent />;
+  permanentRedirect("/ai-astrologer");
 }

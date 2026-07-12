@@ -9,6 +9,7 @@ import { BookOpen, FileText, LogOut, ShieldCheck, UserRound } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/language-provider";
 import { isAdmin as canOpenAdminPanel } from "@/lib/auth/permissions";
+import { secureFetch } from "@/lib/security/csrf";
 
 type SessionUser = {
   id: string;
@@ -68,7 +69,7 @@ export function AuthProfileMenu() {
 
   async function handleLogout() {
     setOpen(false);
-    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    await secureFetch("/api/auth/logout", { method: "POST" }).catch(() => null);
     await signOut({ callbackUrl: "/" });
   }
 
@@ -179,5 +180,3 @@ function getDisplayMeta(user: SessionUser) {
 function safeDisplayValue(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : "";
 }
-
-

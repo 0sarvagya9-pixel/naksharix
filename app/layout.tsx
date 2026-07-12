@@ -3,7 +3,7 @@ import Script from "next/script";
 import { cookies } from "next/headers";
 import { Cinzel, Cinzel_Decorative, Inter, Poppins } from "next/font/google";
 import "@/app/globals.css";
-import { env } from "@/lib/env";
+import { env, validateProductionEnv } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
 import { PwaRegister } from "@/components/pwa-register";
@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo";
 import { normalizeLocale } from "@/lib/i18n";
 
+if (process.env.VERCEL_ENV === "production") validateProductionEnv();
+
 const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display: "swap" });
 const cinzelDecorative = Cinzel_Decorative({ subsets: ["latin"], weight: ["400", "700", "900"], variable: "--font-cinzel-decorative", display: "swap" });
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-poppins", display: "swap" });
@@ -20,14 +22,14 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 
 export const metadata: Metadata = {
   ...seo({
-    title: "Naksharix - Unlock Your Cosmic Destiny",
-    description: "Naksharix is a premium astrology SaaS platform for Astrology, Horoscope, Kundli, Numerology, Tarot Reading, Panchang, AI guidance, and luxury cosmic reports.",
+    title: "Naksharix - Vedic Astrology Tools, Reports and Consultations",
+    description: "Use Naksharix for Kundli, Panchang, horoscope, numerology, tarot, saved digital reports, verified premium access, and astrologer consultation booking.",
     path: "/",
-    keywords: ["AI Astrology", "Vedic Astrology", "Daily Horoscope", "Kundli Matching"]
+    keywords: ["Vedic Astrology", "Daily Horoscope", "Kundli Matching", "Astrology Consultations"]
   }),
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   title: {
-    default: "Naksharix - Unlock Your Cosmic Destiny",
+    default: "Naksharix - Vedic Astrology Tools, Reports and Consultations",
     template: `%s | ${env.NEXT_PUBLIC_APP_NAME}`
   },
   applicationName: "Naksharix",

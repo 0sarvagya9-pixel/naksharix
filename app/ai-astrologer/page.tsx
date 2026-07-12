@@ -8,10 +8,10 @@ import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...seo({
-    title: "AI Astrologer - Upgrading | Naksharix",
-    description: "AI Astrologer is being upgraded for more reliable personalized guidance. Please use Kundli, Panchang, Horoscope, Numerology, Tarot, and Premium Reports meanwhile.",
+    title: "AI Astrologer - Upgrading",
+    description: "Naksharix AI Astrologer is temporarily unavailable while reliability and safety improvements are completed. Kundli, Panchang, horoscope, numerology, tarot, reports, and consultations remain available.",
     path: "/ai-astrologer",
-    keywords: ["AI Astrologer", "Kundli AI", "Vedic Astrology Chat", "Naksharix AI"]
+    keywords: ["AI Astrologer Coming Soon", "Kundli Tools", "Vedic Astrology Tools", "Naksharix AI"]
   }),
   robots: { index: false, follow: true }
 };
@@ -27,7 +27,7 @@ export default function AiAstrologerPage() {
           <p className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-[#00f5a0]">Temporarily Parked</p>
           <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">AI Astrologer Upgrading</h1>
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-[#cbd5e1]">
-            AI Astrologer is being upgraded for more reliable personalized guidance. Please use Kundli, Panchang, Horoscope, Numerology, Tarot, and Premium Reports meanwhile.
+            We are improving reliability and safety before reopening AI guidance. Kundli, Panchang, horoscope, numerology, tarot, reports, and consultation booking remain available.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function AiAstrologerPage() {
             <CardContent className="flex h-full flex-col p-5">
               <ScrollText className="h-6 w-6 text-[#00f5a0]" />
               <h2 className="mt-4 font-cinzel text-xl font-bold text-[#f3d382]">View Reports</h2>
-              <p className="mt-2 text-sm leading-6 text-[#cbd5e1] mb-5">Explore premium reports through the manual contact process.</p>
+              <p className="mt-2 text-sm leading-6 text-[#cbd5e1] mb-5">Explore available digital reports and save completed Kundli reports to your account.</p>
               <Button className="mt-auto w-full bg-[#009b72] text-white hover:bg-[#008766]" asChild>
                 <Link href="/reports">Open Reports</Link>
               </Button>
