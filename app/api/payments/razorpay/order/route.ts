@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     const limited = rateLimitResponse("razorpay-order", user.id || getRequestIp(request), 10, 60_000);
     if (limited) return limited;
     const body = await validateJson(request, schema);
+    if (body.purpose === "SUBSCRIPTION" && env.SUBSCRIPTIONS_ENABLED !== "true") return fail("Not found", 404);
     if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
     const readiness = getRazorpayReadiness();
     if (!readiness.enabled || !razorpay) return fail(readiness.reason, 503);
