@@ -40,14 +40,23 @@ const consultation = source("app/consultation/page.tsx");
 assert(consultation.includes("AstrologersPageContent") && consultation.includes('status: "APPROVED"'), "Consultation remains active", "approved profiles are rendered");
 assert(consultation.includes("index: true"), "Consultation remains indexable", "active public service");
 
+const pricing = source("components/pricing-content.tsx");
+assert(!pricing.includes("RazorpayCheckoutButton") && !pricing.includes("subscriptionPlans"), "Unsupported public subscriptions are hidden", "pricing links only to active reports and consultations");
+assert(pricing.includes('href: "/reports"') && pricing.includes('href: "/consultation"'), "Pricing routes to active services", "report and consultation pages");
+
+const paymentOrder = source("app/api/payments/razorpay/order/route.ts");
+assert(paymentOrder.includes('env.SUBSCRIPTIONS_ENABLED !== "true"'), "Subscription API fails closed", "explicit feature flag required");
+
 const noFakePublicFiles = [
   "app/layout.tsx",
   "app/page.tsx",
+  "app/pricing/page.tsx",
   "app/ai-astrologer/page.tsx",
   "app/talk-to-kundli/page.tsx",
   "app/chatbot/page.tsx",
   "app/shop/page.tsx",
   "components/nx-home.tsx",
+  "components/pricing-content.tsx",
   "components/reports-content.tsx",
   "components/shop-coming-soon-content.tsx",
   "app/reports/[slug]/page.tsx",
