@@ -1,6 +1,25 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
+const zodiacSigns = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"];
+const calculatorSlugs = [
+  "bhakoot-calculator",
+  "dasha-calculator",
+  "destiny-number-calculator",
+  "guna-milan-calculator",
+  "lagna-calculator",
+  "lo-shu-grid-calculator",
+  "manglik-calculator",
+  "marriage-suitability-calculator",
+  "mobile-number-calculator",
+  "moon-sign-calculator",
+  "nadi-dosha-calculator",
+  "nakshatra-calculator",
+  "name-number-calculator",
+  "personality-number-calculator",
+  "vehicle-number-calculator",
+  "yoga-calculator"
+];
 
 function absolute(pathname: string) {
   return new URL(pathname, baseURL).toString();
@@ -72,6 +91,34 @@ test.describe("Naksharix release browser QA", () => {
     }
   });
 
+  test("all zodiac, horoscope, calculator, and legal route families respond", async ({ request }) => {
+    const paths = [
+      ...zodiacSigns.flatMap((sign) => [
+        `/horoscope/${sign}`,
+        `/horoscope/${sign}/today`,
+        `/yearly-horoscope-2026/${sign}`,
+        `/zodiac/${sign}`
+      ]),
+      ...calculatorSlugs.map((slug) => `/free-calculators/${slug}`),
+      "/about",
+      "/contact",
+      "/faq",
+      "/privacy-policy",
+      "/terms-and-conditions",
+      "/refund-policy",
+      "/delivery-policy",
+      "/disclaimer",
+      "/daily-horoscope",
+      "/weekly-horoscope",
+      "/yearly-horoscope"
+    ];
+
+    for (const pathname of paths) {
+      const response = await request.get(absolute(pathname), { maxRedirects: 0 });
+      expect(response.status(), pathname).toBeLessThan(400);
+    }
+  });
+
   for (const viewport of [
     { width: 320, height: 800 },
     { width: 375, height: 812 },
@@ -99,12 +146,32 @@ test.describe("Naksharix release browser QA", () => {
     }
   });
 
+  test("parked pages are noindex and active consultation remains indexable", async ({ page }) => {
+    for (const pathname of ["/ai-astrologer", "/shop"]) {
+      await page.goto(absolute(pathname), { waitUntil: "domcontentloaded" });
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/i);
+    }
+    await page.goto(absolute("/consultation"), { waitUntil: "domcontentloaded" });
+    const robots = page.locator('meta[name="robots"]');
+    if (await robots.count()) await expect(robots).not.toHaveAttribute("content", /noindex/i);
+  });
+
   test("pricing exposes only active services", async ({ page }) => {
     await page.goto(absolute("/pricing"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { level: 1, name: "Services and Pricing" })).toBeVisible();
     await expect(page.getByText("Premium Digital Reports", { exact: true })).toBeVisible();
     await expect(page.getByText("Astrologer Consultations", { exact: true })).toBeVisible();
     await expect(page.getByText(/INR 499\/mo|INR 1499\/mo|Subscribe to Premium|Subscribe to VIP/i)).toHaveCount(0);
+  });
+
+  test("security headers are present on public pages", async ({ request }) => {
+    const response = await request.get(absolute("/"));
+    const headers = response.headers();
+    expect(headers["x-frame-options"]).toBe("DENY");
+    expect(headers["x-content-type-options"]).toBe("nosniff");
+    expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(headers["permissions-policy"]).toContain("camera=()");
+    expect(headers["strict-transport-security"]).toContain("max-age=63072000");
   });
 
   test("desktop theme and language controls work", async ({ page }) => {
@@ -123,6 +190,18 @@ test.describe("Naksharix release browser QA", () => {
     await page.getByRole("option", { name: /Hinglish/i }).click();
     await expect(languageButton).toHaveText("HIN");
     await expect(page.locator("html")).toHaveAttribute("lang", "hi-Latn");
+  });
+
+  test("reduced-motion preference suppresses long animations and transitions", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(absolute("/"), { waitUntil: "domcontentloaded" });
+    const timing = await page.locator("button:visible").first().evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { animationDuration: style.animationDuration, transitionDuration: style.transitionDuration };
+    });
+    const largestDuration = (value: string) => Math.max(...value.split(",").map((part) => Number.parseFloat(part) || 0));
+    expect(largestDuration(timing.animationDuration)).toBeLessThanOrEqual(0.001);
+    expect(largestDuration(timing.transitionDuration)).toBeLessThanOrEqual(0.001);
   });
 
   test("mobile menu opens, closes with Escape, and keeps consultation active", async ({ page }) => {
@@ -145,5 +224,14 @@ test.describe("Naksharix release browser QA", () => {
       await expect(page.locator('input[type="password"]')).toBeVisible();
       await expectNamedInteractiveControls(page);
     }
+  });
+
+  test("protected pages redirect logged-out visitors and unknown routes return 404", async ({ page }) => {
+    await page.goto(absolute("/dashboard"), { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/);
+
+    const response = await page.goto(absolute("/definitely-not-a-real-naksharix-route"), { waitUntil: "domcontentloaded" });
+    expect(response?.status()).toBe(404);
+    await expect(page.locator("body")).toBeVisible();
   });
 });
