@@ -5,6 +5,7 @@ const root = process.cwd();
 const dictionary = fs.readFileSync(path.join(root, "lib/i18n.ts"), "utf8");
 const overrides = fs.readFileSync(path.join(root, "lib/i18n-safe-overrides.ts"), "utf8");
 const provider = fs.readFileSync(path.join(root, "components/language-provider.tsx"), "utf8");
+const serverHelper = fs.readFileSync(path.join(root, "lib/i18n-server.ts"), "utf8");
 const failures = [];
 const riskyPatterns = [
   /Trusted by Millions/i,
@@ -44,9 +45,17 @@ for (const line of dictionary.split("\n")) {
 if (!provider.includes("safeTranslation(locale, key, t(locale, key))")) {
   failures.push("LanguageProvider does not route translations through safeTranslation");
 }
+if (!serverHelper.includes("safeTranslation(locale, key, t(locale, key))")) {
+  failures.push("Server translation helper does not route translations through safeTranslation");
+}
 
 const scanRoots = ["app", "components", "lib"];
-const allowedDirectT = new Set(["components/language-provider.tsx", "lib/i18n-safe-overrides.ts", "lib/i18n.ts"]);
+const allowedDirectT = new Set([
+  "components/language-provider.tsx",
+  "lib/i18n-safe-overrides.ts",
+  "lib/i18n-server.ts",
+  "lib/i18n.ts"
+]);
 
 function walk(relativeDir) {
   const absolute = path.join(root, relativeDir);
@@ -62,10 +71,10 @@ for (const file of scanRoots.flatMap(walk)) {
   if (allowedDirectT.has(file)) continue;
   const text = fs.readFileSync(path.join(root, file), "utf8");
   if (/import\s*\{[^}]*\bt\b[^}]*\}\s*from\s*["']@\/lib\/i18n["']/.test(text)) {
-    failures.push(`${file} imports raw t() instead of using the safe language provider`);
+    failures.push(`${file} imports raw t() instead of using the safe language provider or server helper`);
   }
 }
 
 for (const failure of [...new Set(failures)]) console.log(`FAILED: ${failure}`);
 if (failures.length) process.exit(1);
-console.log("PASSED: risky legacy translations are overridden and raw t() is not used outside the safety layer");
+console.log("PASSED: risky legacy translations are overridden and raw t() is restricted to safety helpers");
