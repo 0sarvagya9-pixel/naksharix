@@ -7,6 +7,19 @@ const authJsCookieNames = [
   "next-auth.session-token",
   "__Secure-next-auth.session-token"
 ];
+const csrfCookieName = "naksharix_csrf";
+const csrfHeaderName = "x-csrf-token";
+const csrfExemptApiPrefixes = [
+  "/api/payments/razorpay/webhook",
+  "/api/auth/callback/",
+  "/api/auth/signin",
+  "/api/auth/signout",
+  "/api/auth/session",
+  "/api/auth/csrf",
+  "/api/auth/providers",
+  "/api/auth/error",
+  "/api/auth/verify-request"
+];
 
 function getLegacyAuthCookieName() {
   return process.env.NODE_ENV === "production" ? "__Host-naksharix_session" : "naksharix_session";
@@ -22,8 +35,29 @@ function hasAuthCookie(request: NextRequest) {
   return authJsCookieNames.some((name) => Boolean(request.cookies.get(name)?.value));
 }
 
+function requiresCsrf(request: NextRequest) {
+  if (!request.nextUrl.pathname.startsWith("/api/")) return false;
+  if (["GET", "HEAD", "OPTIONS"].includes(request.method.toUpperCase())) return false;
+  return !csrfExemptApiPrefixes.some((prefix) => request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(prefix));
+}
+
+function hasValidCsrf(request: NextRequest) {
+  const cookieToken = request.cookies.get(csrfCookieName)?.value ?? "";
+  const headerToken = request.headers.get(csrfHeaderName) ?? "";
+  if (!cookieToken || !headerToken || cookieToken.length !== headerToken.length) return false;
+  let mismatch = 0;
+  for (let index = 0; index < cookieToken.length; index += 1) {
+    mismatch |= cookieToken.charCodeAt(index) ^ headerToken.charCodeAt(index);
+  }
+  return mismatch === 0;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (requiresCsrf(request) && !hasValidCsrf(request)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403, headers: { "Cache-Control": "no-store" } });
+  }
 
   if (!isProtectedPath(pathname)) {
     return NextResponse.next();
@@ -41,5 +75,13 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/astrologer/:path*", "/profile/:path*", "/my-readings/:path*", "/saved-reports/:path*"]
+  matcher: [
+    "/api/:path*",
+    "/dashboard/:path*",
+    "/admin/:path*",
+    "/astrologer/:path*",
+    "/profile/:path*",
+    "/my-readings/:path*",
+    "/saved-reports/:path*"
+  ]
 };
