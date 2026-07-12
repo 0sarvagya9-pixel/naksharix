@@ -1,0 +1,16 @@
+# Never upload local environment files to Vercel builds.
+.env
+.env.*
+!.env.example
+
+# Local build, dependency, test, and editor artifacts.
+node_modules
+.next
+.vercel
+coverage
+playwright-report
+test-results
+*.log
+*.tsbuildinfo
+.vscode
+.idea
