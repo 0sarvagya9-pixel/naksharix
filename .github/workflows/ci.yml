@@ -95,6 +95,7 @@ jobs:
       - name: Run local production HTTP smoke
         shell: bash
         run: |
+          set +e
           npm run start -- -p 3000 > /tmp/naksharix-next.log 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
@@ -107,10 +108,20 @@ jobs:
             sleep 1
           done
           if [ "$READY" -ne 1 ]; then
-            cat /tmp/naksharix-next.log
+            cat /tmp/naksharix-next.log > http-smoke.log
             exit 1
           fi
-          node scripts/qa-http-smoke.mjs
+          node scripts/qa-http-smoke.mjs > http-smoke.log 2>&1
+          SMOKE_EXIT=$?
+          cat http-smoke.log
+          exit "$SMOKE_EXIT"
+      - name: Upload HTTP smoke log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: http-smoke-log
+          path: http-smoke.log
+          if-no-files-found: warn
       - run: git diff --check
       - name: Audit production dependencies for critical vulnerabilities
         continue-on-error: true
