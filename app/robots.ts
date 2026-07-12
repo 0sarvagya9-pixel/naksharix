@@ -7,12 +7,21 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: [
         "/",
+        "/about",
+        "/contact",
+        "/faq",
+        "/privacy-policy",
+        "/terms-and-conditions",
+        "/refund-policy",
+        "/delivery-policy",
+        "/disclaimer",
         "/astrology",
+        "/horoscope",
         "/daily-horoscope",
         "/weekly-horoscope",
         "/monthly-horoscope",
         "/weekly-love-horoscope",
-        "/yearly-horoscope-2026",
+        "/yearly-horoscope",
         "/chinese-horoscope-2026",
         "/numerology-monthly-horoscope",
         "/hi",
@@ -25,11 +34,13 @@ export default function robots(): MetadataRoute.Robots {
         "/panchang",
         "/transits",
         "/zodiac",
-        "/blog"
+        "/astrologers",
+        "/consultation",
+        "/blog",
       ],
-      disallow: ["/admin", "/dashboard", "/api", "/auth", "/ai-astrologer", "/shop", "/consultation"]
+      disallow: ["/admin", "/dashboard", "/api", "/auth", "/ai-astrologer", "/shop"],
     },
     host: env.NEXT_PUBLIC_APP_URL,
-    sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`
+    sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`,
   };
 }
