@@ -10,8 +10,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: node scripts/qa-csrf-coverage.mjs
-      - run: node scripts/qa-i18n-safety.mjs
+        with:
+          show-progress: false
+      - name: Run static safety audits
+        id: static-audits
+        shell: bash
+        run: |
+          set +e
+          node scripts/qa-csrf-coverage.mjs > static-audit.log 2>&1
+          CSRF_EXIT=$?
+          node scripts/qa-i18n-safety.mjs >> static-audit.log 2>&1
+          I18N_EXIT=$?
+          cat static-audit.log
+          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ]; then
+            exit 1
+          fi
+      - name: Upload static audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-audit-log
+          path: static-audit.log
+          if-no-files-found: warn
 
   quality:
     runs-on: ubuntu-latest
@@ -44,6 +64,8 @@ jobs:
       EMAIL_PROVIDER: disabled
     steps:
       - uses: actions/checkout@v4
+        with:
+          show-progress: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
