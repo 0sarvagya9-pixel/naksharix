@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
-import { LegalTrustPage } from "@/components/legal-trust-page";
+import { LegalCurrentPage } from "@/components/legal-current-page";
 
 export const metadata: Metadata = seo({
-  title: "About Naksharix - AI Vedic Astrology Platform",
-  description: "Learn about Naksharix, an AI-powered astrology platform combining Vedic astrology principles with modern product design for practical daily guidance.",
+  title: "About Naksharix - Vedic Astrology Platform",
+  description: "Learn about Naksharix, a digital Vedic astrology platform for Kundli, Panchang, horoscope, numerology, tarot, reports, and consultations.",
   path: "/about",
-  keywords: ["About Naksharix", "AI Astrology", "Vedic Astrology Platform"]
+  keywords: ["About Naksharix", "Vedic Astrology Platform", "Digital Astrology Reports"]
 });
 
 export default function AboutPage() {
-  return <LegalTrustPage page="about" />;
+  return <LegalCurrentPage page="about" />;
 }
