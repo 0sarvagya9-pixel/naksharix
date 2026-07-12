@@ -15,6 +15,14 @@ const nextConfig = {
       { protocol: "https", hostname: "cdn.pixabay.com" }
     ]
   },
+  async redirects() {
+    return [
+      { source: "/auth/login", destination: "/login", permanent: true },
+      { source: "/auth/signup", destination: "/signup", permanent: true },
+      { source: "/terms", destination: "/terms-and-conditions", permanent: true },
+      { source: "/match-making", destination: "/matchmaking", permanent: true }
+    ];
+  },
   async headers() {
     return [
       {
