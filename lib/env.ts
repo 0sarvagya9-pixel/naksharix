@@ -13,6 +13,7 @@ const envSchema = z.object({
   GEMINI_API_KEY: z.string().optional(),
   AI_ASTROLOGER_ENABLED: z.enum(["true", "false"]).default("false"),
   ALLOW_AI_DIAGNOSTICS: z.enum(["true", "false"]).default("false"),
+  SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false"),
   REDIS_URL: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
