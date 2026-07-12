@@ -72,7 +72,21 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
-      - run: npm run qa:all
+      - name: Run complete QA suite
+        shell: bash
+        run: |
+          set +e
+          npm run qa:all > quality-qa.log 2>&1
+          QA_EXIT=$?
+          cat quality-qa.log
+          exit "$QA_EXIT"
+      - name: Upload complete QA log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-qa-log
+          path: quality-qa.log
+          if-no-files-found: warn
       - run: node scripts/qa-csrf-coverage.mjs
       - run: node scripts/qa-i18n-safety.mjs
       - run: npm run lint
