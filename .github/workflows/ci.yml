@@ -44,6 +44,7 @@ jobs:
       - run: npx prisma generate
       - run: npm run qa:release
       - run: node scripts/qa-csrf-coverage.mjs
+      - run: node scripts/qa-i18n-safety.mjs
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
