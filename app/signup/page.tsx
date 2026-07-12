@@ -6,11 +6,14 @@ import { Section } from "@/components/section";
 import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
 
-export const metadata: Metadata = seo({
-  title: "Create your Naksharix account",
-  description: "Create a Naksharix account with Google or email to save readings, reports, and consultations.",
-  path: "/signup"
-});
+export const metadata: Metadata = {
+  ...seo({
+    title: "Create your Naksharix account",
+    description: "Create a Naksharix account with Google or email to save readings, digital reports, and consultation bookings.",
+    path: "/signup"
+  }),
+  robots: { index: false, follow: true }
+};
 
 export default function SignupPage() {
   const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
@@ -25,6 +28,9 @@ export default function SignupPage() {
           <AuthForm mode="signup" googleEnabled={googleEnabled} />
           <p className="mt-4 text-sm naksh-muted-text">
             Already registered? <Link href="/login" className="text-[#01A361]">Sign in</Link>
+          </p>
+          <p className="mt-2 text-sm naksh-muted-text">
+            Want to consult on Naksharix? <Link href="/astrologer/onboarding" className="text-[#01A361]">Apply as an astrologer or consultant</Link>
           </p>
         </CardContent>
       </Card>
