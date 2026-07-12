@@ -11,6 +11,7 @@ const csrfCookieName = "naksharix_csrf";
 const csrfHeaderName = "x-csrf-token";
 const csrfExemptApiPrefixes = [
   "/api/payments/razorpay/webhook",
+  "/api/numerology",
   "/api/auth/callback/",
   "/api/auth/signin",
   "/api/auth/signout",
