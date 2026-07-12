@@ -13,10 +13,12 @@ export function getRazorpayReadiness() {
   return {
     enabled: Boolean(razorpay && missing.length === 0),
     provider: "razorpay",
-    scope: "reports_only",
+    scope: "reports_and_consultations",
     missing,
     required: ["NEXT_PUBLIC_RAZORPAY_KEY_ID", "RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "RAZORPAY_WEBHOOK_SECRET"],
     publicCheckoutAllowed: Boolean(razorpay && missing.length === 0),
-    reason: missing.length ? "Razorpay report checkout is disabled until all required environment variables are configured." : "Razorpay report checkout is configured."
+    reason: missing.length
+      ? "Razorpay checkout is disabled until all required environment variables are configured."
+      : "Razorpay checkout is configured for reports and consultations."
   };
 }
