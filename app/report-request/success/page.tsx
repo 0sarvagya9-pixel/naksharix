@@ -5,7 +5,8 @@ import { Section } from "@/components/section";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { isAdmin } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db";
-import { normalizeLocale, t, type Locale } from "@/lib/i18n";
+import { normalizeLocale, type Locale } from "@/lib/i18n";
+import { safeServerTranslation } from "@/lib/i18n-server";
 import { cookies } from "next/headers";
 
 type SearchParams = Promise<{ id?: string }>;
@@ -24,19 +25,19 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
     <Section className="max-w-3xl">
       <Card className="glass border-[#D4AF37]/30 text-center">
         <CardHeader>
-          <CardTitle className="font-cinzel text-3xl text-[#FFFFFF]">{t(locale, "reportRequestReceived")}</CardTitle>
+          <CardTitle className="font-cinzel text-3xl text-[#FFFFFF]">{safeServerTranslation(locale, "reportRequestReceived")}</CardTitle>
           <p className="naksh-muted-text">Your request has been saved for manual review.</p>
         </CardHeader>
         <CardContent className="space-y-4 naksh-muted-text">
           {showAdminBypass ? (
             <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-4 py-2 text-sm text-[#FFD700]">
               <ShieldCheck className="h-4 w-4" />
-              {t(locale, "adminTestingModePaymentBypassed")}
+              {safeServerTranslation(locale, "adminTestingModePaymentBypassed")}
             </div>
           ) : null}
           <p>No online payment is required at this stage. The workflow is review-based, and generated files appear only after an admin creates a real report PDF.</p>
           <p>Request email: <span className="text-foreground">{report.deliveryEmail}</span></p>
-          <p>{t(locale, "needHelpCare")}</p>
+          <p>{safeServerTranslation(locale, "needHelpCare")}</p>
         </CardContent>
       </Card>
     </Section>
