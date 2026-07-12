@@ -33,6 +33,7 @@ jobs:
       ASTROLOGY_PROVIDER: own_engine
       AI_ASTROLOGER_ENABLED: "false"
       ALLOW_AI_DIAGNOSTICS: "false"
+      SUBSCRIPTIONS_ENABLED: "false"
       EMAIL_PROVIDER: disabled
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +43,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
-      - run: npm run qa:release
+      - run: npm run qa:all
       - run: node scripts/qa-csrf-coverage.mjs
       - run: node scripts/qa-i18n-safety.mjs
       - run: npm run lint
