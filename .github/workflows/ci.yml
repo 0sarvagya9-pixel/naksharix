@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, complete-production-polish]
   pull_request:
 
 jobs:
@@ -26,6 +26,14 @@ jobs:
         image: redis:7-alpine
         ports:
           - 6379:6379
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      JWT_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      ASTROLOGY_PROVIDER: own_engine
+      AI_ASTROLOGER_ENABLED: "false"
+      ALLOW_AI_DIAGNOSTICS: "false"
+      EMAIL_PROVIDER: disabled
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,13 +42,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      - run: npm run qa:release
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
-          JWT_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
       - run: git diff --check
+      - name: Audit production dependencies for critical vulnerabilities
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=critical
