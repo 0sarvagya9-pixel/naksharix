@@ -20,7 +20,9 @@ const nextConfig = {
       { source: "/auth/login", destination: "/login", permanent: true },
       { source: "/auth/signup", destination: "/signup", permanent: true },
       { source: "/terms", destination: "/terms-and-conditions", permanent: true },
-      { source: "/match-making", destination: "/matchmaking", permanent: true }
+      { source: "/match-making", destination: "/matchmaking", permanent: true },
+      { source: "/talk-to-kundli", destination: "/ai-astrologer", permanent: true },
+      { source: "/chatbot", destination: "/ai-astrologer", permanent: true }
     ];
   },
   async headers() {
