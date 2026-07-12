@@ -3,7 +3,7 @@ import Script from "next/script";
 import { cookies } from "next/headers";
 import { Cinzel, Cinzel_Decorative, Inter, Poppins } from "next/font/google";
 import "@/app/globals.css";
-import { env } from "@/lib/env";
+import { env, validateProductionEnv } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
 import { PwaRegister } from "@/components/pwa-register";
@@ -12,6 +12,8 @@ import { LanguageProvider } from "@/components/language-provider";
 import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo";
 import { normalizeLocale } from "@/lib/i18n";
+
+if (process.env.VERCEL_ENV === "production") validateProductionEnv();
 
 const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display: "swap" });
 const cinzelDecorative = Cinzel_Decorative({ subsets: ["latin"], weight: ["400", "700", "900"], variable: "--font-cinzel-decorative", display: "swap" });
