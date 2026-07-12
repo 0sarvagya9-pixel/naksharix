@@ -4,7 +4,8 @@ import { Section } from "@/components/section";
 import { SavedKundliReportList } from "@/components/saved-kundli-report-list";
 import { requireRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
-import { normalizeLocale, t } from "@/lib/i18n";
+import { normalizeLocale } from "@/lib/i18n";
+import { safeServerTranslation } from "@/lib/i18n-server";
 import { canBypassPayment } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
@@ -29,25 +30,26 @@ export default async function SavedReportsPage() {
 
   const paidReportIds = new Set(
     paidPayments
-      .map((p) => (p.metadata as Record<string, unknown> | null)?.savedReportId)
+      .map((payment) => (payment.metadata as Record<string, unknown> | null)?.savedReportId)
       .filter(Boolean) as string[]
   );
 
   const isAdmin = canBypassPayment(user);
-
   const reportsWithUnlockStatus = reports.map((report) => ({
     ...report,
     isUnlocked: isAdmin || paidReportIds.has(report.id)
   }));
+  const title = safeServerTranslation(locale, "savedReports");
+  const emptyText = safeServerTranslation(locale, "noSavedReports");
 
   return (
     <Section>
       <div className="mb-8">
-        <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]"><FileText className="h-4 w-4" />{t(locale, "savedReports")}</p>
-        <h1 className="mt-3 font-cinzel text-4xl font-black">{t(locale, "savedReports")}</h1>
-        <p className="mt-3 max-w-2xl naksh-muted-text">{t(locale, "noSavedReports")}</p>
+        <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]"><FileText className="h-4 w-4" />{title}</p>
+        <h1 className="mt-3 font-cinzel text-4xl font-black">{title}</h1>
+        <p className="mt-3 max-w-2xl naksh-muted-text">{emptyText}</p>
       </div>
-      <SavedKundliReportList reports={reportsWithUnlockStatus} emptyText={t(locale, "noSavedReports")} />
+      <SavedKundliReportList reports={reportsWithUnlockStatus} emptyText={emptyText} />
     </Section>
   );
 }
