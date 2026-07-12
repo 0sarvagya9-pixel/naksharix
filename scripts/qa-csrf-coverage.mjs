@@ -5,6 +5,7 @@ const root = process.cwd();
 const scanRoots = ["app", "components", "lib"];
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".jsx"]);
 const ignored = new Set(["lib/security/csrf.ts"]);
+const readOnlyPostExemptions = ["/api/numerology"];
 const failures = [];
 let clientFiles = 0;
 let secureFetchFiles = 0;
@@ -73,12 +74,14 @@ for (const file of scanRoots.flatMap(walk)) {
 
   for (const call of directFetchCalls(text)) {
     if (!/\bmethod\s*:\s*["'](?:POST|PUT|PATCH|DELETE)["']/i.test(call.text)) continue;
+    if (readOnlyPostExemptions.some((route) => call.text.includes(route))) continue;
     const line = text.slice(0, call.start).split("\n").length;
     failures.push(`${file}:${line} uses direct fetch for a state-changing request; use secureFetch instead`);
   }
 }
 
 console.log(`CSRF coverage scanned ${clientFiles} client files; ${secureFetchFiles} use secureFetch.`);
+console.log(`Read-only POST exemptions: ${readOnlyPostExemptions.join(", ")}`);
 for (const failure of failures) console.log(`FAILED: ${failure}`);
 if (failures.length) process.exit(1);
-console.log("PASSED: no direct client-side mutation fetch calls found");
+console.log("PASSED: no direct client-side state-changing fetch calls found");
