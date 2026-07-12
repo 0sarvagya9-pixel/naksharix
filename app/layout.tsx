@@ -20,14 +20,14 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 
 export const metadata: Metadata = {
   ...seo({
-    title: "Naksharix - Unlock Your Cosmic Destiny",
-    description: "Naksharix is a premium astrology SaaS platform for Astrology, Horoscope, Kundli, Numerology, Tarot Reading, Panchang, AI guidance, and luxury cosmic reports.",
+    title: "Naksharix - Vedic Astrology Tools, Reports and Consultations",
+    description: "Use Naksharix for Kundli, Panchang, horoscope, numerology, tarot, saved digital reports, verified premium access, and astrologer consultation booking.",
     path: "/",
-    keywords: ["AI Astrology", "Vedic Astrology", "Daily Horoscope", "Kundli Matching"]
+    keywords: ["Vedic Astrology", "Daily Horoscope", "Kundli Matching", "Astrology Consultations"]
   }),
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   title: {
-    default: "Naksharix - Unlock Your Cosmic Destiny",
+    default: "Naksharix - Vedic Astrology Tools, Reports and Consultations",
     template: `%s | ${env.NEXT_PUBLIC_APP_NAME}`
   },
   applicationName: "Naksharix",
