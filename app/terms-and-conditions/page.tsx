@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { LegalTrustPage } from "@/components/legal-trust-page";
+import { LegalPolicyPage } from "@/components/legal-policy-page";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...seo({
     title: "Terms & Conditions - Naksharix",
-    description: "Read the Naksharix terms for responsible use of astrology, numerology, tarot, matching, reports, and AI guidance.",
+    description:
+      "Read the Naksharix terms for accounts, astrology tools, digital reports, verified Razorpay payments, consultation bookings, and responsible use.",
     path: "/terms-and-conditions",
-    keywords: ["Naksharix Terms", "Astrology Terms", "AI Guidance Terms"]
+    keywords: ["Naksharix Terms", "Astrology Service Terms", "Digital Report Terms", "Consultation Terms"],
   }),
-  robots: { index: true, follow: true }
+  robots: { index: true, follow: true },
 };
 
 export default function TermsAndConditionsPage() {
-  return <LegalTrustPage page="terms" />;
+  return <LegalPolicyPage page="terms" />;
 }
