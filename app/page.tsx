@@ -3,11 +3,11 @@ import { NxHome } from "@/components/nx-home";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Naksharix - Your Destiny. Your Dharma. | Vedic Astrology",
+  title: "Naksharix - Vedic Astrology Tools, Reports and Consultations",
   description:
-    "Naksharix is your cosmic guide to self-discovery, clarity and a life aligned with your purpose. Kundli, Panchang, Daily Horoscope, Numerology, Tarot and premium reports.",
+    "Explore Kundli, Panchang, horoscope, numerology, tarot, saved digital reports, verified premium access, and astrologer consultation booking on Naksharix.",
   path: "/",
-  keywords: ["Naksharix", "Kundli", "Panchang", "Horoscope", "Vedic Astrology", "Numerology", "Tarot"],
+  keywords: ["Naksharix", "Kundli", "Panchang", "Horoscope", "Vedic Astrology", "Numerology", "Tarot", "Astrology Consultation"],
 });
 
 export default function HomePage() {

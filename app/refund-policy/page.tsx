@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { LegalTrustPage } from "@/components/legal-trust-page";
+import { LegalPolicyPage } from "@/components/legal-policy-page";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
   title: "Refund and Cancellation Policy - Naksharix",
-  description: "Read the current Naksharix refund and cancellation policy while automatic paid reports and payment automation are not active.",
+  description:
+    "Read how Naksharix reviews duplicate or failed payments, digital-report delivery issues, consultation cancellations, reschedules, and eligible refunds.",
   path: "/refund-policy",
-  keywords: ["Naksharix Refund Policy", "Astrology Refund", "Cancellation Policy"]
+  keywords: ["Naksharix Refund Policy", "Digital Report Refund", "Consultation Cancellation", "Razorpay Payment Support"],
 });
 
 export default function RefundPolicyPage() {
-  return <LegalTrustPage page="refund" />;
+  return <LegalPolicyPage page="refund" />;
 }
