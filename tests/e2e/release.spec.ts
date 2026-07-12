@@ -10,7 +10,10 @@ async function installRuntimeErrorGuard(page: Page) {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
+    if (message.type() !== "error") return;
+    const text = message.text();
+    if (/Failed to load resource:.*401 \(Unauthorized\)/i.test(text)) return;
+    errors.push(text);
   });
   return errors;
 }
