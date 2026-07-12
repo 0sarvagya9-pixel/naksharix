@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { AiComingSoonContent } from "@/components/ai-coming-soon-content";
+import { permanentRedirect } from "next/navigation";
 import { seo } from "@/lib/seo";
 
-export const metadata: Metadata = seo({
-  title: "Talk to Your Kundli with AI - Naksharix",
-  description: "Use Gemini-powered Naksharix AI to talk to your Kundli, ask about planets, houses, dasha, transit, dosha, remedies, career, marriage, finance, and health.",
-  path: "/talk-to-kundli",
-  keywords: ["Talk to Kundli", "AI Kundli", "Gemini Astrology", "Kundli Chat"]
-});
+export const metadata: Metadata = {
+  ...seo({
+    title: "AI Astrologer - Upgrading",
+    description: "Naksharix AI Astrologer is temporarily unavailable while reliability and safety improvements are completed.",
+    path: "/ai-astrologer",
+    keywords: ["AI Astrologer Coming Soon", "Kundli Tools", "Astrology Tools"]
+  }),
+  robots: { index: false, follow: true }
+};
 
 export default function TalkToKundliPage() {
-  return <AiComingSoonContent />;
+  permanentRedirect("/ai-astrologer");
 }
