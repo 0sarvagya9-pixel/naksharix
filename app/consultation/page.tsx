@@ -5,8 +5,8 @@ import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...seo({
-    title: "Astrology Consultations - Naksharix",
-    description: "Book a live consultation with verified Vedic astrologers for chat, phone call, or video session guidance.",
+    title: "Astrology Consultations",
+    description: "Book a live consultation with approved Vedic astrologers for chat, phone call, or video session guidance.",
     path: "/consultation",
     keywords: ["Astrology Consultation", "Astrologer Booking", "Vedic Astrologer", "Live Consultation"]
   }),
