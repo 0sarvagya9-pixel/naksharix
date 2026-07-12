@@ -68,16 +68,20 @@ for (const [file, content] of [["components/reports-content.tsx", reportsContent
 }
 
 const sitemap = read("app/sitemap.ts");
-for (const route of ["/ai-astrologer", "/shop", "/consultation"]) {
-  assert(!sitemap.includes(`"${route}"`), `Hold route ${route} should not be promoted in sitemap staticRoutes`);
+for (const route of ["/ai-astrologer", "/talk-to-kundli", "/chatbot", "/shop"]) {
+  assert(!sitemap.includes(`"${route}"`), `Parked route ${route} should not be promoted in sitemap staticRoutes`);
 }
-assert(sitemap.includes("\"/panchang\""), "Provider-verified Panchang should be promoted in sitemap staticRoutes");
+assert(sitemap.includes('"/consultation"'), "Active Consultation should be promoted in sitemap staticRoutes");
+assert(sitemap.includes('"/panchang"'), "Provider-verified Panchang should be promoted in sitemap staticRoutes");
 
 const robots = read("app/robots.ts");
-for (const route of ["/ai-astrologer", "/shop", "/consultation"]) {
-  assert(robots.includes(`"${route}"`), `Hold route ${route} should be disallowed/noindex protected in robots`);
+const allowBlock = robots.match(/allow:\s*\[([\s\S]*?)\]/)?.[1] ?? "";
+const disallowBlock = robots.match(/disallow:\s*\[([\s\S]*?)\]/)?.[1] ?? "";
+for (const route of ["/ai-astrologer", "/talk-to-kundli", "/chatbot", "/shop"]) {
+  assert(disallowBlock.includes(`"${route}"`), `Parked route ${route} should be disallowed in robots`);
 }
-assert(robots.includes("\"/panchang\"") && !robots.includes("\"/panchang\", \"/ai-astrologer\""), "Provider-verified Panchang should be allowed in robots");
+assert(allowBlock.includes('"/consultation"') && !disallowBlock.includes('"/consultation"'), "Active Consultation should be allowed and not disallowed in robots");
+assert(allowBlock.includes('"/panchang"') && !disallowBlock.includes('"/panchang"'), "Provider-verified Panchang should be allowed in robots");
 
 if (failures.length) {
   console.error("QA foundation failed:");
