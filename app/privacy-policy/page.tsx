@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { LegalTrustPage } from "@/components/legal-trust-page";
+import { LegalCurrentPage } from "@/components/legal-current-page";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
   title: "Privacy Policy - Naksharix",
-  description: "Read how Naksharix handles birth details, AI questions, local preferences, support data, and privacy contact requests.",
+  description: "Read how Naksharix handles account data, birth details, saved reports, consultations, Razorpay payment metadata, cookies, and privacy requests.",
   path: "/privacy-policy",
-  keywords: ["Naksharix Privacy Policy", "Astrology Privacy", "AI Astrology Privacy"]
+  keywords: ["Naksharix Privacy Policy", "Astrology Privacy", "Razorpay Privacy"]
 });
 
 export default function PrivacyPolicyPage() {
-  return <LegalTrustPage page="privacy" />;
+  return <LegalCurrentPage page="privacy" />;
 }
