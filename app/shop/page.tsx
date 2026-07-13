@@ -4,12 +4,12 @@ import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...seo({
-    title: "Shop Coming Soon",
-    description: "The Naksharix Shop is being prepared. No public catalogue, cart, product checkout, or physical-order service is available yet.",
+    title: "Spiritual Catalogue | Rudraksha, Yantra, Mala and Symbolic Remedy Items",
+    description: "Explore Naksharix catalogue information for rudraksha, bracelets, yantras, malas, and symbolic remedy items. Availability and fulfilment are confirmed separately; no automatic product checkout is active.",
     path: "/shop",
-    keywords: ["Naksharix Shop Coming Soon", "Spiritual Shop Coming Soon"]
+    keywords: ["Spiritual Catalogue", "Rudraksha", "Yantra", "Mala", "Astrology Remedy Items"]
   }),
-  robots: { index: false, follow: true }
+  robots: { index: true, follow: true }
 };
 
 export default function ShopPage() {
