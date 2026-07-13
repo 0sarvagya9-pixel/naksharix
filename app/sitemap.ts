@@ -61,6 +61,7 @@ const staticRoutes = [
   "/astrologers",
   "/consultation",
   "/reports",
+  "/shop",
   "/zodiac",
   "/matchmaking",
   "/tarot",
@@ -76,7 +77,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes: SitemapEntry[] = [
     ...staticRoutes.map((route): SitemapEntry => ({
       route,
-      priority: route === "" ? 1 : legalRoute(route) ? 0.5 : 0.8,
+      priority: route === "" ? 1 : legalRoute(route) ? 0.5 : route === "/shop" ? 0.72 : 0.8,
       frequency: route === "" ? "daily" : legalRoute(route) ? "yearly" : "weekly",
     })),
     ...featuredAstrologerRoutes().map((route): SitemapEntry => ({ route, priority: 0.74, frequency: "weekly" })),
