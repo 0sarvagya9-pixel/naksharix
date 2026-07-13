@@ -34,7 +34,7 @@ const publicPages = [
   ["/about", "About Naksharix"],
   ["/consultation", "Astrology Consultations"],
   ["/pricing", "Services and Pricing"],
-  ["/shop", "Shop Coming Soon"],
+  ["/shop", "Naksharix Spiritual Catalogue"],
   ["/ai-astrologer", "AI Astrologer"]
 ];
 
@@ -49,6 +49,9 @@ for (const [path, titleMarker] of publicPages) {
   }
   if (path === "/pricing" && /subscribe to|INR 499\/mo|INR 1499\/mo/i.test(html)) {
     fail("pricing safety", "unsupported public subscription checkout is visible");
+  }
+  if (path === "/shop" && /add to cart|buy now|product checkout/i.test(html)) {
+    fail("shop safety", "unsupported ecommerce control or claim is visible");
   }
 }
 
@@ -75,18 +78,22 @@ for (const [path, destination] of redirects) {
 const robotsResponse = await expectStatus("/robots.txt", 200, undefined, "robots.txt");
 if (robotsResponse) {
   const robots = await robotsResponse.text();
-  for (const route of ["/api", "/admin", "/dashboard", "/ai-astrologer", "/talk-to-kundli", "/chatbot", "/shop"]) {
+  for (const route of ["/api", "/admin", "/dashboard", "/ai-astrologer", "/talk-to-kundli", "/chatbot"]) {
     if (!robots.includes(`Disallow: ${route}`)) fail("robots coverage", `missing ${route}`);
   }
-  if (!robots.includes("Allow: /consultation")) fail("robots coverage", "consultation is not allowed");
+  for (const route of ["/consultation", "/shop"]) {
+    if (!robots.includes(`Allow: ${route}`)) fail("robots coverage", `${route} is not allowed`);
+  }
 }
 
 const sitemapResponse = await expectStatus("/sitemap.xml", 200, undefined, "sitemap.xml");
 if (sitemapResponse) {
   const sitemap = await sitemapResponse.text();
-  if (!sitemap.includes("/consultation")) fail("sitemap active routes", "consultation missing");
-  for (const parked of ["/ai-astrologer", "/talk-to-kundli", "/chatbot", "/shop"]) {
-    if (sitemap.includes(parked)) fail("sitemap parked routes", `found ${parked}`);
+  for (const active of ["/consultation", "/shop"]) {
+    if (!sitemap.includes(active)) fail("sitemap active routes", `${active} missing`);
+  }
+  for (const unavailable of ["/ai-astrologer", "/talk-to-kundli", "/chatbot"]) {
+    if (sitemap.includes(unavailable)) fail("sitemap unavailable routes", `found ${unavailable}`);
   }
 }
 
@@ -97,6 +104,18 @@ if (healthResponse) {
     fail("health payload", JSON.stringify(body));
   } else {
     pass("health payload", "database ok");
+  }
+}
+
+const aiStatusResponse = await expectStatus("/api/ai/status", 200, undefined, "AI readiness endpoint");
+if (aiStatusResponse) {
+  const body = await aiStatusResponse.json();
+  if (body.data?.enabled !== false || body.data?.ready !== false) {
+    fail("AI readiness payload", JSON.stringify(body));
+  } else if (/key|secret|model/i.test(JSON.stringify(body))) {
+    fail("AI readiness payload", "sensitive provider metadata exposed");
+  } else {
+    pass("AI readiness payload", "disabled and not ready without provider metadata");
   }
 }
 
@@ -123,7 +142,7 @@ if (csrfResponse) {
         headers: { "Content-Type": "application/json", "x-csrf-token": token, cookie },
         body: JSON.stringify({ messages: [{ role: "user", content: "hello" }] })
       },
-      "parked AI chat fails closed"
+      "disabled AI chat fails closed"
     );
   }
 }
