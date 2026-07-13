@@ -36,9 +36,9 @@ export function translatedApiMessage(locale: Locale, key: "required" | "serviceU
   const messages: Record<typeof key, Record<Locale, string>> = {
     required: requiredMessages,
     serviceUnavailable: {
-      en: "Personalized calculation service is temporarily unavailable. Please try again later.",
-      hi: "व्यक्तिगत गणना सेवा फिलहाल उपलब्ध नहीं है। कृपया बाद में फिर प्रयास करें।",
-      hinglish: "Personalized calculation service abhi available nahi hai. Kripya baad me try karein."
+      en: "Personalized guidance is temporarily unavailable. Please try again later.",
+      hi: "व्यक्तिगत मार्गदर्शन फिलहाल उपलब्ध नहीं है। कृपया बाद में फिर प्रयास करें।",
+      hinglish: "Personalized guidance abhi available nahi hai. Kripya baad me try karein."
     },
     limitReached: {
       en: "You have reached today's free limit.",
@@ -46,9 +46,9 @@ export function translatedApiMessage(locale: Locale, key: "required" | "serviceU
       hinglish: "Aapne aaj ki free limit complete kar li hai."
     },
     aiChatNotConfigured: {
-      en: "AI service is not configured yet. Please add GEMINI_API_KEY.",
-      hi: "AI सेवा अभी कॉन्फ़िगर नहीं है। कृपया GEMINI_API_KEY जोड़ें।",
-      hinglish: "AI service abhi configured nahi hai. Please GEMINI_API_KEY add karein."
+      en: "AI guidance is temporarily unavailable. Please try again later.",
+      hi: "AI मार्गदर्शन फिलहाल उपलब्ध नहीं है। कृपया बाद में फिर प्रयास करें।",
+      hinglish: "AI guidance abhi available nahi hai. Kripya baad me try karein."
     },
     pdfMissing: {
       en: "Report data is missing. Please regenerate the Kundli report and try again.",

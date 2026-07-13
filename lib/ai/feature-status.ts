@@ -2,8 +2,20 @@ import "server-only";
 import { fail } from "@/lib/api";
 import { env } from "@/lib/env";
 
+export function isGeminiKeyConfigured() {
+  return Boolean(env.GEMINI_API_KEY && !env.GEMINI_API_KEY.startsWith("your_"));
+}
+
 export function isAiAstrologerEnabled() {
   return env.AI_ASTROLOGER_ENABLED === "true";
+}
+
+export function isAiAstrologerReady() {
+  return isAiAstrologerEnabled() && isGeminiKeyConfigured();
+}
+
+export function isAiReportGeneratorEnabled() {
+  return env.AI_REPORT_GENERATOR_ENABLED === "true";
 }
 
 export function areAiDiagnosticsEnabled() {
@@ -11,5 +23,5 @@ export function areAiDiagnosticsEnabled() {
 }
 
 export function aiFeatureParkedResponse() {
-  return fail("AI features are temporarily unavailable while reliability and safety improvements are completed.", 503);
+  return fail("AI guidance is temporarily unavailable. Please use Kundli, reports, or consultation services meanwhile.", 503);
 }

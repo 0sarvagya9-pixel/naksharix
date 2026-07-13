@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { env } from "@/lib/env";
 import { blogCategories, blogPosts } from "@/lib/blog-content";
 import { growthPages, nakshatras } from "@/lib/growth-pages";
@@ -61,23 +62,25 @@ const staticRoutes = [
   "/astrologers",
   "/consultation",
   "/reports",
+  "/shop",
   "/zodiac",
   "/matchmaking",
   "/tarot",
   "/numerology",
   "/pricing",
-  "/blog",
+  "/blog"
 ];
 
 type SitemapFrequency = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 type SitemapEntry = { route: string; priority: number; frequency: SitemapFrequency };
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const publicRoutes = isAiAstrologerReady() ? [...staticRoutes, "/ai-astrologer"] : staticRoutes;
   const routes: SitemapEntry[] = [
-    ...staticRoutes.map((route): SitemapEntry => ({
+    ...publicRoutes.map((route): SitemapEntry => ({
       route,
-      priority: route === "" ? 1 : legalRoute(route) ? 0.5 : 0.8,
-      frequency: route === "" ? "daily" : legalRoute(route) ? "yearly" : "weekly",
+      priority: route === "" ? 1 : legalRoute(route) ? 0.5 : route === "/shop" ? 0.72 : route === "/ai-astrologer" ? 0.76 : 0.8,
+      frequency: route === "" ? "daily" : legalRoute(route) ? "yearly" : "weekly"
     })),
     ...featuredAstrologerRoutes().map((route): SitemapEntry => ({ route, priority: 0.74, frequency: "weekly" })),
     ...zodiacSigns.map((sign): SitemapEntry => ({ route: `/horoscope/${sign.slug}`, priority: 0.82, frequency: "daily" })),
@@ -86,14 +89,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...manualReports.map((report): SitemapEntry => ({ route: `/reports/${report.slug}`, priority: 0.78, frequency: "weekly" })),
     ...seoLandingPages.map((page): SitemapEntry => ({ route: `/astrology/${page.slug}`, priority: 0.86, frequency: "weekly" })),
     ...blogCategories.map((category): SitemapEntry => ({ route: `/blog/category/${category.slug}`, priority: 0.76, frequency: "weekly" })),
-    ...blogPosts.map((post): SitemapEntry => ({ route: `/blog/${post.slug}`, priority: 0.72, frequency: "monthly" })),
+    ...blogPosts.map((post): SitemapEntry => ({ route: `/blog/${post.slug}`, priority: 0.72, frequency: "monthly" }))
   ];
 
   return routes.map(({ route, priority, frequency }) => ({
     url: `${env.NEXT_PUBLIC_APP_URL}${route}`,
     lastModified: new Date(),
     changeFrequency: frequency,
-    priority,
+    priority
   }));
 }
 
@@ -107,6 +110,6 @@ function legalRoute(route: string) {
     "/terms-and-conditions",
     "/disclaimer",
     "/refund-policy",
-    "/delivery-policy",
+    "/delivery-policy"
   ].includes(route);
 }

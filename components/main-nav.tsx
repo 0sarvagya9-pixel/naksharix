@@ -4,22 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AuthProfileMenu } from "@/components/auth-profile-menu";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { AuthProfileMenu } from "@/components/auth-profile-menu";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { label: "Home",        href: "/",                active: ["/"] },
-  { label: "Kundli",      href: "/kundli",           active: ["/kundli", "/free-kundli"] },
-  { label: "Horoscope",   href: "/daily-horoscope",  active: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope"] },
-  { label: "Panchang",    href: "/panchang",         active: ["/panchang"] },
-  { label: "Numerology",  href: "/numerology",       active: ["/numerology"] },
-  { label: "Tarot",       href: "/tarot",            active: ["/tarot"] },
-  { label: "Remedies",    href: "/free-calculators", active: ["/free-calculators", "/calculators"] },
-];
+  { label: "Home", href: "/", active: ["/"] },
+  { label: "Kundli", href: "/kundli", active: ["/kundli", "/free-kundli"] },
+  { label: "Horoscope", href: "/daily-horoscope", active: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope"] },
+  { label: "Panchang", href: "/panchang", active: ["/panchang"] },
+  { label: "Numerology", href: "/numerology", active: ["/numerology"] },
+  { label: "Tarot", href: "/tarot", active: ["/tarot"] },
+  { label: "Remedies", href: "/free-calculators", active: ["/free-calculators", "/calculators"] }
+] as const;
 
 const exploreLinks = [
   { label: "About Us", href: "/about" },
@@ -29,26 +29,23 @@ const exploreLinks = [
   { label: "Terms & Conditions", href: "/terms-and-conditions" },
   { label: "Refund Policy", href: "/refund-policy" },
   { label: "Disclaimer", href: "/disclaimer" }
-];
+] as const;
 
 const toolsLinks = [
   { label: "Book Consultation", href: "/consultation" },
+  { label: "Premium Reports", href: "/reports" },
   { label: "Free Calculators", href: "/free-calculators" },
   { label: "Saved Reports", href: "/saved-reports" },
   { label: "Yearly Horoscope", href: "/yearly-horoscope" },
   { label: "Daily Horoscope", href: "/horoscope" }
-];
+] as const;
 
-const futureLinks = [
-  { label: "AI Astrologer — Coming Soon", href: "/ai-astrologer" },
-  { label: "Shop — Coming Soon", href: "/shop" }
-];
+const serviceLinks = [
+  { label: "AI Astrologer", href: "/ai-astrologer" },
+  { label: "Spiritual Catalogue", href: "/shop" }
+] as const;
 
-const moreLinks = [
-  ...exploreLinks,
-  ...toolsLinks,
-  ...futureLinks
-];
+const moreLinks = [...exploreLinks, ...toolsLinks, ...serviceLinks];
 
 const zodiacSigns = [
   { label: "Aries", href: "/horoscope/aries" },
@@ -63,14 +60,22 @@ const zodiacSigns = [
   { label: "Capricorn", href: "/horoscope/capricorn" },
   { label: "Aquarius", href: "/horoscope/aquarius" },
   { label: "Pisces", href: "/horoscope/pisces" }
-];
+] as const;
 
 const horoscopeOptions = [
   { label: "Daily Horoscope", href: "/daily-horoscope" },
   { label: "Weekly Horoscope", href: "/weekly-horoscope" },
   { label: "Weekly Love Horoscope", href: "/weekly-love-horoscope" },
   { label: "Yearly Horoscope", href: "/yearly-horoscope" }
-];
+] as const;
+
+const dropdownStyle = {
+  background: "rgba(10, 14, 26, 0.95)",
+  border: "1px solid rgba(255, 255, 255, 0.20)",
+  backdropFilter: "blur(18px) saturate(140%)",
+  WebkitBackdropFilter: "blur(18px) saturate(140%)",
+  boxShadow: "0 22px 60px rgba(0,0,0,0.45)"
+};
 
 export function MainNav() {
   const pathname = usePathname();
@@ -112,142 +117,19 @@ export function MainNav() {
           </div>
 
           <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex" aria-label="Primary navigation">
-            {navLinks.map((item) => {
-              if (item.label === "Horoscope") {
-                const isHoroscopeActive = pathname.includes("horoscope") || pathname.includes("zodiac");
-                return (
-                  <div key={item.href} className="group relative">
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "px-3 py-1 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white flex items-center gap-0.5",
-                        isHoroscopeActive ? "text-[#f2c56b] font-bold border-b-2 border-[#f2c56b] rounded-none px-1 py-0.5" : ""
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                    <div
-                      className="invisible absolute left-1/2 -translate-x-1/2 top-[120%] z-[1000] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 w-[480px]"
-                      style={{
-                        background: "rgba(10, 14, 26, 0.95)",
-                        backdropFilter: "blur(18px) saturate(140%)",
-                        WebkitBackdropFilter: "blur(18px) saturate(140%)",
-                        border: "1px solid rgba(255, 255, 255, 0.20)",
-                        boxShadow: "0 22px 60px rgba(0,0,0,0.45)"
-                      }}
-                    >
-                      <div className="grid grid-cols-[160px_1fr] gap-4 text-left">
-                        <div>
-                          <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Horoscopes</p>
-                          <div className="grid gap-0.5">
-                            {horoscopeOptions.map((subItem) => (
-                              <Link
-                                key={subItem.href}
-                                href={subItem.href}
-                                className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]"
-                              >
-                                {subItem.label}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Zodiac Signs</p>
-                          <div className="grid grid-cols-3 gap-1">
-                            {zodiacSigns.map((subItem) => (
-                              <Link
-                                key={subItem.href}
-                                href={subItem.href}
-                                className="rounded-lg px-2 py-1 text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]"
-                              >
-                                {subItem.label}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-              const active = isActive(pathname, item.href, item.active);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "px-3 py-1 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white",
-                    active ? "text-[#f2c56b] font-bold border-b-2 border-[#f2c56b] rounded-none px-1 py-0.5" : ""
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-            <div className="group relative">
-              <button
-                type="button"
-                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white"
+            {navLinks.map((item) => item.label === "Horoscope" ? (
+              <HoroscopeMenu key={item.href} pathname={pathname} />
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive(pathname, item.href, item.active) ? "page" : undefined}
+                className={navLinkClass(isActive(pathname, item.href, item.active))}
               >
-                More
-              </button>
-              <div
-                className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
-                style={{
-                  background: "rgba(10, 14, 26, 0.95)",
-                  border: "1px solid rgba(255, 255, 255, 0.20)",
-                  backdropFilter: "blur(18px) saturate(140%)",
-                  WebkitBackdropFilter: "blur(18px) saturate(140%)",
-                  boxShadow: "0 22px 60px rgba(0,0,0,0.45)"
-                }}
-              >
-                <div className="grid grid-cols-3 gap-4 text-left">
-                  <div>
-                    <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Explore</p>
-                    <div className="grid gap-0.5">
-                      {exploreLinks.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Tools</p>
-                    <div className="grid gap-0.5">
-                      {toolsLinks.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Future</p>
-                    <div className="grid gap-0.5">
-                      {futureLinks.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                {item.label}
+              </Link>
+            ))}
+            <MoreMenu />
           </nav>
 
           <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[rgba(255,255,255,0.15)] pl-3">
@@ -256,7 +138,7 @@ export function MainNav() {
             <AuthProfileMenu />
             <Link
               href="/kundli"
-              className="hidden xl:inline-flex items-center justify-center px-4 font-bold text-xs hover:-translate-y-0.5 transition-all duration-200"
+              className="hidden items-center justify-center px-4 text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 xl:inline-flex"
               style={{
                 background: "linear-gradient(135deg, #f7d17a, #c98924)",
                 color: "#17181d",
@@ -288,13 +170,7 @@ export function MainNav() {
             <aside id="naksharix-mobile-sidebar" className="ml-auto h-full w-[min(88vw,380px)] overflow-y-auto border-l border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.98)] p-5 shadow-2xl">
               <div className="flex items-center justify-between">
                 <BrandLogo className="max-w-[12rem]" />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="border-[rgba(20,20,20,0.08)] bg-white text-[#3a3a3c]"
-                  aria-label="Close navigation menu"
-                  onClick={() => setOpen(false)}
-                >
+                <Button variant="outline" size="icon" className="border-[rgba(20,20,20,0.08)] bg-white text-[#3a3a3c]" aria-label="Close navigation menu" onClick={() => setOpen(false)}>
                   <X className="h-5 w-5" />
                 </Button>
               </div>
@@ -318,6 +194,66 @@ export function MainNav() {
   );
 }
 
+function HoroscopeMenu({ pathname }: { pathname: string }) {
+  const active = pathname.includes("horoscope") || pathname.includes("zodiac");
+  return (
+    <div className="group relative">
+      <Link href="/daily-horoscope" className={navLinkClass(active)}>Horoscope</Link>
+      <div className="invisible absolute left-1/2 top-[120%] z-[1000] w-[480px] -translate-x-1/2 translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
+        <div className="grid grid-cols-[160px_1fr] gap-4 text-left">
+          <MenuColumn title="Horoscopes" links={horoscopeOptions} />
+          <div>
+            <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Zodiac Signs</p>
+            <div className="grid grid-cols-3 gap-1">
+              {zodiacSigns.map((item) => <DropdownLink key={item.href} item={item} compact />)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MoreMenu() {
+  return (
+    <div className="group relative">
+      <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white">More</button>
+      <div className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
+        <div className="grid grid-cols-3 gap-4 text-left">
+          <MenuColumn title="Explore" links={exploreLinks} />
+          <MenuColumn title="Tools" links={toolsLinks} />
+          <MenuColumn title="Services" links={serviceLinks} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MenuColumn({ title, links }: { title: string; links: readonly { label: string; href: string }[] }) {
+  return (
+    <div>
+      <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">{title}</p>
+      <div className="grid gap-0.5">
+        {links.map((item) => <DropdownLink key={item.href} item={item} />)}
+      </div>
+    </div>
+  );
+}
+
+function DropdownLink({ item, compact = false }: { item: { label: string; href: string }; compact?: boolean }) {
+  return (
+    <Link href={item.href} className={cn("rounded-lg text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]", compact ? "px-2 py-1" : "px-2.5 py-1.5")}>
+      {item.label}
+    </Link>
+  );
+}
+
+function navLinkClass(active: boolean) {
+  return cn(
+    "flex items-center gap-0.5 px-3 py-1 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white",
+    active ? "rounded-none border-b-2 border-[#f2c56b] px-1 py-0.5 font-bold text-[#f2c56b]" : ""
+  );
+}
 
 function isActive(pathname: string, href: string, activePaths: readonly string[]) {
   if (href === "/") return pathname === "/";

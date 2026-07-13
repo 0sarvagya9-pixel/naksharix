@@ -1,7 +1,10 @@
 import { MetadataRoute } from "next";
+import { isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { env } from "@/lib/env";
 
 export default function robots(): MetadataRoute.Robots {
+  const aiReady = isAiAstrologerReady();
+
   return {
     rules: {
       userAgent: "*",
@@ -36,7 +39,10 @@ export default function robots(): MetadataRoute.Robots {
         "/zodiac",
         "/astrologers",
         "/consultation",
+        "/reports",
+        "/shop",
         "/blog",
+        ...(aiReady ? ["/ai-astrologer"] : [])
       ],
       disallow: [
         "/admin",
@@ -51,13 +57,12 @@ export default function robots(): MetadataRoute.Robots {
         "/payment",
         "/report-request",
         "/astrologer",
-        "/ai-astrologer",
+        ...(aiReady ? [] : ["/ai-astrologer"]),
         "/talk-to-kundli",
-        "/chatbot",
-        "/shop",
-      ],
+        "/chatbot"
+      ]
     },
     host: env.NEXT_PUBLIC_APP_URL,
-    sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`,
+    sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`
   };
 }

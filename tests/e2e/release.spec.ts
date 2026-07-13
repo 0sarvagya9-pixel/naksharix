@@ -137,7 +137,7 @@ test.describe("Naksharix release browser QA", () => {
     });
   }
 
-  test("legacy AI routes permanently resolve to the parked AI page", async ({ page }) => {
+  test("legacy AI routes permanently resolve to the AI page", async ({ page }) => {
     for (const pathname of ["/talk-to-kundli", "/chatbot"]) {
       const response = await page.goto(absolute(pathname), { waitUntil: "domcontentloaded" });
       expect(response?.status(), pathname).toBe(200);
@@ -147,14 +147,33 @@ test.describe("Naksharix release browser QA", () => {
     }
   });
 
-  test("parked pages are noindex and active consultation remains indexable", async ({ page }) => {
-    for (const pathname of ["/ai-astrologer", "/shop"]) {
+  test("AI remains noindex while Shop and consultation are indexable when the AI flag is off", async ({ page }) => {
+    await page.goto(absolute("/ai-astrologer"), { waitUntil: "domcontentloaded" });
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/i);
+
+    for (const pathname of ["/shop", "/consultation"]) {
       await page.goto(absolute(pathname), { waitUntil: "domcontentloaded" });
-      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/i);
+      const robots = page.locator('meta[name="robots"]');
+      if (await robots.count()) await expect(robots).not.toHaveAttribute("content", /noindex/i);
     }
-    await page.goto(absolute("/consultation"), { waitUntil: "domcontentloaded" });
-    const robots = page.locator('meta[name="robots"]');
-    if (await robots.count()) await expect(robots).not.toHaveAttribute("content", /noindex/i);
+  });
+
+  test("Shop catalogue is searchable and uses availability confirmation instead of checkout", async ({ page }) => {
+    await page.goto(absolute("/shop"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { level: 1, name: /Naksharix Spiritual Catalogue/i })).toBeVisible();
+    const search = page.getByPlaceholder("Search products...");
+    await search.fill("Shri Yantra");
+    await expect(page.getByRole("heading", { level: 2, name: "Shri Yantra" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ask Availability" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /Add to Cart|Checkout/i })).toHaveCount(0);
+  });
+
+  test("AI readiness endpoint exposes no secret details", async ({ request }) => {
+    const response = await request.get(absolute("/api/ai/status"));
+    expect(response.status()).toBe(200);
+    const json = await response.json();
+    expect(json).toEqual({ data: { enabled: false, ready: false } });
+    expect(JSON.stringify(json)).not.toMatch(/key|secret|model/i);
   });
 
   test("pricing exposes only active services", async ({ page }) => {
