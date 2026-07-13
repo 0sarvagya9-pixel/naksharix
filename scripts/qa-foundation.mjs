@@ -67,21 +67,29 @@ for (const [file, content] of [["components/reports-content.tsx", reportsContent
   assert(!/Request on WhatsApp|WhatsApp\/Contact|payment confirmation|Instant Report|Order confirmed|Payment success/i.test(content), `${file} contains unsafe report/payment/WhatsApp language`);
 }
 
+const shopPage = read("app/shop/page.tsx");
+const shopContent = read("components/shop-coming-soon-content.tsx");
+assert(shopPage.includes("index: true"), "Informational Shop catalogue should be indexable");
+assert(shopContent.includes("shopProducts") && shopContent.includes("Ask Availability"), "Shop should expose the real informational catalogue without ecommerce");
+assert(!shopContent.includes("RazorpayCheckoutButton") && !shopContent.includes("Add to Cart") && !shopContent.includes("Buy Now"), "Shop must not expose ecommerce controls");
+
+const aiPage = read("app/ai-astrologer/page.tsx");
+assert(aiPage.includes("isAiAstrologerReady") && aiPage.includes("robots: { index: ready"), "AI page indexing should depend on real readiness");
+assert(aiPage.includes("AiAstrologerChat") && aiPage.includes("Temporarily Unavailable"), "AI page should render live chat only when ready and otherwise fail closed");
+
 const sitemap = read("app/sitemap.ts");
-for (const route of ["/ai-astrologer", "/talk-to-kundli", "/chatbot", "/shop"]) {
-  assert(!sitemap.includes(`"${route}"`), `Parked route ${route} should not be promoted in sitemap staticRoutes`);
-}
+assert(sitemap.includes('"/shop"'), "Active informational Shop should be promoted in sitemap staticRoutes");
+assert(sitemap.includes("isAiAstrologerReady") && sitemap.includes('"/ai-astrologer"'), "AI Astrologer should be included in sitemap only when ready");
+assert(!sitemap.includes('"/talk-to-kundli"') && !sitemap.includes('"/chatbot"'), "Legacy AI aliases should not be promoted in sitemap");
 assert(sitemap.includes('"/consultation"'), "Active Consultation should be promoted in sitemap staticRoutes");
 assert(sitemap.includes('"/panchang"'), "Provider-verified Panchang should be promoted in sitemap staticRoutes");
 
 const robots = read("app/robots.ts");
-const allowBlock = robots.match(/allow:\s*\[([\s\S]*?)\]/)?.[1] ?? "";
-const disallowBlock = robots.match(/disallow:\s*\[([\s\S]*?)\]/)?.[1] ?? "";
-for (const route of ["/ai-astrologer", "/talk-to-kundli", "/chatbot", "/shop"]) {
-  assert(disallowBlock.includes(`"${route}"`), `Parked route ${route} should be disallowed in robots`);
-}
-assert(allowBlock.includes('"/consultation"') && !disallowBlock.includes('"/consultation"'), "Active Consultation should be allowed and not disallowed in robots");
-assert(allowBlock.includes('"/panchang"') && !disallowBlock.includes('"/panchang"'), "Provider-verified Panchang should be allowed in robots");
+assert(robots.includes('"/shop"'), "Active informational Shop should be allowed in robots");
+assert(robots.includes("isAiAstrologerReady") && robots.includes('"/ai-astrologer"'), "AI robots rule should depend on readiness");
+assert(robots.includes('"/talk-to-kundli"') && robots.includes('"/chatbot"'), "Legacy AI aliases should be disallowed in robots");
+assert(robots.includes('"/consultation"'), "Active Consultation should be allowed in robots");
+assert(robots.includes('"/panchang"'), "Provider-verified Panchang should be allowed in robots");
 
 if (failures.length) {
   console.error("QA foundation failed:");
@@ -89,4 +97,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("QA foundation passed: numerology, Lo Shu, nakshatra, matching max score, provider-verified Panchang gate, report safety, sitemap/robots guards.");
+console.log("QA foundation passed: numerology, Lo Shu, nakshatra, matching max score, provider-verified Panchang, report safety, active Shop, and readiness-gated AI guards.");
