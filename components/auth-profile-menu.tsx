@@ -91,7 +91,7 @@ export function AuthProfileMenu() {
     );
   }
 
-  const image = user.image ?? user.avatarUrl;
+  const image = safeImageUrl(user.image ?? user.avatarUrl);
   const displayName = getDisplayName(user);
   const displayMeta = getDisplayMeta(user);
   const initials = getInitials(displayName);
@@ -108,7 +108,7 @@ export function AuthProfileMenu() {
         className="grid h-10 w-10 place-items-center rounded-full border border-[#dca956]/25 bg-[#0a1224]/82 p-1 text-sm text-[#ffffff] shadow-[0_10px_28px_rgba(0,5,16,0.28)] transition hover:border-[#dca956]/55 hover:bg-[#dca956]/10 focus:outline-none focus:ring-2 focus:ring-[#dca956]/25"
       >
         <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-[#dca956]/35 bg-[#dca956]/10 text-xs font-bold text-[#fbc02d]">
-          {image ? <Image src={image} alt="" width={28} height={28} className="h-full w-full object-cover" /> : initials}
+          <AvatarImage src={image} initials={initials} />
         </span>
       </button>
       {open ? (
@@ -136,6 +136,29 @@ export function AuthProfileMenu() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+function AvatarImage({ src, initials }: { src: string; initials: string }) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  if (!src || failed) return <>{initials}</>;
+
+  return (
+    <Image
+      src={src}
+      alt=""
+      width={28}
+      height={28}
+      unoptimized
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(true)}
+      className="h-full w-full object-cover"
+    />
   );
 }
 
@@ -179,4 +202,17 @@ function getDisplayMeta(user: SessionUser) {
 
 function safeDisplayValue(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : "";
+}
+
+function safeImageUrl(value: unknown) {
+  const raw = safeDisplayValue(value);
+  if (!raw) return "";
+  if (raw.startsWith("/")) return raw;
+
+  try {
+    const parsed = new URL(raw);
+    return parsed.protocol === "https:" ? parsed.toString() : "";
+  } catch {
+    return "";
+  }
 }
