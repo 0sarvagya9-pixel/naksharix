@@ -50,8 +50,8 @@ for (const [path, titleMarker] of publicPages) {
   if (path === "/pricing" && /subscribe to|INR 499\/mo|INR 1499\/mo/i.test(html)) {
     fail("pricing safety", "unsupported public subscription checkout is visible");
   }
-  if (path === "/shop" && /add to cart|buy now|product checkout/i.test(html)) {
-    fail("shop safety", "unsupported ecommerce control or claim is visible");
+  if (path === "/shop" && /add to cart|buy now|pay with razorpay/i.test(html)) {
+    fail("shop safety", "unsupported ecommerce control is visible");
   }
 }
 
