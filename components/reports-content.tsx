@@ -1,24 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ClipboardList, FileText, ShieldCheck } from "lucide-react";
+import { CheckCircle2, ClipboardList, CreditCard, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 import { Section } from "@/components/section";
-import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/components/language-provider";
 import { manualReports } from "@/lib/manual-catalogue";
-
-type ReportIntentState = { name: string; email: string; phone: string; report: string; dob: string; tob: string; place: string; concern: string; language: string };
+import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 
 export function ReportsContent() {
   const { locale } = useLanguage();
   const labels = reportLabels(locale);
-  const [intent, setIntent] = useState<ReportIntentState>({ name: "", email: "", phone: "", report: manualReports[0]?.slug ?? "", dob: "", tob: "", place: "", concern: "", language: locale });
-  const [review, setReview] = useState(false);
 
   return (
     <main className="min-h-screen bg-[#fbf6ea] text-[#172536]">
@@ -37,87 +31,64 @@ export function ReportsContent() {
           <Card className="mt-6 border-[#e7d8be] bg-[#fff9f0]/80 shadow-[0_18px_55px_rgba(31,41,51,0.06)] lg:mt-0">
             <CardContent className="p-6">
               <ShieldCheck className="h-6 w-6 text-[#b8862e]" />
-              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#172536]">{labels.manualDelivery}</h2>
-              <p className="mt-3 text-sm leading-6 text-[#566575]">{labels.manualDeliveryCopy}</p>
+              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#172536]">{labels.deliveryTitle}</h2>
+              <p className="mt-3 text-sm leading-6 text-[#566575]">{labels.deliveryCopy}</p>
             </CardContent>
           </Card>
         </div>
 
         <div id="report-catalogue" className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {manualReports.map((report) => (
-            <Card key={report.slug} className="flex flex-col border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
-              <CardContent className="flex flex-1 flex-col p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#b8862e]">{report.category}</p>
-                    <h2 className="mt-2 font-cinzel text-2xl font-bold text-[#172536]">{report.name[locale]}</h2>
+          {manualReports.map((report) => {
+            const checkout = getManualReportCheckout(report.slug);
+            const requestHref = `/report-request/new?plan=PREMIUM&reportSlug=${encodeURIComponent(report.slug)}`;
+            const adminBypassHref = `${requestHref}&mode=admin`;
+
+            return (
+              <Card key={report.slug} className="flex flex-col border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
+                <CardContent className="flex flex-1 flex-col p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#b8862e]">{report.category}</p>
+                      <h2 className="mt-2 font-cinzel text-2xl font-bold text-[#172536]">{report.name[locale]}</h2>
+                    </div>
+                    <FileText className="h-5 w-5 shrink-0 text-[#b8862e]" />
                   </div>
-                  <FileText className="h-5 w-5 shrink-0 text-[#b8862e]" />
-                </div>
-                <p className="mt-4 text-sm leading-6 text-[#566575]">{report.description[locale]}</p>
-                <ul className="mt-4 space-y-2 text-sm font-semibold text-[#172536]">
-                  {report.includes[locale].slice(0, 3).map((item) => (
-                    <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-[#0d9b74]" />{item}</li>
-                  ))}
-                </ul>
-                <p className="mt-4 rounded-lg border border-[#e7d8be] bg-[#fff9f0] px-3 py-2 text-sm font-bold text-[#b8862e]">{labels.priceOnRequest}</p>
-                <p className="mt-2 text-xs text-[#6b7280]">{labels.deliveryLabel}</p>
-                <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
-                  <Button variant="outline" asChild className="border-[#d8af66] bg-white text-[#172536]"><Link href={`/reports/${report.slug}`}>{labels.viewDetails}</Link></Button>
-                  <Button asChild className="bg-[#0d9b74] text-white hover:bg-[#087f60]">
-                    <Link href={`/report-request/new?plan=PREMIUM&reportSlug=${report.slug}`}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <p className="mt-4 text-sm leading-6 text-[#566575]">{report.description[locale]}</p>
+                  <ul className="mt-4 space-y-2 text-sm font-semibold text-[#172536]">
+                    {report.includes[locale].slice(0, 3).map((item) => (
+                      <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#0d9b74]" />{item}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-4 rounded-lg border border-[#e7d8be] bg-[#fff9f0] px-3 py-2 text-sm font-bold text-[#b8862e]">
+                    {checkout?.price ?? labels.manualReview}
+                  </p>
+                  <p className="mt-2 text-xs text-[#6b7280]">{checkout ? labels.secureCheckout : labels.manualWorkflow}</p>
+                  <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
+                    <Button variant="outline" asChild className="border-[#d8af66] bg-white text-[#172536]"><Link href={`/reports/${report.slug}`}>{labels.viewDetails}</Link></Button>
+                    {checkout ? (
+                      <RazorpayCheckoutButton
+                        payload={{ purpose: checkout.purpose, reportId: checkout.reportId }}
+                        label={`${labels.pay} ${checkout.price}`}
+                        successHref={`${requestHref}&orderId={paymentId}`}
+                        adminBypassHref={adminBypassHref}
+                      />
+                    ) : (
+                      <Button asChild className="bg-[#0d9b74] text-white hover:bg-[#087f60]">
+                        <Link href={requestHref}><ClipboardList className="h-4 w-4" />{labels.requestReview}</Link>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        <Card id="report-request-intent" className="mt-10 border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
-          <CardContent className="p-6">
-            <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr]">
-              <div>
-                <ClipboardList className="h-6 w-6 text-[#b8862e]" />
-                <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#172536]">{labels.intentTitle}</h2>
-                <p className="mt-3 text-sm leading-7 text-[#566575]">{labels.intentCopy}</p>
-                <p className="mt-4 rounded-xl border border-[#e7d8be] bg-[#fff9f0] p-4 text-sm leading-6 text-[#8a631b]">{labels.intentSafety}</p>
-              </div>
-              <div className="grid gap-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <IntentField label={labels.name} value={intent.name} onChange={(value) => setIntent((current) => ({ ...current, name: value }))} />
-                  <IntentField label={labels.email} value={intent.email} onChange={(value) => setIntent((current) => ({ ...current, email: value }))} />
-                  <IntentField label={labels.phoneOptional} value={intent.phone} onChange={(value) => setIntent((current) => ({ ...current, phone: value }))} />
-                  <div>
-                    <Label className="text-[#172536]">{labels.reportType}</Label>
-                    <select value={intent.report} onChange={(event) => setIntent((current) => ({ ...current, report: event.target.value }))} className="mt-2 w-full rounded-xl border border-[#e7d8be] bg-white px-3 py-2.5 text-sm text-[#172536] outline-none focus:border-[#b8862e]">
-                      {manualReports.map((report) => <option key={report.slug} value={report.slug}>{report.name[locale]}</option>)}
-                    </select>
-                  </div>
-                  <IntentField label={labels.dob} value={intent.dob} onChange={(value) => setIntent((current) => ({ ...current, dob: value }))} />
-                  <IntentField label={labels.tob} value={intent.tob} onChange={(value) => setIntent((current) => ({ ...current, tob: value }))} />
-                  <IntentField label={labels.birthPlace} value={intent.place} onChange={(value) => setIntent((current) => ({ ...current, place: value }))} />
-                  <IntentField label={labels.preferredLanguage} value={intent.language} onChange={(value) => setIntent((current) => ({ ...current, language: value }))} />
-                </div>
-                <div>
-                  <Label className="text-[#172536]">{labels.concern}</Label>
-                  <Textarea value={intent.concern} onChange={(event) => setIntent((current) => ({ ...current, concern: event.target.value }))} className="mt-2 min-h-24 border-[#e7d8be] bg-white text-[#172536]" />
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button type="button" className="bg-[#0d9b74] text-white hover:bg-[#087f60]" onClick={() => setReview(true)}>{labels.prepareRequest}</Button>
-                  <Button asChild className="bg-[#0d9b74] text-white hover:bg-[#087f60]"><Link href={`/report-request/new?plan=PREMIUM&reportSlug=${intent.report}`}>{labels.submitRealRequest}</Link></Button>
-                  <Button variant="outline" asChild className="border-[#d8af66] bg-white text-[#172536]"><Link href="/contact">{labels.contactSupport}</Link></Button>
-                </div>
-                {review ? (
-                  <div className="rounded-2xl border border-[#e7d8be] bg-[#fff9f0] p-4 text-sm leading-7 text-[#566575]">
-                    <p className="font-semibold text-[#172536]">{labels.reviewDetails}</p>
-                    <p>{labels.onlineComingSoon}</p>
-                    <p className="mt-2 text-[#6b7280]">{labels.reviewHint}</p>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <ProcessCard icon={CreditCard} title={labels.stepOneTitle} copy={labels.stepOneCopy} />
+          <ProcessCard icon={ClipboardList} title={labels.stepTwoTitle} copy={labels.stepTwoCopy} />
+          <ProcessCard icon={FileText} title={labels.stepThreeTitle} copy={labels.stepThreeCopy} />
+        </div>
 
         <Card className="mt-10 border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
           <CardContent className="p-6">
@@ -130,113 +101,91 @@ export function ReportsContent() {
   );
 }
 
-function IntentField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function ProcessCard({ icon: Icon, title, copy }: { icon: typeof CreditCard; title: string; copy: string }) {
   return (
-    <div>
-      <Label className="text-[#172536]">{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 border-[#e7d8be] bg-white text-[#172536]" />
-    </div>
+    <Card className="border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
+      <CardContent className="p-6">
+        <Icon className="h-6 w-6 text-[#b8862e]" />
+        <h2 className="mt-4 font-cinzel text-xl font-bold text-[#172536]">{title}</h2>
+        <p className="mt-3 text-sm leading-6 text-[#566575]">{copy}</p>
+      </CardContent>
+    </Card>
   );
 }
 
 function reportLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") {
     return {
-      eyebrow: "Manual Astrology Reports",
+      eyebrow: "Premium Astrology Reports",
       title: "प्रीमियम ज्योतिष रिपोर्ट",
-      subtitle: "कुंडली, मिलान, अंक ज्योतिष, लो शू, करियर, धन, प्रेम और गोचर से जुड़ी विस्तृत रिपोर्ट देखें।",
+      subtitle: "जहाँ fixed price उपलब्ध है वहाँ secure Razorpay checkout करें। बाकी विशेष रिपोर्ट review request के रूप में submit की जा सकती हैं।",
       exploreReports: "रिपोर्ट देखें",
       contactSupport: "सपोर्ट से संपर्क करें",
-      manualDelivery: "Manual delivery only",
-      manualDeliveryCopy: "यहाँ online payment automation active नहीं है। Report workflow manual/review-based रहेगा।",
-      priceOnRequest: "Price on request",
-      deliveryLabel: "Manual review-based workflow",
+      deliveryTitle: "सुरक्षित और स्पष्ट workflow",
+      deliveryCopy: "Paid reports में payment server पर verify होने के बाद ही birth-details form खुलता है। Manual-review reports में कोई payment claim नहीं किया जाता।",
+      manualReview: "Manual review",
+      secureCheckout: "Razorpay payment और server verification",
+      manualWorkflow: "बिना payment के pending-review request",
       viewDetails: "विवरण देखें",
-      request: "Request details तैयार करें",
-      intentTitle: "Report request intent",
-      intentCopy: "अपनी details review करें, फिर secure login form से real request submit करें। Payment request stage पर required नहीं है।",
-      intentSafety: "Real submission logged-in users के लिए DB में pending review request बनाता है। No unsupported payment, order confirmation, or delivery claim.",
-      name: "नाम",
-      email: "ईमेल",
-      phoneOptional: "फोन (optional)",
-      reportType: "Report type",
-      dob: "जन्म तिथि",
-      tob: "जन्म समय",
-      birthPlace: "जन्म स्थान",
-      preferredLanguage: "भाषा",
-      concern: "प्रश्न / concern",
-      prepareRequest: "Request तैयार करें",
-      submitRealRequest: "Real request submit करें",
-      reviewDetails: "Review details",
-      onlineComingSoon: "Online request अब logged-in pending-review workflow में save होती है।",
-      reviewHint: "Final form में accurate birth place select करना जरूरी है ताकि report real provider calculation पर बने।",
+      pay: "भुगतान करें",
+      requestReview: "Review request",
+      stepOneTitle: "1. सही report चुनें",
+      stepOneCopy: "Fixed-price reports में listed fee दिखती है; manual reports साफ़ तौर पर review-only रहती हैं।",
+      stepTwoTitle: "2. सुरक्षित details दें",
+      stepTwoCopy: "Payment verification के बाद या manual request में accurate birth place, date, time और concern submit करें।",
+      stepThreeTitle: "3. वास्तविक delivery",
+      stepThreeCopy: "Download link केवल actual generated PDF उपलब्ध होने पर दिखता है।",
       disclaimer: "अस्वीकरण",
       disclaimerCopy: "ज्योतिष रिपोर्ट चिंतनात्मक मार्गदर्शन के साधन हैं। ये परिणामों की गारंटी नहीं देतीं और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।"
     };
   }
+
   if (locale === "hinglish") {
     return {
-      eyebrow: "Manual Astrology Reports",
+      eyebrow: "Premium Astrology Reports",
       title: "Premium Astrology Reports",
-      subtitle: "Kundli, Milan, Numerology, Lo Shu, Career, Wealth, Love aur Transit se judi detailed reports explore karein.",
+      subtitle: "Jahan fixed price available hai wahan secure Razorpay checkout karein. Baaki special reports review request ke roop me submit ki ja sakti hain.",
       exploreReports: "Explore Reports",
       contactSupport: "Contact Support",
-      manualDelivery: "Manual delivery only",
-      manualDeliveryCopy: "Online payment automation active nahi hai. Report workflow manual/review-based rahega.",
-      priceOnRequest: "Price on request",
-      deliveryLabel: "Manual review-based workflow",
+      deliveryTitle: "Secure aur clear workflow",
+      deliveryCopy: "Paid reports me payment server par verify hone ke baad birth-details form khulta hai. Manual-review reports me koi payment claim nahi hota.",
+      manualReview: "Manual review",
+      secureCheckout: "Razorpay payment aur server verification",
+      manualWorkflow: "No-payment pending-review request",
       viewDetails: "View Details",
-      request: "Prepare Request",
-      intentTitle: "Report Request Intent",
-      intentCopy: "Apni details review karein, phir secure login form se real request submit karein. Request stage par payment required nahi hai.",
-      intentSafety: "Real submission logged-in users ke liye DB me pending review request banata hai. No unsupported payment, order confirmation ya delivery claim.",
-      name: "Name",
-      email: "Email",
-      phoneOptional: "Phone (optional)",
-      reportType: "Report type",
-      dob: "Date of birth",
-      tob: "Time of birth",
-      birthPlace: "Birth place",
-      preferredLanguage: "Preferred language",
-      concern: "Question / concern",
-      prepareRequest: "Prepare Request",
-      submitRealRequest: "Submit Real Request",
-      reviewDetails: "Review Details",
-      onlineComingSoon: "Online request ab logged-in pending-review workflow me save hoti hai.",
-      reviewHint: "Final form me accurate birth place select karna zaroori hai taaki report real provider calculation par bane.",
+      pay: "Pay",
+      requestReview: "Request Review",
+      stepOneTitle: "1. Sahi report choose karein",
+      stepOneCopy: "Fixed-price reports listed fee dikhati hain; manual reports clearly review-only rehti hain.",
+      stepTwoTitle: "2. Secure details submit karein",
+      stepTwoCopy: "Payment verification ke baad ya manual request me accurate birth place, date, time aur concern submit karein.",
+      stepThreeTitle: "3. Real delivery",
+      stepThreeCopy: "Download link sirf actual generated PDF available hone par dikhta hai.",
       disclaimer: "Disclaimer",
       disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
     };
   }
+
   return {
-    eyebrow: "Manual Astrology Reports",
+    eyebrow: "Premium Astrology Reports",
     title: "Premium Astrology Reports",
-    subtitle: "Explore detailed astrology, Kundli, match making, numerology, Lo Shu, career, wealth, love, and transit reports prepared for deeper guidance.",
+    subtitle: "Use secure Razorpay checkout where a fixed price is available. Specialist reports without a listed price can still be submitted for manual review.",
     exploreReports: "Explore Reports",
     contactSupport: "Contact Support",
-    manualDelivery: "Manual delivery only",
-    manualDeliveryCopy: "No online payment automation is active here. The report workflow remains manual/review-based.",
-    priceOnRequest: "Price on request",
-    deliveryLabel: "Manual review-based workflow",
+    deliveryTitle: "A secure, transparent workflow",
+    deliveryCopy: "For paid reports, the birth-details form opens only after server-verified payment. Manual-review reports never make an unsupported payment or delivery claim.",
+    manualReview: "Manual review",
+    secureCheckout: "Razorpay payment with server verification",
+    manualWorkflow: "No-payment pending-review request",
     viewDetails: "View Details",
-    request: "Prepare Request",
-    intentTitle: "Report Request Intent",
-    intentCopy: "Use this panel to review the details needed for a report request, then submit through the secure logged-in form. Payment is not required at request stage.",
-    intentSafety: "Real submission creates a pending-review DB request for logged-in users. It does not create unsupported payment, order confirmation, or delivery.",
-    name: "Name",
-    email: "Email",
-    phoneOptional: "Phone (optional)",
-    reportType: "Report type",
-    dob: "Date of birth",
-    tob: "Time of birth",
-    birthPlace: "Birth place",
-    preferredLanguage: "Preferred language",
-    concern: "Question / concern",
-    prepareRequest: "Prepare Request",
-    submitRealRequest: "Submit Real Request",
-    reviewDetails: "Review Details",
-    onlineComingSoon: "Online request submission now saves to a logged-in pending-review workflow.",
-    reviewHint: "The final form requires an accurate selected birth place so the report can use real provider calculations.",
+    pay: "Pay",
+    requestReview: "Request Review",
+    stepOneTitle: "1. Choose the right report",
+    stepOneCopy: "Fixed-price reports show the exact fee; specialist manual reports are clearly marked review-only.",
+    stepTwoTitle: "2. Submit secure details",
+    stepTwoCopy: "After payment verification, or for a manual request, submit accurate birth place, date, time, and concern.",
+    stepThreeTitle: "3. Receive a real deliverable",
+    stepThreeCopy: "A download link appears only when an actual generated PDF is available.",
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."
   };

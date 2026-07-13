@@ -10,7 +10,12 @@ import { canBypassPayment } from "@/lib/auth/permissions";
 
 type CheckoutPayload =
   | { purpose: "SUBSCRIPTION"; plan: "PREMIUM" | "VIP" }
-  | { purpose: "KUNDLI_REPORT" | "YEARLY_REPORT" | "MATCH_REPORT"; reportId: string; savedReportId?: string };
+  | {
+      purpose: "KUNDLI_REPORT" | "YEARLY_REPORT" | "MATCH_REPORT";
+      reportId: string;
+      savedReportId?: string;
+      reportRequestId?: string;
+    };
 
 type RazorpayResponse = {
   razorpay_order_id: string;
@@ -27,7 +32,21 @@ declare global {
   }
 }
 
-export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay", variant = "default" }: { payload: CheckoutPayload; label?: string; variant?: ButtonProps["variant"] }) {
+type Props = {
+  payload: CheckoutPayload;
+  label?: string;
+  variant?: ButtonProps["variant"];
+  successHref?: string;
+  adminBypassHref?: string;
+};
+
+export function RazorpayCheckoutButton({
+  payload,
+  label = "Pay with Razorpay",
+  variant = "default",
+  successHref,
+  adminBypassHref
+}: Props) {
   const { tr } = useLanguage();
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
@@ -36,12 +55,13 @@ export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay", v
   async function startCheckout() {
     setLoading(true);
     setStatus(tr("creatingSecureOrder"));
+
     const userResponse = await fetch("/api/auth/me", { cache: "no-store" }).catch(() => null);
     const userJson = userResponse?.ok ? await userResponse.json().catch(() => null) : null;
     if (canBypassPayment(userJson?.data?.user)) {
       setLoading(false);
       setStatus(tr("adminTestingModePaymentBypassed"));
-      router.push(getAdminBypassTarget(payload));
+      router.push(adminBypassHref ?? getAdminBypassTarget(payload));
       return;
     }
 
@@ -57,14 +77,27 @@ export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay", v
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    const orderJson = await orderResponse.json();
+    const orderJson = await orderResponse.json().catch(() => null);
     if (!orderResponse.ok) {
       setLoading(false);
-      setStatus(toPaymentMessage(orderJson.error, tr("paymentsComingSoon"), tr("signInToPay")));
+      setStatus(toPaymentMessage(orderJson?.error, tr("paymentsComingSoon"), tr("signInToPay")));
       return;
     }
 
-    const { keyId, order, item } = orderJson.data;
+    const data = orderJson?.data;
+    if (!data?.keyId || !data?.order?.id || !data?.paymentId || !data?.item?.name) {
+      setLoading(false);
+      setStatus(tr("paymentsComingSoon"));
+      return;
+    }
+
+    const { keyId, order, item, paymentId } = data as {
+      keyId: string;
+      order: { id: string; amount: number; currency: string };
+      item: { name: string };
+      paymentId: string;
+    };
+
     const checkout = new window.Razorpay({
       key: keyId,
       amount: order.amount,
@@ -81,20 +114,37 @@ export function RazorpayCheckoutButton({ payload, label = "Pay with Razorpay", v
           body: JSON.stringify(response)
         });
         setLoading(false);
-        setStatus(verifyResponse.ok ? tr("paymentVerified") : tr("paymentsComingSoon"));
+
+        if (!verifyResponse.ok) {
+          setStatus(tr("paymentsComingSoon"));
+          return;
+        }
+
+        setStatus(tr("paymentVerified"));
+        const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
+        if (target) {
+          router.push(target);
+        } else {
+          router.refresh();
+        }
       },
-      modal: { ondismiss: () => { setLoading(false); setStatus(tr("checkoutClosed")); } }
+      modal: {
+        ondismiss: () => {
+          setLoading(false);
+          setStatus(tr("checkoutClosed"));
+        }
+      }
     });
     checkout.open();
   }
 
   return (
     <div className="space-y-2">
-      <Button className="w-full" variant={variant} onClick={startCheckout} disabled={loading}>
+      <Button type="button" className="w-full" variant={variant} onClick={startCheckout} disabled={loading}>
         <CreditCard className="h-4 w-4" />
         {loading ? tr("processing") : label}
       </Button>
-      {status ? <p className="text-sm naksh-muted-text">{status}</p> : null}
+      {status ? <p className="text-sm naksh-muted-text" aria-live="polite">{status}</p> : null}
     </div>
   );
 }
@@ -116,16 +166,19 @@ function loadRazorpayScript() {
       resolve(true);
       return;
     }
+
+    const existing = document.querySelector<HTMLScriptElement>('script[data-naksharix-razorpay="true"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(Boolean(window.Razorpay)), { once: true });
+      existing.addEventListener("error", () => resolve(false), { once: true });
+      return;
+    }
+
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.dataset.naksharixRazorpay = "true";
     script.onload = () => resolve(true);
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
 }
-
-
-
-
-
-

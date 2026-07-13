@@ -1,10 +1,12 @@
 import { NextRequest } from "next/server";
-import { PaymentPurpose, PaymentStatus, ReportPaymentStatus, ReportPlanType, ReportRequestStatus } from "@prisma/client";
+import { PaymentStatus, ReportPaymentStatus, ReportPlanType, ReportRequestStatus } from "@prisma/client";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { canBypassPayment } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db";
+import { getManualReport } from "@/lib/manual-catalogue";
+import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 
@@ -32,9 +34,15 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthenticated", 401);
+
     const rateLimited = rateLimitResponse("report-request-create", user.id || getRequestIp(request), 5, 60_000);
     if (rateLimited) return rateLimited;
+
     const body = await validateJson(request, schema);
+    const report = getManualReport(body.reportSlug);
+    if (!report) return fail("Unknown report type", 422);
+
+    const checkout = getManualReportCheckout(report.slug);
     const adminBypass = Boolean(body.adminBypass && canBypassPayment(user));
 
     if (body.deliveryEmail.toLowerCase() !== user.email.toLowerCase()) {
@@ -43,27 +51,31 @@ export async function POST(request: NextRequest) {
 
     let paymentId: string | undefined;
     let paymentStatus: ReportPaymentStatus = adminBypass ? ReportPaymentStatus.ADMIN_BYPASS : ReportPaymentStatus.PENDING;
-    let planType = body.planType as ReportPlanType;
+    const planType = body.planType as ReportPlanType;
 
-    if (!adminBypass && body.orderId) {
+    if (!adminBypass && checkout) {
+      if (!body.orderId) return fail("Verified payment is required for this fixed-price report.", 402);
+
       const payment = await prisma.payment.findUnique({ where: { id: body.orderId } });
       if (!payment || payment.userId !== user.id) return fail("Payment not found", 404);
-      if (payment.status !== PaymentStatus.PAID) return fail("Payment required. Please complete checkout first.", 402);
-      const allowedPurposes: PaymentPurpose[] = [
-        PaymentPurpose.SUBSCRIPTION,
-        PaymentPurpose.KUNDLI_REPORT,
-        PaymentPurpose.YEARLY_REPORT,
-        PaymentPurpose.MATCH_REPORT
-      ];
-      if (!allowedPurposes.includes(payment.purpose)) return fail("Invalid payment for report request", 422);
+
       const metadata = (payment.metadata as Record<string, unknown> | null) ?? {};
-      const paidPlan = String(metadata.plan ?? body.planType).toUpperCase();
-      planType = paidPlan === "VIP" ? ReportPlanType.VIP : ReportPlanType.PREMIUM;
-      paymentId = payment.id;
-      paymentStatus = ReportPaymentStatus.PAID;
+      const validPayment = payment.status === PaymentStatus.PAID
+        && String(payment.purpose) === checkout.purpose
+        && Number(payment.amount) === checkout.amount
+        && metadata.reportId === checkout.reportId;
+
+      if (!validPayment) {
+        return fail("Payment does not match this report. Please restart checkout from the report page.", 422);
+      }
 
       const existing = await prisma.reportRequest.findUnique({ where: { paymentId: payment.id } });
       if (existing) return ok({ reportRequest: existing });
+
+      paymentId = payment.id;
+      paymentStatus = ReportPaymentStatus.PAID;
+    } else if (!adminBypass && body.orderId) {
+      return fail("This manual-review report does not accept an upfront payment.", 422);
     }
 
     const reportRequest = await prisma.reportRequest.create({
@@ -72,8 +84,8 @@ export async function POST(request: NextRequest) {
         paymentId,
         planType,
         paymentStatus,
-        status: ReportRequestStatus.PENDING_REVIEW,
-        reportSlug: body.reportSlug,
+        status: paymentStatus === ReportPaymentStatus.PAID ? ReportRequestStatus.PAID : ReportRequestStatus.PENDING_REVIEW,
+        reportSlug: report.slug,
         deliveryEmail: user.email,
         fullName: body.fullName,
         gender: body.gender,
@@ -89,20 +101,30 @@ export async function POST(request: NextRequest) {
         adminBypass
       }
     });
+
     await writeReportStatusHistory({
       reportRequestId: reportRequest.id,
       oldStatus: null,
       newStatus: reportRequest.status,
       actor: user,
-      note: "Report request created.",
-      metadata: { paymentStatus: reportRequest.paymentStatus, reportSlug: reportRequest.reportSlug }
+      note: paymentStatus === ReportPaymentStatus.PAID ? "Paid report request created after verified checkout." : "Manual-review report request created.",
+      metadata: {
+        paymentStatus: reportRequest.paymentStatus,
+        reportSlug: reportRequest.reportSlug,
+        paymentId: reportRequest.paymentId
+      }
     });
+
     await writeAuditLog({
       actor: user,
       action: "report_request.created",
       targetType: "ReportRequest",
       targetId: reportRequest.id,
-      metadata: { reportSlug: reportRequest.reportSlug, paymentStatus: reportRequest.paymentStatus }
+      metadata: {
+        reportSlug: reportRequest.reportSlug,
+        paymentStatus: reportRequest.paymentStatus,
+        fixedPriceCheckout: Boolean(checkout)
+      }
     });
 
     return ok({ reportRequest });

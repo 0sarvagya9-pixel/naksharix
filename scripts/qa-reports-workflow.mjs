@@ -19,6 +19,9 @@ function assert(condition, name, detail) {
 const schema = source("prisma/schema.prisma");
 const reportApi = source("app/api/report-requests/route.ts");
 const reportsContent = source("components/reports-content.tsx");
+const reportDetail = source("app/reports/[slug]/page.tsx");
+const requestPage = source("app/report-request/new/page.tsx");
+const checkoutButton = source("components/razorpay-checkout-button.tsx");
 const adminLayout = source("app/admin/layout.tsx");
 const adminApi = source("app/api/admin/report-requests/route.ts");
 const adminActions = source("components/admin/report-request-actions.tsx");
@@ -31,7 +34,32 @@ assert(schema.includes("model ReportRequest"), "ReportRequest model exists", "Pr
 assert(schema.includes("reportSlug") && schema.includes("adminNotes") && schema.includes("generatedPdfBytes"), "ReportRequest stores workflow and PDF fields", "real report workflow metadata");
 assert(reportApi.includes("getCurrentUser()"), "Report request API requires auth", "no anonymous fake persistence");
 assert(reportApi.includes("ReportPaymentStatus.PENDING") && reportApi.includes("PENDING_REVIEW"), "Report request API creates pending-review records", "no-payment request stage is real DB persistence");
-assert(reportsContent.includes("Real submission creates a pending-review DB request"), "Reports page explains real pending-review submission", "no unsupported delivery claim");
+assert(
+  reportsContent.includes("No-payment pending-review request")
+    && reportsContent.includes("server-verified payment")
+    && reportsContent.includes("actual generated PDF"),
+  "Reports page explains paid and pending-review workflows",
+  "no unsupported payment or delivery claim"
+);
+assert(
+  reportDetail.includes("RazorpayCheckoutButton")
+    && reportDetail.includes("successHref={checkoutSuccessHref}")
+    && requestPage.includes("payment.status === PaymentStatus.PAID"),
+  "Fixed-price report checkout continues only after verified payment",
+  "client checkout and server gate are connected"
+);
+assert(
+  reportApi.includes("Payment does not match this report")
+    && reportApi.includes("metadata.reportId === checkout.reportId")
+    && reportApi.includes("Number(payment.amount) === checkout.amount"),
+  "Report request API binds payment to exact report and amount",
+  "cross-report payment reuse is blocked"
+);
+assert(
+  checkoutButton.includes('replace("{paymentId}"') && checkoutButton.includes("/api/payments/razorpay/verify"),
+  "Checkout redirects only after server verification",
+  "payment continuation uses verified internal payment id"
+);
 assert(adminLayout.includes("ADMIN") && adminLayout.includes("SUPER_ADMIN"), "Admin report routes are RBAC-protected", "admin layout guard");
 assert(adminApi.includes("PATCH") && adminApi.includes("adminNotes"), "Admin report workflow updates status and notes", "real admin workflow API");
 assert(adminApi.includes("assertAllowedReportStatusTransition"), "Admin workflow enforces centralized status transitions", "no fake lifecycle status");
