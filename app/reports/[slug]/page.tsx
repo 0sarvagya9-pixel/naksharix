@@ -41,6 +41,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   const checkout = getManualReportCheckout(report.slug);
   const requestHref = `/report-request/new?plan=PREMIUM&reportSlug=${encodeURIComponent(report.slug)}`;
   const adminBypassHref = `${requestHref}&mode=admin`;
+  const checkoutSuccessHref = `${requestHref}&orderId={paymentId}`;
 
   return (
     <main className="inner-page-shell star-field">
@@ -56,7 +57,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
                   <RazorpayCheckoutButton
                     payload={{ purpose: checkout.purpose, reportId: checkout.reportId }}
                     label={`${labels.payAndContinue} ${checkout.price}`}
-                    successHref={(paymentId) => `${requestHref}&orderId=${encodeURIComponent(paymentId)}`}
+                    successHref={checkoutSuccessHref}
                     adminBypassHref={adminBypassHref}
                   />
                 </div>
@@ -116,7 +117,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
                   <RazorpayCheckoutButton
                     payload={{ purpose: checkout.purpose, reportId: checkout.reportId }}
                     label={`${labels.payAndContinue} ${checkout.price}`}
-                    successHref={(paymentId) => `${requestHref}&orderId=${encodeURIComponent(paymentId)}`}
+                    successHref={checkoutSuccessHref}
                     adminBypassHref={adminBypassHref}
                   />
                 </div>
