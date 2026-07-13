@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, Circle, MessageCircle, Phone, Star, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { useLanguage } from "@/components/language-provider";
 
 export type MarketplaceAstrologer = {
@@ -64,13 +63,14 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
           <option value="All">{tr("all")}</option><option value="4">4+ {tr("rating")}</option><option value="4.5">4.5+ {tr("rating")}</option><option value="4.8">4.8+ {tr("rating")}</option>
         </select>
       </div>
+
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         {astrologers.map((astrologer) => (
           <Card key={astrologer.id} className="glass overflow-hidden">
             <CardHeader>
               <div className="flex items-start gap-4">
                 <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-[#D4AF37]/30 bg-[#02112C] text-xl font-bold text-[#FFD700]">
-                  {astrologer.photoUrl ? <Image src={astrologer.photoUrl} alt={astrologer.name} width={64} height={64} className="h-full w-full object-cover" /> : astrologer.name.slice(0, 1)}
+                  <ProfilePhoto src={astrologer.photoUrl} name={astrologer.name} />
                 </div>
                 <div className="min-w-0">
                   <CardTitle className="flex items-center gap-2 font-cinzel text-lg">{astrologer.name}<BadgeCheck className="h-5 w-5 shrink-0 text-[#FFD700]" /></CardTitle>
@@ -100,7 +100,62 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
           </Card>
         ))}
       </div>
-      {!astrologers.length ? <p className="mt-6 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/60 p-4 text-sm naksh-muted-text">{tr("noAstrologersMatch")}</p> : null}
+
+      {!astrologers.length ? (
+        <div className="mt-6 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/60 p-5 text-sm naksh-muted-text">
+          <p>{tr("noAstrologersMatch")}</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button type="button" variant="outline" onClick={() => { setLanguage("All"); setExpertise("All"); setPrice("All"); setRating("All"); }}>Reset filters</Button>
+            <Button asChild><Link href="/contact">Contact Support</Link></Button>
+          </div>
+        </div>
+      ) : null}
     </>
   );
+}
+
+function ProfilePhoto({ src, name }: { src?: string | null; name: string }) {
+  const safeSrc = safeImageUrl(src);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [safeSrc]);
+
+  if (!safeSrc || failed) return <>{getInitials(name)}</>;
+
+  return (
+    <Image
+      src={safeSrc}
+      alt={name}
+      width={64}
+      height={64}
+      unoptimized
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(true)}
+      className="h-full w-full object-cover"
+    />
+  );
+}
+
+function safeImageUrl(value?: string | null) {
+  const raw = value?.trim();
+  if (!raw) return "";
+  if (raw.startsWith("/")) return raw;
+
+  try {
+    const parsed = new URL(raw);
+    return parsed.protocol === "https:" ? parsed.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
+function getInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "A";
 }
