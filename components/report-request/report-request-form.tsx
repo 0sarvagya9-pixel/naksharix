@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,12 +17,22 @@ type Props = {
   orderId?: string;
   plan: "PREMIUM" | "VIP";
   reportSlug?: string;
+  reportName?: string;
+  paymentVerified?: boolean;
   adminBypass?: boolean;
 };
 
 type Errors = Partial<Record<"fullName" | "dateOfBirth" | "timeOfBirth" | "birthPlace" | "concern", string>>;
 
-export function ReportRequestForm({ userEmail, orderId, plan, reportSlug = "premium-kundli", adminBypass = false }: Props) {
+export function ReportRequestForm({
+  userEmail,
+  orderId,
+  plan,
+  reportSlug = "premium-kundli",
+  reportName = "Premium Astrology Report",
+  paymentVerified = false,
+  adminBypass = false
+}: Props) {
   const router = useRouter();
   const { tr, apiLocale, requiredMessage } = useLanguage();
   const [fullName, setFullName] = useState("");
@@ -54,6 +65,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, reportSlug = "prem
     if (!validate()) return;
     setLoading(true);
     setStatus(null);
+
     const response = await secureFetch("/api/report-requests", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,9 +101,22 @@ export function ReportRequestForm({ userEmail, orderId, plan, reportSlug = "prem
   return (
     <form onSubmit={submit} className="space-y-5">
       <div className="rounded-lg border border-[#D4AF37]/25 bg-[#D4AF37]/10 p-4 text-sm text-[#FFFFFF]">
-        {tr("reportDeliveryEmailNotice")}: <span className="font-semibold">{userEmail}</span>
-        <span className="mt-2 block text-[#CBD5E1]">No online payment is required to submit this request. Payment, if enabled later, is handled only after real review and secure checkout.</span>
+        <div className="flex items-start gap-2">
+          {paymentVerified || adminBypass ? <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" /> : null}
+          <div>
+            <p className="font-semibold">{reportName}</p>
+            <p className="mt-1">{tr("reportDeliveryEmailNotice")}: <span className="font-semibold">{userEmail}</span></p>
+            <span className="mt-2 block text-[#CBD5E1]">
+              {paymentVerified
+                ? "Razorpay payment has been verified. This request will be linked to the paid order."
+                : adminBypass
+                  ? tr("adminTestingModePaymentBypassed")
+                  : "This is a manual-review request. No payment is collected at this stage."}
+            </span>
+          </div>
+        </div>
       </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <Field label={tr("fullName")} error={errors.fullName}>
           <Input data-field="fullName" value={fullName} onChange={(event) => { setFullName(event.target.value); setErrors((e) => ({ ...e, fullName: undefined })); }} className={cn(errorClass(Boolean(errors.fullName)))} />
@@ -132,7 +157,7 @@ export function ReportRequestForm({ userEmail, orderId, plan, reportSlug = "prem
           </select>
         </Field>
         <Field label={tr("reportTypePlan")}>
-          <Input value={plan === "VIP" ? tr("vip") : tr("premium")} readOnly />
+          <Input value={`${reportName} · ${plan === "VIP" ? tr("vip") : tr("premium")}`} readOnly />
         </Field>
         <div className="space-y-2 md:col-span-2">
           <Label>{tr("mainQuestionConcern")}</Label>
@@ -140,8 +165,8 @@ export function ReportRequestForm({ userEmail, orderId, plan, reportSlug = "prem
           {errors.concern ? <p className="text-sm text-destructive">{errors.concern}</p> : null}
         </div>
       </div>
-      {adminBypass ? <p className="text-sm text-[#FFD700]">{tr("adminTestingModePaymentBypassed")}</p> : null}
-      {status ? <p className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">{status}</p> : null}
+
+      {status ? <p className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" aria-live="polite">{status}</p> : null}
       <Button type="submit" disabled={loading} className="w-full md:w-auto">
         {loading ? tr("submittingReportRequest") : tr("submitReportRequest")}
       </Button>
@@ -158,5 +183,3 @@ function Field({ label, error, children }: { label: string; error?: string; chil
     </div>
   );
 }
-
-
