@@ -69,7 +69,7 @@ export function ReportsContent() {
                       <RazorpayCheckoutButton
                         payload={{ purpose: checkout.purpose, reportId: checkout.reportId }}
                         label={`${labels.pay} ${checkout.price}`}
-                        successHref={(paymentId) => `${requestHref}&orderId=${encodeURIComponent(paymentId)}`}
+                        successHref={`${requestHref}&orderId={paymentId}`}
                         adminBypassHref={adminBypassHref}
                       />
                     ) : (
