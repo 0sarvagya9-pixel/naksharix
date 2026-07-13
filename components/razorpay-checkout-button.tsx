@@ -36,7 +36,7 @@ type Props = {
   payload: CheckoutPayload;
   label?: string;
   variant?: ButtonProps["variant"];
-  successHref?: string | ((paymentId: string) => string);
+  successHref?: string;
   adminBypassHref?: string;
 };
 
@@ -121,7 +121,7 @@ export function RazorpayCheckoutButton({
         }
 
         setStatus(tr("paymentVerified"));
-        const target = typeof successHref === "function" ? successHref(paymentId) : successHref;
+        const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
         if (target) {
           router.push(target);
         } else {
