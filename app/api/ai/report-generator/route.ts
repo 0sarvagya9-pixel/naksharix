@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
-import { aiFeatureParkedResponse, isAiAstrologerEnabled } from "@/lib/ai/feature-status";
+import { aiFeatureParkedResponse, isAiReportGeneratorEnabled } from "@/lib/ai/feature-status";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { completeAstrologyPrompt } from "@/lib/ai/gemini";
 
@@ -14,7 +14,7 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  if (!isAiAstrologerEnabled()) return aiFeatureParkedResponse();
+  if (!isAiReportGeneratorEnabled()) return aiFeatureParkedResponse();
 
   try {
     const user = await getCurrentUser();
