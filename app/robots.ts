@@ -36,6 +36,8 @@ export default function robots(): MetadataRoute.Robots {
         "/zodiac",
         "/astrologers",
         "/consultation",
+        "/reports",
+        "/shop",
         "/blog",
       ],
       disallow: [
@@ -54,7 +56,6 @@ export default function robots(): MetadataRoute.Robots {
         "/ai-astrologer",
         "/talk-to-kundli",
         "/chatbot",
-        "/shop",
       ],
     },
     host: env.NEXT_PUBLIC_APP_URL,
