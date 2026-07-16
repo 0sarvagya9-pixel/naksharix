@@ -32,8 +32,12 @@ const requiredFiles = [
   "app/shop/page.tsx",
   "components/shop-coming-soon-content.tsx",
   "app/ai-astrologer/page.tsx",
+  "app/api/release/route.ts",
   "lib/ai/feature-status.ts",
-  "lib/ai/gemini-chat.ts"
+  "lib/ai/gemini-chat.ts",
+  "vercel.json",
+  ".github/workflows/production-acceptance.yml",
+  ".github/workflows/database-baseline-rehearsal.yml"
 ];
 
 for (const file of requiredFiles) {
@@ -50,10 +54,15 @@ if (requiredFiles.every(exists)) {
   const aiPage = read("app/ai-astrologer/page.tsx");
   const aiFeatureStatus = read("lib/ai/feature-status.ts");
   const aiProvider = read("lib/ai/gemini-chat.ts");
+  const releaseRoute = read("app/api/release/route.ts");
+  const vercel = JSON.parse(read("vercel.json"));
+  const productionAcceptanceWorkflow = read(".github/workflows/production-acceptance.yml");
+  const databaseBaselineWorkflow = read(".github/workflows/database-baseline-rehearsal.yml");
 
   assert(handoff.includes("complete-production-polish"), "Handoff identifies the authoritative release branch", "complete-production-polish");
-  assert(handoff.includes("PRODUCTION_NOT_VERIFIED"), "Handoff separates code completion from production proof", "production evidence remains explicit");
-  assert(handoff.includes("DISABLED_SAFELY"), "Handoff records the safe AI default", "AI is not silently activated");
+  assert(handoff.includes("PRODUCTION_NOT_VERIFIED"), "Handoff separates deployment status from exact custom-domain proof", "production evidence remains explicit");
+  assert(handoff.includes("ENABLED_NOT_VERIFIED"), "Handoff records approved AI activation without inventing readiness", "production readiness requires live evidence");
+  assert(handoff.includes("Razorpay state: owner-confirmed complete"), "Handoff preserves Razorpay as completed and untouched", "no payment reconfiguration");
 
   assert(acceptanceLower.includes("informational spiritual catalogue"), "Production acceptance documents the current Shop state", "catalogue without ecommerce");
   assert(acceptanceLower.includes("readiness-gated gemini ai chat"), "Production acceptance documents the current AI state", "flag plus real provider key");
@@ -69,6 +78,19 @@ if (requiredFiles.every(exists)) {
   assert(aiPage.includes("isAiAstrologerReady"), "AI page remains readiness-gated", "UI only renders when ready");
   assert(aiFeatureStatus.includes("AI_ASTROLOGER_ENABLED") && aiFeatureStatus.includes("isGeminiKeyConfigured"), "AI readiness requires an explicit flag and provider key", "fail-closed readiness");
   assert(aiProvider.includes("25_000") && aiProvider.includes("GeminiChatProviderError"), "AI provider keeps timeout and strict failure handling", "25-second timeout, no synthetic fallback");
+  assert(vercel?.env?.AI_ASTROLOGER_ENABLED === "true", "Vercel configuration enables the public AI feature flag", "Gemini key readiness is still checked at runtime");
+
+  assert(releaseRoute.includes("VERCEL_GIT_COMMIT_SHA") && releaseRoute.includes("VERCEL_GIT_COMMIT_REF"), "Release endpoint exposes exact non-sensitive deployment identity", "/api/release");
+  assert(!releaseRoute.includes("GEMINI_API_KEY") && !releaseRoute.includes("DATABASE_URL"), "Release endpoint exposes no provider secrets", "identity only");
+
+  assert(productionAcceptanceWorkflow.includes("/api/release") && productionAcceptanceWorkflow.includes("EXPECTED_SHA"), "Production workflow proves the exact custom-domain SHA", "no preview-only acceptance");
+  assert(productionAcceptanceWorkflow.includes("/api/health") && productionAcceptanceWorkflow.includes("/api/ai/status"), "Production workflow verifies database and AI readiness", "live acceptance gates");
+  assert(productionAcceptanceWorkflow.includes("AI_ASTROLOGER_ENABLED is not active") && productionAcceptanceWorkflow.includes("Gemini key/readiness is not active"), "Production workflow fails closed on incomplete AI activation", "no false PASS");
+
+  assert(databaseBaselineWorkflow.includes("postgres:16-alpine"), "Database rehearsal uses disposable PostgreSQL", "isolated service container");
+  assert(databaseBaselineWorkflow.includes("--from-empty") && databaseBaselineWorkflow.includes("--to-schema-datamodel"), "Database rehearsal generates baseline SQL from the current schema", "reviewable artifact");
+  assert(databaseBaselineWorkflow.includes("production_database_touched=false"), "Database rehearsal records that production is untouched", "non-production-only execution");
+  assert(!databaseBaselineWorkflow.includes("migrate reset") && !databaseBaselineWorkflow.includes("db push"), "Database rehearsal contains no destructive Prisma command", "safe baseline generation");
 }
 
 const trackedEnv = execFileSync("git", ["ls-files", ".env", ".env.local", ".env.production"], { cwd: root })
@@ -85,7 +107,7 @@ for (const command of forbiddenDatabaseCommands) {
 
 const migrationsPath = absolute("prisma/migrations");
 if (!fs.existsSync(migrationsPath)) {
-  record("WARNING", "Git-tracked Prisma migration history", "prisma/migrations is absent; follow docs/NAKSHARIX_DATABASE_MIGRATION_RECOVERY.md before any schema deployment");
+  record("WARNING", "Git-tracked Prisma migration history", "prisma/migrations is absent; use the disposable rehearsal artifact and production drift evidence before adoption");
 } else {
   const migrationDirectories = fs.readdirSync(migrationsPath, { withFileTypes: true }).filter((entry) => entry.isDirectory());
   record(migrationDirectories.length ? "PASSED" : "WARNING", "Git-tracked Prisma migration history", `${migrationDirectories.length} migration director${migrationDirectories.length === 1 ? "y" : "ies"} found`);

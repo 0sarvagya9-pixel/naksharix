@@ -6,19 +6,21 @@ Updated: 2026-07-16 (Asia/Kolkata)
 
 - Repository: `0sarvagya9-pixel/naksharix`
 - Authoritative release branch: `complete-production-polish`
-- Release baseline before the final code-side closure work: `10c9ea0f6b41f8c1203d3dee9a774836f06b5347`
+- Release HEAD before this non-Razorpay production package: `fb53430ae504070af64dd988e59b42b04ddcfe34`
 - Default branch: `main`
-- Branch state: `main` and `complete-production-polish` are intentionally divergent.
-- Automatic merge, rebase, reset, force-push, or branch reconciliation is forbidden.
+- `main` and `complete-production-polish` are intentionally divergent.
+- Automatic merge, rebase, reset, force-push, or branch reconciliation remains forbidden.
 
 ## Current status
 
 - Code state: `SAFE_TO_CONTINUE`
-- Production state for the latest release baseline: `PRODUCTION_NOT_VERIFIED`
-- AI state: `DISABLED_SAFELY` unless both the explicit feature flag and a real Gemini key are ready.
+- Vercel status for release HEAD `fb53430...`: `SUCCESS`
+- Custom-domain exact-SHA state: `PRODUCTION_NOT_VERIFIED` until `/api/release` proves the deployed SHA.
+- AI state for this package: `ENABLED_NOT_VERIFIED`.
+- AI activation mechanism: `AI_ASTROLOGER_ENABLED=true` in Vercel configuration plus a separately configured real `GEMINI_API_KEY`.
 - Shop state: active informational spiritual catalogue; ecommerce remains disabled.
-- Subscriptions: disabled unless separately launched and reviewed.
-- Database migration history: `REVIEW_REQUIRED`; `prisma/migrations` was not present at the release baseline.
+- Razorpay state: owner-confirmed complete and intentionally untouched by this package.
+- Database migration history: `REVIEW_REQUIRED`; the release does not yet contain an adopted production migration history.
 
 ## Completed code-side scope
 
@@ -37,23 +39,19 @@ Updated: 2026-07-16 (Asia/Kolkata)
 - Kundli PDF generation and download
 - Authentication and protected dashboards
 
-### Reports and payments
+### Reports, payments, and consultation
 
 - Fixed-price report catalogue
 - Razorpay order creation and signature verification
 - Server-owned amount, report, purpose, and ownership checks
 - Verified payment binding to report requests
-- Manual-review flow for specialist reports without fixed prices
-- Saved-report and download authorization checks
-
-### Consultation
-
+- Manual-review specialist-report path
+- Saved-report and download authorization
 - Approved astrologer listings
 - Slot and availability validation
 - Serializable double-booking protection
 - Razorpay-linked booking flow
-- User, astrologer, and admin dashboard surfaces
-- Resilient profile-image fallback
+- User, astrologer, and admin dashboards
 
 ### Shop
 
@@ -62,7 +60,7 @@ Updated: 2026-07-16 (Asia/Kolkata)
 - Product detail and care information
 - Availability enquiry language
 - Indexable Shop route
-- No cart, automatic checkout, inventory mutation, or fulfilment promise
+- No cart, automatic checkout, stock mutation, or fulfilment promise
 
 ### AI Astrologer
 
@@ -71,90 +69,82 @@ Updated: 2026-07-16 (Asia/Kolkata)
 - Sensitive-data warning
 - Strict Gemini provider route
 - 25-second timeout
-- Fail-closed provider, blocked, empty, timeout, and network handling
+- Fail-closed blocked, empty, timeout, provider, and network handling
 - No synthetic or mock answer fallback
 - Conditional page rendering and indexing
 - Separate internal AI report-generator flag
 - Restricted non-production diagnostics
+- Production feature flag enabled by this package
 
-## Verification evidence
+AI becomes `ENABLED_AND_VERIFIED` only when the production status endpoint returns both `enabled: true` and `ready: true`, and the live AI page does not render the unavailable state.
 
-The release branch has recorded successful CI coverage for:
+## Production identity and acceptance
 
-- Complete deterministic QA suite
-- CSRF and translated-claim audits
-- Source hygiene and recognized-secret scanning
-- ESLint
-- TypeScript typecheck
-- Production build
-- Production-like HTTP smoke
-- Git diff/whitespace check
-- Chromium, Firefox, and WebKit browser QA
-- Responsive widths and serious/critical accessibility checks
+This package adds `/api/release`, which exposes only non-sensitive deployment identity:
 
-CI success proves the tested commit in the CI environment. It does not by itself prove that the custom production alias serves that commit.
+- Vercel Git commit SHA
+- Vercel Git branch
+- Vercel environment
+- service name
 
-## Production evidence
+The `Production Acceptance` GitHub workflow runs after pushes to `complete-production-polish` and verifies:
 
-The last explicitly documented custom-domain production acceptance predates the `10c9ea0...` Phase 2 release baseline. A Vercel success status or preview URL must not be treated as proof that `www.naksharix.com` serves the latest release.
+- custom domain serves the exact pushed SHA
+- apex and `www` hosts have working TLS
+- required security headers
+- `/api/health` is healthy
+- production database connectivity is `ok`
+- Redis is not in an error state
+- AI is enabled and Gemini-ready
+- AI page is live rather than unavailable
+- Shop, reports, and consultation routes respond
+- Shop remains non-transactional
+- robots and sitemap match active features
 
-Before declaring production complete, independently verify:
+The workflow uploads the complete acceptance evidence as a GitHub Actions artifact.
 
-- deployed commit SHA
-- custom-domain alias
-- `/api/health`
-- `/shop`
-- `/ai-astrologer`
-- `/api/ai/status`
-- `/reports`
-- `/consultation`
-- `/robots.txt`
-- `/sitemap.xml`
-- security headers
-- database migration state
+## Database migration recovery
 
-## External operations still requiring provider evidence
+This package adds a `Database Baseline Rehearsal` workflow that:
 
-- Vercel production alias and environment readiness
-- Production PostgreSQL schema and migration history
-- Automated database backups and restore drill
-- Razorpay live webhook configuration
-- Controlled live payment acceptance after relevant configuration changes
-- SMTP/SES delivery and sender-domain authentication
+1. Uses a disposable PostgreSQL 16 service.
+2. Validates the current Prisma schema.
+3. Generates baseline SQL from an empty schema.
+4. Applies that SQL only to the disposable database.
+5. Confirms zero post-apply drift against `prisma/schema.prisma`.
+6. Records tables, indexes, SQL checksum, and QA evidence.
+
+This rehearsal does **not** mutate Neon or production. Production adoption still requires:
+
+- production schema introspection
+- `_prisma_migrations` evidence
+- reviewed drift report
+- verified backup
+- restore rehearsal
+- reviewed baseline SQL
+- explicit production adoption command with rollback ownership
+
+Never run `prisma migrate dev`, `prisma migrate reset`, destructive `db push`, or unreviewed SQL against production.
+
+## External provider operations still requiring authenticated access
+
+- Real Gemini key/model acceptance if production returns `ready: false`
+- SMTP/SES credentials and one receiving-mailbox delivery test
 - SPF, DKIM, DMARC, and MX verification
-- Search Console and sitemap submission
-- Monitoring, uptime alerts, and incident ownership
-- Gemini key/model acceptance before AI activation
+- Neon backup retention and restore drill
+- Production schema adoption after drift review
+- Search Console ownership and sitemap submission
+- Ongoing uptime alerting and incident ownership
 
-These are operational acceptance tasks, not missing frontend placeholders. Never fabricate completion when provider evidence is absent.
+These cannot be truthfully changed from GitHub source access alone. Secrets must never be committed to GitHub, logs, documentation, or chat.
 
-## Database stop rule
+## Operations explicitly excluded
 
-Do not run migration commands against production, a shared Neon database, or any database containing unrecovered data until the procedure in `docs/NAKSHARIX_DATABASE_MIGRATION_RECOVERY.md` has been completed and approved.
-
-Stop immediately if Prisma requests a reset, destructive change, or data-loss acceptance.
-
-## Current blocker
-
-The primary blocker to a truthful `100% production complete` declaration is external production and database evidence—not an unimplemented Coming Soon screen.
-
-## Safe next sequence
-
-1. Keep changes on a feature branch based on `complete-production-polish`.
-2. Pass focused release-state QA.
-3. Pass the full existing CI matrix.
-4. Review the pull request against `complete-production-polish`.
-5. Do not merge into `main`.
-6. Do not deploy, migrate, or enable providers without separate production approval and evidence.
-
-## Operations not performed by this handoff
-
-- No merge to `main`
-- No release-branch reconciliation
-- No force-push
-- No production deployment
-- No database mutation
-- No migration baseline execution
-- No Razorpay setting change
-- No Gemini key or feature-flag change
-- No subscription or ecommerce activation
+- No Razorpay changes
+- No merge or reconciliation with `main`
+- No product ecommerce activation
+- No subscriptions activation
+- No AI report-generator activation
+- No synthetic AI fallback
+- No production database mutation from CI
+- No destructive Prisma operation

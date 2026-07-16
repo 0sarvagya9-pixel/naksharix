@@ -8,7 +8,8 @@
   ],
   "env": {
     "NEXT_PUBLIC_APP_NAME": "Naksharix",
-    "NEXT_PUBLIC_APP_URL": "https://naksharix.com"
+    "NEXT_PUBLIC_APP_URL": "https://naksharix.com",
+    "AI_ASTROLOGER_ENABLED": "true"
   },
   "headers": [
     {

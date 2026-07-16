@@ -1,0 +1,151 @@
+name: Production Acceptance
+
+on:
+  push:
+    branches: [complete-production-polish]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://naksharix.com
+      WWW_URL: https://www.naksharix.com
+      EXPECTED_SHA: ${{ github.sha }}
+    steps:
+      - name: Prepare evidence directory
+        run: mkdir -p production-evidence
+
+      - name: Wait for the exact release deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          matched=0
+          for attempt in {1..24}; do
+            echo "Release identity attempt ${attempt}/24"
+            if curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+              "${BASE_URL}/api/release" -o production-evidence/release.json; then
+              cat production-evidence/release.json
+              if node -e '
+                const fs = require("fs");
+                const body = JSON.parse(fs.readFileSync("production-evidence/release.json", "utf8"));
+                const actual = body?.data?.commitSha;
+                const expected = process.env.EXPECTED_SHA;
+                if (!actual || actual !== expected) process.exit(1);
+              '; then
+                matched=1
+                break
+              fi
+            fi
+            sleep 15
+          done
+          if [ "$matched" -ne 1 ]; then
+            echo "Custom domain did not expose expected release SHA ${EXPECTED_SHA}." >&2
+            exit 1
+          fi
+
+      - name: Verify canonical hosts and TLS
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            --dump-header production-evidence/apex-headers.txt \
+            --output production-evidence/apex.html \
+            "${BASE_URL}/"
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            --dump-header production-evidence/www-headers.txt \
+            --output production-evidence/www.html \
+            "${WWW_URL}/"
+          grep -qi '^x-frame-options: DENY' production-evidence/apex-headers.txt
+          grep -qi '^x-content-type-options: nosniff' production-evidence/apex-headers.txt
+          grep -qi '^referrer-policy: strict-origin-when-cross-origin' production-evidence/apex-headers.txt
+
+      - name: Verify health and production database connectivity
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            "${BASE_URL}/api/health" -o production-evidence/health.json
+          cat production-evidence/health.json
+          node -e '
+            const fs = require("fs");
+            const body = JSON.parse(fs.readFileSync("production-evidence/health.json", "utf8"));
+            const data = body?.data ?? body;
+            if (data?.status !== "ok") throw new Error(`health status is ${data?.status}`);
+            if (data?.checks?.database !== "ok") throw new Error(`database status is ${data?.checks?.database}`);
+            if (data?.checks?.redis === "error") throw new Error("redis status is error");
+          '
+
+      - name: Verify AI Astrologer activation and readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            "${BASE_URL}/api/ai/status" -o production-evidence/ai-status.json
+          cat production-evidence/ai-status.json
+          node -e '
+            const fs = require("fs");
+            const body = JSON.parse(fs.readFileSync("production-evidence/ai-status.json", "utf8"));
+            const data = body?.data ?? body;
+            if (data?.enabled !== true) throw new Error("AI_ASTROLOGER_ENABLED is not active");
+            if (data?.ready !== true) throw new Error("Gemini key/readiness is not active");
+          '
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            "${BASE_URL}/ai-astrologer" -o production-evidence/ai-page.html
+          grep -qi 'AI Astrologer' production-evidence/ai-page.html
+          if grep -qi 'Temporarily Unavailable' production-evidence/ai-page.html; then
+            echo "AI page is still rendering the unavailable state." >&2
+            exit 1
+          fi
+
+      - name: Verify active public product routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for route in shop reports consultation; do
+            curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+              "${BASE_URL}/${route}" -o "production-evidence/${route}.html"
+          done
+          grep -qi 'Spiritual Catalogue' production-evidence/shop.html
+          grep -qi 'Ask Availability' production-evidence/shop.html
+          if grep -Eqi 'Add to Cart|Buy Now' production-evidence/shop.html; then
+            echo "Unsupported ecommerce controls are visible." >&2
+            exit 1
+          fi
+
+      - name: Verify robots and sitemap feature truth
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            "${BASE_URL}/robots.txt" -o production-evidence/robots.txt
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            "${BASE_URL}/sitemap.xml" -o production-evidence/sitemap.xml
+          grep -q '/shop' production-evidence/sitemap.xml
+          grep -q '/consultation' production-evidence/sitemap.xml
+          grep -q '/ai-astrologer' production-evidence/sitemap.xml
+
+      - name: Summarize production acceptance
+        run: |
+          {
+            echo "expected_sha=${EXPECTED_SHA}"
+            echo "base_url=${BASE_URL}"
+            echo "release_identity=PASS"
+            echo "canonical_hosts_tls=PASS"
+            echo "health_database=PASS"
+            echo "ai_enabled_ready=PASS"
+            echo "public_routes=PASS"
+            echo "robots_sitemap=PASS"
+          } | tee production-evidence/summary.txt
+
+      - name: Upload production acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-acceptance-${{ github.sha }}
+          path: production-evidence
+          if-no-files-found: warn
