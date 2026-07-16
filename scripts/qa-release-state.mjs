@@ -43,6 +43,7 @@ for (const file of requiredFiles) {
 if (requiredFiles.every(exists)) {
   const handoff = read("docs/NAKSHARIX_CURRENT_HANDOFF.md");
   const acceptance = read("docs/NAKSHARIX_PRODUCTION_ACCEPTANCE.md");
+  const acceptanceLower = acceptance.toLowerCase();
   const databaseRecovery = read("docs/NAKSHARIX_DATABASE_MIGRATION_RECOVERY.md");
   const shopPage = read("app/shop/page.tsx");
   const shopContent = read("components/shop-coming-soon-content.tsx");
@@ -54,8 +55,8 @@ if (requiredFiles.every(exists)) {
   assert(handoff.includes("PRODUCTION_NOT_VERIFIED"), "Handoff separates code completion from production proof", "production evidence remains explicit");
   assert(handoff.includes("DISABLED_SAFELY"), "Handoff records the safe AI default", "AI is not silently activated");
 
-  assert(acceptance.includes("informational spiritual catalogue"), "Production acceptance documents the current Shop state", "catalogue without ecommerce");
-  assert(acceptance.includes("readiness-gated Gemini AI chat"), "Production acceptance documents the current AI state", "flag plus real provider key");
+  assert(acceptanceLower.includes("informational spiritual catalogue"), "Production acceptance documents the current Shop state", "catalogue without ecommerce");
+  assert(acceptanceLower.includes("readiness-gated gemini ai chat"), "Production acceptance documents the current AI state", "flag plus real provider key");
   assert(!acceptance.includes("Shop remains a noindex, non-transactional Coming Soon page"), "Production acceptance contains no stale Shop state", "old Coming Soon statement removed");
   assert(!acceptance.includes("Public AI input remains unavailable"), "Production acceptance contains no stale unconditional AI state", "AI availability is readiness-gated");
 
