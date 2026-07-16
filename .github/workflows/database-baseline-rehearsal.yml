@@ -33,6 +33,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline_rehearsal?schema=public
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline_rehearsal?schema=public
+      PSQL_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline_rehearsal
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,8 +70,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          psql "${DATABASE_URL}" -v ON_ERROR_STOP=1 -f database-baseline-evidence/baseline.sql \
-            | tee database-baseline-evidence/apply.log
+          psql "${PSQL_URL}" -v ON_ERROR_STOP=1 -f database-baseline-evidence/baseline.sql \
+            2>&1 | tee database-baseline-evidence/apply.log
 
       - name: Confirm disposable database matches Prisma schema
         shell: bash
@@ -80,16 +81,16 @@ jobs:
             --from-url "${DATABASE_URL}" \
             --to-schema-datamodel prisma/schema.prisma \
             --exit-code \
-            | tee database-baseline-evidence/drift.log
+            2>&1 | tee database-baseline-evidence/drift.log
 
       - name: Record schema inventory
         shell: bash
         run: |
           set -euo pipefail
-          psql "${DATABASE_URL}" -Atc \
+          psql "${PSQL_URL}" -Atc \
             "SELECT table_schema || '.' || table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name" \
             | tee database-baseline-evidence/tables.txt
-          psql "${DATABASE_URL}" -Atc \
+          psql "${PSQL_URL}" -Atc \
             "SELECT indexname FROM pg_indexes WHERE schemaname = 'public' ORDER BY indexname" \
             | tee database-baseline-evidence/indexes.txt
 
