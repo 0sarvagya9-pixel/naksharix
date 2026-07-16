@@ -23,8 +23,10 @@ jobs:
           I18N_EXIT=$?
           node scripts/qa-source-hygiene.mjs >> static-audit.log 2>&1
           HYGIENE_EXIT=$?
+          node scripts/qa-release-state.mjs >> static-audit.log 2>&1
+          RELEASE_STATE_EXIT=$?
           cat static-audit.log
-          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ]; then
+          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ] || [ "$RELEASE_STATE_EXIT" -ne 0 ]; then
             exit 1
           fi
       - name: Upload static audit log
