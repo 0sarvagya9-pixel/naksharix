@@ -38,7 +38,8 @@ export const metadata: Metadata = {
   creator: "Naksharix",
   publisher: "Naksharix",
   manifest: "/manifest.json",
-  icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }], apple: "/icons/icon-192.svg" }
+  icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }], apple: "/icons/icon-192.svg" },
+  verification: env.GOOGLE_SITE_VERIFICATION ? { google: env.GOOGLE_SITE_VERIFICATION } : undefined
 };
 
 export const viewport: Viewport = {
@@ -74,7 +75,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${env.NEXT_PUBLIC_GA_ID}`} strategy="afterInteractive" />
             <Script id="ga" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${env.NEXT_PUBLIC_GA_ID}');`}
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${env.NEXT_PUBLIC_GA_ID}',{anonymize_ip:true,allow_google_signals:false,allow_ad_personalization_signals:false,page_location:window.location.origin+window.location.pathname});`}
             </Script>
           </>
         ) : null}
