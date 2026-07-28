@@ -86,6 +86,10 @@ jobs:
           npm install
           npm audit fix --omit=dev
 
+      - name: Reinstall exact locked graph before verification
+        if: steps.state.outputs.safe != 'true'
+        run: npm ci
+
       - name: Verify patched transitive graph
         shell: bash
         run: |
@@ -132,7 +136,6 @@ jobs:
           SUBSCRIPTIONS_ENABLED: "false"
           EMAIL_PROVIDER: disabled
         run: |
-          npm ci
           npm run lint
           npm run typecheck
           npm run build
