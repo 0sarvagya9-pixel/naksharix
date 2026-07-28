@@ -1,0 +1,261 @@
+name: Final Code Closure
+
+on:
+  push:
+    branches:
+      - feat/final-28-code-closure-20260729
+  pull_request:
+    branches:
+      - complete-production-polish
+
+permissions:
+  contents: read
+
+jobs:
+  gate-1-truth-and-safety:
+    name: Gate 1 - Truth and safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/qa-final-code-closure.mjs
+      - run: node scripts/qa-csrf-coverage.mjs
+      - run: node scripts/qa-source-hygiene.mjs
+      - run: node scripts/qa-i18n-safety.mjs
+      - run: git diff --check
+
+  gate-2-complete-quality:
+    name: Gate 2 - Complete QA build
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naksharix
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: final-closure-final-closure-final-closure-secret
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      ASTROLOGY_PROVIDER: own_engine
+      AI_ASTROLOGER_ENABLED: "false"
+      AI_REPORT_GENERATOR_ENABLED: "false"
+      ALLOW_AI_DIAGNOSTICS: "false"
+      SUBSCRIPTIONS_ENABLED: "false"
+      EMAIL_PROVIDER: disabled
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run qa:all
+      - run: npm run qa:final-closure
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+
+  gate-3-production-security:
+    name: Gate 3 - Production dependency security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Fail closed for high or critical production dependency vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
+      - name: Verify locked scopes remain disabled
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const env = fs.readFileSync('lib/env.ts', 'utf8');
+          if (!env.includes('SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false")')) process.exit(1);
+          if (!env.includes('AI_REPORT_GENERATOR_ENABLED: z.enum(["true", "false"]).default("false")')) process.exit(1);
+          if (!env.includes('ALLOW_AI_DIAGNOSTICS: z.enum(["true", "false"]).default("false")')) process.exit(1);
+          NODE
+
+  gate-4-database-rehearsal:
+    name: Gate 4 - Disposable database baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naksharix_baseline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline?schema=public
+      PSQL_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma validate --schema=prisma/schema.prisma
+      - name: Generate and apply baseline only to disposable PostgreSQL
+        run: |
+          set -euo pipefail
+          npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > /tmp/baseline.sql
+          test -s /tmp/baseline.sql
+          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f /tmp/baseline.sql
+      - name: Confirm zero drift
+        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
+      - name: Confirm OTP production-required schema exists in rehearsal DB
+        run: |
+          psql "$PSQL_URL" -Atc "SELECT to_regclass('public.\"User\"'), to_regclass('public.\"Session\"'), to_regclass('public.\"OtpToken\"');" | grep -q 'User'
+          psql "$PSQL_URL" -Atc "SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename='OtpToken';" | grep -q 'OtpToken_email_purpose_idx'
+
+  gate-5-browser-runtime:
+    name: Gate 5 - Browser and runtime smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naksharix_browser
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_browser?schema=public
+      JWT_SECRET: browser-final-browser-final-browser-final-secret
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      ASTROLOGY_PROVIDER: own_engine
+      AI_ASTROLOGER_ENABLED: "false"
+      AI_REPORT_GENERATOR_ENABLED: "false"
+      ALLOW_AI_DIAGNOSTICS: "false"
+      SUBSCRIPTIONS_ENABLED: "false"
+      EMAIL_PROVIDER: disabled
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma db push --skip-generate
+      - run: npm run build
+      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
+      - run: npx playwright install --with-deps chromium
+      - name: Run local production server and browser suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run start -- -p 3000 > /tmp/naksharix.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for attempt in {1..40}; do
+            if curl --silent --fail http://127.0.0.1:3000/api/health > /dev/null; then break; fi
+            if [ "$attempt" -eq 40 ]; then cat /tmp/naksharix.log; exit 1; fi
+            sleep 1
+          done
+          node scripts/qa-http-smoke.mjs
+          npx playwright test --config=tests/e2e/playwright.config.ts --workers=1 --project=chromium
+
+  gate-6-mobile-companion:
+    name: Gate 6 - Mobile companion
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile-app/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx expo-doctor
+
+  package-source:
+    name: Package verified source ZIP
+    needs:
+      - gate-1-truth-and-safety
+      - gate-2-complete-quality
+      - gate-3-production-security
+      - gate-4-database-rehearsal
+      - gate-5-browser-runtime
+      - gate-6-mobile-companion
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Write verification manifest
+        shell: bash
+        run: |
+          mkdir -p FINAL-VERIFICATION
+          cat > FINAL-VERIFICATION/VERIFICATION.txt <<EOF
+          NAKSHARIX FINAL CODE CLOSURE
+          commit=${GITHUB_SHA}
+          gate_1_truth_and_safety=PASS
+          gate_2_complete_quality=PASS
+          gate_3_production_security=PASS
+          gate_4_database_rehearsal=PASS
+          gate_5_browser_runtime=PASS
+          gate_6_mobile_companion=PASS
+          production_database_mutated=false
+          secrets_in_package=false
+          EOF
+      - name: Build source ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          zip_name="NAKSHARIX_FINAL_CODE_CLOSURE_${GITHUB_SHA}.zip"
+          git archive --format=zip --prefix=NAKSHARIX/ -o "$zip_name" HEAD
+          zip -u "$zip_name" FINAL-VERIFICATION/VERIFICATION.txt
+          sha256sum "$zip_name" > "${zip_name}.sha256"
+          printf '%s\n' "$zip_name" > final-zip-name.txt
+      - name: Upload verified ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: naksharix-final-code-closure-${{ github.sha }}
+          path: |
+            NAKSHARIX_FINAL_CODE_CLOSURE_*.zip
+            NAKSHARIX_FINAL_CODE_CLOSURE_*.zip.sha256
+            final-zip-name.txt
+          if-no-files-found: error
+          retention-days: 30
