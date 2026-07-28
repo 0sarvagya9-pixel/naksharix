@@ -32,21 +32,25 @@ jobs:
           const fs = require('fs');
           const p = JSON.parse(fs.readFileSync('package.json','utf8'));
           const safe = p.dependencies?.next === '15.5.22'
-            && !p.dependencies?.['next-auth']
-            && !p.dependencies?.['@auth/prisma-adapter']
-            && p.dependencies?.nodemailer === '9.0.3'
+            && p.dependencies?.['next-auth'] === '5.0.0-beta.32'
+            && p.dependencies?.['@auth/prisma-adapter'] === '2.11.3'
+            && !p.dependencies?.nodemailer
             && p.dependencies?.sharp === '0.35.3'
             && p.dependencies?.ws === '8.21.1'
-            && !p.optionalDependencies?.swisseph;
+            && !p.optionalDependencies?.swisseph
+            && !p.devDependencies?.['@types/nodemailer'];
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `safe=${safe ? 'true' : 'false'}\n`);
           NODE
 
-      - name: Confirm legacy Auth.js packages are unused in source
+      - name: Confirm Auth.js runtime usage and Resend-native email transport
         shell: bash
         run: |
           set -euo pipefail
-          if git grep -nE "from ['\"]next-auth|require\(['\"]next-auth|@auth/prisma-adapter|PrismaAdapter|NextAuth\(" -- ':!package.json' ':!package-lock.json' ':!.github/workflows/security-refresh-pr.yml'; then
-            echo "Legacy Auth.js package is still referenced by runtime source." >&2
+          git grep -q 'NextAuth(' -- auth.ts
+          git grep -q '@auth/prisma-adapter' -- auth.ts
+          git grep -q 'https://api.resend.com/emails' -- lib/email/email-service.ts
+          if git grep -nE "from ['\"]nodemailer|require\(['\"]nodemailer" -- ':!package.json' ':!package-lock.json'; then
+            echo "Nodemailer runtime import remains in source." >&2
             exit 1
           fi
 
@@ -55,17 +59,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm pkg delete dependencies.next-auth
-          npm pkg delete dependencies.@auth/prisma-adapter
+          npm pkg delete dependencies.nodemailer
+          npm pkg delete devDependencies.@types/nodemailer
           npm pkg delete optionalDependencies.swisseph
           npm pkg delete overrides.nodemailer
           npm pkg delete overrides.postcss
           npm install --save-exact \
             next@15.5.22 \
-            nodemailer@9.0.3 \
+            next-auth@5.0.0-beta.32 \
+            @auth/prisma-adapter@2.11.3 \
             sharp@0.35.3 \
             ws@8.21.1
-          npm install --save-dev --save-exact postcss@latest eslint-config-next@15.5.22 @types/nodemailer@latest
+          npm install --save-dev --save-exact postcss@latest eslint-config-next@15.5.22
           npm audit fix --omit=dev
 
       - name: Verify production dependency security
