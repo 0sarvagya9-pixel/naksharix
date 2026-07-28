@@ -1,0 +1,77 @@
+name: Security Refresh Final 28
+
+on:
+  push:
+    branches:
+      - feat/final-28-code-closure-20260729
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: ${{ !contains(github.event.head_commit.message, 'chore(deps): security refresh') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/final-28-code-closure-20260729
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Remove legacy native Swiss dependency
+        run: npm pkg delete optionalDependencies.swisseph
+
+      - name: Upgrade security-sensitive production dependencies
+        run: |
+          npm install --save-exact \
+            next@15.5.22 \
+            next-auth@5.0.0-beta.32 \
+            @auth/prisma-adapter@2.11.3 \
+            nodemailer@9.0.3 \
+            sharp@0.35.3 \
+            ws@8.21.1
+          npm install --save-dev --save-exact postcss@latest
+
+      - name: Apply compatible transitive audit fixes
+        run: npm audit fix --omit=dev
+
+      - name: Verify production dependency audit is clear at high severity
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Verify clean locked install
+        run: npm ci
+
+      - name: Verify application after dependency refresh
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+          JWT_SECRET: security-refresh-security-refresh-security-refresh
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          ASTROLOGY_PROVIDER: own_engine
+          AI_ASTROLOGER_ENABLED: "false"
+          ALLOW_AI_DIAGNOSTICS: "false"
+          SUBSCRIPTIONS_ENABLED: "false"
+          EMAIL_PROVIDER: disabled
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run build
+
+      - name: Commit resolved dependency graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "Dependency graph already current."
+            exit 0
+          fi
+          git commit -m "chore(deps): security refresh"
+          git push origin HEAD:feat/final-28-code-closure-20260729
