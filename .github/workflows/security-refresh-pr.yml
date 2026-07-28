@@ -1,0 +1,93 @@
+name: Security Dependency Remediation
+
+on:
+  pull_request:
+    branches:
+      - complete-production-polish
+
+permissions:
+  contents: write
+
+jobs:
+  remediate:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feat/final-28-code-closure-20260729'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Inspect dependency state
+        id: state
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json','utf8'));
+          const safe = p.dependencies?.next === '15.5.22'
+            && p.dependencies?.['next-auth'] === '5.0.0-beta.32'
+            && p.dependencies?.['@auth/prisma-adapter'] === '2.11.3'
+            && p.dependencies?.nodemailer === '9.0.3'
+            && p.dependencies?.sharp === '0.35.3'
+            && p.dependencies?.ws === '8.21.1'
+            && !p.optionalDependencies?.swisseph;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `safe=${safe ? 'true' : 'false'}\n`);
+          NODE
+
+      - name: Refresh vulnerable dependency graph
+        if: steps.state.outputs.safe != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm pkg delete optionalDependencies.swisseph
+          npm install --save-exact \
+            next@15.5.22 \
+            next-auth@5.0.0-beta.32 \
+            @auth/prisma-adapter@2.11.3 \
+            nodemailer@9.0.3 \
+            sharp@0.35.3 \
+            ws@8.21.1
+          npm install --save-dev --save-exact postcss@latest eslint-config-next@15.5.22 @types/nodemailer@latest
+          npm audit fix --omit=dev
+
+      - name: Verify production dependency security
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Verify application after dependency resolution
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+          JWT_SECRET: security-remediation-security-remediation-secret
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          ASTROLOGY_PROVIDER: own_engine
+          AI_ASTROLOGER_ENABLED: "false"
+          AI_REPORT_GENERATOR_ENABLED: "false"
+          ALLOW_AI_DIAGNOSTICS: "false"
+          SUBSCRIPTIONS_ENABLED: "false"
+          EMAIL_PROVIDER: disabled
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
+
+      - name: Commit remediated graph
+        if: steps.state.outputs.safe != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency changes to commit."
+            exit 0
+          fi
+          git commit -m "chore(deps): remediate production dependency vulnerabilities"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
