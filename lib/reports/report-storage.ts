@@ -1,11 +1,11 @@
 import "server-only";
 import { saveReportPdf } from "@/lib/storage/report-storage";
 
-export function createDatabaseBackedReportPdf(input: {
+export async function createDatabaseBackedReportPdf(input: {
   reportRequestId: string;
   reportSlug: string;
   bytes: Buffer | Uint8Array;
 }) {
-  const stored = saveReportPdf(input);
+  const stored = await saveReportPdf(input);
   return { ...stored, storageProvider: stored.storageDriver };
 }
