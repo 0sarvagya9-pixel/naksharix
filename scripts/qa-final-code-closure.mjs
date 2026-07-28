@@ -23,7 +23,8 @@ const pricing = source("components/pricing-content.tsx");
 const layout = source("app/layout.tsx");
 const env = source("lib/env.ts");
 const home = source("components/nx-home.tsx");
-const monitor = source(".github/workflows/production-monitor.yml");
+const vercel = JSON.parse(source("vercel.json"));
+const cronHealth = source("app/api/cron/production-health/route.ts");
 const opsRoute = source("app/api/ops/readiness/route.ts");
 const emailService = source("lib/email/email-service.ts");
 const reportDelivery = source("app/api/admin/report-requests/[id]/deliver/route.ts");
@@ -54,9 +55,11 @@ assert(exists("app/api/ops/readiness/route.ts"), "Public non-secret ops readines
 assert(opsRoute.includes("X-Robots-Tag"), "Ops readiness endpoint is noindex", "operational endpoint not search-indexed");
 assert(!/(SMTP_PASS|GEMINI_API_KEY|RAZORPAY_KEY_SECRET).*:/m.test(opsRoute), "Ops readiness does not serialize secret values", "presence/status only");
 
-assert(exists(".github/workflows/production-monitor.yml"), "Hourly production monitor exists", "health/release/readiness/robots/sitemap");
-assert(monitor.includes('cron: "17 * * * *"'), "Production monitor runs hourly", "scheduled external HTTP checks");
-assert(monitor.includes("Open or update production incident"), "Monitor has incident path", "GitHub issue on failed production check");
+const healthCron = (vercel.crons ?? []).find((entry) => entry.path === "/api/cron/production-health");
+assert(Boolean(healthCron), "Vercel production health cron is registered", healthCron ? healthCron.schedule : "missing");
+assert(healthCron?.schedule === "17 4 * * *", "Production health cron uses deployment-owned daily schedule", "avoids GitHub default-branch schedule limitation");
+assert(cronHealth.includes("checks.database") && cronHealth.includes("checks.email") && cronHealth.includes("checks.ai"), "Production cron checks critical services", "database, email, AI and locked scope");
+assert(cronHealth.includes("status: healthy ? 200 : 503"), "Production cron fails visibly on degraded state", "Vercel invocation records a non-2xx failure");
 
 assert(emailService.includes("secure: env.SMTP_PORT === 465"), "SMTP TLS mode supports Resend port 465", "production SMTP configuration compatible");
 assert(emailService.includes("from: env.SMTP_FROM!"), "Transactional sender is environment-controlled", "care@naksharix.com can remain the sole configured sender");
