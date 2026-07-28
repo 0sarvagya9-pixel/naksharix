@@ -1,195 +1,161 @@
-# Naksharix Astrology SaaS Platform
+# Naksharix
 
-Naksharix is a production-ready, luxury astrology SaaS foundation with the tagline "Unlock Your Cosmic Destiny." It includes Next.js 15 App Router, TypeScript, Tailwind, Prisma/PostgreSQL, Redis caching, JWT auth, AI astrology features, Kundli generation, matchmaking, Tarot Reading, Numerology, Panchang, subscriptions, payments, admin analytics, SEO, PWA, Docker, PM2, Nginx, and CI.
+Naksharix is a production Next.js astrology platform with authenticated Kundli workflows, Panchang, horoscope, numerology, tarot, matchmaking, premium digital reports, approved astrologer consultations, an opt-in Gemini-backed AI Astrologer, and an informational spiritual Shop catalogue.
 
-## Quick Start
+## Locked production scope
+
+- Authoritative release branch: `complete-production-polish`.
+- Razorpay is the active payment provider for supported report and consultation flows.
+- AI Astrologer can be enabled independently with `AI_ASTROLOGER_ENABLED=true` and a real Gemini key.
+- `AI_REPORT_GENERATOR_ENABLED` remains disabled unless separately approved.
+- Public subscriptions remain disabled with `SUBSCRIPTIONS_ENABLED=false`.
+- Shop is informational/enquiry-only. No cart, Buy Now, stock mutation, or generic ecommerce checkout is part of the active scope.
+- Production database changes are never run automatically by application startup.
+
+## Local development
 
 ```bash
-npm install
+npm ci
 cp .env.example .env
-docker compose up -d postgres redis
-npm run db:migrate
+npx prisma generate
 npm run dev
 ```
 
-Open `http://localhost:3000` for local development. Production branding targets `https://naksharix.com`.
+For a disposable local database, create a separate PostgreSQL database and point only the local process to it. Do not use destructive Prisma commands against production.
 
-## Main Modules
+## Core modules
 
-- Auth: signup, login, logout, secure cookies, persisted JWT sessions, role middleware, OTP-ready schema, and Google OAuth callback flow.
-- Astrology: Kundli, planet positions, houses, lagna, navamsa, dasha, yog, dosha, manglik, Panchang, matchmaking, numerology, tarot.
-- AI: Google Gemini wrappers for chatbot, horoscope generation, tarot interpretation, kundli interpretation, remedies, and yearly-report extension points.
-- Monetization: Stripe checkout, Razorpay orders, subscriptions, coupons, invoices, wallet, credits, referrals, affiliate schema.
-- Admin: revenue/user/content/reporting foundation with role protection.
-- SEO/PWA: metadata, OpenGraph, Twitter cards, sitemap, robots, manifest, offline page.
-- Infrastructure: Docker, docker-compose, Vercel, PM2, Nginx reverse proxy, GitHub Actions CI.
+- **Authentication:** local email/password, secure sessions, Google OAuth, and six-digit email OTP verification.
+- **Astrology:** internal sidereal calculation engine, D1/D9, Panchang, Vimshottari Dasha, Chalit, basic yoga/dosha analysis, numerology, tarot, matching, and verification-gated advanced transit modules.
+- **AI Astrologer:** Gemini-backed English/Hindi/Hinglish chat with explicit consent and fail-closed provider handling.
+- **Premium reports:** server-owned pricing, Razorpay payment binding, generated PDF storage, protected download, admin delivery workflow, and SMTP delivery.
+- **Consultations:** approved astrologer profiles, availability validation, serializable collision protection, booking records, Razorpay-linked payment state, and transactional booking email.
+- **Shop:** searchable spiritual catalogue and availability enquiry only.
+- **Operations:** health/release/readiness endpoints, structured safe logging, production acceptance workflow, hourly production monitor, DB baseline rehearsal, and evidence artifacts.
 
-## Important Environment Variables
+## Important environment variables
 
-Use `.env.example` as the source of truth. At minimum for local DB-backed features:
-
-```bash
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/naksharix?schema=public"
-JWT_SECRET="replace-with-a-strong-32-character-secret"
-NEXT_PUBLIC_APP_URL="https://naksharix.com"
-NEXTAUTH_URL="https://naksharix.com"
-NEXT_PUBLIC_APP_NAME="Naksharix"
-REDIS_URL="redis://localhost:6379"
-```
-
-Add `GEMINI_API_KEY`, Stripe, Razorpay, SMTP, and external astrology provider keys to enable live integrations.
-
-### Google Login
-
-Google login is optional. The "Continue with Google" button appears on login and signup only when both keys are present:
+Use `.env.example` as the base and keep secrets outside source control.
 
 ```bash
+DATABASE_URL="postgresql://..."
+JWT_SECRET="use-a-random-32-plus-character-secret"
+NEXT_PUBLIC_APP_URL="https://www.naksharix.com"
+NEXTAUTH_URL="https://www.naksharix.com"
+ASTROLOGY_PROVIDER="own_engine"
+
+AI_ASTROLOGER_ENABLED="true"
+AI_REPORT_GENERATOR_ENABLED="false"
+ALLOW_AI_DIAGNOSTICS="false"
+SUBSCRIPTIONS_ENABLED="false"
+GEMINI_MODEL="gemini-3.5-flash"
+GEMINI_API_KEY=""
+
+EMAIL_PROVIDER="smtp"
+SMTP_HOST="smtp.resend.com"
+SMTP_PORT="465"
+SMTP_USER="resend"
+SMTP_PASS=""
+SMTP_FROM="Naksharix Care <care@naksharix.com>"
+
+RAZORPAY_KEY_ID=""
+RAZORPAY_KEY_SECRET=""
+RAZORPAY_WEBHOOK_SECRET=""
+
+REDIS_URL=""
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
-NEXTAUTH_SECRET="replace-with-a-random-32-plus-character-secret"
-NEXTAUTH_URL="https://naksharix.com"
+GOOGLE_SITE_VERIFICATION=""
+NEXT_PUBLIC_GA_ID=""
+SENTRY_DSN=""
 ```
 
-In Google Cloud Console, add this authorized redirect URI: `https://naksharix.com/api/auth/google/callback`. For local development use `http://localhost:3000/api/auth/google/callback` and set `NEXTAUTH_URL="http://localhost:3000"`.
+Never commit real values for passwords, API keys, OAuth secrets, database credentials, SMTP credentials, payment secrets, or monitoring DSNs.
 
-## External Astrology Engines
+## Production database safety
 
-The app now uses a pluggable provider layer in `lib/astrology/*`. The flow is:
+The production database may predate Prisma migration history. Therefore:
 
-`birth details -> resolved location/timezone -> astrology provider calculation -> normalized Naksharix report -> Gemini explanation -> premium UI/PDF`.
+- never run `prisma migrate dev` against production;
+- never run `prisma migrate reset` against production;
+- never run destructive `prisma db push` against production;
+- never blindly apply generated baseline SQL;
+- never mark migrations applied before schema introspection, backup evidence, restore rehearsal, drift review, and explicit approval.
 
-Gemini is intentionally not used for astrology calculations. It only explains normalized chart, dasha, dosha, transit, and matching data returned by the provider layer.
-
-Provider env:
+Application startup is migration-free:
 
 ```bash
-ASTROLOGY_PROVIDER="mock" # mock | vedic_rishi | prokerala
-VEDIC_RISHI_USER_ID=""
-VEDIC_RISHI_API_KEY=""
-PROKERALA_CLIENT_ID=""
-PROKERALA_CLIENT_SECRET=""
+npm run start:prod
 ```
 
-The app includes production-safe wrapper points for:
-
-- Swiss Ephemeris or `pyswisseph` via a Python microservice.
-- astrologyAPI through `ASTROLOGY_API_KEY`.
-- VedAstro Panchang through `VEDASTRO_API_URL`.
-- Prokerala credentials in env for extending OAuth-backed requests.
-
-Use `ASTROLOGY_PROVIDER="mock"` for local development and demos. In production, choose a real provider and set the required server-side keys. If a selected production provider is unavailable or missing keys, API routes return a clean user-facing service-unavailable message instead of raw provider output.
-
-### Kundli PDF Reports
-
-Free Kundli reports can be downloaded from the Kundli page after generation. The PDF is rendered server-side with `@react-pdf/renderer` via:
+The migration command is deliberately named to require reviewed use:
 
 ```bash
-POST /api/kundli/pdf
+npm run db:deploy:reviewed-only
 ```
 
-Free PDFs include Naksharix branding, page numbers, disclaimer footer, and a low-opacity watermark: `Generated by Naksharix - Free Kundli Report`.
-
-## Deployment
-
-Complete deployment configs are included:
-
-- Docker: `Dockerfile`, `docker-compose.yml`, `docker-compose.ssl.yml`
-- Nginx: `nginx/nginx.conf`, `nginx/naksharix.conf`, `nginx/naksharix.http-only.conf`
-- Vercel: `vercel.json`, `deploy/vercel.md`
-- Railway: `railway.json`, `nixpacks.toml`, `deploy/railway.md`
-- PM2: `ecosystem.config.js`
-- GoDaddy VPS: `deploy/godaddy/`
-- SSL: `deploy/ssl-setup.md`
-- Production build: `deploy/production-build.md`
-
-### Vercel
-
-1. Create a PostgreSQL database and Redis instance.
-2. Add environment variables in Vercel.
-3. Deploy with the included `vercel.json`.
-4. Run `npm run db:deploy` during release migration.
-
-### Docker
+Before any production migration adoption, run the read-only audit using an explicitly supplied production `DATABASE_URL`:
 
 ```bash
-docker compose up --build
+npm run qa:prod-db-readonly
 ```
 
-### PM2 + Nginx
+The repository also contains `.github/workflows/database-baseline-rehearsal.yml`, which generates and applies baseline SQL only to disposable PostgreSQL and records drift evidence.
+
+## Verification
+
+Primary local checks:
 
 ```bash
-npm install
+npm run qa:all
+npm run qa:final-closure
+npm run lint
+npm run typecheck
 npm run build
-pm2 start ecosystem.config.js
-sudo cp nginx/naksharix.conf /etc/nginx/sites-enabled/naksharix.conf
-sudo nginx -t && sudo systemctl reload nginx
+npm audit --omit=dev --audit-level=high
 ```
 
-## Production Checklist
+CI additionally runs browser QA and production-safety checks. Production pushes to the authoritative branch run the custom-domain acceptance workflow, which checks exact release SHA, TLS/security headers, health/database state, AI readiness, SMTP readiness, locked feature scope, public routes, robots, and sitemap.
 
-- Replace `JWT_SECRET` and set secure production env vars.
-- Run Prisma migrations against production Postgres.
-- Configure Stripe webhook persistence and idempotency.
-- Configure Razorpay signature verification for capture callbacks.
-- Attach Google OAuth callback implementation if social login is required.
-- Wire SMS, WhatsApp, and push providers.
-- Add a real PDF renderer/storage pipeline for generated reports.
-- Connect Swiss Ephemeris microservice for high-precision calculations.
-- Configure observability, backups, and log retention.
-- Run `npm run typecheck` and `npm run build` before release.
+An hourly GitHub Actions production monitor checks `/api/health`, `/api/release`, `/api/ops/readiness`, `robots.txt`, and `sitemap.xml`, stores evidence, and opens/updates a GitHub issue on failure.
 
-## High-Priority Feature Additions
+## Search and analytics
 
-The current build includes these stabilized product modules:
+- `GOOGLE_SITE_VERIFICATION` is rendered through Next.js metadata when configured.
+- Google Analytics is optional and only enabled when `NEXT_PUBLIC_GA_ID` exists.
+- The configured client tracking excludes URL query strings from `page_location`, anonymizes IP, disables Google Signals, and disables ad-personalization signals.
+- Do not add birth details, report contents, payment data, OTPs, secrets, or private questions to analytics events.
 
-- Homepage conversion system: emotional hero, free kundli / AI astrologer / premium report CTAs, trust counters, testimonials, featured astrologers, featured-in strip, FAQ, and sticky mobile CTA.
-- Multi-step Kundli flow: profile details, gender, DOB, time, place, contact fields, zodiac/category focus, Hindi/English preference, location detection, city search fallback, generation state, free summary, and premium upsell.
-- AI astrologer chat: Gemini-backed server route, local chat memory, birth-detail context, suggested career/marriage/finance/health/remedy questions, English/Hindi/Hinglish modes, voice input UI, and fallback guidance.
-- Premium report pages: `/reports/kundli-pro`, `/reports/career-report`, `/reports/marriage-report`, `/reports/finance-report`, `/reports/health-report`, `/reports/yearly-ai`, and `/reports/numerology-report` with benefits, preview, price CTA, testimonials, FAQ, and PDF-template preview.
-- Daily retention dashboard: cosmic score, lucky number, lucky color, lucky time, streak, notification preferences, planet strength, dasha timeline, remedies, saved activity, and "Ask today's question" CTA.
-- SEO growth routes: `/free-kundli`, `/kundli-matching`, `/daily-horoscope`, `/weekly-horoscope`, `/monthly-horoscope`, `/yearly-horoscope-2026`, `/love-compatibility`, `/career-astrology`, `/marriage-astrology`, `/nakshatra`, and 27 `/nakshatra/[slug]` pages with metadata and FAQ schema.
-- Professional trust pages: `/about` explains the Naksharix brand, AI + Vedic positioning, mission, timeline, team placeholders, and ethical disclaimer. `/contact` includes `care@naksharix.com`, contact form UI, response time, quick links, and social placeholders.
-- Human astrologer marketplace: `/astrologers` now supports language, expertise, and price filters with chat/call booking CTAs.
-- Admin operations cockpit: users, kundli submissions, report orders, consultations, testimonials, astrologers, SEO/blogs, pricing plans, revenue, and support operations.
-- AstroSage-style expansion: advanced Kundli sections for planets, houses, nakshatra, dasha, transits, manglik, sade sati, doshas, varshphal, and Lal Kitab remedies.
-- Matching expansion: Ashtakoot/Guna Milan 36-point scoring with Nadi, Bhakoot, Yoni, Gana, Grah Maitri, Tara, Varna, and Vashya diagnostics.
-- Calculator suite: `/calculators` with Moon Sign, Sun Sign, Ascendant, Nakshatra, Ayanamsa, Love, Friendship, and Numerology result cards backed by `POST /api/calculators/core`.
-- 2026 yearly horoscope SEO pages: `/yearly-horoscope-2026/[sign]` for all twelve zodiac signs.
-- Calendar expansion: `/festival-calendar` and `/shubh-muhurat` connected to Panchang CTAs.
-- AI Talk to Kundli: `/talk-to-kundli` uses the Gemini-backed chat interface with kundli context memory.
-- Ecommerce placeholder: `/shop` for gemstones, rudraksha, and yantra with coming-soon purchase state.
-- Consultation booking: `/consultation` plus `POST /api/appointments` with authenticated booking validation and demo-safe astrologer fallback data.
-- Astrologer profiles: `/astrologers` and static profile pages at `/astrologers/[id]`.
-- WhatsApp contact: a global floating contact button controlled by `NEXT_PUBLIC_WHATSAPP_NUMBER`.
-- Paid reports: `/reports` plus `POST /api/reports/checkout` for one-time Stripe checkout using report-specific price IDs.
-- Hindi support: `/hi` landing page with typed translation dictionary in `lib/i18n.ts`.
-- SEO zodiac pages: `/zodiac` and static pages for all twelve signs at `/zodiac/[sign]`.
-- Blog CMS: `/admin/blog` backed by the existing validated `POST /api/blog` endpoint.
-- AI astrology chatbot: `/chatbot` backed by `POST /api/ai/chat`.
-- Dashboard improvements: consultation, paid report, AI chat, account workspace, and recent activity shortcuts.
-- Admin improvements: operations cockpit for users, astrologers, revenue, consultations, content, and support.
+## Email
 
-### New Environment Variables
+SMTP is shared by OTP, report delivery, and consultation booking notifications. The sender is controlled by the single `SMTP_FROM` production variable. Current production configuration is intended to use:
 
-```bash
-NEXT_PUBLIC_WHATSAPP_NUMBER="919999999999"
-STRIPE_KUNDLI_REPORT_PRICE_ID=""
-STRIPE_YEARLY_REPORT_PRICE_ID=""
-STRIPE_MATCH_REPORT_PRICE_ID=""
+```text
+Naksharix Care <care@naksharix.com>
 ```
 
-Create Stripe one-time Price IDs for each paid report in the Stripe Dashboard, then add them to Vercel, Docker, Railway, or your VPS environment. Set `NEXT_PUBLIC_WHATSAPP_NUMBER` to the E.164-style WhatsApp number without `+` or spaces.
+The application never stores raw OTP values. OTPs use a keyed HMAC digest, expiration, attempt limits, invalidation on resend, and one-time consumption.
 
-## Mobile Android Play Store Build
+## Mobile app
 
-A production Expo mobile app scaffold is available in `mobile-app/`.
+`mobile-app/` is an Expo companion application aligned with the locked web product scope. It provides production links to active Naksharix experiences and does not advertise inactive subscriptions, placeholder ads, or a separate mobile payment implementation.
 
 ```bash
 cd mobile-app
-npm install
-npx eas-cli login
-npx eas-cli init
-eas build -p android --profile production
+npm ci
+npm run doctor
+npm run build:android:production
 ```
 
-The Android package is `com.naksharix.app`, and the production EAS profile generates a Play Store `.aab` app bundle. Razorpay, AdSense, and Gemini keys are optional for the mobile build; missing keys keep payment/ad UI in placeholder mode.
+Publishing to Google Play still requires the owner's Google/Expo account authorization and store review.
+
+## Operational endpoints
+
+- `/api/health` — application/database/Redis health.
+- `/api/release` — non-sensitive deployment identity.
+- `/api/ops/readiness` — non-secret production capability/readiness summary.
+- `/api/ai/status` — AI Astrologer enabled/ready state.
+
+## Production ownership boundaries
+
+The repository can implement and test code, but these external proofs still require the relevant account owner when applicable: DNS/DMARC changes, Search Console ownership, Neon backup/restore operations, third-party monitoring credentials, Google Play publishing, and real mailbox/device acceptance. Secrets must never be pasted into source code, GitHub comments, logs, or chat.
