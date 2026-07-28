@@ -55,7 +55,8 @@ export function getEmailReadiness(): EmailReadiness {
 export async function sendEmail(input: {
   to: string;
   subject: string;
-  text: string;
+  text?: string;
+  html?: string;
 }): Promise<EmailSendResult> {
   const readiness = getEmailReadiness();
   if (!readiness.emailEnabled) {
@@ -63,18 +64,26 @@ export async function sendEmail(input: {
     return { sent: false, reason: readiness.reason, missing: readiness.missing };
   }
 
+  if (!input.text && !input.html) {
+    logger.warn("email_delivery_empty_body", { provider: "resend" });
+    return { sent: false, reason: "Email body is empty.", missing: [] };
+  }
+
+  const payload: Record<string, unknown> = {
+    from: env.SMTP_FROM!,
+    to: [input.to],
+    subject: input.subject
+  };
+  if (input.text) payload.text = input.text;
+  if (input.html) payload.html = input.html;
+
   const response = await fetch(RESEND_EMAIL_API, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.SMTP_PASS!}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      from: env.SMTP_FROM!,
-      to: [input.to],
-      subject: input.subject,
-      text: input.text
-    }),
+    body: JSON.stringify(payload),
     cache: "no-store"
   });
 
