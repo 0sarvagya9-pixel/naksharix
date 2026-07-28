@@ -77,7 +77,7 @@ export function PricingContent() {
       </div>
 
       <p className="mx-auto mt-8 max-w-3xl text-center text-sm leading-6 naksh-muted-text">
-        AI Astrologer and Shop ecommerce remain unavailable until their separate reliability, safety, fulfilment, and legal readiness work is complete.
+        AI Astrologer is available as a separate guided experience. Shop remains informational and enquiry-only; public subscriptions and Shop ecommerce checkout are not active.
       </p>
     </Section>
   );
