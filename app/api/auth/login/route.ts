@@ -37,10 +37,37 @@ export async function POST(request: NextRequest) {
       return ok({ user: { id: adminUser.id, email: adminUser.email, name: adminUser.name, role: adminUser.role, effectiveRole, isAdminLogin: true, canBypassPayment: true } });
     }
 
-    const user = await prisma.user.findUnique({ where: { email: body.email } });
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: body.email.trim(),
+          mode: "insensitive"
+        }
+      }
+    });
     if (!user?.passwordHash) return fail("Invalid email or password", 401);
     const valid = await verifyPassword(body.password, user.passwordHash);
     if (!valid) return fail("Invalid email or password", 401);
+
+    const verificationMarker =
+      !user.emailVerified && !user.emailVerifiedAt
+        ? await prisma.otpToken.findFirst({
+            where: {
+              userId: user.id,
+              purpose: "EMAIL_VERIFY"
+            },
+            select: { id: true }
+          })
+        : null;
+
+    if (verificationMarker) {
+      return fail(
+        "Email verification required",
+        403,
+        { code: "EMAIL_VERIFICATION_REQUIRED" }
+      );
+    }
+
     const isAstroAccount = user.role === "ASTROLOGER" || user.role === "CONSULTANT";
     if (loginMode === "ASTROLOGER" && !isAstroAccount) return fail("This email is not registered as an astrologer/consultant account.", 403);
     if (body.roleIntent === "ASTROLOGER" && !isAstroAccount && user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {

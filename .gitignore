@@ -16,3 +16,6 @@ node_modules
 .next-*.log
 *.tsbuildinfo
 .env*.local
+
+# Visual Studio local workspace/cache
+.vs/
