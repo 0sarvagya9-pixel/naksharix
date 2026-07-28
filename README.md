@@ -31,7 +31,7 @@ For a disposable local database, create a separate PostgreSQL database and point
 - **Premium reports:** server-owned pricing, Razorpay payment binding, generated PDF storage, protected download, admin delivery workflow, and SMTP delivery.
 - **Consultations:** approved astrologer profiles, availability validation, serializable collision protection, booking records, Razorpay-linked payment state, and transactional booking email.
 - **Shop:** searchable spiritual catalogue and availability enquiry only.
-- **Operations:** health/release/readiness endpoints, structured safe logging, production acceptance workflow, hourly production monitor, DB baseline rehearsal, and evidence artifacts.
+- **Operations:** health/release/readiness endpoints, structured safe logging, production acceptance workflow, Vercel production health cron, DB baseline rehearsal, and evidence artifacts.
 
 ## Important environment variables
 
@@ -117,7 +117,7 @@ npm audit --omit=dev --audit-level=high
 
 CI additionally runs browser QA and production-safety checks. Production pushes to the authoritative branch run the custom-domain acceptance workflow, which checks exact release SHA, TLS/security headers, health/database state, AI readiness, SMTP readiness, locked feature scope, public routes, robots, and sitemap.
 
-An hourly GitHub Actions production monitor checks `/api/health`, `/api/release`, `/api/ops/readiness`, `robots.txt`, and `sitemap.xml`, stores evidence, and opens/updates a GitHub issue on failure.
+`vercel.json` registers a production-only daily health cron at `/api/cron/production-health`. It validates database connectivity, Redis error state, SMTP readiness, AI readiness, and the locked disabled-feature scope, and returns HTTP 503 when degraded so the invocation is visible in Vercel production logs/observability. This is deployment-owned and does not depend on GitHub's default branch.
 
 ## Search and analytics
 
@@ -154,8 +154,9 @@ Publishing to Google Play still requires the owner's Google/Expo account authori
 - `/api/health` — application/database/Redis health.
 - `/api/release` — non-sensitive deployment identity.
 - `/api/ops/readiness` — non-secret production capability/readiness summary.
+- `/api/cron/production-health` — production cron health verdict.
 - `/api/ai/status` — AI Astrologer enabled/ready state.
 
 ## Production ownership boundaries
 
-The repository can implement and test code, but these external proofs still require the relevant account owner when applicable: DNS/DMARC changes, Search Console ownership, Neon backup/restore operations, third-party monitoring credentials, Google Play publishing, and real mailbox/device acceptance. Secrets must never be pasted into source code, GitHub comments, logs, or chat.
+The repository can implement and test code, but these external proofs still require the relevant account owner when applicable: DNS/DMARC changes, Search Console ownership, Neon backup/restore operations, third-party alerting credentials, Google Play publishing, and real mailbox/device acceptance. Secrets must never be pasted into source code, GitHub comments, logs, or chat.
