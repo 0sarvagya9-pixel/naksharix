@@ -28,7 +28,7 @@ For a disposable local database, create a separate PostgreSQL database and point
 - **Authentication:** local email/password, secure sessions, Google OAuth, and six-digit email OTP verification.
 - **Astrology:** internal sidereal calculation engine, D1/D9, Panchang, Vimshottari Dasha, Chalit, basic yoga/dosha analysis, numerology, tarot, matching, and verification-gated advanced transit modules.
 - **AI Astrologer:** Gemini-backed English/Hindi/Hinglish chat with explicit consent and fail-closed provider handling.
-- **Premium reports:** server-owned pricing, Razorpay payment binding, generated PDF storage, protected download, admin delivery workflow, and SMTP delivery.
+- **Premium reports:** server-owned pricing, Razorpay payment binding, generated PDF storage, protected download, admin delivery workflow, and Resend transactional delivery.
 - **Consultations:** approved astrologer profiles, availability validation, serializable collision protection, booking records, Razorpay-linked payment state, and transactional booking email.
 - **Shop:** searchable spiritual catalogue and availability enquiry only.
 - **Operations:** health/release/readiness endpoints, structured safe logging, production acceptance workflow, Vercel production health cron, DB baseline rehearsal, and evidence artifacts.
@@ -70,7 +70,7 @@ NEXT_PUBLIC_GA_ID=""
 SENTRY_DSN=""
 ```
 
-Never commit real values for passwords, API keys, OAuth secrets, database credentials, SMTP credentials, payment secrets, or monitoring DSNs.
+Never commit real values for passwords, API keys, OAuth secrets, database credentials, email credentials, payment secrets, or monitoring DSNs.
 
 ## Production database safety
 
@@ -115,9 +115,9 @@ npm run build
 npm audit --omit=dev --audit-level=high
 ```
 
-CI additionally runs browser QA and production-safety checks. Production pushes to the authoritative branch run the custom-domain acceptance workflow, which checks exact release SHA, TLS/security headers, health/database state, AI readiness, SMTP readiness, locked feature scope, public routes, robots, and sitemap.
+CI additionally runs browser QA and production-safety checks. Production pushes to the authoritative branch run the custom-domain acceptance workflow, which checks exact release SHA, TLS/security headers, health/database state, AI readiness, email readiness, locked feature scope, public routes, robots, and sitemap.
 
-`vercel.json` registers a production-only daily health cron at `/api/cron/production-health`. It validates database connectivity, Redis error state, SMTP readiness, AI readiness, and the locked disabled-feature scope, and returns HTTP 503 when degraded so the invocation is visible in Vercel production logs/observability. This is deployment-owned and does not depend on GitHub's default branch.
+`vercel.json` registers a production-only daily health cron at `/api/cron/production-health`. It validates database connectivity, Redis error state, email readiness, AI readiness, and the locked disabled-feature scope, and returns HTTP 503 when degraded so the invocation is visible in Vercel production logs/observability. This is deployment-owned and does not depend on GitHub's default branch.
 
 ## Search and analytics
 
@@ -128,7 +128,9 @@ CI additionally runs browser QA and production-safety checks. Production pushes 
 
 ## Email
 
-SMTP is shared by OTP, report delivery, and consultation booking notifications. The sender is controlled by the single `SMTP_FROM` production variable. Current production configuration is intended to use:
+Transactional OTP, report-delivery, consultation, and notification email uses the Resend HTTPS Email API through one shared server-only service. The existing `SMTP_*` environment names are retained as a compatibility contract so the already-configured production values do not need to be renamed: `SMTP_HOST` must be `smtp.resend.com`, `SMTP_USER` must be `resend`, and `SMTP_PASS` holds the Resend API key. The application itself does not require Nodemailer at runtime.
+
+The sender is controlled by the single `SMTP_FROM` production variable and is intended to remain:
 
 ```text
 Naksharix Care <care@naksharix.com>
