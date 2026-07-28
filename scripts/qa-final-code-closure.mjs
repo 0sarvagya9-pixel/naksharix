@@ -61,8 +61,10 @@ assert(healthCron?.schedule === "17 4 * * *", "Production health cron uses deplo
 assert(cronHealth.includes("checks.database") && cronHealth.includes("checks.email") && cronHealth.includes("checks.ai"), "Production cron checks critical services", "database, email, AI and locked scope");
 assert(cronHealth.includes("status: healthy ? 200 : 503"), "Production cron fails visibly on degraded state", "Vercel invocation records a non-2xx failure");
 
-assert(emailService.includes("secure: env.SMTP_PORT === 465"), "SMTP TLS mode supports Resend port 465", "production SMTP configuration compatible");
+assert(emailService.includes("https://api.resend.com/emails"), "Transactional email uses Resend HTTPS API", "same verified Resend key/domain without Nodemailer runtime dependency");
 assert(emailService.includes("from: env.SMTP_FROM!"), "Transactional sender is environment-controlled", "care@naksharix.com can remain the sole configured sender");
+assert(emailService.includes("Authorization: `Bearer ${env.SMTP_PASS!}`"), "Resend API key stays server-side", "existing secret environment contract is preserved");
+assert(!/from\s+["']nodemailer["']/.test(emailService), "Nodemailer runtime import removed", "avoids vulnerable/conflicting mail dependency chain");
 assert(reportDelivery.includes("sendReportDeliveryEmail"), "Report delivery uses real email adapter", "secure report link delivery wired");
 
 assert(otp.includes("createHmac"), "OTP raw value is HMAC protected", "no raw OTP persistence");
