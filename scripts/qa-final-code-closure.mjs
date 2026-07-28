@@ -30,7 +30,9 @@ const reportDelivery = source("app/api/admin/report-requests/[id]/deliver/route.
 const otp = source("lib/auth/otp-service.ts");
 const signup = source("app/api/auth/signup/route.ts");
 const login = source("app/api/auth/login/route.ts");
-const shop = exists("app/shop/page.tsx") ? source("app/shop/page.tsx") : "";
+const shopPage = exists("app/shop/page.tsx") ? source("app/shop/page.tsx") : "";
+const shopContent = exists("components/shop-coming-soon-content.tsx") ? source("components/shop-coming-soon-content.tsx") : "";
+const shopSource = `${shopPage}\n${shopContent}`;
 
 assert(pkg.scripts["start:prod"] === "npm run start:standalone", "Production startup does not auto-run migrations", pkg.scripts["start:prod"]);
 assert(!pkg.scripts["db:deploy"], "Generic production migration command removed", "only reviewed-only command is exposed");
@@ -68,7 +70,10 @@ assert(login.includes("EMAIL_VERIFICATION_REQUIRED"), "Login blocks marked unver
 assert(pkg.scripts["qa:final-closure"] === "node scripts/qa-final-code-closure.mjs", "Final closure QA registered", "package script available");
 assert(pkg.scripts["qa:prod-db-readonly"] === "node scripts/qa-production-db-readonly.mjs", "Production DB read-only QA registered", "manual evidence command available");
 
-assert(!/buy now|add to cart|checkout/i.test(shop), "Shop page remains non-transactional", "no public ecommerce CTA in page source");
+assert(!/(Add to Cart|>\s*Buy Now\s*<|href\s*=\s*["'`]\/(?:cart|checkout)(?:["'`/?#]))/i.test(shopSource), "Shop has no transactional cart/checkout controls", "negative safety wording is allowed; transactional CTAs/routes are not");
+assert(shopContent.includes("Ask Availability"), "Shop uses enquiry-only CTA", "availability is confirmed separately");
+assert(/Public cart and online product checkout are not active|No automatic checkout/i.test(shopContent), "Shop explicitly states non-transactional scope", "user-facing boundary is present");
+
 assert(env.includes('SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false")'), "Subscriptions default disabled", "locked scope preserved");
 assert(env.includes('AI_REPORT_GENERATOR_ENABLED: z.enum(["true", "false"]).default("false")'), "AI report generator default disabled", "locked scope preserved");
 assert(env.includes('ALLOW_AI_DIAGNOSTICS: z.enum(["true", "false"]).default("false")'), "AI diagnostics default disabled", "locked scope preserved");
