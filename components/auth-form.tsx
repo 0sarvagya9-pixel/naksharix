@@ -82,11 +82,30 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     });
     const result = await response.json();
     if (!response.ok) {
+      if (
+        mode === "login" &&
+        result.details?.code === "EMAIL_VERIFICATION_REQUIRED"
+      ) {
+        window.sessionStorage.setItem("naksharix-pending-email", values.email);
+        router.push("/verify-email");
+        return;
+      }
+
       setError(result.error ?? "Authentication failed");
       return;
     }
     window.localStorage.setItem("naksharix-role-intent", roleIntent);
     if (mode === "login") window.localStorage.setItem("naksharix-login-mode", selectedLoginMode);
+
+    if (mode === "signup" && result.data?.verificationRequired) {
+      window.sessionStorage.setItem("naksharix-pending-email", values.email);
+      window.sessionStorage.setItem(
+        "naksharix-otp-delivery-sent",
+        result.data?.deliverySent ? "true" : "false"
+      );
+      router.push("/verify-email");
+      return;
+    }
 
     const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
     const redirectTo = searchParams?.get("redirectTo");
@@ -207,13 +226,3 @@ function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (ro
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
