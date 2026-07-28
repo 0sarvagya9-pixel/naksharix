@@ -15,7 +15,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     const { id } = await params;
     const reportRequest = await prisma.reportRequest.findUnique({ where: { id } });
     if (!reportRequest) return fail("Report request not found", 404);
-    if (!reportRequest.generatedPdfBytes || !reportRequest.generatedPdfSize) {
+    if (!reportRequest.generatedPdfSize || (!reportRequest.generatedPdfBytes && !reportRequest.generatedPdfStorageKey)) {
       return fail("A real generated PDF is required before delivery.", 422);
     }
 
@@ -38,14 +38,14 @@ export async function POST(_request: Request, { params }: { params: Params }) {
         newStatus: ReportRequestStatus.READY_FOR_DELIVERY,
         actor: admin,
         note: "Email delivery not configured; secure download remains available.",
-        metadata: { deliveryMode: "secure_download_only" }
+        metadata: { deliveryMode: "secure_download_only", storageDriver: reportRequest.generatedPdfStorageDriver ?? "database" }
       });
       await writeAuditLog({
         actor: admin,
         action: "report_delivery.email_disabled",
         targetType: "ReportRequest",
         targetId: reportRequest.id,
-        metadata: { missingCount: sent.missing.length }
+        metadata: { missingCount: sent.missing.length, storageDriver: reportRequest.generatedPdfStorageDriver ?? "database" }
       });
       logger.warn("report_delivery_email_disabled", { reportRequestId: reportRequest.id, missingCount: sent.missing.length });
       return fail(sent.reason, 503);
@@ -61,14 +61,14 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       newStatus: ReportRequestStatus.DELIVERED,
       actor: admin,
       note: "Report delivery email sent.",
-      metadata: { deliveryMode: "email" }
+      metadata: { deliveryMode: "email", storageDriver: reportRequest.generatedPdfStorageDriver ?? "database" }
     });
     await writeAuditLog({
       actor: admin,
       action: "report_delivery.email_sent",
       targetType: "ReportRequest",
       targetId: reportRequest.id,
-      metadata: { deliveryMode: "email" }
+      metadata: { deliveryMode: "email", storageDriver: reportRequest.generatedPdfStorageDriver ?? "database" }
     });
     return ok({ reportRequest: updated, delivery: sent });
   } catch (error) {
