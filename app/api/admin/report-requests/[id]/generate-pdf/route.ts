@@ -57,12 +57,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       ayanamsa: "lahiri"
     });
 
-    const content = assemblePremiumReportContent({
-      chart,
-      includePanchang: panchang,
-      includeTransit: transit
-    });
-
+    const content = assemblePremiumReportContent({ chart, includePanchang: panchang, includeTransit: transit });
     const generated = await generatePremiumReportPdf({
       requestId: reportRequest.id,
       templateId: reportRequest.reportSlug,
@@ -75,11 +70,12 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       return fail("PDF generation did not produce a file.", 500);
     }
 
-    const stored = saveReportPdf({
+    const stored = await saveReportPdf({
       reportRequestId: reportRequest.id,
       reportSlug: reportRequest.reportSlug,
       bytes: generated.bytes
     });
+
     await prisma.reportRequest.update({
       where: { id: reportRequest.id },
       data: {
