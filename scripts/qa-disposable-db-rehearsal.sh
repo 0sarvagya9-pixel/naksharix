@@ -30,8 +30,8 @@ echo "PASS: all database targets are disposable localhost" | tee "$EVIDENCE_DIR/
 npx prisma validate --schema=prisma/schema.prisma 2>&1 | tee "$EVIDENCE_DIR/prisma-validate.log"
 npx prisma generate --schema=prisma/schema.prisma 2>&1 | tee "$EVIDENCE_DIR/prisma-generate.log"
 
-# This db push is deliberately restricted by the localhost guard above and is
-# used only to materialize the current schema in an ephemeral CI database.
+# Deliberately restricted by the localhost guard above. This materializes the
+# current schema only in the ephemeral CI source database.
 npx prisma db push --skip-generate 2>&1 | tee "$EVIDENCE_DIR/disposable-db-push.log"
 
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc \
@@ -57,6 +57,10 @@ psql "$POSTGRES_ADMIN_URL" -v ON_ERROR_STOP=1 -c 'CREATE DATABASE naksharix_rest
 psql "$RESTORE_URL" -v ON_ERROR_STOP=1 -f "$EVIDENCE_DIR/schema-backup.sql" \
   2>&1 | tee "$EVIDENCE_DIR/restore-apply.log"
 
+# Compare semantic definitions, not generated catalog names. PostgreSQL exposes
+# NOT NULL entries through information_schema with object-id-derived names such
+# as 2200_16587_1_not_null; those names legitimately change after restore.
+# Nullability is already compared through information_schema.columns.
 inventory_query="COPY (
   SELECT 'COLUMN' AS kind,
          table_name AS object_name,
@@ -65,20 +69,44 @@ inventory_query="COPY (
   FROM information_schema.columns
   WHERE table_schema='public'
   UNION ALL
-  SELECT 'INDEX', tablename, indexname, indexdef
+  SELECT 'INDEX', tablename, indexname, regexp_replace(indexdef, '\\s+', ' ', 'g')
   FROM pg_indexes
   WHERE schemaname='public'
   UNION ALL
   SELECT 'TABLE', table_name, '', table_type
   FROM information_schema.tables
   WHERE table_schema='public'
+  UNION ALL
+  SELECT 'CONSTRAINT',
+         c.conrelid::regclass::text,
+         c.contype::text,
+         regexp_replace(pg_get_constraintdef(c.oid, true), '\\s+', ' ', 'g')
+  FROM pg_constraint c
+  JOIN pg_namespace n ON n.oid = c.connamespace
+  WHERE n.nspname='public' AND c.conrelid <> 0
+  UNION ALL
+  SELECT 'ENUM',
+         t.typname,
+         e.enumsortorder::text,
+         e.enumlabel
+  FROM pg_type t
+  JOIN pg_namespace n ON n.oid = t.typnamespace
+  JOIN pg_enum e ON e.enumtypid = t.oid
+  WHERE n.nspname='public'
   ORDER BY 1,2,3,4
 ) TO STDOUT WITH CSV"
 
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c "$inventory_query" > "$EVIDENCE_DIR/source-inventory.csv"
 psql "$RESTORE_URL" -v ON_ERROR_STOP=1 -c "$inventory_query" > "$EVIDENCE_DIR/restore-inventory.csv"
-diff -u "$EVIDENCE_DIR/source-inventory.csv" "$EVIDENCE_DIR/restore-inventory.csv" \
-  | tee "$EVIDENCE_DIR/inventory.diff"
+
+if ! diff -u "$EVIDENCE_DIR/source-inventory.csv" "$EVIDENCE_DIR/restore-inventory.csv" \
+  > "$EVIDENCE_DIR/inventory.diff"; then
+  cat "$EVIDENCE_DIR/inventory.diff"
+  echo "FAILED: source and restored semantic inventories differ" >&2
+  exit 1
+fi
+
+echo "PASS: source and restored semantic inventories match" | tee "$EVIDENCE_DIR/inventory-match.txt"
 
 psql "$RESTORE_URL" -v ON_ERROR_STOP=1 -Atc \
   "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('User','Session','OtpToken');" \
@@ -96,7 +124,7 @@ test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/restore-otp-index-count.txt")" = "1"
   echo "schema_backup_created=PASS"
   echo "separate_restore_database_created=PASS"
   echo "restore_apply=PASS"
-  echo "source_restore_inventory_match=PASS"
+  echo "source_restore_semantic_inventory_match=PASS"
   echo "otp_required_schema=PASS"
   echo "production_database_touched=false"
   echo "production_database_writes=zero"
