@@ -1,5 +1,5 @@
 import type { CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
-import type { PartialAshtakvargaResult, StrengthFoundationStatus } from "@/lib/astrology/strength/types";
+import type { AshtakvargaScore, PartialAshtakvargaResult, StrengthFoundationStatus } from "@/lib/astrology/strength/types";
 
 const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"] as const;
 type ClassicalPlanet = "Sun" | "Moon" | "Mars" | "Mercury" | "Jupiter" | "Venus" | "Saturn";
@@ -100,7 +100,7 @@ export function calculateInternalAshtakvarga(planets: CanonicalPlanet[], ascenda
   const missing = requiredReferences.filter((reference) => !references.has(reference));
   if (missing.length) return createAshtakvargaDependencyResult(planets, `Missing sign placement for: ${missing.join(", ")}`);
 
-  const scores = (Object.keys(rules) as ClassicalPlanet[]).map((planet) => {
+  const scores: AshtakvargaScore[] = (Object.keys(rules) as ClassicalPlanet[]).map((planet) => {
     const bhinna = Array.from({ length: 12 }, () => 0);
     for (const reference of requiredReferences) {
       const referenceSign = references.get(reference)!;
