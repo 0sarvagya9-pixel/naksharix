@@ -48,7 +48,7 @@ export type StrengthDependency = {
 
 export type PartialShadbalaResult = {
   scores: ShadbalaPlanetScore[];
-  verificationLevel: "provider_verified";
+  verificationLevel: "provider_verified" | "needs_external_validation";
   publicEnabled: false;
   missingDependencies: string[];
   limitations: string[];
@@ -56,17 +56,19 @@ export type PartialShadbalaResult = {
 
 export type PartialAshtakvargaResult = {
   scores: AshtakvargaScore[];
-  verificationLevel: "blocked_until_verified_formula";
+  sarva?: number[];
+  checksums?: Record<string, number>;
+  verificationLevel: "blocked_until_verified_formula" | "needs_external_validation";
   publicEnabled: false;
   missingDependencies: string[];
   limitations: string[];
 };
 
 export const STRENGTH_DEPENDENCIES: StrengthDependency[] = [
-  { key: "planetDegrees", label: "Verified planet degrees", requiredFor: ["shadbala", "ashtakvarga"], status: "blocked_until_provider_ready" },
-  { key: "houses", label: "Verified houses", requiredFor: ["shadbala", "ashtakvarga"], status: "blocked_until_provider_ready" },
-  { key: "aspects", label: "Verified aspects", requiredFor: ["shadbala", "ashtakvarga"], status: "missing" },
-  { key: "retrograde", label: "Retrograde status", requiredFor: ["shadbala"], status: "blocked_until_provider_ready" },
-  { key: "dignity", label: "Planet dignity", requiredFor: ["shadbala"], status: "missing" },
-  { key: "divisionalData", label: "Divisional chart data", requiredFor: ["shadbala"], status: "blocked_until_provider_ready" }
+  { key: "planetDegrees", label: "Verified planet degrees", requiredFor: ["shadbala", "ashtakvarga"], status: "available_unverified" },
+  { key: "houses", label: "Verified houses", requiredFor: ["shadbala", "ashtakvarga"], status: "available_unverified" },
+  { key: "aspects", label: "Verified aspects", requiredFor: ["shadbala"], status: "missing" },
+  { key: "retrograde", label: "Retrograde status", requiredFor: ["shadbala"], status: "available_unverified" },
+  { key: "dignity", label: "Planet dignity", requiredFor: ["shadbala"], status: "available_unverified" },
+  { key: "divisionalData", label: "Divisional chart data", requiredFor: ["shadbala"], status: "available_unverified" }
 ];
