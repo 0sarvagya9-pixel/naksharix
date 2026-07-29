@@ -37,13 +37,20 @@ assert(service.includes("blocked_until_report_content"), "PDF generation require
 assert(service.includes("generated_internal_unverified"), "Generated PDF is labeled internal and unverified", "no public precision claim");
 assert(service.includes("pdfUrl: null"), "Premium report service does not return fake file", "no fake download");
 assert(service.includes("deliveryEnabled: false"), "Premium report service does not enable delivery", "no fake delivery");
-assert(storage.includes("db://report-requests") && storage.includes("publicUrl: null"), "Report PDF storage abstraction uses DB-backed storage without fake public URL", "storage metadata is explicit");
-assert(generateRoute.includes("generatedPdfBytes") && generateRoute.includes("generatedPdfStorageKey") && generateRoute.includes("GENERATED"), "Admin generation stores actual PDF bytes before generated status", "real file metadata");
-assert(downloadRoute.includes("Cache-Control") && downloadRoute.includes("application/pdf"), "Download route streams stored PDF bytes securely", "no fake URL");
+assert(storage.includes("db://report-requests") && storage.includes("publicUrl: null"), "Report PDF storage abstraction keeps DB-backed secure storage and no public URL", "cloud drivers also remain private");
+assert(generateRoute.includes("generatedPdfBytes") && generateRoute.includes("generatedPdfStorageKey") && generateRoute.includes("GENERATED"), "Admin generation stores real PDF storage metadata before generated status", "real file metadata");
+assert(downloadRoute.includes("Cache-Control") && downloadRoute.includes("application/pdf"), "Download route streams stored PDF securely", "no fake URL");
 assert(downloadRoute.includes("reportRequest.userId !== user.id"), "Download route enforces owner/admin authorization", "secure download");
-assert(emailService.includes("SMTP_HOST") && emailService.includes("sendMail"), "Email delivery service requires SMTP before sending", "no fake email");
+assert(
+  emailService.includes("EMAIL_PROVIDER")
+    && emailService.includes("SMTP_HOST")
+    && emailService.includes("https://api.resend.com/emails")
+    && emailService.includes("Authorization: `Bearer ${env.SMTP_PASS!}`"),
+  "Email delivery service requires configured Resend production email settings before sending",
+  "real provider request; no fake sent state"
+);
 assert(delivery.includes("sendEmail"), "Report delivery service delegates to email abstraction", "no fake email");
-assert(deliverRoute.includes("READY_FOR_DELIVERY") && deliverRoute.includes("DELIVERED") && deliverRoute.includes("generatedPdfBytes"), "Delivery route requires real generated PDF and real delivery attempt", "no fake delivered status");
+assert(deliverRoute.includes("READY_FOR_DELIVERY") && deliverRoute.includes("DELIVERED") && deliverRoute.includes("generatedPdfStorageKey"), "Delivery route requires real generated PDF and real delivery attempt", "DB or cloud-backed file; no fake delivered status");
 assert(schema.automaticGenerationEnabled === false, "Template schema keeps automatic generation disabled", "foundation only");
 assert(schema.automaticDeliveryEnabled === false, "Template schema keeps automatic delivery disabled", "foundation only");
 
