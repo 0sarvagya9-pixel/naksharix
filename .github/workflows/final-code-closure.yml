@@ -96,7 +96,7 @@ jobs:
           NODE
 
   gate-4-database-rehearsal:
-    name: Gate 4 - Disposable database baseline
+    name: Gate 4 - Disposable backup and restore rehearsal
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
@@ -116,6 +116,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline?schema=public
       PSQL_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline
+      POSTGRES_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      RESTORE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_restore_rehearsal
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -123,19 +125,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx prisma validate --schema=prisma/schema.prisma
-      - name: Generate and apply baseline only to disposable PostgreSQL
-        run: |
-          set -euo pipefail
-          npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > /tmp/baseline.sql
-          test -s /tmp/baseline.sql
-          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f /tmp/baseline.sql
-      - name: Confirm zero drift
-        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
-      - name: Confirm OTP production-required schema exists in rehearsal DB
-        run: |
-          psql "$PSQL_URL" -Atc "SELECT to_regclass('public.\"User\"'), to_regclass('public.\"Session\"'), to_regclass('public.\"OtpToken\"');" | grep -q 'User'
-          psql "$PSQL_URL" -Atc "SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename='OtpToken';" | grep -q 'OtpToken_email_purpose_idx'
+      - name: Run guarded disposable schema backup and restore rehearsal
+        shell: bash
+        run: bash scripts/qa-disposable-db-rehearsal.sh database-rehearsal-evidence
+      - name: Upload database rehearsal evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-rehearsal-${{ github.sha }}
+          path: database-rehearsal-evidence
+          if-no-files-found: error
+          retention-days: 30
 
   gate-5-browser-runtime:
     name: Gate 5 - Browser and runtime smoke
