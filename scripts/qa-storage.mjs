@@ -8,10 +8,6 @@ function source(file) {
   return fs.readFileSync(path.join(root, file), "utf8");
 }
 
-function exists(file) {
-  return fs.existsSync(path.join(root, file));
-}
-
 function record(status, name, detail) {
   results.push({ status, name, detail });
 }
