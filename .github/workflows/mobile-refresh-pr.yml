@@ -1,0 +1,48 @@
+name: Mobile Expo Dependency Alignment
+
+on:
+  pull_request:
+    branches:
+      - complete-production-polish
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feat/final-28-code-closure-20260729'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile-app/package-lock.json
+      - name: Align Expo SDK 54 dependency versions
+        working-directory: mobile-app
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --save-exact expo@54.0.36
+          npm install --save-dev --save-exact babel-preset-expo@54.0.10
+          npm ci
+          npx tsc --noEmit
+          npx expo-doctor
+      - name: Commit aligned mobile dependency graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mobile-app/package.json mobile-app/package-lock.json
+          if git diff --cached --quiet; then
+            echo "Mobile dependency graph already aligned."
+            exit 0
+          fi
+          git commit -m "chore(mobile): align Expo SDK 54 dependency graph"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
