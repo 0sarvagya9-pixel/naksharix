@@ -32,7 +32,27 @@ jobs:
           npm install --save-dev --save-exact babel-preset-expo@54.0.10
           npm ci
           npx tsc --noEmit
-          npx expo-doctor
+
+          # Prove the project-level Git rule actually ignores Expo machine state.
+          git check-ignore -q --no-index .expo/.probe
+
+          set +e
+          npx expo-doctor > /tmp/expo-doctor.log 2>&1
+          doctor_exit=$?
+          set -e
+          cat /tmp/expo-doctor.log
+          if [ "$doctor_exit" -ne 0 ]; then
+            failures=$(grep -c '^✖ ' /tmp/expo-doctor.log || true)
+            if [ "$failures" -ne 1 ] || ! grep -q 'The .expo directory is not ignored by Git' /tmp/expo-doctor.log; then
+              echo "Expo Doctor has a real failure beyond the known CI .expo false-positive." >&2
+              exit "$doctor_exit"
+            fi
+            if grep -Eq 'Found outdated dependencies|Missing peer dependency|Multiple lock files detected|does not match the installed Expo SDK' /tmp/expo-doctor.log; then
+              echo "Expo Doctor reported an additional dependency/configuration problem." >&2
+              exit "$doctor_exit"
+            fi
+            echo "PASS: Expo Doctor only reported the known CI .expo false-positive; git check-ignore independently proved the path is ignored."
+          fi
       - name: Commit aligned mobile dependency graph
         shell: bash
         run: |
