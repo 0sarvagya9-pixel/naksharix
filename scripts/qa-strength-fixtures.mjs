@@ -39,9 +39,15 @@ function validateStrengthFoundation() {
   ];
   for (const file of files) assert(exists(file), `Strength source exists: ${file}`, file);
   const combined = files.map(source).join("\n");
-  assert(!/publicEnabled:\s*true/.test(combined), "Strength modules are not public enabled", "foundation only");
-  assert(!/verified:\s*true/.test(combined), "Strength modules are not marked verified", "no fake verification");
-  assert(!/total:\s*[1-9][0-9]*(\.[0-9]+)?/.test(combined), "No fake numeric Shadbala total in source", "no score output");
+  const shadbala = source("lib/astrology/strength/shadbala.ts");
+  const ashtakvarga = source("lib/astrology/strength/ashtakvarga.ts");
+  assert(!/publicEnabled:\s*true/.test(combined), "Strength modules are not public enabled", "calculated does not mean externally verified");
+  assert(!/verified:\s*true/.test(combined), "Strength modules are not marked externally verified", "no fake verification");
+  assert(!/total:\s*[1-9][0-9]*(\.[0-9]+)?/.test(shadbala), "No hardcoded fake numeric Shadbala total in source", "runtime score only after all components exist");
+  assert(ashtakvarga.includes("calculateInternalAshtakvarga"), "Ashtakavarga runtime calculator exists", "Bhinna + Sarva distributions");
+  assert(ashtakvarga.includes("Sarva: 337"), "Ashtakavarga 337-point checksum is encoded", "classical aggregate invariant");
+  assert(ashtakvarga.includes("expectedTotals") && ashtakvarga.includes("checksumFailures"), "Ashtakavarga fixed planet totals are enforced", "rule-table corruption fails closed");
+  assert(ashtakvarga.includes('verificationLevel: "needs_external_validation"'), "Ashtakavarga output remains external-validation gated", "independent sign-by-sign fixtures required");
 }
 
 function validateShadbalaFixtures() {
@@ -63,7 +69,7 @@ function validateShadbalaFixtures() {
     if (sample.verified_level === "verified_external") {
       const missing = shadbalaPlanets.flatMap((planet) => shadbalaComponents.filter((component) => typeof sample.expected.planets[planet][component] !== "number").map((component) => `${planet}.${component}`));
       if (missing.length) record("FAILED", sample.name, `verified fixture missing scores: ${missing.join(", ")}`);
-      else record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "Shadbala runtime comparison adapter is not wired yet.");
+      else record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "Shadbala runtime comparison adapter still requires externally trusted full-component fixtures.");
     } else {
       record(sample.verified_level === "needs_external_validation" ? "SKIPPED_NEEDS_EXTERNAL_VALIDATION" : "BLOCKED_UNTIL_PROVIDER_READY", sample.name, sample.source_note);
     }
@@ -82,8 +88,8 @@ function validateAshtakvargaFixtures() {
     assert(typeof sample.expected?.bhinna === "object", prefix, "expected.bhinna object exists");
     assert(Array.isArray(sample.expected?.sarva), prefix, "expected.sarva array exists");
     if (sample.verified_level === "verified_external") {
-      if (!sample.expected.sarva.length) record("FAILED", sample.name, "verified fixture has no Sarva Ashtakvarga values");
-      else record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "Ashtakvarga runtime comparison adapter is not wired yet.");
+      if (!sample.expected.sarva.length) record("FAILED", sample.name, "verified fixture has no Sarva Ashtakavarga values");
+      else record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "Calculated engine is present; trusted sign-by-sign runtime comparison still requires imported fixture values.");
     } else {
       record(sample.verified_level === "needs_external_validation" ? "SKIPPED_NEEDS_EXTERNAL_VALIDATION" : "BLOCKED_UNTIL_PROVIDER_READY", sample.name, sample.source_note);
     }
@@ -99,9 +105,6 @@ const counts = results.reduce((acc, result) => {
   return acc;
 }, {});
 
-for (const result of results) {
-  console.log(`${result.status}: ${result.name}${result.detail ? ` - ${result.detail}` : ""}`);
-}
+for (const result of results) console.log(`${result.status}: ${result.name}${result.detail ? ` - ${result.detail}` : ""}`);
 console.log(`\nStrength fixture QA summary: ${JSON.stringify(counts)}`);
-
 if (counts.FAILED) process.exit(1);
