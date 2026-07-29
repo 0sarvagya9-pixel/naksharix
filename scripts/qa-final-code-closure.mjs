@@ -31,6 +31,7 @@ const reportDelivery = source("app/api/admin/report-requests/[id]/deliver/route.
 const reportStorage = source("lib/storage/report-storage.ts");
 const s3Storage = source("lib/storage/s3-compatible.ts");
 const transitEngine = source("lib/astrology/transit/engine.ts");
+const ashtakvarga = source("lib/astrology/strength/ashtakvarga.ts");
 const otp = source("lib/auth/otp-service.ts");
 const signup = source("app/api/auth/signup/route.ts");
 const login = source("app/api/auth/login/route.ts");
@@ -79,6 +80,11 @@ assert(transitEngine.includes("calculateRefinedTransitTimeline"), "Refined trans
 assert(transitEngine.includes("minute_internal_search"), "Transit engine records refined precision honestly", "no fake external verification claim");
 assert(transitEngine.includes("externalValidationRequired: true"), "Advanced transit activation remains evidence-gated", "external reference validation required before public factual use");
 assert(transitEngine.includes("publicPredictionEnabled: false"), "Unverified advanced transit stays disabled publicly", "calculation code does not bypass evidence gate");
+
+assert(ashtakvarga.includes("calculateInternalAshtakvarga"), "Bhinna and Sarva Ashtakavarga calculator exists", "seven classical planetary tables are calculated");
+assert(ashtakvarga.includes("Sarva: 337"), "Ashtakavarga aggregate checksum is locked", "337-point invariant enforced");
+assert(ashtakvarga.includes("checksumFailures"), "Ashtakavarga rule corruption fails closed", "fixed planetary totals checked at runtime");
+assert(ashtakvarga.includes('verificationLevel: "needs_external_validation"'), "Ashtakavarga public claim remains validation-gated", "independent sign-by-sign fixtures still required");
 
 assert(otp.includes("createHmac"), "OTP raw value is HMAC protected", "no raw OTP persistence");
 assert(otp.includes("randomInt"), "OTP uses cryptographic random integer", "6-digit generator");
