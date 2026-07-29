@@ -84,6 +84,12 @@ function requestPath(config: StorageConfig, driver: S3CompatibleDriver, key: str
   return driver === "r2" ? `/${awsEncode(config.bucket)}/${encoded}` : `/${encoded}`;
 }
 
+function toArrayBuffer(bytes: Uint8Array) {
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return buffer;
+}
+
 async function signedRequest(input: RequestInput) {
   const config = getConfig(input.driver);
   const now = new Date();
@@ -136,7 +142,7 @@ async function signedRequest(input: RequestInput) {
   const response = await fetch(`${config.endpoint}${path}`, {
     method: input.method,
     headers,
-    body: input.method === "PUT" ? body : undefined,
+    body: input.method === "PUT" ? toArrayBuffer(body) : undefined,
     cache: "no-store"
   });
 
