@@ -109,10 +109,12 @@ export function calculateInternalAshtakvarga(planets: CanonicalPlanet[], ascenda
     return { planet, bhinna, verified: false };
   });
 
-  const sarva = Array.from({ length: 12 }, (_, sign) => scores.reduce((sum, score) => sum + Number(score.bhinna[sign] ?? 0), 0));
+  const sarva = Array.from({ length: 12 }, (_, sign) => scores.reduce<number>((sum, score) => sum + Number(score.bhinna[sign] ?? 0), 0));
   for (const score of scores) score.sarva = sarva;
 
-  const checksums = Object.fromEntries(scores.map((score) => [score.planet, score.bhinna.reduce((sum, value) => sum + Number(value ?? 0), 0)]));
+  const checksums: Record<string, number> = Object.fromEntries(
+    scores.map((score) => [score.planet, score.bhinna.reduce<number>((sum, value) => sum + Number(value ?? 0), 0)])
+  );
   checksums.Sarva = sarva.reduce((sum, value) => sum + value, 0);
   const checksumFailures = (Object.keys(expectedTotals) as ClassicalPlanet[]).filter((planet) => checksums[planet] !== expectedTotals[planet]);
   if (checksums.Sarva !== 337) checksumFailures.push("Sun");
