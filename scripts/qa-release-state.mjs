@@ -94,7 +94,7 @@ if (requiredFiles.every(exists)) {
   assert(
     databaseRehearsalScript.includes("pg_dump") &&
       databaseRehearsalScript.includes("RESTORE_URL") &&
-      databaseRehearsalScript.includes("source_restore_inventory_match=PASS"),
+      databaseRehearsalScript.includes("source_restore_semantic_inventory_match=PASS"),
     "Database rehearsal creates and validates a reviewable schema backup",
     "schema dump, separate restore, and semantic inventory comparison"
   );
