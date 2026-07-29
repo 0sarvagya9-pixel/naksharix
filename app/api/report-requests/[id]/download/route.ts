@@ -52,7 +52,10 @@ export async function GET(request: Request, { params }: { params: Params }) {
     targetId: reportRequest.id,
     metadata: { storageDriver: reportRequest.generatedPdfStorageDriver ?? "database", size: bytes.byteLength }
   });
-  return new NextResponse(bytes, {
+
+  const responseBuffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(responseBuffer).set(bytes);
+  return new NextResponse(responseBuffer, {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
