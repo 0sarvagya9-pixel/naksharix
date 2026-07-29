@@ -1,0 +1,133 @@
+name: Gate4 Disposable DB Diagnostic
+
+on:
+  push:
+    branches:
+      - feat/final-28-code-closure-20260729
+    paths:
+      - .github/workflows/gate4-diagnostic.yml
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: ${{ !contains(github.event.head_commit.message, 'diagnostic(gate4)') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naksharix_gate4_diag
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_gate4_diag?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/naksharix_gate4_diag?schema=public
+      PSQL_URL: postgresql://postgres:postgres@localhost:5432/naksharix_gate4_diag
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/final-28-code-closure-20260729
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Run diagnostic without early exit
+        shell: bash
+        run: |
+          set +e
+          mkdir -p diagnostics /tmp/gate4
+
+          npm ci > /tmp/gate4/npm-ci.log 2>&1
+          npm_ci=$?
+
+          npx prisma --version > /tmp/gate4/prisma-version.log 2>&1
+          prisma_version=$?
+
+          npx prisma migrate diff --help > /tmp/gate4/diff-help.log 2>&1
+          diff_help=$?
+
+          npx prisma validate --schema=prisma/schema.prisma > /tmp/gate4/validate.log 2>&1
+          validate=$?
+
+          npx prisma generate --schema=prisma/schema.prisma > /tmp/gate4/generate.log 2>&1
+          generate=$?
+
+          npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > /tmp/gate4/baseline.sql 2> /tmp/gate4/baseline.err
+          baseline=$?
+
+          if [ -s /tmp/gate4/baseline.sql ]; then
+            psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f /tmp/gate4/baseline.sql > /tmp/gate4/apply.log 2>&1
+            apply=$?
+          else
+            echo "baseline.sql missing or empty" > /tmp/gate4/apply.log
+            apply=99
+          fi
+
+          npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code > /tmp/gate4/drift.log 2>&1
+          drift=$?
+
+          table_count=$(psql "$PSQL_URL" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('User','Session','OtpToken');" 2>/tmp/gate4/table.err)
+          table_query=$?
+          index_count=$(psql "$PSQL_URL" -Atc "SELECT count(*) FROM pg_indexes WHERE schemaname='public' AND tablename='OtpToken' AND indexname='OtpToken_email_purpose_idx';" 2>/tmp/gate4/index.err)
+          index_query=$?
+
+          {
+            echo "GATE4 DISPOSABLE DIAGNOSTIC"
+            echo "production_database_touched=false"
+            echo "npm_ci_exit=$npm_ci"
+            echo "prisma_version_exit=$prisma_version"
+            echo "diff_help_exit=$diff_help"
+            echo "validate_exit=$validate"
+            echo "generate_exit=$generate"
+            echo "baseline_generation_exit=$baseline"
+            echo "baseline_apply_exit=$apply"
+            echo "drift_exit=$drift"
+            echo "table_query_exit=$table_query"
+            echo "index_query_exit=$index_query"
+            echo "required_table_count=$table_count"
+            echo "otp_index_count=$index_count"
+            echo
+            echo "--- prisma version ---"
+            cat /tmp/gate4/prisma-version.log
+            echo
+            echo "--- migrate diff help relevant flags ---"
+            grep -E -- '--(from|to)-' /tmp/gate4/diff-help.log || true
+            echo
+            echo "--- baseline stderr ---"
+            cat /tmp/gate4/baseline.err
+            echo
+            echo "--- apply tail ---"
+            tail -80 /tmp/gate4/apply.log
+            echo
+            echo "--- drift tail ---"
+            tail -80 /tmp/gate4/drift.log
+            echo
+            echo "--- table query stderr ---"
+            cat /tmp/gate4/table.err
+            echo
+            echo "--- index query stderr ---"
+            cat /tmp/gate4/index.err
+          } > diagnostics/gate4-latest.txt
+
+          cat diagnostics/gate4-latest.txt
+          exit 0
+      - name: Commit diagnostic evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diagnostics/gate4-latest.txt
+          git commit -m "diagnostic(gate4): capture disposable database failure"
+          git push origin HEAD:feat/final-28-code-closure-20260729
