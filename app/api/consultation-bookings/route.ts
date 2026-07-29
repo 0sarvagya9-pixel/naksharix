@@ -4,7 +4,9 @@ import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { canBypassPayment } from "@/lib/auth/permissions";
+import { sendConsultationBookingEmail } from "@/lib/consultations/booking-email";
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/monitoring/logger";
 
 const schema = z.object({
   astrologerProfileId: z.string().min(1),
@@ -95,7 +97,25 @@ export async function POST(request: NextRequest) {
       return fail("This slot has already been booked for this date and time. Please select another slot.", 409);
     }
 
-    return ok({ booking, redirectTo: `/consultation/success/${booking.id}` }, { status: 201 });
+    let emailSent = false;
+    try {
+      const delivery = await sendConsultationBookingEmail({
+        to: body.customerEmail,
+        customerName: body.customerName,
+        astrologerName: profile.displayName,
+        bookingId: booking.id,
+        scheduledAt: booking.scheduledAt,
+        paymentRequired: !adminBypass
+      });
+      emailSent = delivery.sent;
+      if (!delivery.sent) {
+        logger.warn("consultation_booking_email_not_sent", { bookingId: booking.id });
+      }
+    } catch {
+      logger.warn("consultation_booking_email_failed", { bookingId: booking.id });
+    }
+
+    return ok({ booking, emailSent, redirectTo: `/consultation/success/${booking.id}` }, { status: 201 });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
       return fail("This slot was booked at the same time by another user. Please select another slot.", 409);

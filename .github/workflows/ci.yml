@@ -25,8 +25,10 @@ jobs:
           HYGIENE_EXIT=$?
           node scripts/qa-release-state.mjs >> static-audit.log 2>&1
           RELEASE_STATE_EXIT=$?
+          node scripts/qa-final-code-closure.mjs >> static-audit.log 2>&1
+          FINAL_EXIT=$?
           cat static-audit.log
-          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ] || [ "$RELEASE_STATE_EXIT" -ne 0 ]; then
+          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ] || [ "$RELEASE_STATE_EXIT" -ne 0 ] || [ "$FINAL_EXIT" -ne 0 ]; then
             exit 1
           fi
       - name: Upload static audit log
@@ -63,6 +65,7 @@ jobs:
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       ASTROLOGY_PROVIDER: own_engine
       AI_ASTROLOGER_ENABLED: "false"
+      AI_REPORT_GENERATOR_ENABLED: "false"
       ALLOW_AI_DIAGNOSTICS: "false"
       SUBSCRIPTIONS_ENABLED: "false"
       EMAIL_PROVIDER: disabled
@@ -82,8 +85,10 @@ jobs:
           set +e
           npm run qa:all > quality-qa.log 2>&1
           QA_EXIT=$?
+          npm run qa:final-closure >> quality-qa.log 2>&1
+          FINAL_EXIT=$?
           cat quality-qa.log
-          exit "$QA_EXIT"
+          if [ "$QA_EXIT" -ne 0 ] || [ "$FINAL_EXIT" -ne 0 ]; then exit 1; fi
       - name: Upload complete QA log
         if: always()
         uses: actions/upload-artifact@v4
@@ -127,9 +132,8 @@ jobs:
           path: http-smoke.log
           if-no-files-found: warn
       - run: git diff --check
-      - name: Audit production dependencies for critical vulnerabilities
-        continue-on-error: true
-        run: npm audit --omit=dev --audit-level=critical
+      - name: Audit production dependencies - fail closed on high or critical
+        run: npm audit --omit=dev --audit-level=high
 
   browser-audit:
     runs-on: ubuntu-latest
@@ -154,6 +158,7 @@ jobs:
       NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
       ASTROLOGY_PROVIDER: own_engine
       AI_ASTROLOGER_ENABLED: "false"
+      AI_REPORT_GENERATOR_ENABLED: "false"
       ALLOW_AI_DIAGNOSTICS: "false"
       SUBSCRIPTIONS_ENABLED: "false"
       EMAIL_PROVIDER: disabled

@@ -1,7 +1,8 @@
 import "server-only";
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { env } from "@/lib/env";
-import type { ReportStorageReadiness, StoredReportPdf } from "@/lib/storage/types";
+import { getPrivateObject, putPrivateObject } from "@/lib/storage/s3-compatible";
+import type { ReportStorageDriver, ReportStorageReadiness, StoredReportPdf } from "@/lib/storage/types";
 
 export function getReportStorageReadiness(): ReportStorageReadiness {
   const driver = env.REPORT_STORAGE_DRIVER;
@@ -14,10 +15,10 @@ export function getReportStorageReadiness(): ReportStorageReadiness {
     ].filter(Boolean) as string[];
     return {
       driver,
-      activeDriver: "database",
+      activeDriver: driver,
       enabled: missing.length === 0,
       missing,
-      reason: missing.length ? "R2 storage is not configured; DB-backed secure storage remains active." : "R2 env is present, but the cloud upload adapter is intentionally not active without SDK wiring."
+      reason: missing.length ? "R2 storage is selected but not fully configured." : "Private R2 object storage is active for generated report PDFs."
     };
   }
   if (driver === "s3") {
@@ -29,10 +30,10 @@ export function getReportStorageReadiness(): ReportStorageReadiness {
     ].filter(Boolean) as string[];
     return {
       driver,
-      activeDriver: "database",
+      activeDriver: driver,
       enabled: missing.length === 0,
       missing,
-      reason: missing.length ? "S3 storage is not configured; DB-backed secure storage remains active." : "S3 env is present, but the cloud upload adapter is intentionally not active without SDK wiring."
+      reason: missing.length ? "S3 storage is selected but not fully configured." : "Private AWS S3 object storage is active for generated report PDFs."
     };
   }
   return {
@@ -44,24 +45,83 @@ export function getReportStorageReadiness(): ReportStorageReadiness {
   };
 }
 
-export function saveReportPdf(input: {
+function cloneBytes(value: Buffer | Uint8Array) {
+  const source = value instanceof Uint8Array ? value : new Uint8Array(value);
+  const bytes = new Uint8Array(source.byteLength);
+  bytes.set(source);
+  return bytes;
+}
+
+function storageObjectKey(reportRequestId: string, safeSlug: string) {
+  return `reports/${reportRequestId}/naksharix-${safeSlug}-${reportRequestId}.pdf`;
+}
+
+export async function saveReportPdf(input: {
   reportRequestId: string;
   reportSlug: string;
   bytes: Buffer | Uint8Array;
-}): StoredReportPdf {
-  const sourceBytes = input.bytes instanceof Uint8Array ? input.bytes : new Uint8Array(input.bytes);
-  const bytes = new Uint8Array(sourceBytes.byteLength);
-  bytes.set(sourceBytes);
+}): Promise<StoredReportPdf> {
+  const bytes = cloneBytes(input.bytes);
   const checksum = createHash("sha256").update(bytes).digest("hex");
   const safeSlug = input.reportSlug.replace(/[^a-z0-9-]/gi, "-").toLowerCase();
+  const fileName = `naksharix-${safeSlug}-${input.reportRequestId}.pdf`;
+  const readiness = getReportStorageReadiness();
+
+  if (!readiness.enabled) throw new Error(readiness.reason);
+
+  if (readiness.activeDriver === "database") {
+    return {
+      bytes,
+      fileName,
+      mimeType: "application/pdf",
+      size: bytes.byteLength,
+      checksum,
+      storageKey: `db://report-requests/${input.reportRequestId}/generated-pdf`,
+      storageDriver: "database",
+      publicUrl: null
+    };
+  }
+
+  const key = storageObjectKey(input.reportRequestId, safeSlug);
+  await putPrivateObject(readiness.activeDriver, key, bytes, "application/pdf");
   return {
-    bytes,
-    fileName: `naksharix-${safeSlug}-${input.reportRequestId}.pdf`,
+    bytes: null,
+    fileName,
     mimeType: "application/pdf",
     size: bytes.byteLength,
     checksum,
-    storageKey: `db://report-requests/${input.reportRequestId}/generated-pdf`,
-    storageDriver: "database",
+    storageKey: key,
+    storageDriver: readiness.activeDriver,
     publicUrl: null
   };
+}
+
+function checksumMatches(bytes: Uint8Array, expected: string | null | undefined) {
+  if (!expected || !/^[a-f0-9]{64}$/i.test(expected)) return true;
+  const actual = createHash("sha256").update(bytes).digest();
+  const expectedBytes = Buffer.from(expected, "hex");
+  return actual.length === expectedBytes.length && timingSafeEqual(actual, expectedBytes);
+}
+
+export async function loadReportPdf(input: {
+  storageDriver: string | null | undefined;
+  storageKey: string | null | undefined;
+  databaseBytes: Uint8Array | Buffer | null | undefined;
+  expectedChecksum?: string | null;
+}) {
+  const driver = (input.storageDriver ?? "database") as ReportStorageDriver;
+  let bytes: Uint8Array;
+
+  if (driver === "database") {
+    if (!input.databaseBytes) throw new Error("Database-backed report bytes are missing.");
+    bytes = cloneBytes(input.databaseBytes);
+  } else {
+    if (!input.storageKey || input.storageKey.startsWith("db://")) throw new Error("Private object storage key is missing.");
+    bytes = await getPrivateObject(driver, input.storageKey);
+  }
+
+  if (!checksumMatches(bytes, input.expectedChecksum)) {
+    throw new Error("Stored report checksum verification failed.");
+  }
+  return bytes;
 }

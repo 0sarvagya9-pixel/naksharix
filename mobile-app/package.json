@@ -13,7 +13,7 @@
         "build:android:production": "eas build -p android --profile production"
     },
     "dependencies": {
-        "expo": "~54.0.6",
+        "expo": "54.0.36",
         "expo-status-bar": "~3.0.9",
         "react": "19.1.0",
         "react-dom": "19.1.0",
@@ -24,7 +24,7 @@
     "devDependencies": {
         "@babel/core": "^7.25.2",
         "@types/react": "~19.1.10",
-        "babel-preset-expo": "^55.0.21",
+        "babel-preset-expo": "54.0.10",
         "typescript": "^5.8.3"
     },
     "packageManager": "npm@10.9.3",

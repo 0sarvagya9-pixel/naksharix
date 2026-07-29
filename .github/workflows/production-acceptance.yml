@@ -48,18 +48,21 @@ jobs:
             exit 1
           fi
 
-      - name: Verify canonical hosts and TLS
+      - name: Verify canonical hosts TLS and security headers
         shell: bash
         run: |
           set -euo pipefail
-          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+          apex_effective=$(curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
             --dump-header production-evidence/apex-headers.txt \
             --output production-evidence/apex.html \
-            "${BASE_URL}/"
-          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            --write-out '%{url_effective}' \
+            "${BASE_URL}/")
+          www_effective=$(curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
             --dump-header production-evidence/www-headers.txt \
             --output production-evidence/www.html \
-            "${WWW_URL}/"
+            --write-out '%{url_effective}' \
+            "${WWW_URL}/")
+          printf 'apex_effective=%s\nwww_effective=%s\n' "$apex_effective" "$www_effective" > production-evidence/canonical.txt
           grep -qi '^x-frame-options: DENY' production-evidence/apex-headers.txt
           grep -qi '^x-content-type-options: nosniff' production-evidence/apex-headers.txt
           grep -qi '^referrer-policy: strict-origin-when-cross-origin' production-evidence/apex-headers.txt
@@ -78,6 +81,24 @@ jobs:
             if (data?.status !== "ok") throw new Error(`health status is ${data?.status}`);
             if (data?.checks?.database !== "ok") throw new Error(`database status is ${data?.checks?.database}`);
             if (data?.checks?.redis === "error") throw new Error("redis status is error");
+          '
+
+      - name: Verify production capability truth and SMTP readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
+            "${BASE_URL}/api/ops/readiness" -o production-evidence/readiness.json
+          cat production-evidence/readiness.json
+          node -e '
+            const fs = require("fs");
+            const body = JSON.parse(fs.readFileSync("production-evidence/readiness.json", "utf8"));
+            const data = body?.data ?? body;
+            if (data?.services?.email?.provider !== "smtp" || data?.services?.email?.enabled !== true) throw new Error("SMTP email readiness is not active");
+            if (data?.capabilities?.subscriptionsEnabled !== false) throw new Error("Subscriptions unexpectedly active");
+            if (data?.capabilities?.aiReportGeneratorEnabled !== false) throw new Error("AI report generator unexpectedly active");
+            if (data?.capabilities?.shopMode !== "informational_enquiry_only") throw new Error("Shop scope changed");
+            if (data?.privacy?.analyticsQueryStringExcluded !== true) throw new Error("Analytics privacy marker missing");
           '
 
       - name: Verify AI Astrologer activation and readiness
@@ -106,7 +127,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for route in shop reports consultation; do
+          for route in shop reports consultation pricing signup login verify-email; do
             curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
               "${BASE_URL}/${route}" -o "production-evidence/${route}.html"
           done
@@ -116,6 +137,7 @@ jobs:
             echo "Unsupported ecommerce controls are visible." >&2
             exit 1
           fi
+          grep -qi 'AI Astrologer is available' production-evidence/pricing.html
 
       - name: Verify robots and sitemap feature truth
         shell: bash
@@ -137,6 +159,7 @@ jobs:
             echo "release_identity=PASS"
             echo "canonical_hosts_tls=PASS"
             echo "health_database=PASS"
+            echo "ops_email_scope=PASS"
             echo "ai_enabled_ready=PASS"
             echo "public_routes=PASS"
             echo "robots_sitemap=PASS"
@@ -149,3 +172,4 @@ jobs:
           name: production-acceptance-${{ github.sha }}
           path: production-evidence
           if-no-files-found: warn
+          retention-days: 30

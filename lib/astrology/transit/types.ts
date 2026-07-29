@@ -50,12 +50,14 @@ export type TransitTimelineEvent = {
   planet: TransitPlanetName;
   eventType: "sign_ingress" | "station_retrograde" | "station_direct";
   date: string;
+  occurredAt?: string;
   from: string | boolean | null;
   to: string | boolean | null;
   degree: number | null;
   source: string;
   verificationLevel: TransitVerificationLevel;
-  precision: "daily_provider_scan";
+  precision: "daily_provider_scan" | "minute_internal_search";
+  externalValidationRequired?: boolean;
   note: string;
 };
 

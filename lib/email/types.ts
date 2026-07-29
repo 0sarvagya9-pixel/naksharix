@@ -6,7 +6,7 @@ export type EmailReadiness = {
   provider: EmailProvider;
   emailEnabled: boolean;
   missing: string[];
-  deliveryMode: "disabled" | "smtp_email" | "ses_ready_shell";
+  deliveryMode: "disabled" | "smtp_email" | "resend_api" | "ses_ready_shell";
   reason: string;
 };
 

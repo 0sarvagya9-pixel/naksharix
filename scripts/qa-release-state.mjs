@@ -37,7 +37,8 @@ const requiredFiles = [
   "lib/ai/gemini-chat.ts",
   "vercel.json",
   ".github/workflows/production-acceptance.yml",
-  ".github/workflows/database-baseline-rehearsal.yml"
+  ".github/workflows/database-baseline-rehearsal.yml",
+  "scripts/qa-disposable-db-rehearsal.sh"
 ];
 
 for (const file of requiredFiles) {
@@ -58,6 +59,7 @@ if (requiredFiles.every(exists)) {
   const vercel = JSON.parse(read("vercel.json"));
   const productionAcceptanceWorkflow = read(".github/workflows/production-acceptance.yml");
   const databaseBaselineWorkflow = read(".github/workflows/database-baseline-rehearsal.yml");
+  const databaseRehearsalScript = read("scripts/qa-disposable-db-rehearsal.sh");
 
   assert(handoff.includes("complete-production-polish"), "Handoff identifies the authoritative release branch", "complete-production-polish");
   assert(handoff.includes("PRODUCTION_NOT_VERIFIED"), "Handoff separates deployment status from exact custom-domain proof", "production evidence remains explicit");
@@ -88,9 +90,36 @@ if (requiredFiles.every(exists)) {
   assert(productionAcceptanceWorkflow.includes("AI_ASTROLOGER_ENABLED is not active") && productionAcceptanceWorkflow.includes("Gemini key/readiness is not active"), "Production workflow fails closed on incomplete AI activation", "no false PASS");
 
   assert(databaseBaselineWorkflow.includes("postgres:16-alpine"), "Database rehearsal uses disposable PostgreSQL", "isolated service container");
-  assert(databaseBaselineWorkflow.includes("--from-empty") && databaseBaselineWorkflow.includes("--to-schema-datamodel"), "Database rehearsal generates baseline SQL from the current schema", "reviewable artifact");
-  assert(databaseBaselineWorkflow.includes("production_database_touched=false"), "Database rehearsal records that production is untouched", "non-production-only execution");
-  assert(!databaseBaselineWorkflow.includes("migrate reset") && !databaseBaselineWorkflow.includes("db push"), "Database rehearsal contains no destructive Prisma command", "safe baseline generation");
+  assert(databaseBaselineWorkflow.includes("scripts/qa-disposable-db-rehearsal.sh"), "Database workflow invokes the guarded restore rehearsal", "permanent restore test entrypoint");
+  assert(
+    databaseRehearsalScript.includes("pg_dump") &&
+      databaseRehearsalScript.includes("RESTORE_URL") &&
+      databaseRehearsalScript.includes("source_restore_semantic_inventory_match=PASS"),
+    "Database rehearsal creates and validates a reviewable schema backup",
+    "schema dump, separate restore, and semantic inventory comparison"
+  );
+  assert(
+    databaseRehearsalScript.includes("production_database_touched=false") &&
+      databaseRehearsalScript.includes("production_database_writes=zero") &&
+      databaseRehearsalScript.includes("production_migrations_executed=zero"),
+    "Database rehearsal records that production is untouched",
+    "non-production-only execution"
+  );
+  assert(
+    databaseRehearsalScript.includes("localhost") &&
+      databaseRehearsalScript.includes("127.0.0.1") &&
+      databaseRehearsalScript.includes("REFUSED:") &&
+      databaseRehearsalScript.includes("neon.tech"),
+    "Database rehearsal fails closed outside disposable localhost",
+    "production Neon targets are rejected"
+  );
+  assert(
+    !databaseRehearsalScript.includes("migrate reset") &&
+      !databaseRehearsalScript.includes("db push --force-reset") &&
+      !databaseRehearsalScript.includes("db push --accept-data-loss"),
+    "Database rehearsal contains no destructive Prisma command",
+    "safe disposable materialization only"
+  );
 }
 
 const trackedEnv = execFileSync("git", ["ls-files", ".env", ".env.local", ".env.production"], { cwd: root })

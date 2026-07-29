@@ -1,11 +1,20 @@
 import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AdSensePlaceholder } from "../components/AdSensePlaceholder";
-import { PaymentAction } from "../components/PaymentAction";
-import { mobileEnv } from "../config/env";
+import { mobileEnv, webUrl } from "../config/env";
 
-const features = ["Daily horoscope", "Free kundli", "Kundli milan", "Tarot reading", "Numerology", "Panchang"];
+const features = [
+  { label: "Kundli", path: "/kundli" },
+  { label: "Horoscope", path: "/horoscope" },
+  { label: "Panchang", path: "/panchang" },
+  { label: "Matchmaking", path: "/matchmaking" },
+  { label: "Numerology", path: "/numerology" },
+  { label: "Tarot", path: "/tarot" },
+  { label: "AI Astrologer", path: "/ai-astrologer" },
+  { label: "Premium Reports", path: "/reports" },
+  { label: "Consultations", path: "/consultation" },
+  { label: "Saved Reports", path: "/saved-reports" }
+];
 
 export function HomeScreen() {
   return (
@@ -14,28 +23,34 @@ export function HomeScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.hero}>
           <Text style={styles.eyebrow}>Naksharix</Text>
-          <Text style={styles.title}>Unlock Your Cosmic Destiny</Text>
-          <Text style={styles.subtitle}>Premium astrology guidance for horoscope, kundli, numerology, tarot, panchang, and consultations.</Text>
+          <Text style={styles.title}>Astrology tools, reports and consultations</Text>
+          <Text style={styles.subtitle}>
+            This companion app opens the production Naksharix experiences securely in your browser. Public subscriptions and Shop ecommerce checkout are not active.
+          </Text>
           <TouchableOpacity style={styles.primaryButton} accessibilityRole="button" onPress={() => Linking.openURL(mobileEnv.apiUrl)}>
-            <Text style={styles.primaryButtonText}>Open Web Dashboard</Text>
+            <Text style={styles.primaryButtonText}>Open Naksharix</Text>
             <Text style={styles.primaryButtonIcon}>&gt;</Text>
           </TouchableOpacity>
         </View>
 
-        <AdSensePlaceholder />
-
         <View style={styles.grid}>
           {features.map((feature) => (
-            <View key={feature} style={styles.featureCard}>
+            <TouchableOpacity
+              key={feature.label}
+              style={styles.featureCard}
+              accessibilityRole="link"
+              onPress={() => Linking.openURL(webUrl(feature.path))}
+            >
               <Text style={styles.featureIcon}>*</Text>
-              <Text style={styles.featureText}>{feature}</Text>
-            </View>
+              <Text style={styles.featureText}>{feature.label}</Text>
+            </TouchableOpacity>
           ))}
         </View>
 
-        <PaymentAction title="Premium Kundli Report" subtitle="Birth chart, dasha, yog, dosha, and premium PDF-ready guidance." />
-        <PaymentAction title="Premium Subscription" subtitle="Unlock personalized horoscope, AI readings, reports, and consultation credits." />
-        <PaymentAction title="Consult an Astrologer" subtitle="Chat, audio, and video consultation payment UI is ready for Razorpay activation." />
+        <View style={styles.notice}>
+          <Text style={styles.noticeTitle}>Production scope</Text>
+          <Text style={styles.noticeText}>Payments, account access, OTP verification, reports and consultations are completed on the secure Naksharix website. The app does not store payment credentials.</Text>
+        </View>
 
         <TouchableOpacity accessibilityRole="link" onPress={() => Linking.openURL(mobileEnv.privacyPolicyUrl)}>
           <Text style={styles.privacy}>Privacy Policy</Text>
@@ -57,7 +72,7 @@ const styles = StyleSheet.create({
     gap: 12
   },
   eyebrow: { color: "#F5C76B", fontSize: 13, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase" },
-  title: { color: "#FFF7DF", fontSize: 34, lineHeight: 40, fontWeight: "900" },
+  title: { color: "#FFF7DF", fontSize: 31, lineHeight: 38, fontWeight: "900" },
   subtitle: { color: "#D8CBEF", fontSize: 15, lineHeight: 23 },
   primaryButton: {
     marginTop: 8,
@@ -85,7 +100,8 @@ const styles = StyleSheet.create({
   },
   featureIcon: { color: "#F5C76B", fontSize: 18, fontWeight: "900" },
   featureText: { color: "#FFF7DF", fontSize: 13, fontWeight: "700" },
+  notice: { borderRadius: 14, borderWidth: 1, borderColor: "rgba(245,199,107,0.16)", backgroundColor: "rgba(255,255,255,0.05)", padding: 14, gap: 5 },
+  noticeTitle: { color: "#F5C76B", fontWeight: "800", fontSize: 13 },
+  noticeText: { color: "#D8CBEF", fontSize: 12, lineHeight: 18 },
   privacy: { color: "#F5C76B", textAlign: "center", fontWeight: "700", paddingVertical: 8 }
 });
-
-

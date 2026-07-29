@@ -6,6 +6,7 @@ on:
       - prisma/schema.prisma
       - package.json
       - package-lock.json
+      - scripts/qa-disposable-db-rehearsal.sh
       - .github/workflows/database-baseline-rehearsal.yml
   workflow_dispatch:
 
@@ -15,7 +16,7 @@ permissions:
 jobs:
   rehearse-baseline:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:16-alpine
@@ -32,8 +33,9 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline_rehearsal?schema=public
-      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline_rehearsal?schema=public
       PSQL_URL: postgresql://postgres:postgres@localhost:5432/naksharix_baseline_rehearsal
+      POSTGRES_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      RESTORE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_restore_rehearsal
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,52 +49,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Validate Prisma schema
-        run: npx prisma validate --schema=prisma/schema.prisma
-
-      - name: Generate Prisma client
-        run: npx prisma generate --schema=prisma/schema.prisma
-
-      - name: Generate baseline SQL from an empty schema
+      - name: Run guarded disposable schema backup and restore rehearsal
         shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p database-baseline-evidence
-          npx prisma migrate diff \
-            --from-empty \
-            --to-schema-datamodel prisma/schema.prisma \
-            --script > database-baseline-evidence/baseline.sql
-          test -s database-baseline-evidence/baseline.sql
-          grep -Eq 'CREATE (TABLE|TYPE)' database-baseline-evidence/baseline.sql
-          sha256sum database-baseline-evidence/baseline.sql | tee database-baseline-evidence/baseline.sha256
-
-      - name: Apply baseline only to disposable PostgreSQL
-        shell: bash
-        run: |
-          set -euo pipefail
-          psql "${PSQL_URL}" -v ON_ERROR_STOP=1 -f database-baseline-evidence/baseline.sql \
-            2>&1 | tee database-baseline-evidence/apply.log
-
-      - name: Confirm disposable database matches Prisma schema
-        shell: bash
-        run: |
-          set -euo pipefail
-          npx prisma migrate diff \
-            --from-url "${DATABASE_URL}" \
-            --to-schema-datamodel prisma/schema.prisma \
-            --exit-code \
-            2>&1 | tee database-baseline-evidence/drift.log
-
-      - name: Record schema inventory
-        shell: bash
-        run: |
-          set -euo pipefail
-          psql "${PSQL_URL}" -Atc \
-            "SELECT table_schema || '.' || table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name" \
-            | tee database-baseline-evidence/tables.txt
-          psql "${PSQL_URL}" -Atc \
-            "SELECT indexname FROM pg_indexes WHERE schemaname = 'public' ORDER BY indexname" \
-            | tee database-baseline-evidence/indexes.txt
+        run: bash scripts/qa-disposable-db-rehearsal.sh database-baseline-evidence
 
       - name: Run database-sensitive static QA
         run: |
@@ -100,22 +59,13 @@ jobs:
           npm run qa:payments
           npm run qa:storage
           npm run qa:audit-security
+          npm run qa:final-closure
 
-      - name: Write rehearsal summary
-        run: |
-          {
-            echo "environment=disposable_postgresql"
-            echo "production_database_touched=false"
-            echo "schema_validate=PASS"
-            echo "baseline_generation=PASS"
-            echo "baseline_apply=PASS"
-            echo "post_apply_drift=PASS"
-          } | tee database-baseline-evidence/summary.txt
-
-      - name: Upload baseline rehearsal evidence
+      - name: Upload database rehearsal evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: database-baseline-rehearsal-${{ github.sha }}
           path: database-baseline-evidence
-          if-no-files-found: warn
+          if-no-files-found: error
+          retention-days: 30

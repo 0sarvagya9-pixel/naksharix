@@ -139,40 +139,49 @@ const swissProvider: AstrologyProvider = {
   }
 };
 
+function calculateEnrichedOwnChart(input: AstrologyBirthInput) {
+  const normalized = normalizeBirthInput(input);
+  return enrichBirthChartWithCoreCalculations(calculateOwnEngineBirthChart(normalized), normalized);
+}
+
 const ownEngineProvider: AstrologyProvider = {
   async getBirthChart(input) {
-    return calculateOwnEngineBirthChart(normalizeBirthInput(input));
+    return calculateEnrichedOwnChart(input);
   },
   async getPlanetPositions(input) {
-    return calculateOwnEngineBirthChart(normalizeBirthInput(input)).planetPositions;
+    return calculateEnrichedOwnChart(input).planetPositions;
   },
   async getPanchang(input) {
-    return calculateOwnEngineBirthChart(normalizeBirthInput(input)).panchang;
+    return calculateEnrichedOwnChart(input).panchang;
   },
   async getVimshottariDasha(input) {
-    const normalized = normalizeBirthInput(input);
-    return enrichBirthChartWithCoreCalculations(calculateOwnEngineBirthChart(normalized), normalized).vimshottariDasha;
+    return calculateEnrichedOwnChart(input).vimshottariDasha;
   },
   async getDoshaAnalysis(input) {
-    const chart = calculateOwnEngineBirthChart(normalizeBirthInput(input));
-    return { manglikDosha: chart.manglikDosha, kaalSarpDosha: chart.kaalSarpDosha };
+    const chart = calculateEnrichedOwnChart(input);
+    return chart.doshaAnalysis ?? { manglikDosha: chart.manglikDosha, kaalSarpDosha: chart.kaalSarpDosha };
   },
   async getSadeSati(input) {
-    return calculateOwnEngineBirthChart(normalizeBirthInput(input)).sadeSati;
+    return calculateEnrichedOwnChart(input).sadeSati;
   },
   async getTransitReport(input) {
-    const chart = calculateOwnEngineBirthChart(normalizeBirthInput(input));
-    return { date: new Date().toISOString(), moonSign: chart.avakhada.moonSign, nakshatra: chart.avakhada.nakshatra };
+    const chart = calculateEnrichedOwnChart(input);
+    return {
+      date: new Date().toISOString(),
+      moonSign: chart.avakhada.moonSign,
+      nakshatra: chart.avakhada.nakshatra,
+      note: "Current chart context is calculated internally. Exact transit ingress/station timing remains verification-gated."
+    };
   },
   async getVarshphal(input) {
-    const chart = calculateOwnEngineBirthChart(normalizeBirthInput(input));
+    const chart = calculateEnrichedOwnChart(input);
     return { year: new Date().getFullYear(), natalChart: chart };
   },
   async getKundliMatching() {
     throw new AstrologyProviderUnavailableError();
   },
   async getPersonalizedHoroscope(input, period) {
-    const chart = calculateOwnEngineBirthChart(normalizeBirthInput(input));
+    const chart = calculateEnrichedOwnChart(input);
     return {
       reportId: `own_prediction_${Date.now()}`,
       period,
@@ -181,12 +190,12 @@ const ownEngineProvider: AstrologyProvider = {
       calculationData: { natalChart: chart, transitReport: {}, dasha: chart.vimshottariDasha, sadeSati: chart.sadeSati, moonSign: chart.avakhada.moonSign, nakshatra: chart.avakhada.nakshatra },
       sections: {},
       aiSummary: "",
-      disclaimer: "Naksharix own_engine provides basic calculated chart data. Advanced predictions are not available yet.",
+      disclaimer: "Naksharix own_engine provides calculated chart, dasha, Chalit, basic yoga and dosha modules. Transit timing and any module marked unavailable remain verification-gated.",
       generatedAt: new Date().toISOString()
     };
   },
   async getPersonalizedPrediction(input, period) {
-    const chart = calculateOwnEngineBirthChart(normalizeBirthInput(input));
+    const chart = calculateEnrichedOwnChart(input);
     return {
       reportId: `own_prediction_${Date.now()}`,
       period,
@@ -195,7 +204,7 @@ const ownEngineProvider: AstrologyProvider = {
       calculationData: { natalChart: chart, transitReport: {}, dasha: chart.vimshottariDasha, sadeSati: chart.sadeSati, moonSign: chart.avakhada.moonSign, nakshatra: chart.avakhada.nakshatra },
       sections: {},
       aiSummary: "",
-      disclaimer: "Naksharix own_engine provides basic calculated chart data. Advanced predictions are not available yet.",
+      disclaimer: "Naksharix own_engine provides calculated chart, dasha, Chalit, basic yoga and dosha modules. Transit timing and any module marked unavailable remain verification-gated.",
       generatedAt: new Date().toISOString()
     };
   }

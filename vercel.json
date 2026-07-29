@@ -1,7 +1,7 @@
 {
   "framework": "nextjs",
   "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install",
+  "installCommand": "npm ci",
   "outputDirectory": ".next",
   "regions": [
     "bom1"
@@ -38,6 +38,10 @@
     {
       "path": "/api/panchang",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/production-health",
+      "schedule": "17 4 * * *"
     }
   ]
 }

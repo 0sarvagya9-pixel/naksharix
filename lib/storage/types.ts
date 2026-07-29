@@ -4,19 +4,19 @@ export type ReportStorageDriver = "database" | "r2" | "s3";
 
 export type ReportStorageReadiness = {
   driver: ReportStorageDriver;
-  activeDriver: "database";
+  activeDriver: ReportStorageDriver;
   enabled: boolean;
   missing: string[];
   reason: string;
 };
 
 export type StoredReportPdf = {
-  bytes: Uint8Array<ArrayBuffer>;
+  bytes: Uint8Array<ArrayBuffer> | null;
   fileName: string;
   mimeType: "application/pdf";
   size: number;
   checksum: string;
   storageKey: string;
-  storageDriver: "database";
+  storageDriver: ReportStorageDriver;
   publicUrl: null;
 };

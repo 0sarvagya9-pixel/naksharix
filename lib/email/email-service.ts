@@ -1,8 +1,11 @@
 import "server-only";
-import nodemailer from "nodemailer";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/monitoring/logger";
 import type { EmailReadiness, EmailSendResult } from "@/lib/email/types";
+
+const RESEND_SMTP_HOST = "smtp.resend.com";
+const RESEND_SMTP_USER = "resend";
+const RESEND_EMAIL_API = "https://api.resend.com/emails";
 
 export function getEmailReadiness(): EmailReadiness {
   if (env.EMAIL_PROVIDER === "ses") {
@@ -23,7 +26,7 @@ export function getEmailReadiness(): EmailReadiness {
     return {
       provider: "disabled",
       emailEnabled: false,
-      missing: ["EMAIL_PROVIDER=smtp", "SMTP_HOST", "SMTP_USER", "SMTP_PASS", "SMTP_FROM"],
+      missing: ["EMAIL_PROVIDER=smtp", "SMTP_HOST=smtp.resend.com", "SMTP_USER=resend", "SMTP_PASS", "SMTP_FROM"],
       deliveryMode: "disabled",
       reason: "Email delivery is disabled; secure download remains available."
     };
@@ -31,23 +34,29 @@ export function getEmailReadiness(): EmailReadiness {
 
   const missing = [
     env.SMTP_HOST ? null : "SMTP_HOST",
+    env.SMTP_HOST === RESEND_SMTP_HOST ? null : "SMTP_HOST=smtp.resend.com",
     env.SMTP_USER ? null : "SMTP_USER",
+    env.SMTP_USER === RESEND_SMTP_USER ? null : "SMTP_USER=resend",
     env.SMTP_PASS ? null : "SMTP_PASS",
     env.SMTP_FROM ? null : "SMTP_FROM"
   ].filter(Boolean) as string[];
+
   return {
     provider: "smtp",
     emailEnabled: missing.length === 0,
     missing,
-    deliveryMode: missing.length === 0 ? "smtp_email" : "disabled",
-    reason: missing.length ? "SMTP is not fully configured; email delivery remains disabled." : "SMTP is configured for report delivery email."
+    deliveryMode: missing.length === 0 ? "resend_api" : "disabled",
+    reason: missing.length
+      ? "Resend production email configuration is incomplete or unexpected; delivery is disabled."
+      : "Resend email delivery is configured using the verified domain/API key while preserving the existing SMTP environment contract."
   };
 }
 
 export async function sendEmail(input: {
   to: string;
   subject: string;
-  text: string;
+  text?: string;
+  html?: string;
 }): Promise<EmailSendResult> {
   const readiness = getEmailReadiness();
   if (!readiness.emailEnabled) {
@@ -55,22 +64,34 @@ export async function sendEmail(input: {
     return { sent: false, reason: readiness.reason, missing: readiness.missing };
   }
 
-  const transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST!,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_PORT === 465,
-    auth: {
-      user: env.SMTP_USER!,
-      pass: env.SMTP_PASS!
-    }
-  });
+  if (!input.text && !input.html) {
+    logger.warn("email_delivery_empty_body", { provider: "resend" });
+    return { sent: false, reason: "Email body is empty.", missing: [] };
+  }
 
-  await transporter.sendMail({
+  const payload: Record<string, unknown> = {
     from: env.SMTP_FROM!,
-    to: input.to,
-    subject: input.subject,
-    text: input.text
+    to: [input.to],
+    subject: input.subject
+  };
+  if (input.text) payload.text = input.text;
+  if (input.html) payload.html = input.html;
+
+  const response = await fetch(RESEND_EMAIL_API, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.SMTP_PASS!}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store"
   });
 
+  if (!response.ok) {
+    logger.warn("email_delivery_provider_rejected", { provider: "resend", status: response.status });
+    return { sent: false, reason: "Email provider rejected the delivery request.", missing: [] };
+  }
+
+  logger.info("email_delivery_completed", { provider: "resend", status: response.status });
   return { sent: true, reason: "Email delivery completed.", missing: [] };
 }
