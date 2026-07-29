@@ -28,6 +28,9 @@ const cronHealth = source("app/api/cron/production-health/route.ts");
 const opsRoute = source("app/api/ops/readiness/route.ts");
 const emailService = source("lib/email/email-service.ts");
 const reportDelivery = source("app/api/admin/report-requests/[id]/deliver/route.ts");
+const reportStorage = source("lib/storage/report-storage.ts");
+const s3Storage = source("lib/storage/s3-compatible.ts");
+const transitEngine = source("lib/astrology/transit/engine.ts");
 const otp = source("lib/auth/otp-service.ts");
 const signup = source("app/api/auth/signup/route.ts");
 const login = source("app/api/auth/login/route.ts");
@@ -66,6 +69,16 @@ assert(emailService.includes("from: env.SMTP_FROM!"), "Transactional sender is e
 assert(emailService.includes("Authorization: `Bearer ${env.SMTP_PASS!}`"), "Resend API key stays server-side", "existing secret environment contract is preserved");
 assert(!/from\s+["']nodemailer["']/.test(emailService), "Nodemailer runtime import removed", "avoids vulnerable/conflicting mail dependency chain");
 assert(reportDelivery.includes("sendReportDeliveryEmail"), "Report delivery uses real email adapter", "secure report link delivery wired");
+
+assert(s3Storage.includes("AWS4-HMAC-SHA256"), "Private S3-compatible SigV4 implementation exists", "R2/S3 no longer configuration-only shells");
+assert(reportStorage.includes("putPrivateObject") && reportStorage.includes("getPrivateObject"), "Report storage supports private R2/S3 read-write", "database remains default driver");
+assert(reportStorage.includes("timingSafeEqual") && reportStorage.includes("checksumMatches"), "Cloud report retrieval verifies checksum", "integrity fail-closed");
+assert(reportStorage.includes("publicUrl: null"), "Report storage exposes no public object URL", "downloads remain authenticated through Naksharix");
+
+assert(transitEngine.includes("calculateRefinedTransitTimeline"), "Refined transit event engine exists", "internal binary event search implemented");
+assert(transitEngine.includes("minute_internal_search"), "Transit engine records refined precision honestly", "no fake external verification claim");
+assert(transitEngine.includes("externalValidationRequired: true"), "Advanced transit activation remains evidence-gated", "external reference validation required before public factual use");
+assert(transitEngine.includes("publicPredictionEnabled: false"), "Unverified advanced transit stays disabled publicly", "calculation code does not bypass evidence gate");
 
 assert(otp.includes("createHmac"), "OTP raw value is HMAC protected", "no raw OTP persistence");
 assert(otp.includes("randomInt"), "OTP uses cryptographic random integer", "6-digit generator");
