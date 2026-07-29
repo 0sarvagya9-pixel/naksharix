@@ -31,6 +31,7 @@ const reportDelivery = source("app/api/admin/report-requests/[id]/deliver/route.
 const reportStorage = source("lib/storage/report-storage.ts");
 const s3Storage = source("lib/storage/s3-compatible.ts");
 const transitEngine = source("lib/astrology/transit/engine.ts");
+const shadbala = source("lib/astrology/strength/shadbala.ts");
 const ashtakvarga = source("lib/astrology/strength/ashtakvarga.ts");
 const otp = source("lib/auth/otp-service.ts");
 const signup = source("app/api/auth/signup/route.ts");
@@ -80,6 +81,11 @@ assert(transitEngine.includes("calculateRefinedTransitTimeline"), "Refined trans
 assert(transitEngine.includes("minute_internal_search"), "Transit engine records refined precision honestly", "no fake external verification claim");
 assert(transitEngine.includes("externalValidationRequired: true"), "Advanced transit activation remains evidence-gated", "external reference validation required before public factual use");
 assert(transitEngine.includes("publicPredictionEnabled: false"), "Unverified advanced transit stays disabled publicly", "calculation code does not bypass evidence gate");
+
+assert(shadbala.includes("calculateInternalShadbala"), "Six-component internal Shadbala calculator exists", "Sthana, Dig, Kala, Cheshta, Naisargika and Drik are numerically produced with full context");
+assert(shadbala.includes("sthanaBala") && shadbala.includes("digBala") && shadbala.includes("kalaBala") && shadbala.includes("cheshtaBala") && shadbala.includes("naisargikaBala") && shadbala.includes("drikBala"), "All six Shadbala top-level components are implemented", "internal totals remain evidence-gated");
+assert(shadbala.includes('verificationLevel: "needs_external_validation"'), "Shadbala public claim remains validation-gated", "reference-software calibration required");
+assert(shadbala.includes("total: round("), "Internal Shadbala total is computed, not hardcoded", "numeric engineering result only");
 
 assert(ashtakvarga.includes("calculateInternalAshtakvarga"), "Bhinna and Sarva Ashtakavarga calculator exists", "seven classical planetary tables are calculated");
 assert(ashtakvarga.includes("Sarva: 337"), "Ashtakavarga aggregate checksum is locked", "337-point invariant enforced");
