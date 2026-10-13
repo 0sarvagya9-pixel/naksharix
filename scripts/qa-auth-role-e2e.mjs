@@ -181,6 +181,43 @@ try {
     assert.ok(html.includes("Reviews and Ratings"), "dashboard title absent");
   });
 
+  await check("support tickets are owned by the user and triaged only by admin", async () => {
+    const anonRead = await req("/api/support/tickets");
+    assert.equal(anonRead.status, 401);
+    const payload = { subject: "Account access assistance", message: "Please help with my account settings and access." };
+    const created = await post("/api/support/tickets", payload, userCookie);
+    const createBody = await created.json();
+    assert.equal(created.status, 201, JSON.stringify(createBody));
+    const ticketId = createBody.data.ticket.id;
+    assert.equal(createBody.data.ticket.status, "OPEN");
+
+    const owned = await req("/api/support/tickets", { headers: { cookie: userCookie } });
+    const ownedBody = await owned.json();
+    assert.equal(owned.status, 200);
+    assert.ok(ownedBody.data.tickets.some((ticket) => ticket.id === ticketId));
+    const forbiddenAdmin = await req("/api/admin/support", { headers: { cookie: userCookie } });
+    assert.equal(forbiddenAdmin.status, 404);
+    const invalid = await post("/api/support/tickets", { subject: "a", message: "x" }, userCookie);
+    assert.equal(invalid.status, 422);
+
+    const adminList = await req("/api/admin/support", { headers: { cookie: adminCookie } });
+    const adminBody = await adminList.json();
+    assert.equal(adminList.status, 200);
+    assert.ok(adminBody.data.tickets.some((ticket) => ticket.id === ticketId));
+    const unauthorizedUpdate = await post("/api/admin/support", {
+      ticketId, status: "RESOLVED", priority: "HIGH"
+    }, userCookie, "PATCH");
+    assert.equal(unauthorizedUpdate.status, 404);
+    const reviewed = await post("/api/admin/support", {
+      ticketId, status: "IN_PROGRESS", priority: "HIGH"
+    }, adminCookie, "PATCH");
+    assert.equal(reviewed.status, 200, await reviewed.text());
+    const saved = await prisma.supportTicket.findUniqueOrThrow({ where: { id: ticketId } });
+    assert.equal(saved.status, "IN_PROGRESS");
+    assert.equal(saved.priority, "HIGH");
+    assert.equal(saved.userId, userId);
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);
