@@ -172,7 +172,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.goto(absolute("/shop"), { waitUntil: "domcontentloaded" });
     await page.getByPlaceholder("Search products...").fill("Shri Yantra");
     await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true })).toBeVisible();
-    await page.getByRole("link", { name: "Ask Availability" }).first().click();
+    await page.locator('a[href="/contact?topic=shri-yantra"]').click();
     await expect(page).toHaveURL(/\/contact\?topic=shri-yantra/);
     await expect(page.getByRole("heading", { name: "Availability enquiry: Shri Yantra" })).toBeVisible();
     const enquiry = page.getByRole("link", { name: "Email Naksharix about Shri Yantra" });
