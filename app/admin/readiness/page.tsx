@@ -29,7 +29,7 @@ export default async function AdminReadinessPage() {
 
   let database: Status = "error";
   try {
-    await prisma.$queryRawUnsafe("SELECT 1");
+    await prisma.$queryRaw`SELECT 1`;
     database = "ok";
   } catch {
     database = "error";
