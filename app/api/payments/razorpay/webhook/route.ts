@@ -57,8 +57,14 @@ export async function POST(request: NextRequest) {
     }
     if ((event.event === "payment.failed" || event.event === "payment.authorized") && payment?.order_id) {
       const existingPayment = await prisma.payment.findUnique({ where: { providerOrderId: payment.order_id } });
-      if (existingPayment && event.event === "payment.failed") {
-        await prisma.payment.update({ where: { id: existingPayment.id }, data: { status: PaymentStatus.FAILED } });
+      if (existingPayment && event.event === "payment.failed" && existingPayment.status !== PaymentStatus.PAID) {
+        // Razorpay can deliver a failed attempt after the same order has
+        // already been captured. Never downgrade a paid order on replay.
+        const transitioned = await prisma.payment.updateMany({
+          where: { id: existingPayment.id, status: { not: PaymentStatus.PAID } },
+          data: { status: PaymentStatus.FAILED }
+        });
+        if (transitioned.count === 0) return ok({ received: true });
         const metadata = (existingPayment.metadata as Record<string, unknown> | null) ?? {};
         const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
         const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
