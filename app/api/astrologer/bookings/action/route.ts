@@ -21,6 +21,17 @@ export async function POST(request: NextRequest) {
     const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });
     if (!booking) return fail("Booking not found", 404);
     if (profile && booking.astrologerProfileId !== profile.id) return fail("You cannot update this booking", 403);
+    // An astrologer may decline an unpaid request, but cannot confirm or complete it.
+    // A verified Razorpay payment (or an explicit server-owned free/admin bypass)
+    // is required before an appointment becomes an accepted obligation.
+    if (body.action !== "REJECT" &&
+        !["PAID", "FREE", "ADMIN_BYPASS"].includes(booking.paymentStatus)) {
+      return fail("Verified payment is required before this booking can be confirmed.", 409);
+    }
+    if (body.action === "COMPLETE" &&
+        !["ACCEPTED", "CONFIRMED"].includes(booking.status)) {
+      return fail("Only an accepted or confirmed appointment can be completed.", 422);
+    }
 
     const data = body.action === "ACCEPT"
       ? { status: "ACCEPTED" as const }
