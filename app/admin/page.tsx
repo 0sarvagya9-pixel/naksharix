@@ -101,7 +101,9 @@ export default function AdminPage() {
         </Button>
         <Button variant="outline" asChild>
           <Link href="/admin/payouts">Payout Dashboard</Link>
-              <Button variant="outline" asChild><Link href="/admin/support">Support Desk</Link></Button>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/admin/support">Support Desk</Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="/admin/shop">Shop Catalogue</Link>
