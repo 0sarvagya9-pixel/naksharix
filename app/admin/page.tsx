@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarClock, Newspaper, PackageSearch, ShieldCheck, Ticket, Users, Wallet } from "lucide-react";
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { Section } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const chart = [{ name: "Users", v: 120 }, { name: "Revenue", v: 340 }, { name: "Bookings", v: 210 }, { name: "Reports", v: 470 }];
 type AdminAnalytics = {
   users: number;
   revenue: number;
@@ -106,6 +104,9 @@ export default function AdminPage() {
         </Button>
         <Button variant="outline" asChild>
           <Link href="/admin/shop">Shop Catalogue</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/admin/readiness">System Readiness</Link>
         </Button>
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-4">
@@ -242,9 +243,11 @@ export default function AdminPage() {
         </CardContent>
       </Card>
       <Card className="mt-6">
-        <CardHeader><CardTitle>Revenue and growth</CardTitle></CardHeader>
-        <CardContent className="h-80">
-          <ResponsiveContainer width="100%" height="100%"><LineChart data={chart}><XAxis dataKey="name" /><Tooltip /><Line dataKey="v" stroke="hsl(var(--secondary))" strokeWidth={3} /></LineChart></ResponsiveContainer>
+        <CardHeader><CardTitle>Operational reporting</CardTitle></CardHeader>
+        <CardContent className="space-y-3 text-sm naksh-muted-text">
+          <p>Production metrics above come from authenticated APIs. No sample values are presented as business performance.</p>
+          <p>For real service status and availability checks, open the read-only System Readiness view.</p>
+          <Button variant="outline" asChild><Link href="/admin/readiness">View System Readiness</Link></Button>
         </CardContent>
       </Card>
       <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
