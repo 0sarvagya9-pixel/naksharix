@@ -156,7 +156,9 @@ try {
     const start = await req("/api/auth/google?next=https%3A%2F%2Fevil.example");
     assert.equal(start.status, 307);
     const location = new URL(start.headers.get("location") || "", base);
-    assert.equal(location.origin, base.origin);
+    assert.equal(location.protocol, "http:");
+    assert.ok(["localhost", "127.0.0.1"].includes(location.hostname), "OAuth alias redirected off localhost");
+    assert.equal(location.port, base.port);
     assert.equal(location.pathname, "/auth/login");
     const callback = await req("/api/auth/google/callback?code=forged&state=%2Fadmin");
     assert.equal(callback.status, 410);
