@@ -5,6 +5,7 @@ on:
     branches: [feat/preserve-live-ui-on-production-20260729]
     paths:
       - .github/workflows/live-visual-parity.yml
+      - scripts/qa-live-visual-parity.mjs
 
 permissions:
   contents: read
