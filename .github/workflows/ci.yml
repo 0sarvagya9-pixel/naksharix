@@ -137,6 +137,9 @@ jobs:
             fi
           fi
           cat http-smoke.log
+          if [ "$SMOKE_EXIT" -ne 0 ]; then
+            grep -A15 -B2 -E 'CI_REPORT_PDF_EXCEPTION|CI_REPORT_PDF_STACK' /tmp/naksharix-next.log || true
+          fi
           exit "$SMOKE_EXIT"
       - name: Upload HTTP smoke log
         if: always()
