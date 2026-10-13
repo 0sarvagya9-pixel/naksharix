@@ -69,7 +69,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "Current Product Scope",
         body:
-          "Core tools, saved reports, premium report payments, and consultation booking are part of the active platform. The AI Astrologer and physical shop remain intentionally parked until separately approved for public release.",
+          "Core tools, saved reports, premium report payments, and consultation booking are part of the active platform. The AI Astrologer is optional and readiness-gated. The spiritual Shop is an informational catalogue for enquiries only, without public product checkout or shipping promises.",
       },
       {
         title: "Responsible Use",
@@ -153,7 +153,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "AI Features",
         body:
-          "The public AI Astrologer is currently parked. If an AI feature is enabled later, the feature should explain what context is sent to the configured provider before a user submits sensitive information.",
+          "AI Astrologer is a separate opt-in, readiness-gated feature. Its consent flow explains that submitted context may be processed by the configured AI provider, and users should avoid sharing unnecessary sensitive information.",
       },
       {
         title: "Data Sharing",
@@ -325,7 +325,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
     eyebrow: "Delivery Policy",
     title: "Digital reports, premium access, and consultation delivery",
     intro:
-      "Naksharix currently delivers active paid services digitally. The physical shop remains coming soon and is not part of the active checkout flow.",
+      "Naksharix delivers active paid digital services electronically. The spiritual Shop lists informational products for enquiry; physical product checkout and shipping are not offered.",
     badge: "Delivery",
     icon: PackageCheck,
     highlights: [
@@ -357,7 +357,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "Physical Shipping",
         body:
-          "The Naksharix physical shop is currently parked as coming soon. No active physical-product checkout or shipping commitment is made until the shop is separately launched.",
+          "The Naksharix spiritual Shop is informational and enquiry-only. No public physical-product checkout, stock guarantee or shipping commitment is currently offered.",
       },
       {
         title: "Delivery Problems",
@@ -375,7 +375,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
     highlights: [
       "Payments are processed through Razorpay",
       "Premium reports and consultations require verified payment",
-      "Shop and AI Astrologer remain parked",
+      "Shop enquiries and readiness-gated AI availability",
     ],
     sections: [
       {
@@ -411,12 +411,12 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "Is the AI Astrologer active?",
         body:
-          "No. The public AI Astrologer is intentionally parked while reliability work continues. It should not be treated as an active paid feature.",
+          "AI Astrologer is available only when its live readiness check passes. It is a separate opt-in guided experience, not an active public monthly AI subscription.",
       },
       {
         title: "Is the shop active?",
         body:
-          "No. The physical-product shop remains coming soon. Naksharix does not currently make an active physical-shipping promise through the public shop page.",
+          "Naksharix offers a spiritual product information catalogue and availability enquiries, but not direct product checkout or guaranteed shipping.",
       },
       {
         title: "How do I contact support?",
