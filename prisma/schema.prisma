@@ -817,6 +817,15 @@ model Payout {
   @@index([userId, createdAt])
 }
 
+// Serialized enquiry-only product catalogue, owned by authorized administrators.
+// The public Shop is non-transactional: no stock, cart or checkout claims.
+model ShopCatalogueSnapshot {
+  id        String   @id
+  products  Json
+  updatedBy String
+  updatedAt DateTime @updatedAt
+}
+
 model AdminActionLog {
   id         String   @id @default(cuid())
   adminId    String
