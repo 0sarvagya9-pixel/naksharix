@@ -20,7 +20,7 @@ const password = "E2e!" + randomUUID() + "abc";
 const testCode = "734928";
 const usersToClean = new Set();
 let csrf, csrfCookie, userCookie, adminCookie, astroCookie;
-let userId, astroId, adminId, astroProfileId, bookingId;
+let userId, astroId, adminId, astroProfileId, bookingId, reportId;
 let passed = 0, failed = 0;
 async function req(path, options = {}) {
   const controller = new AbortController();
@@ -156,9 +156,44 @@ try {
     const res = await post("/api/astrologer/bookings/action", { bookingId, action: "ACCEPT" }, astroCookie);
     assert.equal(res.status, 409, "unpaid booking accepted: " + await res.text());
   });
+
+  await check("unpaid paid-report request blocks PDF generation and email delivery", async () => {
+    const report = await prisma.reportRequest.create({ data: {
+      userId, planType: "PREMIUM", paymentStatus: "PENDING", status: "PENDING_REVIEW",
+      reportSlug: "premium-kundli", deliveryEmail: email, fullName: "QA User",
+      dateOfBirth: "1990-01-15", timeOfBirth: "10:30", birthPlace: "Delhi",
+      latitude: 28.6139, longitude: 77.209, timezone: 5.5, language: "en"
+    }});
+    reportId = report.id;
+    const pdf = await post("/api/admin/report-requests/" + reportId + "/generate-pdf", {}, adminCookie);
+    assert.equal(pdf.status, 409, await pdf.text());
+    const delivery = await post("/api/admin/report-requests/" + reportId + "/deliver", {}, adminCookie);
+    assert.equal(delivery.status, 409, await delivery.text());
+  });
+  await check("synthetic paid-state fixture creates real PDF with owner-only download", async () => {
+    await prisma.reportRequest.update({ where: { id: reportId }, data: { paymentStatus: "PAID" } });
+    const pdf = await post("/api/admin/report-requests/" + reportId + "/generate-pdf", {}, adminCookie);
+    const result = await pdf.json();
+    assert.equal(pdf.status, 200, JSON.stringify(result).slice(0, 600));
+    assert.ok(result.data.byteLength > 500, "PDF bytes unexpectedly small");
+    const row = await prisma.reportRequest.findUniqueOrThrow({ where: { id: reportId } });
+    assert.ok(row.generatedPdfSize > 500 && row.generatedPdfChecksum);
+    const owned = await req("/api/report-requests/" + reportId + "/download", { headers: { cookie: userCookie } });
+    assert.equal(owned.status, 200, "owner PDF unavailable");
+    assert.equal(owned.headers.get("content-type"), "application/pdf");
+    const magic = Buffer.from(await owned.arrayBuffer()).subarray(0, 5).toString("ascii");
+    assert.equal(magic, "%PDF-");
+    const anon = await req("/api/report-requests/" + reportId + "/download");
+    assert.equal(anon.status, 401);
+  });
+
 } finally {
   try {
     if (adminId) await prisma.adminActionLog.deleteMany({ where: { adminId } });
+    if (reportId) {
+      await prisma.auditLog.deleteMany({ where: { targetId: reportId } });
+      await prisma.reportRequest.delete({ where: { id: reportId } }).catch(() => {});
+    }
     for (const id of usersToClean) await prisma.user.delete({ where: { id } }).catch(() => {});
   } finally { await prisma.$disconnect(); }
 }
