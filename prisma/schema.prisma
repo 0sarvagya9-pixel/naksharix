@@ -822,6 +822,7 @@ model Payout {
 model ShopCatalogueSnapshot {
   id        String   @id
   products  Json
+  version   Int      @default(1)
   updatedBy String
   updatedAt DateTime @updatedAt
 }
