@@ -102,6 +102,44 @@ await verify("all 12 horoscope APIs yield independent sign-specific responses", 
 await verify("horoscope invalid schema fails closed", async () => {
   assert.equal((await post("/api/horoscope", { zodiac: "x", period: "daily" })).status, 422);
 });
+
+const birth = {
+  name: "Sample Person", gender: "male", dateOfBirth: "1990-01-15", timeOfBirth: "10:30",
+  birthPlace: "Delhi", latitude: 28.6139, longitude: 77.209, timezone: "Asia/Kolkata", language: "en"
+};
+await verify("all six chart-based focused calculator kinds return real computed chart values", async () => {
+  for (const kind of ["dasha", "nakshatra", "moon-sign", "lagna", "manglik", "yoga"]) {
+    const d = await expectData(await post("/api/focused-calculators/kundli", { ...birth, kind }), kind);
+    assert.equal(d.kind, kind);
+    assert.ok(d.avakhada?.nakshatra, "missing Nakshatra for " + kind);
+    assert.ok(d.avakhada?.moonSign, "missing Moon sign for " + kind);
+    assert.ok(d.calculationMeta, "missing calculation evidence for " + kind);
+  }
+});
+await verify("Kundli generator creates structured birth report as anonymous user", async () => {
+  const d = await expectData(await post("/api/kundli/generate", birth), "kundli generate");
+  assert.ok(d.report && typeof d.report === "object", "Kundli chart absent");
+  assert.equal(d.meta?.saved, false, "anonymous Kundli must not save user record");
+});
+await verify("matchmaking engine returns real compatibility calculation", async () => {
+  const bride = {
+    name: "Sample Bride", gender: "female", birthDate: "1992-02-02", birthTime: "13:15",
+    birthPlace: "Delhi", latitude: 28.6139, longitude: 77.209, timezone: "Asia/Kolkata"
+  };
+  const groom = {
+    name: "Sample Groom", gender: "male", birthDate: "1990-01-15", birthTime: "10:30",
+    birthPlace: "Delhi", latitude: 28.6139, longitude: 77.209, timezone: "Asia/Kolkata"
+  };
+  const d = await expectData(await post("/api/matchmaking", { bride, groom, locale: "en" }), "matchmaking");
+  assert.ok(d.match && Number.isFinite(d.match.compatibilityScore), "computed compatibility missing");
+});
+await verify("weekly, monthly and yearly horoscope APIs produce nonempty sign results", async () => {
+  for (const period of ["weekly", "monthly", "yearly"]) {
+    const d = await expectData(await post("/api/horoscope", { zodiac: "aries", period, category: "general" }), period);
+    assert.ok(d.horoscope?.content && d.horoscope.content.length > 25, period + " horoscope empty");
+  }
+});
+
 await verify("tarot draw creates a real spread", async () => {
   const d = await expectData(await post("/api/tarot", { spread: "three-card", question: "How can I reflect on goals?", locale: "en" }), "tarot");
   assert.ok(Array.isArray(d.reading?.cards) && d.reading.cards.length === 3, "three-card spread incorrect");
