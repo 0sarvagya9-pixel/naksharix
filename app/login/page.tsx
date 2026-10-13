@@ -15,7 +15,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true }
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 
   return (
@@ -25,6 +30,11 @@ export default function LoginPage() {
           <CardTitle className="font-cinzel">Login to Naksharix</CardTitle>
         </CardHeader>
         <CardContent>
+          {error === "OAuthAccountNotLinked" ? (
+            <div role="alert" className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm leading-6">
+              This email is already associated with another sign-in method. If you previously registered with a password, sign in using your email and password below. Google accounts are not linked automatically for your security. Contact Naksharix support if you need help recovering access.
+            </div>
+          ) : null}
           <AuthForm mode="login" googleEnabled={googleEnabled} />
           <p className="mt-4 text-sm naksh-muted-text">
             New here? <Link href="/signup" className="text-[#01A361]">Create an account</Link>
