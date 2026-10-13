@@ -60,7 +60,10 @@ export async function POST(request: NextRequest) {
         where: {
           astrologerProfileId: profile.id,
           scheduledAt,
-          status: { in: ["ACCEPTED", "CONFIRMED", "COMPLETED"] }
+          // A pending payment is already an active reservation. Never issue
+          // a second payable booking for the same consultant/time slot.
+          // Follow-up work must add an explicitly verified hold-expiry flow.
+          status: { in: ["REQUESTED", "ACCEPTED", "CONFIRMED", "COMPLETED"] }
         },
         select: { id: true }
       });
