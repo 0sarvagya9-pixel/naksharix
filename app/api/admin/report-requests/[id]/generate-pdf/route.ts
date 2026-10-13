@@ -115,11 +115,6 @@ export async function POST(_request: Request, { params }: { params: Params }) {
 
     return ok({ fileName: stored.fileName, byteLength: stored.size, storageProvider: stored.storageDriver, status: ReportRequestStatus.GENERATED });
   } catch (error) {
-    // CI-only, disposable localhost diagnostic. Remove after root cause closure.
-    if (process.env.CI === "true" && (process.env.DATABASE_URL ?? "").includes("@localhost:5432/naksharix")) {
-      console.error("CI_REPORT_PDF_EXCEPTION", error instanceof Error ? error.name : "unknown", error instanceof Error ? error.message : "");
-      if (error instanceof Error) console.error("CI_REPORT_PDF_STACK", error.stack?.slice(0, 1800));
-    }
     return handleApiError(error);
   }
 }
