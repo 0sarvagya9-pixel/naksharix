@@ -6,15 +6,17 @@ import { chromium } from "@playwright/test";
 const root = process.cwd();
 const outputDir = path.join(root, "visual-parity-evidence");
 const sites = [
-  { key: "live", url: "https://www.naksharix.com/" },
-  { key: "candidate", url: "http://127.0.0.1:3000/" }
+  { key: "live-desktop", url: "https://www.naksharix.com/", mobile: false },
+  { key: "candidate-desktop", url: "http://127.0.0.1:3000/", mobile: false },
+  { key: "live-mobile", url: "https://www.naksharix.com/", mobile: true },
+  { key: "candidate-mobile", url: "http://127.0.0.1:3000/", mobile: true }
 ];
 await fs.mkdir(outputDir, { recursive: true });
 const browser = await chromium.launch({ headless: true, args: ["--no-sandbox"] });
 const captures = [];
 try {
   for (const target of sites) {
-    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, reducedMotion: "reduce", locale: "en-IN" });
+    const context = await browser.newContext({ viewport: target.mobile ? { width: 390, height: 844 } : { width: 1440, height: 900 }, deviceScaleFactor: 1, reducedMotion: "reduce", locale: "en-IN" });
     const page = await context.newPage();
     const response = await page.goto(target.url, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.evaluate(async () => { try { await document.fonts.ready; } catch {} });
@@ -27,7 +29,7 @@ try {
       const images = Array.from(document.querySelectorAll("img")).map(i => ({ alt: i.alt || "", src: i.currentSrc?.slice(0, 200) || "" })).slice(0, 20);
       return { title: document.title, nav, headings, firstText: clean(main.innerText).slice(0, 2400), images };
     });
-    const screenshot = path.join(outputDir, target.key + "-desktop.png");
+    const screenshot = path.join(outputDir, target.key + ".png");
     await page.screenshot({ path: screenshot, animations: "disabled", fullPage: false });
     captures.push({ target: target.key, url: target.url, httpStatus: response?.status(), screenshot, ...snapshot });
     await context.close();
@@ -45,6 +47,12 @@ async function pixels(file) {
   return sharp(file).resize({ width, height, fit:"fill" }).removeAlpha().raw().toBuffer();
 }
 const a=await pixels(first.screenshot), b=await pixels(second.screenshot);
+const mobileFirst = captures[2], mobileSecond = captures[3];
+const ma = await pixels(mobileFirst.screenshot), mb = await pixels(mobileSecond.screenshot);
+let mobileTotalAbs = 0;
+for (let i = 0; i < ma.length; i++) mobileTotalAbs += Math.abs(ma[i] - mb[i]);
+const mobilePixelSimilarity = 1 - mobileTotalAbs / (255 * ma.length);
+
 let totalAbs=0;
 for(let i=0;i<a.length;i++)totalAbs+=Math.abs(a[i]-b[i]);
 const pixelSimilarity = 1-totalAbs/(255*a.length);
@@ -54,6 +62,10 @@ const result={
   headingsCommon:commonHeadings, liveHeadings:first.headings, candidateHeadings:second.headings,
   heroFirstTextEqual:sameNormalized(first.firstText.slice(0,400),second.firstText.slice(0,400)),
   pixelSimilarity:Math.round(pixelSimilarity*10000)/10000,
+  mobilePixelSimilarity:Math.round(mobilePixelSimilarity*10000)/10000,
+  mobileHeadingsExact:JSON.stringify(mobileFirst.headings) === JSON.stringify(mobileSecond.headings),
+  mobileNavExact:JSON.stringify(mobileFirst.nav) === JSON.stringify(mobileSecond.nav),
+  mobileHeroFirstTextEqual:sameNormalized(mobileFirst.firstText.slice(0,400),mobileSecond.firstText.slice(0,400)),
   screenshotPaths:captures.map(x=>x.screenshot.replace(root+"/","")),
   note:"Screenshots are visual evidence. Structural differences require human review. No visual parity PASS is claimed solely by a numeric pixel score."
 };
