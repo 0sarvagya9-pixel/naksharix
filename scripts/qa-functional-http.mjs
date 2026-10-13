@@ -114,12 +114,19 @@ await verify("anonymous user cannot access administrative surfaces", async () =>
   }
 });
 await verify("CSRF blocks unauthorized state changes", async () => {
-  for (const pathname of ["/api/numerology", "/api/tarot", "/api/auth/signup", "/api/consultation-bookings"]) {
+  for (const pathname of ["/api/horoscope", "/api/tarot", "/api/auth/signup", "/api/consultation-bookings"]) {
     const res = await request(pathname, {
       method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({})
     });
     assert.equal(res.status, 403, pathname);
   }
+});
+await verify("public numerology is an intentional CSRF-exempt calculation", async () => {
+  const r = await request("/api/numerology", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: "Example Person", dateOfBirth: "1990-01-15" })
+  });
+  await expectData(r, "public numerology without cookie");
 });
 await verify("anonymous booking is rejected before data mutation", async () => {
   const res = await post("/api/consultation-bookings", {
