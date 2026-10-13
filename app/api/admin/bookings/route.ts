@@ -1,10 +1,11 @@
-import { handleApiError, ok } from "@/lib/api";
-import { requireAdminRole } from "@/lib/auth/roles";
+import { fail, handleApiError, ok } from "@/lib/api";
+import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
   try {
-    await requireAdminRole();
+    const admin = await getAdminApiUser();
+    if (!admin) return fail("Forbidden", 403);
     const bookings = await prisma.consultationBooking.findMany({
       orderBy: { createdAt: "desc" },
       take: 100,
