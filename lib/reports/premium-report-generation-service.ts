@@ -157,7 +157,7 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
     if (section.limitations.length) writeParagraph("Limitations: " + section.limitations.join(" "), 8.5, MUTED, 13);
   }
 
-  writeParagraph("Calculation status: " + status.status + ". Interpretive outputs are not guaranteed outcomes.", 8.5, MUTED);
+  writeParagraph("Calculation status: " + status.status + ". Interpretations are for reflection and do not predict certain results.", 8.5, MUTED);
 
   for (const item of pdf.getPages()) {
     item.drawText("Naksharix  |  Internal reviewed report  |  Page " + (pdf.getPages().indexOf(item) + 1),
