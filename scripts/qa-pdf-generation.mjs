@@ -31,7 +31,7 @@ const downloadRoute = source("app/api/report-requests/[id]/download/route.ts");
 const schema = readJson("fixtures/reports/premium-report-template-schema.json");
 
 assert(types.includes("PremiumReportGenerationStatus"), "Premium report generation status enum exists", "types foundation");
-assert(service.includes("renderToBuffer"), "Premium report service can render a real internal PDF buffer", "react-pdf renderer is wired");
+assert(service.includes("PDFDocument.create") && service.includes("pdf.save") && service.includes("embedFont"), "Premium report service creates a real unicode-capable internal PDF buffer", "Server-side pdf-lib renderer without React reconciler");
 assert(service.includes("blocked_until_admin_review"), "PDF generation requires admin review", "no unreviewed generation");
 assert(service.includes("blocked_until_report_content"), "PDF generation requires assembled report content", "no empty PDF");
 assert(service.includes("generated_internal_unverified"), "Generated PDF is labeled internal and unverified", "no public precision claim");
