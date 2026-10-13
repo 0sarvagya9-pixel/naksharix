@@ -160,7 +160,7 @@ try {
 
   await check("verified consultation review appears only in its astrologer's private dashboard", async () => {
     const denied = await req("/astrologer/reviews", { headers: { cookie: userCookie } });
-    assert.ok([302, 303, 307, 308].includes(denied.status), "ordinary user accessed astrologer reviews");
+    assert.ok([302, 303, 307, 308].includes(denied.status), "ordinary user status=" + denied.status);
     const anonymous = await req("/astrologer/reviews");
     assert.ok([302, 303, 307, 308].includes(anonymous.status), "anonymous visitor accessed reviews");
 
