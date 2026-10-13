@@ -178,6 +178,25 @@ try {
     });
     assert.equal(active, 1);
   });
+  await check("concurrent booking requests serialize to one active reservation", async () => {
+    const slot = await prisma.availabilitySlot.findFirstOrThrow({ where: { astrologerProfileId: astroProfileId } });
+    const requestBody = {
+      astrologerProfileId: astroProfileId, slotId: slot.id, bookingDate: "2027-01-12",
+      customerName: "QA User", customerEmail: email,
+      question: "Concurrent appointment reservation must never create two active bookings."
+    };
+    const pair = await Promise.all([
+      post("/api/consultation-bookings", requestBody, userCookie),
+      post("/api/consultation-bookings", requestBody, userCookie)
+    ]);
+    const statuses = pair.map((res) => res.status).sort((a, b) => a - b);
+    assert.deepEqual(statuses, [201, 409], "concurrent booking responses must be 201 and 409");
+    const count = await prisma.consultationBooking.count({
+      where: { astrologerProfileId: astroProfileId, scheduledAt: new Date("2027-01-12T05:30:00.000Z"),
+        status: { in: ["REQUESTED", "ACCEPTED", "CONFIRMED", "COMPLETED"] } }
+    });
+    assert.equal(count, 1, "concurrent reservations wrote multiple active bookings");
+  });
   await check("unpaid booking cannot be accepted by astrologer", async () => {
     const res = await post("/api/astrologer/bookings/action", { bookingId, action: "ACCEPT" }, astroCookie);
     assert.equal(res.status, 409, "unpaid booking accepted: " + await res.text());
