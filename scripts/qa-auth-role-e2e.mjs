@@ -107,6 +107,21 @@ try {
       assert.equal(view.status, 200, path + " HTTP " + view.status);
     }
   });
+  await check("admin operational readiness view uses real checks without sample metrics", async () => {
+    const response = await req("/admin/readiness", { headers: { cookie: adminCookie } });
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.ok(html.includes("System Readiness"));
+    assert.ok(html.includes("Production database"));
+    assert.ok(html.includes("Distributed Redis"));
+    assert.ok(!html.includes("ci-secret-ci-secret"), "sensitive environment output not allowed");
+    const publicRes = await req("/admin/readiness");
+    const publicBody = await publicRes.text();
+    assert.ok([302, 303, 307, 308].includes(publicRes.status) ||
+      (publicRes.status === 200 && publicBody.includes("NEXT_REDIRECT")),
+      "unauthenticated admin view must redirect");
+    assert.ok(!publicBody.includes("Production database"), "admin diagnostics cannot render anonymously");
+  });
   await check("astrologer signup creates pending private profile", async () => {
     const res = await post("/api/auth/signup", { name: "QA Astrologer", email: astroEmail, password, role: "ASTROLOGER", locale: "en" });
     const body = await res.json();
