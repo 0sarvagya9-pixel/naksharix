@@ -170,6 +170,10 @@ try {
     const original = initialBody.data.products;
     assert.ok(original.length > 2);
     const target = original[0];
+    const headingMarker = ">" + target.name.en + "</h2>";
+    const beforePage = await req("/shop");
+    assert.equal(beforePage.status, 200);
+    assert.ok((await beforePage.text()).includes(headingMarker), "active product must render as a real Shop heading");
     const updated = original.map((p) => p.id === target.id ? { ...p, status: "inactive" } : p);
     const write = await post("/api/admin/shop-catalogue", { expectedVersion: 0, products: updated }, adminCookie, "PUT");
     const result = await write.json();
@@ -177,7 +181,7 @@ try {
     assert.equal(result.data.version, 1);
     const publicPage = await req("/shop");
     assert.equal(publicPage.status, 200);
-    assert.ok(!(await publicPage.text()).includes(target.name.en), "deactivated product leaked to public Shop");
+    assert.ok(!(await publicPage.text()).includes(headingMarker), "deactivated product still rendered as a visible Shop heading");
     const adminRead = await req("/api/admin/shop-catalogue", { headers: { cookie: adminCookie } });
     const saved = await adminRead.json();
     assert.equal(saved.data.version, 1);
