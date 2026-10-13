@@ -6,13 +6,13 @@ import { Edit3, ImagePlus, PackageSearch, Plus, Search, Trash2 } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { secureFetch } from "@/lib/security/csrf";
 import {
   categoryLabel,
   emptyShopProduct,
   normalizeShopProducts,
   shopCategories,
   shopProducts,
-  shopProductStorageKey,
   shopPurposes,
   type ShopProduct
 } from "@/lib/manual-catalogue";
@@ -27,14 +27,27 @@ export function AdminShopContent() {
   const [editing, setEditing] = useState<FormState | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [version, setVersion] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(shopProductStorageKey);
-      if (stored) setProducts(normalizeShopProducts(JSON.parse(stored)));
-    } catch {
-      setProducts(shopProducts);
-    }
+    let active = true;
+    fetch("/api/admin/shop-catalogue", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || "Unable to load the persisted Shop catalogue.");
+        return payload.data as { products: ShopProduct[]; version: number };
+      })
+      .then((data) => {
+        if (!active) return;
+        setProducts(data.products);
+        setVersion(data.version);
+        setError("");
+      })
+      .catch((cause) => {
+        if (active) setError(cause instanceof Error ? cause.message : "Catalogue storage unavailable.");
+      });
+    return () => { active = false; };
   }, []);
 
   const filtered = useMemo(() => {
@@ -45,12 +58,30 @@ export function AdminShopContent() {
     });
   }, [category, products, query, status]);
 
-  function persist(nextProducts: ShopProduct[], message: string) {
+  async function persist(nextProducts: ShopProduct[], message: string): Promise<boolean> {
+    if (saving) return false;
     const sorted = [...nextProducts].sort((a, b) => Number(b.featured) - Number(a.featured) || a.name.en.localeCompare(b.name.en));
-    setProducts(sorted);
-    window.localStorage.setItem(shopProductStorageKey, JSON.stringify(sorted));
-    setNotice(message);
-    setError("");
+    setSaving(true);
+    setNotice("");
+    try {
+      const response = await secureFetch("/api/admin/shop-catalogue", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products: sorted, expectedVersion: version })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Could not save Shop catalogue.");
+      setProducts(payload.data.products as ShopProduct[]);
+      setVersion(payload.data.version as number);
+      setNotice(message);
+      setError("");
+      return true;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Catalogue save failed.");
+      return false;
+    } finally {
+      setSaving(false);
+    }
   }
 
   function startAdd() {
@@ -65,7 +96,7 @@ export function AdminShopContent() {
     setError("");
   }
 
-  function saveProduct(event: FormEvent<HTMLFormElement>) {
+  async function saveProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!editing) return;
     const name = editing.name.en.trim();
@@ -93,24 +124,23 @@ export function AdminShopContent() {
     };
     const exists = products.some((item) => item.id === product.id);
     const next = exists ? products.map((item) => (item.id === product.id ? product : item)) : [...products, product];
-    persist(next, exists ? "Product updated." : "Product added.");
-    setEditing(null);
+    if (await persist(next, exists ? "Product updated." : "Product added.")) setEditing(null);
   }
 
   function toggleStatus(product: ShopProduct) {
     const nextStatus = product.status === "active" ? "inactive" : "active";
     if (nextStatus === "inactive" && !window.confirm(`Deactivate ${product.name.en}? It will be hidden from the public shop.`)) return;
-    persist(products.map((item) => (item.id === product.id ? { ...item, status: nextStatus, updatedAt: new Date().toISOString() } : item)), `Product marked ${nextStatus}.`);
+    void persist(products.map((item) => (item.id === product.id ? { ...item, status: nextStatus, updatedAt: new Date().toISOString() } : item)), `Product marked ${nextStatus}.`);
   }
 
   function removeProduct(product: ShopProduct) {
-    if (!window.confirm(`Delete ${product.name.en}? This removes it from this local admin catalogue.`)) return;
-    persist(products.filter((item) => item.id !== product.id), "Product deleted from local catalogue.");
+    if (!window.confirm(`Delete ${product.name.en}? This removes it from the published catalogue.`)) return;
+    void persist(products.filter((item) => item.id !== product.id), "Product deleted from published catalogue.");
   }
 
   function resetSeed() {
-    if (!window.confirm("Reset local shop catalogue to seed products?")) return;
-    persist(shopProducts, "Seed catalogue restored.");
+    if (!window.confirm("Reset the published Shop catalogue to seed products?")) return;
+    void persist(shopProducts, "Published seed catalogue restored.");
   }
 
   return (
@@ -122,7 +152,7 @@ export function AdminShopContent() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">Admin Catalogue</p>
               <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382]">Shop Product Management</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[#a8b3c7]">
-                Manage the current spiritual product catalogue foundation. These changes are stored in this browser until database-backed products are connected.
+                Manage the published enquiry-only Shop catalogue. Changes are saved securely to shared database storage and audited across administrator sessions.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

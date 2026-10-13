@@ -8,9 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Section } from "@/components/section";
 import { useLanguage } from "@/components/language-provider";
-import { categoryLabel, shopCategories, shopProducts } from "@/lib/manual-catalogue";
+import { categoryLabel, shopCategories, type ShopProduct } from "@/lib/manual-catalogue";
 
-export function ShopComingSoonContent() {
+export function ShopComingSoonContent({ initialProducts }: { initialProducts: ShopProduct[] }) {
   const { locale } = useLanguage();
   const labels = shopLabels(locale);
   const [query, setQuery] = useState("");
@@ -18,13 +18,13 @@ export function ShopComingSoonContent() {
 
   const products = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return shopProducts.filter((product) => {
+    return initialProducts.filter((product) => {
       if (product.status !== "active") return false;
       const categoryMatch = category === "all" || product.category === category;
       const text = `${product.name[locale]} ${product.shortDescription[locale]} ${product.purpose} ${product.tags.join(" ")}`.toLowerCase();
       return categoryMatch && (!needle || text.includes(needle));
     });
-  }, [category, locale, query]);
+  }, [category, initialProducts, locale, query]);
 
   return (
     <main className="inner-page-shell star-field min-h-screen">

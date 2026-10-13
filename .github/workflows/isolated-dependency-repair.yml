@@ -1,0 +1,81 @@
+name: Isolated Dependency Repair
+
+on:
+  push:
+    branches: [feat/preserve-live-ui-on-production-20260729]
+    paths:
+      - .github/workflows/isolated-dependency-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  isolated-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Guard exact feature branch and preserve product scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'feat/preserve-live-ui-on-production-20260729'
+          test -f package-lock.json
+          test -f mobile-app/package-lock.json
+          test -z "$(git status --porcelain)"
+      - name: Prepare controlled production-dependency patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json','utf8'));
+          const plugin = p.dependencies['tailwindcss-animate'];
+          if (!plugin || p.devDependencies['tailwindcss-animate']) process.exit(1);
+          delete p.dependencies['tailwindcss-animate'];
+          p.devDependencies['tailwindcss-animate'] = plugin;
+          p.overrides['@prisma/config'] = { 'deepmerge-ts': '^8.0.2' };
+          fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n');
+          NODE
+          npm install next@15.5.27 sharp@0.35.5 --save-exact --package-lock-only --ignore-scripts --no-audit --no-fund
+          set +e
+          npm audit fix --package-lock-only --omit=dev --ignore-scripts --no-fund > /tmp/naksharix-audit-fix.log 2>&1
+          FIX_EXIT=$?
+          set -e
+          echo "NON_FORCE_AUDIT_FIX_EXIT=${FIX_EXIT}"
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm audit --omit=dev --audit-level=high
+          DATABASE_URL='postgresql://test:test@127.0.0.1:5432/naksharix_ci' npx prisma validate
+          DATABASE_URL='postgresql://test:test@127.0.0.1:5432/naksharix_ci' npx prisma generate
+          node scripts/qa-final-code-closure.mjs
+          npm run qa:consultation-time
+          npm run qa:auth-redirect
+      - name: Verify strictly scoped changes, then commit to feature branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          while IFS= read -r p; do
+            case "$p" in
+              package.json|package-lock.json|mobile-app/package.json|mobile-app/package-lock.json) ;;
+              *) echo "UNEXPECTED_CHANGED_FILE=$p"; exit 1 ;;
+            esac
+          done < <(git diff --name-only)
+          git add package.json package-lock.json mobile-app/package.json mobile-app/package-lock.json
+          git diff --cached --quiet && { echo 'NO_MANIFEST_DIFF'; exit 1; }
+          git config user.name 'naksharix-safe-dependency-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'security(deps): reviewed Next/Sharp patch and Expo SDK lock repair'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Upload audit-fix diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-repair-audit-log
+          path: /tmp/naksharix-audit-fix.log
+          if-no-files-found: ignore

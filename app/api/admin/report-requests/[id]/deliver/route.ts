@@ -1,6 +1,6 @@
 import { ReportRequestStatus } from "@prisma/client";
 import { fail, handleApiError, ok } from "@/lib/api";
-import { requireAdminRole } from "@/lib/auth/roles";
+import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/monitoring/logger";
@@ -11,10 +11,14 @@ type Params = Promise<{ id: string }>;
 
 export async function POST(_request: Request, { params }: { params: Params }) {
   try {
-    const admin = await requireAdminRole();
+    const admin = await getAdminApiUser();
+    if (!admin) return fail("Forbidden", 403);
     const { id } = await params;
     const reportRequest = await prisma.reportRequest.findUnique({ where: { id } });
     if (!reportRequest) return fail("Report request not found", 404);
+    if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
+      return fail("Verified payment or authorized admin bypass is required before delivering a paid report.", 409);
+    }
     if (!reportRequest.generatedPdfSize || (!reportRequest.generatedPdfBytes && !reportRequest.generatedPdfStorageKey)) {
       return fail("A real generated PDF is required before delivery.", 422);
     }

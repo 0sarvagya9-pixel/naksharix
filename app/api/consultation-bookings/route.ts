@@ -7,6 +7,7 @@ import { canBypassPayment } from "@/lib/auth/permissions";
 import { sendConsultationBookingEmail } from "@/lib/consultations/booking-email";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
+import { consultationSlotWeekday, parseConsultationSlotTime } from "@/lib/consultations/slot-time";
 
 const schema = z.object({
   astrologerProfileId: z.string().min(1),
@@ -42,12 +43,12 @@ export async function POST(request: NextRequest) {
     });
     if (!slot) return fail("Selected slot is invalid or inactive", 422);
 
-    const scheduledAt = new Date(`${body.bookingDate}T${slot.startTime}:00`);
-    if (Number.isNaN(scheduledAt.getTime()) || scheduledAt < new Date()) {
+    const scheduledAt = parseConsultationSlotTime(body.bookingDate, slot.startTime);
+    if (!scheduledAt || scheduledAt < new Date()) {
       return fail("Please choose a valid future appointment time", 422);
     }
 
-    if (scheduledAt.getDay() !== slot.dayOfWeek) {
+    if (consultationSlotWeekday(body.bookingDate) !== slot.dayOfWeek) {
       return fail("Selected slot does not match the day of week for the booking date", 422);
     }
 

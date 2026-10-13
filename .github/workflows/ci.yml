@@ -101,6 +101,12 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      - name: Bootstrap empty disposable PostgreSQL for HTTP smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e 'const u = new URL(process.env.DATABASE_URL || ""); if (process.env.CI !== "true" || u.hostname !== "localhost" || u.port !== "5432" || u.pathname !== "/naksharix") { process.exit(1); }'
+          npx prisma db push --skip-generate
       - name: Run local production HTTP smoke
         shell: bash
         run: |
@@ -122,6 +128,14 @@ jobs:
           fi
           node scripts/qa-http-smoke.mjs > http-smoke.log 2>&1
           SMOKE_EXIT=$?
+          if [ "$SMOKE_EXIT" -eq 0 ]; then
+            node scripts/qa-functional-http.mjs >> http-smoke.log 2>&1
+            SMOKE_EXIT=$?
+            if [ "$SMOKE_EXIT" -eq 0 ]; then
+              node scripts/qa-auth-role-e2e.mjs >> http-smoke.log 2>&1
+              SMOKE_EXIT=$?
+            fi
+          fi
           cat http-smoke.log
           exit "$SMOKE_EXIT"
       - name: Upload HTTP smoke log

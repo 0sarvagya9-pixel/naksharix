@@ -13,6 +13,7 @@ import { loginSchema, signupSchema } from "@/lib/validations/auth";
 import { secureFetch } from "@/lib/security/csrf";
 import { useLanguage } from "@/components/language-provider";
 import { errorClass, scrollToFirstError } from "@/lib/form-validation";
+import { safeInternalAuthPath } from "@/lib/auth/safe-redirect";
 
 type Mode = "login" | "signup";
 type RoleIntent = "USER" | "ASTROLOGER";
@@ -108,7 +109,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     }
 
     const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-    const redirectTo = searchParams?.get("redirectTo");
+    const redirectTo = safeInternalAuthPath(searchParams?.get("redirectTo") ?? searchParams?.get("next"));
     if (redirectTo) {
       router.push(redirectTo);
     } else {

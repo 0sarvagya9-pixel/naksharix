@@ -168,6 +168,18 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("button", { name: /Add to Cart|Checkout/i })).toHaveCount(0);
   });
 
+  test("Shop enquiry preserves selected item and opens product-specific support email", async ({ page }) => {
+    await page.goto(absolute("/shop"), { waitUntil: "domcontentloaded" });
+    await page.getByPlaceholder("Search products...").fill("Shri Yantra");
+    await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true })).toBeVisible();
+    await page.locator('a[href="/contact?topic=shri-yantra"]').click();
+    await expect(page).toHaveURL(/\/contact\?topic=shri-yantra/);
+    await expect(page.getByRole("heading", { name: "Availability enquiry: Shri Yantra" })).toBeVisible();
+    const enquiry = page.getByRole("link", { name: "Email Naksharix about Shri Yantra" });
+    await expect(enquiry).toHaveAttribute("href", /mailto:care@naksharix\.com\?subject=.+Shri%20Yantra/i);
+    await expect(page.getByRole("button", { name: /Add to Cart|Checkout/i })).toHaveCount(0);
+  });
+
   test("AI readiness endpoint exposes no secret details", async ({ request }) => {
     const response = await request.get(absolute("/api/ai/status"));
     expect(response.status()).toBe(200);

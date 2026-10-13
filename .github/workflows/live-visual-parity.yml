@@ -1,0 +1,71 @@
+name: Live Visual Parity Evidence
+
+on:
+  push:
+    branches: [feat/preserve-live-ui-on-production-20260729]
+    paths:
+      - .github/workflows/live-visual-parity.yml
+      - scripts/qa-live-visual-parity.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naksharix
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      JWT_SECRET: visual-qa-secret-visual-qa-secret-visual-qa-secret
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      ASTROLOGY_PROVIDER: own_engine
+      AI_ASTROLOGER_ENABLED: "false"
+      AI_REPORT_GENERATOR_ENABLED: "false"
+      ALLOW_AI_DIAGNOSTICS: "false"
+      SUBSCRIPTIONS_ENABLED: "false"
+      EMAIL_PROVIDER: disabled
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1
+      - run: npx playwright install --with-deps chromium
+      - run: npx prisma generate
+      - run: npm run build
+      - name: Capture live and candidate snapshots (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run start -- -p 3000 > /tmp/naksh-visual-app.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          READY=0
+          for i in {1..35}; do
+            if curl --silent --fail http://127.0.0.1:3000/ > /dev/null; then READY=1; break; fi
+            sleep 2
+          done
+          if [ "$READY" -ne 1 ]; then cat /tmp/naksh-visual-app.log; exit 1; fi
+          node scripts/qa-live-visual-parity.mjs
+      - name: Preserve design parity screenshots and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: naksharix-live-design-parity
+          path: visual-parity-evidence
+          if-no-files-found: warn

@@ -56,7 +56,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
         <select aria-label="Filter astrologers by expertise" value={expertise} onChange={(event) => setExpertise(event.target.value)} className={filterClassName}>
           <option value="All">{tr("all")}</option><option value="Vedic">{tr("vedic")}</option><option value="Tarot">{tr("tarotWord")}</option><option value="Numerology">{tr("numerologyWord")}</option><option value="Kundli">Kundli</option>
         </select>
-        <select aria-label="Filter astrologers by maximum price" value={price} onChange={(event) => setPrice(event.target.value)} className={filterClassName}>
+        <select aria-label="Filter astrologers by maximum 30-minute consultation amount" value={price} onChange={(event) => setPrice(event.target.value)} className={filterClassName}>
           <option value="All">{tr("all")}</option><option value="40">{tr("upToInr40")}</option><option value="50">{tr("upToInr50")}</option><option value="60">{tr("upToInr60")}</option>
         </select>
         <select aria-label="Filter astrologers by minimum rating" value={rating} onChange={(event) => setRating(event.target.value)} className={filterClassName}>
@@ -82,7 +82,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-[#FFD700]">
                 <Star className="h-4 w-4 fill-current" />
-                {(astrologer.rating || 0).toFixed(1)} {tr("rating")} | {astrologer.experienceYears}+ {tr("years")} | INR {astrologer.pricePerMinute}/min
+                {(astrologer.rating || 0).toFixed(1)} {tr("rating")} | {astrologer.experienceYears}+ {tr("years")} | INR {astrologer.pricePerMinute} / 30-minute booking
               </div>
               <p className="flex items-center gap-2 text-sm text-emerald-200"><Circle className="h-2 w-2 fill-current" /> {astrologer.status ?? tr("onlineForDemoBookings")}</p>
               <div className="flex flex-wrap gap-2 text-xs">

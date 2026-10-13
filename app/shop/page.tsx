@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ShopComingSoonContent } from "@/components/shop-coming-soon-content";
+import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true }
 };
 
-export default function ShopPage() {
-  return <ShopComingSoonContent />;
+export const dynamic = "force-dynamic";
+
+export default async function ShopPage() {
+  const catalogue = await getShopCatalogue();
+  return <ShopComingSoonContent initialProducts={catalogue.products} />;
 }

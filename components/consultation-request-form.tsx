@@ -194,7 +194,7 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
                 type="date"
               />
             </Field>
-            <Field label={tr("preferredTimeSlot")} error={errors.selectedSlot}>
+            <Field label={`${tr("preferredTimeSlot")} (IST / UTC+05:30)`} error={errors.selectedSlot}>
               <select
                 data-field="selectedSlot"
                 value={selectedSlot}

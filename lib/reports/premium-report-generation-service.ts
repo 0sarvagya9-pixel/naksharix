@@ -1,5 +1,8 @@
-import React from "react";
-import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import "server-only";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import { getPremiumEngineActivationStatus } from "@/lib/astrology/premium-engine/activation-status";
 import type { PremiumReportContentResult } from "@/lib/reports/premium-report-content-engine";
 import { premiumReportAutomationStatus, type PremiumReportGenerationStatus } from "@/lib/reports/premium-report-types";
@@ -32,94 +35,139 @@ export type PremiumReportGenerationResult =
       reason: string;
     };
 
-const styles = StyleSheet.create({
-  page: {
-    padding: 36,
-    backgroundColor: "#020612",
-    color: "#ffffff",
-    fontSize: 10,
-    fontFamily: "Helvetica"
-  },
-  title: {
-    color: "#f3d382",
-    fontSize: 20,
-    marginBottom: 8
-  },
-  subtitle: {
-    color: "#94a3b8",
-    fontSize: 10,
-    marginBottom: 18
-  },
-  section: {
-    border: "1 solid #1e293b",
-    padding: 10,
-    marginBottom: 10,
-    backgroundColor: "#0a1224"
-  },
-  sectionTitle: {
-    color: "#f3d382",
-    fontSize: 12,
-    marginBottom: 5
-  },
-  body: {
-    color: "#e5e7eb",
-    lineHeight: 1.35
-  },
-  muted: {
-    color: "#94a3b8",
-    fontSize: 8,
-    marginTop: 4
+const PAGE_WIDTH = 595.28;
+const PAGE_HEIGHT = 841.89;
+const LEFT = 42;
+const TEXT_WIDTH = PAGE_WIDTH - LEFT * 2;
+const GOLD = rgb(0.68, 0.45, 0.12);
+const INK = rgb(0.08, 0.13, 0.23);
+const MUTED = rgb(0.34, 0.4, 0.5);
+const WHITE = rgb(1, 1, 1);
+
+function blocked(
+  status: Exclude<PremiumReportGenerationResult["status"], "generated_internal_unverified">,
+  reason: string
+): PremiumReportGenerationResult {
+  return { generated: false, status, pdfUrl: null, deliveryEnabled: false, reason };
+}
+
+function readableText(value: unknown): string {
+  if (value == null) return "Unavailable";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.slice(0, 14).map((item, index) => String(index + 1) + ". " + readableInline(item)).join("\n");
+  if (typeof value === "object") return Object.entries(value as Record<string, unknown>)
+    .slice(0, 22).map(([key, item]) => labelize(key) + ": " + readableInline(item)).join("\n");
+  return "Data available";
+}
+
+function readableInline(value: unknown): string {
+  if (value == null) return "not available";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.length + " entries";
+  if (typeof value === "object") return Object.entries(value as Record<string, unknown>).slice(0, 6)
+    .map(([key, item]) => labelize(key) + " " + (item && typeof item === "object" ? "available" : String(item ?? "not available"))).join(", ");
+  return "Available";
+}
+function labelize(value: string) {
+  return value.replace(/([A-Z])/g, " $1").replace(/[_-]+/g, " ").replace(/^./, (first) => first.toUpperCase());
+}
+
+// Use the bundled fonts so English and Devanagari reports do not rely on React rendering.
+async function loadReportFont(pdf: PDFDocument): Promise<PDFFont> {
+  pdf.registerFontkit(fontkit);
+  const bytes = await readFile(path.join(process.cwd(), "public", "fonts", "NotoSansDevanagari-Regular.ttf"));
+  return pdf.embedFont(bytes, { subset: true });
+}
+function safePrint(value: string) {
+  // Disallow control characters, emoji and unsupported scripts; preserve Latin and Devanagari.
+  return value.replace(/\r/g, "").replace(/[^\u0009\u000A\u0020-\u007E\u00A0-\u00FF\u0900-\u097F]/gu, " ");
+}
+function wrapLine(text: string, font: PDFFont, size: number, width: number): string[] {
+  const out: string[] = [];
+  let current = "";
+  for (const word of safePrint(text).split(/\s+/).filter(Boolean)) {
+    const proposal = current ? current + " " + word : word;
+    if (font.widthOfTextAtSize(proposal, size) <= width) {
+      current = proposal;
+      continue;
+    }
+    if (current) out.push(current);
+    current = "";
+    for (const character of Array.from(word)) {
+      const test = current + character;
+      if (current && font.widthOfTextAtSize(test, size) > width) {
+        out.push(current);
+        current = character;
+      } else {
+        current = test;
+      }
+    }
   }
-});
+  if (current) out.push(current);
+  return out.length ? out : [""];
+}
 
 export async function generatePremiumReportPdf(request: PremiumReportGenerationRequest): Promise<PremiumReportGenerationResult> {
-  const pdfStatus = getPremiumEngineActivationStatus("pdf_generation");
+  const status = getPremiumEngineActivationStatus("pdf_generation");
+  if (!request.content) return blocked("blocked_until_report_content", "Real chart-based report content is required.");
+  if (!request.reviewedByAdmin) return blocked("blocked_until_admin_review", "Admin review is required before creating a report PDF.");
 
-  if (!request.content) {
-    return blocked("blocked_until_report_content", "Report content must be assembled from real engine output before PDF generation.");
+  const pdf = await PDFDocument.create();
+  pdf.setTitle("Naksharix Premium Report " + request.requestId);
+  pdf.setAuthor("Naksharix");
+  pdf.setSubject("Reviewed astrological chart report with calculation limitations");
+  const font = await loadReportFont(pdf);
+  let page: PDFPage = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  let y = PAGE_HEIGHT - 52;
+
+  const newPage = () => {
+    page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+    y = PAGE_HEIGHT - 52;
+  };
+  const ensure = (height: number) => {
+    if (y < 55 + height) newPage();
+  };
+  const writeLine = (line: string, size: number, color = INK, gap = 1.45) => {
+    const height = size * gap;
+    ensure(height);
+    page.drawText(line || " ", { x: LEFT, y, font, size, color, maxWidth: TEXT_WIDTH });
+    y -= height;
+  };
+  const writeParagraph = (text: string, size = 9.5, color = INK, space = 8) => {
+    for (const sourceLine of String(text).split(/\n/)) {
+      for (const line of wrapLine(sourceLine, font, size, TEXT_WIDTH)) writeLine(line, size, color);
+    }
+    y -= space;
+  };
+
+  page.drawRectangle({ x: 0, y: PAGE_HEIGHT - 106, width: PAGE_WIDTH, height: 106, color: rgb(0.04, 0.1, 0.19) });
+  writeLine("NAKSHARIX  |  PREMIUM ASTROLOGY REPORT", 18, WHITE, 1.5);
+  writeLine("Prepared from Naksharix internal astrology calculations", 10, WHITE, 2.3);
+  y -= 20;
+  writeParagraph("Reference: " + request.requestId, 9, MUTED);
+  writeParagraph("Report type: " + request.templateId, 9, MUTED);
+
+  for (const section of request.content.sections) {
+    const title = safePrint(section.title + " (" + section.status + ")");
+    ensure(45);
+    page.drawRectangle({ x: LEFT, y: y - 7, width: TEXT_WIDTH, height: 2, color: GOLD });
+    y -= 21;
+    writeParagraph(title, 12, GOLD, 10);
+    writeParagraph(readableText(section.data), 9, INK, 6);
+    if (section.limitations.length) writeParagraph("Limitations: " + section.limitations.join(" "), 8.5, MUTED, 13);
   }
 
-  if (!request.reviewedByAdmin) {
-    return blocked("blocked_until_admin_review", "Internal PDF generation requires admin review before any file is created.");
+  writeParagraph("Calculation status: " + status.status + ". Interpretations are for reflection and do not predict certain results.", 8.5, MUTED);
+
+  for (const item of pdf.getPages()) {
+    item.drawText("Naksharix  |  Internal reviewed report  |  Page " + (pdf.getPages().indexOf(item) + 1),
+      { x: LEFT, y: 29, font, size: 8, color: MUTED });
   }
-
-  const document = React.createElement(
-    Document,
-    {
-      title: `Naksharix Premium Report ${request.requestId}`,
-      author: "Naksharix",
-      subject: "Internal reviewed premium astrology report draft"
-    },
-    React.createElement(
-      Page,
-      { size: "A4", style: styles.page },
-      React.createElement(Text, { style: styles.title }, "Naksharix Premium Report Draft"),
-      React.createElement(
-        Text,
-        { style: styles.subtitle },
-        "Internal reviewed PDF draft. Delivery and payment workflow are not enabled by this generator."
-      ),
-      ...request.content.sections.map((section) =>
-        React.createElement(
-          View,
-          { key: section.key, style: styles.section },
-          React.createElement(Text, { style: styles.sectionTitle }, `${section.title} (${section.status})`),
-          React.createElement(Text, { style: styles.body }, summarizeSectionData(section.data)),
-          section.limitations.length
-            ? React.createElement(Text, { style: styles.muted }, `Limitations: ${section.limitations.join(" ")}`)
-            : null
-        )
-      ),
-      React.createElement(
-        Text,
-        { style: styles.muted },
-        `Public status: ${pdfStatus.status}. No public download URL or automated delivery is enabled.`
-      )
-    )
-  );
-
-  const bytes = await renderToBuffer(document);
-
+  const saved = await pdf.save({ useObjectStreams: true });
+  const bytes = Buffer.from(saved);
+  if (bytes.subarray(0, 5).toString("ascii") !== "%PDF-") {
+    throw new Error("PDF serialization returned an invalid document");
+  }
   return {
     generated: true,
     status: "generated_internal_unverified",
@@ -127,56 +175,8 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
     bytes,
     byteLength: bytes.byteLength,
     deliveryEnabled: false,
-    reason: "A real internal PDF buffer was generated for reviewed content only. It is not delivered or exposed publicly."
+    reason: "A real internal reviewed PDF with calculation limitations was generated for protected storage."
   };
-}
-
-function blocked(status: Exclude<PremiumReportGenerationResult["status"], "generated_internal_unverified">, reason: string): PremiumReportGenerationResult {
-  return {
-    generated: false,
-    status,
-    pdfUrl: null,
-    deliveryEnabled: false,
-    reason
-  };
-}
-
-function summarizeSectionData(data: unknown) {
-  if (data == null) return "Section data is unavailable.";
-  if (typeof data === "string") return data;
-  if (typeof data === "number" || typeof data === "boolean") return String(data);
-  if (Array.isArray(data)) return data.slice(0, 12).map((item, index) => `${index + 1}. ${summarizeInline(item)}`).join("\n");
-  if (typeof data === "object") {
-    return Object.entries(data as Record<string, unknown>)
-      .slice(0, 18)
-      .map(([key, value]) => `${labelize(key)}: ${summarizeInline(value)}`)
-      .join("\n");
-  }
-  return "Section data is available in a non-display format.";
-}
-
-function summarizeInline(value: unknown): string {
-  if (value == null) return "Not available";
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
-  if (Array.isArray(value)) return value.length ? `${value.length} entries` : "No entries";
-  if (typeof value === "object") {
-    const fields = Object.entries(value as Record<string, unknown>)
-      .slice(0, 5)
-      .map(([key, nestedValue]) => `${labelize(key)} ${inlineScalar(nestedValue)}`);
-    return fields.join(", ");
-  }
-  return "Available";
-}
-
-function inlineScalar(value: unknown) {
-  if (value == null) return "not available";
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
-  if (Array.isArray(value)) return value.length ? `${value.length} entries` : "no entries";
-  return "available";
-}
-
-function labelize(value: string) {
-  return value.replace(/([A-Z])/g, " $1").replace(/[_-]+/g, " ").replace(/^./, (first) => first.toUpperCase());
 }
 
 export function getPremiumReportPublicDeliveryStatus() {

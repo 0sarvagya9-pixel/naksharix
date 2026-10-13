@@ -1,6 +1,6 @@
 import { ReportRequestStatus } from "@prisma/client";
 import { fail, handleApiError, ok } from "@/lib/api";
-import { requireAdminRole } from "@/lib/auth/roles";
+import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { calculateInternalChart } from "@/lib/astrology/premium-engine/chart";
@@ -16,13 +16,17 @@ type Params = Promise<{ id: string }>;
 
 export async function POST(_request: Request, { params }: { params: Params }) {
   try {
-    const admin = await requireAdminRole();
+    const admin = await getAdminApiUser();
+    if (!admin) return fail("Forbidden", 403);
     const limited = rateLimitResponse("admin-generate-pdf", admin.id, 10, 60_000);
     if (limited) return limited;
     const { id } = await params;
     const reportRequest = await prisma.reportRequest.findUnique({ where: { id } });
     if (!reportRequest) return fail("Report request not found", 404);
-    if (!reportRequest.latitude || !reportRequest.longitude || reportRequest.timezone === null) {
+    if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
+      return fail("Verified payment or authorized admin bypass is required before generating a paid report.", 409);
+    }
+    if (reportRequest.latitude === null || reportRequest.longitude === null || reportRequest.timezone === null) {
       return fail("Birth latitude, longitude, and timezone are required before PDF generation.", 422);
     }
 

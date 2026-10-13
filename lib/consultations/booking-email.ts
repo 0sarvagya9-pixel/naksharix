@@ -1,6 +1,7 @@
 import "server-only";
 
 import { sendEmail } from "@/lib/email/email-service";
+import { formatConsultationSlotTime } from "@/lib/consultations/slot-time";
 
 export async function sendConsultationBookingEmail(input: {
   to: string;
@@ -10,11 +11,7 @@ export async function sendConsultationBookingEmail(input: {
   scheduledAt: Date;
   paymentRequired: boolean;
 }) {
-  const when = new Intl.DateTimeFormat("en-IN", {
-    dateStyle: "full",
-    timeStyle: "short",
-    timeZone: "Asia/Kolkata"
-  }).format(input.scheduledAt);
+  const when = formatConsultationSlotTime(input.scheduledAt);
 
   return sendEmail({
     to: input.to,

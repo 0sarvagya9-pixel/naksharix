@@ -37,7 +37,7 @@ for (const page of legacyPages) {
 const shopPage = source("app/shop/page.tsx");
 const shopContent = source("components/shop-coming-soon-content.tsx");
 assert(shopPage.includes("index: true") && shopPage.includes("Spiritual Catalogue"), "Shop publishes a truthful informational catalogue", "indexable catalogue metadata");
-assert(shopContent.includes("shopProducts") && shopContent.includes("Ask Availability"), "Shop catalogue renders real seed product information", "searchable contact-based catalogue");
+assert(shopPage.includes("getShopCatalogue") && shopContent.includes("initialProducts") && shopContent.includes("Ask Availability"), "Shop catalogue renders real persisted or safe seed product information", "server-backed searchable contact-based catalogue");
 assert(!shopContent.includes("RazorpayCheckoutButton") && !shopContent.includes("Add to Cart") && !shopContent.includes("Buy Now"), "Shop does not invent ecommerce", "no cart or product checkout controls");
 
 const aiPage = source("app/ai-astrologer/page.tsx");

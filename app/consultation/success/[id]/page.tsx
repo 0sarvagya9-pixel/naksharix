@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
+import { formatConsultationSlotTime } from "@/lib/consultations/slot-time";
 
 export const dynamic = "force-dynamic";
 
@@ -43,13 +44,13 @@ export default async function ConsultationSuccessPage({ params }: PageProps) {
 
             <p className="text-sm leading-6 text-slate-300">
               {isConfirmed
-                ? `Booking confirmed for ${booking.scheduledAt.toLocaleString("en-IN")}. A meeting join link will be assigned and updated on your dashboard before the session starts.`
+                ? `Booking confirmed for ${formatConsultationSlotTime(booking.scheduledAt)}. A meeting join link will be assigned and updated on your dashboard before the session starts.`
                 : "Your slot request is saved. Please check your dashboard for updates or to complete pending payments."}
             </p>
 
             <div className="rounded-lg border border-[#D4AF37]/20 bg-[#02112C]/40 p-4 space-y-2 text-sm text-slate-300">
               <p><span className="text-[#FFD700] font-semibold">Astrologer:</span> {booking.astrologerProfile.displayName}</p>
-              <p><span className="text-[#FFD700] font-semibold">Date & Time:</span> {booking.scheduledAt.toLocaleString("en-IN")} ({booking.durationMins} mins)</p>
+              <p><span className="text-[#FFD700] font-semibold">Date & Time:</span> {formatConsultationSlotTime(booking.scheduledAt)} ({booking.durationMins} mins)</p>
               <p><span className="text-[#FFD700] font-semibold">Booking Status:</span> {booking.status}</p>
               <p><span className="text-[#FFD700] font-semibold">Payment Status:</span> {booking.paymentStatus}</p>
               <p><span className="text-[#FFD700] font-semibold">Confirmation Email:</span> {metadata?.customerEmail ?? user.email}</p>

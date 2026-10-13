@@ -1,14 +1,15 @@
 import { ReportRequestStatus } from "@prisma/client";
 import { z } from "zod";
 import { fail, handleApiError, ok } from "@/lib/api";
-import { requireAdminRole } from "@/lib/auth/roles";
+import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { assertAllowedReportStatusTransition } from "@/lib/reports/report-status-transitions";
 
 export async function GET() {
   try {
-    await requireAdminRole();
+    const admin = await getAdminApiUser();
+    if (!admin) return fail("Forbidden", 403);
     const reportRequests = await prisma.reportRequest.findMany({
       orderBy: { createdAt: "desc" },
       take: 50,
@@ -47,7 +48,8 @@ const patchSchema = z.object({
 
 export async function PATCH(request: Request) {
   try {
-    const admin = await requireAdminRole();
+    const admin = await getAdminApiUser();
+    if (!admin) return fail("Forbidden", 403);
     const body = patchSchema.parse(await request.json());
     const current = await prisma.reportRequest.findUnique({ where: { id: body.id } });
     if (!current) return fail("Report request not found", 404);
