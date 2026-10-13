@@ -158,6 +158,29 @@ try {
   });
 
 
+  await check("verified consultation review appears only in its astrologer's private dashboard", async () => {
+    const denied = await req("/astrologer/reviews", { headers: { cookie: userCookie } });
+    const deniedHtml = await denied.text();
+    assert.ok([302, 303, 307, 308].includes(denied.status) || (denied.status === 200 && deniedHtml.includes("NEXT_REDIRECT") && !deniedHtml.includes("Latest Client Reviews")), "role authorization response unexpected");
+    const anonymous = await req("/astrologer/reviews");
+    assert.ok([302, 303, 307, 308].includes(anonymous.status), "anonymous visitor accessed reviews");
+
+    // Synthetic paid/completed fixture is confined to disposable CI PostgreSQL.
+    await prisma.consultationBooking.update({
+      where: { id: bookingId }, data: { status: "COMPLETED", paymentStatus: "PAID" }
+    });
+    const reviewText = "This completed consultation gave useful context for my decisions.";
+    const review = await post("/api/consultation-bookings/review", {
+      bookingId, rating: 5, body: reviewText
+    }, userCookie);
+    assert.equal(review.status, 200, await review.text());
+    const ownerPage = await req("/astrologer/reviews", { headers: { cookie: astroCookie } });
+    assert.equal(ownerPage.status, 200);
+    const html = await ownerPage.text();
+    assert.ok(html.includes(reviewText), "verified review body not rendered in private dashboard");
+    assert.ok(html.includes("Reviews and Ratings"), "dashboard title absent");
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);
