@@ -27,3 +27,8 @@ export async function requireAstroRole() {
 export async function requireAdminRole() {
   return requireRole(["ADMIN", "SUPER_ADMIN"]);
 }
+/** API handlers must return HTTP 403, never catch a Next.js redirect as HTTP 500. */
+export async function getAdminApiUser() {
+  const user = await getCurrentUser();
+  return user && (user.role === "ADMIN" || user.role === "SUPER_ADMIN") ? user : null;
+}
