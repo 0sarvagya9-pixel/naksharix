@@ -20,6 +20,25 @@ function assert(condition, name, detail) {
   record(condition ? "PASSED" : "FAILED", name, detail);
 }
 
+// P0 security regression: legacy OAuth endpoints may only direct users to the
+// audited NextAuth entrypoint; they must not exchange codes or link by email.
+const legacyGoogleStart = source("app/api/auth/google/route.ts");
+const legacyGoogleCallback = source("app/api/auth/google/callback/route.ts");
+assert(legacyGoogleStart.includes('new URL("/auth/login", request.url)') &&
+  !legacyGoogleStart.includes("accounts.google.com") &&
+  !legacyGoogleStart.includes('searchParams.set("state"'),
+  "Legacy Google login forwards only to the audited NextAuth login", "no self-managed OAuth state");
+assert(legacyGoogleCallback.includes("status: 410") &&
+  !legacyGoogleCallback.includes("prisma.user.upsert") &&
+  !legacyGoogleCallback.includes("setAuthCookie") &&
+  !legacyGoogleCallback.includes("oauth2.googleapis.com"),
+  "Legacy Google callback fails closed", "no arbitrary email linking or session creation");
+
+const payableBooking = source("app/api/consultation-bookings/route.ts");
+assert(payableBooking.includes('"REQUESTED", "ACCEPTED", "CONFIRMED", "COMPLETED"') &&
+  payableBooking.includes("TransactionIsolationLevel.Serializable"),
+  "Unpaid consultation reserves the selected slot", "prevents multiple payable requests at one time");
+
 const legacyPages = [
   { route: "app/talk-to-kundli/page.tsx", label: "Legacy Kundli AI", markers: ["permanentRedirect", "/ai-astrologer"] },
   { route: "app/chatbot/page.tsx", label: "Legacy chatbot", markers: ["permanentRedirect", "/ai-astrologer"] }

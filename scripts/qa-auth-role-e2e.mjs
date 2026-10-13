@@ -152,6 +152,51 @@ try {
     const b = await prisma.consultationBooking.findUniqueOrThrow({ where: { id: bookingId } });
     assert.equal(b.userId, userId);
   });
+  await check("legacy Google OAuth aliases cannot bypass NextAuth or redirect off-site", async () => {
+    const start = await req("/api/auth/google?next=https%3A%2F%2Fevil.example");
+    assert.equal(start.status, 307);
+    const location = new URL(start.headers.get("location") || "", base);
+    assert.equal(location.protocol, "http:");
+    assert.ok(["localhost", "127.0.0.1"].includes(location.hostname), "OAuth alias redirected off localhost");
+    assert.equal(location.port, base.port);
+    assert.equal(location.pathname, "/auth/login");
+    const callback = await req("/api/auth/google/callback?code=forged&state=%2Fadmin");
+    assert.equal(callback.status, 410);
+    assert.doesNotMatch(callback.headers.get("set-cookie") || "", /naksharix_session/);
+  });
+  await check("second unpaid booking of same astrologer slot is rejected", async () => {
+    const slot = await prisma.availabilitySlot.findFirstOrThrow({ where: { astrologerProfileId: astroProfileId } });
+    const collision = await post("/api/consultation-bookings", {
+      astrologerProfileId: astroProfileId, slotId: slot.id, bookingDate: "2027-01-05",
+      customerName: "QA User", customerEmail: email,
+      question: "Please check that this pending slot cannot be sold twice."
+    }, userCookie);
+    assert.equal(collision.status, 409, await collision.text());
+    const active = await prisma.consultationBooking.count({
+      where: { astrologerProfileId: astroProfileId, scheduledAt: new Date("2027-01-05T05:30:00.000Z"),
+        status: { in: ["REQUESTED", "ACCEPTED", "CONFIRMED", "COMPLETED"] } }
+    });
+    assert.equal(active, 1);
+  });
+  await check("concurrent booking requests serialize to one active reservation", async () => {
+    const slot = await prisma.availabilitySlot.findFirstOrThrow({ where: { astrologerProfileId: astroProfileId } });
+    const requestBody = {
+      astrologerProfileId: astroProfileId, slotId: slot.id, bookingDate: "2027-01-12",
+      customerName: "QA User", customerEmail: email,
+      question: "Concurrent appointment reservation must never create two active bookings."
+    };
+    const pair = await Promise.all([
+      post("/api/consultation-bookings", requestBody, userCookie),
+      post("/api/consultation-bookings", requestBody, userCookie)
+    ]);
+    const statuses = pair.map((res) => res.status).sort((a, b) => a - b);
+    assert.deepEqual(statuses, [201, 409], "concurrent booking responses must be 201 and 409");
+    const count = await prisma.consultationBooking.count({
+      where: { astrologerProfileId: astroProfileId, scheduledAt: new Date("2027-01-12T05:30:00.000Z"),
+        status: { in: ["REQUESTED", "ACCEPTED", "CONFIRMED", "COMPLETED"] } }
+    });
+    assert.equal(count, 1, "concurrent reservations wrote multiple active bookings");
+  });
   await check("unpaid booking cannot be accepted by astrologer", async () => {
     const res = await post("/api/astrologer/bookings/action", { bookingId, action: "ACCEPT" }, astroCookie);
     assert.equal(res.status, 409, "unpaid booking accepted: " + await res.text());
