@@ -28,8 +28,8 @@ async function req(path, options = {}) {
   try { return await fetch(new URL(path, base), { redirect: "manual", signal: controller.signal, ...options }); }
   finally { clearTimeout(timer); }
 }
-async function post(path, body, session = "") {
-  return req(path, { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": csrf, cookie: [csrfCookie, session].filter(Boolean).join("; ") }, body: JSON.stringify(body) });
+async function post(path, body, session = "", method = "POST") {
+  return req(path, { method, headers: { "content-type": "application/json", "x-csrf-token": csrf, cookie: [csrfCookie, session].filter(Boolean).join("; ") }, body: JSON.stringify(body) });
 }
 async function check(name, action) {
   try { await action(); passed++; console.log("AUTH_ROLE_PASS " + name); }
@@ -155,6 +155,37 @@ try {
   await check("unpaid booking cannot be accepted by astrologer", async () => {
     const res = await post("/api/astrologer/bookings/action", { bookingId, action: "ACCEPT" }, astroCookie);
     assert.equal(res.status, 409, "unpaid booking accepted: " + await res.text());
+  });
+
+
+  await check("Shop catalogue admin-only persistence and public deactivation", async () => {
+    const anon = await req("/api/admin/shop-catalogue");
+    assert.equal(anon.status, 403);
+    const userDenied = await req("/api/admin/shop-catalogue", { headers: { cookie: userCookie } });
+    assert.equal(userDenied.status, 403);
+    const initial = await req("/api/admin/shop-catalogue", { headers: { cookie: adminCookie } });
+    const initialBody = await initial.json();
+    assert.equal(initial.status, 200, JSON.stringify(initialBody));
+    assert.equal(initialBody.data.version, 0);
+    const original = initialBody.data.products;
+    assert.ok(original.length > 2);
+    const target = original[0];
+    const updated = original.map((p) => p.id === target.id ? { ...p, status: "inactive" } : p);
+    const write = await post("/api/admin/shop-catalogue", { expectedVersion: 0, products: updated }, adminCookie, "PUT");
+    const result = await write.json();
+    assert.equal(write.status, 200, JSON.stringify(result));
+    assert.equal(result.data.version, 1);
+    const publicPage = await req("/shop");
+    assert.equal(publicPage.status, 200);
+    assert.ok(!(await publicPage.text()).includes(target.name.en), "deactivated product leaked to public Shop");
+    const adminRead = await req("/api/admin/shop-catalogue", { headers: { cookie: adminCookie } });
+    const saved = await adminRead.json();
+    assert.equal(saved.data.version, 1);
+    assert.equal(saved.data.products.find((p) => p.id === target.id).status, "inactive");
+    const race = await post("/api/admin/shop-catalogue", { expectedVersion: 0, products: original }, adminCookie, "PUT");
+    assert.equal(race.status, 409, "concurrent stale edit must reject");
+    const restore = await post("/api/admin/shop-catalogue", { expectedVersion: 1, products: original }, adminCookie, "PUT");
+    assert.equal(restore.status, 200, await restore.text());
   });
 
   await check("unpaid paid-report request blocks PDF generation and email delivery", async () => {
