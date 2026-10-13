@@ -16,6 +16,9 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     const { id } = await params;
     const reportRequest = await prisma.reportRequest.findUnique({ where: { id } });
     if (!reportRequest) return fail("Report request not found", 404);
+    if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
+      return fail("Verified payment or authorized admin bypass is required before delivering a paid report.", 409);
+    }
     if (!reportRequest.generatedPdfSize || (!reportRequest.generatedPdfBytes && !reportRequest.generatedPdfStorageKey)) {
       return fail("A real generated PDF is required before delivery.", 422);
     }
