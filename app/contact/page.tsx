@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPolicyPage } from "@/components/legal-policy-page";
 import { seo } from "@/lib/seo";
-import { shopProducts } from "@/lib/manual-catalogue";
+import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 
 export const metadata: Metadata = seo({
   title: "Contact Naksharix Support",
@@ -17,7 +17,8 @@ export default async function ContactPage({
   searchParams: Promise<{ topic?: string }>;
 }) {
   const { topic } = await searchParams;
-  const product = shopProducts.find((item) => item.status === "active" && item.slug === topic);
+  const catalogue = await getShopCatalogue();
+  const product = catalogue.products.find((item) => item.status === "active" && item.slug === topic);
   if (!product) return <LegalPolicyPage page="contact" />;
 
   const subject = "Naksharix product availability: " + product.name.en;
