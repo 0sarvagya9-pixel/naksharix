@@ -85,6 +85,7 @@ export default function DashboardPage() {
               <Button asChild><Link href="/kundli">Generate Kundli</Link></Button>
               <Button variant="outline" asChild><Link href="/reports">View Reports</Link></Button>
               <Button variant="outline" asChild><Link href="/free-calculators">Free Calculators</Link></Button>
+              <Button variant="outline" asChild><Link href="/support">Support Centre</Link></Button>
               {showBecomeAstrologer ? <BecomeAstrologerButton /> : null}
             </div>
           </div>
