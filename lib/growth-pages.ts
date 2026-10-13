@@ -19,7 +19,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Free Kundli Generator",
     h2: "Create a birth chart summary before choosing a premium report",
     intro: "Enter your name, date of birth, birth time, and birth place to generate a free Kundli summary on Naksharix.",
-    ctas: [{ label: "Generate Free Kundli", href: "/kundli" }, { label: "AI Astrologer Coming Soon", href: "/ai-astrologer" }],
+    ctas: [{ label: "Generate Free Kundli", href: "/kundli" }, { label: "Explore AI Astrologer", href: "/ai-astrologer" }],
     faqs: [
       { question: "Is the free Kundli enough to start?", answer: "Yes. It gives a readable summary first, then offers a premium report for deeper detail." },
       { question: "What birth details are required?", answer: "Name, gender, date, time, place, latitude, longitude, timezone, and optional contact details." }
@@ -61,7 +61,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Weekly Horoscope",
     h2: "Plan your week with calmer astrological context",
     intro: "Weekly horoscope helps you understand themes, timing, and practical choices across love, work, family, travel, and finance.",
-    ctas: [{ label: "Horoscope Coming Soon", href: "/horoscope" }, { label: "AI Astrologer Coming Soon", href: "/ai-astrologer" }],
+    ctas: [{ label: "Explore Horoscopes", href: "/horoscope" }, { label: "Explore AI Astrologer", href: "/ai-astrologer" }],
     faqs: [
       { question: "Is weekly horoscope personalized?", answer: "It can use zodiac and birth context when available." },
       { question: "Can I upgrade after reading?", answer: "Yes. Premium yearly and career reports are available." }
@@ -75,7 +75,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Monthly Horoscope",
     h2: "Understand the larger themes of your month",
     intro: "Monthly horoscope gives a wider planning view with practical signals for routines, decisions, and relationships.",
-    ctas: [{ label: "Horoscope Coming Soon", href: "/horoscope" }, { label: "View Yearly Report", href: "/reports/yearly-horoscope-report" }],
+    ctas: [{ label: "Explore Horoscopes", href: "/horoscope" }, { label: "View Yearly Report", href: "/reports/yearly-horoscope-report" }],
     faqs: [
       { question: "Does it include remedies?", answer: "Yes. The generated guidance includes a gentle practical remedy." },
       { question: "Does it show lucky details?", answer: "Yes. Horoscope results include lucky number, color, and gemstone." }
@@ -85,11 +85,11 @@ export const growthPages: Record<string, GrowthPage> = {
     slug: "yearly-horoscope-2026",
     path: "/yearly-horoscope-2026",
     title: "Yearly Horoscope 2026 - Naksharix",
-    description: "Explore Yearly Horoscope 2026 with career, love, finance, health, lucky periods, and premium AI yearly prediction report.",
+    description: "Explore Yearly Horoscope 2026 with career, love, finance, health, lucky periods, and premium yearly prediction report.",
     h1: "Yearly Horoscope 2026",
     h2: "A broader planning view for the year ahead",
     intro: "Use the yearly horoscope route for annual themes and upgrade to a personalized 2026 prediction report when you need depth.",
-    ctas: [{ label: "Horoscope Coming Soon", href: "/horoscope" }, { label: "View Yearly Report", href: "/reports/yearly-horoscope-report" }],
+    ctas: [{ label: "Explore Horoscopes", href: "/horoscope" }, { label: "View Yearly Report", href: "/reports/yearly-horoscope-report" }],
     faqs: [
       { question: "Is this for all signs?", answer: "Yes. You can choose your zodiac sign in the horoscope tool." },
       { question: "Can I get a detailed yearly PDF?", answer: "Yes. The Yearly Prediction Report includes structured sections and sample preview." }
@@ -117,7 +117,7 @@ export const growthPages: Record<string, GrowthPage> = {
     h1: "Career Astrology",
     h2: "Use your chart as a planning mirror for work",
     intro: "Career astrology can highlight working style, decision timing, communication patterns, and areas for conscious effort.",
-    ctas: [{ label: "AI Astrologer Coming Soon", href: "/ai-astrologer" }, { label: "View Career Report", href: "/reports/career-report" }],
+    ctas: [{ label: "Explore AI Astrologer", href: "/ai-astrologer" }, { label: "View Career Report", href: "/reports/career-report" }],
     faqs: [
       { question: "Can astrology guarantee a job?", answer: "No. Naksharix avoids deterministic claims and focuses on reflection and planning." },
       { question: "Does career report include remedies?", answer: "Yes. It includes practical and spiritual habit suggestions." }
