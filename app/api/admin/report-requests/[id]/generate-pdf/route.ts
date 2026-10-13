@@ -23,7 +23,10 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     const { id } = await params;
     const reportRequest = await prisma.reportRequest.findUnique({ where: { id } });
     if (!reportRequest) return fail("Report request not found", 404);
-    if (!reportRequest.latitude || !reportRequest.longitude || reportRequest.timezone === null) {
+    if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
+      return fail("Verified payment or authorized admin bypass is required before generating a paid report.", 409);
+    }
+    if (reportRequest.latitude === null || reportRequest.longitude === null || reportRequest.timezone === null) {
       return fail("Birth latitude, longitude, and timezone are required before PDF generation.", 422);
     }
 
