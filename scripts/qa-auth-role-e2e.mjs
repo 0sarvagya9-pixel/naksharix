@@ -107,6 +107,21 @@ try {
       assert.equal(view.status, 200, path + " HTTP " + view.status);
     }
   });
+  await check("admin operational readiness view uses real checks without sample metrics", async () => {
+    const response = await req("/admin/readiness", { headers: { cookie: adminCookie } });
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.ok(html.includes("System Readiness"));
+    assert.ok(html.includes("Production database"));
+    assert.ok(html.includes("Distributed Redis"));
+    assert.ok(!html.includes("ci-secret-ci-secret"), "sensitive environment output not allowed");
+    const publicRes = await req("/admin/readiness");
+    const publicBody = await publicRes.text();
+    assert.ok([302, 303, 307, 308].includes(publicRes.status) ||
+      (publicRes.status === 200 && publicBody.includes("NEXT_REDIRECT")),
+      "unauthenticated admin view must redirect");
+    assert.ok(!publicBody.includes("Production database"), "admin diagnostics cannot render anonymously");
+  });
   await check("astrologer signup creates pending private profile", async () => {
     const res = await post("/api/auth/signup", { name: "QA Astrologer", email: astroEmail, password, role: "ASTROLOGER", locale: "en" });
     const body = await res.json();
@@ -224,6 +239,43 @@ try {
     const html = await ownerPage.text();
     assert.ok(html.includes(reviewText), "verified review body not rendered in private dashboard");
     assert.ok(html.includes("Reviews and Ratings"), "dashboard title absent");
+  });
+
+  await check("support tickets are owned by the user and triaged only by admin", async () => {
+    const anonRead = await req("/api/support/tickets");
+    assert.equal(anonRead.status, 401);
+    const payload = { subject: "Account access assistance", message: "Please help with my account settings and access." };
+    const created = await post("/api/support/tickets", payload, userCookie);
+    const createBody = await created.json();
+    assert.equal(created.status, 201, JSON.stringify(createBody));
+    const ticketId = createBody.data.ticket.id;
+    assert.equal(createBody.data.ticket.status, "OPEN");
+
+    const owned = await req("/api/support/tickets", { headers: { cookie: userCookie } });
+    const ownedBody = await owned.json();
+    assert.equal(owned.status, 200);
+    assert.ok(ownedBody.data.tickets.some((ticket) => ticket.id === ticketId));
+    const forbiddenAdmin = await req("/api/admin/support", { headers: { cookie: userCookie } });
+    assert.equal(forbiddenAdmin.status, 404);
+    const invalid = await post("/api/support/tickets", { subject: "a", message: "x" }, userCookie);
+    assert.equal(invalid.status, 422);
+
+    const adminList = await req("/api/admin/support", { headers: { cookie: adminCookie } });
+    const adminBody = await adminList.json();
+    assert.equal(adminList.status, 200);
+    assert.ok(adminBody.data.tickets.some((ticket) => ticket.id === ticketId));
+    const unauthorizedUpdate = await post("/api/admin/support", {
+      ticketId, status: "RESOLVED", priority: "HIGH"
+    }, userCookie, "PATCH");
+    assert.equal(unauthorizedUpdate.status, 404);
+    const reviewed = await post("/api/admin/support", {
+      ticketId, status: "IN_PROGRESS", priority: "HIGH"
+    }, adminCookie, "PATCH");
+    assert.equal(reviewed.status, 200, await reviewed.text());
+    const saved = await prisma.supportTicket.findUniqueOrThrow({ where: { id: ticketId } });
+    assert.equal(saved.status, "IN_PROGRESS");
+    assert.equal(saved.priority, "HIGH");
+    assert.equal(saved.userId, userId);
   });
 
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {

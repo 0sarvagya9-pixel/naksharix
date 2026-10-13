@@ -10,7 +10,6 @@ import { secureFetch } from "@/lib/security/csrf";
 import {
   categoryLabel,
   emptyShopProduct,
-  normalizeShopProducts,
   shopCategories,
   shopProducts,
   shopPurposes,
