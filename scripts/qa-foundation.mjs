@@ -70,7 +70,7 @@ for (const [file, content] of [["components/reports-content.tsx", reportsContent
 const shopPage = read("app/shop/page.tsx");
 const shopContent = read("components/shop-coming-soon-content.tsx");
 assert(shopPage.includes("index: true"), "Informational Shop catalogue should be indexable");
-assert(shopContent.includes("shopProducts") && shopContent.includes("Ask Availability"), "Shop should expose the real informational catalogue without ecommerce");
+assert(shopPage.includes("getShopCatalogue") && shopContent.includes("initialProducts") && shopContent.includes("Ask Availability"), "Shop should expose the real server-backed informational catalogue without ecommerce");
 assert(!shopContent.includes("RazorpayCheckoutButton") && !shopContent.includes("Add to Cart") && !shopContent.includes("Buy Now"), "Shop must not expose ecommerce controls");
 
 const aiPage = read("app/ai-astrologer/page.tsx");
