@@ -119,11 +119,9 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
   const font = await loadReportFont(pdf);
   let page: PDFPage = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   let y = PAGE_HEIGHT - 52;
-  let pageNo = 1;
 
   const newPage = () => {
     page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-    pageNo++;
     y = PAGE_HEIGHT - 52;
   };
   const ensure = (height: number) => {
@@ -185,7 +183,8 @@ export function getPremiumReportPublicDeliveryStatus() {
   return {
     generated: false,
     pdfUrl: null,
+    deliveryEnabled: false,
     status: "blocked_until_verified_chart_and_workflow" as const,
-    automation: premiumReportAutomationStatus()
+    reason: premiumReportAutomationStatus.publicClaimBoundary
   };
 }
