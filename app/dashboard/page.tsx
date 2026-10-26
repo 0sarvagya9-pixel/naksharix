@@ -18,7 +18,10 @@ const activeTools = [
   { title: "Browse Reports", href: "/reports", copy: "Submit real pending-review report requests without payment at request stage.", icon: ClipboardList },
   { title: "Today Panchang", href: "/panchang", copy: "Open provider-calculated Panchang with location and timezone notes.", icon: MoonStar },
   { title: "Transit Snapshot", href: "/transits", copy: "View provider-calculated current Gochar positions without prediction claims.", icon: Sparkles },
-  { title: "Free Calculators", href: "/free-calculators", copy: "Open focused calculators that reuse existing engines.", icon: FileText }
+  { title: "Free Calculators", href: "/free-calculators", copy: "Open focused calculators that reuse existing engines.", icon: FileText },
+  { title: "Written Guidance", href: "/ask-astrologer", copy: "Submit a written question for staff review and track it privately.", icon: ClipboardList },
+  { title: "Puja Information", href: "/puja-enquiry", copy: "Ask about traditional puja practices without purchasing a booking.", icon: Sparkles },
+  { title: "Free Learning", href: "/learn", copy: "Study introductory Vedic astrology concepts with real tools.", icon: FileText }
 ];
 
 export default function DashboardPage() {
