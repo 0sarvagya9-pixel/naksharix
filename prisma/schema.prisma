@@ -869,3 +869,22 @@ model LearningProgress {
   @@unique([userId, lessonId])
   @@index([userId, completedAt])
 }
+
+
+// Private operator-managed partner registry. Zero verified partners are seeded.
+// A partner is never displayed as verified without an administrator decision.
+model PujaPartner {
+  id              String    @id @default(cuid())
+  name            String
+  region          String
+  traditions      String[]  @default([])
+  evidenceUrl     String?
+  reviewStatus    String    @default("PENDING")
+  reviewedById    String?
+  reviewedAt      DateTime?
+  reviewNote      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([reviewStatus, createdAt])
+}
