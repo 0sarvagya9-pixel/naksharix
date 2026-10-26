@@ -51,7 +51,7 @@
     linear-gradient(0deg, rgba(13,15,26,.88), transparent 35%);
 }
 .nx-ed-hero-inner { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 365px; align-items: center; gap: 3rem; padding-block: 7.3rem 6.5rem; }
-.nx-ed-hero-copy { max-width: 760px; z-index: 1; animation: nx-ed-fade-up .6s both; }
+.nx-ed-hero-copy { max-width: 760px; z-index: 1; }
 .nx-ed-hero h1 {
   font-family: var(--font-cinzel), Georgia, serif; margin: 1.35rem 0 1.5rem;
   max-width: 770px; font-size: clamp(2.7rem, 5.3vw, 5.8rem); font-weight: 700;
