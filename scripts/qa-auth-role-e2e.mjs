@@ -309,6 +309,20 @@ try {
     assert.equal(closedReply.status, 409);
   });
 
+  await check("push subscription API does not falsely claim unimplemented delivery", async () => {
+    const anon = await post("/api/notifications/subscribe", {
+      endpoint: "https://push.example.test/subscription", keys: {}
+    });
+    assert.equal(anon.status, 401);
+    const logged = await post("/api/notifications/subscribe", {
+      endpoint: "https://push.example.test/subscription", keys: {}
+    }, userCookie);
+    const result = await logged.json();
+    assert.equal(logged.status, 503, JSON.stringify(result));
+    assert.doesNotMatch(JSON.stringify(result), /"subscribed":true/);
+    assert.doesNotMatch(JSON.stringify(result), /push\.example\.test/);
+  });
+
   await check("written questions and puja enquiries are real private non-payment tickets", async () => {
     for (const path of ["/ask-astrologer", "/puja-enquiry", "/learn"]) {
       const page = await req(path);
