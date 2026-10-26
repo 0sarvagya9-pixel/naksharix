@@ -152,6 +152,10 @@ jobs:
   browser-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 50
+    # Playwright image provides matched Chromium, Firefox and WebKit binaries.
+    # Keep all three project browsers and avoid flaky multi-browser downloads.
+    container:
+      image: mcr.microsoft.com/playwright:v1.54.1-noble
     services:
       postgres:
         image: postgres:16-alpine
@@ -167,7 +171,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/naksharix?schema=public
       JWT_SECRET: browser-ci-secret-browser-ci-secret-browser-ci-secret
       NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
       ASTROLOGY_PROVIDER: own_engine
@@ -187,8 +191,19 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
-      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Verify preinstalled cross-browser binaries
+        run: |
+          set -euo pipefail
+          for browser in chromium firefox webkit; do
+            test -d "/ms-playwright" || { echo "No browser cache"; exit 1; }
+          done
+          npx playwright --version
       - run: npx prisma generate
+      - name: Bootstrap isolated browser-test database
+        run: |
+          set -euo pipefail
+          node -e 'const u = new URL(process.env.DATABASE_URL || ""); if (process.env.CI !== "true" || u.hostname !== "postgres" || u.pathname !== "/naksharix") process.exit(1);'
+          npx prisma db push --skip-generate
       - run: npm run build
       - name: Run browser release QA
         shell: bash
