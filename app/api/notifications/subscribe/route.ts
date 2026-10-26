@@ -3,7 +3,7 @@ import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 
-const schema = z.object({ endpoint: z.string().url(), keys: z.record(z.string()) });
+const schema = z.object({ endpoint: z.string().url(), keys: z.record(z.string(), z.string()) });
 
 export async function POST(request: NextRequest) {
   try {

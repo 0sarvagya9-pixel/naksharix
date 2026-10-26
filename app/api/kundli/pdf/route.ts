@@ -8,7 +8,7 @@ import { logKundliPdfValidation, normalizeKundliPdfData } from "@/lib/kundli/pdf
 import { readLanguageFromRequest } from "@/lib/server-language";
 
 const schema = z.object({
-  report: z.record(z.unknown()),
+  report: z.record(z.string(), z.unknown()),
   pdfType: z.enum(["FREE", "PREMIUM"]).default("FREE"),
   language: z.enum(["en", "hi", "hinglish"]).optional()
 });

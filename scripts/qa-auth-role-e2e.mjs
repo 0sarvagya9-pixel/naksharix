@@ -276,6 +276,37 @@ try {
     assert.equal(saved.status, "IN_PROGRESS");
     assert.equal(saved.priority, "HIGH");
     assert.equal(saved.userId, userId);
+
+    const userMutation = randomUUID();
+    const userReply = { ticketId, clientMutationId: userMutation, message: "Can you advise how to access my account?" };
+    const anonymousReply = await post("/api/support/tickets/reply", userReply);
+    assert.equal(anonymousReply.status, 401);
+    const userSent = await post("/api/support/tickets/reply", userReply, userCookie);
+    assert.equal(userSent.status, 200, await userSent.text());
+    const replay = await post("/api/support/tickets/reply", userReply, userCookie);
+    const replayBody = await replay.json();
+    assert.equal(replay.status, 200);
+    assert.equal(replayBody.data.duplicate, true);
+    const deniedStaff = await post("/api/admin/support/reply", {
+      ticketId, message: "I should not be able to respond as staff.", clientMutationId: randomUUID()
+    }, userCookie);
+    assert.equal(deniedStaff.status, 404);
+    const staffReply = await post("/api/admin/support/reply", {
+      ticketId, message: "We have reviewed your account-access request.", clientMutationId: randomUUID()
+    }, adminCookie);
+    assert.equal(staffReply.status, 200, await staffReply.text());
+    const conversation = await prisma.supportTicket.findUniqueOrThrow({ where: { id: ticketId } });
+    assert.equal(conversation.messages.length, 3, "reply replay appended a duplicate message");
+    assert.equal(conversation.messages[1].author, "USER");
+    assert.equal(conversation.messages[2].author, "ADMIN");
+    const closure = await post("/api/admin/support", {
+      ticketId, status: "RESOLVED", priority: "HIGH"
+    }, adminCookie, "PATCH");
+    assert.equal(closure.status, 200, await closure.text());
+    const closedReply = await post("/api/support/tickets/reply", {
+      ticketId, message: "I need more help.", clientMutationId: randomUUID()
+    }, userCookie);
+    assert.equal(closedReply.status, 409);
   });
 
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {

@@ -10,24 +10,46 @@ import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "???? ?????? - Free Kundli Online | Naksharix",
-  description: "Naksharix ?? ???, ???? ????, ??? ?? ????? ?? ???? ?????? ?????? ???? ??????, ???, ????, ????? ?? ??? ??????? ?????",
+  title: "फ्री कुंडली – जन्म कुंडली ऑनलाइन हिंदी | Naksharix",
+  description: "जन्म तारीख, समय और स्थान की जानकारी से ऑनलाइन फ्री कुंडली बनाएं। ग्रह स्थिति, लग्न, दशा और पंचांग से जुड़े पारंपरिक ज्योतिषीय संकेत समझें।",
   path: "/hi/free-kundli",
-  keywords: ["Free Kundli", "???? ??????", "Online Kundli", "Janam Kundli"]
+  keywords: ["फ्री कुंडली", "जन्म कुंडली", "Free Kundli", "Janam Kundli"]
 });
 
 export default function FreeKundliHindiPage() {
-  const schema = { "@context": "https://schema.org", "@type": "WebApplication", name: "???? ??????", url: `${env.NEXT_PUBLIC_APP_URL}/hi/free-kundli`, applicationCategory: "LifestyleApplication", inLanguage: "hi-IN" };
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "फ्री कुंडली",
+    url: `${env.NEXT_PUBLIC_APP_URL}/hi/free-kundli`,
+    applicationCategory: "LifestyleApplication",
+    inLanguage: "hi-IN"
+  };
+  const topics = ["जन्म विवरण", "ग्रह स्थिति", "लग्न", "दशा और पंचांग"];
   return (
     <main className="star-field">
       <Section>
         <JsonLd id="free-kundli-hi-schema" data={schema} />
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Free Kundli</p>
-        <h1 className="mt-3 font-cinzel text-4xl font-black">???? ?????? ??????</h1>
-        <p className="mt-4 max-w-3xl naksh-muted-text">???, ???? ????, ??? ?? ????? ?? ???? ???? ?????? ????? ?? ????, ???, ????, ?????, ??? ?? ??? ?? ??????? ?????</p>
-        <Card className="glass mt-8"><CardContent className="grid gap-3 pt-6 sm:grid-cols-2 lg:grid-cols-4">{["???? ??????", "???? ?????", "?????", "??? ????????"].map((item) => <div key={item} className="flex items-center gap-3 rounded-md border border-[#D4AF37]/20 p-3"><FileText className="h-4 w-4 text-[#FFD700]" />{item}</div>)}</CardContent></Card>
-        <div className="mt-8 flex flex-wrap gap-3"><Button asChild><Link href="/kundli">Generate Kundli</Link></Button><Button variant="outline" asChild><Link href="/reports">Premium report</Link></Button></div>
-        <SeoInternalLinks title="?????? ?? ??? ???? ????" />
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">फ्री कुंडली</p>
+        <h1 className="mt-3 font-cinzel text-4xl font-black">ऑनलाइन फ्री जन्म कुंडली</h1>
+        <p className="mt-4 max-w-3xl naksh-muted-text">
+          नाम, जन्म तारीख, जन्म समय और जन्म स्थान की जानकारी देकर कुंडली संबंधी विवरण देखें।
+          गणना और व्याख्या उपलब्ध डेटा तथा आपके दिए गए विवरणों पर निर्भर करती है।
+        </p>
+        <Card className="glass mt-8">
+          <CardContent className="grid gap-3 pt-6 sm:grid-cols-2 lg:grid-cols-4">
+            {topics.map((item) => (
+              <div key={item} className="flex items-center gap-3 rounded-md border border-[#D4AF37]/20 p-3">
+                <FileText className="h-4 w-4 text-[#FFD700]" />{item}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Button asChild><Link href="/kundli">कुंडली बनाएं</Link></Button>
+          <Button variant="outline" asChild><Link href="/reports">विस्तृत रिपोर्ट देखें</Link></Button>
+        </div>
+        <SeoInternalLinks title="कुंडली और ज्योतिष के अन्य उपयोगी पेज" />
       </Section>
     </main>
   );

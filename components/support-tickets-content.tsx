@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { secureFetch } from "@/lib/security/csrf";
+import { SupportConversation } from "@/components/support-conversation";
 
 type Ticket = {
   id: string;
@@ -16,12 +17,6 @@ type Ticket = {
   createdAt: string;
   messages: unknown;
 };
-
-function firstMessage(messages: unknown) {
-  if (!Array.isArray(messages)) return "";
-  const first = messages[0] as { text?: unknown } | undefined;
-  return typeof first?.text === "string" ? first.text : "";
-}
 
 export function SupportTicketsContent() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -118,7 +113,7 @@ export function SupportTicketsContent() {
                     <h2 className="font-semibold">{ticket.subject}</h2>
                     <span className="text-xs font-semibold text-[#FFD700]">{ticket.status}</span>
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap break-words text-sm naksh-muted-text">{firstMessage(ticket.messages)}</p>
+                  <SupportConversation ticketId={ticket.id} messages={ticket.messages} status={ticket.status} onSent={load} />
                   <p className="mt-3 text-xs naksh-muted-text">Created {new Date(ticket.createdAt).toLocaleDateString("en-IN")} · Priority: {ticket.priority}</p>
                 </div>
               ))}

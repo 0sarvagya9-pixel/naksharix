@@ -75,6 +75,19 @@ for (const file of scanRoots.flatMap(walk)) {
   }
 }
 
+const hindiLandingPages = [
+  ["app/hi/aaj-ka-rashifal/page.tsx", "आज का राशिफल"],
+  ["app/hi/free-kundli/page.tsx", "फ्री कुंडली"],
+  ["app/hi/kundli-milan/page.tsx", "कुंडली मिलान"]
+];
+for (const [file, requiredText] of hindiLandingPages) {
+  const content = fs.readFileSync(path.join(root, file), "utf8");
+  if (!content.includes(requiredText)) failures.push(file + " has no readable Hindi heading");
+  if (/["'][? ]{2,}[?][? ]*["']/.test(content) || /\?{3,}/.test(content)) {
+    failures.push(file + " contains replacement question marks");
+  }
+}
+
 for (const failure of [...new Set(failures)]) console.log(`FAILED: ${failure}`);
 if (failures.length) process.exit(1);
 console.log("PASSED: risky legacy translations are overridden and raw t() is restricted to safety helpers");
