@@ -4,6 +4,7 @@ import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { validateConsultationMeetingUrl } from "@/lib/consultations/meeting-link";
 
 const schema = z.object({
   bookingId: z.string().min(1),
@@ -24,6 +25,10 @@ export async function POST(request: NextRequest) {
     const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });
     if (!booking) return fail("Booking not found", 404);
 
+    if (body.meetingLink !== undefined && body.meetingLink !== "" &&
+        !validateConsultationMeetingUrl(body.meetingLink)) {
+      return fail("A supported HTTPS meeting provider link is required.", 422);
+    }
     const existingMetadata = booking.metadata && typeof booking.metadata === "object" ? booking.metadata as Record<string, unknown> : {};
     const updatedMetadata = {
       ...existingMetadata,
