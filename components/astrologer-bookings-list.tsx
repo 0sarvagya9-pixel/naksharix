@@ -1,4 +1,5 @@
 import { AstrologerBookingActions } from "@/components/astrologer-booking-actions";
+import { ConsultationMeetingControl } from "@/components/consultation-meeting-control";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type BookingRow = {
@@ -63,7 +64,12 @@ export function AstrologerBookingsList({
                   ) : null}
                   <p className="text-sm leading-6 text-[#F0F0F0]">{booking.question}</p>
                 </div>
-                {showActions ? <AstrologerBookingActions bookingId={booking.id} /> : null}
+                <div className="space-y-3">
+                  {showActions ? <AstrologerBookingActions bookingId={booking.id} /> : null}
+                  {showActions && ["ACCEPTED", "CONFIRMED"].includes(booking.status) &&
+                    ["PAID", "FREE", "ADMIN_BYPASS"].includes(booking.paymentStatus) ?
+                    <ConsultationMeetingControl bookingId={booking.id} /> : null}
+                </div>
               </div>
             </div>
           );
