@@ -103,7 +103,7 @@
 .nx-ed-slider-dots button.is-active { width: 37px; background: #f5cd90; }
 .nx-ed-quick-section { position: relative; z-index: 2; background: #fffdf9; border-bottom: 1px solid #eee3d7; padding: 2rem 0 2.1rem; }
 .nx-ed-quick-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: .6rem 1.5rem; margin-bottom: 1.2rem; }
-.nx-ed-quick-heading span { font-size: .65rem; font-weight: 900; letter-spacing: .16em; color: #ad6a42; }
+.nx-ed-quick-heading span { font-size: .65rem; font-weight: 900; letter-spacing: .16em; color: #74391f; }
 .nx-ed-quick-heading strong { font-family: var(--font-cinzel), Georgia, serif; font-size: 1.18rem; color: #3a2d2a; }
 .nx-ed-quick-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .7rem; }
 .nx-ed-quick-link {
