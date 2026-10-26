@@ -442,6 +442,45 @@ try {
     assert.equal(conversation.messages[1].author, "ADMIN");
   });
 
+  await check("free lessons persist real owner-scoped progress and forbid forged credits", async () => {
+    const endpoint = "/api/learn/progress";
+    const anon = await req(endpoint);
+    assert.equal(anon.status, 401);
+    const initial = await req(endpoint, { headers: { cookie: userCookie } });
+    const initialData = await initial.json();
+    assert.equal(initial.status, 200, JSON.stringify(initialData));
+    assert.equal(initialData.data.totalLessons, 4);
+    assert.equal(initialData.data.completed.length, 0);
+    const invalid = await post(endpoint, {
+      lessonId: "fake-certified-course", completed: true
+    }, userCookie);
+    assert.equal(invalid.status, 422);
+    const spoof = await post(endpoint, {
+      lessonId: "panchang", completed: true, userId: adminId
+    }, userCookie);
+    assert.equal(spoof.status, 422);
+    const completed = await post(endpoint, { lessonId: "panchang", completed: true }, userCookie);
+    assert.equal(completed.status, 200, await completed.text());
+    const saved = await prisma.learningProgress.findUniqueOrThrow({
+      where: { userId_lessonId: { userId, lessonId: "panchang" } }
+    });
+    assert.ok(saved.completedAt instanceof Date);
+    const isolated = await req(endpoint, { headers: { cookie: astroCookie } });
+    const isolatedData = await isolated.json();
+    assert.equal(isolated.status, 200);
+    assert.equal(isolatedData.data.completed.length, 0);
+    const duplicate = await post(endpoint, { lessonId: "panchang", completed: true }, userCookie);
+    assert.equal(duplicate.status, 200, await duplicate.text());
+    const count = await prisma.learningProgress.count({ where: { userId, lessonId: "panchang" } });
+    assert.equal(count, 1, "replayed completion created duplicate records");
+    const unset = await post(endpoint, { lessonId: "panchang", completed: false }, userCookie);
+    assert.equal(unset.status, 200, await unset.text());
+    const after = await req(endpoint, { headers: { cookie: userCookie } });
+    const afterData = await after.json();
+    assert.equal(after.status, 200);
+    assert.equal(afterData.data.completed.length, 0);
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);
