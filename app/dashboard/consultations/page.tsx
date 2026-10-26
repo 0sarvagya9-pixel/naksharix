@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
+import { readConsultationMeetingUrl } from "@/lib/consultations/meeting-link";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,20 @@ export default async function UserConsultationHistoryPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm naksh-muted-text">{booking.question}</p>
+                {["CONFIRMED", "ACCEPTED"].includes(booking.status) &&
+                  ["PAID", "FREE", "ADMIN_BYPASS"].includes(booking.paymentStatus) &&
+                  readConsultationMeetingUrl(booking.metadata) ?
+                  <div className="rounded-lg border border-[#D4AF37]/25 p-4">
+                    <p className="text-xs naksh-muted-text">Your astrologer has assigned an external meeting room.</p>
+                    <a href={readConsultationMeetingUrl(booking.metadata)!} target="_blank" rel="noopener noreferrer"
+                      className="mt-2 inline-block rounded-lg border border-[#D4AF37]/40 px-4 py-2 text-sm font-semibold text-[#FFD700]">
+                      Join external consultation room
+                    </a>
+                    <p className="mt-2 text-xs naksh-muted-text">The meeting is hosted by a third party. Confirm the time and privacy controls with your astrologer.</p>
+                  </div> : null}
+                {["CONFIRMED", "ACCEPTED"].includes(booking.status) &&
+                  !readConsultationMeetingUrl(booking.metadata) ?
+                  <p className="text-xs naksh-muted-text">No external meeting link has been assigned yet.</p> : null}
                 {booking.status === "COMPLETED" && !booking.reviews.length ? <ConsultationReviewForm bookingId={booking.id} /> : null}
                 {booking.reviews.length ? <p className="rounded-lg border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm naksh-muted-text">Reviewed with {booking.reviews[0].rating}/5 stars.</p> : null}
               </CardContent>
