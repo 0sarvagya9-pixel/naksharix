@@ -545,6 +545,65 @@ try {
     assert.equal(afterData.data.completed.length, 0);
   });
 
+  await check("puja partner registry is staff-only and lists only independently reviewed entries", async () => {
+    const endpoint = "/api/admin/puja-partners";
+    const unauth = await req(endpoint);
+    assert.equal(unauth.status, 404);
+    const forbidden = await post(endpoint, {
+      name: "Fixture Regional Temple", region: "India",
+      traditions: ["Ganesh Puja"], evidenceUrl: "https://example.org/registry/temple"
+    }, userCookie);
+    assert.equal(forbidden.status, 404);
+    const created = await post(endpoint, {
+      name: "Fixture Regional Temple", region: "Test India",
+      traditions: ["Ganesh Puja"], evidenceUrl: "https://example.org/registry/temple"
+    }, adminCookie);
+    const info = await created.json();
+    assert.equal(created.status, 201, JSON.stringify(info));
+    const partnerId = info.data.partner.id;
+    assert.equal(info.data.partner.reviewStatus, "PENDING");
+    try {
+      const publicBefore = await req("/api/puja/partners");
+      const beforeData = await publicBefore.json();
+      assert.equal(publicBefore.status, 200);
+      assert.ok(!beforeData.data.partners.some((x) => x.id === partnerId));
+      const privateRequest = await post("/api/guidance-enquiries", {
+        kind: "PUJA_ENQUIRY", topic: "SPIRITUAL_PRACTICE", partnerId,
+        message: "Please share basic details about this regional ritual enquiry before booking."
+      }, userCookie);
+      assert.equal(privateRequest.status, 422, "unreviewed partner was accepted as an option");
+      const blockedReview = await post(endpoint, {
+        partnerId, decision: "VERIFIED", note: "Users cannot verify providers."
+      }, userCookie, "PATCH");
+      assert.equal(blockedReview.status, 404);
+      const reviewed = await post(endpoint, {
+        partnerId, decision: "VERIFIED",
+        note: "Disposable fixture: manual review only, not a real vendor."
+      }, adminCookie, "PATCH");
+      assert.equal(reviewed.status, 200, await reviewed.text());
+      const publicAfter = await req("/api/puja/partners");
+      const afterData = await publicAfter.json();
+      assert.equal(publicAfter.status, 200);
+      assert.ok(afterData.data.partners.some((x) => x.id === partnerId));
+      assert.ok(!JSON.stringify(afterData).includes("evidenceUrl"), "private review evidence leaked");
+      const enquiry = await post("/api/guidance-enquiries", {
+        kind: "PUJA_ENQUIRY", topic: "SPIRITUAL_PRACTICE", partnerId,
+        message: "I am looking for the traditional meaning of a Ganesh Puja ceremony."
+      }, userCookie);
+      assert.equal(enquiry.status, 201, await enquiry.text());
+      const suspended = await post(endpoint, {
+        partnerId, decision: "SUSPENDED",
+        note: "Disable the test partner from the public catalogue."
+      }, adminCookie, "PATCH");
+      assert.equal(suspended.status, 200, await suspended.text());
+      const hidden = await req("/api/puja/partners");
+      const hiddenData = await hidden.json();
+      assert.ok(!hiddenData.data.partners.some((x) => x.id === partnerId));
+    } finally {
+      await prisma.pujaPartner.delete({ where: { id: partnerId } });
+    }
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);
