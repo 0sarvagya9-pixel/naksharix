@@ -25,7 +25,8 @@ export async function POST(request: Request) {
     if (result.kind === "not_found") return fail("Ticket not found", 404);
     if (result.kind === "closed") return fail("Reopen the ticket before replying.", 409);
     if (result.kind === "full") return fail("Conversation limit reached.", 409);
-    if (!result.duplicate) {
+
+    if (result.kind !== "ok") return fail("Unable to append support reply.", 409);    if (!result.duplicate) {
       await writeAuditLog({
         actor: admin,
         action: "support_ticket.staff_replied",
