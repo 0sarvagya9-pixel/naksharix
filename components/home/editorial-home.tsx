@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowLeft, ArrowRight, BookOpen, CalendarDays, ChevronRight, CircleHelp,
-  Compass, Heart, MoonStar, PlayCircle, ShieldCheck, Sparkles, Sun, Users
+  ArrowLeft, ArrowRight, CalendarDays, ChevronRight, CircleHelp,
+  Compass, Heart, MoonStar, ShieldCheck, Sparkles, Sun, Users
 } from "lucide-react";
 
 const STARRY_SKY = "https://images.unsplash.com/photo-1519681393784-d120267933ba";
@@ -208,7 +208,7 @@ export function EditorialHome() {
         </div>
       </section>
 
-      <section className="nx-ed-section nx-ed-services" aria-labelledby="nx-ed-services-title">
+      <section className="nx-ed-section nx-ed-services" aria-label="Featured Naksharix services">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="EXPLORE NAKSHARIX" title="Astrology, made personal." copy="Discover real features—beautifully presented, with straightforward explanations and responsible expectations." />
           <div className="nx-ed-service-grid">
