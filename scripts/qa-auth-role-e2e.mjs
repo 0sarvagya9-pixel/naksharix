@@ -114,6 +114,15 @@ try {
     assert.ok(html.includes("System Readiness"));
     assert.ok(html.includes("Production database"));
     assert.ok(html.includes("Distributed Redis"));
+    assert.ok(html.includes("Learning and Puja schema"), "new tables are shown in operator readiness");
+    const schemaRes = await req("/api/admin/readiness", { headers: { cookie: adminCookie } });
+    assert.equal(schemaRes.status, 200);
+    const schemaJson = await schemaRes.json();
+    assert.equal(schemaJson.data.services.databaseSchema.ready, true);
+    assert.equal(schemaJson.data.services.databaseSchema.missingCount, 0);
+    assert.equal(schemaJson.data.services.monitoring.provider, "console_safe_logger",
+      "Sentry config alone must not claim an active SDK");
+
     assert.ok(!html.includes("ci-secret-ci-secret"), "sensitive environment output not allowed");
     const publicRes = await req("/admin/readiness");
     const publicBody = await publicRes.text();
