@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
+import { isIP } from "node:net";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
@@ -20,6 +21,7 @@ function safeReferenceUrl(value: string) {
     return url.protocol === "https:" && !url.username && !url.password &&
       !url.port && url.hostname.includes(".") &&
       !["localhost", "127.0.0.1", "0.0.0.0"].includes(url.hostname) &&
+      isIP(url.hostname) === 0 &&
       !url.hash && !url.hostname.endsWith(".local");
   } catch { return false; }
 }
