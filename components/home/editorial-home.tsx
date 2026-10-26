@@ -191,8 +191,8 @@ export function EditorialHome() {
             </div>
             <button type="button" onClick={() => advance(1)} aria-label="Next featured destination"><ArrowRight size={18}/></button>
             <button type="button" onClick={() => setManuallyPaused((value) => !value)}
-              aria-label={manuallyPaused ? "Play featured slideshow" : "Pause featured slideshow"}
-              aria-pressed={manuallyPaused}>
+              aria-label={reducedMotion ? "Automatic slideshow disabled by reduced motion" : manuallyPaused ? "Play featured slideshow" : "Pause featured slideshow"}
+              aria-pressed={manuallyPaused} disabled={reducedMotion}>
               {manuallyPaused ? <Play size={17} aria-hidden="true" /> : <Pause size={17} aria-hidden="true" />}
             </button>
           </div>
