@@ -34,6 +34,27 @@ npx prisma generate --schema=prisma/schema.prisma 2>&1 | tee "$EVIDENCE_DIR/pris
 # current schema only in the ephemeral CI source database.
 npx prisma db push --skip-generate 2>&1 | tee "$EVIDENCE_DIR/disposable-db-push.log"
 
+# Rehearse only on the guarded disposable localhost database.
+# The preceding db push creates current tables; drop ONLY these empty staging
+# tables in ephemeral CI, then apply the exact versioned add-only SQL as if the
+# live DB had the previous release schema. Never execute against Neon.
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c 'DROP TABLE public."LearningProgress", public."PujaPartner";'
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261026-learning-progress.sql \
+  2>&1 | tee "$EVIDENCE_DIR/learning-migration-rehearsal.log"
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261026-puja-partner-registry.sql \
+  2>&1 | tee "$EVIDENCE_DIR/puja-migration-rehearsal.log"
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc "
+SELECT count(*) FROM information_schema.tables
+WHERE table_schema='public' AND table_name IN ('LearningProgress','PujaPartner');" \
+  | tee "$EVIDENCE_DIR/feature-table-count.txt"
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc "
+SELECT count(*) FROM pg_indexes WHERE schemaname='public'
+AND indexname IN ('LearningProgress_userId_lessonId_key','LearningProgress_userId_completedAt_idx','PujaPartner_reviewStatus_createdAt_idx');" \
+  | tee "$EVIDENCE_DIR/feature-index-count.txt"
+test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/feature-table-count.txt")" = "2"
+test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/feature-index-count.txt")" = "3"
+echo 'feature_sql_migrations_disposable_only=PASS' | tee "$EVIDENCE_DIR/feature-migration-gate.txt"
+
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc \
   "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('User','Session','OtpToken');" \
   | tee "$EVIDENCE_DIR/source-required-table-count.txt"
@@ -121,6 +142,7 @@ test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/restore-otp-index-count.txt")" = "1"
 {
   echo "environment=disposable_postgresql"
   echo "source_schema_materialized=PASS"
+  echo "feature_migrations_verified_on_disposable_legacy_schema=PASS"
   echo "schema_backup_created=PASS"
   echo "separate_restore_database_created=PASS"
   echo "restore_apply=PASS"
