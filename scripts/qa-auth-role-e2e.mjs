@@ -152,6 +152,54 @@ try {
     const slot = await post("/api/astrologer/availability", { dayOfWeek: 2, startTime: "11:00", endTime: "11:30", consultationType: "CHAT", isActive: true, status: "ONLINE" }, astroCookie);
     assert.equal(slot.status, 201, await slot.text());
   });
+  await check("expert credentials need independent admin review before public reviewed badge", async () => {
+    const credentials = "/api/astrologer/credentials";
+    const reviewApi = "/api/admin/astrologers/credentials";
+    const invalidActor = await post(credentials, {
+      credentialName: "Professional Astronomy Certificate",
+      issuer: "Example Academy", issuedYear: 2024,
+      referenceUrl: "https://example.org/credentials/example"
+    }, userCookie);
+    assert.equal(invalidActor.status, 403);
+    const firstProfile = await req("/astrologers/" + astroProfileId);
+    const firstHtml = await firstProfile.text();
+    assert.equal(firstProfile.status, 200);
+    assert.ok(firstHtml.includes("credentials unverified"), "Public page incorrectly claims verified expert");
+    const malicious = await post(credentials, {
+      credentialName: "Professional Astronomy Certificate",
+      issuer: "Example Academy", issuedYear: 2024,
+      referenceUrl: "http://localhost/admin"
+    }, astroCookie);
+    assert.equal(malicious.status, 422);
+    const evidence = {
+      credentialName: "Professional Astronomy Certificate",
+      issuer: "Example Academy", issuedYear: 2024,
+      referenceUrl: "https://example.org/credentials/example"
+    };
+    const submitted = await post(credentials, evidence, astroCookie);
+    assert.equal(submitted.status, 200, await submitted.text());
+    const stored = await prisma.astrologerProfile.findUniqueOrThrow({
+      where: { id: astroProfileId }, select: { certificates: true }
+    });
+    assert.equal(stored.certificates.reviewStatus, "PENDING");
+    const selfReview = await post(reviewApi, {
+      profileId: astroProfileId, decision: "DOCUMENTS_REVIEWED",
+      note: "This account cannot approve its own evidence."
+    }, astroCookie);
+    assert.equal(selfReview.status, 404);
+    const staffReview = await post(reviewApi, {
+      profileId: astroProfileId, decision: "DOCUMENTS_REVIEWED",
+      note: "Reviewed public credential evidence manually in disposable CI fixture."
+    }, adminCookie);
+    assert.equal(staffReview.status, 200, await staffReview.text());
+    const publicAfter = await req("/astrologers/" + astroProfileId);
+    const publicHtml = await publicAfter.text();
+    assert.equal(publicAfter.status, 200);
+    assert.ok(publicHtml.includes("Professional documents reviewed by Naksharix"));
+    assert.ok(!publicHtml.includes(evidence.referenceUrl),
+      "Private credential reference leaked onto public page");
+  });
+
   await check("user booking persists correct IST time without payment bypass", async () => {
     const slot = await prisma.availabilitySlot.findFirstOrThrow({ where: { astrologerProfileId: astroProfileId } });
     const res = await post("/api/consultation-bookings", {
@@ -217,6 +265,76 @@ try {
     assert.equal(res.status, 409, "unpaid booking accepted: " + await res.text());
   });
 
+
+  await check("consultation session link is role-scoped and stored only for confirmed bookings", async () => {
+    const fixture = await prisma.consultationBooking.create({
+      data: {
+        userId, astrologerProfileId: astroProfileId, mode: "VIDEO",
+        status: "CONFIRMED", paymentStatus: "ADMIN_BYPASS", amount: 0,
+        scheduledAt: new Date("2027-06-12T08:00:00.000Z"), durationMins: 30,
+        question: "Private audiovisual booking coordination acceptance fixture."
+      }
+    });
+    const unauthorizedNotes = await post("/api/astrologer/notes", {
+      userId, title: "Owner-only private note", body: "Only the linked astrologer may write this context.", private: true
+    }, userCookie);
+    assert.equal(unauthorizedNotes.status, 403);
+    const publicNote = await post("/api/astrologer/notes", {
+      userId, title: "Insecure visibility", body: "This must never become public.", private: false
+    }, astroCookie);
+    assert.equal(publicNote.status, 422);
+    const eligibleNote = await post("/api/astrologer/notes", {
+      userId, title: "Private case context", body: "This note is restricted to the booked astrologer.", private: true
+    }, astroCookie);
+    assert.equal(eligibleNote.status, 201, await eligibleNote.text());
+    const noteRow = await prisma.astrologerNote.findFirstOrThrow({
+      where: { astrologerProfileId: astroProfileId, userId, title: "Private case context" }
+    });
+    assert.equal(noteRow.private, true);
+    const endpoint = "/api/consultations/session-link";
+    const meetingLink = "https://meet.jit.si/naksharix-qa-" + unique;
+    const anon = await req(endpoint + "?bookingId=" + encodeURIComponent(fixture.id));
+    assert.equal(anon.status, 401);
+    const deniedWrite = await post(endpoint, { bookingId: fixture.id, meetingLink }, userCookie);
+    assert.equal(deniedWrite.status, 404, "Customer must not assign provider links");
+    for (const malicious of [
+      "javascript:alert(1)", "https://evil.example/room",
+      "https://meet.jit.si.evil.example/room",
+      "https://user@meet.jit.si/room",
+      "http://meet.jit.si/room"
+    ]) {
+      const response = await post(endpoint, { bookingId: fixture.id, meetingLink: malicious }, astroCookie);
+      assert.equal(response.status, 422, "Unsafe meeting provider accepted: " + malicious);
+    }
+    const saved = await post(endpoint, { bookingId: fixture.id, meetingLink }, astroCookie);
+    assert.equal(saved.status, 200, await saved.text());
+    const ownerRead = await req(endpoint + "?bookingId=" + fixture.id, {
+      headers: { cookie: userCookie }
+    });
+    const ownerData = await ownerRead.json();
+    assert.equal(ownerRead.status, 200);
+    assert.equal(ownerData.data.assigned, true);
+    assert.equal(ownerData.data.meetingLink, meetingLink);
+    assert.equal(ownerData.data.providerReady, false, "No unverified third-party provider uptime claim");
+    const astrologerRead = await req(endpoint + "?bookingId=" + fixture.id, {
+      headers: { cookie: astroCookie }
+    });
+    assert.equal(astrologerRead.status, 200);
+    const unpaid = await post(endpoint, { bookingId, meetingLink }, astroCookie);
+    assert.equal(unpaid.status, 409, "Unpaid customer booking assigned an active meeting room");
+    const unpaidRead = await req(endpoint + "?bookingId=" + bookingId, {
+      headers: { cookie: userCookie }
+    });
+    const unpaidData = await unpaidRead.json();
+    assert.equal(unpaidRead.status, 200);
+    assert.equal(unpaidData.data.meetingLink, null);
+    const customerDashboard = await req("/dashboard/consultations", {
+      headers: { cookie: userCookie }
+    });
+    const rendered = await customerDashboard.text();
+    assert.equal(customerDashboard.status, 200);
+    assert.ok(rendered.includes(meetingLink), "Customer could not view assigned provider room");
+  });
 
   await check("verified consultation review appears only in its astrologer's private dashboard", async () => {
     const denied = await req("/astrologer/reviews", { headers: { cookie: userCookie } });
@@ -386,6 +504,104 @@ try {
     });
     assert.equal(conversation.messages.length, 2);
     assert.equal(conversation.messages[1].author, "ADMIN");
+  });
+
+  await check("free lessons persist real owner-scoped progress and forbid forged credits", async () => {
+    const endpoint = "/api/learn/progress";
+    const anon = await req(endpoint);
+    assert.equal(anon.status, 401);
+    const initial = await req(endpoint, { headers: { cookie: userCookie } });
+    const initialData = await initial.json();
+    assert.equal(initial.status, 200, JSON.stringify(initialData));
+    assert.equal(initialData.data.totalLessons, 4);
+    assert.equal(initialData.data.completed.length, 0);
+    const invalid = await post(endpoint, {
+      lessonId: "fake-certified-course", completed: true
+    }, userCookie);
+    assert.equal(invalid.status, 422);
+    const spoof = await post(endpoint, {
+      lessonId: "panchang", completed: true, userId: adminId
+    }, userCookie);
+    assert.equal(spoof.status, 422);
+    const completed = await post(endpoint, { lessonId: "panchang", completed: true }, userCookie);
+    assert.equal(completed.status, 200, await completed.text());
+    const saved = await prisma.learningProgress.findUniqueOrThrow({
+      where: { userId_lessonId: { userId, lessonId: "panchang" } }
+    });
+    assert.ok(saved.completedAt instanceof Date);
+    const isolated = await req(endpoint, { headers: { cookie: astroCookie } });
+    const isolatedData = await isolated.json();
+    assert.equal(isolated.status, 200);
+    assert.equal(isolatedData.data.completed.length, 0);
+    const duplicate = await post(endpoint, { lessonId: "panchang", completed: true }, userCookie);
+    assert.equal(duplicate.status, 200, await duplicate.text());
+    const count = await prisma.learningProgress.count({ where: { userId, lessonId: "panchang" } });
+    assert.equal(count, 1, "replayed completion created duplicate records");
+    const unset = await post(endpoint, { lessonId: "panchang", completed: false }, userCookie);
+    assert.equal(unset.status, 200, await unset.text());
+    const after = await req(endpoint, { headers: { cookie: userCookie } });
+    const afterData = await after.json();
+    assert.equal(after.status, 200);
+    assert.equal(afterData.data.completed.length, 0);
+  });
+
+  await check("puja partner registry is staff-only and lists only independently reviewed entries", async () => {
+    const endpoint = "/api/admin/puja-partners";
+    const unauth = await req(endpoint);
+    assert.equal(unauth.status, 404);
+    const forbidden = await post(endpoint, {
+      name: "Fixture Regional Temple", region: "India",
+      traditions: ["Ganesh Puja"], evidenceUrl: "https://example.org/registry/temple"
+    }, userCookie);
+    assert.equal(forbidden.status, 404);
+    const created = await post(endpoint, {
+      name: "Fixture Regional Temple", region: "Test India",
+      traditions: ["Ganesh Puja"], evidenceUrl: "https://example.org/registry/temple"
+    }, adminCookie);
+    const info = await created.json();
+    assert.equal(created.status, 201, JSON.stringify(info));
+    const partnerId = info.data.partner.id;
+    assert.equal(info.data.partner.reviewStatus, "PENDING");
+    try {
+      const publicBefore = await req("/api/puja/partners");
+      const beforeData = await publicBefore.json();
+      assert.equal(publicBefore.status, 200);
+      assert.ok(!beforeData.data.partners.some((x) => x.id === partnerId));
+      const privateRequest = await post("/api/guidance-enquiries", {
+        kind: "PUJA_ENQUIRY", topic: "SPIRITUAL_PRACTICE", partnerId,
+        message: "Please share basic details about this regional ritual enquiry before booking."
+      }, userCookie);
+      assert.equal(privateRequest.status, 422, "unreviewed partner was accepted as an option");
+      const blockedReview = await post(endpoint, {
+        partnerId, decision: "VERIFIED", note: "Users cannot verify providers."
+      }, userCookie, "PATCH");
+      assert.equal(blockedReview.status, 404);
+      const reviewed = await post(endpoint, {
+        partnerId, decision: "VERIFIED",
+        note: "Disposable fixture: manual review only, not a real vendor."
+      }, adminCookie, "PATCH");
+      assert.equal(reviewed.status, 200, await reviewed.text());
+      const publicAfter = await req("/api/puja/partners");
+      const afterData = await publicAfter.json();
+      assert.equal(publicAfter.status, 200);
+      assert.ok(afterData.data.partners.some((x) => x.id === partnerId));
+      assert.ok(!JSON.stringify(afterData).includes("evidenceUrl"), "private review evidence leaked");
+      const enquiry = await post("/api/guidance-enquiries", {
+        kind: "PUJA_ENQUIRY", topic: "SPIRITUAL_PRACTICE", partnerId,
+        message: "I am looking for the traditional meaning of a Ganesh Puja ceremony."
+      }, userCookie);
+      assert.equal(enquiry.status, 201, await enquiry.text());
+      const suspended = await post(endpoint, {
+        partnerId, decision: "SUSPENDED",
+        note: "Disable the test partner from the public catalogue."
+      }, adminCookie, "PATCH");
+      assert.equal(suspended.status, 200, await suspended.text());
+      const hidden = await req("/api/puja/partners");
+      const hiddenData = await hidden.json();
+      assert.ok(!hiddenData.data.partners.some((x) => x.id === partnerId));
+    } finally {
+      await prisma.pujaPartner.delete({ where: { id: partnerId } });
+    }
   });
 
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {

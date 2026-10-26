@@ -8,7 +8,8 @@ const kindSchema = z.enum(["WRITTEN_GUIDANCE", "PUJA_ENQUIRY"]);
 const schema = z.object({
   kind: kindSchema,
   topic: z.enum(["CAREER", "RELATIONSHIPS", "FAMILY", "SPIRITUAL_PRACTICE", "GENERAL"]),
-  message: z.string().trim().min(20).max(1200)
+  message: z.string().trim().min(20).max(1200),
+  partnerId: z.string().min(1).max(120).optional()
 }).strict();
 
 const categories = {
@@ -29,6 +30,16 @@ export async function POST(request: Request) {
     // Validate before counting attempts. Never accept recipient IDs, prices,
     // astrologer assignments, payment flags, or an externally supplied subject.
     const input = await validateJson(request, schema);
+    if (input.partnerId && input.kind !== "PUJA_ENQUIRY") {
+      return fail("Partner references are only valid for puja enquiries", 422);
+    }
+    const selectedPartner = input.partnerId ? await prisma.pujaPartner.findFirst({
+      where: { id: input.partnerId, reviewStatus: "VERIFIED" },
+      select: { id: true, name: true }
+    }) : null;
+    if (input.partnerId && !selectedPartner) {
+      return fail("Partner is not reviewed or is unavailable for enquiries", 422);
+    }
     const limit = await rateLimit("guidance-enquiry:" + user.id, 5, 86400);
     if (!limit.allowed) return fail("Daily request limit reached. Please try again later.", 429);
 
@@ -36,13 +47,16 @@ export async function POST(request: Request) {
       ? "[WRITTEN GUIDANCE] " + categories[input.topic]
       : "[PUJA ENQUIRY] " + categories[input.topic];
 
+    const selectedSubject = selectedPartner
+      ? subject + " / Partner enquiry: " + selectedPartner.name.slice(0, 35)
+      : subject;
     // Existing customer-owned SupportTicket gives a real admin queue and
     // customer/staff two-way replies without a production schema migration.
     // This is NOT an astrologer assignment, puja booking, or paid service.
     const ticket = await prisma.supportTicket.create({
       data: {
         userId: user.id,
-        subject,
+        subject: selectedSubject,
         status: "OPEN",
         priority: "NORMAL",
         messages: [{

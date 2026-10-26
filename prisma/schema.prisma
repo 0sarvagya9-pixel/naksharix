@@ -179,6 +179,7 @@ model User {
   chatThreads                  ChatThread[]
   appointments                 Appointment[]         @relation("ClientAppointments")
   supportTickets               SupportTicket[]
+  learningProgress              LearningProgress[]
   reviews                      Review[]
   affiliate                    Affiliate?
   astrologerProfile            Astrologer?
@@ -853,3 +854,37 @@ model Affiliate {
   createdAt DateTime @default(now())
 }
 
+
+
+// Free self-study completion only; not an examination or certification.
+model LearningProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  completedAt DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId, completedAt])
+}
+
+
+// Private operator-managed partner registry. Zero verified partners are seeded.
+// A partner is never displayed as verified without an administrator decision.
+model PujaPartner {
+  id              String    @id @default(cuid())
+  name            String
+  region          String
+  traditions      String[]  @default([])
+  evidenceUrl     String?
+  reviewStatus    String    @default("PENDING")
+  reviewedById    String?
+  reviewedAt      DateTime?
+  reviewNote      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([reviewStatus, createdAt])
+}

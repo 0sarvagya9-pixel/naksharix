@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { requireAstroRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
+import { AstrologerCredentialForm } from "@/components/astrologer-credential-form";
+import { credentialState } from "@/lib/astrologers/credentials";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +52,7 @@ export default async function AstrologerProfilePage() {
               availableForCall: activeProfile.availableForCall,
               availableForVideo: activeProfile.availableForVideo
             } : { displayName: user.name }} />
+            {profile ? <AstrologerCredentialForm initialStatus={credentialState(profile.certificates).reviewStatus} /> : null}
           </CardContent>
         </Card>
       </Section>
