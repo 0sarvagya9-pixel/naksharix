@@ -31,6 +31,20 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(page.getByRole("heading", { level: 1, name: /A little clarity/i })).toBeVisible();
   });
 
+  test("public service pages have photographic banners without changing their core content", async ({ page }) => {
+    for (const path of ["/consultation", "/reports", "/shop", "/learn", "/puja-enquiry"]) {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+      await expect(page.locator(".nx-ed-inner-banner img")).toHaveCount(1);
+      await expect(page.locator(".nx-ed-inner-banner h2")).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+      const dimensions = await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth,
+        client: document.documentElement.clientWidth
+      }));
+      expect(dimensions.width, path).toBeLessThanOrEqual(dimensions.client + 2);
+    }
+  });
+
   test("320px mobile has no overflow and respects reduced motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 320, height: 750 });
