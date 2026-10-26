@@ -6,6 +6,7 @@ import { Section } from "@/components/section";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { formatConsultationSlotTime } from "@/lib/consultations/slot-time";
+import { readConsultationMeetingUrl } from "@/lib/consultations/meeting-link";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,15 @@ export default async function ConsultationSuccessPage({ params }: PageProps) {
               <p><span className="text-[#FFD700] font-semibold">Payment Status:</span> {booking.paymentStatus}</p>
               <p><span className="text-[#FFD700] font-semibold">Confirmation Email:</span> {metadata?.customerEmail ?? user.email}</p>
             </div>
+
+            {["CONFIRMED", "ACCEPTED"].includes(booking.status) &&
+              ["PAID", "FREE", "ADMIN_BYPASS"].includes(booking.paymentStatus) &&
+              readConsultationMeetingUrl(booking.metadata) ? (
+              <a href={readConsultationMeetingUrl(booking.metadata)!} target="_blank" rel="noopener noreferrer"
+                className="inline-flex rounded-lg border border-[#D4AF37]/40 px-4 py-2 font-semibold text-[#FFD700]">
+                Join external session room
+              </a>
+            ) : null}
 
             {metadata?.adminBypass ? (
               <p className="rounded-md border border-[#D4AF37]/20 bg-[#D4AF37]/10 p-3 text-xs text-[#FFD700]">
