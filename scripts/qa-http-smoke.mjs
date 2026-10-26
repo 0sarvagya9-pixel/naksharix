@@ -107,6 +107,21 @@ if (healthResponse) {
   }
 }
 
+const opsResponse = await expectStatus("/api/ops/readiness", 200, undefined, "public capability readiness");
+if (opsResponse) {
+  const responseBody = await opsResponse.json();
+  const schema = responseBody.data?.services?.databaseSchema;
+  if (schema?.ready !== true || schema?.missingCount !== 0) {
+    fail("predeploy feature schema", "Disposable database is missing LearningProgress or PujaPartner");
+  } else pass("predeploy feature schema", "both staged feature tables and indexes exist");
+}
+const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
+if (partnerResponse) {
+  const body = await partnerResponse.json();
+  if (!Array.isArray(body.data?.partners)) fail("puja registry", "expected reviewed partner array");
+  else pass("puja registry", "safe empty/verified partner listing");
+}
+
 const aiStatusResponse = await expectStatus("/api/ai/status", 200, undefined, "AI readiness endpoint");
 if (aiStatusResponse) {
   const body = await aiStatusResponse.json();
