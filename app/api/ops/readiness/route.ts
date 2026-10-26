@@ -5,10 +5,12 @@ import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getReportStorageReadiness } from "@/lib/storage/report-storage";
 import { getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 import { isAiAstrologerEnabled, isAiAstrologerReady } from "@/lib/ai/feature-status";
+import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
+export async function GET() {
+  const schema = await getSchemaReadiness().catch(() => null);
   const email = getEmailReadiness();
   const monitoring = getMonitoringReadiness();
   const storage = getReportStorageReadiness();
@@ -32,6 +34,7 @@ export function GET() {
       shopMode: "informational_enquiry_only"
     },
     services: {
+      databaseSchema: { ready: schema?.ready ?? false, missingCount: schema?.missingCount ?? 2 },
       email: {
         provider: email.provider,
         enabled: email.emailEnabled,
