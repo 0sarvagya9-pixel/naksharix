@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft, ArrowRight, CalendarDays, ChevronRight, CircleHelp,
-  Compass, Heart, MoonStar, ShieldCheck, Sparkles, Sun, Users
+  Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
 } from "lucide-react";
 
 const STARRY_SKY = "https://images.unsplash.com/photo-1519681393784-d120267933ba";
@@ -120,6 +120,7 @@ function SectionTitle({ eyebrow, title, copy }: { eyebrow: string; title: string
 export function EditorialHome() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [manuallyPaused, setManuallyPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(true);
 
   useEffect(() => {
@@ -131,10 +132,10 @@ export function EditorialHome() {
   }, []);
 
   useEffect(() => {
-    if (paused || reducedMotion) return;
+    if (paused || manuallyPaused || reducedMotion) return;
     const timer = window.setInterval(() => setActive((index) => (index + 1) % heroSlides.length), 7500);
     return () => window.clearInterval(timer);
-  }, [paused, reducedMotion]);
+  }, [paused, manuallyPaused, reducedMotion]);
 
   const slide = heroSlides[active];
   function advance(direction: number) {
@@ -189,6 +190,11 @@ export function EditorialHome() {
               ))}
             </div>
             <button type="button" onClick={() => advance(1)} aria-label="Next featured destination"><ArrowRight size={18}/></button>
+            <button type="button" onClick={() => setManuallyPaused((value) => !value)}
+              aria-label={manuallyPaused ? "Play featured slideshow" : "Pause featured slideshow"}
+              aria-pressed={manuallyPaused}>
+              {manuallyPaused ? <Play size={17} aria-hidden="true" /> : <Pause size={17} aria-hidden="true" />}
+            </button>
           </div>
         </div>
       </section>
