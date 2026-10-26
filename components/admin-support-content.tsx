@@ -6,6 +6,7 @@ import { Section } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { secureFetch } from "@/lib/security/csrf";
+import { SupportConversation } from "@/components/support-conversation";
 
 type Ticket = {
   id: string; subject: string; status: string; priority: string;
@@ -14,12 +15,6 @@ type Ticket = {
 };
 const statusOptions = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
 const priorityOptions = ["LOW", "NORMAL", "HIGH"] as const;
-
-function summary(messages: unknown) {
-  if (!Array.isArray(messages)) return "";
-  const entry = messages[0] as { text?: unknown } | undefined;
-  return typeof entry?.text === "string" ? entry.text : "";
-}
 
 export function AdminSupportContent() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -41,6 +36,13 @@ export function AdminSupportContent() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
+
+  async function refresh() {
+    const response = await fetch("/api/admin/support", { cache: "no-store" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Support desk could not refresh.");
+    setTickets(result.data?.tickets ?? []);
+  }
 
   function edit(id: string, patch: Partial<Ticket>) {
     setTickets((existing) => existing.map((ticket) => ticket.id === id ? { ...ticket, ...patch } : ticket));
@@ -90,7 +92,7 @@ export function AdminSupportContent() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-wrap break-words text-sm naksh-muted-text">{summary(ticket.messages)}</p>
+                <SupportConversation ticketId={ticket.id} messages={ticket.messages} status={ticket.status} admin onSent={refresh} />
                 <div className="mt-4 flex flex-wrap items-end gap-4">
                   <label className="grid gap-2 text-sm">
                     <span>Status</span>
