@@ -45,6 +45,18 @@ test.describe("Naksharix editorial photo homepage", () => {
     }
   });
 
+  test("autoplay can be explicitly paused and resumed", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const pause = page.getByRole("button", { name: "Pause featured slideshow" });
+    await expect(pause).toBeVisible();
+    await pause.click();
+    const play = page.getByRole("button", { name: "Play featured slideshow" });
+    await expect(play).toHaveAttribute("aria-pressed", "true");
+    await play.click();
+    await expect(pause).toHaveAttribute("aria-pressed", "false");
+  });
+
   test("320px mobile has no overflow and respects reduced motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 320, height: 750 });
