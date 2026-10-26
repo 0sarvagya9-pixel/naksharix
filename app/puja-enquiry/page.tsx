@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { GuidanceIntakeForm } from "@/components/guidance-intake-form";
 import { getCurrentUser } from "@/lib/auth/jwt";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +36,14 @@ const traditions = [
 
 export default async function PujaEnquiryPage() {
   const user = await getCurrentUser();
+  const partners = await prisma.pujaPartner.findMany({
+    where: { reviewStatus: "VERIFIED" },
+    select: { id: true, name: true, region: true, traditions: true },
+    take: 50, orderBy: { createdAt: "asc" }
+  }).catch((error: unknown) => {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") return [];
+    throw error;
+  });
   return (
     <main className="star-field">
       <Section>
@@ -58,8 +68,25 @@ export default async function PujaEnquiryPage() {
             or fulfillment for this enquiry channel. Submitting does not book a ritual,
             collect payment or guarantee a spiritual, medical or financial outcome.
           </div>
+          <div className="mb-8 rounded-xl border border-[#D4AF37]/20 p-5">
+            <h2 className="font-cinzel text-xl font-bold">Partner review registry</h2>
+            {partners.length ? (
+              <ul className="mt-4 space-y-3 text-sm">
+                {partners.map((partner) => (
+                  <li key={partner.id}>
+                    <strong>{partner.name}</strong> — {partner.region}. Topics: {partner.traditions.join(", ")}.
+                    Partner review does not confirm available dates or fulfillment.
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="mt-3 text-sm naksh-muted-text">
+              No operator-reviewed partners are listed yet. General puja information requests remain available.
+            </p>}
+          </div>
           {user ? (
-            <GuidanceIntakeForm kind="PUJA_ENQUIRY" />
+            <GuidanceIntakeForm kind="PUJA_ENQUIRY" availablePartners={partners.map((partner) => ({
+              id: partner.id, name: partner.name, region: partner.region
+            }))} />
           ) : (
             <div className="rounded-xl border border-[#D4AF37]/20 p-6">
               <p className="mb-4 text-sm naksh-muted-text">Sign in to submit and track an enquiry privately.</p>
