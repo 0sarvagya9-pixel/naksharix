@@ -16,7 +16,7 @@ const features = [
   { label: "Saved Reports", path: "/saved-reports" }
 ];
 
-export function HomeScreen() {
+export function HomeScreen({ onOpenNumerology }: { onOpenNumerology: () => void }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" />
@@ -25,7 +25,7 @@ export function HomeScreen() {
           <Text style={styles.eyebrow}>Naksharix</Text>
           <Text style={styles.title}>Astrology tools, reports and consultations</Text>
           <Text style={styles.subtitle}>
-            This companion app opens the production Naksharix experiences securely in your browser. Public subscriptions and Shop ecommerce checkout are not active.
+            Use native offline numerology on this device, or open the other Naksharix experiences in your browser. Public subscriptions and Shop checkout are inactive.
           </Text>
           <TouchableOpacity style={styles.primaryButton} accessibilityRole="button" onPress={() => Linking.openURL(mobileEnv.apiUrl)}>
             <Text style={styles.primaryButtonText}>Open Naksharix</Text>
@@ -33,6 +33,11 @@ export function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity style={styles.primaryButton} accessibilityRole="button"
+          onPress={onOpenNumerology}>
+          <Text style={styles.primaryButtonText}>Try offline native numerology</Text>
+          <Text style={styles.primaryButtonIcon}>&gt;</Text>
+        </TouchableOpacity>
         <View style={styles.grid}>
           {features.map((feature) => (
             <TouchableOpacity
