@@ -57,6 +57,22 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(pause).toHaveAttribute("aria-pressed", "false");
   });
 
+  test("free learning self-check has real answers, explanations and no certificate claim", async ({ page }) => {
+    await page.goto("/learn", { waitUntil: "domcontentloaded" });
+    const practice = page.getByRole("region", { name: "Learning self-check" });
+    await expect(practice.getByRole("button", { name: "Check answers" })).toBeDisabled();
+    const choices = [
+      "Birth time and location",
+      "Tithi",
+      "27",
+      "A traditional interpretive timeline"
+    ];
+    for (const choice of choices) await practice.getByRole("radio", { name: choice }).check();
+    await practice.getByRole("button", { name: "Check answers" }).click();
+    await expect(practice.getByText("Self-check: 4/4.", { exact: false })).toBeVisible();
+    await expect(practice.getByText("Learning only; not an accredited result.", { exact: false })).toBeVisible();
+  });
+
   test("320px mobile has no overflow and respects reduced motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 320, height: 750 });
