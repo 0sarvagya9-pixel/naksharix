@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { GuidanceIntakeForm } from "@/components/guidance-intake-form";
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -46,6 +47,11 @@ export default async function PujaEnquiryPage() {
   });
   return (
     <main className="star-field">
+      <EditorialServiceBanner eyebrow="PUJA & TRADITIONS"
+        headline="A space for sacred traditions"
+        caption="Explore customary practices and submit a private enquiry. Ceremonies, priest availability and delivery are not automatically guaranteed."
+        image="/naksharix/ganesh-hero-light-saffron.jpg" imageAlt="Saffron-toned traditional Ganesh artwork"
+        link="/ask-astrologer" linkLabel="Ask a written question" />
       <Section>
         <div className="mx-auto max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Traditional Practices</p>
