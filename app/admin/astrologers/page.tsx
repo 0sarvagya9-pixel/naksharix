@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { requireAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
+import { AdminCredentialReview } from "@/components/admin-credential-review";
+import { credentialState } from "@/lib/astrologers/credentials";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +47,20 @@ export default async function AdminAstrologersPage() {
                   <p><span className="text-foreground">Availability:</span> {[profile.availableForChat ? "Chat" : null, profile.availableForCall ? "Call" : null, profile.availableForVideo ? "Video" : null].filter(Boolean).join(", ") || "Not set"}</p>
                   {profile.city || profile.country ? <p><span className="text-foreground">Location:</span> {[profile.city, profile.country].filter(Boolean).join(", ")}</p> : null}
                   <p>{profile.bio || "No bio submitted yet."}</p>
+                  {credentialState(profile.certificates).evidence ? (
+                    <div className="rounded-lg border border-[#D4AF37]/20 p-3">
+                      <p>Document submitted: {credentialState(profile.certificates).evidence!.credentialName}</p>
+                      <p>Issuer: {credentialState(profile.certificates).evidence!.issuer}</p>
+                      <p>Year: {credentialState(profile.certificates).evidence!.issuedYear}</p>
+                      <p>Review state: {credentialState(profile.certificates).reviewStatus}</p>
+                      <a className="text-[#FFD700] underline" target="_blank" rel="noopener noreferrer"
+                        href={credentialState(profile.certificates).evidence!.referenceUrl}>
+                        Open professional document reference
+                      </a>
+                      <AdminCredentialReview profileId={profile.id}
+                        status={credentialState(profile.certificates).reviewStatus} />
+                    </div>
+                  ) : <p>No professional credential reference has been submitted.</p>}
                   <div className="flex flex-wrap gap-2 pt-2">
                     {profile.status === "APPROVED" ? <Button size="sm" variant="outline" asChild><Link href={`/astrologers/${profile.id}`}>View public profile</Link></Button> : null}
                   </div>
