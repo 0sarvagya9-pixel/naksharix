@@ -218,6 +218,60 @@ try {
   });
 
 
+  await check("consultation session link is role-scoped and stored only for confirmed bookings", async () => {
+    const fixture = await prisma.consultationBooking.create({
+      data: {
+        userId, astrologerProfileId: astroProfileId, mode: "VIDEO",
+        status: "CONFIRMED", paymentStatus: "ADMIN_BYPASS", amount: 0,
+        scheduledAt: new Date("2027-06-12T08:00:00.000Z"), durationMins: 30,
+        question: "Private audiovisual booking coordination acceptance fixture."
+      }
+    });
+    const endpoint = "/api/consultations/session-link";
+    const meetingLink = "https://meet.jit.si/naksharix-qa-" + unique;
+    const anon = await req(endpoint + "?bookingId=" + encodeURIComponent(fixture.id));
+    assert.equal(anon.status, 401);
+    const deniedWrite = await post(endpoint, { bookingId: fixture.id, meetingLink }, userCookie);
+    assert.equal(deniedWrite.status, 404, "Customer must not assign provider links");
+    for (const malicious of [
+      "javascript:alert(1)", "https://evil.example/room",
+      "https://meet.jit.si.evil.example/room",
+      "https://user@meet.jit.si/room",
+      "http://meet.jit.si/room"
+    ]) {
+      const response = await post(endpoint, { bookingId: fixture.id, meetingLink: malicious }, astroCookie);
+      assert.equal(response.status, 422, "Unsafe meeting provider accepted: " + malicious);
+    }
+    const saved = await post(endpoint, { bookingId: fixture.id, meetingLink }, astroCookie);
+    assert.equal(saved.status, 200, await saved.text());
+    const ownerRead = await req(endpoint + "?bookingId=" + fixture.id, {
+      headers: { cookie: userCookie }
+    });
+    const ownerData = await ownerRead.json();
+    assert.equal(ownerRead.status, 200);
+    assert.equal(ownerData.data.assigned, true);
+    assert.equal(ownerData.data.meetingLink, meetingLink);
+    assert.equal(ownerData.data.providerReady, false, "No unverified third-party provider uptime claim");
+    const astrologerRead = await req(endpoint + "?bookingId=" + fixture.id, {
+      headers: { cookie: astroCookie }
+    });
+    assert.equal(astrologerRead.status, 200);
+    const unpaid = await post(endpoint, { bookingId, meetingLink }, astroCookie);
+    assert.equal(unpaid.status, 409, "Unpaid customer booking assigned an active meeting room");
+    const unpaidRead = await req(endpoint + "?bookingId=" + bookingId, {
+      headers: { cookie: userCookie }
+    });
+    const unpaidData = await unpaidRead.json();
+    assert.equal(unpaidRead.status, 200);
+    assert.equal(unpaidData.data.meetingLink, null);
+    const customerDashboard = await req("/dashboard/consultations", {
+      headers: { cookie: userCookie }
+    });
+    const rendered = await customerDashboard.text();
+    assert.equal(customerDashboard.status, 200);
+    assert.ok(rendered.includes(meetingLink), "Customer could not view assigned provider room");
+  });
+
   await check("verified consultation review appears only in its astrologer's private dashboard", async () => {
     const denied = await req("/astrologer/reviews", { headers: { cookie: userCookie } });
     const deniedHtml = await denied.text();
