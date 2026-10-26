@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { getRedis } from "@/lib/redis";
 import { getEmailReadiness } from "@/lib/email/email-service";
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
+import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +47,8 @@ export default async function AdminReadinessPage() {
     }
   }
 
+  let newTables: Awaited<ReturnType<typeof getSchemaReadiness>> | null = null;
+  try { newTables = await getSchemaReadiness(); } catch { newTables = null; }
   const email = getEmailReadiness();
   const monitoring = getMonitoringReadiness();
   const emailStatus: Status = email.emailEnabled ? "ok" : "missing";
@@ -55,6 +58,15 @@ export default async function AdminReadinessPage() {
       name: "Production database",
       status: database,
       note: "Read-only connectivity probe. This is not a backup or schema-drift verification."
+    },
+    {
+      name: "Learning and Puja schema",
+      status: !newTables ? "error" : newTables.ready ? "ok" : "missing",
+      note: !newTables
+        ? "Read-only schema inspection failed; release must be held."
+        : newTables.ready
+          ? "LearningProgress and PujaPartner with required indexes are present."
+          : "Missing required objects: " + newTables.checks.filter((item) => !item.present).map((item) => item.object).join(", ") + ". Deploy only after verified backup, reviewed migration, and independent restore proof."
     },
     {
       name: "Distributed Redis",
