@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 import { getRedis } from "@/lib/redis";
 import { getEmailReadiness } from "@/lib/email/email-service";
 import { isAiAstrologerEnabled, isAiAstrologerReady } from "@/lib/ai/feature-status";
+import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ export async function GET() {
   const checks = {
     app: true,
     database: false,
+    databaseSchema: false,
     redis: "not_configured" as "ok" | "error" | "not_configured",
     email: false,
     ai: false,
@@ -23,6 +25,8 @@ export async function GET() {
   } catch {
     checks.database = false;
   }
+
+  checks.databaseSchema = (await getSchemaReadiness().catch(() => null))?.ready === true;
 
   const redis = getRedis();
   if (redis) {
@@ -45,6 +49,7 @@ export async function GET() {
   const healthy =
     checks.app &&
     checks.database &&
+    checks.databaseSchema &&
     checks.redis !== "error" &&
     checks.email &&
     checks.ai &&
