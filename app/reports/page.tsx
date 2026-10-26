@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
 import { ReportsContent } from "@/components/reports-content";
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 
 export const metadata: Metadata = seo({
   title: "Premium Astrology Reports | Kundli, Match Making, Numerology & Career Reports",
@@ -10,5 +11,10 @@ export const metadata: Metadata = seo({
 });
 
 export default function ReportsPage() {
-  return <ReportsContent />;
+  return <><EditorialServiceBanner eyebrow="CHARTS & REPORTS"
+    headline="A deeper look at your cosmic story"
+    caption="Explore available traditional chart, matching and numerology report topics. Availability and any applicable pricing are shown in the report workflow."
+    image="https://images.unsplash.com/photo-1500534623283-312aade485b7" imageAlt="Golden sunrise over mountains"
+    link="/kundli" linkLabel="Begin with a free Kundli" />
+    <ReportsContent /></>;
 }
