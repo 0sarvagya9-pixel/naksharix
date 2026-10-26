@@ -309,6 +309,85 @@ try {
     assert.equal(closedReply.status, 409);
   });
 
+  await check("push subscription API does not falsely claim unimplemented delivery", async () => {
+    const anon = await post("/api/notifications/subscribe", {
+      endpoint: "https://push.example.test/subscription", keys: {}
+    });
+    assert.equal(anon.status, 401);
+    const logged = await post("/api/notifications/subscribe", {
+      endpoint: "https://push.example.test/subscription", keys: {}
+    }, userCookie);
+    const result = await logged.json();
+    assert.equal(logged.status, 503, JSON.stringify(result));
+    assert.doesNotMatch(JSON.stringify(result), /"subscribed":true/);
+    assert.doesNotMatch(JSON.stringify(result), /push\.example\.test/);
+  });
+
+  await check("written questions and puja enquiries are real private non-payment tickets", async () => {
+    for (const path of ["/ask-astrologer", "/puja-enquiry", "/learn"]) {
+      const page = await req(path);
+      assert.equal(page.status, 200, "public explanatory page missing: " + path);
+    }
+    const anon = await post("/api/guidance-enquiries", {
+      kind: "WRITTEN_GUIDANCE", topic: "CAREER",
+      message: "Please review this career question using available guidance."
+    });
+    assert.equal(anon.status, 401);
+    const rejected = await post("/api/guidance-enquiries", {
+      kind: "PUJA_ENQUIRY", topic: "GENERAL",
+      message: "Need a ceremony.", paymentStatus: "PAID"
+    }, userCookie);
+    assert.equal(rejected.status, 422, "client may not inject payment fields");
+    const written = await post("/api/guidance-enquiries", {
+      kind: "WRITTEN_GUIDANCE", topic: "CAREER",
+      message: "I am exploring a career change and want to know what traditional chart concepts mean."
+    }, userCookie);
+    const writtenBody = await written.json();
+    assert.equal(written.status, 201, JSON.stringify(writtenBody));
+    assert.equal(writtenBody.data.paymentRequired, false);
+    assert.equal(writtenBody.data.expertAssigned, false);
+    assert.equal(writtenBody.data.bookingCreated, false);
+    const writtenId = writtenBody.data.ticket.id;
+    const puja = await post("/api/guidance-enquiries", {
+      kind: "PUJA_ENQUIRY", topic: "SPIRITUAL_PRACTICE",
+      message: "I would like more information about Rudrabhishek traditions before making any arrangements."
+    }, userCookie);
+    const pujaBody = await puja.json();
+    assert.equal(puja.status, 201, JSON.stringify(pujaBody));
+    const pujaId = pujaBody.data.ticket.id;
+    const actual = await prisma.supportTicket.findMany({
+      where: { id: { in: [writtenId, pujaId] } },
+      select: { id: true, userId: true, subject: true, messages: true }
+    });
+    assert.equal(actual.length, 2);
+    for (const ticket of actual) {
+      assert.equal(ticket.userId, userId);
+      assert.equal(ticket.messages.length, 1);
+      assert.equal(ticket.messages[0].author, "USER");
+    }
+    assert.ok(actual.some((item) => item.subject.startsWith("[WRITTEN GUIDANCE]")));
+    assert.ok(actual.some((item) => item.subject.startsWith("[PUJA ENQUIRY]")));
+
+    const owned = await req("/api/support/tickets", { headers: { cookie: userCookie } });
+    const ownedData = await owned.json();
+    assert.ok(ownedData.data.tickets.some((ticket) => ticket.id === pujaId));
+    const staff = await req("/api/admin/support", { headers: { cookie: adminCookie } });
+    const staffData = await staff.json();
+    assert.ok(staffData.data.tickets.some((ticket) => ticket.id === writtenId));
+    const staffReply = await post("/api/admin/support/reply", {
+      ticketId: writtenId,
+      message: "Your question was received. Guidance availability will be reviewed before any assignment.",
+      clientMutationId: randomUUID()
+    }, adminCookie);
+    assert.equal(staffReply.status, 200, await staffReply.text());
+    const conversation = await prisma.supportTicket.findUniqueOrThrow({
+      where: { id: writtenId },
+      select: { messages: true }
+    });
+    assert.equal(conversation.messages.length, 2);
+    assert.equal(conversation.messages[1].author, "ADMIN");
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);

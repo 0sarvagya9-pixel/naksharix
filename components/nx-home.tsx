@@ -39,6 +39,9 @@ const SIGNATURE_TOOLS = [
   { label: "Love & Relations", sub: "Explore compatibility context", href: "/matchmaking", icon: Heart },
   { label: "Spiritual Growth", sub: "Browse reflective tools", href: "/free-calculators", icon: Eye },
   { label: "Consult an Astrologer", sub: "Book an approved profile", href: "/consultation", icon: HelpCircle },
+  { label: "Written Question", sub: "Request human review", href: "/ask-astrologer", icon: HelpCircle },
+  { label: "Puja Enquiry", sub: "Ask about traditions", href: "/puja-enquiry", icon: Shield },
+  { label: "Free Learning", sub: "Study the essentials", href: "/learn", icon: Sparkles },
 ];
 
 const PREMIUM_FEATURES = [

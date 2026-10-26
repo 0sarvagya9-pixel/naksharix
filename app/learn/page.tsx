@@ -1,0 +1,105 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Section } from "@/components/section";
+import { seo } from "@/lib/seo";
+
+export const metadata: Metadata = seo({
+  title: "Learn the Basics of Vedic Astrology | Free Lessons",
+  description: "Study beginner-level Kundli, Panchang, Nakshatra, Dasha and responsible astrological interpretation with free Naksharix learning guides.",
+  path: "/learn"
+});
+
+const lessons = [
+  {
+    id: "birth-chart",
+    number: "01",
+    name: "How a Janam Kundli is organized",
+    summary: "The birth chart places the traditional twelve houses and the positions of grahas into a structured map for interpretation.",
+    ideas: [
+      "Lagna or Ascendant anchors the first house and depends strongly on accurate birth time and location.",
+      "The twelve houses traditionally represent themes such as identity, resources, relationships and work.",
+      "Graha signs and house placements are inputs to interpretation, not guarantees about events."
+    ],
+    href: "/kundli",
+    action: "Open the Kundli tool"
+  },
+  {
+    id: "panchang",
+    number: "02",
+    name: "Reading the Panchang",
+    summary: "Panchang brings together five traditional elements to describe a date and location.",
+    ideas: [
+      "Tithi describes the angular relationship of the Moon and Sun.",
+      "Nakshatra tracks the Moon within the traditional lunar mansion system.",
+      "Yoga, Karana and Vara round out the five elements; published times depend on location and conventions."
+    ],
+    href: "/panchang",
+    action: "Calculate today's Panchang"
+  },
+  {
+    id: "nakshatras",
+    number: "03",
+    name: "Nakshatras, signs and the Moon",
+    summary: "Nakshatra and rashi are different traditional ways of dividing the sky into interpretive regions.",
+    ideas: [
+      "The zodiac uses twelve signs, while the conventional Nakshatra system uses twenty-seven divisions.",
+      "Your Moon sign depends on the Moon's position at the entered moment.",
+      "Ayanamsa, timing accuracy and astronomical source can change a boundary calculation."
+    ],
+    href: "/free-calculators/nakshatra-calculator",
+    action: "Explore the Nakshatra calculator"
+  },
+  {
+    id: "dasha",
+    number: "04",
+    name: "Understanding Dasha timelines",
+    summary: "Dasha frameworks organize periods for traditional chart-based reflection.",
+    ideas: [
+      "Vimshottari Dasha uses a cyclical traditional period scheme derived from the natal Moon's Nakshatra.",
+      "The timing of transitions requires careful dates and consistent calculation settings.",
+      "A period is not a deterministic prediction of a job, marriage, accident or medical outcome."
+    ],
+    href: "/free-calculators/dasha-calculator",
+    action: "Explore the Dasha calculator"
+  }
+] as const;
+
+export default function LearnPage() {
+  return (
+    <main className="star-field">
+      <Section>
+        <div className="mx-auto max-w-5xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Free Learning Library</p>
+          <h1 className="mt-3 font-cinzel text-4xl font-black">Understand Vedic Astrology</h1>
+          <p className="mt-4 max-w-3xl text-base leading-8 naksh-muted-text">
+            Four original, introductory lessons to help you understand the vocabulary,
+            calculations and limitations behind common astrology tools. Work through
+            the concepts and try the connected calculators.
+          </p>
+          <div className="mt-8 grid gap-5 lg:grid-cols-2">
+            {lessons.map((lesson) => (
+              <article id={lesson.id} key={lesson.id}
+                className="rounded-2xl border border-[#D4AF37]/25 bg-[#061D3C]/80 p-6">
+                <span className="text-xs font-bold tracking-[0.2em] text-[#FFD700]">LESSON {lesson.number}</span>
+                <h2 className="mt-2 font-cinzel text-2xl font-black">{lesson.name}</h2>
+                <p className="mt-3 text-sm leading-7 naksh-muted-text">{lesson.summary}</p>
+                <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-7 naksh-muted-text">
+                  {lesson.ideas.map((idea) => <li key={idea}>{idea}</li>)}
+                </ul>
+                <Link href={lesson.href} className="mt-5 inline-block rounded-lg border border-[#D4AF37]/40 px-4 py-2 text-sm font-semibold text-[#FFD700] hover:bg-[#D4AF37]/10">
+                  {lesson.action}
+                </Link>
+              </article>
+            ))}
+          </div>
+          <div className="mt-8 rounded-xl border border-[#D4AF37]/20 p-5 text-sm leading-7 naksh-muted-text">
+            These are free self-study guides, not accredited training, a live course,
+            an exam or a certificate. Traditional astrology should not substitute
+            for medical, legal, financial or other professional advice. No expert
+            mentor or class schedule is represented by this page.
+          </div>
+        </div>
+      </Section>
+    </main>
+  );
+}
