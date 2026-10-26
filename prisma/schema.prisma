@@ -179,6 +179,7 @@ model User {
   chatThreads                  ChatThread[]
   appointments                 Appointment[]         @relation("ClientAppointments")
   supportTickets               SupportTicket[]
+  learningProgress              LearningProgress[]
   reviews                      Review[]
   affiliate                    Affiliate?
   astrologerProfile            Astrologer?
@@ -853,3 +854,18 @@ model Affiliate {
   createdAt DateTime @default(now())
 }
 
+
+
+// Free self-study completion only; not an examination or certification.
+model LearningProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  completedAt DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId, completedAt])
+}
