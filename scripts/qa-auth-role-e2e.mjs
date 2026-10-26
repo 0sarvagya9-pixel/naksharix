@@ -275,6 +275,22 @@ try {
         question: "Private audiovisual booking coordination acceptance fixture."
       }
     });
+    const unauthorizedNotes = await post("/api/astrologer/notes", {
+      userId, title: "Owner-only private note", body: "Only the linked astrologer may write this context.", private: true
+    }, userCookie);
+    assert.equal(unauthorizedNotes.status, 403);
+    const publicNote = await post("/api/astrologer/notes", {
+      userId, title: "Insecure visibility", body: "This must never become public.", private: false
+    }, astroCookie);
+    assert.equal(publicNote.status, 422);
+    const eligibleNote = await post("/api/astrologer/notes", {
+      userId, title: "Private case context", body: "This note is restricted to the booked astrologer.", private: true
+    }, astroCookie);
+    assert.equal(eligibleNote.status, 201, await eligibleNote.text());
+    const noteRow = await prisma.astrologerNote.findFirstOrThrow({
+      where: { astrologerProfileId: astroProfileId, userId, title: "Private case context" }
+    });
+    assert.equal(noteRow.private, true);
     const endpoint = "/api/consultations/session-link";
     const meetingLink = "https://meet.jit.si/naksharix-qa-" + unique;
     const anon = await req(endpoint + "?bookingId=" + encodeURIComponent(fixture.id));
