@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Section } from "@/components/section";
 import { seo } from "@/lib/seo";
+import { LearningProgress } from "@/components/learning-progress";
 
 export const metadata: Metadata = seo({
   title: "Learn the Basics of Vedic Astrology | Free Lessons",
@@ -92,6 +93,7 @@ export default function LearnPage() {
               </article>
             ))}
           </div>
+          <LearningProgress />
           <div className="mt-8 rounded-xl border border-[#D4AF37]/20 p-5 text-sm leading-7 naksh-muted-text">
             These are free self-study guides, not accredited training, a live course,
             an exam or a certificate. Traditional astrology should not substitute
