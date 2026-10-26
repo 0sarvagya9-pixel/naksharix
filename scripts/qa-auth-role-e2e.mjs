@@ -152,6 +152,54 @@ try {
     const slot = await post("/api/astrologer/availability", { dayOfWeek: 2, startTime: "11:00", endTime: "11:30", consultationType: "CHAT", isActive: true, status: "ONLINE" }, astroCookie);
     assert.equal(slot.status, 201, await slot.text());
   });
+  await check("expert credentials need independent admin review before public reviewed badge", async () => {
+    const credentials = "/api/astrologer/credentials";
+    const reviewApi = "/api/admin/astrologers/credentials";
+    const invalidActor = await post(credentials, {
+      credentialName: "Professional Astronomy Certificate",
+      issuer: "Example Academy", issuedYear: 2024,
+      referenceUrl: "https://example.org/credentials/example"
+    }, userCookie);
+    assert.equal(invalidActor.status, 403);
+    const firstProfile = await req("/astrologers/" + astroProfileId);
+    const firstHtml = await firstProfile.text();
+    assert.equal(firstProfile.status, 200);
+    assert.ok(firstHtml.includes("credentials unverified"), "Public page incorrectly claims verified expert");
+    const malicious = await post(credentials, {
+      credentialName: "Professional Astronomy Certificate",
+      issuer: "Example Academy", issuedYear: 2024,
+      referenceUrl: "http://localhost/admin"
+    }, astroCookie);
+    assert.equal(malicious.status, 422);
+    const evidence = {
+      credentialName: "Professional Astronomy Certificate",
+      issuer: "Example Academy", issuedYear: 2024,
+      referenceUrl: "https://example.org/credentials/example"
+    };
+    const submitted = await post(credentials, evidence, astroCookie);
+    assert.equal(submitted.status, 200, await submitted.text());
+    const stored = await prisma.astrologerProfile.findUniqueOrThrow({
+      where: { id: astroProfileId }, select: { certificates: true }
+    });
+    assert.equal(stored.certificates.reviewStatus, "PENDING");
+    const selfReview = await post(reviewApi, {
+      profileId: astroProfileId, decision: "DOCUMENTS_REVIEWED",
+      note: "This account cannot approve its own evidence."
+    }, astroCookie);
+    assert.equal(selfReview.status, 404);
+    const staffReview = await post(reviewApi, {
+      profileId: astroProfileId, decision: "DOCUMENTS_REVIEWED",
+      note: "Reviewed public credential evidence manually in disposable CI fixture."
+    }, adminCookie);
+    assert.equal(staffReview.status, 200, await staffReview.text());
+    const publicAfter = await req("/astrologers/" + astroProfileId);
+    const publicHtml = await publicAfter.text();
+    assert.equal(publicAfter.status, 200);
+    assert.ok(publicHtml.includes("Professional documents reviewed by Naksharix"));
+    assert.ok(!publicHtml.includes(evidence.referenceUrl),
+      "Private credential reference leaked onto public page");
+  });
+
   await check("user booking persists correct IST time without payment bypass", async () => {
     const slot = await prisma.availabilitySlot.findFirstOrThrow({ where: { astrologerProfileId: astroProfileId } });
     const res = await post("/api/consultation-bookings", {
