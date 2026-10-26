@@ -17,7 +17,7 @@ export function PremiumGlassShell({
     <div
       className={cn(
         "relative z-10 w-full overflow-hidden flex flex-col min-h-screen",
-        isHome ? "max-w-none mx-0 my-0 rounded-none" : "max-w-[1420px] mx-auto my-6 md:my-10 rounded-[38px] sm:min-h-[calc(100vh-80px)]",
+        isHome ? "naksharix-home-shell max-w-none mx-0 my-0 rounded-none" : "max-w-[1420px] mx-auto my-6 md:my-10 rounded-[38px] sm:min-h-[calc(100vh-80px)]",
         className
       )}
       style={isHome ? { background: "transparent", border: "none", boxShadow: "none", backdropFilter: "none", WebkitBackdropFilter: "none" } : {
