@@ -192,6 +192,7 @@ jobs:
       - run: npm ci
       - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
       - name: Verify preinstalled cross-browser binaries
+        shell: bash
         run: |
           set -euo pipefail
           for browser in chromium firefox webkit; do
@@ -200,6 +201,7 @@ jobs:
           npx playwright --version
       - run: npx prisma generate
       - name: Bootstrap isolated browser-test database
+        shell: bash
         run: |
           set -euo pipefail
           node -e 'const u = new URL(process.env.DATABASE_URL || ""); if (process.env.CI !== "true" || u.hostname !== "postgres" || u.pathname !== "/naksharix") process.exit(1);'
