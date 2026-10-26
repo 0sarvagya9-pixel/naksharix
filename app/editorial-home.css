@@ -284,3 +284,5 @@
   .nx-ed-inner-banner-shade { background: rgba(15,14,29,.79); }
   .nx-ed-inner-banner-body { width: calc(100% - 1.7rem); padding-block: 3rem; }
 }
+
+main.star-field > .nx-ed-inner-banner:first-child { padding-top: 0 !important; }
