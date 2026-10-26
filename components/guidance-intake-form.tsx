@@ -14,7 +14,8 @@ const topics = [
   { value: "GENERAL", label: "General enquiry" }
 ] as const;
 
-export function GuidanceIntakeForm({ kind }: { kind: Kind }) {
+export function GuidanceIntakeForm({ kind, availablePartners = [] }: { kind: Kind; availablePartners?: { id: string; name: string; region: string }[] }) {
+  const [partnerId, setPartnerId] = useState("");
   const [topic, setTopic] = useState<(typeof topics)[number]["value"]>("GENERAL");
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -30,7 +31,7 @@ export function GuidanceIntakeForm({ kind }: { kind: Kind }) {
       const response = await secureFetch("/api/guidance-enquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, topic, message: message.trim() })
+        body: JSON.stringify({ kind, topic, message: message.trim(), ...(kind === "PUJA_ENQUIRY" && partnerId ? { partnerId } : {}) })
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Request could not be recorded.");
@@ -69,6 +70,18 @@ export function GuidanceIntakeForm({ kind }: { kind: Kind }) {
               {topics.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
             </select>
           </label>
+          {kind === "PUJA_ENQUIRY" && availablePartners.length ? (
+            <label className="block space-y-2 text-sm">
+              <span>Partner to ask about (optional, enquiry only)</span>
+              <select value={partnerId} onChange={(event) => setPartnerId(event.target.value)}
+                className="w-full rounded-lg border border-[#263957] bg-[#02112C] p-3 text-white">
+                <option value="">General request — no partner assigned</option>
+                {availablePartners.map((partner) => <option key={partner.id} value={partner.id}>
+                  {partner.name} · {partner.region}
+                </option>)}
+              </select>
+            </label>
+          ) : null}
           <label className="block space-y-2 text-sm">
             <span>Your question or request</span>
             <textarea required minLength={20} maxLength={1200} rows={7}
