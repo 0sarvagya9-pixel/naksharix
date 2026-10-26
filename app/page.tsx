@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NxHome } from "@/components/nx-home";
+import { EditorialHome } from "@/components/home/editorial-home";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
@@ -13,7 +13,7 @@ export const metadata: Metadata = seo({
 export default function HomePage() {
   return (
     <main className="overflow-hidden bg-[var(--nx-bg)] text-[var(--nx-text)]">
-      <NxHome />
+      <EditorialHome />
     </main>
   );
 }

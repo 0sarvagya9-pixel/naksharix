@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ShopComingSoonContent } from "@/components/shop-coming-soon-content";
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { seo } from "@/lib/seo";
 
@@ -17,5 +18,10 @@ export const dynamic = "force-dynamic";
 
 export default async function ShopPage() {
   const catalogue = await getShopCatalogue();
-  return <ShopComingSoonContent initialProducts={catalogue.products} />;
+  return <><EditorialServiceBanner eyebrow="SPIRITUAL DISCOVERY"
+    headline="Objects of tradition and intention"
+    caption="Explore the Naksharix catalogue and enquire about availability. Product checkout and guaranteed delivery are not active."
+    image="/naksharix/ganesh-hero-light-saffron.jpg" imageAlt="Traditional devotional illustration"
+    link="/contact" linkLabel="Ask about an item" />
+    <ShopComingSoonContent initialProducts={catalogue.products} /></>;
 }

@@ -42,7 +42,10 @@ const toolsLinks = [
 
 const serviceLinks = [
   { label: "AI Astrologer", href: "/ai-astrologer" },
-  { label: "Spiritual Catalogue", href: "/shop" }
+  { label: "Spiritual Catalogue", href: "/shop" },
+  { label: "Ask an Astrologer", href: "/ask-astrologer" },
+  { label: "Puja & Traditions", href: "/puja-enquiry" },
+  { label: "Learning Library", href: "/learn" }
 ] as const;
 
 const moreLinks = [...exploreLinks, ...toolsLinks, ...serviceLinks];

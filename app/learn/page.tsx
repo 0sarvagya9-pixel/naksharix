@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Section } from "@/components/section";
 import { seo } from "@/lib/seo";
 import { LearningProgress } from "@/components/learning-progress";
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 
 export const metadata: Metadata = seo({
   title: "Learn the Basics of Vedic Astrology | Free Lessons",
@@ -68,6 +69,11 @@ const lessons = [
 export default function LearnPage() {
   return (
     <main className="star-field">
+      <EditorialServiceBanner eyebrow="THE LEARNING LIBRARY"
+        headline="Wisdom starts with curiosity"
+        caption="Learn the foundations of Kundli, Panchang, Nakshatras and Dasha in four self-study lessons. No paid course or qualification is implied."
+        image="https://images.unsplash.com/photo-1519681393784-d120267933ba" imageAlt="Milky Way sky above snowy mountains"
+        link="/free-calculators" linkLabel="Explore the free calculators" />
       <Section>
         <div className="mx-auto max-w-5xl">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Free Learning Library</p>

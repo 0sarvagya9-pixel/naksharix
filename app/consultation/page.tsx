@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AstrologersPageContent } from "@/components/astrologers-page-content";
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import { prisma } from "@/lib/db";
 import { seo } from "@/lib/seo";
 
@@ -41,5 +42,10 @@ export default async function ConsultationPage() {
     availableForVideo: profile.availableForVideo
   }))).catch(() => []);
 
-  return <AstrologersPageContent profiles={profiles} />;
+  return <><EditorialServiceBanner eyebrow="PERSONAL CONSULTATIONS"
+    headline="Real conversations, meaningful questions"
+    caption="Browse the approved profiles and read session details before choosing a consultation. External meeting rooms depend on assigned providers."
+    image="https://images.unsplash.com/photo-1519681393784-d120267933ba" imageAlt="Star-filled night sky above mountains"
+    link="/ask-astrologer" linkLabel="Ask a written question" />
+    <AstrologersPageContent profiles={profiles} /></>;
 }
