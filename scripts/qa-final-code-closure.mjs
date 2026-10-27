@@ -100,9 +100,12 @@ assert(login.includes("EMAIL_VERIFICATION_REQUIRED"), "Login blocks marked unver
 assert(pkg.scripts["qa:final-closure"] === "node scripts/qa-final-code-closure.mjs", "Final closure QA registered", "package script available");
 assert(pkg.scripts["qa:prod-db-readonly"] === "node scripts/qa-production-db-readonly.mjs", "Production DB read-only QA registered", "manual evidence command available");
 
-assert(!/(Add to Cart|>\s*Buy Now\s*<|href\s*=\s*["'`]\/(?:cart|checkout)(?:["'`/?#]))/i.test(shopSource), "Shop has no transactional cart/checkout controls", "negative safety wording is allowed; transactional CTAs/routes are not");
-assert(shopContent.includes("Ask Availability"), "Shop uses enquiry-only CTA", "availability is confirmed separately");
-assert(/Public cart and online product checkout are not active|No automatic checkout/i.test(shopContent), "Shop explicitly states non-transactional scope", "user-facing boundary is present");
+assert(shopSource.includes("AddToCartButton") && shopContent.includes("quote-cart-controls"), "Shop quote cart UI exists", "local-only client cart without payment");
+assert(read("components/shop/cart-page-client.tsx").includes("No payment is charged") &&
+  read("components/shop/cart-page-client.tsx").includes("Secure checkout is not enabled"), "Cart visibly discloses non-payment scope", "all checkout remains held");
+assert(read("components/shop/quote-cart-controls.tsx").includes("localStorage") &&
+  !/razorpay|stripe|paymentIntent|checkoutSession|order\.create/.test(read("components/shop/quote-cart-controls.tsx")), "Cart cannot take payment or create an order", "saved draft only");
+assert(!/Pay with Razorpay|Buy Now/i.test(shopSource), "Shop paid controls not active", "quote-only not chargeable");
 
 assert(env.includes('SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false")'), "Subscriptions default disabled", "locked scope preserved");
 assert(env.includes('AI_REPORT_GENERATOR_ENABLED: z.enum(["true", "false"]).default("false")'), "AI report generator default disabled", "locked scope preserved");

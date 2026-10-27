@@ -15,7 +15,8 @@ for (const term of ['kind: z.literal("SHOP")', 'kind: z.literal("PUJA")',
  assert.ok(route.includes(term), "ENQUIRY_SERVER_VALIDATION_MISSING=" + term);
 }
 assert.ok(!/razorpay|providerOrderId|checkout|payment\.create|booking\.create|card(number)?/i.test(route), "ENQUIRY_MUST_NEVER_COLLECT_PAYMENT");
-assert.ok(shop.includes("/commerce-enquiry?kind=SHOP&item="), "SHOP_CTA_MISSING");
+assert.ok(shop.includes("AddToCartButton"), "SHOP_CART_CTA_MISSING");
+assert.ok(read("components/shop/cart-page-client.tsx").includes("/commerce-enquiry?kind=SHOP&item="), "SHOP_QUOTE_FROM_CART_MISSING");
 assert.ok(puja.includes("/commerce-enquiry?kind=PUJA&item="), "PUJA_CTA_MISSING");
 assert.ok(page.includes("getCurrentUser()") && page.includes("getShopCatalogue()"),"PAGE_SOURCE_OWNED_OPTIONS_MISSING");
 assert.ok(component.includes("secureFetch(") && component.includes("/api/commerce/enquiries"),"CSRF_PROTECTED_BROWSER_REQUEST_MISSING");
