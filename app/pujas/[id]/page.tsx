@@ -6,10 +6,12 @@ import { ArrowLeft, ArrowRight, CalendarDays, ShieldCheck } from "lucide-react";
 import { pujaTopics, findPujaTopic } from "@/lib/puja/service-catalogue";
 import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-photos";
 import { seo } from "@/lib/seo";
+import { getPublishedPujaOffers,displayPujaPrice } from "@/lib/puja/offerings";
 
 type Props={params:Promise<{id:string}>};
 export function generateStaticParams() {return pujaTopics.map(p=>({id:p.id}));}
 export const dynamicParams=false;
+export const dynamic="force-dynamic";
 export async function generateMetadata({params}:Props):Promise<Metadata>{
   const {id}=await params;const topic=findPujaTopic(id);
   if(!topic)return {title:"Puja topic unavailable",robots:{index:false,follow:false}};
@@ -18,6 +20,7 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{
 export default async function PujaTopicPage({params}:Props) {
   const {id}=await params;const item=findPujaTopic(id);if(!item)notFound();
   const related=pujaTopics.filter(p=>p.category===item.category&&p.id!==item.id).slice(0,5);
+  const offering=(await getPublishedPujaOffers())[item.id];
   return <main className="star-field min-h-screen bg-[#fffaf3] pb-20">
     <div className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
       <Link href="/pujas" className="inline-flex items-center gap-2 text-sm font-bold text-[#8e3442]"><ArrowLeft size={16}/> Puja directory</Link>
@@ -32,6 +35,15 @@ export default async function PujaTopicPage({params}:Props) {
           <span className="text-sm font-bold uppercase tracking-[.18em] text-[#8e3442]">{item.category} • {item.deity}</span>
           <h1 className="mt-4 font-cinzel text-3xl font-black md:text-5xl">{item.name}</h1>
           <p className="mt-5 text-base leading-8 text-[#634e52]">{item.description}. Customary details vary according to community, family and temple practice.</p>
+          <div className="mt-6 rounded-2xl border border-[#e6c499] bg-[#fffbf6] p-4">
+            {offering ? <>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#8c4050]">Published service fee</p>
+              <p className="mt-2 text-3xl font-bold text-[#752939]">{displayPujaPrice(offering.pricePaise)}</p>
+              {offering.durationMinutes ? <p className="mt-2 text-sm text-[#5f4d54]">Estimated duration: {offering.durationMinutes} minutes</p>:null}
+              {offering.note ? <p className="mt-2 text-sm leading-6 text-[#5f4d54]">{offering.note}</p>:null}
+              <p className="mt-2 text-xs text-[#80656a]">Operator, date and final inclusion remain subject to confirmation. No payment taken on this page.</p>
+            </> : <p className="text-sm font-semibold text-[#684e58]">Service fee not published yet.</p>}
+          </div>
           <div className="mt-7 space-y-4 text-sm leading-7 text-[#634e52]">
             <p className="flex gap-3"><CalendarDays size={19} className="mt-1 shrink-0 text-[#9e4952]"/> Confirm dates and local muhurat from your city&apos;s Panchang.</p>
             <p className="flex gap-3"><ShieldCheck size={19} className="mt-1 shrink-0 text-[#9e4952]"/> Temple, pandit, materials, price and completion details require separate written confirmation.</p>

@@ -888,3 +888,14 @@ model PujaPartner {
 
   @@index([reviewStatus, createdAt])
 }
+
+/** Optional owner-approved pricing, disabled until set by an authorized admin. */
+model PujaOffering {
+  topicId         String   @id
+  pricePaise      Int?
+  durationMinutes Int?
+  available       Boolean  @default(false)
+  note            String   @default("")
+  updatedBy       String
+  updatedAt       DateTime @updatedAt
+}

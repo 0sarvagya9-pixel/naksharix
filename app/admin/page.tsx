@@ -105,6 +105,7 @@ export default function AdminPage() {
         <Button variant="outline" asChild>
           <Link href="/admin/support">Support Desk</Link>
         </Button>
+        <Button variant="outline" asChild><Link href="/admin/puja-offerings">Puja Prices & Availability</Link></Button>
         <Button variant="outline" asChild><Link href="/admin/puja-partners">Puja Partner Review</Link>
         </Button>
         <Button variant="outline" asChild>

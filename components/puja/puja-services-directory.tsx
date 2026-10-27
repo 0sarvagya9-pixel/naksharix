@@ -6,8 +6,9 @@ import Link from "next/link";
 import { CalendarDays,Search,ShieldCheck,ArrowRight } from "lucide-react";
 import { pujaTopics,pujaCategories } from "@/lib/puja/service-catalogue";
 import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-photos";
+import type { PublicPujaOffer } from "@/lib/puja/offerings";
 
-export function PujaServicesDirectory() {
+export function PujaServicesDirectory({offerings}:{offerings:Record<string,PublicPujaOffer>}) {
   const [query,setQuery]=useState("");
   const [hydrated,setHydrated]=useState(false);
   useEffect(()=>setHydrated(true),[]);
@@ -74,6 +75,10 @@ export function PujaServicesDirectory() {
             <p className="mt-2 text-xs font-semibold text-[#983844]">{topic.deity}</p>
             {pujaEditorialPhoto(topic.id,topic.category) ? <p className="mt-2 text-xs leading-5 text-[#5d4b50]">Representative photo: <a href={pujaEditorialPhoto(topic.id,topic.category)!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category)!.author}</a>{" · "}<a href={pujaEditorialPhoto(topic.id,topic.category)!.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category)!.license}</a></p>:null}
             <p className="mt-3 flex-1 text-sm leading-6 text-[#6c5459]">{topic.description}.</p>
+            {offerings[topic.id] ? <p className="mt-3 text-lg font-extrabold text-[#842c3e]">
+              {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(offerings[topic.id].pricePaise/100)}
+              <span className="ml-2 text-xs font-normal text-[#67515a]">listed service fee · subject to booking confirmation</span>
+            </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
             <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
               Enquire <ArrowRight size={16}/>
