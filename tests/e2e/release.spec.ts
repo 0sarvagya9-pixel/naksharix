@@ -206,11 +206,11 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("button", { name: /Checkout|Pay/i })).toHaveCount(0);
   });
 
-  test("premium homepage showcases actual catalogue item artwork and ritual cards", async ({ page }) => {
+  test("premium homepage shows credited real catalogue reference photography and ritual cards", async ({ page }) => {
     await page.goto(absolute("/"), { waitUntil: "domcontentloaded" });
     await expect(page.getByText("5 Mukhi Rudraksha", { exact: true })).toBeVisible();
     await expect(page.getByText("Rudrabhishek", { exact: true })).toBeVisible();
-    await expect(page.locator('img[alt="5 Mukhi Rudraksha original illustrative artwork"]')).toBeVisible();
+    await expect(page.locator('img[alt*="Panchamukhi Rudraksha"]').first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Explore Puja directory" }).first()).toBeVisible();
   });
 
