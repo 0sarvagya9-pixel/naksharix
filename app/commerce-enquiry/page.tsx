@@ -5,6 +5,7 @@ import { CommerceEnquiryForm, type EnquiryOption } from "@/components/commerce-e
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { nextTwoYearsPujaCalendar } from "@/lib/puja/observances";
+import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { seo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 
@@ -24,13 +25,18 @@ export default async function CommerceEnquiryPage({
     (await getShopCatalogue()).products
       .filter(p => p.status === "active")
       .map(p => ({ id: p.id, label: p.name.en, note: "Price, image and inventory confirmation pending staff review." })) :
-    nextTwoYearsPujaCalendar().events.map(e =>
-      ({ id: e.id, label: e.name + " — " + e.date, note: "India reference date: " + e.date + ". Local tithi and availability must be confirmed." }));
+    [
+      ...pujaTopics.map(p => ({ id: "ritual:" + p.id, label: p.name + " · " + p.category,
+        note: p.description + ". Date and operator availability require review." })),
+      ...nextTwoYearsPujaCalendar().events.map(e =>
+        ({ id: e.id, label: e.name + " — " + e.date,
+          note: "India reference date: " + e.date + ". Local tithi and availability must be confirmed." }))
+    ];
   return (
-    <main className="star-field min-h-screen">
+    <main className="star-field min-h-screen bg-[#fffaf3]">
       <Section>
         <div className="mx-auto max-w-3xl">
-          <p className="text-sm uppercase tracking-[0.2em] text-[#FFD700]">Verified operations first</p>
+          <p className="text-sm uppercase tracking-[0.2em] text-[#8e3442]">Verified operations first</p>
           <h1 className="mt-3 font-cinzel text-3xl font-bold sm:text-4xl">
             {kind === "SHOP" ? "Product availability enquiry" : "Puja date and availability enquiry"}
           </h1>

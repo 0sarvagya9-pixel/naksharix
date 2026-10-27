@@ -11,7 +11,7 @@ for (const term of ["getCurrentUser()", "validateJson(request, schema)", "getSho
 }
 for (const term of ['kind: z.literal("SHOP")', 'kind: z.literal("PUJA")',
  "quantity: z.number().int().min(1).max(10)", "city: z.string().trim().min(2).max(90)",
- "z.string().trim().min(10).max(1200)", 'p.id === input.itemId', 'e.id === input.itemId']) {
+ "z.string().trim().min(10).max(1200)", 'p.id === input.itemId', 'e.id === input.itemId', 'findPujaTopic(input.itemId.slice(7))']) {
  assert.ok(route.includes(term), "ENQUIRY_SERVER_VALIDATION_MISSING=" + term);
 }
 assert.ok(!/razorpay|providerOrderId|checkout|payment\.create|booking\.create|card(number)?/i.test(route), "ENQUIRY_MUST_NEVER_COLLECT_PAYMENT");

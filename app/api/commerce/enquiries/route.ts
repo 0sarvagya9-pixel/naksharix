@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { nextTwoYearsPujaCalendar } from "@/lib/puja/observances";
+import { findPujaTopic } from "@/lib/puja/service-catalogue";
 
 const schema = z.discriminatedUnion("kind", [
   z.object({
@@ -43,18 +44,32 @@ export async function POST(request: Request) {
         "Customer message: " + input.message
       ].join("\n");
     } else {
-      const calendar = nextTwoYearsPujaCalendar();
-      const event = calendar.events.find(e => e.id === input.itemId);
-      if (!event) return fail("Puja observance was not found in the reviewed future calendar.", 422);
-      subject = "[PUJA DATE ENQUIRY] " + event.name.slice(0, 65);
-      description = [
-        "Reference observance: " + event.name,
-        "India reference date: " + event.date,
-        "City: " + input.city,
-        "Local tithi/muhurat: NOT VERIFIED",
-        "Pandit/temple availability: NOT VERIFIED",
-        "Customer message: " + input.message
-      ].join("\n");
+      if (input.itemId.startsWith("ritual:")) {
+        const ritual = findPujaTopic(input.itemId.slice(7));
+        if (!ritual) return fail("This traditional Puja topic was not found.", 422);
+        subject = "[PUJA TOPIC ENQUIRY] " + ritual.name.slice(0, 65);
+        description = [
+          "Traditional Puja: " + ritual.name,
+          "Category: " + ritual.category,
+          "City: " + input.city,
+          "Local tithi/muhurat: NOT VERIFIED",
+          "Pandit/temple availability: NOT VERIFIED",
+          "Customer message: " + input.message
+        ].join("\n");
+      } else {
+        const calendar = nextTwoYearsPujaCalendar();
+        const event = calendar.events.find(e => e.id === input.itemId);
+        if (!event) return fail("Puja observance was not found in the reviewed future calendar.", 422);
+        subject = "[PUJA DATE ENQUIRY] " + event.name.slice(0, 65);
+        description = [
+          "Reference observance: " + event.name,
+          "India reference date: " + event.date,
+          "City: " + input.city,
+          "Local tithi/muhurat: NOT VERIFIED",
+          "Pandit/temple availability: NOT VERIFIED",
+          "Customer message: " + input.message
+        ].join("\n");
+      }
     }
     const limited = await rateLimit("commerce-enquiry:" + user.id, 5, 86400);
     if (!limited.allowed) return fail("Daily enquiry limit reached.", 429);

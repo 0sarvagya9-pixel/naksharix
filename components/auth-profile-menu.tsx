@@ -105,7 +105,7 @@ export function AuthProfileMenu() {
         aria-expanded={open}
         aria-label={displayName}
         onClick={() => setOpen((value) => !value)}
-        className="grid h-10 w-10 place-items-center rounded-full border border-[#dca956]/25 bg-[#0a1224]/82 p-1 text-sm text-[#ffffff] shadow-[0_10px_28px_rgba(0,5,16,0.28)] transition hover:border-[#dca956]/55 hover:bg-[#dca956]/10 focus:outline-none focus:ring-2 focus:ring-[#dca956]/25"
+        className="grid h-10 w-10 place-items-center rounded-full border border-[#dfbda1] bg-[#fff9f0] p-1 text-sm text-[#8a2e3b] shadow-[0_6px_16px_rgba(92,43,35,0.08)] transition hover:border-[#a43b4b] hover:bg-[#fff0e2] focus:outline-none focus:ring-2 focus:ring-[#a43b4b]/25"
       >
         <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-[#dca956]/35 bg-[#dca956]/10 text-xs font-bold text-[#fbc02d]">
           <AvatarImage src={image} initials={initials} />
@@ -114,10 +114,10 @@ export function AuthProfileMenu() {
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-[#1e293b] bg-[#0a1224]/95 p-2 shadow-[0_18px_60px_rgba(2,6,18,0.62),0_0_28px_rgba(0,245,160,0.12)] backdrop-blur-xl"
+          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-[#e6c6a9] bg-[#fffaf4]/95 p-2 shadow-[0_18px_50px_rgba(68,36,32,0.20)] backdrop-blur-xl"
         >
           <div className="border-b border-[#dca956]/20 px-3 py-3">
-            <p className="truncate font-cinzel text-sm font-bold text-[#f3d382]">{displayName}</p>
+            <p className="truncate font-cinzel text-sm font-bold text-[#8e3240]">{displayName}</p>
             <p className="truncate text-xs naksh-muted-text">{displayMeta}</p>
           </div>
           <ProfileLink href="/profile" icon={UserRound} label={tr("myProfile")} onClick={() => setOpen(false)} />
@@ -128,7 +128,7 @@ export function AuthProfileMenu() {
             type="button"
             role="menuitem"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm naksh-muted-text transition hover:bg-[#dca956]/10 hover:text-[#f3d382]"
+            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm naksh-muted-text transition hover:bg-[#f7e3d4] hover:text-[#8e3240]"
           >
             <LogOut className="h-4 w-4" />
             {tr("logout")}
@@ -168,7 +168,7 @@ function ProfileLink({ href, icon: Icon, label, onClick }: { href: string; icon:
       role="menuitem"
       href={href}
       onClick={onClick}
-      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm naksh-muted-text transition hover:bg-[#0f1c3a] hover:text-[#f3d382]"
+      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm naksh-muted-text transition hover:bg-[#f7e3d4] hover:text-[#8e3240]"
     >
       <Icon className="h-4 w-4" />
       {label}

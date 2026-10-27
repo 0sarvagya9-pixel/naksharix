@@ -176,6 +176,29 @@ await expectStatus("/api/commerce/enquiries", 403, {
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ kind: "SHOP", itemId: "5-mukhi-rudraksha", quantity: 1, message: "Please confirm stock and shipping." })
 }, "commerce enquiry rejects POST without CSRF");
+const pujaDirectory = await expectStatus("/pujas", 200, undefined, "traditional Puja directory");
+if (pujaDirectory) {
+  const html = await pujaDirectory.text();
+  if (!html.includes("Puja Directory") || !html.includes("Explore Puja"))
+    fail("Puja directory", "Missing searchable directory header");
+  else pass("Puja directory", "traditional categories available");
+}
+for (const [url,label] of [
+  ["/pujas/rudrabhishek","Puja detail"],
+  ["/pujas/navagraha-shanti-puja","Navagraha detail"],
+  ["/shop/5-mukhi-rudraksha","Shop product detail"],
+  ["/shop/shri-yantra","Shop Yantra detail"]
+]) await expectStatus(url,200,undefined,label);
+// Next.js may stream a notFound() page with HTTP 200 after headers have begun.
+const unknownPuja = await request("/pujas/imaginary-paid-ritual");
+const unknownPage = await unknownPuja.text();
+if (![200, 404].includes(unknownPuja.status) ||
+    !unknownPage.includes("Page not found") ||
+    !/noindex/i.test(unknownPage)) {
+  fail("unknown ritual fails closed", "Expected unindexable not-found page, received HTTP " + unknownPuja.status);
+} else {
+  pass("unknown ritual fails closed", "404 UI and noindex; status " + unknownPuja.status);
+}
 const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
 if (partnerResponse) {
   const body = await partnerResponse.json();

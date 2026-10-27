@@ -662,6 +662,25 @@ try {
       assert.equal(pujaTicket.userId, userId);
       assert.match(pujaTicket.subject, /^\[PUJA DATE ENQUIRY\]/);
       assert.ok(JSON.stringify(pujaTicket.messages).includes("Local tithi/muhurat: NOT VERIFIED"));
+      const ritual = await post("/api/commerce/enquiries", {
+        kind: "PUJA", itemId: "ritual:rudrabhishek", city: "Bhopal",
+        message: "Please explain possible traditional arrangement requirements."
+      }, userCookie);
+      const ritualBody = await ritual.json();
+      assert.equal(ritual.status, 201, JSON.stringify(ritualBody));
+      assert.equal(ritualBody.data.bookingCreated, false);
+      assert.equal(ritualBody.data.paymentRequired, false);
+      created.push(ritualBody.data.ticket.id);
+      const ritualTicket = await prisma.supportTicket.findUniqueOrThrow({
+        where: { id: ritualBody.data.ticket.id }
+      });
+      assert.match(ritualTicket.subject, /^\[PUJA TOPIC ENQUIRY\]/);
+      assert.ok(JSON.stringify(ritualTicket.messages).includes("Traditional Puja: Rudrabhishek"));
+      const forgedRitual = await post("/api/commerce/enquiries", {
+        kind: "PUJA", itemId: "ritual:invented-paid-ritual", city: "Bhopal",
+        message: "Please do not allow me to book invented ceremonies."
+      }, userCookie);
+      assert.equal(forgedRitual.status, 422);
       const invalidCalendar = await post("/api/commerce/enquiries", {
         kind: "PUJA", itemId: "2029-invented-ceremony", city: "Bhopal",
         message: "This event should not be available for booking."
@@ -689,7 +708,7 @@ try {
       { expectedVersion: 0, products: unlicensed }, adminCookie, "PUT");
     assert.equal(refusedPhoto.status, 422, "Unlicensed third-party product photo was published");
     const target = original[0];
-    const headingMarker = ">" + target.name.en + "</h2>";
+    const headingMarker = ">" + target.name.en + "</a></h2>"; // product heading now contains a linked detail-page title
     const beforePage = await req("/shop");
     assert.equal(beforePage.status, 200);
     assert.ok((await beforePage.text()).includes(headingMarker), "active product must render as a real Shop heading");

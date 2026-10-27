@@ -1,3 +1,4 @@
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CalendarDays, MapPin, ShieldCheck } from "lucide-react";
@@ -32,6 +33,11 @@ export default function PujaCalendarPage() {
   }
   return (
     <main className="star-field min-h-screen">
+      <EditorialServiceBanner eyebrow="TRADITIONAL HINDU CALENDAR"
+        headline="Follow the seasons of worship"
+        caption="Explore a rolling two-year reference list of major Puja and festival dates. Confirm regional customs and local tithi independently."
+        image="/naksharix/editorial-puja.svg" imageAlt="Original illustration of a Puja thali and diya"
+        link="/pujas" linkLabel="Explore all Puja types" />
       <Section>
         <div className="rounded-3xl border border-[#D4AF37]/30 bg-[#061D3C]/80 p-6 md:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FFD700]">Hindu calendar • India reference</p>
