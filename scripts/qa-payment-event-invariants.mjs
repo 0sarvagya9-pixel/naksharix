@@ -15,6 +15,7 @@ const invariant = [
   ["failure cannot downgrade paid consultation", webhook.includes('paymentStatus: "PENDING"') && webhook.includes("consultationBooking.updateMany")],
   ["client verification rejects mismatched paid id", verify.includes("existingPayment.providerPaymentId !== body.razorpay_payment_id")],
   ["client verification rejects refund recapture", verify.includes('existingPayment.status === "REFUNDED"')],
+  ["client verify refuses null finalization", verify.includes('if (!payment) return fail("Payment no longer eligible for capture", 409)')],
   ["client verification excludes canceled consultations", verify.includes("A captured payment does not resurrect a canceled or rejected session.") && verify.includes("consultationBooking.updateMany")],
   ["client captures cannot reopen canceled/delivered reports", verify.includes("reportRequest.updateMany") && verify.includes("ReportRequestStatus.PAYMENT_PENDING") && verify.includes("if (updated.count === 1) await writeReportStatusHistory")],
   ["webhook captures cannot reopen canceled/delivered reports", webhook.includes("reportRequest.updateMany") && webhook.includes("paymentStatus: { in: [ReportPaymentStatus.PENDING, ReportPaymentStatus.FAILED] }")],
