@@ -67,8 +67,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (payment && bookingId) {
-      await prisma.consultationBooking.update({
-        where: { id: bookingId },
+      // A captured payment does not resurrect a canceled or rejected session.
+      await prisma.consultationBooking.updateMany({
+        where: {
+          id: bookingId, userId: user.id,
+          status: { in: ["REQUESTED", "PAYMENT_PENDING", "ACCEPTED", "CONFIRMED"] },
+          paymentStatus: { in: ["PENDING", "FAILED"] }
+        },
         data: { status: "CONFIRMED", paymentStatus: "PAID" }
       });
     }
