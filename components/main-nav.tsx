@@ -44,6 +44,7 @@ const serviceLinks = [
   { label: "AI Astrologer", href: "/ai-astrologer" },
   { label: "Spiritual Catalogue", href: "/shop" },
   { label: "Ask an Astrologer", href: "/ask-astrologer" },
+  { label: "All Puja Types", href: "/pujas" },
   { label: "Puja & Traditions", href: "/puja-enquiry" },
   { label: "Two-Year Puja Calendar", href: "/puja-calendar" },
   { label: "Learning Library", href: "/learn" }
