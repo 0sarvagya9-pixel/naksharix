@@ -18,6 +18,13 @@ assert.ok(!/razorpay|providerOrderId|checkout|payment\.create|booking\.create|ca
 assert.ok(shop.includes("AddToCartButton"), "SHOP_CART_CTA_MISSING");
 assert.ok(read("components/shop/cart-page-client.tsx").includes("/commerce-enquiry?kind=SHOP&item="), "SHOP_QUOTE_FROM_CART_MISSING");
 assert.ok(puja.includes("/commerce-enquiry?kind=PUJA&item="), "PUJA_CTA_MISSING");
+const cartQuote=read("app/api/commerce/cart-quote/route.ts");
+const cartUi=read("components/shop/cart-page-client.tsx");
+for(const term of ["getCurrentUser()","validateJson(request,schema)","getShopCatalogue()","p.status===\"active\"","rateLimit(","prisma.supportTicket.create","paymentRequired:false","orderCreated:false","fulfillmentConfirmed:false"]){
+ assert.ok(cartQuote.includes(term),"CART_QUOTE_SAFETY_GUARD_MISSING="+term);
+}
+assert.ok(cartUi.includes('secureFetch("/api/commerce/cart-quote"') && cartUi.includes("Request quote for entire cart"),"CART_QUOTE_UI_MISSING");
+assert.ok(!/razorpay|checkoutSession|payment\.create|providerOrderId/i.test(cartQuote),"CART_QUOTE_MUST_NOT_CHARGE");
 assert.ok(page.includes("getCurrentUser()") && page.includes("getShopCatalogue()"),"PAGE_SOURCE_OWNED_OPTIONS_MISSING");
 assert.ok(component.includes("secureFetch(") && component.includes("/api/commerce/enquiries"),"CSRF_PROTECTED_BROWSER_REQUEST_MISSING");
 assert.ok(component.includes("Open your support tickets"),"SUPPORT_TRACKING_MISSING");

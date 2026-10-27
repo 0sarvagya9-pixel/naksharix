@@ -1,17 +1,36 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { secureFetch } from "@/lib/security/csrf";
 import type { ShopProduct } from "@/lib/manual-catalogue";
 import { readCart, writeCart, type CartLine } from "@/components/shop/quote-cart-controls";
 
 export function CartPageClient({products}:{products:ShopProduct[]}){
  const [lines,setLines]=useState<CartLine[]>([]);
+ const [city,setCity]=useState("");
+ const [message,setMessage]=useState("");
+ const [pending,setPending]=useState(false);
+ const [ticket,setTicket]=useState("");
+ const [issue,setIssue]=useState("");
  useEffect(()=>{const load=()=>setLines(readCart());load();window.addEventListener("naksharix-cart-changed",load);return()=>window.removeEventListener("naksharix-cart-changed",load)},[]);
  const productMap=useMemo(()=>new Map(products.filter(p=>p.status==="active").map(p=>[p.id,p])),[products]);
  const valid=lines.filter(l=>productMap.has(l.productId));
  const total=valid.reduce((sum,line)=>sum+(productMap.get(line.productId)?.unitPricePaise||0)*line.quantity,0);
  const unpriced=valid.some(l=>!productMap.get(l.productId)?.unitPricePaise);
  const formatter=new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2});
+ async function submitQuote(event:React.FormEvent<HTMLFormElement>){
+   event.preventDefault();
+   if(pending||!valid.length)return;
+   setPending(true);setIssue("");
+   try{
+     const response=await secureFetch("/api/commerce/cart-quote",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:valid.map(l=>({productId:l.productId,quantity:l.quantity})),city:city.trim(),message:message.trim()})});
+     const payload=await response.json();
+     if(!response.ok)throw new Error(payload.error||"Quote request failed.");
+     const id=payload.data?.ticket?.id;
+     if(typeof id!=="string")throw new Error("No tracked support ticket returned.");
+     setTicket(id);
+   }catch(e){setIssue(e instanceof Error?e.message:"Quote request failed.")}finally{setPending(false)}
+ }
  function update(id:string,qty:number){const next=lines.filter(l=>l.productId!==id);if(qty>0)next.push({productId:id,quantity:Math.min(99,qty)});writeCart(next);setLines(next)}
  return <div className="mx-auto max-w-5xl px-5 py-12">
   <p className="text-xs font-extrabold uppercase tracking-[.21em] text-[#9d453c]">Spiritual catalogue</p>
@@ -36,7 +55,26 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
      <p className="mt-3 text-xl font-bold">{unpriced?"Final price pending verification":formatter.format(total/100)}</p>
      {unpriced?<p className="mt-3 text-sm leading-6 text-[#674f56]">Some products do not yet have approved selling prices. No totals or charges are invented.</p>:<p className="mt-3 text-sm leading-6 text-[#674f56]">Product subtotal only; shipping, applicable tax and final availability must still be confirmed.</p>}
      <p className="mt-5 rounded-lg border border-[#ebcfad] bg-white p-3 text-sm">Secure checkout is not enabled until supplier fulfilment and refund operations are verified. Request a quote for each item above.</p>
-     <Link href="/shop" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg bg-[#7e2a3e] px-5 text-sm font-bold text-white">Continue shopping</Link>
+     {ticket ? <div role="status" className="mt-5 rounded-xl border border-[#bfdeb9] bg-white p-4 text-sm">
+       <p className="font-semibold">Request received. No payment was taken.</p>
+       <p className="mt-2 break-all">Ticket: {ticket}</p>
+       <Link className="mt-3 inline-block font-bold text-[#762c3c] underline" href="/support">Track your request</Link>
+     </div> :
+     <form className="mt-5 space-y-3" onSubmit={submitQuote}>
+       <label className="block text-sm font-bold text-[#482b36]">Delivery city
+         <input required minLength={2} maxLength={90} value={city} onChange={event=>setCity(event.target.value)}
+           className="mt-2 block min-h-11 w-full rounded-lg border border-[#d9b78b] bg-white px-3 text-[#382430]" placeholder="Your city"/>
+       </label>
+       <label className="block text-sm font-bold text-[#482b36]">Request details
+         <textarea required minLength={10} maxLength={1200} rows={3} value={message} onChange={event=>setMessage(event.target.value)}
+           className="mt-2 block w-full rounded-lg border border-[#d9b78b] bg-white p-3 text-[#382430]" placeholder="Ask about size, authenticity and delivery terms."/>
+       </label>
+       {issue?<p role="alert" className="text-sm font-semibold text-[#9a2944]">{issue}</p>:null}
+       <button type="submit" disabled={pending||!valid.length} className="w-full rounded-xl bg-[#7e2a3e] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">
+         {pending?"Sending request…":"Request quote for entire cart"}
+       </button>
+     </form>}
+     <Link href="/shop" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d2ae82] px-5 text-sm font-bold text-[#742d3e]">Continue shopping</Link>
    </aside>
   </div>}
  </div>;
