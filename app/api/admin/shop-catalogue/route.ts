@@ -27,6 +27,7 @@ const product = z.object({
   imageRights: z.enum(["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"]).optional(),
   imageEvidenceUrl: z.string().url().max(500).optional(),
   priceLabel: localized,
+  unitPricePaise: z.number().int().min(100).max(100000000).nullable().optional(),
   status: z.enum(["active", "inactive"]),
   featured: z.boolean(),
   tags: z.array(z.string().max(100)).max(24),

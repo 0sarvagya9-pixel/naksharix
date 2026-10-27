@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { AuthProfileMenu } from "@/components/auth-profile-menu";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -145,6 +145,7 @@ export function MainNav() {
           <div className="ml-auto flex flex-shrink-0 items-center gap-1 border-l border-[rgba(126,39,37,0.15)] pl-2 sm:gap-2 sm:pl-3">
             <LanguageSwitcher className="w-auto min-w-12" />
             <ThemeToggle />
+            <Link href="/cart" aria-label="View shopping cart" className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[#702536] hover:bg-[#fff1e7]"><ShoppingCart size={19}/></Link>
             <AuthProfileMenu />
             <Link
               href="/kundli"

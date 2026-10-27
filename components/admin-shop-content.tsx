@@ -114,6 +114,7 @@ export function AdminShopContent() {
       longDescription: localizedText(editing.longDescription.en || editing.shortDescription.en),
       imageAlt: localizedText(editing.imageAlt.en || `${name} product visual`),
       priceLabel: localizedText(editing.priceLabel.en || "Price on request"),
+      unitPricePaise: editing.unitPricePaise ?? null,
       howToUse: localizedText(editing.howToUse.en),
       careNote: localizedText(editing.careNote.en),
       disclaimer: localizedText(editing.disclaimer.en || defaultDisclaimer()),
@@ -285,7 +286,15 @@ function ProductForm({ editing, setEditing, saveProduct }: { editing: FormState 
             ]} />
           <Field label="Image rights evidence HTTPS URL" value={editing.imageEvidenceUrl || ""}
             onChange={(value) => setEditing({ ...editing, imageEvidenceUrl: value || undefined })} />
-          <Field label="Price label" value={editing.priceLabel.en} onChange={(value) => setEditing({ ...editing, priceLabel: localizedText(value) })} />
+          <Field label="Approved sale price in INR (numeric, leave blank until verified)"
+            value={editing.unitPricePaise ? (editing.unitPricePaise / 100).toFixed(2) : ""}
+            onChange={(value) => {
+              const rupees = Number(value);
+              const paise = Math.round(rupees * 100);
+              setEditing({ ...editing, unitPricePaise: value.trim() && Number.isFinite(rupees) && paise >= 100 && paise <= 100000000 ? paise : null });
+            }} />
+          <p className="text-xs text-[#5b4a52]">Only enter your confirmed item selling price; this enables a visible price, not customer charging. Product checkout remains blocked until genuine fulfilment is verified.</p>
+          <Field label="Price note" value={editing.priceLabel.en} onChange={(value) => setEditing({ ...editing, priceLabel: localizedText(value) })} />
           <Field label="Tags, comma separated" value={editing.tags.join(", ")} onChange={(value) => setEditing({ ...editing, tags: value.split(",").map((tag) => tag.trim()).filter(Boolean) })} />
           <TextareaField label="How to use" value={editing.howToUse.en} onChange={(value) => setEditing({ ...editing, howToUse: localizedText(value) })} />
           <TextareaField label="Care note" value={editing.careNote.en} onChange={(value) => setEditing({ ...editing, careNote: localizedText(value) })} />

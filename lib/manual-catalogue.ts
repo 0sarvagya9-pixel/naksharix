@@ -16,6 +16,8 @@ export type ShopProduct = {
   imageEvidenceUrl?: string;
   imageAlt: CatalogueText;
   priceLabel: CatalogueText;
+  /** Approved integer INR paise; absent means NOT PRICED or bookable. */
+  unitPricePaise?: number | null;
   status: ProductStatus;
   featured: boolean;
   tags: string[];
@@ -113,6 +115,7 @@ export function emptyShopProduct(): ShopProduct {
     longDescription: text(""),
     imageUrl: "",
     imageAlt: text(""),
+    unitPricePaise: null,
     priceLabel: {
       en: "Price on request",
       hi: "Price on request",
@@ -146,6 +149,7 @@ function product(id: string, category: string, purpose: string, en: string, hi: 
     },
     imageUrl: `/shop/${id}-illustration.svg`,
     imageAlt: { en: `${en} product visual`, hi: `${hi} उत्पाद visual`, hinglish: `${hinglish} product visual` },
+    unitPricePaise: null,
     priceLabel: {
       en: "Price on request",
       hi: "Price on request",
@@ -192,6 +196,7 @@ function normalizeShopProduct(item: unknown): ShopProduct | null {
     imageEvidenceUrl: safeString(source.imageEvidenceUrl) || undefined,
     imageAlt: safeText(source.imageAlt || source.name),
     priceLabel: priceLabel.en ? priceLabel : text("Price on request"),
+    unitPricePaise: Number.isSafeInteger(source.unitPricePaise) && (source.unitPricePaise as number) > 0 && (source.unitPricePaise as number) <= 100000000 ? source.unitPricePaise : null,
     status: source.status === "inactive" ? "inactive" : "active",
     featured: Boolean(source.featured),
     tags: Array.isArray(source.tags) ? source.tags.map((tag) => safeString(tag)).filter(Boolean) : [],
