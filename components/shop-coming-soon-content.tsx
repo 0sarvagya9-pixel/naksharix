@@ -73,7 +73,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                 <div className="mb-5 overflow-hidden rounded-xl border border-[#D4AF37]/20 bg-[#fff2e2]">
                   <Image
                     src={safeProductVisual(product)}
-                    alt={product.imageAlt[locale] || product.name[locale]}
+                    alt={product.galleryImages?.[0]?.alt || product.imageAlt[locale] || product.name[locale]}
                     width={640} height={420} unoptimized
                     className="h-48 w-full object-contain p-3"
                   />
@@ -128,6 +128,9 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
 }
 
 function safeProductVisual(product: ShopProduct): string {
+  const gallery = product.galleryImages?.[0];
+  if (gallery && /^https:\/\//i.test(gallery.url) && /^https:\/\//i.test(gallery.evidenceUrl) && gallery.imageRights) return gallery.url;
+  if (gallery?.url.startsWith("/") && !gallery.url.startsWith("//") && !gallery.url.includes("\\")) return gallery.url;
   const source = product.imageUrl.trim();
   if (source.startsWith("/") && !source.startsWith("//") && !source.includes("\\")) return source;
   if (/^https:\/\//i.test(source) &&

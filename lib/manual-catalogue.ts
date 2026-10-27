@@ -2,6 +2,7 @@ import type { Locale } from "@/lib/i18n";
 
 export type CatalogueText = Record<Locale, string>;
 export type ProductStatus = "active" | "inactive";
+export type ProductGalleryImage = { url: string; alt: string; imageRights: "OWNED" | "LICENSED" | "SUPPLIER_AUTHORIZED"; evidenceUrl: string; };
 export type ShopProduct = {
   id: string;
   slug: string;
@@ -15,6 +16,7 @@ export type ShopProduct = {
   imageRights?: "OWNED" | "LICENSED" | "SUPPLIER_AUTHORIZED";
   imageEvidenceUrl?: string;
   imageAlt: CatalogueText;
+  galleryImages?: ProductGalleryImage[];
   priceLabel: CatalogueText;
   /** Approved integer INR paise; absent means NOT PRICED or bookable. */
   unitPricePaise?: number | null;
@@ -115,6 +117,7 @@ export function emptyShopProduct(): ShopProduct {
     longDescription: text(""),
     imageUrl: "",
     imageAlt: text(""),
+    galleryImages: [],
     unitPricePaise: null,
     priceLabel: {
       en: "Price on request",
@@ -149,6 +152,7 @@ function product(id: string, category: string, purpose: string, en: string, hi: 
     },
     imageUrl: `/shop/${id}-illustration.svg`,
     imageAlt: { en: `${en} product visual`, hi: `${hi} उत्पाद visual`, hinglish: `${hinglish} product visual` },
+    galleryImages: [],
     unitPricePaise: null,
     priceLabel: {
       en: "Price on request",
@@ -195,6 +199,21 @@ function normalizeShopProduct(item: unknown): ShopProduct | null {
     imageRights: ["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"].includes(source.imageRights || "") ? source.imageRights : undefined,
     imageEvidenceUrl: safeString(source.imageEvidenceUrl) || undefined,
     imageAlt: safeText(source.imageAlt || source.name),
+    galleryImages: Array.isArray(source.galleryImages)
+      ? source.galleryImages.filter((entry): entry is ProductGalleryImage => {
+          if (!entry || typeof entry !== "object") return false;
+          const image = entry as Partial<ProductGalleryImage>;
+          const url = safeString(image.url);
+          const local = url.startsWith("/") && !url.startsWith("//") && !url.includes("\\");
+          const external = /^https:\/\//i.test(url);
+          return Boolean(local || (external && image.imageRights && /^https:\/\//i.test(image.evidenceUrl || "")));
+        }).slice(0, 8).map(image => ({
+          url: image.url,
+          alt: safeString(image.alt) || name.en,
+          imageRights: image.imageRights || "OWNED",
+          evidenceUrl: safeString(image.evidenceUrl)
+        }))
+      : [],
     priceLabel: priceLabel.en ? priceLabel : text("Price on request"),
     unitPricePaise: Number.isSafeInteger(source.unitPricePaise) && (source.unitPricePaise as number) > 0 && (source.unitPricePaise as number) <= 100000000 ? source.unitPricePaise : null,
     status: source.status === "inactive" ? "inactive" : "active",

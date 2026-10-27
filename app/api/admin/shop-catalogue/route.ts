@@ -24,6 +24,12 @@ const product = z.object({
     "Use an HTTPS image URL, a local path, or leave blank"
   ),
   imageAlt: localized,
+  galleryImages: z.array(z.object({
+    url: z.string().min(1).max(1500).refine(s => (s.startsWith("/") && !s.startsWith("//") && !s.includes("\\")) || /^https:\/\//i.test(s), "Local or HTTPS images only"),
+    alt: z.string().min(3).max(180),
+    imageRights: z.enum(["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"]),
+    evidenceUrl: z.string().max(500)
+  }).strict()).max(8).optional(),
   imageRights: z.enum(["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"]).optional(),
   imageEvidenceUrl: z.string().url().max(500).optional(),
   priceLabel: localized,
@@ -77,6 +83,16 @@ export async function PUT(request: Request) {
           evidence.port || !evidence.hostname.includes(".") ||
           evidence.hostname.endsWith(".local")) {
         return fail("External photo rights evidence must be a public HTTPS reference.", 422);
+      }
+    }
+    for (const item of products) {
+      for (const image of item.galleryImages || []) {
+        if (!/^https:\/\//i.test(image.url)) continue;
+        if (!image.imageRights || !/^https:\/\//i.test(image.evidenceUrl)) return fail("Each external gallery image requires rights evidence.", 422);
+        const proof = new URL(image.evidenceUrl);
+        if (proof.protocol !== "https:" || proof.username || proof.password || proof.port ||
+            !proof.hostname.includes(".") || proof.hostname.endsWith(".local"))
+          return fail("Gallery rights proof must be publicly verifiable HTTPS.", 422);
       }
     }
     const ids = new Set(products.map((p) => p.id));

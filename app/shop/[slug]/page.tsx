@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { AddToCartButton } from "@/components/shop/quote-cart-controls";
+import { ProductGallery } from "@/components/shop/product-gallery";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import type { ShopProduct } from "@/lib/manual-catalogue";
 import { seo } from "@/lib/seo";
@@ -33,15 +33,12 @@ export default async function ProductDetails({params}:Props) {
   const product=await productBySlug(slug);
   if (!product) notFound();
   const image=imageFor(product);
-  const illustrated=image.endsWith("-illustration.svg")||image.endsWith("-placeholder.svg");
+  const illustrated=!(product.galleryImages?.length) && (image.endsWith("-illustration.svg")||image.endsWith("-placeholder.svg"));
   return <main className="star-field min-h-screen bg-[#fffaf3] pb-20">
     <div className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
       <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-bold text-[#8e3442]"><ArrowLeft size={16}/> Back to shop</Link>
       <div className="mt-7 grid gap-8 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-3xl border border-[#d3ab76]/35 bg-[#f3dcaf]">
-          <Image src={image} alt={product.imageAlt.en||product.name.en} width={850} height={650} unoptimized
-            className="aspect-[4/3] w-full object-contain"/>
-        </div>
+        <ProductGallery initialSrc={image} initialAlt={product.imageAlt.en||product.name.en} photos={product.galleryImages||[]} />
         <div className="rounded-3xl border border-[#d8b372]/35 bg-white p-6 text-[#402a2d] md:p-10">
           <p className="text-sm font-bold uppercase tracking-widest text-[#8e3442]">{product.category} • {product.purpose}</p>
           <h1 className="mt-4 font-cinzel text-3xl font-black md:text-5xl">{product.name.en}</h1>

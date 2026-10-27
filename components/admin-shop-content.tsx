@@ -286,6 +286,31 @@ function ProductForm({ editing, setEditing, saveProduct }: { editing: FormState 
             ]} />
           <Field label="Image rights evidence HTTPS URL" value={editing.imageEvidenceUrl || ""}
             onChange={(value) => setEditing({ ...editing, imageEvidenceUrl: value || undefined })} />
+          <section className="space-y-3 rounded-xl border border-[#b99064]/50 bg-[#291d2b] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div><h3 className="font-semibold text-white">Product photo gallery</h3>
+              <p className="mt-1 text-xs text-[#ded1d8]">Up to 8 supplier/owned/licensed photos, each with alternate text and rights proof. Do not upload competitor imagery.</p></div>
+              <Button type="button" variant="outline" disabled={(editing.galleryImages || []).length >= 8}
+                onClick={() => setEditing({ ...editing, galleryImages: [...(editing.galleryImages || []), { url:"", alt: editing.name.en || "Product photo", imageRights:"SUPPLIER_AUTHORIZED", evidenceUrl:"" }] })}>
+                <ImagePlus className="h-4 w-4" /> Add photo
+              </Button>
+            </div>
+            {(editing.galleryImages || []).map((photo, index) => (
+              <div key={index} className="space-y-2 rounded-xl border border-[#856475] p-3">
+                <div className="flex items-center justify-between text-sm text-[#f6e9e0]"><strong>Photo {index + 1}</strong>
+                  <button type="button" className="font-semibold underline" onClick={() => setEditing({ ...editing, galleryImages: (editing.galleryImages || []).filter((_, i) => i !== index) })}>Remove</button>
+                </div>
+                <Field label="Secure HTTPS photo URL or owned /public path" value={photo.url}
+                  onChange={value => setEditing({ ...editing, galleryImages: (editing.galleryImages || []).map((x,i) => i===index ? {...x,url:value}:x) })} />
+                <Field label="Accessible description" value={photo.alt}
+                  onChange={value => setEditing({ ...editing, galleryImages: (editing.galleryImages || []).map((x,i) => i===index ? {...x,alt:value}:x) })} />
+                <SelectField label="Image rights" value={photo.imageRights} options={[{value:"OWNED",label:"Owned"},{value:"LICENSED",label:"Licensed"},{value:"SUPPLIER_AUTHORIZED",label:"Supplier authorized"}]}
+                  onChange={value => setEditing({ ...editing, galleryImages: (editing.galleryImages || []).map((x,i) => i===index ? {...x,imageRights:value as typeof photo.imageRights}:x) })} />
+                <Field label="Public HTTPS rights evidence URL (required for external photos)" value={photo.evidenceUrl}
+                  onChange={value => setEditing({ ...editing, galleryImages: (editing.galleryImages || []).map((x,i) => i===index ? {...x,evidenceUrl:value}:x) })} />
+              </div>
+            ))}
+          </section>
           <Field label="Approved sale price in INR (numeric, leave blank until verified)"
             value={editing.unitPricePaise ? (editing.unitPricePaise / 100).toFixed(2) : ""}
             onChange={(value) => {
