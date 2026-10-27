@@ -211,6 +211,24 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
   });
 
+  test("individual Puja detail page keeps safe enquiry context", async ({ page }) => {
+    await page.goto(absolute("/pujas/rudrabhishek"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Rudrabhishek", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Enquire about Rudrabhishek/ })).toHaveAttribute(
+      "href", /kind=PUJA.*ritual%3Arudrabhishek/
+    );
+    await expect(page.getByText(/No booking or payment is taken/)).toBeVisible();
+  });
+
+  test("individual shop product detail shows honest illustrative photo disclosure", async ({ page }) => {
+    await page.goto(absolute("/shop/shri-yantra"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Shri Yantra" })).toBeVisible();
+    await expect(page.getByText(/not a photograph of supplied physical stock/)).toBeVisible();
+    await expect(page.getByRole("link", { name: /Enquire about this item/ })).toHaveAttribute(
+      "href", /kind=SHOP&item=shri-yantra/
+    );
+  });
+
   test("AI readiness endpoint exposes no secret details", async ({ request }) => {
     const response = await request.get(absolute("/api/ai/status"));
     expect(response.status()).toBe(200);
