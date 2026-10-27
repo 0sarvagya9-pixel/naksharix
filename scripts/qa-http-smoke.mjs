@@ -183,6 +183,13 @@ if (pujaDirectory) {
     fail("Puja directory", "Missing searchable directory header");
   else pass("Puja directory", "traditional categories available");
 }
+for (const [url,label] of [
+  ["/pujas/rudrabhishek","Puja detail"],
+  ["/pujas/navagraha-shanti-puja","Navagraha detail"],
+  ["/shop/5-mukhi-rudraksha","Shop product detail"],
+  ["/shop/shri-yantra","Shop Yantra detail"]
+]) await expectStatus(url,200,undefined,label);
+await expectStatus("/pujas/imaginary-paid-ritual",404,undefined,"unknown ritual fails closed");
 const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
 if (partnerResponse) {
   const body = await partnerResponse.json();
