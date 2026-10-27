@@ -64,6 +64,7 @@ const staticRoutes = [
   "/ask-astrologer",
   "/puja-enquiry",
   "/puja-calendar",
+  "/commerce-enquiry",
   "/learn",
   "/reports",
   "/shop",
