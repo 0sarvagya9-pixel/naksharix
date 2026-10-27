@@ -12,6 +12,8 @@ const home=read("components/home/editorial-home.tsx");
 assert.ok(home.includes("Spiritual Catalogue")&&home.includes("Traditional Puja"),"REFERENCE_SECTIONS_MISSING");
 assert.ok(!home.includes("images.unsplash.com/photo-1519681393784-d120267933ba"),"GENERIC_MOUNTAIN_RETAINED");
 assert.ok(home.includes('number:"08"'),"EIGHT_SERVICE_CARDS_REQUIRED");
+const directory=read("components/puja/puja-services-directory.tsx");
+assert.ok(directory.includes("results.slice(0,visibleCount)") && directory.includes("Load more Puja topics"),"PUJA_MOBILE_PAGINATION_MISSING");
 const nav=read("components/main-nav.tsx");
 for(const x of ['label: "Reports"','label: "Consultation"','label: "Puja"','label: "Shop"'])assert.ok(nav.includes(x),"TOP_NAV_MISSING="+x);
 assert.ok(read("app/layout.tsx").includes("reference-redesign.css"),"REDESIGN_NOT_IMPORTED");

@@ -25,7 +25,15 @@ test("capture sitewide public visual evidence for desktop and mobile", async ({ 
     await expect(page.locator("main").first()).toBeVisible();
     await page.evaluate(async () => { await document.fonts.ready; });
     const screenshotPath = testInfo.outputPath("visual-" + screen.name + ".png");
-    await page.screenshot({ path: screenshotPath, fullPage: true, animations: "disabled" });
+    // Full-page iPhone captures can exceed WebKit's 32,767px dimension
+    // limit for long content catalogs; capture two real viewports instead.
+    await page.screenshot({ path: screenshotPath, fullPage: false, animations: "disabled" });
+    const midway = await page.evaluate(() =>
+      Math.max(0, Math.floor((document.documentElement.scrollHeight - window.innerHeight) / 2)));
+    await page.evaluate(y => window.scrollTo(0,y), midway);
+    const middlePath = testInfo.outputPath("visual-" + screen.name + "-middle.png");
+    await page.screenshot({ path: middlePath, fullPage: false, animations: "disabled" });
+    await testInfo.attach(screen.name + "-middle", { path: middlePath, contentType: "image/png" });
     await testInfo.attach(screen.name + "-visual", { path: screenshotPath, contentType: "image/png" });
   }
 });

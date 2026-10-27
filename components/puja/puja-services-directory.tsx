@@ -11,6 +11,7 @@ export function PujaServicesDirectory() {
   const [hydrated,setHydrated]=useState(false);
   useEffect(()=>setHydrated(true),[]);
   const [category,setCategory]=useState<(typeof pujaCategories)[number]>("All");
+  const [visibleCount,setVisibleCount]=useState(12);
   const results=useMemo(()=>pujaTopics.filter(p=>
     (category==="All"||p.category===category) &&
     [p.name,p.deity,p.category,p.description].join(" ").toLowerCase().includes(query.trim().toLowerCase())
@@ -47,21 +48,21 @@ export function PujaServicesDirectory() {
           <h2 id="puja-catalogue-heading" className="mt-2 font-cinzel text-3xl font-bold text-[#412831]">Puja Directory</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">The topics listed below do not imply temple assignments or priest availability.</p>
         </div>
-        <span role="status" className="rounded-full border border-[#e2b575]/35 px-4 py-2 text-sm text-[#84303d]">{results.length} topics</span>
+        <span role="status" className="rounded-full border border-[#e2b575]/35 px-4 py-2 text-sm text-[#84303d]">Showing {Math.min(visibleCount,results.length)} of {results.length} topics</span>
       </div>
       <label className="relative mt-7 block max-w-xl">
         <span className="sr-only">Search Puja types or deities</span>
         <Search size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#e8bd7c]"/>
-        <input type="search" disabled={!hydrated} value={query} onChange={e=>setQuery(e.target.value)}
+        <input type="search" disabled={!hydrated} value={query} onChange={e=>{setQuery(e.target.value);setVisibleCount(12)}}
           placeholder="Search Puja, deity, tradition..." className="h-12 w-full rounded-xl border border-[#cba66a]/45 bg-white pl-12 pr-4 text-[#412831] placeholder:text-[#826b6d] focus-visible:outline-[#f5d490]"/>
       </label>
       <div role="group" aria-label="Filter Puja categories" className="mt-5 flex flex-wrap gap-2">
-        {pujaCategories.map(key=><button key={key} type="button" disabled={!hydrated} aria-pressed={category===key} onClick={()=>setCategory(key)}
+        {pujaCategories.map(key=><button key={key} type="button" disabled={!hydrated} aria-pressed={category===key} onClick={()=>{setCategory(key);setVisibleCount(12)}}
           className={"rounded-full border px-4 py-2 text-sm font-semibold transition "+(category===key
             ?"border-[#ffdf9f] bg-[#f5c979] text-[#351b1e]":"border-[#d5b17d]/40 bg-white text-[#5e424b] hover:border-[#f5d59c]")}>{key}</button>)}
       </div>
       {results.length?<div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {results.map(topic=><article key={topic.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#d0a766]/35 bg-white transition hover:-translate-y-1 hover:border-[#f4ca7f]">
+        {results.slice(0,visibleCount).map(topic=><article key={topic.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#d0a766]/35 bg-white transition hover:-translate-y-1 hover:border-[#f4ca7f]">
           <div className="relative aspect-[16/10] overflow-hidden bg-[#fff1de]">
             <Image src={topic.graphic} alt={topic.category+" category decorative illustration"} width={640} height={400} unoptimized
               className="h-full w-full object-cover transition-transform group-hover:scale-105"/>
@@ -80,6 +81,14 @@ export function PujaServicesDirectory() {
       </div>:<div className="mt-8 rounded-2xl border border-[#deb373]/35 p-8 text-center text-[#665056]">
         No matching Puja topic. <button type="button" className="ml-2 underline" onClick={()=>{setQuery("");setCategory("All")}}>Clear filters</button>
       </div>}
+      {results.length > visibleCount && (
+        <div className="mt-9 flex justify-center">
+          <button type="button" onClick={()=>setVisibleCount(n=>Math.min(results.length,n+12))}
+            className="min-h-12 rounded-xl border border-[#ab6470]/45 bg-white px-7 py-3 text-sm font-bold text-[#842d3c] shadow-sm transition hover:bg-[#fce9dd]">
+            Load more Puja topics ({results.length-visibleCount} remaining)
+          </button>
+        </div>
+      )}
       <div className="mt-12 grid gap-5 rounded-2xl border border-[#d0a36c]/30 bg-[#fff4e6] p-7 md:grid-cols-3">
         {[
           ["01","Explore","Choose a traditional Puja, festival date, or ceremony topic."],

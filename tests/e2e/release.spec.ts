@@ -198,6 +198,15 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("link", { name: "Explore Puja directory" }).first()).toBeVisible();
   });
 
+  test("Puja directory initially limits mobile cards and reveals more on demand", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(12);
+    await page.getByRole("button", { name: /Load more Puja topics/ }).click();
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(24);
+  });
+
   test("Puja service directory filters traditions and preserves selected topic", async ({ page }) => {
     await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
