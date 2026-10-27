@@ -79,7 +79,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
               {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(offerings[topic.id].pricePaise/100)}
               <span className="ml-2 text-xs font-normal text-[#67515a]">listed service fee · subject to booking confirmation</span>
             </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
-            <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
+            <Link href={offerings[topic.id] ? "/puja-booking?item="+encodeURIComponent(topic.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
               {offerings[topic.id] ? "Request booking" : "Enquire"} <ArrowRight size={16}/>
             </Link>

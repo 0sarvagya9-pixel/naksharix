@@ -48,7 +48,7 @@ export default async function PujaTopicPage({params}:Props) {
             <p className="flex gap-3"><CalendarDays size={19} className="mt-1 shrink-0 text-[#9e4952]"/> Confirm dates and local muhurat from your city&apos;s Panchang.</p>
             <p className="flex gap-3"><ShieldCheck size={19} className="mt-1 shrink-0 text-[#9e4952]"/> Temple, pandit, materials, price and completion details require separate written confirmation.</p>
           </div>
-          <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
+          <Link href={offering ? "/puja-booking?item="+encodeURIComponent(item.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
             className="mt-8 inline-flex min-h-12 items-center gap-3 rounded-xl bg-[#f1c67c] px-6 py-3 font-bold text-[#311a1f]">
             {offering ? "Request booking for " : "Enquire about "}{item.name} <ArrowRight size={18}/>
           </Link>
