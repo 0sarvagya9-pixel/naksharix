@@ -17,4 +17,16 @@ for(const part of ["Image usage rights", "Image rights evidence HTTPS URL", "SUP
 for(const part of ["imageRights?:", "imageEvidenceUrl?:", "imageRights: [\"OWNED\""]) {
   assert.ok(model.includes(part),"SHOP_IMAGE_PROOF_PERSISTENCE_MISSING="+part);
 }
-console.log("SHOP_VISUAL_AND_IMAGE_RIGHTS_QA=PASS;UNLICENSED_EXTERNAL_PHOTOS=HELD;LIVE_CHECKOUT=NO");
+const photos=read("lib/shop/real-photo-seeds.ts");
+const store=read("lib/shop/catalogue-store.ts");
+const productDetail=read("components/shop/product-gallery.tsx");
+const home=read("components/home/editorial-home.tsx");
+const entries=[...photos.matchAll(/^\s*"([a-z0-9-]+)":\s*\{url:/gm)].map(m=>m[1]);
+assert.equal(entries.length,12,"REAL_SEED_PHOTO_COUNT_NOT_12");
+assert.equal(new Set(entries).size,12,"REAL_SEED_PHOTO_IDS_DUPLICATED");
+assert.ok(photos.includes("thumb.wikimedia.org") && photos.includes("commons.wikimedia.org") && photos.includes("licenseUrl:"),"PHOTO_PROVENANCE_MISSING");
+assert.ok(store.includes("photoFallbackForLegacySeed") && store.includes("product.imageRights"),"STORED_ADMIN_IMAGES_NOT_PRESERVED");
+assert.ok(productDetail.includes("Real reference photograph, not verified Naksharix stock") &&
+  productDetail.includes("chosen.credit") && productDetail.includes("chosen.licenseUrl"),"PRODUCT_IMAGE_RIGHTS_DISCLOSURE_MISSING");
+assert.ok(home.includes("referencePhotoForProduct(item.id)") && ui.includes("Real reference photo"),"PHOTOGRAPHY_NOT_SITEWIDE");
+console.log("SHOP_VISUAL_AND_IMAGE_RIGHTS_QA=PASS;LICENSED_PHOTO_REFERENCES=12;UNLICENSED_EXTERNAL_PHOTOS=HELD;LIVE_CHECKOUT=NO");
