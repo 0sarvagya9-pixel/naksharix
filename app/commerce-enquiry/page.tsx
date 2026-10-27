@@ -33,10 +33,10 @@ export default async function CommerceEnquiryPage({
           note: "India reference date: " + e.date + ". Local tithi and availability must be confirmed." }))
     ];
   return (
-    <main className="star-field min-h-screen">
+    <main className="star-field min-h-screen bg-[#fffaf3]">
       <Section>
         <div className="mx-auto max-w-3xl">
-          <p className="text-sm uppercase tracking-[0.2em] text-[#FFD700]">Verified operations first</p>
+          <p className="text-sm uppercase tracking-[0.2em] text-[#8e3442]">Verified operations first</p>
           <h1 className="mt-3 font-cinzel text-3xl font-bold sm:text-4xl">
             {kind === "SHOP" ? "Product availability enquiry" : "Puja date and availability enquiry"}
           </h1>
