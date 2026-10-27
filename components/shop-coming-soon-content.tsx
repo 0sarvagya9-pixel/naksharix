@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { HeartHandshake, PackageSearch, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,6 +69,16 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
           {products.map((product) => (
             <Card key={product.id} className="inner-card flex h-full flex-col transition hover:-translate-y-1 hover:border-[#dca956]/50">
               <CardContent className="flex h-full flex-col p-6">
+                <div className="mb-5 overflow-hidden rounded-xl border border-[#D4AF37]/20 bg-[#09162d]">
+                  <Image
+                    src={safeProductVisual(product)}
+                    alt={product.imageAlt[locale] || product.name[locale]}
+                    width={640} height={420} unoptimized
+                    className="h-48 w-full object-contain p-3"
+                  />
+                  {safeProductVisual(product).endsWith("-placeholder.svg") &&
+                    <p className="pb-2 text-center text-xs text-[#a8b3c7]">Illustrative catalogue visual, not an actual stock photograph</p>}
+                </div>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#00f5a0]">{categoryLabel(product.category, locale)}</p>
@@ -109,6 +120,16 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
       </Section>
     </main>
   );
+}
+
+function safeProductVisual(product: ShopProduct): string {
+  const source = product.imageUrl.trim();
+  if (source.startsWith("/") && !source.startsWith("//") && !source.includes("\\")) return source;
+  if (/^https:\/\//i.test(source) &&
+      product.imageRights && /^https:\/\//i.test(product.imageEvidenceUrl || "")) {
+    return source;
+  }
+  return "/shop/combo-placeholder.svg";
 }
 
 function shopLabels(locale: "en" | "hi" | "hinglish") {
