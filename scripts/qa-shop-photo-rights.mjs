@@ -65,3 +65,9 @@ for(const marker of ["ATOMIC_INCREMENT", "redis.call('INCR'", "redis.call('EXPIR
 }
 assert.ok(cache.includes("if (sharedRedisConfigured())") && cache.includes('throw new Error("Shared Redis unavailable for rate limiting")'),"REDIS_RATE_LIMIT_MUST_FAIL_CLOSED");
 assert.ok(read("app/admin/readiness/page.tsx").includes("redisPing()") && read("app/api/admin/readiness/route.ts").includes("redisPing()"),"REDIS_ADMIN_READINESS_PROBE_MISSING");
+
+const publicHealth = read("app/api/health/route.ts");
+const productionHealth = read("app/api/cron/production-health/route.ts");
+for (const [name, route] of [["health",publicHealth],["production-health",productionHealth]]) {
+  assert.ok(route.includes("sharedRedisConfigured()") && route.includes("redisPing()") && !route.includes("getRedis()"),"REDIS_TRANSPORT_HEALTH_MONITOR_MISSING_"+name);
+}
