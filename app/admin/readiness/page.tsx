@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { requireAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
-import { getRedis } from "@/lib/redis";
+import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getEmailReadiness } from "@/lib/email/email-service";
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
@@ -37,16 +37,7 @@ export default async function AdminReadinessPage() {
     database = "error";
   }
 
-  const redisClient = getRedis();
-  let redis: Status = redisClient ? "error" : "missing";
-  if (redisClient) {
-    try {
-      await redisClient.ping();
-      redis = "ok";
-    } catch {
-      redis = "error";
-    }
-  }
+  const redis: Status = !sharedRedisConfigured() ? "missing" : await redisPing() ? "ok" : "error";
 
   let newTables: Awaited<ReturnType<typeof getSchemaReadiness>> | null = null;
   try { newTables = await getSchemaReadiness(); } catch { newTables = null; }

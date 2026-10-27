@@ -53,3 +53,15 @@ for(const marker of ["getShopCatalogue()","getPublishedPujaOffers()","getPublish
 }
 assert.ok(readinessPage.includes("getCommercialReadiness") && readinessPage.includes("Automatic Shop/Puja payments: DISABLED"),"ADMIN_READINESS_UI_MISSING");
 assert.ok(readinessApi.includes("const commercial = await getCommercialReadiness()") && readinessApi.includes("    commercial,"),"ADMIN_READINESS_API_MISSING");
+
+const redisCache=read("lib/cache/redis-cache.ts");
+const cache=read("lib/cache/index.ts");
+const env=read("lib/env.ts");
+for(const marker of ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"]) {
+  assert.ok(env.includes(marker),"REDIS_REST_ENV_SCHEMA_MISSING="+marker);
+}
+for(const marker of ["ATOMIC_INCREMENT", "redis.call('INCR'", "redis.call('EXPIRE'", 'restCommand(["EVAL"', "AbortSignal.timeout(3500)", "redisPing()"]) {
+  assert.ok(redisCache.includes(marker),"ATOMIC_REDIS_REST_MISSING="+marker);
+}
+assert.ok(cache.includes("if (sharedRedisConfigured())") && cache.includes('throw new Error("Shared Redis unavailable for rate limiting")'),"REDIS_RATE_LIMIT_MUST_FAIL_CLOSED");
+assert.ok(read("app/admin/readiness/page.tsx").includes("redisPing()") && read("app/api/admin/readiness/route.ts").includes("redisPing()"),"REDIS_ADMIN_READINESS_PROBE_MISSING");

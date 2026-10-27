@@ -5,7 +5,7 @@ import { getEmailReadiness } from "@/lib/email/email-service";
 import { env } from "@/lib/env";
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
-import { getRedis } from "@/lib/redis";
+import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
 
@@ -23,16 +23,8 @@ export async function GET() {
     database = "error";
   }
 
-  const redisClient = getRedis();
-  let redis: "ok" | "error" | "not_configured" = redisClient ? "error" : "not_configured";
-  if (redisClient) {
-    try {
-      await redisClient.ping();
-      redis = "ok";
-    } catch {
-      redis = "error";
-    }
-  }
+  const redis: "ok" | "error" | "not_configured" = !sharedRedisConfigured()
+    ? "not_configured" : await redisPing() ? "ok" : "error";
 
   let schema: Awaited<ReturnType<typeof getSchemaReadiness>> | null = null;
   try { schema = await getSchemaReadiness(); } catch { schema = null; }

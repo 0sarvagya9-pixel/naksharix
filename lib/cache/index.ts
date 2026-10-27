@@ -1,7 +1,7 @@
 import "server-only";
 
 import { memoryGet, memoryIncrement, memorySet } from "@/lib/cache/memory-cache";
-import { redisGet, redisIncrement, redisSet } from "@/lib/cache/redis-cache";
+import { redisGet, redisIncrement, redisSet, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 
 export async function cacheGet<T>(key: string): Promise<T | null> {
   try {
@@ -30,11 +30,14 @@ export async function cacheGetOrSet<T>(key: string, ttlSeconds: number, factory:
 }
 
 export async function cacheIncrement(key: string, ttlSeconds: number) {
-  try {
-    const redisCount = await redisIncrement(key, ttlSeconds);
-    if (redisCount !== null) return redisCount;
-  } catch {
-    // Fall through to memory cache.
+  // Never silently weaken a configured distributed rate limit to per-instance
+  // memory after the shared provider fails. Callers must fail closed instead.
+  if (sharedRedisConfigured()) {
+    const result = await redisIncrement(key, ttlSeconds);
+    if (result === null) throw new Error("Shared Redis unavailable for rate limiting");
+    return result;
   }
+  // Unconfigured local/dev mode continues to support non-distributed counters;
+  // Admin Readiness explicitly reports that production is not fully protected.
   return memoryIncrement(key, ttlSeconds);
 }
