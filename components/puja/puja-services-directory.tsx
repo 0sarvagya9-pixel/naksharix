@@ -72,7 +72,7 @@ export function PujaServicesDirectory() {
           <div className="flex flex-1 flex-col p-5">
             <h3 className="font-cinzel text-lg font-bold text-[#412831]"><Link href={"/pujas/"+topic.id} className="hover:text-[#f4c87d]">{topic.name}</Link></h3>
             <p className="mt-2 text-xs font-semibold text-[#983844]">{topic.deity}</p>
-            {pujaEditorialPhoto(topic.id,topic.category) ? <p className="mt-2 text-xs leading-5 text-[#5d4b50]">Representative photo: <a href={pujaEditorialPhoto(topic.id,topic.category).source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category).author}</a>{" · "}<a href={pujaEditorialPhoto(topic.id,topic.category).licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category).license}</a></p>:null}
+            {pujaEditorialPhoto(topic.id,topic.category) ? <p className="mt-2 text-xs leading-5 text-[#5d4b50]">Representative photo: <a href={pujaEditorialPhoto(topic.id,topic.category)!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category)!.author}</a>{" · "}<a href={pujaEditorialPhoto(topic.id,topic.category)!.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category)!.license}</a></p>:null}
             <p className="mt-3 flex-1 text-sm leading-6 text-[#6c5459]">{topic.description}.</p>
             <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">

@@ -42,6 +42,6 @@ assert.ok(shop.includes("AddToCartButton") && read("app/cart/page.tsx").includes
 assert.ok(adminApi.includes("unitPricePaise: z.number().int().min(100)") && adminApi.includes("imageRights"),"PRICE_OR_IMAGE_RIGHTS_UNVALIDATED");
 assert.ok(cart.includes("No payment is charged") && cart.includes("Secure checkout is not enabled"),"CART_PAYMENT_SAFETY_MISSING");
 const photoRegistry=read("lib/puja/editorial-photos.ts");
-assert.ok(photoRegistry.includes("CC BY-SA 4.0") && photoRegistry.includes("CC0 1.0") && read("components/puja/puja-services-directory.tsx").includes("editorialPujaPhotos[topic.id].license"),"PUJA_IMAGE_RIGHTS_CREDIT_MISSING");
+assert.ok(photoRegistry.includes("CC BY-SA 4.0") && photoRegistry.includes("CC0 1.0") && read("components/puja/puja-services-directory.tsx").includes("pujaEditorialPhoto(topic.id,topic.category)!.license"),"PUJA_IMAGE_RIGHTS_CREDIT_MISSING");
 
 console.log("SITEWIDE_VISUAL_QA=PASS;ORIGINAL_RELEVANT_VISUALS=7;SERVICE_CARDS=8;LIVE_PAYMENT_CHANGES=NO");
