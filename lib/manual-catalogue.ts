@@ -11,6 +11,9 @@ export type ShopProduct = {
   shortDescription: CatalogueText;
   longDescription: CatalogueText;
   imageUrl: string;
+  /** Rights evidence is required for third-party hosted product imagery. */
+  imageRights?: "OWNED" | "LICENSED" | "SUPPLIER_AUTHORIZED";
+  imageEvidenceUrl?: string;
   imageAlt: CatalogueText;
   priceLabel: CatalogueText;
   status: ProductStatus;
@@ -185,6 +188,8 @@ function normalizeShopProduct(item: unknown): ShopProduct | null {
     shortDescription: safeText(source.shortDescription || source.description),
     longDescription: safeText(source.longDescription || source.shortDescription || source.description),
     imageUrl: safeString(source.imageUrl),
+    imageRights: ["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"].includes(source.imageRights || "") ? source.imageRights : undefined,
+    imageEvidenceUrl: safeString(source.imageEvidenceUrl) || undefined,
     imageAlt: safeText(source.imageAlt || source.name),
     priceLabel: priceLabel.en ? priceLabel : text("Price on request"),
     status: source.status === "inactive" ? "inactive" : "active",
