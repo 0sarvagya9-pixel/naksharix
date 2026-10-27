@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
-import { getRedis } from "@/lib/redis";
+import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getEmailReadiness } from "@/lib/email/email-service";
 import { isAiAstrologerEnabled, isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
@@ -28,14 +28,8 @@ export async function GET() {
 
   checks.databaseSchema = (await getSchemaReadiness().catch(() => null))?.ready === true;
 
-  const redis = getRedis();
-  if (redis) {
-    try {
-      await redis.ping();
-      checks.redis = "ok";
-    } catch {
-      checks.redis = "error";
-    }
+  if (sharedRedisConfigured()) {
+    checks.redis = await redisPing() ? "ok" : "error";
   }
 
   const email = getEmailReadiness();
