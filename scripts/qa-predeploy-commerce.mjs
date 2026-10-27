@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 const read=(path)=>readFileSync(path,"utf8");
 const schema=read("prisma/schema.prisma");
-const sql=["docs/sql/20261027_puja_offering.sql","docs/sql/20261027_shop_orders.sql","docs/sql/20261027_puja_bookings.sql"];
-for(const [name] of [["PujaOffering"],["ShopOrder"],["PujaBookingRequest"]])
+const sql=["docs/sql/20261027_puja_offering.sql","docs/sql/20261027_shop_orders.sql","docs/sql/20261027_puja_bookings.sql","docs/sql/20261027_manual_report_offerings.sql"];
+for(const [name] of [["PujaOffering"],["ShopOrder"],["PujaBookingRequest"],["ManualReportOffering"]])
  assert.ok(schema.includes("model "+name+" {"),"Missing Prisma model "+name);
 for(const path of sql){
  const source=read(path);
@@ -34,4 +34,10 @@ assert.ok(read("components/puja/booking-request-client.tsx").includes('secureFet
  read("app/puja-bookings/page.tsx").includes("userId:user.id"),"Customer Puja booking flow missing");
 assert.ok(read("scripts/qa-auth-role-e2e.mjs").includes("real Shop order request")&&
  read("scripts/qa-auth-role-e2e.mjs").includes("real Puja booking requires"),"Disposable HTTP acceptance missing");
+const reportAdmin=read("app/api/admin/manual-report-offerings/route.ts");
+const reportUI=read("components/reports-content.tsx");
+assert.ok(reportAdmin.includes("getAdminApiUser()")&&reportAdmin.includes("getManualReportCheckout(input.reportSlug)")&&
+ reportAdmin.includes("adminActionLog.create"),"Manual report prices must be admin-only and gateway-safe");
+assert.ok(reportUI.includes("formattedManualPrice")&&reportUI.includes("manualOfferings[report.slug]"),
+ "Manual report public price missing");
 console.log("COMMERCE_PREDEPLOY_QA=PASS;PERSISTED_ORDER_AND_PUJA_REQUEST=YES;OWNER_ADMIN_CAS=YES;LIVE_CHARGING=NO");
