@@ -190,6 +190,7 @@ model User {
   payouts                      Payout[]
   adminActionLogs              AdminActionLog[]
   shopOrders                   ShopOrder[]
+  pujaBookingRequests          PujaBookingRequest[]
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -928,4 +929,30 @@ model ShopOrder {
   updatedAt         DateTime @updatedAt
   @@index([userId, createdAt])
   @@index([status, createdAt])
+}
+
+/** Sankalp and preferences are private. A request is NOT a confirmed Puja booking. */
+model PujaBookingRequest {
+ id                 String   @id @default(cuid())
+ userId             String
+ user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ topicId            String
+ quotedPricePaise   Int
+ preferredDate      DateTime
+ city               String
+ devoteeName        String
+ gotra              String?
+ sankalpNote        String
+ customerPhone      String
+ status             String   @default("REQUESTED")
+ partnerId          String?
+ scheduledAt        DateTime?
+ evidenceUrl        String?
+ adminNote          String   @default("")
+ version            Int      @default(1)
+ createdAt          DateTime @default(now())
+ updatedAt          DateTime @updatedAt
+ @@index([userId, createdAt])
+ @@index([status, createdAt])
+ @@index([topicId, preferredDate])
 }
