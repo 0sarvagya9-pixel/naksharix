@@ -49,3 +49,9 @@ A production backup or restore gate is not passed merely by a disposable Postgre
 ## Home, Shop and Puja calendar photo-reference completion
 - Two homepage services, the Shop inner hero and rolling Puja calendar banner now reuse documented, previously licensed real-reference photographs instead of matching placeholder illustrations.
 - On-page source/photographer/license credits accompany new placements; photos are representative, not ownership, inventory, or performed-ceremony evidence. No new photo license or product authenticity was invented.
+
+## 2026-10-28 live recovery clone and Admin commercial readiness
+- Neon production snapshot creation was attempted but API returned `snapshots limit exceeded`. Existing named snapshot `snap-silent-wind-aqx6bfp4` is preserved; no delete was attempted.
+- A new **non-production** production-HEAD branch `br-quiet-credit-aqcg7yfu` was created and verified READY. Production and clone each show 38 public tables, with matching counts for User (5), ConsultationBooking (0), SupportTicket (0), ReportRequest (0), PujaPartner (0) at inspection. The clean clone is a point-in-time copy-on-write recovery checkpoint, **not** an independent current snapshot or guaranteed recovery drill.
+- Production schema remains 38/43; no live DDL executed. Snapshots limit remains a blocker to fresh independent snapshot and restore acceptance, unless approved recovery procedure establishes an equivalent valid backup.
+- Admin-only `/admin/readiness` and `/api/admin/readiness` now show actual source-backed/commercial-data checks: required five tables, positive product prices, owner/supplier photo-rights records (not stock authenticity), published Puja rates, administrator-reviewed partners, specialist report fees and explicit unpaid fulfilment/payment hard stops. No external evidence is fabricated.

@@ -42,3 +42,14 @@ const reviewForm=read("components/consultation-review-form.tsx");
 assert.ok(reviewForm.includes("Rate your consultation") && reviewForm.includes("Submit rating") && reviewForm.includes("aria-pressed={rating === value}"),"ACCESSIBLE_CUSTOMER_RATINGS_MISSING");
 assert.ok(read("app/api/consultation-bookings/review/route.ts").includes("rating: z.coerce.number().int().min(1).max(5)"),"RATINGS_MUST_BE_INTEGERS");
 console.log("SHOP_VISUAL_AND_IMAGE_RIGHTS_QA=PASS;LICENSED_PHOTO_REFERENCES=12;UNLICENSED_EXTERNAL_PHOTOS=HELD;LIVE_CHECKOUT=NO");
+
+// Admin-only commercial readiness must distinguish genuine published owner data
+// from proof of supplier stock, contracts, delivery and payments.
+const commercial=read("lib/ops/commercial-readiness.ts");
+const readinessPage=read("app/admin/readiness/page.tsx");
+const readinessApi=read("app/api/admin/readiness/route.ts");
+for(const marker of ["getShopCatalogue()","getPublishedPujaOffers()","getPublishedManualReportOffers()","prisma.pujaPartner.count","to_regclass", "readyForAutomaticPayments: false", "imageRights === \"SUPPLIER_AUTHORIZED\""]) {
+  assert.ok(commercial.includes(marker),"ADMIN_COMMERCE_READINESS_GATE_MISSING="+marker);
+}
+assert.ok(readinessPage.includes("getCommercialReadiness") && readinessPage.includes("Automatic Shop/Puja payments: DISABLED"),"ADMIN_READINESS_UI_MISSING");
+assert.ok(readinessApi.includes("const commercial = await getCommercialReadiness()") && readinessApi.includes("    commercial,"),"ADMIN_READINESS_API_MISSING");

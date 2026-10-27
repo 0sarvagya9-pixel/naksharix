@@ -7,6 +7,7 @@ import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
 import { getRedis } from "@/lib/redis";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
+import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export async function GET() {
   const email = getEmailReadiness();
   const payments = getRazorpayReadiness();
   const monitoring = getMonitoringReadiness();
+  const commercial = await getCommercialReadiness();
 
   return ok({
     app: {
@@ -71,6 +73,7 @@ export async function GET() {
         safeMetadataOnly: monitoring.safeMetadataOnly
       }
     },
+    commercial,
     checkedAt: new Date().toISOString()
   }, { status: database === "ok" ? 200 : 503 });
 }
