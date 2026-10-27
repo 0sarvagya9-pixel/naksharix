@@ -64,7 +64,7 @@ export function Footer() {
             © {new Date().getFullYear()} Naksharix. All rights reserved.
           </p>
           <p style={{ fontSize: 11, color: "#525866" }}>
-            Digital reports and consultations · Payments processed through Razorpay
+            Explore traditional astrology, reports, consultations, Puja information and spiritual products
           </p>
         </div>
       </div>

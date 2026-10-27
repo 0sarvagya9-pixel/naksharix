@@ -50,3 +50,8 @@ background:linear-gradient(95deg,rgba(103,22,29,.98) 0%,rgba(117,24,38,.96) 38%,
 .nx-ed-hero{min-height:590px}
 .nx-ed-hero-inner{padding-block:3rem 5rem}
 }
+
+.nx-reference-promo{display:flex;align-items:center;justify-content:center;gap:clamp(12px,3vw,48px);min-height:30px;padding:4px 18px;background:#871c2f;color:#fff2d9;font-size:11px;font-weight:650;letter-spacing:.015em}
+.nx-reference-promo a{color:#fff6da;text-decoration:underline;text-underline-offset:3px;font-weight:800}
+.nx-reference-promo a:hover{color:#fff}
+@media(max-width:700px){.nx-reference-promo{justify-content:center;text-align:center;font-size:10px}.nx-reference-promo a{display:none}}

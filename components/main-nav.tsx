@@ -13,12 +13,13 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Home", href: "/", active: ["/"] },
+  { label: "Reports", href: "/reports", active: ["/reports"] },
+  { label: "Consultation", href: "/consultation", active: ["/consultation", "/astrologers"] },
+  { label: "Puja", href: "/pujas", active: ["/pujas", "/puja-enquiry", "/puja-calendar"] },
+  { label: "Shop", href: "/shop", active: ["/shop"] },
   { label: "Kundli", href: "/kundli", active: ["/kundli", "/free-kundli"] },
   { label: "Horoscope", href: "/daily-horoscope", active: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope"] },
-  { label: "Panchang", href: "/panchang", active: ["/panchang"] },
-  { label: "Numerology", href: "/numerology", active: ["/numerology"] },
-  { label: "Tarot", href: "/tarot", active: ["/tarot"] },
-  { label: "Remedies", href: "/free-calculators", active: ["/free-calculators", "/calculators"] }
+  { label: "Panchang", href: "/panchang", active: ["/panchang"] }
 ] as const;
 
 const exploreLinks = [
@@ -106,6 +107,10 @@ export function MainNav() {
 
   return (
     <div className="sticky top-0 z-50 w-full">
+      <div className="nx-reference-promo">
+        <span>NAKSHARIX • Vedic astrology tools, traditional knowledge and private guidance</span>
+        <Link href="/pujas">Explore Puja Services <span aria-hidden="true">→</span></Link>
+      </div>
       <header
         className="w-full transition-all duration-300"
         style={{
@@ -117,11 +122,11 @@ export function MainNav() {
         }}
       >
         <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
-          <div className="flex min-w-[14rem] flex-shrink-0 items-center">
+          <div className="flex min-w-[10rem] flex-shrink-0 items-center">
             <BrandLogo className="max-w-full" />
           </div>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex" aria-label="Primary navigation">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex" aria-label="Primary navigation">
             {navLinks.map((item) => item.label === "Horoscope" ? (
               <HoroscopeMenu key={item.href} pathname={pathname} />
             ) : (
@@ -137,7 +142,7 @@ export function MainNav() {
             <MoreMenu />
           </nav>
 
-          <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[rgba(255,255,255,0.15)] pl-3">
+          <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[rgba(126,39,37,0.15)] pl-3">
             <LanguageSwitcher className="w-auto min-w-12" />
             <ThemeToggle />
             <AuthProfileMenu />
@@ -255,7 +260,7 @@ function DropdownLink({ item, compact = false }: { item: { label: string; href: 
 
 function navLinkClass(active: boolean) {
   return cn(
-    "flex items-center gap-0.5 px-3 py-1 text-sm font-semibold text-[#492b32] transition hover:text-white",
+    "flex items-center gap-0.5 px-2 py-1 text-[13px] font-semibold text-[#492b32] transition hover:text-white",
     active ? "rounded-none border-b-2 border-[#f2c56b] px-1 py-0.5 font-bold text-[#9b2d36]" : ""
   );
 }
