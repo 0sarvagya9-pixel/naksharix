@@ -8,8 +8,8 @@ import {
   Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
 } from "lucide-react";
 
-const STARRY_SKY = "https://images.unsplash.com/photo-1519681393784-d120267933ba";
-const GOLDEN_HORIZON = "https://images.unsplash.com/photo-1500534623283-312aade485b7";
+const STARRY_SKY = "/naksharix/editorial-consultation.svg";
+const GOLDEN_HORIZON = "/naksharix/editorial-panchang.svg";
 
 const heroSlides = [
   {
@@ -18,7 +18,7 @@ const heroSlides = [
     accent: "your way forward.",
     body: "Explore Vedic astrology with beautiful digital tools, clear explanations and thoughtful ways to seek guidance.",
     image: STARRY_SKY,
-    alt: "Photograph of the Milky Way above a snowy mountain range",
+    alt: "Original illustrated consultation and birth-chart theme",
     main: { label: "Generate free Kundli", href: "/kundli" },
     secondary: { label: "Explore astrology tools", href: "/free-calculators" }
   },
@@ -28,7 +28,7 @@ const heroSlides = [
     accent: "for each new day.",
     body: "Read the Panchang for your location, understand the day’s traditional context and discover the zodiac.",
     image: GOLDEN_HORIZON,
-    alt: "Golden sunlight rising over a layered mountain landscape",
+    alt: "Original illustrated Hindu Panchang calendar",
     main: { label: "View today’s Panchang", href: "/panchang" },
     secondary: { label: "Today’s horoscope", href: "/daily-horoscope" }
   },
@@ -65,15 +65,15 @@ const services = [
     number: "02", label: "Consult an Astrologer",
     copy: "Explore approved profiles, available consultation options and session details.",
     href: "/consultation", cta: "Explore consultations",
-    image: STARRY_SKY,
-    alt: "Star-filled sky above mountains"
+    image: "/naksharix/editorial-consultation.svg",
+    alt: "Original consultation artwork"
   },
   {
     number: "03", label: "Reports & reflections",
     copy: "Browse available report topics and read the details before requesting one.",
     href: "/reports", cta: "Explore reports",
-    image: GOLDEN_HORIZON,
-    alt: "Sunrise through mountain silhouettes"
+    image: "/naksharix/editorial-reports.svg",
+    alt: "Illustrated Panchang calendar"
   }
 ] as const;
 
@@ -95,15 +95,15 @@ const journeys = [
     label: "Learn the foundations", eyebrow: "FREE LEARNING",
     desc: "Go from birth charts to the Panchang through four introductory lessons with linked calculators.",
     href: "/learn", cta: "Start learning",
-    image: STARRY_SKY,
-    alt: "Night sky with visible stars above the mountains"
+    image: "/naksharix/editorial-learning.svg",
+    alt: "Illustrated open Vedic learning book"
   },
   {
     label: "Spiritual catalogue", eyebrow: "CURATED DISCOVERY",
     desc: "Browse spiritual products and make an enquiry. Online checkout and delivery are not active.",
     href: "/shop", cta: "View catalogue",
-    image: "/naksharix/zodiac-wheel-gold.jpg",
-    alt: "Detailed gold zodiac artwork"
+    image: "/shop/rudraksha-mala-illustration.svg",
+    alt: "Illustrative Rudraksha mala artwork"
   }
 ] as const;
 
@@ -239,7 +239,7 @@ export function EditorialHome() {
       <section className="nx-ed-cosmos-split" aria-labelledby="nx-ed-horoscope-title">
         <div className="nx-ed-container nx-ed-cosmos-inner">
           <div className="nx-ed-cosmos-photo">
-            <Image src={GOLDEN_HORIZON} alt="Photograph of golden sunrise over distant mountains" fill sizes="(max-width: 850px) 100vw, 45vw" quality={75}/>
+            <Image src={GOLDEN_HORIZON} alt="Illustrated Hindu calendar and Panchang" fill sizes="(max-width: 850px) 100vw, 45vw" quality={75}/>
             <div className="nx-ed-cosmos-photo-label"><Sun size={18} aria-hidden="true"/> A moment for reflection, every day</div>
           </div>
           <div className="nx-ed-cosmos-copy">

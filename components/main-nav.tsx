@@ -75,7 +75,7 @@ const horoscopeOptions = [
 ] as const;
 
 const dropdownStyle = {
-  background: "rgba(10, 14, 26, 0.95)",
+  background: "rgba(80, 30, 33, 0.98)",
   border: "1px solid rgba(255, 255, 255, 0.20)",
   backdropFilter: "blur(18px) saturate(140%)",
   WebkitBackdropFilter: "blur(18px) saturate(140%)",
@@ -109,11 +109,11 @@ export function MainNav() {
       <header
         className="w-full transition-all duration-300"
         style={{
-          background: "rgba(18, 22, 34, 0.38)",
+          background: "rgba(255, 251, 247, 0.97)",
           backdropFilter: "blur(22px) saturate(145%)",
           WebkitBackdropFilter: "blur(22px) saturate(145%)",
-          borderBottom: "1px solid rgba(255,255,255,0.22)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12)"
+          borderBottom: "1px solid rgba(126,39,37,0.16)",
+          boxShadow: "0 7px 22px rgba(76,32,27,0.07)"
         }}
       >
         <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
@@ -222,7 +222,7 @@ function HoroscopeMenu({ pathname }: { pathname: string }) {
 function MoreMenu() {
   return (
     <div className="group relative">
-      <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white">More</button>
+      <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">More</button>
       <div className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
         <div className="grid grid-cols-3 gap-4 text-left">
           <MenuColumn title="Explore" links={exploreLinks} />
@@ -255,8 +255,8 @@ function DropdownLink({ item, compact = false }: { item: { label: string; href: 
 
 function navLinkClass(active: boolean) {
   return cn(
-    "flex items-center gap-0.5 px-3 py-1 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white",
-    active ? "rounded-none border-b-2 border-[#f2c56b] px-1 py-0.5 font-bold text-[#f2c56b]" : ""
+    "flex items-center gap-0.5 px-3 py-1 text-sm font-semibold text-[#492b32] transition hover:text-white",
+    active ? "rounded-none border-b-2 border-[#f2c56b] px-1 py-0.5 font-bold text-[#9b2d36]" : ""
   );
 }
 

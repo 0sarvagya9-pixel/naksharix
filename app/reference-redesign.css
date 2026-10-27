@@ -1,0 +1,52 @@
+/* NAKSHARIX – warm burgundy, ivory and saffron system inspired by modern
+   high-polish Indian astrology commerce layouts. All images owned or original. */
+.nx-editorial{--ed-ink:#39242b;--ed-accent:#992d3a;--ed-gold:#d49c4d;--ed-paper:#fffcf7;--ed-cream:#fff6eb;background:#fffcf7}
+.nx-ed-hero{min-height:clamp(510px,61svh,700px);background:#651820}
+.nx-ed-hero-wash{
+background:linear-gradient(95deg,rgba(103,22,29,.98) 0%,rgba(117,24,38,.96) 38%,rgba(120,36,40,.60) 68%,rgba(72,18,32,.28) 100%);
+}
+.nx-ed-photo{object-position:center;filter:saturate(1.1)}
+.nx-ed-hero h1{font-family:var(--font-poppins),sans-serif;font-weight:800;font-size:clamp(2.35rem,4.7vw,5rem);letter-spacing:-.045em}
+.nx-ed-hero h1 em{background:linear-gradient(110deg,#fff5d8,#ffd084 65%,#fff0c7);background-clip:text;-webkit-background-clip:text}
+.nx-ed-hero-inner{padding-block:4.2rem 5.7rem}
+.nx-ed-floating-wheel{border:9px solid rgba(255,217,157,.65);box-shadow:0 12px 65px rgba(44,6,8,.25)}
+.nx-ed-button-gold{background:#ffcf83;color:#52252a!important;border-radius:9px}
+.nx-ed-button-outline{border-radius:9px}
+.nx-ed-quick-section{background:#fff8ef;padding:1.4rem 0}
+.nx-ed-quick-link{background:#fff;border-color:#ead5c9;border-radius:12px;box-shadow:0 8px 20px rgba(117,49,44,.05)}
+.nx-ed-service-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.nx-ed-section{padding-block:clamp(3rem,5vw,5.2rem)}
+.nx-ed-services{background:#fffaf4}
+.nx-ed-section-title h2,.nx-ed-service-card h3,.nx-ed-card-body h3{font-family:var(--font-poppins),sans-serif;letter-spacing:-.035em;font-weight:750}
+.nx-ed-service-card{border-radius:20px;border:1px solid #eaded3;box-shadow:0 16px 32px rgba(80,40,38,.08)}
+.nx-ed-card-image{aspect-ratio:1.48;background:#f7ead7}
+.nx-ed-card-image img{object-fit:cover}
+.nx-ed-card-number{background:#962f3b;color:#fff}
+.nx-ed-text-link{color:#922b39!important}
+.nx-ed-cosmos-split{background:#fff1e6}
+.nx-ed-zodiac-grid a{border-radius:12px;background:white;border-color:#e9cab9}
+.nx-ed-zodiac-grid a:hover{background:#fff9ef}
+.nx-ed-journey{background:#fffdfa}
+.nx-ed-journey-card{border-radius:18px}
+.nx-ed-why{background:linear-gradient(110deg,#76242d,#4a1e2e)}
+.nx-ed-why-art{border-radius:22px}
+.nx-ed-end-cta{background:#ffe9d1}
+.nx-ed-end-inner h2{font-family:var(--font-poppins),sans-serif}
+.nx-ed-inner-banner{background:#6c212e;min-height:340px;position:relative}
+.nx-ed-inner-banner-photo{opacity:.65}
+.nx-ed-inner-banner-photo img{object-fit:contain!important;object-position:75% center;background:linear-gradient(110deg,#fff6e6,#edd0ae)}
+.nx-ed-inner-banner-shade{background:linear-gradient(90deg,#651f29 0%,#6b2732 36%,rgba(106,32,46,.93) 48%,rgba(106,36,44,.05) 85%)!important}
+.nx-ed-inner-banner-copy h2{font-family:var(--font-poppins),sans-serif}
+.nx-ed-inner-banner-copy a{border-radius:10px}
+.nx-ed-hero a:focus-visible,.nx-ed-quick-link:focus-visible{outline:3px solid #faad35;outline-offset:4px}
+@media(max-width:850px){
+.nx-ed-hero{min-height:610px}
+.nx-ed-hero-wash{background:linear-gradient(90deg,rgba(108,22,31,.96),rgba(112,23,36,.78))}
+.nx-ed-service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+.nx-ed-service-grid{grid-template-columns:1fr}
+.nx-ed-service-card:last-child{grid-column:auto}
+.nx-ed-hero{min-height:590px}
+.nx-ed-hero-inner{padding-block:3rem 5rem}
+}
