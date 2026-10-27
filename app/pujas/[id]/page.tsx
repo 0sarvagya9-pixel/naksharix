@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, CalendarDays, ShieldCheck } from "lucide-react";
 import { pujaTopics, findPujaTopic } from "@/lib/puja/service-catalogue";
+import { editorialPujaPhotos, pujaEditorialImage } from "@/lib/puja/editorial-photos";
 import { seo } from "@/lib/seo";
 
 type Props={params:Promise<{id:string}>};
@@ -22,7 +23,10 @@ export default async function PujaTopicPage({params}:Props) {
       <Link href="/pujas" className="inline-flex items-center gap-2 text-sm font-bold text-[#8e3442]"><ArrowLeft size={16}/> Puja directory</Link>
       <div className="mt-7 grid gap-8 md:grid-cols-2">
         <div className="overflow-hidden rounded-3xl border border-[#ddba80]/35 bg-[#fff2e4]">
-          <Image src={item.graphic} alt={item.category+" decorative artwork, not a temple photograph"} width={860} height={610} unoptimized className="aspect-[4/3] w-full object-cover"/>
+          <Image src={pujaEditorialImage(item.id,item.graphic)} alt={editorialPujaPhotos[item.id] ? "Representative photograph of a related ritual" : item.category+" category illustration"} width={860} height={610} unoptimized className="aspect-[4/3] w-full object-cover"/>
+          {editorialPujaPhotos[item.id] ? <div className="bg-white px-4 py-3 text-xs leading-5 text-[#5d4551]">
+            Representative image, not a Naksharix ceremony. Photo: <a href={editorialPujaPhotos[item.id].source} target="_blank" rel="noopener noreferrer" className="underline">{editorialPujaPhotos[item.id].author}</a>{" · "}<a href={editorialPujaPhotos[item.id].licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{editorialPujaPhotos[item.id].license}</a>.
+          </div>:null}
         </div>
         <div className="rounded-3xl border border-[#ddba80]/35 bg-white p-7 text-[#402a2d] md:p-10">
           <span className="text-sm font-bold uppercase tracking-[.18em] text-[#8e3442]">{item.category} • {item.deity}</span>
