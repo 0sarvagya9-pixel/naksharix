@@ -70,8 +70,8 @@ for (const [file, content] of [["components/reports-content.tsx", reportsContent
 const shopPage = read("app/shop/page.tsx");
 const shopContent = read("components/shop-coming-soon-content.tsx");
 assert(shopPage.includes("index: true"), "Informational Shop catalogue should be indexable");
-assert(shopPage.includes("getShopCatalogue") && shopContent.includes("initialProducts") && shopContent.includes("Ask Availability"), "Shop should expose the real server-backed informational catalogue without ecommerce");
-assert(!shopContent.includes("RazorpayCheckoutButton") && !shopContent.includes("Add to Cart") && !shopContent.includes("Buy Now"), "Shop must not expose ecommerce controls");
+assert(shopPage.includes("getShopCatalogue") && shopContent.includes("initialProducts") && shopContent.includes("Product support") && shopContent.includes("AddToCartButton"), "Shop should expose real server-backed products, draft cart and product support");
+assert(!shopContent.includes("RazorpayCheckoutButton") && !shopContent.includes(">Buy Now<") && read("app/api/commerce/orders/route.ts").includes('paymentStatus:"UNPAID"'), "Shop draft cart and manual orders must never collect payment");
 
 const aiPage = read("app/ai-astrologer/page.tsx");
 assert(aiPage.includes("isAiAstrologerReady") && aiPage.includes("robots: { index: ready"), "AI page indexing should depend on real readiness");
