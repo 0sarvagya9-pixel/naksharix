@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { secureFetch } from "@/lib/security/csrf";
 import type { ShopProduct } from "@/lib/manual-catalogue";
@@ -18,7 +18,7 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
  const total=valid.reduce((sum,line)=>sum+(productMap.get(line.productId)?.unitPricePaise||0)*line.quantity,0);
  const unpriced=valid.some(l=>!productMap.get(l.productId)?.unitPricePaise);
  const formatter=new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2});
- async function submitQuote(event:React.FormEvent<HTMLFormElement>){
+ async function submitQuote(event:FormEvent<HTMLFormElement>){
    event.preventDefault();
    if(pending||!valid.length)return;
    setPending(true);setIssue("");
