@@ -146,6 +146,7 @@ export function MainNav() {
             <LanguageSwitcher className="w-auto min-w-12" />
             <ThemeToggle />
             <Link href="/cart" aria-label="View shopping cart" className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[#702536] hover:bg-[#fff1e7]"><ShoppingCart size={19}/></Link>
+            <Link href="/orders" className="hidden rounded-lg px-3 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7] sm:inline-flex">My Orders</Link>
             <AuthProfileMenu />
             <Link
               href="/kundli"

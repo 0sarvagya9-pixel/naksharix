@@ -11,6 +11,12 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
  const [message,setMessage]=useState("");
  const [pending,setPending]=useState(false);
  const [ticket,setTicket]=useState("");
+ const [orderId,setOrderId]=useState("");
+ const [buyerName,setBuyerName]=useState("");
+ const [buyerPhone,setBuyerPhone]=useState("");
+ const [address,setAddress]=useState("");
+ const [stateName,setStateName]=useState("");
+ const [postalCode,setPostalCode]=useState("");
  const [issue,setIssue]=useState("");
  useEffect(()=>{const load=()=>setLines(readCart());load();window.addEventListener("naksharix-cart-changed",load);return()=>window.removeEventListener("naksharix-cart-changed",load)},[]);
  const productMap=useMemo(()=>new Map(products.filter(p=>p.status==="active").map(p=>[p.id,p])),[products]);
@@ -30,6 +36,22 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
      if(typeof id!=="string")throw new Error("No tracked support ticket returned.");
      setTicket(id);
    }catch(e){setIssue(e instanceof Error?e.message:"Quote request failed.")}finally{setPending(false)}
+ }
+ async function submitOrder(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();if(pending||!valid.length||unpriced)return;
+  setPending(true);setIssue("");
+  try{
+    const response=await secureFetch("/api/commerce/orders",{method:"POST",headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({items:valid.map(l=>({productId:l.productId,quantity:l.quantity})),
+       customerName:buyerName.trim(),customerPhone:buyerPhone.trim(),deliveryAddress:address.trim(),
+       deliveryCity:city.trim(),deliveryState:stateName.trim(),postalCode:postalCode.trim(),customerNote:message.trim()})});
+    const body=await response.json();
+    if(!response.ok)throw new Error(body.error||"Order request failed.");
+    const id=body.data?.order?.id;
+    if(typeof id!=="string")throw new Error("Order was not confirmed by the server.");
+    setOrderId(id);writeCart([]);setLines([]);
+  }catch(e){setIssue(e instanceof Error?e.message:"Order request failed.")}
+  finally{setPending(false)}
  }
  function update(id:string,qty:number){const next=lines.filter(l=>l.productId!==id);if(qty>0)next.push({productId:id,quantity:Math.min(10,qty)});writeCart(next);setLines(next)}
  return <div className="mx-auto max-w-5xl px-5 py-12">
@@ -74,6 +96,20 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
          {pending?"Sending request…":"Request quote for entire cart"}
        </button>
      </form>}
+     {!unpriced && !orderId ? <form onSubmit={submitOrder} className="mt-6 space-y-3 border-t border-[#e0c29f] pt-5">
+      <h3 className="font-cinzel text-lg font-bold text-[#632638]">Place order request</h3>
+      <p className="text-xs leading-5 text-[#624b55]">Save a real order for owner confirmation. No money is charged online. Shipping, applicable taxes and fulfilment are confirmed before dispatch.</p>
+      <label className="block text-sm font-bold">Full name<input required minLength={2} maxLength={120} value={buyerName} onChange={e=>setBuyerName(e.target.value)} className="mt-2 w-full rounded-lg border p-3"/></label>
+      <label className="block text-sm font-bold">Phone number<input required minLength={8} maxLength={20} value={buyerPhone} onChange={e=>setBuyerPhone(e.target.value)} className="mt-2 w-full rounded-lg border p-3" placeholder="Mobile or contact number"/></label>
+      <label className="block text-sm font-bold">Delivery address<textarea required minLength={12} maxLength={350} rows={3} value={address} onChange={e=>setAddress(e.target.value)} className="mt-2 w-full rounded-lg border p-3"/></label>
+      <label className="block text-sm font-bold">City<input required minLength={2} maxLength={90} value={city} onChange={e=>setCity(e.target.value)} className="mt-2 w-full rounded-lg border p-3"/></label>
+      <label className="block text-sm font-bold">State<input required minLength={2} maxLength={90} value={stateName} onChange={e=>setStateName(e.target.value)} className="mt-2 w-full rounded-lg border p-3"/></label>
+      <label className="block text-sm font-bold">6-digit PIN<input required pattern="[0-9]{6}" maxLength={6} value={postalCode} onChange={e=>setPostalCode(e.target.value)} className="mt-2 w-full rounded-lg border p-3" inputMode="numeric"/></label>
+      <button type="submit" disabled={pending} className="w-full rounded-xl bg-[#7d2a3e] p-3 font-bold text-white disabled:opacity-50">{pending?"Saving order…":"Place order request — no online charge"}</button>
+     </form> : null}
+     {orderId ? <p role="status" className="mt-4 rounded-lg border border-[#b7dcae] bg-white p-3 text-sm">
+       Order #{orderId} created. <Link href="/orders" className="font-bold text-[#7c2e3e] underline">Track My Orders</Link>.
+     </p> : null}
      <Link href="/shop" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d2ae82] px-5 text-sm font-bold text-[#742d3e]">Continue shopping</Link>
    </aside>
   </div>}
