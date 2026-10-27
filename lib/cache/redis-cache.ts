@@ -9,7 +9,7 @@ const ATOMIC_INCREMENT = "local n = redis.call('INCR', KEYS[1]); if n == 1 then 
 const restUrl = env.UPSTASH_REDIS_REST_URL;
 const restToken = env.UPSTASH_REDIS_REST_TOKEN;
 export function sharedRedisConfigured() {
-  return Boolean(env.REDIS_URL || (restUrl && restToken));
+  return Boolean(env.REDIS_URL || restUrl || restToken);
 }
 
 async function restCommand(command: (string | number)[]): Promise<unknown> {
