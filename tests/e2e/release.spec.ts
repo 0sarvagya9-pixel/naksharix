@@ -259,6 +259,21 @@ test.describe("Naksharix release browser QA", () => {
     expect(JSON.stringify(json)).not.toMatch(/key|secret|model/i);
   });
 
+  test("readiness reports the deployment target consistently with release metadata", async ({ request }) => {
+    const [release, readiness] = await Promise.all([
+      request.get(absolute("/api/release")),
+      request.get(absolute("/api/ops/readiness"))
+    ]);
+    expect(release.status()).toBe(200);
+    expect(readiness.status()).toBe(200);
+    const [{ data: releaseData }, { data: readinessData }] = await Promise.all([
+      release.json(), readiness.json()
+    ]);
+    expect(readinessData.environment).toBe(releaseData.environment);
+    expect(["preview", "production", "development", "test"]).toContain(readinessData.environment);
+    expect(readinessData.capabilities.shopMode).toBe("informational_enquiry_only");
+  });
+
   test("pricing exposes only active services", async ({ page }) => {
     await page.goto(absolute("/pricing"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { level: 1, name: "Services and Pricing" })).toBeVisible();
