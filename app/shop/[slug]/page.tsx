@@ -38,7 +38,7 @@ export default async function ProductDetails({params}:Props) {
     <div className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
       <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-bold text-[#8e3442]"><ArrowLeft size={16}/> Back to shop</Link>
       <div className="mt-7 grid gap-8 lg:grid-cols-2">
-        <ProductGallery initialSrc={image} initialAlt={product.imageAlt.en||product.name.en} photos={product.galleryImages||[]} />
+        <ProductGallery initialSrc={image} initialAlt={product.imageAlt.en||product.name.en} photos={product.galleryImages||[]} mainImageRights={product.imageRights} />
         <div className="rounded-3xl border border-[#d8b372]/35 bg-white p-6 text-[#402a2d] md:p-10">
           <p className="text-sm font-bold uppercase tracking-widest text-[#8e3442]">{product.category} • {product.purpose}</p>
           <h1 className="mt-4 font-cinzel text-3xl font-black md:text-5xl">{product.name.en}</h1>
@@ -70,7 +70,7 @@ export default async function ProductDetails({params}:Props) {
         </section>)}
       </div>
       <p className="mt-9 flex items-center gap-3 text-sm text-[#634e52]"><ShieldCheck size={18}/>
-        No stock count or availability guarantee is displayed.
+        Final item specifications and delivery terms are confirmed before fulfilment.
       </p>
     </div>
   </main>;

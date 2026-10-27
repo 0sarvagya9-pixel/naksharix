@@ -38,3 +38,10 @@ Neon project `delicate-star-51216895` / `production` branch `br-holy-resonance-a
 Exactly 38 tables match 43 `model` declarations in the current source; the five missing models are the five DDL files listed above.
 The separate restored-snapshot and disposable schema-rehearsal branches are not evidence of a successful **current** production restore or of deployed new tables. All read-only operations were metadata inspections, not schema writes.
 A production backup or restore gate is not passed merely by a disposable PostgreSQL CI rehearsal. Production backup recovery must be verified immediately before running DDL. `_prisma_migrations` metadata is not present in the read-only audit and must be reconciled before automatic Prisma migration tooling; reviewed additive DDL is distinct from `prisma migrate deploy`.
+
+## 2026-10-28 supplementary predeploy UI fixes
+- Shop catalogue card/detail images disclose LICENSED category references separately from administrator-authorized image sources; image rights do not independently certify delivered SKU authenticity.
+- The cart displays selected product thumbnails; server-side pricing, order authentication and no-payment safeguards are unchanged.
+- Consultation feedback is presented as accessible 1-5 star ratings; backend rejects fractional stars.
+- Product-support labels replace visible 'Ask Availability' buttons, without fabricating actual item availability or prices.
+- Pending external acceptance remains: exact seller photos and fee approvals, extra Puja-specific photographs, verified partners, actual fulfilment, current-production database backup/restore, migrations, payment/refunds, release staging and final visual signoff.

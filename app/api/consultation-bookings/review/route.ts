@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 
 const schema = z.object({
   bookingId: z.string().min(1),
-  rating: z.coerce.number().min(1).max(5),
+  rating: z.coerce.number().int().min(1).max(5),
   body: z.string().max(800).optional()
 });
 

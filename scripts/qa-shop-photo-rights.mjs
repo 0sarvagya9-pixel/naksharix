@@ -29,4 +29,11 @@ assert.ok(store.includes("photoFallbackForLegacySeed") && store.includes("produc
 assert.ok(productDetail.includes("Real reference photograph, not verified Naksharix stock") &&
   productDetail.includes("chosen.credit") && productDetail.includes("chosen.licenseUrl"),"PRODUCT_IMAGE_RIGHTS_DISCLOSURE_MISSING");
 assert.ok(home.includes("referencePhotoForProduct(item.id)") && ui.includes("Real reference photo"),"PHOTOGRAPHY_NOT_SITEWIDE");
+assert.ok(productDetail.includes('chosen.imageRights === "LICENSED"') && productDetail.includes("administrator-approved usage rights"),"ADMIN_APPROVED_PHOTOS_MISLABELLED_AS_REFERENCES");
+assert.ok(ui.includes('product.galleryImages[0].imageRights === "LICENSED"'),"SHOP_CARD_LICENSE_LABEL_MISSING");
+const cart=read("components/shop/cart-page-client.tsx");
+assert.ok(cart.includes('import Image from "next/image"') && cart.includes("p.galleryImages?.[0]?.url"),"CART_PRODUCT_PHOTOS_MISSING");
+const reviewForm=read("components/consultation-review-form.tsx");
+assert.ok(reviewForm.includes("Rate your consultation") && reviewForm.includes("Submit rating") && reviewForm.includes("aria-pressed={rating === value}"),"ACCESSIBLE_CUSTOMER_RATINGS_MISSING");
+assert.ok(read("app/api/consultation-bookings/review/route.ts").includes("rating: z.coerce.number().int().min(1).max(5)"),"RATINGS_MUST_BE_INTEGERS");
 console.log("SHOP_VISUAL_AND_IMAGE_RIGHTS_QA=PASS;LICENSED_PHOTO_REFERENCES=12;UNLICENSED_EXTERNAL_PHOTOS=HELD;LIVE_CHECKOUT=NO");
