@@ -12,6 +12,14 @@ const good = {
   sourcingPaise: 25000, shippingPaise: 4000, taxPaise: 6000,
   gatewayFeePaise: 2500, returnsReservePaise: 2000, minimumMarginPaise: 10000
 };
+// Rights enum must agree with the Admin catalogue and ShopProduct schema.
+for (const imageRights of ["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"]) {
+  const eligible = reviewMarketCandidate({ ...good, imageRights }, now);
+  assert.equal(eligible.state, "PRICE_CANDIDATE_REQUIRES_ADMIN_APPROVAL");
+  assert.equal(eligible.autoPublish, false);
+  assert.equal(eligible.autoCheckout, false);
+}
+assert.equal(reviewMarketCandidate({ ...good, imageRights: "LICENCED" }, now).state, "REVIEW_HELD");
 const accepted = reviewMarketCandidate(good, now);
 assert.equal(accepted.state, "PRICE_CANDIDATE_REQUIRES_ADMIN_APPROVAL");
 assert.equal(accepted.autoCheckout, false);
