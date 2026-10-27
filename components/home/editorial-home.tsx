@@ -8,8 +8,8 @@ import {
   Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
 } from "lucide-react";
 
-const STARRY_SKY = "/naksharix/editorial-consultation.svg";
-const GOLDEN_HORIZON = "/naksharix/editorial-panchang.svg";
+const STARRY_SKY = "/naksharix/ganesh-hero-light-saffron.jpg";
+const GOLDEN_HORIZON = "/naksharix/zodiac-wheel-gold.jpg";
 
 const heroSlides = [
   {
@@ -18,7 +18,7 @@ const heroSlides = [
     accent: "your way forward.",
     body: "Explore Vedic astrology with beautiful digital tools, clear explanations and thoughtful ways to seek guidance.",
     image: STARRY_SKY,
-    alt: "Original illustrated consultation and birth-chart theme",
+    alt: "Devotional Ganesha editorial artwork with traditional temple motifs",
     main: { label: "Generate free Kundli", href: "/kundli" },
     secondary: { label: "Explore astrology tools", href: "/free-calculators" }
   },
@@ -28,7 +28,7 @@ const heroSlides = [
     accent: "for each new day.",
     body: "Read the Panchang for your location, understand the day’s traditional context and discover the zodiac.",
     image: GOLDEN_HORIZON,
-    alt: "Original illustrated Hindu Panchang calendar",
+    alt: "Zodiac wheel editorial artwork",
     main: { label: "View today’s Panchang", href: "/panchang" },
     secondary: { label: "Today’s horoscope", href: "/daily-horoscope" }
   },

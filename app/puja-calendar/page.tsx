@@ -32,17 +32,17 @@ export default function PujaCalendarPage() {
     groups.set(month, [...(groups.get(month) || []), item]);
   }
   return (
-    <main className="star-field min-h-screen">
+    <main className="star-field min-h-screen nx-puja-calendar">
       <EditorialServiceBanner eyebrow="TRADITIONAL HINDU CALENDAR"
         headline="Follow the seasons of worship"
         caption="Explore a rolling two-year reference list of major Puja and festival dates. Confirm regional customs and local tithi independently."
         image="/naksharix/editorial-puja.svg" imageAlt="Original illustration of a Puja thali and diya"
         link="/pujas" linkLabel="Explore all Puja types" />
       <Section>
-        <div className="rounded-3xl border border-[#D4AF37]/30 bg-[#061D3C]/80 p-6 md:p-10">
+        <div className="rounded-[1.7rem] border border-[#D6AB67]/55 bg-[linear-gradient(115deg,#421b2b_0%,#702a39_60%,#8b4239_100%)] p-6 text-[#fffaf2] shadow-[0_25px_70px_rgba(65,23,36,.17)] md:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FFD700]">Hindu calendar • India reference</p>
-          <h1 className="mt-3 font-cinzel text-3xl font-black sm:text-5xl">Upcoming Puja Calendar</h1>
-          <p className="mt-4 max-w-3xl text-base leading-8 naksh-muted-text">
+          <h1 className="mt-3 font-cinzel text-3xl font-black text-[#fffaf2] sm:text-5xl">Upcoming Puja Calendar</h1>
+          <p className="mt-4 max-w-3xl text-base leading-8 text-[#f8e9de]">
             A date-ordered list of major Hindu pujas, vrats and festivals. The next two calendar years
             automatically move forward with today&apos;s date in India. All dates are reference dates,
             not guaranteed ceremony slots.
@@ -56,13 +56,13 @@ export default function PujaCalendarPage() {
           </div>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-[#D4AF37]/25 bg-[#061D3C]/75 p-5 text-sm leading-7 naksh-muted-text">
-            <MapPin className="mb-2 h-5 w-5 text-[#FFD700]" />
+          <div className="rounded-2xl border border-[#e6c49a] bg-[#fff8ee] p-5 text-sm leading-7 text-[#503942]">
+            <MapPin className="mb-2 h-5 w-5 text-[#8b3041]" />
             Festival observance may differ by city, sect and local sunrise/tithi.
             Confirm muhurat with a local Panchang and your priest before planning a ceremony.
           </div>
-          <div className="rounded-2xl border border-[#D4AF37]/25 bg-[#061D3C]/75 p-5 text-sm leading-7 naksh-muted-text">
-            <ShieldCheck className="mb-2 h-5 w-5 text-[#FFD700]" />
+          <div className="rounded-2xl border border-[#e6c49a] bg-[#fff8ee] p-5 text-sm leading-7 text-[#503942]">
+            <ShieldCheck className="mb-2 h-5 w-5 text-[#8b3041]" />
             No temple, priest, price, stock, payment or fulfillment is reserved by a listing.
             This is a curated major-festival index, not every regional observance.
           </div>
@@ -70,21 +70,21 @@ export default function PujaCalendarPage() {
         <div className="mt-9 space-y-9">
           {[...groups.entries()].map(([month, items]) => (
             <section key={month} aria-labelledby={"calendar-" + month}>
-              <h2 id={"calendar-" + month} className="mb-4 font-cinzel text-2xl font-bold text-[#FFD700]">
+              <h2 id={"calendar-" + month} className="mb-4 font-cinzel text-2xl font-bold text-[#702638]">
                 {new Intl.DateTimeFormat("en-IN", { timeZone: "UTC", month: "long", year: "numeric" })
                   .format(new Date(month + "-01T12:00:00Z"))}
               </h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {items.map((event) => (
-                  <Card key={event.id} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
+                  <Card key={event.id} className="h-full border-[#e9d0b0] bg-[#fffcf8] text-[#36252d] shadow-[0_12px_30px_rgba(80,39,45,.055)]">
                     <CardContent className="flex h-full flex-col p-5">
-                      <CalendarDays className="h-5 w-5 text-[#FFD700]" />
-                      <h3 className="mt-3 font-cinzel text-xl font-bold">{event.name}</h3>
-                      <p className="mt-2 text-sm text-[#FFD700]">{displayDate(event.date)}</p>
-                      <p className="mt-3 text-xs naksh-muted-text">Information only • booking not available</p>
+                      <CalendarDays className="h-5 w-5 text-[#a35b32]" />
+                      <h3 className="mt-3 font-cinzel text-xl font-bold text-[#412834]">{event.name}</h3>
+                      <p className="mt-2 text-sm font-semibold text-[#863345]">{displayDate(event.date)}</p>
+                      <p className="mt-3 text-xs text-[#69565d]">Information only • booking not available</p>
                       <div className="mt-auto flex flex-wrap gap-4 pt-5 text-sm">
-                        <Link href={"/commerce-enquiry?kind=PUJA&item=" + encodeURIComponent(event.id)} className="font-semibold text-[#FFD700] hover:underline">Enquire about this Puja</Link>
-                        <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="naksh-muted-text hover:underline">Source date</a>
+                        <Link href={"/commerce-enquiry?kind=PUJA&item=" + encodeURIComponent(event.id)} className="font-semibold text-[#83303f] underline-offset-4 hover:underline">Enquire about this Puja</Link>
+                        <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[#68565a] underline-offset-4 hover:underline">Source date</a>
                       </div>
                     </CardContent>
                   </Card>
@@ -93,9 +93,9 @@ export default function PujaCalendarPage() {
             </section>
           ))}
         </div>
-        {!calendar.events.length && <p className="mt-8 naksh-muted-text">No reviewed observances are available in this window. Calendar source review is required.</p>}
+        {!calendar.events.length && <p className="mt-8 text-[#55434b]">No reviewed observances are available in this window. Calendar source review is required.</p>}
         {calendar.futureYearsRequireReview &&
-          <p className="mt-8 rounded-xl border border-amber-500/30 p-4 text-sm naksh-muted-text">
+          <p className="mt-8 rounded-xl border border-[#dec59c] bg-[#fff6e8] p-4 text-sm text-[#674539]">
             A future calendar year is not yet source-reviewed. Missing dates are intentionally not invented.
           </p>}
       </Section>
