@@ -50,7 +50,7 @@ export default async function PujaTopicPage({params}:Props) {
           </div>
           <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
             className="mt-8 inline-flex min-h-12 items-center gap-3 rounded-xl bg-[#f1c67c] px-6 py-3 font-bold text-[#311a1f]">
-            Enquire about {item.name} <ArrowRight size={18}/>
+            {offering ? "Request booking for " : "Enquire about "}{item.name} <ArrowRight size={18}/>
           </Link>
         </div>
       </div>

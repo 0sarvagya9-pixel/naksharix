@@ -81,7 +81,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
             </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
             <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
-              Enquire <ArrowRight size={16}/>
+              {offerings[topic.id] ? "Request booking" : "Enquire"} <ArrowRight size={16}/>
             </Link>
           </div>
         </article>)}
