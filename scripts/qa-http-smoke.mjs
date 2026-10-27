@@ -291,7 +291,7 @@ const assetPaths = [...new Set([
   ...productSlugs.map(slug => "/shop/" + slug + "-illustration.svg")
 ])];
 const catalogueChecks = [
-  ...topicRecords.map(item => ({ path: "/pujas/" + encodeURIComponent(item.id), kind: "puja", marker: "Enquire about " + item.name })),
+  ...topicRecords.map(item => ({ path: "/pujas/" + encodeURIComponent(item.id), kind: "puja", marker: item.name })),
   ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Enquire about this item" })),
   ...assetPaths.map(path => ({ path, kind: "svg", marker: "<svg" }))
 ];
@@ -306,7 +306,7 @@ await Promise.all(Array.from({ length: 6 }, async () => {
         continue;
       }
       const body = await response.text();
-      if (!body.includes(item.marker)) {
+      if (!body.includes(item.marker) || (item.kind === "puja" && !body.includes("Enquire about"))) {
         fail("catalogue integrity " + item.path, "Missing expected " + item.kind + " content");
       } else {
         pass("catalogue integrity " + item.path, "HTTP 200; expected " + item.kind + " content");
