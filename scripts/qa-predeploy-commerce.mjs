@@ -2,14 +2,20 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 const read=(path)=>readFileSync(path,"utf8");
 const schema=read("prisma/schema.prisma");
-const sql=["docs/sql/20261027_puja_offering.sql","docs/sql/20261027_shop_orders.sql","docs/sql/20261027_puja_bookings.sql","docs/sql/20261027_manual_report_offerings.sql"];
-for(const [name] of [["PujaOffering"],["ShopOrder"],["PujaBookingRequest"],["ManualReportOffering"]])
+const sql=["docs/sql/20261027_shop_catalogue_snapshot.sql","docs/sql/20261027_puja_offering.sql","docs/sql/20261027_shop_orders.sql","docs/sql/20261027_puja_bookings.sql","docs/sql/20261027_manual_report_offerings.sql"];
+for(const [name] of [["ShopCatalogueSnapshot"],["PujaOffering"],["ShopOrder"],["PujaBookingRequest"],["ManualReportOffering"]])
  assert.ok(schema.includes("model "+name+" {"),"Missing Prisma model "+name);
 for(const path of sql){
  const source=read(path);
  assert.ok(source.includes("CREATE TABLE IF NOT EXISTS"),"Missing additive DDL: "+path);
  assert.ok(!/\bDROP\s+(?:TABLE|SCHEMA)\b|\bTRUNCATE\b|\bDELETE\s+FROM\b/i.test(source),"Destructive DDL prohibited: "+path);
 }
+const snapshotSql=read("docs/sql/20261027_shop_catalogue_snapshot.sql");
+const store=read("lib/shop/catalogue-store.ts");
+assert.ok(snapshotSql.includes('"products" JSONB NOT NULL') &&
+ snapshotSql.includes('"version" INTEGER NOT NULL DEFAULT 1') &&
+ store.includes("shopCatalogueSnapshot.findUnique") &&
+ store.includes("storageReady: false"), "Catalogue schema and fail-closed fallback mismatch");
 const orders=read("app/api/commerce/orders/route.ts");
 const adminOrders=read("app/api/admin/shop-orders/route.ts");
 const puja=read("app/api/puja/bookings/route.ts");
@@ -40,4 +46,4 @@ assert.ok(reportAdmin.includes("getAdminApiUser()")&&reportAdmin.includes("getMa
  reportAdmin.includes("adminActionLog.create"),"Manual report prices must be admin-only and gateway-safe");
 assert.ok(reportUI.includes("formattedManualPrice")&&reportUI.includes("manualOfferings[report.slug]"),
  "Manual report public price missing");
-console.log("COMMERCE_PREDEPLOY_QA=PASS;PERSISTED_ORDER_AND_PUJA_REQUEST=YES;OWNER_ADMIN_CAS=YES;LIVE_CHARGING=NO");
+console.log("COMMERCE_PREDEPLOY_QA=PASS;REVIEWED_MISSING_TABLES=5;PERSISTED_ORDER_AND_PUJA_REQUEST=YES;OWNER_ADMIN_CAS=YES;LIVE_CHARGING=NO");
