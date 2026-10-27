@@ -86,6 +86,9 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(panel).toBeVisible();
     await expect(panel.getByRole("link", { name: "Puja", exact: true })).toHaveAttribute("href", "/pujas");
     await expect(panel.getByRole("link", { name: "Shop", exact: true })).toHaveAttribute("href", "/shop");
+    await expect(panel.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute("href", "/login");
+    await expect(panel.getByRole("link", { name: "My account", exact: true })).toHaveAttribute("href", "/profile");
+    await expect(panel.getByRole("button", { name: "Language" })).toBeVisible();
     await page.getByRole("button", { name: "Close navigation menu" }).click();
     await expect(panel).toHaveCount(0);
   });

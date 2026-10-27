@@ -184,7 +184,15 @@ export function MainNav() {
                   <X className="h-5 w-5" />
                 </Button>
               </div>
-              <div className="mt-6 grid gap-2">
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e5c5a5] bg-[#fff6e9] p-3">
+                <p className="text-xs font-semibold text-[#794051]">Choose language</p>
+                <LanguageSwitcher className="!block w-20" />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Link href="/login" onClick={() => setOpen(false)} className="rounded-xl bg-[#832e3f] px-3 py-3 text-center text-sm font-bold text-white">Sign in</Link>
+                <Link href="/profile" onClick={() => setOpen(false)} className="rounded-xl border border-[#d8ac8f] bg-white px-3 py-3 text-center text-sm font-bold text-[#772d3c]">My account</Link>
+              </div>
+              <div className="mt-3 grid gap-2">
                 {[...navLinks, ...moreLinks].map((item) => (
                   <Link
                     key={`${item.href}-mobile`}
