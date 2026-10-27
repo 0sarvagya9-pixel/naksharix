@@ -28,4 +28,5 @@ assert.ok(read("components/pwa-register.tsx").includes('"127.0.0.1"'),"CI_SERVIC
 const siteShell=read("components/layout/premium-glass-shell.tsx");
 assert.ok(siteShell.includes('data-layout={isEditorial ? "editorial" : "workspace"}'),"PUBLIC_FULL_BLEED_LAYOUT_MISSING");
 assert.ok(siteShell.includes('"naksharix-editorial-shell mx-0 my-0 max-w-none rounded-none"'),"PUBLIC_CONTAINED_BY_WORKSPACE");
+assert.ok(!read("app/shop/[slug]/page.tsx").includes('text-[#e1d6dd]'), "SHOP_DETAIL_LOW_CONTRAST_TEXT");
 console.log("SITEWIDE_VISUAL_QA=PASS;ORIGINAL_RELEVANT_VISUALS=7;SERVICE_CARDS=8;LIVE_PAYMENT_CHANGES=NO");

@@ -68,7 +68,7 @@ export default async function ProductDetails({params}:Props) {
           ["Important note",product.disclaimer.en]
         ].map(([title,body])=><section key={title} className="rounded-2xl border border-[#d4ac72]/35 bg-[#fffbf4] p-6 text-[#402a2d]">
           <h2 className="font-cinzel text-xl font-bold text-[#8e3442]">{title}</h2>
-          <p className="mt-3 text-sm leading-7 text-[#e1d6dd]">{body}</p>
+          <p className="mt-3 text-sm leading-7 text-[#67545a]">{body}</p>
         </section>)}
       </div>
       <p className="mt-9 flex items-center gap-3 text-sm text-[#634e52]"><ShieldCheck size={18}/>

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:3000";
 const failures = [];
 const passes = [];
@@ -254,6 +255,67 @@ await expectStatus(
   { method: "POST", headers: { "Content-Type": "application/json", "x-razorpay-signature": "invalid" }, body: "{}" },
   "Razorpay webhook bypasses CSRF but rejects invalid signature"
 );
+
+
+// Full public-catalogue GET-only inspection: not just the homepage or two sample cards.
+// Runs exclusively against the CI disposable-db smoke server; never creates orders,
+// contacts providers, changes production data, or assumes images are stock photos.
+const topicSource = readFileSync("lib/puja/service-catalogue.ts", "utf8");
+const startMarker = "Object.freeze([";
+const startAt = topicSource.indexOf(startMarker);
+const endAt = topicSource.indexOf("]);", startAt);
+let topicRecords = [];
+if (startAt < 0 || endAt < 0) {
+  fail("complete Puja source inventory", "Puja catalogue block not found");
+} else {
+  try {
+    topicRecords = JSON.parse(topicSource.slice(startAt + "Object.freeze(".length, endAt + 1));
+    if (topicRecords.length !== 94 || new Set(topicRecords.map(t => t.id)).size !== 94) {
+      fail("complete Puja source inventory", "Expected 94 distinct traditional Puja topics");
+    } else {
+      pass("complete Puja source inventory", "94 unique topics");
+    }
+  } catch (error) {
+    fail("complete Puja source inventory", String(error));
+  }
+}
+const shopSource = readFileSync("lib/manual-catalogue.ts", "utf8");
+const productSlugs = [...shopSource.matchAll(/\bproduct\("([a-z0-9-]+)"/g)].map(m => m[1]);
+if (productSlugs.length !== 12 || new Set(productSlugs).size !== 12) {
+  fail("complete Shop source inventory", "Expected 12 distinct published seed products");
+} else {
+  pass("complete Shop source inventory", "12 unique seed products");
+}
+const assetPaths = [...new Set([
+  ...topicRecords.map(item => item.graphic),
+  ...productSlugs.map(slug => "/shop/" + slug + "-illustration.svg")
+])];
+const catalogueChecks = [
+  ...topicRecords.map(item => ({ path: "/pujas/" + encodeURIComponent(item.id), kind: "puja", marker: "Enquire about " + item.name })),
+  ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Enquire about this item" })),
+  ...assetPaths.map(path => ({ path, kind: "svg", marker: "<svg" }))
+];
+let catalogueNext = 0;
+await Promise.all(Array.from({ length: 6 }, async () => {
+  while (catalogueNext < catalogueChecks.length) {
+    const item = catalogueChecks[catalogueNext++];
+    try {
+      const response = await request(item.path, { signal: AbortSignal.timeout(12000) });
+      if (response.status !== 200) {
+        fail("catalogue integrity " + item.path, "Expected HTTP 200, got " + response.status);
+        continue;
+      }
+      const body = await response.text();
+      if (!body.includes(item.marker)) {
+        fail("catalogue integrity " + item.path, "Missing expected " + item.kind + " content");
+      } else {
+        pass("catalogue integrity " + item.path, "HTTP 200; expected " + item.kind + " content");
+      }
+    } catch (error) {
+      fail("catalogue integrity " + item.path, error instanceof Error ? error.message : String(error));
+    }
+  }
+}));
 
 for (const result of passes) console.log(`PASSED: ${result.name}${result.detail ? ` - ${result.detail}` : ""}`);
 for (const result of failures) console.log(`FAILED: ${result.name} - ${result.detail}`);
