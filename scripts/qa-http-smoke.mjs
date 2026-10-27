@@ -176,6 +176,13 @@ await expectStatus("/api/commerce/enquiries", 403, {
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ kind: "SHOP", itemId: "5-mukhi-rudraksha", quantity: 1, message: "Please confirm stock and shipping." })
 }, "commerce enquiry rejects POST without CSRF");
+const pujaDirectory = await expectStatus("/pujas", 200, undefined, "traditional Puja directory");
+if (pujaDirectory) {
+  const html = await pujaDirectory.text();
+  if (!html.includes("Puja Directory") || !html.includes("Explore Puja"))
+    fail("Puja directory", "Missing searchable directory header");
+  else pass("Puja directory", "traditional categories available");
+}
 const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
 if (partnerResponse) {
   const body = await partnerResponse.json();
