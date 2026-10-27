@@ -82,7 +82,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#00f5a0]">{categoryLabel(product.category, locale)}</p>
-                    <h2 className="mt-2 font-cinzel text-2xl font-bold text-white">{product.name[locale]}</h2>
+                    <h2 className="mt-2 font-cinzel text-2xl font-bold text-white"><Link href={"/shop/"+encodeURIComponent(product.slug)} className="hover:text-[#f4c87d]">{product.name[locale]}</Link></h2>
                   </div>
                   <PackageSearch className="h-6 w-6 shrink-0 text-[#f3d382]" />
                 </div>
