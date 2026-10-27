@@ -28,6 +28,26 @@ for (const file of essential) assert.ok(fs.existsSync(path.join(root, file)), "M
 has("app/page.tsx", "<EditorialHome />");
 has("lib/ops/schema-readiness.ts", 'to_regclass(\'public."LearningProgress"\')');
 has("lib/ops/schema-readiness.ts", 'to_regclass(\'public."PujaPartner"\')');
+
+// R2 schema must reject partial columns, wrong precision, absent validated FK,
+// reversed indexes and invalid indexes before any production schema is accepted.
+for (const field of ["lessonId", "userId", "completedAt", "createdAt", "updatedAt",
+  "traditions", "evidenceUrl", "reviewedById", "reviewedAt", "reviewNote"]) {
+  has("lib/ops/schema-readiness.ts", "'" + field + "'");
+}
+for (const contract of ["LearningProgress_userId_fkey",
+  "LearningProgress_userId_lessonId_key", "LearningProgress_userId_completedAt_idx",
+  "PujaPartner_reviewStatus_createdAt_idx", "f.confdeltype='c'", "f.confupdtype='c'",
+  "i.indisvalid AND i.indisready"]) {
+  has("lib/ops/schema-readiness.ts", contract);
+}
+for (const mandatory of ["c.data_type=required.data_type", "c.datetime_precision=3",
+  "c.udt_name='_text'", "c.is_nullable='NO'", "f.convalidated",
+  "LearningProgress_pkey", "PujaPartner_pkey", "i.indnkeyatts=2",
+  "i.indkey[0]", "i.indkey[1]", "i.indpred IS NULL", "i.indexprs IS NULL"]) {
+  has("lib/ops/schema-readiness.ts", mandatory);
+}
+
 has("scripts/qa-disposable-db-rehearsal.sh", "feature_sql_migrations_disposable_only=PASS");
 has("scripts/qa-disposable-db-rehearsal.sh", "all database targets are disposable localhost");
 has("scripts/qa-production-db-readonly.mjs", "DATABASE_WRITES_PERFORMED=ZERO");
