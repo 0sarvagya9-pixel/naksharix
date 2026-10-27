@@ -190,6 +190,19 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("button", { name: /Checkout|Pay/i })).toHaveCount(0);
   });
 
+  test("Puja service directory filters traditions and preserves selected topic", async ({ page }) => {
+    await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
+    const search = page.getByRole("searchbox", { name: "Search Puja types or deities" });
+    await search.fill("Rudrabhishek");
+    await expect(page.getByRole("heading", { name: "Rudrabhishek", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(1);
+    await page.getByRole("link", { name: "Enquire", exact: true }).click();
+    await expect(page).toHaveURL(/kind=PUJA&item=ritual%3Arudrabhishek/);
+    await expect(page.getByRole("heading", { name: "Puja date and availability enquiry" })).toBeVisible();
+    await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
+  });
+
   test("AI readiness endpoint exposes no secret details", async ({ request }) => {
     const response = await request.get(absolute("/api/ai/status"));
     expect(response.status()).toBe(200);
