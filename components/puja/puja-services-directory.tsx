@@ -66,7 +66,7 @@ export function PujaServicesDirectory() {
             <span className="absolute left-3 top-3 rounded-full bg-[#271325]/90 px-3 py-1 text-xs font-bold text-[#f9da9e]">{topic.category}</span>
           </div>
           <div className="flex flex-1 flex-col p-5">
-            <h3 className="font-cinzel text-lg font-bold text-white">{topic.name}</h3>
+            <h3 className="font-cinzel text-lg font-bold text-white"><Link href={"/pujas/"+topic.id} className="hover:text-[#f4c87d]">{topic.name}</Link></h3>
             <p className="mt-2 text-xs font-semibold text-[#f4c67c]">{topic.deity}</p>
             <p className="mt-3 flex-1 text-sm leading-6 text-[#dbd2de]">{topic.description}.</p>
             <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
