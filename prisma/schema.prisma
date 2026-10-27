@@ -956,3 +956,14 @@ model PujaBookingRequest {
  @@index([status, createdAt])
  @@index([topicId, preferredDate])
 }
+
+/** Owner-approved published fee for manual-only reports. Gateway amounts stay immutable. */
+model ManualReportOffering {
+ reportSlug     String   @id
+ pricePaise     Int?
+ available      Boolean  @default(false)
+ deliveryDays   Int?
+ note           String   @default("")
+ updatedBy      String
+ updatedAt      DateTime @updatedAt
+}

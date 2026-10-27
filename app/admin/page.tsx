@@ -116,6 +116,9 @@ export default function AdminPage() {
           <Link href="/admin/shop-orders">Shop Orders and Fulfilment</Link>
         </Button>
         <Button variant="outline" asChild>
+          <Link href="/admin/manual-report-prices">Manual Report Prices</Link>
+        </Button>
+        <Button variant="outline" asChild>
           <Link href="/admin/readiness">System Readiness</Link>
         </Button>
       </div>

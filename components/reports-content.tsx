@@ -10,7 +10,7 @@ import { useLanguage } from "@/components/language-provider";
 import { manualReports } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 
-export function ReportsContent() {
+export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,{pricePaise:number;deliveryDays:number|null;note:string}>}) {
   const { locale } = useLanguage();
   const labels = reportLabels(locale);
 
@@ -40,6 +40,8 @@ export function ReportsContent() {
         <div id="report-catalogue" className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {manualReports.map((report) => {
             const checkout = getManualReportCheckout(report.slug);
+            const manualPrice=!checkout?manualOfferings[report.slug]:undefined;
+            const formattedManualPrice=manualPrice?new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(manualPrice.pricePaise/100):null;
             const requestHref = `/report-request/new?plan=PREMIUM&reportSlug=${encodeURIComponent(report.slug)}`;
             const adminBypassHref = `${requestHref}&mode=admin`;
 
@@ -67,9 +69,11 @@ export function ReportsContent() {
                     ))}
                   </ul>
                   <p className="mt-4 rounded-lg border border-[#e7d8be] bg-[#fff9f0] px-3 py-2 text-sm font-bold text-[#b8862e]">
-                    {checkout?.price ?? labels.manualReview}
+                    {checkout?.price ?? formattedManualPrice ?? labels.manualReview}
                   </p>
-                  <p className="mt-2 text-xs text-[#6b7280]">{checkout ? labels.secureCheckout : labels.manualWorkflow}</p>
+                  <p className="mt-2 text-xs text-[#6b7280]">{checkout ? labels.secureCheckout :
+                      manualPrice ? "Owner-approved manual service fee; no online payment is charged until individually confirmed." :
+                      labels.manualWorkflow}</p>
                   <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
                     <Button variant="outline" asChild className="border-[#d8af66] bg-white text-[#372630]"><Link href={`/reports/${report.slug}`}>{labels.viewDetails}</Link></Button>
                     {checkout ? (
@@ -81,7 +85,7 @@ export function ReportsContent() {
                       />
                     ) : (
                       <Button asChild className="bg-[#832d40] text-white hover:bg-[#6f2335]">
-                        <Link href={requestHref}><ClipboardList className="h-4 w-4" />{labels.requestReview}</Link>
+                        <Link href={requestHref}><ClipboardList className="h-4 w-4" />{formattedManualPrice ? labels.requestReview+" · "+formattedManualPrice : labels.requestReview}</Link>
                       </Button>
                     )}
                   </div>
