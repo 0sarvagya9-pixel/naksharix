@@ -15,7 +15,10 @@ const invariant = [
   ["failure cannot downgrade paid consultation", webhook.includes('paymentStatus: "PENDING"') && webhook.includes("consultationBooking.updateMany")],
   ["client verification rejects mismatched paid id", verify.includes("existingPayment.providerPaymentId !== body.razorpay_payment_id")],
   ["client verification rejects refund recapture", verify.includes('existingPayment.status === "REFUNDED"')],
-  ["client verification excludes canceled consultations", verify.includes("A captured payment does not resurrect a canceled or rejected session.") && verify.includes("consultationBooking.updateMany")]
+  ["client verification excludes canceled consultations", verify.includes("A captured payment does not resurrect a canceled or rejected session.") && verify.includes("consultationBooking.updateMany")],
+  ["client captures cannot reopen canceled/delivered reports", verify.includes("reportRequest.updateMany") && verify.includes("ReportRequestStatus.PAYMENT_PENDING") && verify.includes("if (updated.count === 1) await writeReportStatusHistory")],
+  ["webhook captures cannot reopen canceled/delivered reports", webhook.includes("reportRequest.updateMany") && webhook.includes("paymentStatus: { in: [ReportPaymentStatus.PENDING, ReportPaymentStatus.FAILED] }")],
+  ["webhook failure cannot regress paid report", webhook.includes("paymentStatus: ReportPaymentStatus.PENDING") && webhook.includes("data: { paymentStatus: ReportPaymentStatus.FAILED }")]
 ];
 for (const [name, accepted] of invariant) {
   assert.ok(accepted, "Payment invariant gate failed: " + name);
