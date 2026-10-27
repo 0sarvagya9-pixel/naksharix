@@ -9,7 +9,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Rudrabhishek",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "Traditional worship of Lord Shiva through abhisheka, recitation and offerings; the precise items and sequence vary by temple.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -17,7 +17,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Laghu Rudra Puja",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "A shorter Rudra-focused Shiva worship format that may involve abhisheka and Vedic chanting according to local custom.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -25,7 +25,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Maha Rudra Puja",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "An extended Rudra worship observance centred on Shiva and traditional recitations, with priest-led scope confirmed separately.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -33,7 +33,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Mahamrityunjaya Puja",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "Prayer to Shiva using the Mahamrityunjaya mantra, associated with devotion, resilience and spiritual reflection.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -41,7 +41,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Somvar Shiva Puja",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "Monday observance dedicated to Shiva, often involving prayer, simple offerings and personal devotional practice.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -49,7 +49,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Pradosh Vrat Puja",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "Shiva worship associated with the Pradosh period; specific observance time follows the locally applicable Panchang.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -57,7 +57,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Shiv-Parvati Puja",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "Devotional worship honouring Shiva and Parvati together, traditionally associated with family harmony and reverence.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -65,7 +65,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Bilva Archana",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "An archana dedicated to Shiva using bilva leaves; local traditions determine the full offering sequence.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -73,7 +73,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Kashi Vishwanath Smaran Puja",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "Prayer remembering Shiva as Kashi Vishwanath; devotional format need not imply service at the Kashi temple.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -81,7 +81,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Lingashtakam Archana",
     "category": "Shiva",
     "deity": "Shiva",
-    "description": "A Shiva-centered tradition with customary offerings and recitations",
+    "description": "Recitation-focused Shiva observance associated with the Lingashtakam hymn and customary offerings.",
     "graphic": "/pujas/shiva-illustration.svg"
   },
   {
@@ -89,7 +89,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Durga Saptashati Path",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Recitation of the Durga Saptashati in Goddess Durga worship; chapter selection and ritual sequence require confirmation.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -97,7 +97,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Nav Chandi Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Chandi-oriented worship invoking the Divine Mother; exact recitation and priestly arrangements vary by tradition.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -105,7 +105,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Shat Chandi Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "An extended Chandi recitation observance; do not assume a fixed duration or number of priests without confirmation.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -113,7 +113,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Baglamukhi Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Devotional Puja associated with Goddess Baglamukhi, with tradition-specific recitations and responsible priest guidance.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -121,7 +121,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Kali Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Prayer and customary offerings in honour of Goddess Kali; regional observances differ in timing and form.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -129,7 +129,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Lalita Sahasranama Archana",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Archana focused on the Lalita Sahasranama names, an expression of devotion to Goddess Lalita.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -137,7 +137,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Maha Lakshmi Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Worship of Goddess Lakshmi traditionally centred on gratitude, prosperity symbolism and home or temple offerings.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -145,7 +145,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ashta Lakshmi Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Devotional observance honouring the eight aspects of Lakshmi, with prayers linked to different forms of wellbeing.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -153,7 +153,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Saraswati Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Prayer to Goddess Saraswati associated with learning, music, arts and thoughtful beginnings.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -161,7 +161,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Annapurna Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Devotional worship of Annapurna, traditionally expressing gratitude for food, nourishment and hospitality.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -169,7 +169,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Maha Gauri Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Prayer to Maha Gauri, a form of Goddess Durga, according to family or regional practice.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -177,7 +177,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Kumari Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "Ritual honouring the Divine Mother through the Kumari tradition; practice varies considerably by community.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -185,7 +185,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Durga Ashtami Puja",
     "category": "Devi",
     "deity": "Divine Mother",
-    "description": "A Devi-centered tradition; practices vary by family and community",
+    "description": "An Ashtami-day observance during the Durga festival period, with locally observed dates and customs.",
     "graphic": "/pujas/devi-illustration.svg"
   },
   {
@@ -193,7 +193,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Satyanarayan Katha",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "A devotional reading of Satyanarayan Katha, commonly accompanied by offerings and family prayer.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -201,7 +201,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Vishnu Sahasranama Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Worship of Lord Vishnu with recitation of names from the Vishnu Sahasranama.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -209,7 +209,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Lakshmi Narayan Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Prayer honouring Lakshmi and Narayan together, traditionally associated with spiritual and household wellbeing.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -217,7 +217,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Krishna Janmashtami Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Janmashtami worship marking the birth of Krishna; observance follows the local festival calendar.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -225,7 +225,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ekadashi Vishnu Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Vishnu-oriented prayer during Ekadashi, with fasting practices varying according to family and health needs.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -233,7 +233,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Narasimha Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Prayer to Narasimha, an incarnation of Vishnu, with ritual form determined by local Vaishnava custom.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -241,7 +241,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Tulsi Vivah Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Ceremonial Tulsi Vivah observance recalling the symbolic marriage of Tulsi and Vishnu/Shaligram.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -249,7 +249,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Dhanvantari Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Devotional prayer to Dhanvantari, traditionally connected with the concept of wellbeing, not medical treatment.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -257,7 +257,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ram Navami Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Rama Navami worship commemorating the birth of Lord Rama, with readings, bhajan and prayer traditions.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -265,7 +265,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Hanuman Puja",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Devotional worship of Hanuman through customary prayer and recitations such as the Hanuman Chalisa.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -273,7 +273,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Sita-Ram Kalyanam",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "Celebration of the sacred union of Sita and Rama in narrative, prayer and regional wedding-style traditions.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -281,7 +281,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Sudarshan Homa",
     "category": "Vishnu",
     "deity": "Vishnu and avatars",
-    "description": "A devotional practice associated with Vishnu and related traditions",
+    "description": "A Vishnu Sudarshan-themed homa with offerings into the sacred fire; specific mantras and arrangements require a priest.",
     "graphic": "/pujas/vishnu-illustration.svg"
   },
   {
@@ -289,7 +289,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ganesh Puja",
     "category": "Ganesha",
     "deity": "Ganesha",
-    "description": "A traditional prayer associated with Ganesha",
+    "description": "Ganesha Puja traditionally performed for auspicious beginnings and devotional reflection.",
     "graphic": "/pujas/ganesha-illustration.svg"
   },
   {
@@ -297,7 +297,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Sankashti Ganesh Puja",
     "category": "Ganesha",
     "deity": "Ganesha",
-    "description": "A traditional prayer associated with Ganesha",
+    "description": "Prayer to Ganesha associated with Sankashti dates, as determined by the local moonrise and observance calendar.",
     "graphic": "/pujas/ganesha-illustration.svg"
   },
   {
@@ -305,7 +305,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ganesh Atharvashirsha Path",
     "category": "Ganesha",
     "deity": "Ganesha",
-    "description": "A traditional prayer associated with Ganesha",
+    "description": "Recitation of Ganapati Atharvashirsha as a focused Ganesha devotional practice.",
     "graphic": "/pujas/ganesha-illustration.svg"
   },
   {
@@ -313,7 +313,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ganapati Abhishek",
     "category": "Ganesha",
     "deity": "Ganesha",
-    "description": "A traditional prayer associated with Ganesha",
+    "description": "Abhisheka dedicated to Lord Ganesha using customary substances and recitations selected by the priest.",
     "graphic": "/pujas/ganesha-illustration.svg"
   },
   {
@@ -321,7 +321,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Siddhivinayak Archana",
     "category": "Ganesha",
     "deity": "Ganesha",
-    "description": "A traditional prayer associated with Ganesha",
+    "description": "Archana devoted to Ganesha in the Siddhivinayak tradition; this listing does not claim affiliation with a temple.",
     "graphic": "/pujas/ganesha-illustration.svg"
   },
   {
@@ -329,7 +329,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ganesh Chaturthi Puja",
     "category": "Ganesha",
     "deity": "Ganesha",
-    "description": "A traditional prayer associated with Ganesha",
+    "description": "Ganesh Chaturthi worship marking Ganesha's festival, with regional installation and immersion customs.",
     "graphic": "/pujas/ganesha-illustration.svg"
   },
   {
@@ -337,7 +337,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ganapati Homa",
     "category": "Ganesha",
     "deity": "Ganesha",
-    "description": "A traditional prayer associated with Ganesha",
+    "description": "A fire offering dedicated to Ganapati, generally conducted by a qualified priest with confirmed materials and scope.",
     "graphic": "/pujas/ganesha-illustration.svg"
   },
   {
@@ -345,7 +345,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Navagraha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Traditional prayers directed to the Navagraha, the nine planetary deities of Hindu astrological practice.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -353,7 +353,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Surya Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Surya-focused Graha Shanti observance involving prayers to the Sun deity, without any promised astrological result.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -361,7 +361,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Chandra Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Chandra-focused Graha Shanti prayer associated with the Moon in traditional Jyotisha.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -369,7 +369,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Mangal Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Mangal-focused Graha Shanti prayer associated with Mars in traditional Jyotisha.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -377,7 +377,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Budh Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Budh-focused Graha Shanti observance associated with Mercury in traditional Jyotisha.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -385,7 +385,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Guru Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Guru or Brihaspati-focused prayer associated with Jupiter in traditional Jyotisha.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -393,7 +393,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Shukra Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Shukra-focused planetary prayer associated with Venus in traditional Jyotisha.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -401,7 +401,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Shani Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Shani-focused Graha Shanti prayer associated with Saturn, with no guarantee of outcomes.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -409,7 +409,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Rahu Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Rahu-focused Graha Shanti observance connected with the lunar node in traditional Jyotisha.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -417,7 +417,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ketu Graha Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Ketu-focused Graha Shanti observance connected with the lunar node in traditional Jyotisha.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -425,7 +425,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Mangal Dosh Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Traditional observance associated with Mangal Dosh considerations in horoscope interpretation, without determinist claims.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -433,7 +433,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Kaal Sarp Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "An observance sometimes requested for Kaal Sarp interpretations; necessity and meaning are tradition-dependent.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -441,7 +441,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Grahan Shanti Puja",
     "category": "Graha",
     "deity": "Navagraha",
-    "description": "A customary graha observance subject to local guidance",
+    "description": "Traditional Grahan-related prayer linked to eclipse observances; timing depends on local astronomical visibility and custom.",
     "graphic": "/pujas/graha-illustration.svg"
   },
   {
@@ -449,7 +449,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Griha Pravesh Puja",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "A home-entry ceremony to mark moving into a new residence, usually shaped by local family and priestly customs.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -457,7 +457,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Vastu Shanti Puja",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "Prayer seeking an auspicious beginning for a home or property, with Vastu traditions differing by region.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -465,7 +465,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Bhoomi Pujan",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "Traditional ground-breaking or land-blessing ceremony before construction or a new property project.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -473,7 +473,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Naamkaran Sanskar",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "Naming ceremony celebrating a child's name in family and cultural tradition.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -481,7 +481,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Annaprashan Sanskar",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "A family ceremony marking a child's introduction to first solid foods; health and feeding decisions remain medical matters.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -489,7 +489,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Vidyarambh Puja",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "An educational-beginning ceremony often associated with writing or learning for the first time.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -497,7 +497,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Upanayan Sanskar",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "Traditional initiation observance whose eligibility and form vary by community and family.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -505,7 +505,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Vivah Mangala Puja",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "Auspicious wedding-related prayer within regional marriage customs, with venue and officiant arranged separately.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -513,7 +513,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Anniversary Puja",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "Family prayer celebrating a marriage anniversary or meaningful relationship milestone.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -521,7 +521,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ayushya Puja",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "Birthday or longevity-themed prayer for gratitude and wellbeing; not a guarantee of long life.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -529,7 +529,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Pitru Tarpan",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "A remembrance observance for ancestors through respectful water offerings and family custom.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -537,7 +537,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Tripindi Shraddha",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "A Shraddha-related ancestral remembrance tradition requiring sensitive, qualified local priest guidance.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -545,7 +545,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Narayan Bali Ritual",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "A tradition-specific ancestral rite that must be discussed with a qualified officiant before arranging.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -553,7 +553,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Mundan Sanskar",
     "category": "Family",
     "deity": "Life ceremonies",
-    "description": "A family tradition that varies by region and custom",
+    "description": "A childhood tonsure ceremony whose timing, practical safety and form depend on family tradition.",
     "graphic": "/pujas/family-illustration.svg"
   },
   {
@@ -561,7 +561,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Agnihotra Havan",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A Vedic-style daily fire offering tradition practised with suitable safety precautions and guidance.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -569,7 +569,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Rudra Homa",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A Shiva Rudra-focused sacred fire observance using agreed mantras and offerings.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -577,7 +577,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Navagraha Homa",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A Navagraha-focused homa offering connected with nine planetary deities in Hindu tradition.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -585,7 +585,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Maha Lakshmi Homa",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A Lakshmi-focused homa involving ritual fire offerings and prosperity-themed prayers.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -593,7 +593,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Saraswati Homa",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A Saraswati-focused fire offering invoking learning, the arts and discernment.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -601,7 +601,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Ayush Homa",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "An Ayush-themed sacred fire observance traditionally focused on prayers for wellbeing and gratitude.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -609,7 +609,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Chandi Homa",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A Devi Chandi-focused homa with particular recitations and sacred fire offerings.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -617,7 +617,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Vastu Shanti Homa",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "Fire offerings associated with Vastu Shanti traditions for a home or built space.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -625,7 +625,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Mrityunjaya Homa",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A Mahamrityunjaya mantra-focused fire observance dedicated to Shiva and spiritual reflection.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -633,7 +633,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Gayatri Havan",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A Gayatri mantra-themed havan, with fire offerings and recitation led according to family or priestly custom.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -641,7 +641,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Samuhik Havan",
     "category": "Homa",
     "deity": "Havan and homa",
-    "description": "A supervised fire ceremony with traditional recitations",
+    "description": "A group havan in which family or community members participate under suitable priestly and fire-safety supervision.",
     "graphic": "/pujas/homa-illustration.svg"
   },
   {
@@ -649,7 +649,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Diwali Lakshmi Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Diwali worship honouring Goddess Lakshmi with customary lamps, prayer and home offerings.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -657,7 +657,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Dhanteras Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Dhanteras observance of gratitude and prosperity symbolism, often associated with Dhanvantari and Lakshmi.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -665,7 +665,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Navratri Kalash Sthapana",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Navratri commencement marked by Kalash Sthapana, with local muhurat and ritual details confirmed independently.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -673,7 +673,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Durga Navami Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Durga worship on the Navami festival day as determined by the applicable local Panchang.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -681,7 +681,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Dussehra Ayudha Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Ayudha Puja during the Dussehra period, traditionally expressing respect for tools, instruments or livelihoods.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -689,7 +689,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Govardhan Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Govardhan Puja celebrating Krishna-related traditions and gratitude for nature and sustenance.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -697,7 +697,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Kartik Purnima Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Kartik Purnima worship associated with the full-moon observance, lamps and differing regional customs.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -705,7 +705,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Chhath Surya Arghya",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Chhath observance involving offerings to Surya at the appropriate sunrise or sunset, with regional safety requirements.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -713,7 +713,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Karwa Chauth Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Karwa Chauth prayer and customary fasting associated with married-life traditions; fasting is always a personal health choice.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -721,7 +721,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Akshaya Tritiya Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Akshaya Tritiya observance focused on auspicious beginnings and devotional giving; no financial outcomes are implied.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -729,7 +729,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Vasant Panchami Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Vasant Panchami worship of Saraswati and the arrival of spring, often linked with educational beginnings.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -737,7 +737,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Raksha Bandhan Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Raksha Bandhan-related family prayer centred on relationships, care and symbolic protection.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -745,7 +745,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Holika Dahan Ritual",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Holika Dahan bonfire observance and prayer; local fire permissions, safety and timing must be respected.",
     "graphic": "/pujas/festival-illustration.svg"
   },
   {
@@ -753,7 +753,7 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
     "name": "Makar Sankranti Surya Puja",
     "category": "Festival",
     "deity": "Seasonal observances",
-    "description": "A seasonal observance; confirm the local Panchang date",
+    "description": "Makar Sankranti observance honouring Surya as the solar transition is marked, with regional dates and celebrations.",
     "graphic": "/pujas/festival-illustration.svg"
   }
 ]);
