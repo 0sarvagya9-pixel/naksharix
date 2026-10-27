@@ -683,6 +683,11 @@ try {
     assert.equal(initialBody.data.version, 0);
     const original = initialBody.data.products;
     assert.ok(original.length > 2);
+    const unlicensed = original.map((p) => p.id === original[0].id
+      ? { ...p, imageUrl: "https://vendor.example.test/borrowed-photo.jpg" } : p);
+    const refusedPhoto = await post("/api/admin/shop-catalogue",
+      { expectedVersion: 0, products: unlicensed }, adminCookie, "PUT");
+    assert.equal(refusedPhoto.status, 422, "Unlicensed third-party product photo was published");
     const target = original[0];
     const headingMarker = ">" + target.name.en + "</h2>";
     const beforePage = await req("/shop");
