@@ -14,11 +14,13 @@ export async function GET() {
   const email = getEmailReadiness();
   const monitoring = getMonitoringReadiness();
   const storage = getReportStorageReadiness();
-  const production = process.env.VERCEL_ENV === "production" || env.NODE_ENV === "production";
+  // Next.js sets NODE_ENV=production for optimized preview builds too.
+  // Prefer the actual Vercel target to avoid falsely labeling previews as live production.
+  const runtimeEnvironment = process.env.VERCEL_ENV?.trim() || env.NODE_ENV;
 
   const data = {
     service: "naksharix",
-    environment: production ? "production" : env.NODE_ENV,
+    environment: runtimeEnvironment,
     deployment: {
       sha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
       branch: process.env.VERCEL_GIT_COMMIT_REF ?? null
