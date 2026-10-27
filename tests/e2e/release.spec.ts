@@ -164,6 +164,8 @@ test.describe("Naksharix release browser QA", () => {
     const search = page.getByPlaceholder("Search products...");
     await search.fill("Shri Yantra");
     await expect(page.getByRole("heading", { level: 2, name: "Shri Yantra" })).toBeVisible();
+    await expect(page.locator('img[alt*="Yantra"]').first()).toBeVisible();
+    await expect(page.getByText("Illustrative catalogue visual, not an actual stock photograph").first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Ask Availability" }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: /Add to Cart|Checkout/i })).toHaveCount(0);
   });
