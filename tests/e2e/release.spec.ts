@@ -44,7 +44,11 @@ async function expectNoHorizontalOverflow(page: Page) {
     documentWidth: document.documentElement.scrollWidth,
     bodyWidth: document.body.scrollWidth
   }));
-  expect(dimensions.documentWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport + 2);
+  const overflowNodes = await page.evaluate(() =>
+    [...document.querySelectorAll("body *")]
+      .filter(el => { const r=el.getBoundingClientRect();return r.right>document.documentElement.clientWidth+2 && r.width>0; })
+      .slice(0,8).map(el=>({tag:el.tagName,classes:String(el.className).slice(0,140),right:Math.round(el.getBoundingClientRect().right)})));
+  expect(dimensions.documentWidth, JSON.stringify({dimensions,overflowNodes})).toBeLessThanOrEqual(dimensions.viewport + 2);
   expect(dimensions.bodyWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport + 2);
 }
 

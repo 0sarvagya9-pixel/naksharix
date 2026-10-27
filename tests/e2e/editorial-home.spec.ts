@@ -115,7 +115,10 @@ test.describe("Naksharix editorial photo homepage", () => {
       imagesWithAlt: [...document.querySelectorAll(".nx-editorial img")].every((el) => el.hasAttribute("alt")),
       controlsNamed: [...document.querySelectorAll(".nx-ed-slider-controls button")].every((el) => Boolean(el.getAttribute("aria-label")))
     }));
-    expect(result.documentWidth, JSON.stringify(result)).toBeLessThanOrEqual(result.viewport + 2);
+    const overs = await page.evaluate(() => [...document.querySelectorAll("body *")]
+      .filter(el=>el.getBoundingClientRect().right>document.documentElement.clientWidth+2)
+      .slice(0,8).map(el=>[el.tagName,String(el.className).slice(0,80)]));
+    expect(result.documentWidth, JSON.stringify({result,overs})).toBeLessThanOrEqual(result.viewport + 2);
     expect(result.animation).toBe("none");
     expect(result.imagesWithAlt).toBe(true);
     expect(result.controlsNamed).toBe(true);

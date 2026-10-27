@@ -121,8 +121,8 @@ export function MainNav() {
           boxShadow: "0 7px 22px rgba(76,32,27,0.07)"
         }}
       >
-        <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
-          <div className="flex min-w-[10rem] flex-shrink-0 items-center">
+        <div className="mx-auto flex h-14 w-full min-w-0 items-center gap-2 px-3 sm:gap-4 sm:px-5 lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center xl:min-w-[10rem] xl:flex-none">
             <BrandLogo className="max-w-full" />
           </div>
 
@@ -142,7 +142,7 @@ export function MainNav() {
             <MoreMenu />
           </nav>
 
-          <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[rgba(126,39,37,0.15)] pl-3">
+          <div className="ml-auto flex flex-shrink-0 items-center gap-1 border-l border-[rgba(126,39,37,0.15)] pl-2 sm:gap-2 sm:pl-3">
             <LanguageSwitcher className="w-auto min-w-12" />
             <ThemeToggle />
             <AuthProfileMenu />
