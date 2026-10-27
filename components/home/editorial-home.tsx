@@ -87,7 +87,7 @@ const journeys = [
   {
     label: "Puja & traditions", eyebrow: "TRADITIONS",
     desc: "Explore customary practices and submit an enquiry. Ceremony services and partner availability require confirmation.",
-    href: "/puja-enquiry", cta: "Explore puja enquiries",
+    href: "/pujas", cta: "Explore Puja directory",
     image: "/naksharix/ganesh-hero-light-saffron.jpg",
     alt: "Traditional Ganesh devotional art"
   },
@@ -274,6 +274,81 @@ export function EditorialHome() {
                 </span>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+
+      <section className="nx-ed-section" aria-labelledby="naksharix-featured-products">
+        <div className="nx-ed-container">
+          <SectionTitle eyebrow="SACRED ESSENTIALS" title="Explore the spiritual catalogue."
+            copy="Beautifully illustrated traditional items. Authenticity, exact product specification and a quote are confirmed separately." />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { id:"5-mukhi-rudraksha", name:"5 Mukhi Rudraksha" },
+              { id:"dhan-yog-bracelet", name:"Dhan Yog Bracelet" },
+              { id:"shri-yantra", name:"Shri Yantra" },
+              { id:"rudraksha-mala", name:"Rudraksha Mala" }
+            ].map(item=>(
+              <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1d1328] text-white shadow-xl">
+                <Link href={"/commerce-enquiry?kind=SHOP&item="+item.id} className="block overflow-hidden" aria-label={"Enquire about "+item.name}>
+                  <Image src={"/shop/"+item.id+"-illustration.svg"} alt={item.name+" original illustrative artwork"}
+                    width={540} height={390} unoptimized className="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105"/>
+                </Link>
+                <div className="p-5">
+                  <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
+                  <p className="mt-2 text-xs text-[#d8c7d9]">Illustrative art • Item details on request</p>
+                  <Link href={"/commerce-enquiry?kind=SHOP&item="+item.id}
+                    className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
+                    Enquire <ArrowRight size={16}/>
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 text-right">
+            <Link href="/shop" className="inline-flex items-center gap-2 font-bold text-[#e3b86b]">
+              Explore all spiritual products <ArrowRight size={17}/>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="nx-ed-section" aria-labelledby="naksharix-featured-pujas">
+        <div className="nx-ed-container">
+          <SectionTitle eyebrow="PUJA TRADITIONS" title="Ceremonies for every occasion."
+            copy="Explore traditional Puja topics and upcoming festival dates. Availability and local muhurat require confirmation." />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { id:"rudrabhishek", name:"Rudrabhishek", category:"shiva" },
+              { id:"maha-lakshmi-puja", name:"Maha Lakshmi Puja", category:"devi" },
+              { id:"navagraha-shanti-puja", name:"Navagraha Shanti", category:"graha" },
+              { id:"griha-pravesh-puja", name:"Griha Pravesh Puja", category:"family" }
+            ].map(item=>(
+              <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1c1427] text-white">
+                <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
+                  aria-label={"Enquire about "+item.name}>
+                  <Image src={"/pujas/"+item.category+"-illustration.svg"} alt={item.name+" category decorative artwork"}
+                    width={540} height={335} unoptimized className="aspect-[16/10] w-full object-cover transition duration-300 hover:scale-105" />
+                </Link>
+                <div className="p-5">
+                  <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
+                  <p className="mt-2 text-xs text-[#d8c7d9]">Traditional practice • Information only</p>
+                  <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
+                    className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
+                    Enquire <ArrowRight size={16}/>
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap justify-end gap-5">
+            <Link href="/puja-calendar" className="inline-flex items-center gap-2 font-bold text-[#e3b86b]">
+              Upcoming festivals <CalendarDays size={17}/>
+            </Link>
+            <Link href="/pujas" className="inline-flex items-center gap-2 font-bold text-[#e3b86b]">
+              Explore Puja directory <ArrowRight size={17}/>
+            </Link>
           </div>
         </div>
       </section>
