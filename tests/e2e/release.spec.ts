@@ -44,7 +44,11 @@ async function expectNoHorizontalOverflow(page: Page) {
     documentWidth: document.documentElement.scrollWidth,
     bodyWidth: document.body.scrollWidth
   }));
-  expect(dimensions.documentWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport + 2);
+  const overflowNodes = await page.evaluate(() =>
+    [...document.querySelectorAll("body *")]
+      .filter(el => { const r=el.getBoundingClientRect();return r.right>document.documentElement.clientWidth+2 && r.width>0; })
+      .slice(0,8).map(el=>({tag:el.tagName,classes:String(el.className).slice(0,140),right:Math.round(el.getBoundingClientRect().right)})));
+  expect(dimensions.documentWidth, JSON.stringify({dimensions,overflowNodes})).toBeLessThanOrEqual(dimensions.viewport + 2);
   expect(dimensions.bodyWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport + 2);
 }
 
@@ -62,7 +66,7 @@ async function expectNamedInteractiveControls(page: Page) {
 }
 
 test.describe("Naksharix release browser QA", () => {
-  test("core public pages render without runtime errors", async ({ page }) => {
+  test("core public pages render without runtime errors", async ({ context }) => {
     const paths = [
       "/",
       "/about",
@@ -81,14 +85,22 @@ test.describe("Naksharix release browser QA", () => {
     ];
 
     for (const pathname of paths) {
-      const runtimeErrors = await installRuntimeErrorGuard(page);
-      const response = await page.goto(absolute(pathname), { waitUntil: "domcontentloaded" });
-      expect(response?.status(), pathname).toBeLessThan(400);
-      await expect(page.locator("body")).toBeVisible();
-      await expect(page.locator("h1").first(), pathname).toBeVisible();
-      await expectNoHorizontalOverflow(page);
-      await expectNamedInteractiveControls(page);
-      expect(runtimeErrors, `${pathname}: ${runtimeErrors.join("\n")}`).toEqual([]);
+      // Isolate each hard navigation: WebKit can report cancelled Next.js RSC prefetches
+      // from the departing document as console errors during the next page load.
+      // Keep the runtime-error guard strict on each newly opened page.
+      const page = await context.newPage();
+      try {
+        const runtimeErrors = await installRuntimeErrorGuard(page);
+        const response = await page.goto(absolute(pathname), { waitUntil: "domcontentloaded" });
+        expect(response?.status(), pathname).toBeLessThan(400);
+        await expect(page.locator("body")).toBeVisible();
+        await expect(page.locator("h1").first(), pathname).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+        await expectNamedInteractiveControls(page);
+        expect(runtimeErrors, `${pathname}: ${runtimeErrors.join("\n")}`).toEqual([]);
+      } finally {
+        await page.close();
+      }
     }
   });
 
@@ -164,20 +176,79 @@ test.describe("Naksharix release browser QA", () => {
     const search = page.getByPlaceholder("Search products...");
     await search.fill("Shri Yantra");
     await expect(page.getByRole("heading", { level: 2, name: "Shri Yantra" })).toBeVisible();
+    await expect(page.locator('img[alt*="Yantra"]').first()).toBeVisible();
+    await expect(page.getByText("Illustrative catalogue visual, not an actual stock photograph").first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Ask Availability" }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: /Add to Cart|Checkout/i })).toHaveCount(0);
   });
 
-  test("Shop enquiry preserves selected item and opens product-specific support email", async ({ page }) => {
+  test("Shop enquiry preserves selected SKU and requires account before private support request", async ({ page }) => {
     await page.goto(absolute("/shop"), { waitUntil: "domcontentloaded" });
     await page.getByPlaceholder("Search products...").fill("Shri Yantra");
     await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true })).toBeVisible();
-    await page.locator('a[href="/contact?topic=shri-yantra"]').click();
-    await expect(page).toHaveURL(/\/contact\?topic=shri-yantra/);
-    await expect(page.getByRole("heading", { name: "Availability enquiry: Shri Yantra" })).toBeVisible();
-    const enquiry = page.getByRole("link", { name: "Email Naksharix about Shri Yantra" });
-    await expect(enquiry).toHaveAttribute("href", /mailto:care@naksharix\.com\?subject=.+Shri%20Yantra/i);
-    await expect(page.getByRole("button", { name: /Add to Cart|Checkout/i })).toHaveCount(0);
+    await page.locator('a[href="/commerce-enquiry?kind=SHOP&item=shri-yantra"]').click();
+    await expect(page).toHaveURL(/\/commerce-enquiry\?kind=SHOP&item=shri-yantra/);
+    await expect(page.getByRole("heading", { name: "Product availability enquiry" })).toBeVisible();
+    await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Add to Cart|Checkout|Pay/i })).toHaveCount(0);
+  });
+
+  test("Puja enquiry from reviewed calendar requires account and does not claim booking", async ({ page }) => {
+    await page.goto(absolute("/puja-calendar"), { waitUntil: "domcontentloaded" });
+    await page.getByRole("link", { name: "Enquire about this Puja" }).first().click();
+    await expect(page).toHaveURL(/\/commerce-enquiry\?kind=PUJA&item=/);
+    await expect(page.getByRole("heading", { name: "Puja date and availability enquiry" })).toBeVisible();
+    await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Checkout|Pay/i })).toHaveCount(0);
+  });
+
+  test("premium homepage showcases actual catalogue item artwork and ritual cards", async ({ page }) => {
+    await page.goto(absolute("/"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("5 Mukhi Rudraksha", { exact: true })).toBeVisible();
+    await expect(page.getByText("Rudrabhishek", { exact: true })).toBeVisible();
+    await expect(page.locator('img[alt="5 Mukhi Rudraksha original illustrative artwork"]')).toBeVisible();
+    await expect(page.getByRole("link", { name: "Explore Puja directory" }).first()).toBeVisible();
+  });
+
+  test("Puja directory initially limits mobile cards and reveals more on demand", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(12);
+    await page.getByRole("button", { name: /Load more Puja topics/ }).click();
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(24);
+  });
+
+  test("Puja service directory filters traditions and preserves selected topic", async ({ page }) => {
+    await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
+    const search = page.getByRole("searchbox", { name: "Search Puja types or deities" });
+    await expect(search).toBeEnabled();
+    await search.fill("Rudrabhishek");
+    await expect(page.getByRole("heading", { name: "Rudrabhishek", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(1);
+    await page.getByRole("link", { name: "Enquire", exact: true }).click();
+    await expect(page).toHaveURL(/kind=PUJA&item=ritual%3Arudrabhishek/);
+    await expect(page.getByRole("heading", { name: "Puja date and availability enquiry" })).toBeVisible();
+    await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
+  });
+
+  test("individual Puja detail page keeps safe enquiry context", async ({ page }) => {
+    await page.goto(absolute("/pujas/rudrabhishek"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Rudrabhishek", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Enquire about Rudrabhishek/ })).toHaveAttribute(
+      "href", /kind=PUJA.*ritual%3Arudrabhishek/
+    );
+    await expect(page.getByText(/No booking or payment is taken/)).toBeVisible();
+  });
+
+  test("individual shop product detail shows honest illustrative photo disclosure", async ({ page }) => {
+    await page.goto(absolute("/shop/shri-yantra"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Shri Yantra" })).toBeVisible();
+    await expect(page.getByText(/not a photograph of supplied physical stock/)).toBeVisible();
+    await expect(page.getByRole("link", { name: /Enquire about this item/ })).toHaveAttribute(
+      "href", /kind=SHOP&item=shri-yantra/
+    );
   });
 
   test("AI readiness endpoint exposes no secret details", async ({ request }) => {
@@ -186,6 +257,21 @@ test.describe("Naksharix release browser QA", () => {
     const json = await response.json();
     expect(json).toEqual({ data: { enabled: false, ready: false } });
     expect(JSON.stringify(json)).not.toMatch(/key|secret|model/i);
+  });
+
+  test("readiness reports the deployment target consistently with release metadata", async ({ request }) => {
+    const [release, readiness] = await Promise.all([
+      request.get(absolute("/api/release")),
+      request.get(absolute("/api/ops/readiness"))
+    ]);
+    expect(release.status()).toBe(200);
+    expect(readiness.status()).toBe(200);
+    const [{ data: releaseData }, { data: readinessData }] = await Promise.all([
+      release.json(), readiness.json()
+    ]);
+    expect(readinessData.environment).toBe(releaseData.environment);
+    expect(["preview", "production", "development", "test"]).toContain(readinessData.environment);
+    expect(readinessData.capabilities.shopMode).toBe("informational_enquiry_only");
   });
 
   test("pricing exposes only active services", async ({ page }) => {
@@ -212,6 +298,7 @@ test.describe("Naksharix release browser QA", () => {
 
     const themeButton = page.getByRole("button", { name: "Toggle dark and light mode" });
     await expect(themeButton).toBeVisible();
+    await expect(themeButton).toBeEnabled();
     const before = await page.locator("html").evaluate((element) => element.classList.contains("dark"));
     await themeButton.click();
     const after = await page.locator("html").evaluate((element) => element.classList.contains("dark"));

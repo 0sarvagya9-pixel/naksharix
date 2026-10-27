@@ -107,6 +107,7 @@ jobs:
           set -euo pipefail
           node -e 'const u = new URL(process.env.DATABASE_URL || ""); if (process.env.CI !== "true" || u.hostname !== "localhost" || u.port !== "5432" || u.pathname !== "/naksharix") { process.exit(1); }'
           npx prisma db push --skip-generate
+          node scripts/qa-align-disposable-feature-schema.mjs
       - name: Run local production HTTP smoke
         shell: bash
         run: |
@@ -206,6 +207,7 @@ jobs:
           set -euo pipefail
           node -e 'const u = new URL(process.env.DATABASE_URL || ""); if (process.env.CI !== "true" || u.hostname !== "postgres" || u.pathname !== "/naksharix") process.exit(1);'
           npx prisma db push --skip-generate
+          node scripts/qa-align-disposable-feature-schema.mjs
       - run: npm run build
       - name: Run browser release QA
         shell: bash

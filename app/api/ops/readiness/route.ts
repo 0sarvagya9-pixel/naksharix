@@ -5,18 +5,22 @@ import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getReportStorageReadiness } from "@/lib/storage/report-storage";
 import { getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 import { isAiAstrologerEnabled, isAiAstrologerReady } from "@/lib/ai/feature-status";
+import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
+export async function GET() {
+  const schema = await getSchemaReadiness().catch(() => null);
   const email = getEmailReadiness();
   const monitoring = getMonitoringReadiness();
   const storage = getReportStorageReadiness();
-  const production = process.env.VERCEL_ENV === "production" || env.NODE_ENV === "production";
+  // Next.js sets NODE_ENV=production for optimized preview builds too.
+  // Prefer the actual Vercel target to avoid falsely labeling previews as live production.
+  const runtimeEnvironment = process.env.VERCEL_ENV?.trim() || env.NODE_ENV;
 
   const data = {
     service: "naksharix",
-    environment: production ? "production" : env.NODE_ENV,
+    environment: runtimeEnvironment,
     deployment: {
       sha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
       branch: process.env.VERCEL_GIT_COMMIT_REF ?? null
@@ -32,6 +36,7 @@ export function GET() {
       shopMode: "informational_enquiry_only"
     },
     services: {
+      databaseSchema: { ready: schema?.ready ?? false, missingCount: schema?.missingCount ?? 2 },
       email: {
         provider: email.provider,
         enabled: email.emailEnabled,

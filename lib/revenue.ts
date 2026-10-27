@@ -53,7 +53,11 @@ function safeEqual(a: string, b: string) {
 export async function finalizePaidPayment(providerOrderId: string, providerPaymentId: string, metadata: Record<string, unknown> = {}) {
   const payment = await prisma.payment.findUnique({ where: { providerOrderId } });
   if (!payment) return null;
-  if (payment.status === PaymentStatus.PAID) return payment;
+  // A late captured webhook must never reopen a refunded/waived payment.
+  if (payment.status === PaymentStatus.PAID) {
+    return payment.providerPaymentId === providerPaymentId ? payment : null;
+  }
+  if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.FAILED) return null;
 
   const invoiceNumber = `NXR-${new Date().getFullYear()}-${payment.id.slice(-8).toUpperCase()}`;
   const taxAmount = Number(payment.amount) * 0.18;
@@ -62,7 +66,7 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
 
   return prisma.$transaction(async (tx) => {
     const claimed = await tx.payment.updateMany({
-      where: { id: payment.id, status: { not: PaymentStatus.PAID } },
+      where: { id: payment.id, status: { in: [PaymentStatus.PENDING, PaymentStatus.FAILED] } },
       data: {
         status: PaymentStatus.PAID,
         providerPaymentId,
@@ -71,7 +75,11 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
     });
 
     if (claimed.count === 0) {
-      return tx.payment.findUnique({ where: { id: payment.id } });
+      // Race-safe: another captured transaction may have finalized first.
+      // Return only an identical PAID transaction, never a refunded record.
+      const current = await tx.payment.findUnique({ where: { id: payment.id } });
+      return current?.status === PaymentStatus.PAID &&
+        current.providerPaymentId === providerPaymentId ? current : null;
     }
 
     const paid = await tx.payment.findUnique({ where: { id: payment.id } });

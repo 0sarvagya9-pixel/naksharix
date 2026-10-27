@@ -7,6 +7,9 @@ on:
       - package.json
       - package-lock.json
       - scripts/qa-disposable-db-rehearsal.sh
+      - deploy/sql/20261026-learning-progress.sql
+      - deploy/sql/20261026-puja-partner-registry.sql
+      - lib/ops/schema-readiness.ts
       - .github/workflows/database-baseline-rehearsal.yml
   workflow_dispatch:
 

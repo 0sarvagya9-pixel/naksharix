@@ -51,7 +51,7 @@ try {
   const mode = String(evidence.readOnly?.[0]?.transaction_read_only ?? "");
   record(mode === "on" ? "PASSED" : "FAILED", "Read-only transaction enforcement", mode || "unknown");
 
-  const requiredTables = ["User", "Session", "OtpToken", "ReportRequest", "Payment", "ConsultationBooking", "AstrologerProfile"];
+  const requiredTables = ["User", "Session", "OtpToken", "ReportRequest", "Payment", "ConsultationBooking", "AstrologerProfile", "LearningProgress", "PujaPartner"];
   const tableSet = new Set(evidence.tableRows.map((row) => row.table_name));
   for (const table of requiredTables) {
     record(tableSet.has(table) ? "PASSED" : "FAILED", `Required table ${table}`, tableSet.has(table) ? "present" : "missing");
@@ -62,7 +62,9 @@ try {
     Session: ["userId", "tokenHash", "expiresAt", "revokedAt"],
     OtpToken: ["id", "userId", "email", "purpose", "codeHash", "attempts", "expiresAt", "consumedAt", "createdAt"],
     ReportRequest: ["id", "userId", "deliveryEmail", "generatedPdfBytes", "generatedPdfSize", "deliveryStatus", "emailSentAt"],
-    ConsultationBooking: ["id", "userId", "astrologerProfileId", "status", "paymentStatus", "scheduledAt", "metadata"]
+    ConsultationBooking: ["id", "userId", "astrologerProfileId", "status", "paymentStatus", "scheduledAt", "metadata"],
+    LearningProgress: ["id", "userId", "lessonId", "completedAt", "createdAt", "updatedAt"],
+    PujaPartner: ["id", "name", "region", "traditions", "evidenceUrl", "reviewStatus", "reviewedById", "reviewedAt", "reviewNote"]
   };
   const columns = new Map();
   for (const row of evidence.columnRows) {
@@ -83,6 +85,23 @@ try {
 
   const indexNames = new Set(evidence.indexRows.map((row) => row.indexname));
   record(indexNames.has("OtpToken_email_purpose_idx") ? "PASSED" : "FAILED", "OTP email/purpose index", [...indexNames].join(", ") || "none");
+  // Additional live feature indexes: audit their existence before production
+  // cutover, but do not create/repair anything from this read-only script.
+  const featureIndexes = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SET TRANSACTION READ ONLY`;
+    return tx.$queryRaw`
+      SELECT indexname FROM pg_indexes WHERE schemaname='public'
+      AND indexname IN ('LearningProgress_userId_lessonId_key',
+        'LearningProgress_userId_completedAt_idx','PujaPartner_reviewStatus_createdAt_idx')
+    `;
+  });
+  const featureSet = new Set(featureIndexes.map((x) => x.indexname));
+  for (const required of [
+    "LearningProgress_userId_lessonId_key",
+    "LearningProgress_userId_completedAt_idx",
+    "PujaPartner_reviewStatus_createdAt_idx"
+  ]) record(featureSet.has(required) ? "PASSED" : "FAILED", "Feature index " + required, featureSet.has(required) ? "present" : "missing");
+
 
   const failures = results.filter((entry) => entry.status === "FAILED");
   console.log(`\nProduction DB read-only QA summary: ${JSON.stringify({ passed: results.filter((entry) => entry.status === "PASSED").length, reviewRequired: results.filter((entry) => entry.status === "REVIEW_REQUIRED").length, failed: failures.length })}`);

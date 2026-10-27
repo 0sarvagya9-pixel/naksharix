@@ -3,7 +3,8 @@ import { isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { env } from "@/lib/env";
 import { blogCategories, blogPosts } from "@/lib/blog-content";
 import { growthPages, nakshatras } from "@/lib/growth-pages";
-import { manualReports } from "@/lib/manual-catalogue";
+import { manualReports, shopProducts } from "@/lib/manual-catalogue";
+import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { seoLandingPages } from "@/lib/seo-pages";
 import { zodiacSigns } from "@/lib/zodiac";
 
@@ -63,6 +64,9 @@ const staticRoutes = [
   "/consultation",
   "/ask-astrologer",
   "/puja-enquiry",
+  "/pujas",
+  "/puja-calendar",
+  "/commerce-enquiry",
   "/learn",
   "/reports",
   "/shop",
@@ -90,6 +94,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...Object.values(growthPages).map((page): SitemapEntry => ({ route: page.path, priority: 0.88, frequency: "weekly" })),
     ...nakshatras.map((slug): SitemapEntry => ({ route: `/nakshatra/${slug}`, priority: 0.76, frequency: "monthly" })),
     ...manualReports.map((report): SitemapEntry => ({ route: `/reports/${report.slug}`, priority: 0.78, frequency: "weekly" })),
+    ...shopProducts.map((p): SitemapEntry => ({ route: `/shop/${p.slug}`, priority: 0.7, frequency: "monthly" })),
+    ...pujaTopics.map((p): SitemapEntry => ({ route: `/pujas/${p.id}`, priority: 0.68, frequency: "monthly" })),
     ...seoLandingPages.map((page): SitemapEntry => ({ route: `/astrology/${page.slug}`, priority: 0.86, frequency: "weekly" })),
     ...blogCategories.map((category): SitemapEntry => ({ route: `/blog/category/${category.slug}`, priority: 0.76, frequency: "weekly" })),
     ...blogPosts.map((post): SitemapEntry => ({ route: `/blog/${post.slug}`, priority: 0.72, frequency: "monthly" }))

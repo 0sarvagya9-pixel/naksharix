@@ -5,42 +5,43 @@ import { Section } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { seo } from "@/lib/seo";
+import { nextTwoYearsPujaCalendar } from "@/lib/puja/observances";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = seo({
-  title: "Hindu Festival Calendar 2026 - Naksharix",
-  description: "Explore Naksharix festival calendar with Hindu festivals, vrata days, panchang links, and shubh muhurat planning.",
+  title: "Upcoming Hindu Festival Calendar | Naksharix",
+  description: "Explore a rolling, source-reviewed two-year calendar for Hindu Puja festivals, vrats and traditional celebrations. Cross-check local tithi and muhurat.",
   path: "/festival-calendar",
-  keywords: ["Festival Calendar", "Hindu Calendar", "Panchang", "Vrata"]
+  keywords: ["Festival Calendar", "Hindu Calendar", "Panchang", "Puja Dates", "Vrat"]
 });
 
-const festivals = [
-  ["Makar Sankranti", "January 2026", "Sun transition and harvest gratitude."],
-  ["Maha Shivratri", "February 2026", "Devotional discipline, fasting, and Shiva worship."],
-  ["Holi", "March 2026", "Color, renewal, and relationship repair."],
-  ["Akshaya Tritiya", "April 2026", "Auspicious start, charity, and prosperity rituals."],
-  ["Raksha Bandhan", "August 2026", "Family bonds and protection prayers."],
-  ["Diwali", "November 2026", "Lakshmi puja, light, prosperity, and renewal."]
-];
-
 export default function FestivalCalendarPage() {
+  const calendar = nextTwoYearsPujaCalendar();
   return (
     <main className="star-field">
       <Section>
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Hindu Calendar</p>
-        <h1 className="mt-3 font-cinzel text-4xl font-black">Festival Calendar 2026</h1>
-        <p className="mt-4 max-w-3xl naksh-muted-text">Plan important festivals, vrata days, devotional routines, and auspicious windows with Naksharix Panchang and Muhurat tools.</p>
+        <h1 className="mt-3 font-cinzel text-4xl font-black">Upcoming Festival Calendar</h1>
+        <p className="mt-4 max-w-3xl naksh-muted-text">
+          Major India-reference dates automatically follow the current two-year window.
+          Regional tithi, city-specific muhurat and actual temple availability must be confirmed.
+        </p>
         <div className="mt-7 flex flex-wrap gap-3">
-          <Button asChild><Link href="/panchang">Today&apos;s Panchang</Link></Button>
-          <Button variant="outline" asChild><Link href="/shubh-muhurat">Find Shubh Muhurat</Link></Button>
+          <Button asChild><Link href="/puja-calendar">Explore full two-year Puja calendar</Link></Button>
+          <Button variant="outline" asChild><Link href="/panchang">Check local Panchang</Link></Button>
+          <Button variant="outline" asChild><Link href="/puja-enquiry">Enquire about Puja</Link></Button>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {festivals.map(([name, date, copy]) => (
-            <Card key={name} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
+          {calendar.events.slice(0, 12).map((event) => (
+            <Card key={event.id} className="border-[#D4AF37]/20 bg-[#061D3C]/75">
               <CardContent className="p-5">
                 <CalendarDays className="h-5 w-5 text-[#FFD700]" />
-                <h2 className="mt-4 font-cinzel text-xl font-bold">{name}</h2>
-                <p className="mt-1 text-sm text-[#FFD700]">{date}</p>
-                <p className="mt-3 text-sm leading-6 naksh-muted-text">{copy}</p>
+                <h2 className="mt-4 font-cinzel text-xl font-bold">{event.name}</h2>
+                <p className="mt-2 text-sm text-[#FFD700]">{event.date}</p>
+                <p className="mt-3 text-xs naksh-muted-text">
+                  Reference date only. No confirmed temple or payment booking.
+                </p>
+                <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-xs underline text-[#FFD700]">Check date source</a>
               </CardContent>
             </Card>
           ))}

@@ -35,9 +35,11 @@ export const logger = {
 
 export function getMonitoringReadiness() {
   return {
-    provider: process.env.SENTRY_DSN ? "sentry_ready_env_present" : "console_safe_logger",
+    provider: "console_safe_logger",
     sentryConfigured: Boolean(process.env.SENTRY_DSN),
     safeMetadataOnly: true,
-    reason: process.env.SENTRY_DSN ? "Sentry DSN is present; adapter can be wired without changing call sites." : "Sentry DSN is missing; structured console logging is active."
+    reason: process.env.SENTRY_DSN
+      ? "Sentry DSN is present but there is no active sending SDK; console-only monitoring and alerting unverified."
+      : "Safe structured console logging is active. Sentry SDK and central paging have not been configured."
   };
 }

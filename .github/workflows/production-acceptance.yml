@@ -95,6 +95,7 @@ jobs:
             const body = JSON.parse(fs.readFileSync("production-evidence/readiness.json", "utf8"));
             const data = body?.data ?? body;
             if (data?.services?.email?.provider !== "smtp" || data?.services?.email?.enabled !== true) throw new Error("SMTP email readiness is not active");
+            if (data?.services?.databaseSchema?.ready !== true || data?.services?.databaseSchema?.missingCount !== 0) throw new Error("Release held: learning/puja tables or indexes missing");
             if (data?.capabilities?.subscriptionsEnabled !== false) throw new Error("Subscriptions unexpectedly active");
             if (data?.capabilities?.aiReportGeneratorEnabled !== false) throw new Error("AI report generator unexpectedly active");
             if (data?.capabilities?.shopMode !== "informational_enquiry_only") throw new Error("Shop scope changed");
@@ -127,7 +128,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for route in shop reports consultation pricing signup login verify-email; do
+          for route in shop reports consultation pricing signup login verify-email learn puja-enquiry ask-astrologer; do
             curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
               "${BASE_URL}/${route}" -o "production-evidence/${route}.html"
           done

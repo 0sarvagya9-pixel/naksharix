@@ -8,12 +8,14 @@ const storageKey = "naksharix-theme";
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(storageKey) as "dark" | "light" | null;
     const initial = stored ?? "dark";
     setTheme(initial);
     document.documentElement.classList.toggle("dark", initial === "dark");
+    setHydrated(true);
   }, []);
 
   function toggleTheme() {
@@ -24,7 +26,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle dark and light mode">
+    <Button variant="ghost" size="icon" className="text-[#782c39] hover:bg-[#f9e8d9] hover:text-[#782c39]" onClick={toggleTheme} disabled={!hydrated} aria-label="Toggle dark and light mode">
       {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
     </Button>
   );

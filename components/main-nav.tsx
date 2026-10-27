@@ -13,12 +13,13 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Home", href: "/", active: ["/"] },
+  { label: "Reports", href: "/reports", active: ["/reports"] },
+  { label: "Consultation", href: "/consultation", active: ["/consultation", "/astrologers"] },
+  { label: "Puja", href: "/pujas", active: ["/pujas", "/puja-enquiry", "/puja-calendar"] },
+  { label: "Shop", href: "/shop", active: ["/shop"] },
   { label: "Kundli", href: "/kundli", active: ["/kundli", "/free-kundli"] },
   { label: "Horoscope", href: "/daily-horoscope", active: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope"] },
-  { label: "Panchang", href: "/panchang", active: ["/panchang"] },
-  { label: "Numerology", href: "/numerology", active: ["/numerology"] },
-  { label: "Tarot", href: "/tarot", active: ["/tarot"] },
-  { label: "Remedies", href: "/free-calculators", active: ["/free-calculators", "/calculators"] }
+  { label: "Panchang", href: "/panchang", active: ["/panchang"] }
 ] as const;
 
 const exploreLinks = [
@@ -44,7 +45,9 @@ const serviceLinks = [
   { label: "AI Astrologer", href: "/ai-astrologer" },
   { label: "Spiritual Catalogue", href: "/shop" },
   { label: "Ask an Astrologer", href: "/ask-astrologer" },
+  { label: "All Puja Types", href: "/pujas" },
   { label: "Puja & Traditions", href: "/puja-enquiry" },
+  { label: "Two-Year Puja Calendar", href: "/puja-calendar" },
   { label: "Learning Library", href: "/learn" }
 ] as const;
 
@@ -73,7 +76,7 @@ const horoscopeOptions = [
 ] as const;
 
 const dropdownStyle = {
-  background: "rgba(10, 14, 26, 0.95)",
+  background: "rgba(80, 30, 33, 0.98)",
   border: "1px solid rgba(255, 255, 255, 0.20)",
   backdropFilter: "blur(18px) saturate(140%)",
   WebkitBackdropFilter: "blur(18px) saturate(140%)",
@@ -104,22 +107,26 @@ export function MainNav() {
 
   return (
     <div className="sticky top-0 z-50 w-full">
+      <div className="nx-reference-promo">
+        <span>NAKSHARIX • Vedic astrology tools, traditional knowledge and private guidance</span>
+        <Link href="/pujas">Explore Puja Services <span aria-hidden="true">→</span></Link>
+      </div>
       <header
         className="w-full transition-all duration-300"
         style={{
-          background: "rgba(18, 22, 34, 0.38)",
+          background: "rgba(255, 251, 247, 0.97)",
           backdropFilter: "blur(22px) saturate(145%)",
           WebkitBackdropFilter: "blur(22px) saturate(145%)",
-          borderBottom: "1px solid rgba(255,255,255,0.22)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12)"
+          borderBottom: "1px solid rgba(126,39,37,0.16)",
+          boxShadow: "0 7px 22px rgba(76,32,27,0.07)"
         }}
       >
-        <div className="mx-auto flex h-14 w-full items-center gap-4 px-5 lg:px-8">
-          <div className="flex min-w-[14rem] flex-shrink-0 items-center">
+        <div className="mx-auto flex h-14 w-full min-w-0 items-center gap-2 px-3 sm:gap-4 sm:px-5 lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center xl:min-w-[10rem] xl:flex-none">
             <BrandLogo className="max-w-full" />
           </div>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex" aria-label="Primary navigation">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex" aria-label="Primary navigation">
             {navLinks.map((item) => item.label === "Horoscope" ? (
               <HoroscopeMenu key={item.href} pathname={pathname} />
             ) : (
@@ -135,7 +142,7 @@ export function MainNav() {
             <MoreMenu />
           </nav>
 
-          <div className="ml-auto flex flex-shrink-0 items-center gap-2 border-l border-[rgba(255,255,255,0.15)] pl-3">
+          <div className="ml-auto flex flex-shrink-0 items-center gap-1 border-l border-[rgba(126,39,37,0.15)] pl-2 sm:gap-2 sm:pl-3">
             <LanguageSwitcher className="w-auto min-w-12" />
             <ThemeToggle />
             <AuthProfileMenu />
@@ -157,7 +164,7 @@ export function MainNav() {
               ref={menuButtonRef}
               variant="outline"
               size="icon"
-              className="border-[rgba(255,255,255,0.22)] bg-white/10 text-white hover:bg-white/20 xl:hidden"
+              className="border-[rgba(138,43,56,0.28)] bg-[#fff8ee] text-[#852f3c] hover:bg-[#f8e5d4] xl:hidden"
               aria-label="Open navigation menu"
               aria-expanded={open}
               aria-controls="naksharix-mobile-sidebar"
@@ -177,13 +184,21 @@ export function MainNav() {
                   <X className="h-5 w-5" />
                 </Button>
               </div>
-              <div className="mt-6 grid gap-2">
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e5c5a5] bg-[#fff6e9] p-3">
+                <p className="text-xs font-semibold text-[#794051]">Choose language</p>
+                <LanguageSwitcher className="!block w-20" />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Link href="/login" onClick={() => setOpen(false)} className="rounded-xl bg-[#832e3f] px-3 py-3 text-center text-sm font-bold text-white">Sign in</Link>
+                <Link href="/profile" onClick={() => setOpen(false)} className="rounded-xl border border-[#d8ac8f] bg-white px-3 py-3 text-center text-sm font-bold text-[#772d3c]">My account</Link>
+              </div>
+              <div className="mt-3 grid gap-2">
                 {[...navLinks, ...moreLinks].map((item) => (
                   <Link
                     key={`${item.href}-mobile`}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className="rounded-xl border border-[rgba(20,20,20,0.08)] bg-white px-4 py-3 text-sm font-semibold text-[#3a3a3c] hover:bg-[rgba(20,20,20,0.03)]"
+                    className="rounded-xl border border-[rgba(148,67,56,0.16)] bg-[#fffcf8] px-4 py-3 text-sm font-semibold text-[#4e3038] hover:bg-[#fff0e4]"
                   >
                     {item.label}
                   </Link>
@@ -220,7 +235,7 @@ function HoroscopeMenu({ pathname }: { pathname: string }) {
 function MoreMenu() {
   return (
     <div className="group relative">
-      <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white">More</button>
+      <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">More</button>
       <div className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
         <div className="grid grid-cols-3 gap-4 text-left">
           <MenuColumn title="Explore" links={exploreLinks} />
@@ -253,8 +268,8 @@ function DropdownLink({ item, compact = false }: { item: { label: string; href: 
 
 function navLinkClass(active: boolean) {
   return cn(
-    "flex items-center gap-0.5 px-3 py-1 text-sm font-semibold text-[#fffff0]/90 transition hover:text-white",
-    active ? "rounded-none border-b-2 border-[#f2c56b] px-1 py-0.5 font-bold text-[#f2c56b]" : ""
+    "flex items-center gap-0.5 px-2 py-1 text-[13px] font-semibold text-[#492b32] transition hover:text-[#9b2d36]",
+    active ? "rounded-none border-b-2 border-[#f2c56b] px-1 py-0.5 font-bold text-[#9b2d36]" : ""
   );
 }
 

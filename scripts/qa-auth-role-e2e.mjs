@@ -114,6 +114,15 @@ try {
     assert.ok(html.includes("System Readiness"));
     assert.ok(html.includes("Production database"));
     assert.ok(html.includes("Distributed Redis"));
+    assert.ok(html.includes("Learning and Puja schema"), "new tables are shown in operator readiness");
+    const schemaRes = await req("/api/admin/readiness", { headers: { cookie: adminCookie } });
+    assert.equal(schemaRes.status, 200);
+    const schemaJson = await schemaRes.json();
+    assert.equal(schemaJson.data.services.databaseSchema.ready, true);
+    assert.equal(schemaJson.data.services.databaseSchema.missingCount, 0);
+    assert.equal(schemaJson.data.services.monitoring.provider, "console_safe_logger",
+      "Sentry config alone must not claim an active SDK");
+
     assert.ok(!html.includes("ci-secret-ci-secret"), "sensitive environment output not allowed");
     const publicRes = await req("/admin/readiness");
     const publicBody = await publicRes.text();
@@ -604,6 +613,84 @@ try {
     }
   });
 
+  await check("authenticated Shop and Puja enquiries persist in real support queue without payments", async () => {
+    const created = [];
+    try {
+      const unauth = await post("/api/commerce/enquiries", {
+        kind: "SHOP", itemId: "shri-yantra", quantity: 1,
+        message: "Can you confirm authenticity and delivery options?"
+      });
+      assert.equal(unauth.status, 401);
+      const rejected = await post("/api/commerce/enquiries", {
+        kind: "SHOP", itemId: "shri-yantra", quantity: 0,
+        message: "Please provide your best price and supplier details."
+      }, userCookie);
+      assert.equal(rejected.status, 422);
+      const priceInjection = await post("/api/commerce/enquiries", {
+        kind: "SHOP", itemId: "shri-yantra", quantity: 1, amount: 1,
+        paymentStatus: "PAID", message: "Please reserve and deliver two yantras."
+      }, userCookie);
+      assert.equal(priceInjection.status, 422);
+      const shop = await post("/api/commerce/enquiries", {
+        kind: "SHOP", itemId: "shri-yantra", quantity: 2,
+        message: "Please verify the actual physical item, stock and price."
+      }, userCookie);
+      const shopBody = await shop.json();
+      assert.equal(shop.status, 201, JSON.stringify(shopBody));
+      assert.equal(shopBody.data.paymentRequired, false);
+      assert.equal(shopBody.data.orderCreated, false);
+      assert.equal(shopBody.data.bookingCreated, false);
+      assert.equal(shopBody.data.trackingPath, "/support");
+      created.push(shopBody.data.ticket.id);
+      const ticket = await prisma.supportTicket.findUniqueOrThrow({ where: { id: shopBody.data.ticket.id } });
+      assert.equal(ticket.userId, userId);
+      assert.match(ticket.subject, /^\[SHOP ENQUIRY\]/);
+      assert.ok(JSON.stringify(ticket.messages).includes("Quantity requested: 2"));
+      const feed = await req("/api/puja/calendar");
+      assert.equal(feed.status, 200);
+      const first = (await feed.json()).data.events[0];
+      assert.ok(first?.id);
+      const puja = await post("/api/commerce/enquiries", {
+        kind: "PUJA", itemId: first.id, city: "Bhopal",
+        message: "Please advise about local Panchang and pandit availability."
+      }, userCookie);
+      const pujaBody = await puja.json();
+      assert.equal(puja.status, 201, JSON.stringify(pujaBody));
+      assert.equal(pujaBody.data.fulfillmentConfirmed, false);
+      created.push(pujaBody.data.ticket.id);
+      const pujaTicket = await prisma.supportTicket.findUniqueOrThrow({ where: { id: pujaBody.data.ticket.id } });
+      assert.equal(pujaTicket.userId, userId);
+      assert.match(pujaTicket.subject, /^\[PUJA DATE ENQUIRY\]/);
+      assert.ok(JSON.stringify(pujaTicket.messages).includes("Local tithi/muhurat: NOT VERIFIED"));
+      const ritual = await post("/api/commerce/enquiries", {
+        kind: "PUJA", itemId: "ritual:rudrabhishek", city: "Bhopal",
+        message: "Please explain possible traditional arrangement requirements."
+      }, userCookie);
+      const ritualBody = await ritual.json();
+      assert.equal(ritual.status, 201, JSON.stringify(ritualBody));
+      assert.equal(ritualBody.data.bookingCreated, false);
+      assert.equal(ritualBody.data.paymentRequired, false);
+      created.push(ritualBody.data.ticket.id);
+      const ritualTicket = await prisma.supportTicket.findUniqueOrThrow({
+        where: { id: ritualBody.data.ticket.id }
+      });
+      assert.match(ritualTicket.subject, /^\[PUJA TOPIC ENQUIRY\]/);
+      assert.ok(JSON.stringify(ritualTicket.messages).includes("Traditional Puja: Rudrabhishek"));
+      const forgedRitual = await post("/api/commerce/enquiries", {
+        kind: "PUJA", itemId: "ritual:invented-paid-ritual", city: "Bhopal",
+        message: "Please do not allow me to book invented ceremonies."
+      }, userCookie);
+      assert.equal(forgedRitual.status, 422);
+      const invalidCalendar = await post("/api/commerce/enquiries", {
+        kind: "PUJA", itemId: "2029-invented-ceremony", city: "Bhopal",
+        message: "This event should not be available for booking."
+      }, userCookie);
+      assert.equal(invalidCalendar.status, 422);
+    } finally {
+      await prisma.supportTicket.deleteMany({ where: { id: { in: created } } });
+    }
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);
@@ -615,8 +702,13 @@ try {
     assert.equal(initialBody.data.version, 0);
     const original = initialBody.data.products;
     assert.ok(original.length > 2);
+    const unlicensed = original.map((p) => p.id === original[0].id
+      ? { ...p, imageUrl: "https://vendor.example.test/borrowed-photo.jpg" } : p);
+    const refusedPhoto = await post("/api/admin/shop-catalogue",
+      { expectedVersion: 0, products: unlicensed }, adminCookie, "PUT");
+    assert.equal(refusedPhoto.status, 422, "Unlicensed third-party product photo was published");
     const target = original[0];
-    const headingMarker = ">" + target.name.en + "</h2>";
+    const headingMarker = ">" + target.name.en + "</a></h2>"; // product heading now contains a linked detail-page title
     const beforePage = await req("/shop");
     assert.equal(beforePage.status, 200);
     assert.ok((await beforePage.text()).includes(headingMarker), "active product must render as a real Shop heading");

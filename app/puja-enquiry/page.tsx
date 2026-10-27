@@ -50,9 +50,14 @@ export default async function PujaEnquiryPage() {
       <EditorialServiceBanner eyebrow="PUJA & TRADITIONS"
         headline="A space for sacred traditions"
         caption="Explore customary practices and submit a private enquiry. Ceremonies, priest availability and delivery are not automatically guaranteed."
-        image="/naksharix/ganesh-hero-light-saffron.jpg" imageAlt="Saffron-toned traditional Ganesh artwork"
+        image="/naksharix/editorial-puja.svg" imageAlt="Illustrated puja thali with a glowing diya"
         link="/ask-astrologer" linkLabel="Ask a written question" />
       <Section>
+        <div className="mx-auto mb-6 max-w-4xl rounded-2xl border border-[#D4AF37]/25 bg-[#061D3C]/70 p-5">
+          <p className="mb-3 text-sm naksh-muted-text">View the upcoming two-year Hindu Puja and festival calendar. Reference dates are informational, not confirmed temple slots.</p>
+          <Button asChild variant="outline"><Link href="/puja-calendar">View Upcoming Puja Dates</Link></Button>
+          <Button asChild variant="outline" className="ml-2"><Link href="/pujas">Explore All Puja Types</Link></Button>
+        </div>
         <div className="mx-auto max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Traditional Practices</p>
           <h1 className="mt-3 font-cinzel text-4xl font-black">Puja Information and Enquiries</h1>

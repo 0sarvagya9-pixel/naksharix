@@ -6,6 +6,7 @@ import { env } from "@/lib/env";
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
 import { getRedis } from "@/lib/redis";
+import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,8 @@ export async function GET() {
     }
   }
 
+  let schema: Awaited<ReturnType<typeof getSchemaReadiness>> | null = null;
+  try { schema = await getSchemaReadiness(); } catch { schema = null; }
   const email = getEmailReadiness();
   const payments = getRazorpayReadiness();
   const monitoring = getMonitoringReadiness();
@@ -45,6 +48,7 @@ export async function GET() {
     },
     services: {
       database,
+      databaseSchema: { ready: schema?.ready ?? false, checks: schema?.checks ?? [], missingCount: schema?.missingCount ?? 2 },
       redis,
       email: {
         provider: email.provider,
