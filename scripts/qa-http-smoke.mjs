@@ -293,7 +293,7 @@ const assetPaths = [...new Set([
 const catalogueChecks = [
   ...topicRecords.map(item => ({ path: "/pujas/" + encodeURIComponent(item.id), kind: "puja", marker: item.name })),
   ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Price awaiting verification" })),
-  {path:"/cart",kind:"cart",marker:"Secure checkout is not enabled"},
+  {path:"/cart",kind:"cart",marker:"Your cart"},
   ...assetPaths.map(path => ({ path, kind: "svg", marker: "<svg" }))
 ];
 let catalogueNext = 0;
