@@ -40,8 +40,13 @@ export async function POST(request: NextRequest) {
         }
 
         if (paid && bookingId) {
-          await prisma.consultationBooking.update({
-            where: { id: bookingId },
+          await prisma.consultationBooking.updateMany({
+            where: {
+              id: bookingId,
+              userId: paid.userId,
+              status: { in: ["REQUESTED", "PAYMENT_PENDING", "ACCEPTED", "CONFIRMED"] },
+              paymentStatus: { in: ["PENDING", "FAILED"] }
+            },
             data: { status: "CONFIRMED", paymentStatus: "PAID" }
           });
         }
@@ -58,7 +63,16 @@ export async function POST(request: NextRequest) {
     if ((event.event === "payment.failed" || event.event === "payment.authorized") && payment?.order_id) {
       const existingPayment = await prisma.payment.findUnique({ where: { providerOrderId: payment.order_id } });
       if (existingPayment && event.event === "payment.failed") {
-        await prisma.payment.update({ where: { id: existingPayment.id }, data: { status: PaymentStatus.FAILED } });
+        // Failed callbacks can arrive after a captured/paid webhook. A stale
+        // failure must NEVER downgrade PAID, REFUNDED or waived entitlements.
+        const updated = await prisma.payment.updateMany({
+          where: { id: existingPayment.id, status: PaymentStatus.PENDING },
+          data: { status: PaymentStatus.FAILED }
+        });
+        if (updated.count === 0) {
+          logger.info("razorpay_stale_failed_event_ignored", { paymentId: existingPayment.id });
+          return ok({ received: true });
+        }
         const metadata = (existingPayment.metadata as Record<string, unknown> | null) ?? {};
         const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
         const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
@@ -71,8 +85,9 @@ export async function POST(request: NextRequest) {
         }
 
         if (bookingId) {
-          await prisma.consultationBooking.update({
-            where: { id: bookingId },
+          await prisma.consultationBooking.updateMany({
+            where: { id: bookingId, userId: existingPayment.userId,
+              paymentStatus: "PENDING" },
             data: { paymentStatus: "FAILED" }
           });
         }
