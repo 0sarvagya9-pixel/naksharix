@@ -48,7 +48,7 @@ export default async function ProductDetails({params}:Props) {
           <div className="mt-7 rounded-xl border border-[#e8c78f]/35 p-4">
             <p className="font-semibold text-[#f5d39b]">Product information and quotation</p>
             <p className="mt-2 text-sm leading-7 text-[#d9cfdd]">
-              The product's exact material, specification, authenticity, price, dispatch and delivery terms are confirmed by staff before purchase.
+              The product&apos;s exact material, specification, authenticity, price, dispatch and delivery terms are confirmed by staff before purchase.
               No automatic online checkout is active.
             </p>
           </div>
