@@ -34,6 +34,16 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(page.getByRole("heading", { level: 1, name: /A little clarity/i })).toBeVisible();
   });
 
+  test("public service pages are full-width while account tools retain focused workspaces", async ({ page }) => {
+    for (const path of ["/", "/shop", "/pujas", "/consultation", "/reports", "/faq"]) {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+      await expect(page.locator('[data-layout="editorial"]')).toBeVisible();
+      const width = await page.locator('[data-layout="editorial"]').evaluate(node => node.getBoundingClientRect().width);
+      const viewport = await page.evaluate(() => document.documentElement.clientWidth);
+      expect(Math.abs(width-viewport), path).toBeLessThanOrEqual(2);
+    }
+  });
+
   test("public service pages have photographic banners without changing their core content", async ({ page }) => {
     for (const path of ["/consultation", "/reports", "/shop", "/learn", "/puja-enquiry"]) {
       await page.goto(path, { waitUntil: "domcontentloaded" });

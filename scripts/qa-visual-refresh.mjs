@@ -25,4 +25,7 @@ assert.ok(read("components/auth-profile-menu.tsx").includes('bg-[#fffaf4]/95'),"
 assert.ok(read("components/brand-logo.tsx").includes("from-[#6d2635]"),"WORDMARK_IVORY_CONTRAST_MISSING");
 assert.ok(!read("components/background/premium-cosmic-background.tsx").includes("premium-cosmic-bg-v2.webp"),"OLD_BACKGROUND_NOT_REMOVED");
 assert.ok(read("components/pwa-register.tsx").includes('"127.0.0.1"'),"CI_SERVICE_WORKER_ISOLATION_MISSING");
+const siteShell=read("components/layout/premium-glass-shell.tsx");
+assert.ok(siteShell.includes('data-layout={isEditorial ? "editorial" : "workspace"}'),"PUBLIC_FULL_BLEED_LAYOUT_MISSING");
+assert.ok(siteShell.includes('"naksharix-editorial-shell mx-0 my-0 max-w-none rounded-none"'),"PUBLIC_CONTAINED_BY_WORKSPACE");
 console.log("SITEWIDE_VISUAL_QA=PASS;ORIGINAL_RELEVANT_VISUALS=7;SERVICE_CARDS=8;LIVE_PAYMENT_CHANGES=NO");
