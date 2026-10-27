@@ -33,7 +33,7 @@ export function PujaRequestClient({topicId,name,pricePaise}:{topicId:string;name
     <p className="mt-2 text-sm">Your preferred date is not a confirmed appointment.</p>
     <Link className="mt-4 inline-block font-bold text-[#762a3b] underline" href="/puja-bookings">Track My Puja Requests</Link>
   </div>:<form onSubmit={submit} className="mt-7 space-y-5 rounded-2xl border border-[#e2c4a1] bg-white p-6 shadow-sm">
-   <label className={labelClass}>Devotee's full name<input required minLength={2} maxLength={120} value={devoteeName} onChange={e=>setDevoteeName(e.target.value)} className={inputClass}/></label>
+   <label className={labelClass}>Devotee&apos;s full name<input required minLength={2} maxLength={120} value={devoteeName} onChange={e=>setDevoteeName(e.target.value)} className={inputClass}/></label>
    <label className={labelClass}>Phone<input required minLength={8} maxLength={20} value={customerPhone} onChange={e=>setCustomerPhone(e.target.value)} className={inputClass}/></label>
    <label className={labelClass}>Preferred date (not a reserved time)<input required type="date" value={preferredDate} onChange={e=>setPreferredDate(e.target.value)} className={inputClass}/></label>
    <label className={labelClass}>City / location<input required minLength={2} maxLength={100} value={city} onChange={e=>setCity(e.target.value)} className={inputClass}/></label>
