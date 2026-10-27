@@ -101,10 +101,10 @@ assert(pkg.scripts["qa:final-closure"] === "node scripts/qa-final-code-closure.m
 assert(pkg.scripts["qa:prod-db-readonly"] === "node scripts/qa-production-db-readonly.mjs", "Production DB read-only QA registered", "manual evidence command available");
 
 assert(shopSource.includes("AddToCartButton") && shopContent.includes("quote-cart-controls"), "Shop quote cart UI exists", "local-only client cart without payment");
-assert(read("components/shop/cart-page-client.tsx").includes("No payment is charged") &&
-  read("components/shop/cart-page-client.tsx").includes("Secure checkout is not enabled"), "Cart visibly discloses non-payment scope", "all checkout remains held");
-assert(read("components/shop/quote-cart-controls.tsx").includes("localStorage") &&
-  !/razorpay|stripe|paymentIntent|checkoutSession|order\.create/.test(read("components/shop/quote-cart-controls.tsx")), "Cart cannot take payment or create an order", "saved draft only");
+assert(source("components/shop/cart-page-client.tsx").includes("No payment is charged") &&
+  source("components/shop/cart-page-client.tsx").includes("Secure checkout is not enabled"), "Cart visibly discloses non-payment scope", "all checkout remains held");
+assert(source("components/shop/quote-cart-controls.tsx").includes("localStorage") &&
+  !/razorpay|stripe|paymentIntent|checkoutSession|order\.create/.test(source("components/shop/quote-cart-controls.tsx")), "Cart cannot take payment or create an order", "saved draft only");
 assert(!/Pay with Razorpay|Buy Now/i.test(shopSource), "Shop paid controls not active", "quote-only not chargeable");
 
 assert(env.includes('SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false")'), "Subscriptions default disabled", "locked scope preserved");
