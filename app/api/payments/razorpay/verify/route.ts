@@ -29,7 +29,16 @@ export async function POST(request: NextRequest) {
       select: { id: true, userId: true, amount: true, currency: true, status: true, providerPaymentId: true, metadata: true }
     });
     if (!existingPayment || existingPayment.userId !== user.id) return fail("Payment not found", 404);
-    if (existingPayment.status === "PAID") return ok({ payment: existingPayment });
+    if (existingPayment.status === "PAID") {
+      if (existingPayment.providerPaymentId !== body.razorpay_payment_id) {
+        return fail("Payment ID does not match the completed order", 409);
+      }
+      return ok({ payment: existingPayment });
+    }
+    if (existingPayment.status === "REFUNDED" || existingPayment.status === "ADMIN_BYPASS" ||
+        existingPayment.status === "FREE") {
+      return fail("This payment cannot be captured again", 409);
+    }
 
     const captured = await verifyRazorpayCapturedPayment(body.razorpay_order_id, body.razorpay_payment_id, Number(existingPayment.amount), existingPayment.currency);
     if (!captured.ok) return fail("Payment could not be verified", 400);
