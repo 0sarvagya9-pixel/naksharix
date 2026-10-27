@@ -113,6 +113,32 @@ if (opsResponse) {
   const schema = responseBody.data?.services?.databaseSchema;
   if (schema?.ready !== true || schema?.missingCount !== 0) {
     fail("predeploy feature schema", "Disposable database is missing LearningProgress or PujaPartner");
+    // Debug metadata ONLY against disposable CI localhost PostgreSQL. Read-only,
+    // no credentials and no application rows are printed; never connect to Neon.
+    const db = process.env.DATABASE_URL;
+    if (process.env.CI === "true" && db) {
+      try {
+        const uri = new URL(db);
+        if (["localhost", "127.0.0.1"].includes(uri.hostname) &&
+            ["/naksharix", "/naksharix_browser"].includes(uri.pathname)) {
+          const { PrismaClient } = await import("@prisma/client");
+          const client = new PrismaClient();
+          try {
+            const metadata = await client.$transaction(async (tx) => {
+              await tx.$executeRaw`SET TRANSACTION READ ONLY`;
+              const columns = await tx.$queryRaw`SELECT table_name, column_name, data_type, udt_name, is_nullable, datetime_precision FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('LearningProgress','PujaPartner') ORDER BY table_name,column_name`;
+              const indexes = await tx.$queryRaw`SELECT tablename, indexname, indexdef FROM pg_indexes WHERE schemaname='public' AND tablename IN ('LearningProgress','PujaPartner') ORDER BY tablename,indexname`;
+              const constraints = await tx.$queryRaw`SELECT c.conrelid::regclass::text AS table_name,c.conname,c.contype,c.convalidated,c.confdeltype,c.confupdtype,pg_get_constraintdef(c.oid) AS definition FROM pg_constraint c WHERE c.conrelid IN (to_regclass('public."LearningProgress"'),to_regclass('public."PujaPartner"')) ORDER BY c.conname`;
+              return {columns,indexes,constraints};
+            });
+            console.log("DISPOSABLE_SCHEMA_METADATA=" + JSON.stringify(metadata));
+          } finally { await client.$disconnect(); }
+        }
+      } catch (diagnosticError) {
+        console.log("DISPOSABLE_SCHEMA_METADATA_UNAVAILABLE=" + String(diagnosticError).slice(0,160));
+      }
+    }
+
   } else pass("predeploy feature schema", "both staged feature tables and indexes exist");
 }
 const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
