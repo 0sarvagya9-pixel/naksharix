@@ -279,7 +279,7 @@ export function EditorialHome() {
       </section>
 
 
-      <section className="nx-ed-section" aria-labelledby="naksharix-featured-products">
+      <section className="nx-ed-section" aria-label="Featured spiritual products">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="SACRED ESSENTIALS" title="Explore the spiritual catalogue."
             copy="Beautifully illustrated traditional items. Authenticity, exact product specification and a quote are confirmed separately." />
@@ -314,7 +314,7 @@ export function EditorialHome() {
         </div>
       </section>
 
-      <section className="nx-ed-section" aria-labelledby="naksharix-featured-pujas">
+      <section className="nx-ed-section" aria-label="Featured Puja topics">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="PUJA TRADITIONS" title="Ceremonies for every occasion."
             copy="Explore traditional Puja topics and upcoming festival dates. Availability and local muhurat require confirmation." />
