@@ -222,6 +222,7 @@ test.describe("Naksharix release browser QA", () => {
 
     const themeButton = page.getByRole("button", { name: "Toggle dark and light mode" });
     await expect(themeButton).toBeVisible();
+    await expect(themeButton).toBeEnabled();
     const before = await page.locator("html").evaluate((element) => element.classList.contains("dark"));
     await themeButton.click();
     const after = await page.locator("html").evaluate((element) => element.classList.contains("dark"));
