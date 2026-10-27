@@ -189,7 +189,16 @@ for (const [url,label] of [
   ["/shop/5-mukhi-rudraksha","Shop product detail"],
   ["/shop/shri-yantra","Shop Yantra detail"]
 ]) await expectStatus(url,200,undefined,label);
-await expectStatus("/pujas/imaginary-paid-ritual",404,undefined,"unknown ritual fails closed");
+// Next.js may stream a notFound() page with HTTP 200 after headers have begun.
+const unknownPuja = await request("/pujas/imaginary-paid-ritual");
+const unknownPage = await unknownPuja.text();
+if (![200, 404].includes(unknownPuja.status) ||
+    !unknownPage.includes("Page not found") ||
+    !/noindex/i.test(unknownPage)) {
+  fail("unknown ritual fails closed", "Expected unindexable not-found page, received HTTP " + unknownPuja.status);
+} else {
+  pass("unknown ritual fails closed", "404 UI and noindex; status " + unknownPuja.status);
+}
 const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
 if (partnerResponse) {
   const body = await partnerResponse.json();
