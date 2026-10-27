@@ -164,7 +164,7 @@ export function MainNav() {
               ref={menuButtonRef}
               variant="outline"
               size="icon"
-              className="border-[rgba(255,255,255,0.22)] bg-white/10 text-white hover:bg-white/20 xl:hidden"
+              className="border-[rgba(138,43,56,0.28)] bg-[#fff8ee] text-[#852f3c] hover:bg-[#f8e5d4] xl:hidden"
               aria-label="Open navigation menu"
               aria-expanded={open}
               aria-controls="naksharix-mobile-sidebar"
@@ -190,7 +190,7 @@ export function MainNav() {
                     key={`${item.href}-mobile`}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className="rounded-xl border border-[rgba(20,20,20,0.08)] bg-white px-4 py-3 text-sm font-semibold text-[#3a3a3c] hover:bg-[rgba(20,20,20,0.03)]"
+                    className="rounded-xl border border-[rgba(148,67,56,0.16)] bg-[#fffcf8] px-4 py-3 text-sm font-semibold text-[#4e3038] hover:bg-[#fff0e4]"
                   >
                     {item.label}
                   </Link>
@@ -260,7 +260,7 @@ function DropdownLink({ item, compact = false }: { item: { label: string; href: 
 
 function navLinkClass(active: boolean) {
   return cn(
-    "flex items-center gap-0.5 px-2 py-1 text-[13px] font-semibold text-[#492b32] transition hover:text-white",
+    "flex items-center gap-0.5 px-2 py-1 text-[13px] font-semibold text-[#492b32] transition hover:text-[#9b2d36]",
     active ? "rounded-none border-b-2 border-[#f2c56b] px-1 py-0.5 font-bold text-[#9b2d36]" : ""
   );
 }

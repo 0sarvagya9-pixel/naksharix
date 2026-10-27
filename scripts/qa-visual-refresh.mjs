@@ -15,4 +15,8 @@ assert.ok(home.includes('number:"08"'),"EIGHT_SERVICE_CARDS_REQUIRED");
 const nav=read("components/main-nav.tsx");
 for(const x of ['label: "Reports"','label: "Consultation"','label: "Puja"','label: "Shop"'])assert.ok(nav.includes(x),"TOP_NAV_MISSING="+x);
 assert.ok(read("app/layout.tsx").includes("reference-redesign.css"),"REDESIGN_NOT_IMPORTED");
+const header=read("components/main-nav.tsx");
+assert.ok(header.includes('bg-[#fff8ee] text-[#852f3c]') && !header.includes('hover:text-white"'),"IVORY_HEADER_CONTRAST_REGRESSION");
+assert.ok(read("components/language-switcher.tsx").includes('bg-[#fff8ee]'),"LANGUAGE_THEME_INCONSISTENT");
+assert.ok(read("components/auth-profile-menu.tsx").includes('bg-[#fffaf4]/95'),"PROFILE_THEME_INCONSISTENT");
 console.log("SITEWIDE_VISUAL_QA=PASS;ORIGINAL_RELEVANT_VISUALS=7;SERVICE_CARDS=8;LIVE_PAYMENT_CHANGES=NO");

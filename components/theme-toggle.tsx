@@ -26,7 +26,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} disabled={!hydrated} aria-label="Toggle dark and light mode">
+    <Button variant="ghost" size="icon" className="text-[#782c39] hover:bg-[#f9e8d9] hover:text-[#782c39]" onClick={toggleTheme} disabled={!hydrated} aria-label="Toggle dark and light mode">
       {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
     </Button>
   );
