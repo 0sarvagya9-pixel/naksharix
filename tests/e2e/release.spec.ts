@@ -66,7 +66,7 @@ async function expectNamedInteractiveControls(page: Page) {
 }
 
 test.describe("Naksharix release browser QA", () => {
-  test("core public pages render without runtime errors", async ({ page }) => {
+  test("core public pages render without runtime errors", async ({ context }) => {
     const paths = [
       "/",
       "/about",
@@ -85,14 +85,22 @@ test.describe("Naksharix release browser QA", () => {
     ];
 
     for (const pathname of paths) {
-      const runtimeErrors = await installRuntimeErrorGuard(page);
-      const response = await page.goto(absolute(pathname), { waitUntil: "domcontentloaded" });
-      expect(response?.status(), pathname).toBeLessThan(400);
-      await expect(page.locator("body")).toBeVisible();
-      await expect(page.locator("h1").first(), pathname).toBeVisible();
-      await expectNoHorizontalOverflow(page);
-      await expectNamedInteractiveControls(page);
-      expect(runtimeErrors, `${pathname}: ${runtimeErrors.join("\n")}`).toEqual([]);
+      // Isolate each hard navigation: WebKit can report cancelled Next.js RSC prefetches
+      // from the departing document as console errors during the next page load.
+      // Keep the runtime-error guard strict on each newly opened page.
+      const page = await context.newPage();
+      try {
+        const runtimeErrors = await installRuntimeErrorGuard(page);
+        const response = await page.goto(absolute(pathname), { waitUntil: "domcontentloaded" });
+        expect(response?.status(), pathname).toBeLessThan(400);
+        await expect(page.locator("body")).toBeVisible();
+        await expect(page.locator("h1").first(), pathname).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+        await expectNamedInteractiveControls(page);
+        expect(runtimeErrors, `${pathname}: ${runtimeErrors.join("\n")}`).toEqual([]);
+      } finally {
+        await page.close();
+      }
     }
   });
 
