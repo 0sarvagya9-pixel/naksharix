@@ -168,16 +168,24 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("button", { name: /Add to Cart|Checkout/i })).toHaveCount(0);
   });
 
-  test("Shop enquiry preserves selected item and opens product-specific support email", async ({ page }) => {
+  test("Shop enquiry preserves selected SKU and requires account before private support request", async ({ page }) => {
     await page.goto(absolute("/shop"), { waitUntil: "domcontentloaded" });
     await page.getByPlaceholder("Search products...").fill("Shri Yantra");
     await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true })).toBeVisible();
-    await page.locator('a[href="/contact?topic=shri-yantra"]').click();
-    await expect(page).toHaveURL(/\/contact\?topic=shri-yantra/);
-    await expect(page.getByRole("heading", { name: "Availability enquiry: Shri Yantra" })).toBeVisible();
-    const enquiry = page.getByRole("link", { name: "Email Naksharix about Shri Yantra" });
-    await expect(enquiry).toHaveAttribute("href", /mailto:care@naksharix\.com\?subject=.+Shri%20Yantra/i);
-    await expect(page.getByRole("button", { name: /Add to Cart|Checkout/i })).toHaveCount(0);
+    await page.locator('a[href="/commerce-enquiry?kind=SHOP&item=shri-yantra"]').click();
+    await expect(page).toHaveURL(/\/commerce-enquiry\?kind=SHOP&item=shri-yantra/);
+    await expect(page.getByRole("heading", { name: "Product availability enquiry" })).toBeVisible();
+    await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Add to Cart|Checkout|Pay/i })).toHaveCount(0);
+  });
+
+  test("Puja enquiry from reviewed calendar requires account and does not claim booking", async ({ page }) => {
+    await page.goto(absolute("/puja-calendar"), { waitUntil: "domcontentloaded" });
+    await page.getByRole("link", { name: "Enquire about this Puja" }).first().click();
+    await expect(page).toHaveURL(/\/commerce-enquiry\?kind=PUJA&item=/);
+    await expect(page.getByRole("heading", { name: "Puja date and availability enquiry" })).toBeVisible();
+    await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Checkout|Pay/i })).toHaveCount(0);
   });
 
   test("AI readiness endpoint exposes no secret details", async ({ request }) => {
