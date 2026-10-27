@@ -89,7 +89,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                 </details>
                 <div className="mt-auto pt-5">
                   <Button asChild className="w-full bg-[#006b50] text-white hover:bg-[#00583f]">
-                    <Link href={`/contact?topic=${encodeURIComponent(product.slug)}`}><HeartHandshake className="h-4 w-4" />{labels.askAvailability}</Link>
+                    <Link href={`/commerce-enquiry?kind=SHOP&item=${encodeURIComponent(product.id)}`}><HeartHandshake className="h-4 w-4" />{labels.askAvailability}</Link>
                   </Button>
                 </div>
               </CardContent>
