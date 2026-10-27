@@ -1,3 +1,4 @@
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
 import { TarotPageContent } from "@/components/tarot-page-content";
@@ -10,5 +11,9 @@ export const metadata: Metadata = seo({
 });
 
 export default function TarotPage() {
-  return <TarotPageContent />;
+  return <><EditorialServiceBanner eyebrow="TAROT EXPLORATION"
+  headline="A symbolic path to reflection"
+  caption="Explore traditional card symbolism and thoughtful questions. This is not a verified prediction or professional advice."
+  image="/naksharix/editorial-tarot.svg" imageAlt="Original decorative tarot card illustration"
+  link="/learn" linkLabel="Explore the learning library" /><TarotPageContent /></>;
 }

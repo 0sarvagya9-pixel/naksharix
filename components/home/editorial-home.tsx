@@ -8,8 +8,8 @@ import {
   Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
 } from "lucide-react";
 
-const STARRY_SKY = "https://images.unsplash.com/photo-1519681393784-d120267933ba";
-const GOLDEN_HORIZON = "https://images.unsplash.com/photo-1500534623283-312aade485b7";
+const STARRY_SKY = "/naksharix/editorial-consultation.svg";
+const GOLDEN_HORIZON = "/naksharix/editorial-panchang.svg";
 
 const heroSlides = [
   {
@@ -18,7 +18,7 @@ const heroSlides = [
     accent: "your way forward.",
     body: "Explore Vedic astrology with beautiful digital tools, clear explanations and thoughtful ways to seek guidance.",
     image: STARRY_SKY,
-    alt: "Photograph of the Milky Way above a snowy mountain range",
+    alt: "Original illustrated consultation and birth-chart theme",
     main: { label: "Generate free Kundli", href: "/kundli" },
     secondary: { label: "Explore astrology tools", href: "/free-calculators" }
   },
@@ -28,7 +28,7 @@ const heroSlides = [
     accent: "for each new day.",
     body: "Read the Panchang for your location, understand the day’s traditional context and discover the zodiac.",
     image: GOLDEN_HORIZON,
-    alt: "Golden sunlight rising over a layered mountain landscape",
+    alt: "Original illustrated Hindu Panchang calendar",
     main: { label: "View today’s Panchang", href: "/panchang" },
     secondary: { label: "Today’s horoscope", href: "/daily-horoscope" }
   },
@@ -55,25 +55,36 @@ const quickLinks = [
 
 const services = [
   {
-    number: "01", label: "Know your Kundli",
-    copy: "Discover the traditional chart built from your birth date, time and place.",
-    href: "/kundli", cta: "Create my Kundli",
-    image: "/naksharix/zodiac-wheel-gold.jpg",
-    alt: "Golden zodiac wheel on an astrology-inspired background"
+    number:"01",label:"Personal Kundli",copy:"Explore the traditional birth chart with time- and location-based inputs.",
+    href:"/kundli",cta:"Create free Kundli",image:"/naksharix/editorial-kundli.svg",alt:"Original illustrated Vedic birth-chart grid"
   },
   {
-    number: "02", label: "Consult an Astrologer",
-    copy: "Explore approved profiles, available consultation options and session details.",
-    href: "/consultation", cta: "Explore consultations",
-    image: STARRY_SKY,
-    alt: "Star-filled sky above mountains"
+    number:"02",label:"Expert Consultations",copy:"Read approved astrologer profiles and available session formats.",
+    href:"/consultation",cta:"Explore consultations",image:"/naksharix/editorial-consultation.svg",alt:"Original artwork illustrating a person in consultation"
   },
   {
-    number: "03", label: "Reports & reflections",
-    copy: "Browse available report topics and read the details before requesting one.",
-    href: "/reports", cta: "Explore reports",
-    image: GOLDEN_HORIZON,
-    alt: "Sunrise through mountain silhouettes"
+    number:"03",label:"Personal Reports",copy:"Browse available personalized Kundli, match-making and numerology topics.",
+    href:"/reports",cta:"View astrology reports",image:"/naksharix/editorial-reports.svg",alt:"Original illustrated report and zodiac diagram"
+  },
+  {
+    number:"04",label:"Traditional Puja",copy:"Browse 94 Puja topics and request written availability confirmation.",
+    href:"/pujas",cta:"Explore Puja directory",image:"/naksharix/editorial-puja.svg",alt:"Original illustration of a traditional puja thali"
+  },
+  {
+    number:"05",label:"Kundli Matching",copy:"Compare traditional chart inputs and learn about Guna Milan.",
+    href:"/matchmaking",cta:"Check compatibility",image:"/naksharix/editorial-kundli.svg",alt:"Vedic birth chart geometry illustration"
+  },
+  {
+    number:"06",label:"Your Daily Panchang",copy:"Understand the five traditional Panchang elements for a chosen place.",
+    href:"/panchang",cta:"Explore Panchang",image:"/naksharix/editorial-panchang.svg",alt:"Original calendar illustration with ritual dates"
+  },
+  {
+    number:"07",label:"Spiritual Catalogue",copy:"Discover Rudraksha, malas and yantras with clear item enquiries.",
+    href:"/shop",cta:"Explore the collection",image:"/shop/rudraksha-mala-illustration.svg",alt:"Original Rudraksha mala product illustration"
+  },
+  {
+    number:"08",label:"Free Learning",copy:"Start with original introductory lessons on charts, planets and Panchang.",
+    href:"/learn",cta:"Start learning",image:"/naksharix/editorial-learning.svg",alt:"Illustration of an open traditional learning book"
   }
 ] as const;
 
@@ -95,15 +106,15 @@ const journeys = [
     label: "Learn the foundations", eyebrow: "FREE LEARNING",
     desc: "Go from birth charts to the Panchang through four introductory lessons with linked calculators.",
     href: "/learn", cta: "Start learning",
-    image: STARRY_SKY,
-    alt: "Night sky with visible stars above the mountains"
+    image: "/naksharix/editorial-learning.svg",
+    alt: "Illustrated open Vedic learning book"
   },
   {
     label: "Spiritual catalogue", eyebrow: "CURATED DISCOVERY",
     desc: "Browse spiritual products and make an enquiry. Online checkout and delivery are not active.",
     href: "/shop", cta: "View catalogue",
-    image: "/naksharix/zodiac-wheel-gold.jpg",
-    alt: "Detailed gold zodiac artwork"
+    image: "/shop/rudraksha-mala-illustration.svg",
+    alt: "Illustrative Rudraksha mala artwork"
   }
 ] as const;
 
@@ -239,7 +250,7 @@ export function EditorialHome() {
       <section className="nx-ed-cosmos-split" aria-labelledby="nx-ed-horoscope-title">
         <div className="nx-ed-container nx-ed-cosmos-inner">
           <div className="nx-ed-cosmos-photo">
-            <Image src={GOLDEN_HORIZON} alt="Photograph of golden sunrise over distant mountains" fill sizes="(max-width: 850px) 100vw, 45vw" quality={75}/>
+            <Image src={GOLDEN_HORIZON} alt="Illustrated Hindu calendar and Panchang" fill sizes="(max-width: 850px) 100vw, 45vw" quality={75}/>
             <div className="nx-ed-cosmos-photo-label"><Sun size={18} aria-hidden="true"/> A moment for reflection, every day</div>
           </div>
           <div className="nx-ed-cosmos-copy">

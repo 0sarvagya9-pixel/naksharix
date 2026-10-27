@@ -73,7 +73,7 @@ export default function LearnPage() {
       <EditorialServiceBanner eyebrow="THE LEARNING LIBRARY"
         headline="Wisdom starts with curiosity"
         caption="Learn the foundations of Kundli, Panchang, Nakshatras and Dasha in four self-study lessons. No paid course or qualification is implied."
-        image="https://images.unsplash.com/photo-1519681393784-d120267933ba" imageAlt="Milky Way sky above snowy mountains"
+        image="/naksharix/editorial-learning.svg" imageAlt="Original illustration of an open astrology study book"
         link="/free-calculators" linkLabel="Explore the free calculators" />
       <Section>
         <div className="mx-auto max-w-5xl">

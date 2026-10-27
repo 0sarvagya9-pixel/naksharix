@@ -44,7 +44,11 @@ async function expectNoHorizontalOverflow(page: Page) {
     documentWidth: document.documentElement.scrollWidth,
     bodyWidth: document.body.scrollWidth
   }));
-  expect(dimensions.documentWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport + 2);
+  const overflowNodes = await page.evaluate(() =>
+    [...document.querySelectorAll("body *")]
+      .filter(el => { const r=el.getBoundingClientRect();return r.right>document.documentElement.clientWidth+2 && r.width>0; })
+      .slice(0,8).map(el=>({tag:el.tagName,classes:String(el.className).slice(0,140),right:Math.round(el.getBoundingClientRect().right)})));
+  expect(dimensions.documentWidth, JSON.stringify({dimensions,overflowNodes})).toBeLessThanOrEqual(dimensions.viewport + 2);
   expect(dimensions.bodyWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport + 2);
 }
 
@@ -196,6 +200,15 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByText("Rudrabhishek", { exact: true })).toBeVisible();
     await expect(page.locator('img[alt="5 Mukhi Rudraksha original illustrative artwork"]')).toBeVisible();
     await expect(page.getByRole("link", { name: "Explore Puja directory" }).first()).toBeVisible();
+  });
+
+  test("Puja directory initially limits mobile cards and reveals more on demand", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(12);
+    await page.getByRole("button", { name: /Load more Puja topics/ }).click();
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(24);
   });
 
   test("Puja service directory filters traditions and preserves selected topic", async ({ page }) => {

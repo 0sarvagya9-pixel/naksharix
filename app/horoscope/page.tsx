@@ -1,3 +1,4 @@
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, Compass, Moon, Shield, Star, Sun } from "lucide-react";
@@ -23,10 +24,15 @@ export default function HoroscopeHubPage() {
 
   return (
     <main className="star-field">
+      <EditorialServiceBanner eyebrow="YOUR HOROSCOPE"
+        headline="The zodiac, one day at a time"
+        caption="Read the twelve traditional signs, daily themes and weekly reflections. Interpretations are for personal reflection."
+        image="/naksharix/zodiac-wheel-gold.jpg" imageAlt="Decorative golden zodiac wheel"
+        link="/daily-horoscope" linkLabel="View today's horoscope" />
       <Section first>
         <div className="text-center max-w-3xl mx-auto mb-12">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Cosmic Insights</p>
-          <h1 className="mt-3 font-cinzel text-5xl font-black text-white">Vedic Horoscope Hub</h1>
+          <h1 className="mt-3 font-cinzel text-5xl font-black text-[#48282f]">Vedic Horoscope Hub</h1>
           <p className="mt-4 text-base naksh-muted-text">
             Gain reflective clarity on love, career, wellbeing, and professional momentum. Select a timeframe or click on your zodiac sign below.
           </p>

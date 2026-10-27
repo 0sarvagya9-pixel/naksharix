@@ -14,7 +14,7 @@ export default function ReportsPage() {
   return <><EditorialServiceBanner eyebrow="CHARTS & REPORTS"
     headline="A deeper look at your cosmic story"
     caption="Explore available traditional chart, matching and numerology report topics. Availability and any applicable pricing are shown in the report workflow."
-    image="https://images.unsplash.com/photo-1500534623283-312aade485b7" imageAlt="Golden sunrise over mountains"
+    image="/naksharix/editorial-reports.svg" imageAlt="Illustrated birth-chart report"
     link="/kundli" linkLabel="Begin with a free Kundli" />
     <ReportsContent /></>;
 }

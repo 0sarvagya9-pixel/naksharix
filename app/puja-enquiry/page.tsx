@@ -50,7 +50,7 @@ export default async function PujaEnquiryPage() {
       <EditorialServiceBanner eyebrow="PUJA & TRADITIONS"
         headline="A space for sacred traditions"
         caption="Explore customary practices and submit a private enquiry. Ceremonies, priest availability and delivery are not automatically guaranteed."
-        image="/naksharix/ganesh-hero-light-saffron.jpg" imageAlt="Saffron-toned traditional Ganesh artwork"
+        image="/naksharix/editorial-puja.svg" imageAlt="Illustrated puja thali with a glowing diya"
         link="/ask-astrologer" linkLabel="Ask a written question" />
       <Section>
         <div className="mx-auto mb-6 max-w-4xl rounded-2xl border border-[#D4AF37]/25 bg-[#061D3C]/70 p-5">
