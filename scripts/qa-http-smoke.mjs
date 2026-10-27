@@ -141,6 +141,27 @@ if (opsResponse) {
 
   } else pass("predeploy feature schema", "both staged feature tables and indexes exist");
 }
+const calendarPage = await expectStatus("/puja-calendar", 200, undefined, "rolling Hindu Puja calendar page");
+if (calendarPage) {
+  const html = await calendarPage.text();
+  if (!html.includes("Upcoming Puja Calendar")) fail("Hindu Puja calendar title", "Expected calendar page content");
+  else pass("Hindu Puja calendar title", "source-reviewed calendar render");
+}
+const calendarFeed = await expectStatus("/api/puja/calendar", 200, undefined, "rolling Puja API");
+if (calendarFeed) {
+  const payload = await calendarFeed.json();
+  const calendar = payload?.data;
+  const valid = calendar && /^\d{4}-\d{2}-\d{2}$/.test(calendar.from) &&
+    /^\d{4}-\d{2}-\d{2}$/.test(calendar.untilExclusive) &&
+    calendar.bookingAvailable === false &&
+    calendar.exhaustiveRegionalCoverage === false &&
+    Array.isArray(calendar.events) &&
+    calendar.events.length > 0 &&
+    calendar.events.every((item) => item.date >= calendar.from &&
+      item.date < calendar.untilExclusive && item.bookingStatus === "information_only");
+  if (!valid) fail("Puja calendar feed truth", "Invalid range or unverified booking claim");
+  else pass("Puja calendar feed truth", calendar.events.length + " informational events");
+}
 const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
 if (partnerResponse) {
   const body = await partnerResponse.json();
