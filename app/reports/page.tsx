@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
 import { ReportsContent } from "@/components/reports-content";
 import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
+import { getPublishedManualReportOffers } from "@/lib/reports/manual-offerings";
 
 export const metadata: Metadata = seo({
   title: "Premium Astrology Reports | Kundli, Match Making, Numerology & Career Reports",
@@ -10,11 +11,13 @@ export const metadata: Metadata = seo({
   keywords: ["Premium Astrology Reports", "Kundli Report", "Match Making Report", "Numerology Report", "Lo Shu Report"]
 });
 
-export default function ReportsPage() {
+export const dynamic="force-dynamic";
+export default async function ReportsPage() {
+  const manualOfferings=await getPublishedManualReportOffers();
   return <><EditorialServiceBanner eyebrow="CHARTS & REPORTS"
     headline="A deeper look at your cosmic story"
     caption="Explore available traditional chart, matching and numerology report topics. Availability and any applicable pricing are shown in the report workflow."
     image="/naksharix/editorial-reports.svg" imageAlt="Illustrated birth-chart report"
     link="/kundli" linkLabel="Begin with a free Kundli" />
-    <ReportsContent /></>;
+    <ReportsContent manualOfferings={manualOfferings}/></>;
 }

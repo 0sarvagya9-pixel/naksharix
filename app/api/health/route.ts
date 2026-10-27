@@ -1,6 +1,6 @@
 ﻿import { ok } from "@/lib/api";
 import { prisma } from "@/lib/db";
-import { getRedis } from "@/lib/redis";
+import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 
 export const dynamic = "force-dynamic";
 
@@ -18,14 +18,8 @@ export async function GET() {
     checks.database = "error";
   }
 
-  const redis = getRedis();
-  if (redis) {
-    try {
-      await redis.ping();
-      checks.redis = "ok";
-    } catch {
-      checks.redis = "error";
-    }
+  if (sharedRedisConfigured()) {
+    checks.redis = await redisPing() ? "ok" : "error";
   }
 
   const healthy = checks.app === "ok" && checks.database === "ok" && checks.redis !== "error";

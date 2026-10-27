@@ -35,7 +35,7 @@ assert(schema.includes("reportSlug") && schema.includes("adminNotes") && schema.
 assert(reportApi.includes("getCurrentUser()"), "Report request API requires auth", "no anonymous fake persistence");
 assert(reportApi.includes("ReportPaymentStatus.PENDING") && reportApi.includes("PENDING_REVIEW"), "Report request API creates pending-review records", "no-payment request stage is real DB persistence");
 assert(
-  reportsContent.includes("No-payment pending-review request")
+  reportsContent.includes("Personalized quote before any payment")
     && reportsContent.includes("server-verified payment")
     && reportsContent.includes("actual generated PDF"),
   "Reports page explains paid and pending-review workflows",

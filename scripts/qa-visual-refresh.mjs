@@ -29,4 +29,19 @@ const siteShell=read("components/layout/premium-glass-shell.tsx");
 assert.ok(siteShell.includes('data-layout={isEditorial ? "editorial" : "workspace"}'),"PUBLIC_FULL_BLEED_LAYOUT_MISSING");
 assert.ok(siteShell.includes('"naksharix-editorial-shell mx-0 my-0 max-w-none rounded-none"'),"PUBLIC_CONTAINED_BY_WORKSPACE");
 assert.ok(!read("app/shop/[slug]/page.tsx").includes('text-[#e1d6dd]'), "SHOP_DETAIL_LOW_CONTRAST_TEXT");
+// The premium redesign must not regress into unreadable navy panels or cartoon hero art.
+const premium=read("app/premium-ux-20261027.css");
+const calendar=read("app/puja-calendar/page.tsx");
+assert.ok(home.includes('const STARRY_SKY = "/naksharix/ganesh-hero-light-saffron.jpg"'),"CARTOON_HERO_RETURNED");
+assert.ok(premium.includes("header nav > a") && premium.includes("color:#432b34!important") && premium.includes("header nav > a[aria-current"),"HEADER_CONTRAST_UNSAFE");
+assert.ok(calendar.includes("nx-puja-calendar") && calendar.includes("text-[#fffaf2]") && calendar.includes("text-[#f8e9de]") && calendar.includes("bg-[#fff8ee]"),"CALENDAR_DARK_ON_DARK_REGRESSION");
+const shop=read("components/shop-coming-soon-content.tsx");
+const adminApi=read("app/api/admin/shop-catalogue/route.ts");
+const cart=read("components/shop/cart-page-client.tsx");
+assert.ok(shop.includes("AddToCartButton") && read("app/cart/page.tsx").includes("CartPageClient"),"CART_LINK_BROKEN");
+assert.ok(adminApi.includes("unitPricePaise: z.number().int().min(100)") && adminApi.includes("imageRights"),"PRICE_OR_IMAGE_RIGHTS_UNVALIDATED");
+assert.ok(cart.includes("No payment is charged") && cart.includes("Secure checkout is not enabled"),"CART_PAYMENT_SAFETY_MISSING");
+const photoRegistry=read("lib/puja/editorial-photos.ts");
+assert.ok(photoRegistry.includes("CC BY-SA 4.0") && photoRegistry.includes("CC0 1.0") && read("components/puja/puja-services-directory.tsx").includes("pujaEditorialPhoto(topic.id,topic.category)!.license"),"PUJA_IMAGE_RIGHTS_CREDIT_MISSING");
+
 console.log("SITEWIDE_VISUAL_QA=PASS;ORIGINAL_RELEVANT_VISUALS=7;SERVICE_CARDS=8;LIVE_PAYMENT_CHANGES=NO");

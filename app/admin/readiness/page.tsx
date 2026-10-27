@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { requireAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
-import { getRedis } from "@/lib/redis";
+import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getEmailReadiness } from "@/lib/email/email-service";
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
+import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -36,21 +37,13 @@ export default async function AdminReadinessPage() {
     database = "error";
   }
 
-  const redisClient = getRedis();
-  let redis: Status = redisClient ? "error" : "missing";
-  if (redisClient) {
-    try {
-      await redisClient.ping();
-      redis = "ok";
-    } catch {
-      redis = "error";
-    }
-  }
+  const redis: Status = !sharedRedisConfigured() ? "missing" : await redisPing() ? "ok" : "error";
 
   let newTables: Awaited<ReturnType<typeof getSchemaReadiness>> | null = null;
   try { newTables = await getSchemaReadiness(); } catch { newTables = null; }
   const email = getEmailReadiness();
   const monitoring = getMonitoringReadiness();
+  const commercial = await getCommercialReadiness();
   const emailStatus: Status = email.emailEnabled ? "ok" : "missing";
 
   const checks: Check[] = [
@@ -92,7 +85,7 @@ export default async function AdminReadinessPage() {
     {
       name: "Public Shop scope",
       status: "ok",
-      note: "Shop is approved as catalogue and enquiry-only; no cart or automatic checkout."
+      note: "Server-backed product catalogue, draft cart and unpaid owner-confirmed order requests exist. Automatic Shop payment checkout remains disabled."
     },
     {
       name: "Account verification and release parity",
@@ -134,6 +127,33 @@ export default async function AdminReadinessPage() {
             </Card>
           ))}
         </div>
+        <section className="mt-10" aria-labelledby="commercial-readiness-heading">
+          <h2 id="commercial-readiness-heading" className="font-cinzel text-2xl font-bold">Commerce and fulfilment readiness</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 naksh-muted-text">
+            Live read-only checks of the connected database and owner-managed catalogue. A published fee or image-rights record is not evidence of actual stock, a delivered product or completed ceremony.
+          </p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {commercial.checks.map(check => (
+              <Card key={check.key} className="glass">
+                <CardHeader><CardTitle className="flex items-start justify-between gap-4 text-base">
+                  <span>{check.title}</span>
+                  <span className={check.status === "ready" ? "text-xs text-[#00f5a0]" : "text-xs text-[#FFD700]"}>
+                    {check.status === "ready" ? "DATA PRESENT" : check.status === "unknown" ? "UNKNOWN" : "ACTION REQUIRED"}
+                  </span>
+                </CardTitle></CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-6 naksh-muted-text">{check.detail}</p>
+                  {check.actionHref && check.actionHref !== "/admin/readiness" ? (
+                    <Link href={check.actionHref} className="mt-3 inline-block text-sm font-semibold text-[#f2ce88] underline">Open management page</Link>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <p className="mt-5 text-sm font-semibold text-[#f9d18c]">
+            Automatic Shop/Puja payments: DISABLED pending independently verified fulfilment, refunds and payment-provider acceptance.
+          </p>
+        </section>
         <Card className="mt-6 glass">
           <CardHeader><CardTitle>Build identity</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm naksh-muted-text">

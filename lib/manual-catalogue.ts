@@ -1,7 +1,9 @@
 import type { Locale } from "@/lib/i18n";
+import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
 
 export type CatalogueText = Record<Locale, string>;
 export type ProductStatus = "active" | "inactive";
+export type ProductGalleryImage = { url: string; alt: string; imageRights: "OWNED" | "LICENSED" | "SUPPLIER_AUTHORIZED"; evidenceUrl: string; credit?:string; licenseName?:string; licenseUrl?:string; };
 export type ShopProduct = {
   id: string;
   slug: string;
@@ -15,7 +17,10 @@ export type ShopProduct = {
   imageRights?: "OWNED" | "LICENSED" | "SUPPLIER_AUTHORIZED";
   imageEvidenceUrl?: string;
   imageAlt: CatalogueText;
+  galleryImages?: ProductGalleryImage[];
   priceLabel: CatalogueText;
+  /** Approved integer INR paise; absent means NOT PRICED or bookable. */
+  unitPricePaise?: number | null;
   status: ProductStatus;
   featured: boolean;
   tags: string[];
@@ -113,6 +118,8 @@ export function emptyShopProduct(): ShopProduct {
     longDescription: text(""),
     imageUrl: "",
     imageAlt: text(""),
+    galleryImages: [],
+    unitPricePaise: null,
     priceLabel: {
       en: "Price on request",
       hi: "Price on request",
@@ -144,8 +151,12 @@ function product(id: string, category: string, purpose: string, en: string, hi: 
       hi: `${descHi} इसे चिंतनात्मक, आस्था-आधारित catalogue item के रूप में देखें और guidance, practical judgment और personal comfort के साथ चुनें।`,
       hinglish: `${descHinglish} Ise reflective, faith-based catalogue item ke roop mein dekhein aur guidance, practical judgment aur personal comfort ke saath choose karein.`
     },
-    imageUrl: `/shop/${id}-illustration.svg`,
-    imageAlt: { en: `${en} product visual`, hi: `${hi} उत्पाद visual`, hinglish: `${hinglish} product visual` },
+    imageUrl: referencePhotoForProduct(id)?.url || `/shop/${id}-illustration.svg`,
+    imageRights: referencePhotoForProduct(id) ? "LICENSED" : undefined,
+    imageEvidenceUrl: referencePhotoForProduct(id)?.evidenceUrl,
+    imageAlt: { en: referencePhotoForProduct(id)?.alt || `${en} product visual`, hi: referencePhotoForProduct(id)?.alt || `${hi} उत्पाद visual`, hinglish: referencePhotoForProduct(id)?.alt || `${hinglish} product visual` },
+    galleryImages: referencePhotoForProduct(id) ? [referencePhotoForProduct(id)!] : [],
+    unitPricePaise: null,
     priceLabel: {
       en: "Price on request",
       hi: "Price on request",
@@ -191,7 +202,26 @@ function normalizeShopProduct(item: unknown): ShopProduct | null {
     imageRights: ["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"].includes(source.imageRights || "") ? source.imageRights : undefined,
     imageEvidenceUrl: safeString(source.imageEvidenceUrl) || undefined,
     imageAlt: safeText(source.imageAlt || source.name),
+    galleryImages: Array.isArray(source.galleryImages)
+      ? source.galleryImages.filter((entry): entry is ProductGalleryImage => {
+          if (!entry || typeof entry !== "object") return false;
+          const image = entry as Partial<ProductGalleryImage>;
+          const url = safeString(image.url);
+          const local = url.startsWith("/") && !url.startsWith("//") && !url.includes("\\");
+          const external = /^https:\/\//i.test(url);
+          return Boolean(local || (external && image.imageRights && /^https:\/\//i.test(image.evidenceUrl || "")));
+        }).slice(0, 8).map(image => ({
+          url: image.url,
+          alt: safeString(image.alt) || name.en,
+          imageRights: image.imageRights || "OWNED",
+          evidenceUrl: safeString(image.evidenceUrl),
+          credit: safeString(image.credit) || undefined,
+          licenseName: safeString(image.licenseName) || undefined,
+          licenseUrl: safeString(image.licenseUrl) || undefined
+        }))
+      : [],
     priceLabel: priceLabel.en ? priceLabel : text("Price on request"),
+    unitPricePaise: Number.isSafeInteger(source.unitPricePaise) && (source.unitPricePaise as number) > 0 && (source.unitPricePaise as number) <= 100000000 ? source.unitPricePaise : null,
     status: source.status === "inactive" ? "inactive" : "active",
     featured: Boolean(source.featured),
     tags: Array.isArray(source.tags) ? source.tags.map((tag) => safeString(tag)).filter(Boolean) : [],

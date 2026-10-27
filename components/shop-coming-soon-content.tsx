@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { HeartHandshake, PackageSearch, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { PackageSearch, Search, ShieldCheck, Sparkles, ShoppingBag } from "lucide-react";
+import { AddToCartButton } from "@/components/shop/quote-cart-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -72,12 +73,15 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                 <div className="mb-5 overflow-hidden rounded-xl border border-[#D4AF37]/20 bg-[#fff2e2]">
                   <Image
                     src={safeProductVisual(product)}
-                    alt={product.imageAlt[locale] || product.name[locale]}
+                    alt={product.galleryImages?.[0]?.alt || product.imageAlt[locale] || product.name[locale]}
                     width={640} height={420} unoptimized
                     className="h-48 w-full object-contain p-3"
                   />
-                  {(safeProductVisual(product).endsWith("-placeholder.svg") || safeProductVisual(product).endsWith("-illustration.svg")) &&
-                    <p className="pb-2 text-center text-xs text-[#6b565b]">Illustrative catalogue visual, not an actual stock photograph</p>}
+                  {product.galleryImages?.[0]?.evidenceUrl ? <div className="px-3 pb-3 text-center text-xs leading-5 text-[#57424b]">
+                    <p>{product.galleryImages[0].imageRights === "LICENSED" ? "Real reference photo • actual item may differ" : "Seller-authorized catalogue photograph • confirm exact supplied item"}</p>
+                    <a href={product.galleryImages[0].evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{product.galleryImages[0].credit || "Photo source"}</a>
+                    {product.galleryImages[0].licenseUrl ? <>{" · "}<a href={product.galleryImages[0].licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{product.galleryImages[0].licenseName || "License"}</a></>:null}
+                  </div> : <p className="pb-2 text-center text-xs text-[#6b565b]">{product.imageRights && product.imageEvidenceUrl ? "Catalogue photo with approved usage rights; confirm exact delivered item" : "Illustrative catalogue visual, not an actual stock photograph"}</p>}
                 </div>
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -98,10 +102,14 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                   {product.careNote[locale] ? <p className="mt-3"><strong className="text-[#702d3d]">{labels.care}:</strong> {product.careNote[locale]}</p> : null}
                   <p className="mt-3 text-xs leading-5">{product.disclaimer[locale]}</p>
                 </details>
-                <div className="mt-auto pt-5">
-                  <Button asChild className="w-full bg-[#922f40] text-white hover:bg-[#762436]">
-                    <Link href={`/commerce-enquiry?kind=SHOP&item=${encodeURIComponent(product.id)}`}><HeartHandshake className="h-4 w-4" />{labels.askAvailability}</Link>
-                  </Button>
+                <div className="mt-auto space-y-3 pt-5">
+                  <p className="text-lg font-extrabold text-[#722536]">{product.unitPricePaise
+                    ? new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(product.unitPricePaise/100)
+                    : "Price awaiting verification"}</p>
+                  <AddToCartButton productId={product.id} />
+                  <Link href={"/shop/"+encodeURIComponent(product.slug)} className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#d2ae87] text-sm font-semibold text-[#773344] hover:bg-[#fff3e8]">
+                    <ShoppingBag className="h-4 w-4" /> View details
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -123,6 +131,9 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
 }
 
 function safeProductVisual(product: ShopProduct): string {
+  const gallery = product.galleryImages?.[0];
+  if (gallery && /^https:\/\//i.test(gallery.url) && /^https:\/\//i.test(gallery.evidenceUrl) && gallery.imageRights) return gallery.url;
+  if (gallery?.url.startsWith("/") && !gallery.url.startsWith("//") && !gallery.url.includes("\\")) return gallery.url;
   const source = product.imageUrl.trim();
   if (source.startsWith("/") && !source.startsWith("//") && !source.includes("\\")) return source;
   if (/^https:\/\//i.test(source) &&
@@ -136,14 +147,14 @@ function shopLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") return {
     eyebrow: "Spiritual Catalogue",
     title: "Naksharix आध्यात्मिक कैटलॉग",
-    subtitle: "रुद्राक्ष, ब्रेसलेट, यंत्र, माला और symbolic remedy items की जानकारी देखें। अभी कोई public cart या online product checkout नहीं है।",
-    explore: "कैटलॉग देखें", contact: "उपलब्धता पूछें", safetyTitle: "जानकारी पहले, बिक्री बाद में", safetyCopy: "यह एक वास्तविक informational catalogue है। खरीद, stock, authenticity और fulfilment की पुष्टि support द्वारा अलग से की जाती है।", safetyItems: ["No automatic checkout", "Availability confirmation", "Faith-based items", "No guaranteed outcomes"],
-    searchPlaceholder: "उत्पाद खोजें...", categoryLabel: "श्रेणी", allCategories: "सभी श्रेणियाँ", details: "विवरण और उपयोग", howToUse: "कैसे उपयोग करें", care: "देखभाल", askAvailability: "उपलब्धता पूछें", noResults: "इस filter में कोई catalogue item नहीं मिला।", reset: "Filter reset करें", footerNote: "ये items आस्था और चिंतन के सहायक साधन हैं। चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं और किसी परिणाम की गारंटी नहीं देते।"
+    subtitle: "रुद्राक्ष, ब्रेसलेट, यंत्र, माला और symbolic remedy items की जानकारी देखें। आप कार्ट में आइटम जोड़ सकते हैं; ऑनलाइन पेमेंट तब तक नहीं होगा जब तक सप्लायर, कीमत और डिलीवरी सत्यापित न हों।",
+    explore: "कैटलॉग देखें", contact: "उत्पाद सहायता", safetyTitle: "जानकारी पहले, बिक्री बाद में", safetyCopy: "यह एक वास्तविक informational catalogue है। खरीद, stock, authenticity और fulfilment की पुष्टि support द्वारा अलग से की जाती है।", safetyItems: ["Add to cart", "Price confirmation", "Faith-based items", "No guaranteed outcomes"],
+    searchPlaceholder: "उत्पाद खोजें...", categoryLabel: "श्रेणी", allCategories: "सभी श्रेणियाँ", details: "विवरण और उपयोग", howToUse: "कैसे उपयोग करें", care: "देखभाल", askAvailability: "उत्पाद सहायता", noResults: "इस filter में कोई catalogue item नहीं मिला।", reset: "Filter reset करें", footerNote: "ये items आस्था और चिंतन के सहायक साधन हैं। चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं और किसी परिणाम की गारंटी नहीं देते।"
   };
   if (locale === "hinglish") return {
-    eyebrow: "Spiritual Catalogue", title: "Naksharix Spiritual Catalogue", subtitle: "Rudraksha, bracelets, yantras, mala aur symbolic remedy items ki information dekhein. Abhi public cart ya online product checkout active nahi hai.", explore: "Explore Catalogue", contact: "Ask Availability", safetyTitle: "Information first, sale only after confirmation", safetyCopy: "Yeh real informational catalogue hai. Purchase, stock, authenticity aur fulfilment support se separately confirm hota hai.", safetyItems: ["No automatic checkout", "Availability confirmation", "Faith-based items", "No guaranteed outcomes"], searchPlaceholder: "Search products...", categoryLabel: "Category", allCategories: "All categories", details: "Details and use", howToUse: "How to use", care: "Care", askAvailability: "Ask Availability", noResults: "Is filter me koi catalogue item nahi mila.", reset: "Reset Filters", footerNote: "Ye items faith aur reflection support ke liye hain. Medical, legal, financial ya professional advice ka replacement nahi hain aur kisi result ki guarantee nahi dete."
+    eyebrow: "Spiritual Catalogue", title: "Naksharix Spiritual Catalogue", subtitle: "Rudraksha, bracelets, yantras, mala aur symbolic remedy items ki information dekhein. Items ko cart mein add kar sakte hain, lekin supplier, price aur delivery verify hone tak payment checkout band hai.", explore: "Explore Catalogue", contact: "Product support", safetyTitle: "Information first, sale only after confirmation", safetyCopy: "Yeh real informational catalogue hai. Purchase, stock, authenticity aur fulfilment support se separately confirm hota hai.", safetyItems: ["Add to cart", "Price confirmation", "Faith-based items", "No guaranteed outcomes"], searchPlaceholder: "Search products...", categoryLabel: "Category", allCategories: "All categories", details: "Details and use", howToUse: "How to use", care: "Care", askAvailability: "Product support", noResults: "Is filter me koi catalogue item nahi mila.", reset: "Reset Filters", footerNote: "Ye items faith aur reflection support ke liye hain. Medical, legal, financial ya professional advice ka replacement nahi hain aur kisi result ki guarantee nahi dete."
   };
   return {
-    eyebrow: "Spiritual Catalogue", title: "Naksharix Spiritual Catalogue", subtitle: "Explore information about rudraksha, bracelets, yantras, malas, and symbolic remedy items. Public cart and online product checkout are not active.", explore: "Explore Catalogue", contact: "Ask Availability", safetyTitle: "Information first, sale only after confirmation", safetyCopy: "This is a real informational catalogue. Purchase, stock, authenticity, and fulfilment are confirmed separately by support.", safetyItems: ["No automatic checkout", "Availability confirmation", "Faith-based items", "No guaranteed outcomes"], searchPlaceholder: "Search products...", categoryLabel: "Category", allCategories: "All categories", details: "Details and use", howToUse: "How to use", care: "Care", askAvailability: "Ask Availability", noResults: "No catalogue items match these filters.", reset: "Reset Filters", footerNote: "These items are faith-based aids for reflection. They do not replace medical, legal, financial, or professional advice and do not guarantee outcomes."
+    eyebrow: "Spiritual Catalogue", title: "Naksharix Spiritual Catalogue", subtitle: "Explore spiritual products, view approved prices, add items to your cart, and request confirmed purchase terms. Payments are not collected before fulfilment approval.", explore: "Explore Catalogue", contact: "Product support", safetyTitle: "Information first, sale only after confirmation", safetyCopy: "This is a real informational catalogue. Purchase, stock, authenticity, and fulfilment are confirmed separately by support.", safetyItems: ["Add to cart", "Price confirmation", "Faith-based items", "No guaranteed outcomes"], searchPlaceholder: "Search products...", categoryLabel: "Category", allCategories: "All categories", details: "Details and use", howToUse: "How to use", care: "Care", askAvailability: "Product support", noResults: "No catalogue items match these filters.", reset: "Reset Filters", footerNote: "These items are faith-based aids for reflection. They do not replace medical, legal, financial, or professional advice and do not guarantee outcomes."
   };
 }

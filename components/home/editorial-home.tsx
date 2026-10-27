@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
+import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-photos";
 import {
   ArrowLeft, ArrowRight, CalendarDays, ChevronRight, CircleHelp,
   Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
 } from "lucide-react";
 
-const STARRY_SKY = "/naksharix/editorial-consultation.svg";
-const GOLDEN_HORIZON = "/naksharix/editorial-panchang.svg";
+const STARRY_SKY = "/naksharix/ganesh-hero-light-saffron.jpg";
+const GOLDEN_HORIZON = "/naksharix/zodiac-wheel-gold.jpg";
 
 const heroSlides = [
   {
@@ -18,7 +20,7 @@ const heroSlides = [
     accent: "your way forward.",
     body: "Explore Vedic astrology with beautiful digital tools, clear explanations and thoughtful ways to seek guidance.",
     image: STARRY_SKY,
-    alt: "Original illustrated consultation and birth-chart theme",
+    alt: "Devotional Ganesha editorial artwork with traditional temple motifs",
     main: { label: "Generate free Kundli", href: "/kundli" },
     secondary: { label: "Explore astrology tools", href: "/free-calculators" }
   },
@@ -28,7 +30,7 @@ const heroSlides = [
     accent: "for each new day.",
     body: "Read the Panchang for your location, understand the day’s traditional context and discover the zodiac.",
     image: GOLDEN_HORIZON,
-    alt: "Original illustrated Hindu Panchang calendar",
+    alt: "Zodiac wheel editorial artwork",
     main: { label: "View today’s Panchang", href: "/panchang" },
     secondary: { label: "Today’s horoscope", href: "/daily-horoscope" }
   },
@@ -68,7 +70,7 @@ const services = [
   },
   {
     number:"04",label:"Traditional Puja",copy:"Browse 94 Puja topics and request written availability confirmation.",
-    href:"/pujas",cta:"Explore Puja directory",image:"/naksharix/editorial-puja.svg",alt:"Original illustration of a traditional puja thali"
+    href:"/pujas",cta:"Explore Puja directory",image:pujaEditorialImage("rudrabhishek","/naksharix/editorial-puja.svg","shiva"),alt:"Licensed representative photograph of Shiva Puja ritual context"
   },
   {
     number:"05",label:"Kundli Matching",copy:"Compare traditional chart inputs and learn about Guna Milan.",
@@ -80,7 +82,7 @@ const services = [
   },
   {
     number:"07",label:"Spiritual Catalogue",copy:"Discover Rudraksha, malas and yantras with clear item enquiries.",
-    href:"/shop",cta:"Explore the collection",image:"/shop/rudraksha-mala-illustration.svg",alt:"Original Rudraksha mala product illustration"
+    href:"/shop",cta:"Explore the collection",image:referencePhotoForProduct("rudraksha-mala")?.url || "/shop/rudraksha-mala-illustration.svg",alt:"Licensed Rudraksha mala material photograph; exact sold item may differ"
   },
   {
     number:"08",label:"Free Learning",copy:"Start with original introductory lessons on charts, planets and Panchang.",
@@ -233,12 +235,14 @@ export function EditorialHome() {
               <article className="nx-ed-service-card" key={item.href}>
                 <Link href={item.href} className="nx-ed-card-image" aria-label={item.cta}>
                   <Image src={item.image} alt={item.alt} fill sizes="(max-width: 700px) 100vw, (max-width: 1080px) 50vw, 33vw"
-                    quality={75} />
+                    quality={75} unoptimized={item.href === "/pujas" || item.href === "/shop"} />
                   <span className="nx-ed-card-number">{item.number}</span>
                 </Link>
                 <div className="nx-ed-card-body">
                   <h3>{item.label}</h3>
                   <p>{item.copy}</p>
+                  {item.href === "/pujas" && pujaEditorialPhoto("rudrabhishek","shiva") ? <p className="text-xs">Representative ritual image · <a href={pujaEditorialPhoto("rudrabhishek","shiva")!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto("rudrabhishek","shiva")!.author} · {pujaEditorialPhoto("rudrabhishek","shiva")!.license}</a></p> : null}
+                  {item.href === "/shop" && referencePhotoForProduct("rudraksha-mala") ? <p className="text-xs">Reference photo, not exact stock · <a href={referencePhotoForProduct("rudraksha-mala")!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{referencePhotoForProduct("rudraksha-mala")!.credit} · {referencePhotoForProduct("rudraksha-mala")!.licenseName}</a></p> : null}
                   <Link href={item.href} className="nx-ed-text-link">{item.cta}<ArrowRight size={17} aria-hidden="true"/></Link>
                 </div>
               </article>
@@ -293,7 +297,7 @@ export function EditorialHome() {
       <section className="nx-ed-section" aria-label="Featured spiritual products">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="SACRED ESSENTIALS" title="Explore the spiritual catalogue."
-            copy="Beautifully illustrated traditional items. Authenticity, exact product specification and a quote are confirmed separately." />
+            copy="Browse real reference photographs of devotional items. Exact stock, specifications and final prices are confirmed before dispatch." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { id:"5-mukhi-rudraksha", name:"5 Mukhi Rudraksha" },
@@ -303,12 +307,15 @@ export function EditorialHome() {
             ].map(item=>(
               <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1d1328] text-white shadow-xl">
                 <Link href={"/commerce-enquiry?kind=SHOP&item="+item.id} className="block overflow-hidden" aria-label={"Enquire about "+item.name}>
-                  <Image src={"/shop/"+item.id+"-illustration.svg"} alt={item.name+" original illustrative artwork"}
+                  <Image src={referencePhotoForProduct(item.id)?.url || "/shop/"+item.id+"-illustration.svg"} alt={referencePhotoForProduct(item.id)?.alt || item.name+" illustration"}
                     width={540} height={390} unoptimized className="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105"/>
                 </Link>
                 <div className="p-5">
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
-                  <p className="mt-2 text-xs text-[#d8c7d9]">Illustrative art • Item details on request</p>
+                  <p className="mt-2 text-xs text-[#e2ced8]">Real licensed reference photo • Exact supplied item may differ</p>
+                  {referencePhotoForProduct(item.id) ? <a href={referencePhotoForProduct(item.id)!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-[11px] leading-5 underline text-[#f3dcb9]">
+                    {referencePhotoForProduct(item.id)!.credit} · {referencePhotoForProduct(item.id)!.licenseName}
+                  </a> : null}
                   <Link href={"/commerce-enquiry?kind=SHOP&item="+item.id}
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
                     Enquire <ArrowRight size={16}/>
@@ -339,12 +346,15 @@ export function EditorialHome() {
               <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1c1427] text-white">
                 <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
                   aria-label={"Enquire about "+item.name}>
-                  <Image src={"/pujas/"+item.category+"-illustration.svg"} alt={item.name+" category decorative artwork"}
+                  <Image src={pujaEditorialImage(item.id,"/pujas/"+item.category+"-illustration.svg",item.category)} alt={item.name+" representative ritual photo"}
                     width={540} height={335} unoptimized className="aspect-[16/10] w-full object-cover transition duration-300 hover:scale-105" />
                 </Link>
                 <div className="p-5">
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
-                  <p className="mt-2 text-xs text-[#d8c7d9]">Traditional practice • Information only</p>
+                  <p className="mt-2 text-xs text-[#d8c7d9]">Traditional practice • Representative image</p>
+                  {pujaEditorialPhoto(item.id,item.category) ? <a className="mt-2 inline-block text-[11px] leading-5 text-[#f2dab7] underline" href={pujaEditorialPhoto(item.id,item.category)!.source} target="_blank" rel="noopener noreferrer">
+                    {pujaEditorialPhoto(item.id,item.category)!.author} · {pujaEditorialPhoto(item.id,item.category)!.license}
+                  </a> : null}
                   <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
                     Enquire <ArrowRight size={16}/>

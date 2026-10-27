@@ -691,6 +691,40 @@ try {
     }
   });
 
+  await check("Puja owner price editor restricts roles and publishes only approved fees", async () => {
+    const url="/api/admin/puja-offerings";
+    const anonymous=await req(url);assert.equal(anonymous.status,403);
+    const userDenied=await req(url,{headers:{cookie:userCookie}});assert.equal(userDenied.status,403);
+    const baseline=await req(url,{headers:{cookie:adminCookie}});
+    assert.equal(baseline.status,200,await baseline.text());
+    const input={topicId:"rudrabhishek",pricePaise:199900,durationMinutes:90,available:true,note:"CI synthetic fee, not a genuine customer quote"};
+    const invalid=await post(url,{...input,topicId:"invented-temple-ceremony"},adminCookie,"PUT");
+    assert.equal(invalid.status,422);
+    const missingFee=await post(url,{...input,pricePaise:null},adminCookie,"PUT");
+    assert.equal(missingFee.status,422);
+    try {
+      const publish=await post(url,input,adminCookie,"PUT");
+      assert.equal(publish.status,200,await publish.text());
+      const updated=await req(url,{headers:{cookie:adminCookie}});
+      const data=await updated.json();assert.equal(updated.status,200);
+      assert.equal(data.data.offerings.find(o=>o.topicId==="rudrabhishek").pricePaise,199900);
+      const detail=await req("/pujas/rudrabhishek");
+      assert.equal(detail.status,200);
+      assert.match(await detail.text(),/₹1,999/);
+      const directory=await req("/pujas");
+      assert.equal(directory.status,200);
+      assert.match(await directory.text(),/₹1,999/);
+      const stop=await post(url,{...input,available:false},adminCookie,"PUT");
+      assert.equal(stop.status,200,await stop.text());
+      const unpublished=await req("/pujas/rudrabhishek");
+      assert.equal(unpublished.status,200);
+      assert.doesNotMatch(await unpublished.text(),/₹1,999/);
+    } finally {
+      // CI localhost database only, never production. Clean the synthetic offer record.
+      await prisma.pujaOffering.deleteMany({where:{topicId:"rudrabhishek"}});
+    }
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);
@@ -728,6 +762,128 @@ try {
     assert.equal(race.status, 409, "concurrent stale edit must reject");
     const restore = await post("/api/admin/shop-catalogue", { expectedVersion: 1, products: original }, adminCookie, "PUT");
     assert.equal(restore.status, 200, await restore.text());
+  });
+
+  await check("real Shop order request, server-calculated subtotal, role gate and owner dispatch tracking", async () => {
+    const catalogueUrl="/api/admin/shop-catalogue";
+    const savedResponse=await req(catalogueUrl,{headers:{cookie:adminCookie}});
+    const saved=(await savedResponse.json()).data;
+    assert.equal(savedResponse.status,200);
+    const sku=saved.products.find(p=>p.id==="shri-yantra");assert.ok(sku);
+    const original=saved.products;
+    const priced=original.map(p=>p.id===sku.id?{...p,unitPricePaise:129900}:p);
+    let orderId;
+    try {
+      const setPrice=await post(catalogueUrl,{expectedVersion:saved.version,products:priced},adminCookie,"PUT");
+      assert.equal(setPrice.status,200,await setPrice.text());
+      const input={items:[{productId:sku.id,quantity:2}],customerName:"QA Customer",
+        customerPhone:"+91 9876543210",deliveryAddress:"House 40, Test Lane, Example Ward, Madhya Pradesh",
+        deliveryCity:"Indore",deliveryState:"Madhya Pradesh",postalCode:"452001",customerNote:"Test only, no real shipment"};
+      const anon=await post("/api/commerce/orders",input);assert.equal(anon.status,401);
+      const forged=await post("/api/commerce/orders",{...input,paymentStatus:"PAID",amount:1},userCookie);
+      assert.equal(forged.status,422);
+      const created=await post("/api/commerce/orders",input,userCookie);
+      const body=await created.json();assert.equal(created.status,201,JSON.stringify(body));
+      orderId=body.data.order.id;assert.equal(body.data.order.subtotalPaise,259800);
+      assert.equal(body.data.order.paymentStatus,"UNPAID");
+      assert.equal(body.data.charged,false);
+      const userOrders=await req("/api/commerce/orders",{headers:{cookie:userCookie}});
+      assert.ok((await userOrders.json()).data.orders.some(o=>o.id===orderId));
+      const adminRead=await req("/api/admin/shop-orders",{headers:{cookie:adminCookie}});
+      const adminRows=(await adminRead.json()).data.orders;
+      const row=adminRows.find(o=>o.id===orderId);assert.ok(row&&row.status==="REQUESTED");
+      const patch={id:orderId,expectedVersion:row.version,status:"CONFIRMED",shippingPaise:0,taxPaise:0,
+        trackingReference:null,adminNote:"Verified QA-only owner acknowledgement"};
+      const denied=await post("/api/admin/shop-orders",patch,userCookie,"PATCH");assert.equal(denied.status,403);
+      const confirmed=await post("/api/admin/shop-orders",patch,adminCookie,"PATCH");
+      const confirmedBody=await confirmed.json();assert.equal(confirmed.status,200,JSON.stringify(confirmedBody));
+      assert.equal(confirmedBody.data.order.totalPaise,259800);
+      assert.equal(confirmedBody.data.order.paymentStatus,"UNPAID");
+      const stale=await post("/api/admin/shop-orders",patch,adminCookie,"PATCH");assert.equal(stale.status,409);
+      const dispatchWithoutTracking=await post("/api/admin/shop-orders",
+        {...patch,expectedVersion:2,status:"DISPATCHED"},adminCookie,"PATCH");
+      assert.equal(dispatchWithoutTracking.status,422);
+    } finally {
+      if(orderId)await prisma.shopOrder.deleteMany({where:{id:orderId}});
+      const stateRes=await req(catalogueUrl,{headers:{cookie:adminCookie}});
+      const state=(await stateRes.json()).data;
+      const reset=await post(catalogueUrl,{expectedVersion:state.version,products:original},adminCookie,"PUT");
+      assert.equal(reset.status,200,await reset.text());
+    }
+  });
+
+  await check("real Puja booking requires published price and verified priest, supports private tracking", async () => {
+    const topicId="rudrabhishek",offerUrl="/api/admin/puja-offerings";
+    const offerInput={topicId,pricePaise:199900,durationMinutes:90,available:true,note:"Disposable CI-only service offering"};
+    const request={topicId,preferredDate:new Date(Date.now()+5*86400000).toISOString().slice(0,10),
+      city:"Indore",devoteeName:"QA Devotee",gotra:null,
+      sankalpNote:"This is a synthetic Puja test. No ceremony to be performed.",customerPhone:"+91 9876543210"};
+    let bookingId,partnerId;
+    try {
+      const anon=await post("/api/puja/bookings",request);assert.equal(anon.status,401);
+      const unopened=await post("/api/puja/bookings",request,userCookie);assert.equal(unopened.status,422);
+      const approved=await post(offerUrl,offerInput,adminCookie,"PUT");assert.equal(approved.status,200,await approved.text());
+      const injected=await post("/api/puja/bookings",{...request,paymentStatus:"PAID"},userCookie);
+      assert.equal(injected.status,422);
+      const created=await post("/api/puja/bookings",request,userCookie);
+      const body=await created.json();assert.equal(created.status,201,JSON.stringify(body));
+      bookingId=body.data.booking.id;
+      assert.equal(body.data.confirmed,false);assert.equal(body.data.panditAssigned,false);
+      assert.equal(body.data.booking.quotedPricePaise,199900);
+      const ownerList=await req("/api/puja/bookings",{headers:{cookie:userCookie}});
+      assert.ok((await ownerList.json()).data.bookings.some(p=>p.id===bookingId));
+      const adminList=await req("/api/admin/puja-bookings",{headers:{cookie:adminCookie}});
+      const row=(await adminList.json()).data.bookings.find(p=>p.id===bookingId);
+      assert.ok(row && row.status==="REQUESTED");
+      const patch={id:bookingId,expectedVersion:row.version,status:"CONFIRMED",partnerId:null,
+        scheduledAt:null,adminNote:"CI synthetic verification only",evidenceUrl:null};
+      const unauthorized=await post("/api/admin/puja-bookings",patch,userCookie,"PATCH");assert.equal(unauthorized.status,403);
+      const noPartner=await post("/api/admin/puja-bookings",patch,adminCookie,"PATCH");assert.equal(noPartner.status,422);
+      const partner=await prisma.pujaPartner.create({data:{
+        name:"QA disposable verified priest",region:"Indore",traditions:["Shiva"],reviewStatus:"VERIFIED"
+      }});
+      partnerId=partner.id;
+      const approvedBooking=await post("/api/admin/puja-bookings",{...patch,partnerId},adminCookie,"PATCH");
+      const confirmed=(await approvedBooking.json());assert.equal(approvedBooking.status,200,JSON.stringify(confirmed));
+      assert.equal(confirmed.data.booking.status,"CONFIRMED");
+      const stale=await post("/api/admin/puja-bookings",{...patch,partnerId},adminCookie,"PATCH");
+      assert.equal(stale.status,409);
+      const scheduled=await post("/api/admin/puja-bookings",
+        {...patch,partnerId,expectedVersion:2,status:"SCHEDULED",
+          scheduledAt:new Date(Date.now()+5*86400000).toISOString()},adminCookie,"PATCH");
+      assert.equal(scheduled.status,200,await scheduled.text());
+      const latest=await prisma.pujaBookingRequest.findUniqueOrThrow({where:{id:bookingId}});
+      assert.equal(latest.status,"SCHEDULED");assert.ok(latest.scheduledAt);
+    } finally {
+      if(bookingId)await prisma.pujaBookingRequest.deleteMany({where:{id:bookingId}});
+      if(partnerId)await prisma.pujaPartner.deleteMany({where:{id:partnerId}});
+      await prisma.pujaOffering.deleteMany({where:{topicId}});
+    }
+  });
+
+  await check("manual report fee publication preserves gateway amounts and can be unpublished", async () => {
+    const endpoint="/api/admin/manual-report-offerings";
+    assert.equal((await req(endpoint)).status,403);
+    assert.equal((await req(endpoint,{headers:{cookie:userCookie}})).status,403);
+    const offer={reportSlug:"love-report",pricePaise:159900,available:true,deliveryDays:5,
+      note:"Synthetic manual specialist report rate; does not accept online payment"};
+    const blocked=await post(endpoint,{...offer,reportSlug:"premium-kundli"},adminCookie,"PUT");
+    assert.equal(blocked.status,422);
+    const missing=await post(endpoint,{...offer,pricePaise:null},adminCookie,"PUT");
+    assert.equal(missing.status,422);
+    try{
+      const publish=await post(endpoint,offer,adminCookie,"PUT");
+      assert.equal(publish.status,200,await publish.text());
+      const reportPage=await req("/reports");
+      assert.equal(reportPage.status,200);
+      assert.match(await reportPage.text(),/₹1,599/);
+      const remove=await post(endpoint,{...offer,available:false},adminCookie,"PUT");
+      assert.equal(remove.status,200,await remove.text());
+      const after=await req("/reports");assert.equal(after.status,200);
+      assert.doesNotMatch(await after.text(),/₹1,599/);
+    }finally{
+      await prisma.manualReportOffering.deleteMany({where:{reportSlug:"love-report"}});
+    }
   });
 
   await check("unpaid paid-report request blocks PDF generation and email delivery", async () => {

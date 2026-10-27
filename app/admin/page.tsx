@@ -105,10 +105,18 @@ export default function AdminPage() {
         <Button variant="outline" asChild>
           <Link href="/admin/support">Support Desk</Link>
         </Button>
+        <Button variant="outline" asChild><Link href="/admin/puja-offerings">Puja Prices & Availability</Link></Button>
+        <Button variant="outline" asChild><Link href="/admin/puja-bookings">Puja Booking Management</Link></Button>
         <Button variant="outline" asChild><Link href="/admin/puja-partners">Puja Partner Review</Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="/admin/shop">Shop Catalogue</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/admin/shop-orders">Shop Orders and Fulfilment</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/admin/manual-report-prices">Manual Report Prices</Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="/admin/readiness">System Readiness</Link>

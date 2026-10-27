@@ -1,0 +1,44 @@
+/* 2026-10-27 brand-wide editorial contrast correction.
+   Never override headings inside one card with a global muted-token. */
+:root { --nx-premium-wine: #73283b; --nx-premium-ink: #37232b; --nx-premium-cream: #fffbf5; }
+html { scroll-padding-top: 7.5rem; }
+body.naksh-page-bg { background:#fffbf5; color:#37232b; }
+body.naksh-page-bg header {
+  background:rgba(255,251,245,.98)!important;
+  border-bottom:1px solid rgba(126,39,37,.16)!important;
+  color:#38242c!important;
+}
+body.naksh-page-bg header nav > a,
+body.naksh-page-bg header nav > button,
+body.naksh-page-bg header nav [role="button"] {
+  color:#432b34!important;
+}
+body.naksh-page-bg header nav > a[aria-current="page"] {
+  color:#8b263c!important;
+  text-decoration-color:#c69341;
+}
+body.naksh-page-bg header nav > a:hover,
+body.naksh-page-bg header nav > button:hover { color:#952a3c!important; }
+body.naksh-page-bg header a:focus-visible,
+body.naksh-page-bg header button:focus-visible { outline:3px solid #c69139;outline-offset:3px; }
+.nx-ed-hero {
+  background:#421725;
+  min-height:clamp(540px,65svh,740px);
+}
+.nx-ed-hero-wash {
+  background:linear-gradient(90deg,rgba(34,15,22,.95) 0%,rgba(51,16,29,.92) 37%,rgba(63,22,32,.50) 72%,rgba(42,15,23,.18) 100%)!important;
+}
+.nx-ed-photo {object-position:center 43%;filter:saturate(1.04) contrast(1.03);}
+.nx-ed-hero h1 {font-family:var(--font-cinzel),Georgia,serif;font-weight:700;letter-spacing:-.027em;font-size:clamp(2.6rem,4.8vw,5.25rem);}
+.nx-ed-hero h1 em {background:linear-gradient(110deg,#fff0ce,#eec079);background-clip:text;-webkit-background-clip:text;}
+.nx-ed-service-card {border-radius:16px;}
+.nx-ed-service-card h3 {font-family:var(--font-cinzel),Georgia,serif;letter-spacing:-.012em;}
+.nx-ed-card-image {aspect-ratio:1.65;}
+.nx-puja-calendar {background:linear-gradient(180deg,#fffcf8,#f9f0e7);color:#372630;}
+.nx-puja-calendar button:focus-visible,
+.nx-puja-calendar a:focus-visible {outline:3px solid #9b3647;outline-offset:3px;}
+.nx-puja-calendar :is(h1,h2,h3) {text-wrap:balance;}
+@media(max-width:850px) {
+  .nx-ed-hero-wash {background:linear-gradient(90deg,rgba(37,15,23,.96),rgba(52,18,30,.79))!important;}
+  .nx-ed-hero h1 {font-size:clamp(2.3rem,7vw,4rem);}
+}

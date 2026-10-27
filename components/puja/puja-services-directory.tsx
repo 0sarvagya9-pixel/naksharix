@@ -5,8 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays,Search,ShieldCheck,ArrowRight } from "lucide-react";
 import { pujaTopics,pujaCategories } from "@/lib/puja/service-catalogue";
+import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-photos";
+import type { PublicPujaOffer } from "@/lib/puja/offerings";
 
-export function PujaServicesDirectory() {
+export function PujaServicesDirectory({offerings}:{offerings:Record<string,PublicPujaOffer>}) {
   const [query,setQuery]=useState("");
   const [hydrated,setHydrated]=useState(false);
   useEffect(()=>setHydrated(true),[]);
@@ -64,17 +66,22 @@ export function PujaServicesDirectory() {
       {results.length?<div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {results.slice(0,visibleCount).map(topic=><article key={topic.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#d0a766]/35 bg-white transition hover:-translate-y-1 hover:border-[#f4ca7f]">
           <div className="relative aspect-[16/10] overflow-hidden bg-[#fff1de]">
-            <Image src={topic.graphic} alt={topic.category+" category decorative illustration"} width={640} height={400} unoptimized
+            <Image src={pujaEditorialImage(topic.id,topic.graphic,topic.category)} alt={pujaEditorialPhoto(topic.id,topic.category) ? "Representative ritual photograph for "+topic.name : topic.category+" category illustration"} width={640} height={400} unoptimized
               className="h-full w-full object-cover transition-transform group-hover:scale-105"/>
             <span className="absolute left-3 top-3 rounded-full bg-[#271325]/90 px-3 py-1 text-xs font-bold text-[#f9da9e]">{topic.category}</span>
           </div>
           <div className="flex flex-1 flex-col p-5">
             <h3 className="font-cinzel text-lg font-bold text-[#412831]"><Link href={"/pujas/"+topic.id} className="hover:text-[#f4c87d]">{topic.name}</Link></h3>
             <p className="mt-2 text-xs font-semibold text-[#983844]">{topic.deity}</p>
+            {pujaEditorialPhoto(topic.id,topic.category) ? <p className="mt-2 text-xs leading-5 text-[#5d4b50]">Representative photo: <a href={pujaEditorialPhoto(topic.id,topic.category)!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category)!.author}</a>{" · "}<a href={pujaEditorialPhoto(topic.id,topic.category)!.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category)!.license}</a></p>:null}
             <p className="mt-3 flex-1 text-sm leading-6 text-[#6c5459]">{topic.description}.</p>
-            <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
+            {offerings[topic.id] ? <p className="mt-3 text-lg font-extrabold text-[#842c3e]">
+              {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(offerings[topic.id].pricePaise/100)}
+              <span className="ml-2 text-xs font-normal text-[#67515a]">listed service fee · subject to booking confirmation</span>
+            </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
+            <Link href={offerings[topic.id] ? "/puja-booking?item="+encodeURIComponent(topic.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
-              Enquire <ArrowRight size={16}/>
+              {offerings[topic.id] ? "Request booking" : "Enquire"} <ArrowRight size={16}/>
             </Link>
           </div>
         </article>)}

@@ -17,6 +17,8 @@ const envSchema = z.object({
   ALLOW_AI_DIAGNOSTICS: z.enum(["true", "false"]).default("false"),
   SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false"),
   REDIS_URL: z.string().optional(),
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_SITE_VERIFICATION: z.string().optional(),

@@ -11,9 +11,11 @@ import { contactHref } from "@/lib/contact-cta";
 import { getManualReport, manualReports } from "@/lib/manual-catalogue";
 import { normalizeLocale } from "@/lib/i18n";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
+import { getPublishedManualReportOffers } from "@/lib/reports/manual-offerings";
 import { seo } from "@/lib/seo";
 
 type Params = Promise<{ slug: string }>;
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return manualReports.map((report) => ({ slug: report.slug }));
@@ -39,6 +41,8 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
   const labels = detailLabels(locale);
   const checkout = getManualReportCheckout(report.slug);
+  const ownerApprovedManualFee=!checkout?(await getPublishedManualReportOffers())[report.slug]:undefined;
+  const manualFee=ownerApprovedManualFee?new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(ownerApprovedManualFee.pricePaise/100):null;
   const requestHref = `/report-request/new?plan=PREMIUM&reportSlug=${encodeURIComponent(report.slug)}`;
   const adminBypassHref = `${requestHref}&mode=admin`;
   const checkoutSuccessHref = `${requestHref}&orderId={paymentId}`;
@@ -63,7 +67,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
                 </div>
               ) : (
                 <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
-                  <Link href={requestHref}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
+                  <Link href={requestHref}><ClipboardList className="h-4 w-4" />{manualFee ? labels.request+" · "+manualFee : labels.request}</Link>
                 </Button>
               )}
               <Button variant="outline" asChild><Link href="/contact">{labels.contactSupport}</Link></Button>
@@ -73,8 +77,8 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             <CardContent className="p-6">
               <FileText className="h-6 w-6 text-[#00f5a0]" />
               <p className="mt-4 text-sm text-[#a8b3c7]">{labels.price}</p>
-              <p className="mt-2 font-cinzel text-3xl font-black text-[#fbc02d]">{checkout?.price ?? labels.manualReview}</p>
-              <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{checkout ? labels.paidNote : labels.manualNote}</p>
+              <p className="mt-2 font-cinzel text-3xl font-black text-[#fbc02d]">{checkout?.price ?? manualFee ?? labels.manualReview}</p>
+              <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{checkout ? labels.paidNote : ownerApprovedManualFee ? "Owner-approved manual service fee. Request handling is confirmed individually; this page does not collect an automatic payment." : labels.manualNote}</p>
             </CardContent>
           </Card>
         </div>
@@ -123,7 +127,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
                 </div>
               ) : (
                 <Button asChild className="bg-[#009b72] text-white hover:bg-[#008766]">
-                  <Link href={requestHref}><ClipboardList className="h-4 w-4" />{labels.request}</Link>
+                  <Link href={requestHref}><ClipboardList className="h-4 w-4" />{manualFee ? labels.request+" · "+manualFee : labels.request}</Link>
                 </Button>
               )}
               <Button variant="outline" asChild><a href={contactHref()}>{labels.emailSupport}</a></Button>

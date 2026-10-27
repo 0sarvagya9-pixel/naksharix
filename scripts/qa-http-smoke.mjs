@@ -51,7 +51,7 @@ for (const [path, titleMarker] of publicPages) {
   if (path === "/pricing" && /subscribe to|INR 499\/mo|INR 1499\/mo/i.test(html)) {
     fail("pricing safety", "unsupported public subscription checkout is visible");
   }
-  if (path === "/shop" && /add to cart|buy now|pay with razorpay/i.test(html)) {
+  if (path === "/shop" && /buy now|pay with razorpay|complete payment/i.test(html)) {
     fail("shop safety", "unsupported ecommerce control is visible");
   }
 }
@@ -292,7 +292,8 @@ const assetPaths = [...new Set([
 ])];
 const catalogueChecks = [
   ...topicRecords.map(item => ({ path: "/pujas/" + encodeURIComponent(item.id), kind: "puja", marker: item.name })),
-  ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Enquire about this item" })),
+  ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Price awaiting verification" })),
+  {path:"/cart",kind:"cart",marker:"Your cart"},
   ...assetPaths.map(path => ({ path, kind: "svg", marker: "<svg" }))
 ];
 let catalogueNext = 0;

@@ -74,8 +74,8 @@ if (requiredFiles.every(exists)) {
   assert(databaseRecovery.includes("Do not run migration commands against production"), "Database recovery document carries a production stop rule", "no blind baseline or reset");
   assert(databaseRecovery.includes("isolated disposable PostgreSQL database"), "Database recovery requires isolated rehearsal", "production schema is not used for experiments");
 
-  assert(shopPage.includes("index: true") && shopContent.includes("Ask Availability"), "Shop source matches the documented informational catalogue", "indexable and enquiry-only");
-  assert(!shopContent.includes("Add to Cart") && !shopContent.includes("Buy Now"), "Shop remains non-transactional", "no ecommerce control");
+  assert(shopPage.includes("index: true") && shopContent.includes("Product support") && shopContent.includes("AddToCartButton"), "Shop source matches the supported manual-order catalogue", "indexable product support and draft cart");
+  assert(!shopContent.includes("RazorpayCheckoutButton") && !shopContent.includes(">Buy Now<") && read("app/api/commerce/orders/route.ts").includes('paymentStatus:"UNPAID"'), "Shop draft cart cannot collect online payments", "all manual orders remain unpaid");
 
   assert(aiPage.includes("isAiAstrologerReady"), "AI page remains readiness-gated", "UI only renders when ready");
   assert(aiFeatureStatus.includes("AI_ASTROLOGER_ENABLED") && aiFeatureStatus.includes("isGeminiKeyConfigured"), "AI readiness requires an explicit flag and provider key", "fail-closed readiness");
