@@ -20,4 +20,7 @@ assert.ok(header.includes('bg-[#fff8ee] text-[#852f3c]') && !header.includes('ho
 assert.ok(header.includes('Sign in</Link>') && header.includes('My account</Link>') && header.includes('<LanguageSwitcher className="!block w-20" />'),"MOBILE_ACCOUNT_OR_LANGUAGE_MISSING");
 assert.ok(read("components/language-switcher.tsx").includes('bg-[#fff8ee]'),"LANGUAGE_THEME_INCONSISTENT");
 assert.ok(read("components/auth-profile-menu.tsx").includes('bg-[#fffaf4]/95'),"PROFILE_THEME_INCONSISTENT");
+assert.ok(read("components/brand-logo.tsx").includes("from-[#6d2635]"),"WORDMARK_IVORY_CONTRAST_MISSING");
+assert.ok(!read("components/background/premium-cosmic-background.tsx").includes("premium-cosmic-bg-v2.webp"),"OLD_BACKGROUND_NOT_REMOVED");
+assert.ok(read("components/pwa-register.tsx").includes('"127.0.0.1"'),"CI_SERVICE_WORKER_ISOLATION_MISSING");
 console.log("SITEWIDE_VISUAL_QA=PASS;ORIGINAL_RELEVANT_VISUALS=7;SERVICE_CARDS=8;LIVE_PAYMENT_CHANGES=NO");

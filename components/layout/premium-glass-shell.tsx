@@ -21,11 +21,11 @@ export function PremiumGlassShell({
         className
       )}
       style={isHome ? { background: "transparent", border: "none", boxShadow: "none", backdropFilter: "none", WebkitBackdropFilter: "none" } : {
-        background: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025))",
+        background: "linear-gradient(135deg, rgba(255,251,246,0.96), rgba(255,245,230,0.90))",
         backdropFilter: "blur(4px) saturate(135%)",
         WebkitBackdropFilter: "blur(4px) saturate(135%)",
-        border: "1px solid rgba(255,255,255,0.32)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35), 0 32px 100px rgba(20,12,8,0.22), 0 0 70px rgba(216,154,43,0.12)"
+        border: "1px solid rgba(170,103,82,0.20)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 24px 70px rgba(100,45,39,0.09)"
       }}
     >
       {children}

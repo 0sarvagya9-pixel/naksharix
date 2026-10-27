@@ -18,8 +18,8 @@ export function BrandLogo({ className, compact = false }: { className?: string; 
       </span>
       {!compact ? (
         <span className="min-w-0 leading-none">
-          <span className="block bg-gradient-to-r from-[#f3d382] via-[#f3d382] to-[#dca956] bg-clip-text font-cinzel text-lg font-black tracking-[0.16em] text-transparent md:text-xl">NAKSHARIX</span>
-          <span className="hidden text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-[#f5d49a] lg:block naksh-brand-subtitle">Vedic Astrology</span>
+          <span className="block bg-gradient-to-r from-[#6d2635] via-[#963b44] to-[#ac6b3e] bg-clip-text font-cinzel text-lg font-black tracking-[0.16em] text-transparent md:text-xl">NAKSHARIX</span>
+          <span className="hidden text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-[#71505a] lg:block naksh-brand-subtitle">Vedic Astrology</span>
         </span>
       ) : null}
     </Link>
