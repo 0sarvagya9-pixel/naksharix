@@ -2,6 +2,14 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { shopProducts, type ShopProduct } from "@/lib/manual-catalogue";
+import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
+function photoFallbackForLegacySeed(product:ShopProduct):ShopProduct {
+  if (product.imageUrl !== "/shop/"+product.id+"-illustration.svg" ||
+      (product.galleryImages || []).length || product.imageRights) return product;
+  const sample=referencePhotoForProduct(product.id);
+  return sample ? {...product,imageUrl:sample.url,imageRights:"LICENSED",imageEvidenceUrl:sample.evidenceUrl,
+    galleryImages:[sample],imageAlt:{en:sample.alt,hi:sample.alt,hinglish:sample.alt}} : product;
+}
 
 export const SHOP_CATALOGUE_ID = "default";
 
@@ -18,7 +26,7 @@ export async function getShopCatalogue(): Promise<ShopCatalogueState> {
     });
     if (!snapshot) return { products: shopProducts, version: 0, storageReady: true };
     if (!Array.isArray(snapshot.products)) throw new Error("Invalid saved shop catalogue shape");
-    return { products: snapshot.products as unknown as ShopProduct[], version: snapshot.version, storageReady: true };
+    return { products: (snapshot.products as unknown as ShopProduct[]).map(photoFallbackForLegacySeed), version: snapshot.version, storageReady: true };
   } catch (error) {
     // Preserve existing public seed catalogue until the production DB migration is approved.
     // Admin writes fail closed while storage is not provisioned; never fall back to localStorage.

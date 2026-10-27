@@ -1,8 +1,9 @@
 import type { Locale } from "@/lib/i18n";
+import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
 
 export type CatalogueText = Record<Locale, string>;
 export type ProductStatus = "active" | "inactive";
-export type ProductGalleryImage = { url: string; alt: string; imageRights: "OWNED" | "LICENSED" | "SUPPLIER_AUTHORIZED"; evidenceUrl: string; };
+export type ProductGalleryImage = { url: string; alt: string; imageRights: "OWNED" | "LICENSED" | "SUPPLIER_AUTHORIZED"; evidenceUrl: string; credit?:string; licenseName?:string; licenseUrl?:string; };
 export type ShopProduct = {
   id: string;
   slug: string;
@@ -150,9 +151,11 @@ function product(id: string, category: string, purpose: string, en: string, hi: 
       hi: `${descHi} इसे चिंतनात्मक, आस्था-आधारित catalogue item के रूप में देखें और guidance, practical judgment और personal comfort के साथ चुनें।`,
       hinglish: `${descHinglish} Ise reflective, faith-based catalogue item ke roop mein dekhein aur guidance, practical judgment aur personal comfort ke saath choose karein.`
     },
-    imageUrl: `/shop/${id}-illustration.svg`,
-    imageAlt: { en: `${en} product visual`, hi: `${hi} उत्पाद visual`, hinglish: `${hinglish} product visual` },
-    galleryImages: [],
+    imageUrl: referencePhotoForProduct(id)?.url || `/shop/${id}-illustration.svg`,
+    imageRights: referencePhotoForProduct(id) ? "LICENSED" : undefined,
+    imageEvidenceUrl: referencePhotoForProduct(id)?.evidenceUrl,
+    imageAlt: { en: referencePhotoForProduct(id)?.alt || `${en} product visual`, hi: referencePhotoForProduct(id)?.alt || `${hi} उत्पाद visual`, hinglish: referencePhotoForProduct(id)?.alt || `${hinglish} product visual` },
+    galleryImages: referencePhotoForProduct(id) ? [referencePhotoForProduct(id)!] : [],
     unitPricePaise: null,
     priceLabel: {
       en: "Price on request",
@@ -211,7 +214,10 @@ function normalizeShopProduct(item: unknown): ShopProduct | null {
           url: image.url,
           alt: safeString(image.alt) || name.en,
           imageRights: image.imageRights || "OWNED",
-          evidenceUrl: safeString(image.evidenceUrl)
+          evidenceUrl: safeString(image.evidenceUrl),
+          credit: safeString(image.credit) || undefined,
+          licenseName: safeString(image.licenseName) || undefined,
+          licenseUrl: safeString(image.licenseUrl) || undefined
         }))
       : [],
     priceLabel: priceLabel.en ? priceLabel : text("Price on request"),
