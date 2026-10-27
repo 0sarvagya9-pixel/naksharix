@@ -31,7 +31,7 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
      setTicket(id);
    }catch(e){setIssue(e instanceof Error?e.message:"Quote request failed.")}finally{setPending(false)}
  }
- function update(id:string,qty:number){const next=lines.filter(l=>l.productId!==id);if(qty>0)next.push({productId:id,quantity:Math.min(99,qty)});writeCart(next);setLines(next)}
+ function update(id:string,qty:number){const next=lines.filter(l=>l.productId!==id);if(qty>0)next.push({productId:id,quantity:Math.min(10,qty)});writeCart(next);setLines(next)}
  return <div className="mx-auto max-w-5xl px-5 py-12">
   <p className="text-xs font-extrabold uppercase tracking-[.21em] text-[#9d453c]">Spiritual catalogue</p>
   <h1 className="mt-3 font-cinzel text-4xl font-bold text-[#35232b]">Your cart</h1>
