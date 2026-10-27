@@ -189,6 +189,7 @@ model User {
   astrologerNotes              AstrologerNote[]
   payouts                      Payout[]
   adminActionLogs              AdminActionLog[]
+  shopOrders                   ShopOrder[]
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -898,4 +899,33 @@ model PujaOffering {
   note            String   @default("")
   updatedBy       String
   updatedAt       DateTime @updatedAt
+}
+
+/** A real persisted owner-fulfillable order request. It NEVER implies online payment. */
+model ShopOrder {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items             Json
+  customerName      String
+  customerPhone     String
+  deliveryAddress   String
+  deliveryCity      String
+  deliveryState     String
+  postalCode        String
+  customerNote      String   @default("")
+  subtotalPaise     Int
+  shippingPaise     Int?
+  taxPaise          Int?
+  totalPaise        Int?
+  status            String   @default("REQUESTED")
+  paymentStatus     String   @default("UNPAID")
+  fulfillmentMode   String   @default("MANUAL_CONFIRMATION")
+  trackingReference String?
+  adminNote         String   @default("")
+  version           Int      @default(1)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
 }
