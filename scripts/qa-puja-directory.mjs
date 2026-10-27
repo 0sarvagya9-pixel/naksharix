@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { pujaTopics, pujaCategories, findPujaTopic } from "../lib/puja/service-catalogue.ts";
 assert.ok(pujaTopics.length >= 90, "PUJA_TYPES_INCOMPLETE");
 assert.equal(new Set(pujaTopics.map(p=>p.id)).size, pujaTopics.length);
+assert.equal(new Set(pujaTopics.map(p=>p.description)).size, pujaTopics.length, "PUJA_COPY_NOT_UNIQUE");
+assert.ok(pujaTopics.every(p=>p.description.length>=65 && !/guarantee|booked|verified temple/i.test(p.description)),"PUJA_COPY_UNSAFE_OR_UNINFORMATIVE");
 assert.ok(pujaTopics.every(p=>p.id && p.name && p.description && p.graphic.startsWith("/pujas/")));
 for(const category of pujaCategories.slice(1))assert.ok(pujaTopics.some(p=>p.category===category),"CATEGORY_EMPTY="+category);
 assert.equal(findPujaTopic("rudrabhishek")?.name,"Rudrabhishek");
