@@ -189,7 +189,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.getByRole("link", { name: "View cart" }).click();
     await expect(page).toHaveURL(/\/cart$/);
     await expect(page.getByRole("heading", { name: "Your cart" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Shri Yantra" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Shri Yantra", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Request quote for entire cart" })).toBeVisible();
     await expect(page.getByText(/No payment is charged from this cart/)).toBeVisible();
     await page.getByRole("link", { name: "Request confirmed terms" }).click();
