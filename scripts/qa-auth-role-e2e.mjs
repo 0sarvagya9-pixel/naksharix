@@ -613,6 +613,65 @@ try {
     }
   });
 
+  await check("authenticated Shop and Puja enquiries persist in real support queue without payments", async () => {
+    const created = [];
+    try {
+      const unauth = await post("/api/commerce/enquiries", {
+        kind: "SHOP", itemId: "shri-yantra", quantity: 1,
+        message: "Can you confirm authenticity and delivery options?"
+      });
+      assert.equal(unauth.status, 401);
+      const rejected = await post("/api/commerce/enquiries", {
+        kind: "SHOP", itemId: "shri-yantra", quantity: 0,
+        message: "Please provide your best price and supplier details."
+      }, userCookie);
+      assert.equal(rejected.status, 422);
+      const priceInjection = await post("/api/commerce/enquiries", {
+        kind: "SHOP", itemId: "shri-yantra", quantity: 1, amount: 1,
+        paymentStatus: "PAID", message: "Please reserve and deliver two yantras."
+      }, userCookie);
+      assert.equal(priceInjection.status, 422);
+      const shop = await post("/api/commerce/enquiries", {
+        kind: "SHOP", itemId: "shri-yantra", quantity: 2,
+        message: "Please verify the actual physical item, stock and price."
+      }, userCookie);
+      const shopBody = await shop.json();
+      assert.equal(shop.status, 201, JSON.stringify(shopBody));
+      assert.equal(shopBody.data.paymentRequired, false);
+      assert.equal(shopBody.data.orderCreated, false);
+      assert.equal(shopBody.data.bookingCreated, false);
+      assert.equal(shopBody.data.trackingPath, "/support");
+      created.push(shopBody.data.ticket.id);
+      const ticket = await prisma.supportTicket.findUniqueOrThrow({ where: { id: shopBody.data.ticket.id } });
+      assert.equal(ticket.userId, userId);
+      assert.match(ticket.subject, /^\[SHOP ENQUIRY\]/);
+      assert.ok(JSON.stringify(ticket.messages).includes("Quantity requested: 2"));
+      const feed = await req("/api/puja/calendar");
+      assert.equal(feed.status, 200);
+      const first = (await feed.json()).data.events[0];
+      assert.ok(first?.id);
+      const puja = await post("/api/commerce/enquiries", {
+        kind: "PUJA", itemId: first.id, city: "Bhopal",
+        message: "Please advise about local Panchang and pandit availability."
+      }, userCookie);
+      const pujaBody = await puja.json();
+      assert.equal(puja.status, 201, JSON.stringify(pujaBody));
+      assert.equal(pujaBody.data.fulfillmentConfirmed, false);
+      created.push(pujaBody.data.ticket.id);
+      const pujaTicket = await prisma.supportTicket.findUniqueOrThrow({ where: { id: pujaBody.data.ticket.id } });
+      assert.equal(pujaTicket.userId, userId);
+      assert.match(pujaTicket.subject, /^\[PUJA DATE ENQUIRY\]/);
+      assert.ok(JSON.stringify(pujaTicket.messages).includes("Local tithi/muhurat: NOT VERIFIED"));
+      const invalidCalendar = await post("/api/commerce/enquiries", {
+        kind: "PUJA", itemId: "2029-invented-ceremony", city: "Bhopal",
+        message: "This event should not be available for booking."
+      }, userCookie);
+      assert.equal(invalidCalendar.status, 422);
+    } finally {
+      await prisma.supportTicket.deleteMany({ where: { id: { in: created } } });
+    }
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);
