@@ -45,3 +45,7 @@ A production backup or restore gate is not passed merely by a disposable Postgre
 - Consultation feedback is presented as accessible 1-5 star ratings; backend rejects fractional stars.
 - Product-support labels replace visible 'Ask Availability' buttons, without fabricating actual item availability or prices.
 - Pending external acceptance remains: exact seller photos and fee approvals, extra Puja-specific photographs, verified partners, actual fulfilment, current-production database backup/restore, migrations, payment/refunds, release staging and final visual signoff.
+
+## Home, Shop and Puja calendar photo-reference completion
+- Two homepage services, the Shop inner hero and rolling Puja calendar banner now reuse documented, previously licensed real-reference photographs instead of matching placeholder illustrations.
+- On-page source/photographer/license credits accompany new placements; photos are representative, not ownership, inventory, or performed-ceremony evidence. No new photo license or product authenticity was invented.

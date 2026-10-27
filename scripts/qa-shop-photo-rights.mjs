@@ -29,6 +29,11 @@ assert.ok(store.includes("photoFallbackForLegacySeed") && store.includes("produc
 assert.ok(productDetail.includes("Real reference photograph, not verified Naksharix stock") &&
   productDetail.includes("chosen.credit") && productDetail.includes("chosen.licenseUrl"),"PRODUCT_IMAGE_RIGHTS_DISCLOSURE_MISSING");
 assert.ok(home.includes("referencePhotoForProduct(item.id)") && ui.includes("Real reference photo"),"PHOTOGRAPHY_NOT_SITEWIDE");
+assert.ok(home.includes('referencePhotoForProduct("rudraksha-mala")') && home.includes('pujaEditorialImage("rudrabhishek"'),"HOME_SERVICES_MUST_USE_REAL_CREDITED_REFERENCES");
+const shopPage=read("app/shop/page.tsx");
+assert.ok(shopPage.includes('referencePhotoForProduct("rudraksha-mala")') && shopPage.includes("Banner shows a licensed reference photograph"),"SHOP_HERO_PHOTO_ATTRIBUTION_MISSING");
+const calendarPage=read("app/puja-calendar/page.tsx");
+assert.ok(calendarPage.includes('pujaEditorialImage("griha-pravesh-puja"') && calendarPage.includes("representative ritual photograph"),"PUJA_CALENDAR_REAL_PHOTO_ATTRIBUTION_MISSING");
 assert.ok(productDetail.includes('chosen.imageRights === "LICENSED"') && productDetail.includes("administrator-approved usage rights"),"ADMIN_APPROVED_PHOTOS_MISLABELLED_AS_REFERENCES");
 assert.ok(ui.includes('product.galleryImages[0].imageRights === "LICENSED"'),"SHOP_CARD_LICENSE_LABEL_MISSING");
 const cart=read("components/shop/cart-page-client.tsx");

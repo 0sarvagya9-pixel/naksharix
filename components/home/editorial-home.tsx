@@ -70,7 +70,7 @@ const services = [
   },
   {
     number:"04",label:"Traditional Puja",copy:"Browse 94 Puja topics and request written availability confirmation.",
-    href:"/pujas",cta:"Explore Puja directory",image:"/naksharix/editorial-puja.svg",alt:"Original illustration of a traditional puja thali"
+    href:"/pujas",cta:"Explore Puja directory",image:pujaEditorialImage("rudrabhishek","/naksharix/editorial-puja.svg","shiva"),alt:"Licensed representative photograph of Shiva Puja ritual context"
   },
   {
     number:"05",label:"Kundli Matching",copy:"Compare traditional chart inputs and learn about Guna Milan.",
@@ -82,7 +82,7 @@ const services = [
   },
   {
     number:"07",label:"Spiritual Catalogue",copy:"Discover Rudraksha, malas and yantras with clear item enquiries.",
-    href:"/shop",cta:"Explore the collection",image:"/shop/rudraksha-mala-illustration.svg",alt:"Original Rudraksha mala product illustration"
+    href:"/shop",cta:"Explore the collection",image:referencePhotoForProduct("rudraksha-mala")?.url || "/shop/rudraksha-mala-illustration.svg",alt:"Licensed Rudraksha mala material photograph; exact sold item may differ"
   },
   {
     number:"08",label:"Free Learning",copy:"Start with original introductory lessons on charts, planets and Panchang.",
@@ -235,12 +235,14 @@ export function EditorialHome() {
               <article className="nx-ed-service-card" key={item.href}>
                 <Link href={item.href} className="nx-ed-card-image" aria-label={item.cta}>
                   <Image src={item.image} alt={item.alt} fill sizes="(max-width: 700px) 100vw, (max-width: 1080px) 50vw, 33vw"
-                    quality={75} />
+                    quality={75} unoptimized={item.href === "/pujas" || item.href === "/shop"} />
                   <span className="nx-ed-card-number">{item.number}</span>
                 </Link>
                 <div className="nx-ed-card-body">
                   <h3>{item.label}</h3>
                   <p>{item.copy}</p>
+                  {item.href === "/pujas" && pujaEditorialPhoto("rudrabhishek","shiva") ? <p className="text-xs">Representative ritual image · <a href={pujaEditorialPhoto("rudrabhishek","shiva")!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto("rudrabhishek","shiva")!.author} · {pujaEditorialPhoto("rudrabhishek","shiva")!.license}</a></p> : null}
+                  {item.href === "/shop" && referencePhotoForProduct("rudraksha-mala") ? <p className="text-xs">Reference photo, not exact stock · <a href={referencePhotoForProduct("rudraksha-mala")!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{referencePhotoForProduct("rudraksha-mala")!.credit} · {referencePhotoForProduct("rudraksha-mala")!.licenseName}</a></p> : null}
                   <Link href={item.href} className="nx-ed-text-link">{item.cta}<ArrowRight size={17} aria-hidden="true"/></Link>
                 </div>
               </article>
