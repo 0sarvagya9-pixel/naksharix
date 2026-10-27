@@ -51,14 +51,16 @@ export async function POST(request: NextRequest) {
     if (payment && reportRequestId) {
       const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
       if (reportRequest && reportRequest.userId === user.id) {
-        const updated = await prisma.reportRequest.update({
-          where: { id: reportRequestId },
+        const updated = await prisma.reportRequest.updateMany({
+          where: { id: reportRequestId, userId: user.id,
+            status: { in: [ReportRequestStatus.RECEIVED, ReportRequestStatus.PENDING_REVIEW, ReportRequestStatus.PAYMENT_PENDING] },
+            paymentStatus: { in: [ReportPaymentStatus.PENDING, ReportPaymentStatus.FAILED] } },
           data: { paymentStatus: ReportPaymentStatus.PAID, status: ReportRequestStatus.PAID }
         });
-        await writeReportStatusHistory({
+        if (updated.count === 1) await writeReportStatusHistory({
           reportRequestId,
           oldStatus: reportRequest.status,
-          newStatus: updated.status,
+          newStatus: ReportRequestStatus.PAID,
           actor: user,
           note: "Razorpay client verification confirmed captured payment.",
           metadata: { paymentId: payment.id, provider: "razorpay" }
