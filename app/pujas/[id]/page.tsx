@@ -29,7 +29,7 @@ export default async function PujaTopicPage({params}:Props) {
           <h1 className="mt-4 font-cinzel text-3xl font-black md:text-5xl">{item.name}</h1>
           <p className="mt-5 text-base leading-8 text-[#e1d4e1]">{item.description}. Customary details vary according to community, family and temple practice.</p>
           <div className="mt-7 space-y-4 text-sm leading-7 text-[#e5d9e0]">
-            <p className="flex gap-3"><CalendarDays size={19} className="mt-1 shrink-0 text-[#f5cb81]"/> Confirm dates and local muhurat from your city's Panchang.</p>
+            <p className="flex gap-3"><CalendarDays size={19} className="mt-1 shrink-0 text-[#f5cb81]"/> Confirm dates and local muhurat from your city&apos;s Panchang.</p>
             <p className="flex gap-3"><ShieldCheck size={19} className="mt-1 shrink-0 text-[#f5cb81]"/> Temple, pandit, materials, price and completion details require separate written confirmation.</p>
           </div>
           <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
