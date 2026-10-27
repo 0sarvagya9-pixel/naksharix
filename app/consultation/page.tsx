@@ -45,7 +45,7 @@ export default async function ConsultationPage() {
   return <><EditorialServiceBanner eyebrow="PERSONAL CONSULTATIONS"
     headline="Real conversations, meaningful questions"
     caption="Browse the approved profiles and read session details before choosing a consultation. External meeting rooms depend on assigned providers."
-    image="https://images.unsplash.com/photo-1519681393784-d120267933ba" imageAlt="Star-filled night sky above mountains"
+    image="/naksharix/editorial-consultation.svg" imageAlt="Original illustration of an astrology consultation"
     link="/ask-astrologer" linkLabel="Ask a written question" />
     <AstrologersPageContent profiles={profiles} /></>;
 }

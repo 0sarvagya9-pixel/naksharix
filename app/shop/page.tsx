@@ -21,7 +21,7 @@ export default async function ShopPage() {
   return <><EditorialServiceBanner eyebrow="SPIRITUAL DISCOVERY"
     headline="Objects of tradition and intention"
     caption="Explore the Naksharix catalogue and enquire about availability. Product checkout and guaranteed delivery are not active."
-    image="/naksharix/ganesh-hero-light-saffron.jpg" imageAlt="Traditional devotional illustration"
+    image="/shop/rudraksha-mala-illustration.svg" imageAlt="Original illustration of Rudraksha prayer beads"
     link="/contact" linkLabel="Ask about an item" />
     <ShopComingSoonContent initialProducts={catalogue.products} /></>;
 }

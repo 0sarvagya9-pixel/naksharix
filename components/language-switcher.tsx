@@ -38,7 +38,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="flex h-9 w-full min-w-12 items-center justify-center rounded-md border border-[#263957] bg-[#0f1c3a] px-2 text-xs font-bold text-[#ffffff] outline-none transition hover:border-[#dca956]/60 hover:bg-[#142647] focus:border-[#dca956] focus:ring-2 focus:ring-[#dca956]/20"
+        className="flex h-9 w-full min-w-12 items-center justify-center rounded-md border border-[#d9b99f] bg-[#fff8ee] px-2 text-xs font-bold text-[#6e2837] outline-none transition hover:border-[#9b3342] hover:bg-[#f8eadb] focus:border-[#9b3342] focus:ring-2 focus:ring-[#9b3342]/20"
       >
         {languageCode(locale)}
       </button>
@@ -46,7 +46,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         <div
           role="listbox"
           aria-label="Language options"
-          className="absolute right-0 top-full z-[90] mt-2 w-36 rounded-xl border border-[#dca956]/30 bg-[#050b18]/95 p-1.5 shadow-2xl shadow-black/70 ring-1 ring-white/5 backdrop-blur-xl"
+          className="absolute right-0 top-full z-[90] mt-2 w-36 rounded-xl border border-[#e6c6a7] bg-[#fffcf8]/95 p-1.5 shadow-xl ring-1 ring-[#9b3342]/10 backdrop-blur-xl"
         >
           {languageOptions.map((option) => (
             <button
@@ -58,12 +58,12 @@ export function LanguageSwitcher({ className }: { className?: string }) {
               className={cn(
                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-semibold transition",
                 locale === option.value
-                  ? "bg-[#dca956]/14 text-[#f3d382]"
-                  : "text-white hover:bg-[#0f1c3a] hover:text-[#f3d382]"
+                  ? "bg-[#f8e3d2] text-[#7d2735]"
+                  : "text-[#4b3338] hover:bg-[#fae9dc] hover:text-[#7d2735]"
               )}
             >
               <span>{option.label}</span>
-              <span className="text-[0.65rem] text-[#94a3b8]">{languageCode(option.value)}</span>
+              <span className="text-[0.65rem] text-[#8b6862]">{languageCode(option.value)}</span>
             </button>
           ))}
         </div>

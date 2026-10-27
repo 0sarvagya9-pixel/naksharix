@@ -5,6 +5,7 @@ import { Cinzel, Cinzel_Decorative, Inter, Poppins } from "next/font/google";
 import "@/app/globals.css";
 import "@/app/accessibility-overrides.css";
 import "@/app/editorial-home.css";
+import "@/app/reference-redesign.css";
 import { env, validateProductionEnv } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";

@@ -275,6 +275,16 @@ function ProductForm({ editing, setEditing, saveProduct }: { editing: FormState 
           <TextareaField label="Short description" value={editing.shortDescription.en} onChange={(value) => setEditing({ ...editing, shortDescription: localizedText(value) })} required />
           <TextareaField label="Long description" value={editing.longDescription.en} onChange={(value) => setEditing({ ...editing, longDescription: localizedText(value) })} />
           <Field label="Image URL or /public path" value={editing.imageUrl} onChange={(value) => setEditing({ ...editing, imageUrl: value })} />
+          <SelectField label="Image usage rights (required for external URLs)" value={editing.imageRights || ""}
+            onChange={(value) => setEditing({ ...editing, imageRights: (value || undefined) as ShopProduct["imageRights"] })}
+            options={[
+              { value: "", label: "No external photo approval" },
+              { value: "OWNED", label: "Owned by Naksharix" },
+              { value: "LICENSED", label: "Licensed image" },
+              { value: "SUPPLIER_AUTHORIZED", label: "Authorized by supplier" }
+            ]} />
+          <Field label="Image rights evidence HTTPS URL" value={editing.imageEvidenceUrl || ""}
+            onChange={(value) => setEditing({ ...editing, imageEvidenceUrl: value || undefined })} />
           <Field label="Price label" value={editing.priceLabel.en} onChange={(value) => setEditing({ ...editing, priceLabel: localizedText(value) })} />
           <Field label="Tags, comma separated" value={editing.tags.join(", ")} onChange={(value) => setEditing({ ...editing, tags: value.split(",").map((tag) => tag.trim()).filter(Boolean) })} />
           <TextareaField label="How to use" value={editing.howToUse.en} onChange={(value) => setEditing({ ...editing, howToUse: localizedText(value) })} />
