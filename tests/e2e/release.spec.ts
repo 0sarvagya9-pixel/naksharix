@@ -177,7 +177,7 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("heading", { level: 2, name: "Shri Yantra" })).toBeVisible();
     await expect(page.locator('img[alt*="Yantra"]').first()).toBeVisible();
     await expect(page.getByText("Illustrative catalogue visual, not an actual stock photograph").first()).toBeVisible();
-    await expect(page.getByRole("button", { name: "Add product to cart" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add product to cart" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Buy Now|Pay with Razorpay/i })).toHaveCount(0);
   });
 
@@ -185,7 +185,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.goto(absolute("/shop"), { waitUntil: "domcontentloaded" });
     await page.getByPlaceholder("Search products...").fill("Shri Yantra");
     await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true })).toBeVisible();
-    await page.getByRole("button", { name: "Add product to cart" }).click();
+    await page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add product to cart" }).click();
     await page.getByRole("link", { name: "View cart" }).click();
     await expect(page).toHaveURL(/\/cart$/);
     await expect(page.getByRole("heading", { name: "Your cart" })).toBeVisible();
