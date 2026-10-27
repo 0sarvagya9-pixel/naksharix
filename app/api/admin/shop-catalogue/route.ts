@@ -28,7 +28,10 @@ const product = z.object({
     url: z.string().min(1).max(1500).refine(s => (s.startsWith("/") && !s.startsWith("//") && !s.includes("\\")) || /^https:\/\//i.test(s), "Local or HTTPS images only"),
     alt: z.string().min(3).max(180),
     imageRights: z.enum(["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"]),
-    evidenceUrl: z.string().max(500)
+    evidenceUrl: z.string().max(500),
+    credit: z.string().max(260).optional(),
+    licenseName: z.string().max(110).optional(),
+    licenseUrl: z.string().url().max(500).optional()
   }).strict()).max(8).optional(),
   imageRights: z.enum(["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"]).optional(),
   imageEvidenceUrl: z.string().url().max(500).optional(),

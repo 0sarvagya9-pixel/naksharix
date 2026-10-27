@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
 import {
   ArrowLeft, ArrowRight, CalendarDays, ChevronRight, CircleHelp,
   Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
@@ -293,7 +294,7 @@ export function EditorialHome() {
       <section className="nx-ed-section" aria-label="Featured spiritual products">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="SACRED ESSENTIALS" title="Explore the spiritual catalogue."
-            copy="Beautifully illustrated traditional items. Authenticity, exact product specification and a quote are confirmed separately." />
+            copy="Browse real reference photographs of devotional items. Exact stock, specifications and final prices are confirmed before dispatch." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { id:"5-mukhi-rudraksha", name:"5 Mukhi Rudraksha" },
@@ -303,12 +304,15 @@ export function EditorialHome() {
             ].map(item=>(
               <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1d1328] text-white shadow-xl">
                 <Link href={"/commerce-enquiry?kind=SHOP&item="+item.id} className="block overflow-hidden" aria-label={"Enquire about "+item.name}>
-                  <Image src={"/shop/"+item.id+"-illustration.svg"} alt={item.name+" original illustrative artwork"}
+                  <Image src={referencePhotoForProduct(item.id)?.url || "/shop/"+item.id+"-illustration.svg"} alt={referencePhotoForProduct(item.id)?.alt || item.name+" illustration"}
                     width={540} height={390} unoptimized className="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105"/>
                 </Link>
                 <div className="p-5">
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
-                  <p className="mt-2 text-xs text-[#d8c7d9]">Illustrative art • Item details on request</p>
+                  <p className="mt-2 text-xs text-[#e2ced8]">Real licensed reference photo • Exact supplied item may differ</p>
+                  {referencePhotoForProduct(item.id) ? <a href={referencePhotoForProduct(item.id)!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-[11px] leading-5 underline text-[#f3dcb9]">
+                    {referencePhotoForProduct(item.id)!.credit} · {referencePhotoForProduct(item.id)!.licenseName}
+                  </a> : null}
                   <Link href={"/commerce-enquiry?kind=SHOP&item="+item.id}
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
                     Enquire <ArrowRight size={16}/>

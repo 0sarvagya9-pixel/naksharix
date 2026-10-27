@@ -4,7 +4,8 @@ import Image from "next/image";
 import type { ProductGalleryImage } from "@/lib/manual-catalogue";
 type GalleryProps={initialSrc:string;initialAlt:string;photos:ProductGalleryImage[]};
 export function ProductGallery({initialSrc,initialAlt,photos}:GalleryProps){
- const entries=photos.length ? photos.slice(0,8).map(photo=>({src:photo.url,alt:photo.alt})) : [{src:initialSrc,alt:initialAlt}];
+ const entries=photos.length ? photos.slice(0,8).map(photo=>({src:photo.url,alt:photo.alt,credit:photo.credit||"",licenseName:photo.licenseName||"",licenseUrl:photo.licenseUrl||"",source:photo.evidenceUrl})) :
+ [{src:initialSrc,alt:initialAlt,credit:"",licenseName:"",licenseUrl:"",source:""}];
  const [active,setActive]=useState(0);
  const chosen=entries[Math.min(active,entries.length-1)];
  return <div className="overflow-hidden rounded-3xl border border-[#d3ab76]/45 bg-[#fbefdf] p-3">
@@ -19,6 +20,10 @@ export function ProductGallery({initialSrc,initialAlt,photos}:GalleryProps){
        <Image src={entry.src} alt={entry.alt} width={200} height={160} unoptimized className="aspect-[4/3] w-full rounded-lg object-cover"/>
      </button>)}
    </div>:null}
-   <p className="mt-3 px-1 text-xs leading-5 text-[#65525b]">{photos.length?"Seller-provided product photography. Exact product variant and contents remain subject to the final confirmed offer.":"Illustrative catalogue artwork; not verified stock photography."}</p>
+   <div className="mt-3 space-y-1 px-1 text-xs leading-5 text-[#584550]">
+     <p>{photos.length ? "Real reference photograph, not verified Naksharix stock; confirm the exact delivered item, material, and combo contents before purchase." : "Illustrative catalogue artwork; not verified stock photography."}</p>
+     {chosen.source ? <p>Photo: <a className="font-semibold underline" href={chosen.source} target="_blank" rel="noopener noreferrer">{chosen.credit || "Photographer / source"}</a>
+        {chosen.licenseUrl ? <>{" · "}<a className="underline" href={chosen.licenseUrl} target="_blank" rel="noopener noreferrer">{chosen.licenseName || "License"}</a></> : null}</p> : null}
+   </div>
  </div>
 }

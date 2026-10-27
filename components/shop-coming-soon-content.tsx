@@ -77,8 +77,11 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                     width={640} height={420} unoptimized
                     className="h-48 w-full object-contain p-3"
                   />
-                  {(safeProductVisual(product).endsWith("-placeholder.svg") || safeProductVisual(product).endsWith("-illustration.svg")) &&
-                    <p className="pb-2 text-center text-xs text-[#6b565b]">Illustrative catalogue visual, not an actual stock photograph</p>}
+                  {product.galleryImages?.[0]?.evidenceUrl ? <div className="px-3 pb-3 text-center text-xs leading-5 text-[#57424b]">
+                    <p>Real reference photo • actual item may differ</p>
+                    <a href={product.galleryImages[0].evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{product.galleryImages[0].credit || "Photo source"}</a>
+                    {product.galleryImages[0].licenseUrl ? <>{" · "}<a href={product.galleryImages[0].licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{product.galleryImages[0].licenseName || "License"}</a></>:null}
+                  </div> : <p className="pb-2 text-center text-xs text-[#6b565b]">Illustrative catalogue visual, not an actual stock photograph</p>}
                 </div>
                 <div className="flex items-start justify-between gap-4">
                   <div>
