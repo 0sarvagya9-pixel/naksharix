@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo,useState } from "react";
+import { useEffect,useMemo,useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays,Search,ShieldCheck,ArrowRight } from "lucide-react";
@@ -8,6 +8,8 @@ import { pujaTopics,pujaCategories } from "@/lib/puja/service-catalogue";
 
 export function PujaServicesDirectory() {
   const [query,setQuery]=useState("");
+  const [hydrated,setHydrated]=useState(false);
+  useEffect(()=>setHydrated(true),[]);
   const [category,setCategory]=useState<(typeof pujaCategories)[number]>("All");
   const results=useMemo(()=>pujaTopics.filter(p=>
     (category==="All"||p.category===category) &&
@@ -50,11 +52,11 @@ export function PujaServicesDirectory() {
       <label className="relative mt-7 block max-w-xl">
         <span className="sr-only">Search Puja types or deities</span>
         <Search size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#e8bd7c]"/>
-        <input type="search" value={query} onChange={e=>setQuery(e.target.value)}
+        <input type="search" disabled={!hydrated} value={query} onChange={e=>setQuery(e.target.value)}
           placeholder="Search Puja, deity, tradition..." className="h-12 w-full rounded-xl border border-[#cba66a]/45 bg-[#170f28] pl-12 pr-4 text-white placeholder:text-[#bfb5c9] focus-visible:outline-[#f5d490]"/>
       </label>
       <div role="group" aria-label="Filter Puja categories" className="mt-5 flex flex-wrap gap-2">
-        {pujaCategories.map(key=><button key={key} type="button" aria-pressed={category===key} onClick={()=>setCategory(key)}
+        {pujaCategories.map(key=><button key={key} type="button" disabled={!hydrated} aria-pressed={category===key} onClick={()=>setCategory(key)}
           className={"rounded-full border px-4 py-2 text-sm font-semibold transition "+(category===key
             ?"border-[#ffdf9f] bg-[#f5c979] text-[#351b1e]":"border-[#d5b17d]/40 bg-[#21172c] text-[#f3d8b4] hover:border-[#f5d59c]")}>{key}</button>)}
       </div>

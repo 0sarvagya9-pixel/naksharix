@@ -307,7 +307,7 @@ export function EditorialHome() {
             ))}
           </div>
           <div className="mt-6 text-right">
-            <Link href="/shop" className="inline-flex items-center gap-2 font-bold text-[#e3b86b]">
+            <Link href="/shop" className="inline-flex items-center gap-2 font-bold text-[#724012]">
               Explore all spiritual products <ArrowRight size={17}/>
             </Link>
           </div>
@@ -343,10 +343,10 @@ export function EditorialHome() {
             ))}
           </div>
           <div className="mt-6 flex flex-wrap justify-end gap-5">
-            <Link href="/puja-calendar" className="inline-flex items-center gap-2 font-bold text-[#e3b86b]">
+            <Link href="/puja-calendar" className="inline-flex items-center gap-2 font-bold text-[#724012]">
               Upcoming festivals <CalendarDays size={17}/>
             </Link>
-            <Link href="/pujas" className="inline-flex items-center gap-2 font-bold text-[#e3b86b]">
+            <Link href="/pujas" className="inline-flex items-center gap-2 font-bold text-[#724012]">
               Explore Puja directory <ArrowRight size={17}/>
             </Link>
           </div>

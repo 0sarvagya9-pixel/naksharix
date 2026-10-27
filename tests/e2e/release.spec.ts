@@ -202,6 +202,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
     const search = page.getByRole("searchbox", { name: "Search Puja types or deities" });
+    await expect(search).toBeEnabled();
     await search.fill("Rudrabhishek");
     await expect(page.getByRole("heading", { name: "Rudrabhishek", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(1);
