@@ -56,9 +56,9 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
           <div className="grid gap-3 md:grid-cols-[1fr_240px]">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94a3b8]" />
-              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={labels.searchPlaceholder} className="border-[#ecd7c3] bg-white pl-9 text-white" />
+              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={labels.searchPlaceholder} className="border-[#ecd7c3] bg-white pl-9 text-[#402831]" />
             </div>
-            <select aria-label={labels.categoryLabel} value={category} onChange={(event) => setCategory(event.target.value)} className="h-10 rounded-md border border-[#ecd7c3] bg-white px-3 text-sm text-white">
+            <select aria-label={labels.categoryLabel} value={category} onChange={(event) => setCategory(event.target.value)} className="h-10 rounded-md border border-[#ecd7c3] bg-white px-3 text-sm text-[#402831]">
               <option value="all">{labels.allCategories}</option>
               {shopCategories.map((item) => <option key={item.key} value={item.key}>{item[locale]}</option>)}
             </select>
@@ -69,7 +69,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
           {products.map((product) => (
             <Card key={product.id} className="inner-card flex h-full flex-col transition hover:-translate-y-1 hover:border-[#dca956]/50">
               <CardContent className="flex h-full flex-col p-6">
-                <div className="mb-5 overflow-hidden rounded-xl border border-[#D4AF37]/20 bg-[#09162d]">
+                <div className="mb-5 overflow-hidden rounded-xl border border-[#D4AF37]/20 bg-[#fff2e2]">
                   <Image
                     src={safeProductVisual(product)}
                     alt={product.imageAlt[locale] || product.name[locale]}
@@ -82,7 +82,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#8c2e3b]">{categoryLabel(product.category, locale)}</p>
-                    <h2 className="mt-2 font-cinzel text-2xl font-bold text-white"><Link href={"/shop/"+encodeURIComponent(product.slug)} className="hover:text-[#f4c87d]">{product.name[locale]}</Link></h2>
+                    <h2 className="mt-2 font-cinzel text-2xl font-bold text-[#402831]"><Link href={"/shop/"+encodeURIComponent(product.slug)} className="hover:text-[#f4c87d]">{product.name[locale]}</Link></h2>
                   </div>
                   <PackageSearch className="h-6 w-6 shrink-0 text-[#8c2e3b]" />
                 </div>
@@ -91,11 +91,11 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                   <span className="rounded-full border border-[#dca956]/25 px-3 py-1 text-xs text-[#8c2e3b]">{product.purpose}</span>
                   {product.tags.slice(0, 2).map((tag) => <span key={tag} className="rounded-full border border-[#ecd7c3] px-3 py-1 text-xs text-[#6b565b]">{tag}</span>)}
                 </div>
-                <details className="mt-5 rounded-xl border border-[#ecd7c3] bg-[#0b1830]/65 p-4 text-sm text-[#6b565b]">
+                <details className="mt-5 rounded-xl border border-[#ecd7c3] bg-[#fff8ee] p-4 text-sm text-[#6b565b]">
                   <summary className="cursor-pointer font-semibold text-[#8c2e3b]">{labels.details}</summary>
                   <p className="mt-3 leading-6">{product.longDescription[locale]}</p>
-                  {product.howToUse[locale] ? <p className="mt-3"><strong className="text-white">{labels.howToUse}:</strong> {product.howToUse[locale]}</p> : null}
-                  {product.careNote[locale] ? <p className="mt-3"><strong className="text-white">{labels.care}:</strong> {product.careNote[locale]}</p> : null}
+                  {product.howToUse[locale] ? <p className="mt-3"><strong className="text-[#702d3d]">{labels.howToUse}:</strong> {product.howToUse[locale]}</p> : null}
+                  {product.careNote[locale] ? <p className="mt-3"><strong className="text-[#702d3d]">{labels.care}:</strong> {product.careNote[locale]}</p> : null}
                   <p className="mt-3 text-xs leading-5">{product.disclaimer[locale]}</p>
                 </details>
                 <div className="mt-auto pt-5">
