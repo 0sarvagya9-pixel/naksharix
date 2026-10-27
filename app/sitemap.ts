@@ -63,6 +63,7 @@ const staticRoutes = [
   "/consultation",
   "/ask-astrologer",
   "/puja-enquiry",
+  "/pujas",
   "/puja-calendar",
   "/commerce-enquiry",
   "/learn",
