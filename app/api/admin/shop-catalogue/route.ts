@@ -4,6 +4,7 @@ import { fail, handleApiError, ok } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { getShopCatalogue, SHOP_CATALOGUE_ID } from "@/lib/shop/catalogue-store";
+import { matchesExternalPhotoProof } from "@/lib/shop/photo-rights";
 
 const text = z.string().max(1200);
 const localized = z.object({
@@ -84,8 +85,9 @@ export async function PUT(request: Request) {
       const evidence = new URL(item.imageEvidenceUrl);
       if (evidence.protocol !== "https:" || evidence.username || evidence.password ||
           evidence.port || !evidence.hostname.includes(".") ||
-          evidence.hostname.endsWith(".local")) {
-        return fail("External photo rights evidence must be a public HTTPS reference.", 422);
+          evidence.hostname.endsWith(".local") ||
+          !matchesExternalPhotoProof(item.imageUrl, item.imageEvidenceUrl, item.imageRights)) {
+        return fail("External photo and its rights evidence do not match.", 422);
       }
     }
     for (const item of products) {
@@ -94,8 +96,9 @@ export async function PUT(request: Request) {
         if (!image.imageRights || !/^https:\/\//i.test(image.evidenceUrl)) return fail("Each external gallery image requires rights evidence.", 422);
         const proof = new URL(image.evidenceUrl);
         if (proof.protocol !== "https:" || proof.username || proof.password || proof.port ||
-            !proof.hostname.includes(".") || proof.hostname.endsWith(".local"))
-          return fail("Gallery rights proof must be publicly verifiable HTTPS.", 422);
+            !proof.hostname.includes(".") || proof.hostname.endsWith(".local") ||
+            !matchesExternalPhotoProof(image.url, image.evidenceUrl, image.imageRights))
+          return fail("Gallery image and rights proof must match.", 422);
       }
     }
     const ids = new Set(products.map((p) => p.id));
