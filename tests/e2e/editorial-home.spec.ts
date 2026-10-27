@@ -8,7 +8,7 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(main.getByRole("heading", { level: 1, name: /Your universe/i })).toBeVisible();
     await expect(main.getByRole("link", { name: /Generate free Kundli/i })).toHaveAttribute("href", "/kundli");
     await expect(main.getByRole("link", { name: /Explore Puja directory/i }).first()).toHaveAttribute("href", "/pujas");
-    await expect(main.locator(".nx-ed-service-card")).toHaveCount(3);
+    await expect(main.locator(".nx-ed-service-card")).toHaveCount(8);
     await expect(main.locator(".nx-ed-journey-card")).toHaveCount(3);
     await expect(main.locator(".nx-ed-zodiac-grid a")).toHaveCount(12);
     await expect(main.locator(".nx-ed-hero-photo")).toHaveCount(3);

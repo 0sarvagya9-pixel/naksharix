@@ -55,25 +55,36 @@ const quickLinks = [
 
 const services = [
   {
-    number: "01", label: "Know your Kundli",
-    copy: "Discover the traditional chart built from your birth date, time and place.",
-    href: "/kundli", cta: "Create my Kundli",
-    image: "/naksharix/zodiac-wheel-gold.jpg",
-    alt: "Golden zodiac wheel on an astrology-inspired background"
+    number:"01",label:"Personal Kundli",copy:"Explore the traditional birth chart with time- and location-based inputs.",
+    href:"/kundli",cta:"Create free Kundli",image:"/naksharix/editorial-kundli.svg",alt:"Original illustrated Vedic birth-chart grid"
   },
   {
-    number: "02", label: "Consult an Astrologer",
-    copy: "Explore approved profiles, available consultation options and session details.",
-    href: "/consultation", cta: "Explore consultations",
-    image: "/naksharix/editorial-consultation.svg",
-    alt: "Original consultation artwork"
+    number:"02",label:"Expert Consultations",copy:"Read approved astrologer profiles and available session formats.",
+    href:"/consultation",cta:"Explore consultations",image:"/naksharix/editorial-consultation.svg",alt:"Original artwork illustrating a person in consultation"
   },
   {
-    number: "03", label: "Reports & reflections",
-    copy: "Browse available report topics and read the details before requesting one.",
-    href: "/reports", cta: "Explore reports",
-    image: "/naksharix/editorial-reports.svg",
-    alt: "Illustrated Panchang calendar"
+    number:"03",label:"Personal Reports",copy:"Browse available personalized Kundli, match-making and numerology topics.",
+    href:"/reports",cta:"View astrology reports",image:"/naksharix/editorial-reports.svg",alt:"Original illustrated report and zodiac diagram"
+  },
+  {
+    number:"04",label:"Traditional Puja",copy:"Browse 94 Puja topics and request written availability confirmation.",
+    href:"/pujas",cta:"Explore Puja directory",image:"/naksharix/editorial-puja.svg",alt:"Original illustration of a traditional puja thali"
+  },
+  {
+    number:"05",label:"Kundli Matching",copy:"Compare traditional chart inputs and learn about Guna Milan.",
+    href:"/matchmaking",cta:"Check compatibility",image:"/naksharix/editorial-kundli.svg",alt:"Vedic birth chart geometry illustration"
+  },
+  {
+    number:"06",label:"Your Daily Panchang",copy:"Understand the five traditional Panchang elements for a chosen place.",
+    href:"/panchang",cta:"Explore Panchang",image:"/naksharix/editorial-panchang.svg",alt:"Original calendar illustration with ritual dates"
+  },
+  {
+    number:"07",label:"Spiritual Catalogue",copy:"Discover Rudraksha, malas and yantras with clear item enquiries.",
+    href:"/shop",cta:"Explore the collection",image:"/shop/rudraksha-mala-illustration.svg",alt:"Original Rudraksha mala product illustration"
+  },
+  {
+    number:"08",label:"Free Learning",copy:"Start with original introductory lessons on charts, planets and Panchang.",
+    href:"/learn",cta:"Start learning",image:"/naksharix/editorial-learning.svg",alt:"Illustration of an open traditional learning book"
   }
 ] as const;
 
