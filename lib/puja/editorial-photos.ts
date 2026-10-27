@@ -15,4 +15,67 @@ export const editorialPujaPhotos:Record<string,EditorialPhoto> = {
   "navagraha-homa": {src:"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Navagraha_Pooja.jpg/960px-Navagraha_Pooja.jpg",source:"https://commons.wikimedia.org/wiki/File:Navagraha_Pooja.jpg",author:"RHKalpana",license:"CC BY-SA 4.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/"},
   "griha-pravesh-puja": {src:"https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Griha_Pravesh_Puja_Ceremony.jpg/960px-Griha_Pravesh_Puja_Ceremony.jpg",source:"https://commons.wikimedia.org/wiki/File:Griha_Pravesh_Puja_Ceremony.jpg",author:"AditiChintarevula",license:"CC0 1.0",licenseUrl:"https://creativecommons.org/publicdomain/zero/1.0/"}
 };
-export function pujaEditorialImage(id:string,fallback:string):string{return editorialPujaPhotos[id]?.src||fallback;}
+export const categoryPujaPhotos:Record<string,EditorialPhoto> = {
+  "Shiva": {
+    "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/A_shiva_lingam_at_Rudraksha_Matham.jpg/960px-A_shiva_lingam_at_Rudraksha_Matham.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:A_shiva_lingam_at_Rudraksha_Matham.jpg",
+    "author": "Adityamadhav83",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "Devi": {
+    "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Durga_Puja_idol.jpg/960px-Durga_Puja_idol.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Durga_Puja_idol.jpg",
+    "author": "Bhabatirtha Goswami",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "Vishnu": {
+    "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/Satyanarayan_Pooja.jpg/960px-Satyanarayan_Pooja.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Satyanarayan_Pooja.jpg",
+    "author": "Coolgama",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+  },
+  "Ganesha": {
+    "src": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Ganesh_Pooja.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Ganesh_Pooja.jpg",
+    "author": "SrijaC",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "Graha": {
+    "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Navagraha_Pooja.jpg/960px-Navagraha_Pooja.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Navagraha_Pooja.jpg",
+    "author": "RHKalpana",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "Family": {
+    "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Griha_Pravesh_Puja_Ceremony.jpg/960px-Griha_Pravesh_Puja_Ceremony.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Griha_Pravesh_Puja_Ceremony.jpg",
+    "author": "AditiChintarevula",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "Homa": {
+    "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Yajna.jpg/960px-Yajna.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Yajna.jpg",
+    "author": "Gaurav Dhwaj Khadka",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "Festival": {
+    "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Diwali_worship.jpg/960px-Diwali_worship.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Diwali_worship.jpg",
+    "author": "Moneysha26",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  }
+};
+export function pujaEditorialPhoto(id:string,category?:string):EditorialPhoto|undefined {
+  return editorialPujaPhotos[id] || categoryPujaPhotos[category ? category.charAt(0).toUpperCase()+category.slice(1).toLowerCase() : ""];
+}
+export function pujaEditorialImage(id:string,fallback:string,category?:string):string {
+  return pujaEditorialPhoto(id,category)?.src || fallback;
+}

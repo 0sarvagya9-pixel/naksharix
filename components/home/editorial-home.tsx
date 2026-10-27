@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
+import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-photos";
 import {
   ArrowLeft, ArrowRight, CalendarDays, ChevronRight, CircleHelp,
   Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
@@ -343,12 +344,15 @@ export function EditorialHome() {
               <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1c1427] text-white">
                 <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
                   aria-label={"Enquire about "+item.name}>
-                  <Image src={"/pujas/"+item.category+"-illustration.svg"} alt={item.name+" category decorative artwork"}
+                  <Image src={pujaEditorialImage(item.id,"/pujas/"+item.category+"-illustration.svg",item.category)} alt={item.name+" representative ritual photo"}
                     width={540} height={335} unoptimized className="aspect-[16/10] w-full object-cover transition duration-300 hover:scale-105" />
                 </Link>
                 <div className="p-5">
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
-                  <p className="mt-2 text-xs text-[#d8c7d9]">Traditional practice • Information only</p>
+                  <p className="mt-2 text-xs text-[#d8c7d9]">Traditional practice • Representative image</p>
+                  {pujaEditorialPhoto(item.id,item.category) ? <a className="mt-2 inline-block text-[11px] leading-5 text-[#f2dab7] underline" href={pujaEditorialPhoto(item.id,item.category)!.source} target="_blank" rel="noopener noreferrer">
+                    {pujaEditorialPhoto(item.id,item.category)!.author} · {pujaEditorialPhoto(item.id,item.category)!.license}
+                  </a> : null}
                   <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
                     Enquire <ArrowRight size={16}/>
