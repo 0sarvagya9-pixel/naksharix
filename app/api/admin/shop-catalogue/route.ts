@@ -24,6 +24,8 @@ const product = z.object({
     "Use an HTTPS image URL, a local path, or leave blank"
   ),
   imageAlt: localized,
+  imageRights: z.enum(["OWNED", "LICENSED", "SUPPLIER_AUTHORIZED"]).optional(),
+  imageEvidenceUrl: z.string().url().max(500).optional(),
   priceLabel: localized,
   status: z.enum(["active", "inactive"]),
   featured: z.boolean(),
@@ -62,6 +64,20 @@ export async function PUT(request: Request) {
     const result = bodySchema.safeParse(parsed);
     if (!result.success) return fail("Invalid shop catalogue data", 422);
     const { expectedVersion, products } = result.data;
+    // A third-party HTTPS image must carry an administrator-confirmed license
+    // reference. Do not import competitor photographs without rights evidence.
+    for (const item of products) {
+      if (!/^https:\/\//i.test(item.imageUrl)) continue;
+      if (!item.imageRights || !item.imageEvidenceUrl) {
+        return fail("External product image requires documented image-use rights.", 422);
+      }
+      const evidence = new URL(item.imageEvidenceUrl);
+      if (evidence.protocol !== "https:" || evidence.username || evidence.password ||
+          evidence.port || !evidence.hostname.includes(".") ||
+          evidence.hostname.endsWith(".local")) {
+        return fail("External photo rights evidence must be a public HTTPS reference.", 422);
+      }
+    }
     const ids = new Set(products.map((p) => p.id));
     const slugs = new Set(products.map((p) => p.slug));
     if (ids.size !== products.length || slugs.size !== products.length) return fail("Duplicate product ID or slug", 422);

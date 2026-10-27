@@ -29,12 +29,22 @@ export async function POST(request: NextRequest) {
       select: { id: true, userId: true, amount: true, currency: true, status: true, providerPaymentId: true, metadata: true }
     });
     if (!existingPayment || existingPayment.userId !== user.id) return fail("Payment not found", 404);
-    if (existingPayment.status === "PAID") return ok({ payment: existingPayment });
+    if (existingPayment.status === "PAID") {
+      if (existingPayment.providerPaymentId !== body.razorpay_payment_id) {
+        return fail("Payment ID does not match the completed order", 409);
+      }
+      return ok({ payment: existingPayment });
+    }
+    if (existingPayment.status === "REFUNDED" || existingPayment.status === "ADMIN_BYPASS" ||
+        existingPayment.status === "FREE") {
+      return fail("This payment cannot be captured again", 409);
+    }
 
     const captured = await verifyRazorpayCapturedPayment(body.razorpay_order_id, body.razorpay_payment_id, Number(existingPayment.amount), existingPayment.currency);
     if (!captured.ok) return fail("Payment could not be verified", 400);
 
     const payment = await finalizePaidPayment(body.razorpay_order_id, body.razorpay_payment_id, { verifiedBy: "client", gatewayStatus: "captured" });
+    if (!payment) return fail("Payment no longer eligible for capture", 409);
     const metadata = (payment?.metadata as Record<string, unknown> | null) ?? {};
     const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
     const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
@@ -42,14 +52,16 @@ export async function POST(request: NextRequest) {
     if (payment && reportRequestId) {
       const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
       if (reportRequest && reportRequest.userId === user.id) {
-        const updated = await prisma.reportRequest.update({
-          where: { id: reportRequestId },
+        const updated = await prisma.reportRequest.updateMany({
+          where: { id: reportRequestId, userId: user.id,
+            status: { in: [ReportRequestStatus.RECEIVED, ReportRequestStatus.PENDING_REVIEW, ReportRequestStatus.PAYMENT_PENDING] },
+            paymentStatus: { in: [ReportPaymentStatus.PENDING, ReportPaymentStatus.FAILED] } },
           data: { paymentStatus: ReportPaymentStatus.PAID, status: ReportRequestStatus.PAID }
         });
-        await writeReportStatusHistory({
+        if (updated.count === 1) await writeReportStatusHistory({
           reportRequestId,
           oldStatus: reportRequest.status,
-          newStatus: updated.status,
+          newStatus: ReportRequestStatus.PAID,
           actor: user,
           note: "Razorpay client verification confirmed captured payment.",
           metadata: { paymentId: payment.id, provider: "razorpay" }
@@ -58,8 +70,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (payment && bookingId) {
-      await prisma.consultationBooking.update({
-        where: { id: bookingId },
+      // A captured payment does not resurrect a canceled or rejected session.
+      await prisma.consultationBooking.updateMany({
+        where: {
+          id: bookingId, userId: user.id,
+          status: { in: ["REQUESTED", "PAYMENT_PENDING", "ACCEPTED", "CONFIRMED"] },
+          paymentStatus: { in: ["PENDING", "FAILED"] }
+        },
         data: { status: "CONFIRMED", paymentStatus: "PAID" }
       });
     }

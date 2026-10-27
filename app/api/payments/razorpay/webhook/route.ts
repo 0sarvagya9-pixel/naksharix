@@ -23,15 +23,17 @@ export async function POST(request: NextRequest) {
 
         if (paid && reportRequestId) {
           const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
-          if (reportRequest) {
-            const updated = await prisma.reportRequest.update({
-              where: { id: reportRequestId },
+          if (reportRequest && reportRequest.userId === paid.userId) {
+            const updated = await prisma.reportRequest.updateMany({
+              where: { id: reportRequestId, userId: paid.userId,
+                status: { in: [ReportRequestStatus.RECEIVED, ReportRequestStatus.PENDING_REVIEW, ReportRequestStatus.PAYMENT_PENDING] },
+                paymentStatus: { in: [ReportPaymentStatus.PENDING, ReportPaymentStatus.FAILED] } },
               data: { paymentStatus: ReportPaymentStatus.PAID, status: ReportRequestStatus.PAID }
             });
-            await writeReportStatusHistory({
+            if (updated.count === 1) await writeReportStatusHistory({
               reportRequestId,
               oldStatus: reportRequest.status,
-              newStatus: updated.status,
+              newStatus: ReportRequestStatus.PAID,
               actor: { id: paid.userId, role: "USER" },
               note: "Razorpay webhook verified paid status.",
               metadata: { paymentId: paid.id, provider: "razorpay" }
@@ -40,8 +42,13 @@ export async function POST(request: NextRequest) {
         }
 
         if (paid && bookingId) {
-          await prisma.consultationBooking.update({
-            where: { id: bookingId },
+          await prisma.consultationBooking.updateMany({
+            where: {
+              id: bookingId,
+              userId: paid.userId,
+              status: { in: ["REQUESTED", "PAYMENT_PENDING", "ACCEPTED", "CONFIRMED"] },
+              paymentStatus: { in: ["PENDING", "FAILED"] }
+            },
             data: { status: "CONFIRMED", paymentStatus: "PAID" }
           });
         }
@@ -58,21 +65,33 @@ export async function POST(request: NextRequest) {
     if ((event.event === "payment.failed" || event.event === "payment.authorized") && payment?.order_id) {
       const existingPayment = await prisma.payment.findUnique({ where: { providerOrderId: payment.order_id } });
       if (existingPayment && event.event === "payment.failed") {
-        await prisma.payment.update({ where: { id: existingPayment.id }, data: { status: PaymentStatus.FAILED } });
+        // Failed callbacks can arrive after a captured/paid webhook. A stale
+        // failure must NEVER downgrade PAID, REFUNDED or waived entitlements.
+        const updated = await prisma.payment.updateMany({
+          where: { id: existingPayment.id, status: PaymentStatus.PENDING },
+          data: { status: PaymentStatus.FAILED }
+        });
+        if (updated.count === 0) {
+          logger.info("razorpay_stale_failed_event_ignored", { paymentId: existingPayment.id });
+          return ok({ received: true });
+        }
         const metadata = (existingPayment.metadata as Record<string, unknown> | null) ?? {};
         const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
         const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
 
         if (reportRequestId) {
-          await prisma.reportRequest.update({
-            where: { id: reportRequestId },
+          await prisma.reportRequest.updateMany({
+            where: { id: reportRequestId, userId: existingPayment.userId,
+              status: { in: [ReportRequestStatus.RECEIVED, ReportRequestStatus.PENDING_REVIEW, ReportRequestStatus.PAYMENT_PENDING] },
+              paymentStatus: ReportPaymentStatus.PENDING },
             data: { paymentStatus: ReportPaymentStatus.FAILED }
           });
         }
 
         if (bookingId) {
-          await prisma.consultationBooking.update({
-            where: { id: bookingId },
+          await prisma.consultationBooking.updateMany({
+            where: { id: bookingId, userId: existingPayment.userId,
+              paymentStatus: "PENDING" },
             data: { paymentStatus: "FAILED" }
           });
         }

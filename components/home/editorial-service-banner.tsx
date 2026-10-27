@@ -17,7 +17,7 @@ export function EditorialServiceBanner({ eyebrow, headline, caption, image, imag
   return (
     <section className="nx-ed-inner-banner" aria-label={eyebrow}>
       <div className="nx-ed-inner-banner-photo" aria-hidden="true">
-        <Image src={image} alt="" fill sizes="100vw" quality={72}/>
+        <Image src={image} alt="" fill sizes="100vw" unoptimized/>
       </div>
       <div className="nx-ed-inner-banner-shade" aria-hidden="true" />
       <div className="nx-ed-container nx-ed-inner-banner-body">

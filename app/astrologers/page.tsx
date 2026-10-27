@@ -1,3 +1,4 @@
+import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import type { Metadata } from "next";
 import { AstrologersPageContent } from "@/components/astrologers-page-content";
 import { prisma } from "@/lib/db";
@@ -38,5 +39,10 @@ export default async function AstrologersPage() {
     availableForVideo: profile.availableForVideo
   }))).catch(() => []);
 
-  return <AstrologersPageContent profiles={profiles} />;
+  return <><EditorialServiceBanner eyebrow="MEET THE ASTROLOGERS"
+    headline="Find guidance from an approved practitioner"
+    caption="Explore only approved profiles and their listed areas of practice. Availability is verified separately before booking."
+    image="/naksharix/editorial-consultation.svg" imageAlt="Original astrology consultation illustration"
+    link="/consultation" linkLabel="Browse consultation options" />
+    <AstrologersPageContent profiles={profiles} /></>;
 }

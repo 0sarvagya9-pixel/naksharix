@@ -1,57 +1,54 @@
 import Script from "next/script";
 import { env } from "@/lib/env";
 
+/** Grounded public structured data only: no invented stock, prices, native app,
+ * searchable site endpoint, unverified AI capabilities or supplier offers.
+ */
 export function SchemaMarkup() {
-  const siteUrl = env.NEXT_PUBLIC_APP_URL;
-  const schema = {
+  const siteUrl = env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Naksharix",
     url: siteUrl,
     logo: `${siteUrl}/logo.svg`,
-    slogan: "Unlock Your Cosmic Destiny",
-    sameAs: [siteUrl],
     brand: { "@type": "Brand", name: "Naksharix" },
-    offers: { "@type": "AggregateOffer", category: "Astrology SaaS", availability: "https://schema.org/InStock" },
-    knowsAbout: ["Astrology", "Horoscope", "Kundli", "Numerology", "Tarot Reading", "Panchang", "Aaj Ka Rashifal", "Kundli Milan"],
-    contactPoint: { "@type": "ContactPoint", contactType: "customer support", url: `${siteUrl}/contact` }
+    knowsAbout: ["Vedic astrology", "Horoscope", "Kundli", "Numerology", "Tarot", "Panchang", "Kundli matching"],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      url: `${siteUrl}/contact`
+    }
   };
-
   const website = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Naksharix",
     url: siteUrl,
-    description: "Premium astrology, horoscope, kundli, numerology, tarot reading, and panchang platform.",
-    inLanguage: ["en-IN", "hi-IN"],
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${siteUrl}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string"
-    }
+    description: "Vedic astrology tools, personalized reports, horoscope, Panchang and traditional Puja topics.",
+    inLanguage: ["en-IN", "hi-IN"]
   };
-
   const navigation = {
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
-    name: ["Today Horoscope", "Free Kundli", "Kundli Milan", "Aaj Ka Rashifal", "Blog", "AI Astrology Chat"],
-    url: [`${siteUrl}/horoscope/all-signs/today`, `${siteUrl}/kundli`, `${siteUrl}/hi/kundli-milan`, `${siteUrl}/hi/aaj-ka-rashifal`, `${siteUrl}/blog`, `${siteUrl}/chatbot`]
+    name: ["Free Kundli", "Horoscope", "Panchang", "Consultations", "Reports", "Puja Directory", "Spiritual Catalogue"],
+    url: [
+      `${siteUrl}/kundli`, `${siteUrl}/daily-horoscope`, `${siteUrl}/panchang`,
+      `${siteUrl}/consultation`, `${siteUrl}/reports`, `${siteUrl}/pujas`, `${siteUrl}/shop`
+    ]
   };
-
-  const softwareApplication = {
+  const webApp = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+    "@type": "WebApplication",
     name: "Naksharix",
     applicationCategory: "LifestyleApplication",
-    operatingSystem: "Web, iOS, Android",
+    operatingSystem: "Any",
     url: siteUrl,
-    description: "Premium astrology SaaS for Horoscope, Kundli, Numerology, Tarot Reading, Panchang, and AI astrology guidance.",
-    offers: { "@type": "Offer", price: "0", priceCurrency: "INR" }
+    description: "Browser-based astrology and cultural-information tools with optional consultation and report workflows."
   };
-
   return (
     <Script id="naksharix-schema" type="application/ld+json" strategy="afterInteractive">
-      {JSON.stringify([schema, website, navigation, softwareApplication])}
+      {JSON.stringify([organization, website, navigation, webApp])}
     </Script>
   );
 }

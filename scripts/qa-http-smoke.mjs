@@ -141,6 +141,64 @@ if (opsResponse) {
 
   } else pass("predeploy feature schema", "both staged feature tables and indexes exist");
 }
+const calendarPage = await expectStatus("/puja-calendar", 200, undefined, "rolling Hindu Puja calendar page");
+if (calendarPage) {
+  const html = await calendarPage.text();
+  if (!html.includes("Upcoming Puja Calendar")) fail("Hindu Puja calendar title", "Expected calendar page content");
+  else pass("Hindu Puja calendar title", "source-reviewed calendar render");
+}
+const calendarFeed = await expectStatus("/api/puja/calendar", 200, undefined, "rolling Puja API");
+if (calendarFeed) {
+  const payload = await calendarFeed.json();
+  const calendar = payload?.data;
+  const valid = calendar && /^\d{4}-\d{2}-\d{2}$/.test(calendar.from) &&
+    /^\d{4}-\d{2}-\d{2}$/.test(calendar.untilExclusive) &&
+    calendar.bookingAvailable === false &&
+    calendar.exhaustiveRegionalCoverage === false &&
+    Array.isArray(calendar.events) &&
+    calendar.events.length > 0 &&
+    calendar.events.every((item) => item.date >= calendar.from &&
+      item.date < calendar.untilExclusive && item.bookingStatus === "information_only");
+  if (!valid) fail("Puja calendar feed truth", "Invalid range or unverified booking claim");
+  else pass("Puja calendar feed truth", calendar.events.length + " informational events");
+}
+for (const kind of ["SHOP", "PUJA"]) {
+  const response = await expectStatus("/commerce-enquiry?kind=" + kind, 200, undefined, "commerce enquiry page " + kind);
+  if (response) {
+    const html = await response.text();
+    const marker = kind === "SHOP" ? "Product availability enquiry" : "Puja date and availability enquiry";
+    if (!html.includes(marker) || !html.includes("Sign in")) fail("commerce enquiry page " + kind, "missing login fence");
+    else pass("commerce enquiry page " + kind, "source-owned options and login fence");
+  }
+}
+await expectStatus("/api/commerce/enquiries", 403, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ kind: "SHOP", itemId: "5-mukhi-rudraksha", quantity: 1, message: "Please confirm stock and shipping." })
+}, "commerce enquiry rejects POST without CSRF");
+const pujaDirectory = await expectStatus("/pujas", 200, undefined, "traditional Puja directory");
+if (pujaDirectory) {
+  const html = await pujaDirectory.text();
+  if (!html.includes("Puja Directory") || !html.includes("Explore Puja"))
+    fail("Puja directory", "Missing searchable directory header");
+  else pass("Puja directory", "traditional categories available");
+}
+for (const [url,label] of [
+  ["/pujas/rudrabhishek","Puja detail"],
+  ["/pujas/navagraha-shanti-puja","Navagraha detail"],
+  ["/shop/5-mukhi-rudraksha","Shop product detail"],
+  ["/shop/shri-yantra","Shop Yantra detail"]
+]) await expectStatus(url,200,undefined,label);
+// Next.js may stream a notFound() page with HTTP 200 after headers have begun.
+const unknownPuja = await request("/pujas/imaginary-paid-ritual");
+const unknownPage = await unknownPuja.text();
+if (![200, 404].includes(unknownPuja.status) ||
+    !unknownPage.includes("Page not found") ||
+    !/noindex/i.test(unknownPage)) {
+  fail("unknown ritual fails closed", "Expected unindexable not-found page, received HTTP " + unknownPuja.status);
+} else {
+  pass("unknown ritual fails closed", "404 UI and noindex; status " + unknownPuja.status);
+}
 const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
 if (partnerResponse) {
   const body = await partnerResponse.json();
