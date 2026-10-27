@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
+
 import { ShoppingCart } from "lucide-react";
 
 export const SHOP_CART_STORAGE_KEY="naksharix-product-cart-v1";
@@ -31,6 +31,6 @@ export function AddToCartButton({productId}:{productId:string}){
       className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#822c40] px-4 py-3 font-bold text-white transition hover:bg-[#671f31] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d39942]">
       <ShoppingCart className="h-4 w-4"/>{added?"Added to cart":"Add to cart"}
     </button>
-    {added?<Link className="inline-flex items-center rounded-xl border border-[#cfaf85] px-3 text-sm font-bold text-[#743042]" href="/cart">View cart</Link>:null}
+    {added?<a className="inline-flex items-center rounded-xl border border-[#cfaf85] px-3 text-sm font-bold text-[#743042]" href="/cart">View cart</a>:null}
   </div>;
 }
