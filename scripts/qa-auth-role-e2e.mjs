@@ -708,7 +708,7 @@ try {
       { expectedVersion: 0, products: unlicensed }, adminCookie, "PUT");
     assert.equal(refusedPhoto.status, 422, "Unlicensed third-party product photo was published");
     const target = original[0];
-    const headingMarker = ">" + target.name.en + "</h2>";
+    const headingMarker = ">" + target.name.en + "</a></h2>"; // product heading now contains a linked detail-page title
     const beforePage = await req("/shop");
     assert.equal(beforePage.status, 200);
     assert.ok((await beforePage.text()).includes(headingMarker), "active product must render as a real Shop heading");
