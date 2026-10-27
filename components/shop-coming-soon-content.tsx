@@ -76,7 +76,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                     width={640} height={420} unoptimized
                     className="h-48 w-full object-contain p-3"
                   />
-                  {safeProductVisual(product).endsWith("-placeholder.svg") &&
+                  {(safeProductVisual(product).endsWith("-placeholder.svg") || safeProductVisual(product).endsWith("-illustration.svg")) &&
                     <p className="pb-2 text-center text-xs text-[#a8b3c7]">Illustrative catalogue visual, not an actual stock photograph</p>}
                 </div>
                 <div className="flex items-start justify-between gap-4">

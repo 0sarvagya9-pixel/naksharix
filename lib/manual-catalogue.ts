@@ -144,7 +144,7 @@ function product(id: string, category: string, purpose: string, en: string, hi: 
       hi: `${descHi} इसे चिंतनात्मक, आस्था-आधारित catalogue item के रूप में देखें और guidance, practical judgment और personal comfort के साथ चुनें।`,
       hinglish: `${descHinglish} Ise reflective, faith-based catalogue item ke roop mein dekhein aur guidance, practical judgment aur personal comfort ke saath choose karein.`
     },
-    imageUrl: `/shop/${placeholderImageForCategory(category)}.svg`,
+    imageUrl: `/shop/${id}-illustration.svg`,
     imageAlt: { en: `${en} product visual`, hi: `${hi} उत्पाद visual`, hinglish: `${hinglish} product visual` },
     priceLabel: {
       en: "Price on request",
