@@ -9,11 +9,11 @@ export function readCart():CartLine[]{
   try{
     const raw=JSON.parse(window.localStorage.getItem(SHOP_CART_STORAGE_KEY)||"[]");
     if(!Array.isArray(raw))return[];
-    return raw.filter((line):line is CartLine=>Boolean(line)&&typeof line.productId==="string"&&/^[a-zA-Z0-9-]{1,128}$/.test(line.productId)&&Number.isSafeInteger(line.quantity)&&line.quantity>=1&&line.quantity<=99).slice(0,100);
+    return raw.filter((line):line is CartLine=>Boolean(line)&&typeof line.productId==="string"&&/^[a-zA-Z0-9-]{1,128}$/.test(line.productId)&&Number.isSafeInteger(line.quantity)&&line.quantity>=1&&line.quantity<=99).slice(0,20);
   }catch{return[]}
 }
 export function writeCart(lines:CartLine[]){
-  window.localStorage.setItem(SHOP_CART_STORAGE_KEY,JSON.stringify(lines.slice(0,100)));
+  window.localStorage.setItem(SHOP_CART_STORAGE_KEY,JSON.stringify(lines.slice(0,20)));
   window.dispatchEvent(new Event("naksharix-cart-changed"));
 }
 export function AddToCartButton({productId}:{productId:string}){
@@ -22,7 +22,7 @@ export function AddToCartButton({productId}:{productId:string}){
     const list=readCart();
     const i=list.findIndex(l=>l.productId===productId);
     if(i>=0)list[i]={...list[i],quantity:Math.min(99,list[i].quantity+1)};
-    else if(list.length<100)list.push({productId,quantity:1});
+    else if(list.length<20)list.push({productId,quantity:1});
     writeCart(list);
     setAdded(true);
   }
