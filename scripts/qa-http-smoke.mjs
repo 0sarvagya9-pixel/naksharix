@@ -162,6 +162,20 @@ if (calendarFeed) {
   if (!valid) fail("Puja calendar feed truth", "Invalid range or unverified booking claim");
   else pass("Puja calendar feed truth", calendar.events.length + " informational events");
 }
+for (const kind of ["SHOP", "PUJA"]) {
+  const response = await expectStatus("/commerce-enquiry?kind=" + kind, 200, undefined, "commerce enquiry page " + kind);
+  if (response) {
+    const html = await response.text();
+    const marker = kind === "SHOP" ? "Product availability enquiry" : "Puja date and availability enquiry";
+    if (!html.includes(marker) || !html.includes("Sign in")) fail("commerce enquiry page " + kind, "missing login fence");
+    else pass("commerce enquiry page " + kind, "source-owned options and login fence");
+  }
+}
+await expectStatus("/api/commerce/enquiries", 403, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ kind: "SHOP", itemId: "5-mukhi-rudraksha", quantity: 1, message: "Please confirm stock and shipping." })
+}, "commerce enquiry rejects POST without CSRF");
 const partnerResponse = await expectStatus("/api/puja/partners", 200, undefined, "public reviewed-only Puja registry");
 if (partnerResponse) {
   const body = await partnerResponse.json();
