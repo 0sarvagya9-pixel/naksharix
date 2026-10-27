@@ -691,6 +691,40 @@ try {
     }
   });
 
+  await check("Puja owner price editor restricts roles and publishes only approved fees", async () => {
+    const url="/api/admin/puja-offerings";
+    const anonymous=await req(url);assert.equal(anonymous.status,403);
+    const userDenied=await req(url,{headers:{cookie:userCookie}});assert.equal(userDenied.status,403);
+    const baseline=await req(url,{headers:{cookie:adminCookie}});
+    assert.equal(baseline.status,200,await baseline.text());
+    const input={topicId:"rudrabhishek",pricePaise:199900,durationMinutes:90,available:true,note:"CI synthetic fee, not a genuine customer quote"};
+    const invalid=await post(url,{...input,topicId:"invented-temple-ceremony"},adminCookie,"PUT");
+    assert.equal(invalid.status,422);
+    const missingFee=await post(url,{...input,pricePaise:null},adminCookie,"PUT");
+    assert.equal(missingFee.status,422);
+    try {
+      const publish=await post(url,input,adminCookie,"PUT");
+      assert.equal(publish.status,200,await publish.text());
+      const updated=await req(url,{headers:{cookie:adminCookie}});
+      const data=await updated.json();assert.equal(updated.status,200);
+      assert.equal(data.data.offerings.find(o=>o.topicId==="rudrabhishek").pricePaise,199900);
+      const detail=await req("/pujas/rudrabhishek");
+      assert.equal(detail.status,200);
+      assert.match(await detail.text(),/₹1,999/);
+      const directory=await req("/pujas");
+      assert.equal(directory.status,200);
+      assert.match(await directory.text(),/₹1,999/);
+      const stop=await post(url,{...input,available:false},adminCookie,"PUT");
+      assert.equal(stop.status,200,await stop.text());
+      const unpublished=await req("/pujas/rudrabhishek");
+      assert.equal(unpublished.status,200);
+      assert.doesNotMatch(await unpublished.text(),/₹1,999/);
+    } finally {
+      // CI localhost database only, never production. Clean the synthetic offer record.
+      await prisma.pujaOffering.deleteMany({where:{topicId:"rudrabhishek"}});
+    }
+  });
+
   await check("Shop catalogue admin-only persistence and public deactivation", async () => {
     const anon = await req("/api/admin/shop-catalogue");
     assert.equal(anon.status, 403);
