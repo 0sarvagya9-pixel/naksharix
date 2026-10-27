@@ -41,7 +41,7 @@
     "qa:remedies": "node scripts/qa-remedies.mjs",
     "qa:premium-report-content": "node scripts/qa-premium-report-content.mjs",
     "qa:advanced-engine": "npm run qa:transit && npm run qa:varga && npm run qa:strength",
-    "qa:all": "npm run qa:foundation && npm run qa:engine && npm run qa:provider-kundli && npm run qa:provider-panchang && npm run qa:provider-transit && npm run qa:provider-varga && npm run qa:ephemeris && npm run qa:panchang && npm run qa:transit && npm run qa:varga && npm run qa:strength && npm run qa:premium-engine && npm run qa:interpretation && npm run qa:remedies && npm run qa:premium-report-content && npm run qa:fixture-import && npm run qa:reports-workflow && npm run qa:payments && npm run qa:consultation-time && npm run qa:auth-redirect && npm run qa:pdf-generation && npm run qa:storage && npm run qa:delivery && npm run qa:audit-security && npm run qa:automation && npm run qa:production-safety && npm run qa:release-state && npm run qa:mobile-native && npm run qa:predeploy-bundle && npm run qa:puja-calendar && npm run qa:commerce-admission && npm run qa:payment-events && npm run qa:commerce-enquiry && npm run qa:shop-photo-rights && npm run qa:puja-directory && npm run qa:visual-source",
+    "qa:all": "npm run qa:foundation && npm run qa:engine && npm run qa:provider-kundli && npm run qa:provider-panchang && npm run qa:provider-transit && npm run qa:provider-varga && npm run qa:ephemeris && npm run qa:panchang && npm run qa:transit && npm run qa:varga && npm run qa:strength && npm run qa:premium-engine && npm run qa:interpretation && npm run qa:remedies && npm run qa:premium-report-content && npm run qa:fixture-import && npm run qa:reports-workflow && npm run qa:payments && npm run qa:consultation-time && npm run qa:auth-redirect && npm run qa:pdf-generation && npm run qa:storage && npm run qa:delivery && npm run qa:audit-security && npm run qa:automation && npm run qa:production-safety && npm run qa:release-state && npm run qa:mobile-native && npm run qa:predeploy-bundle && npm run qa:puja-calendar && npm run qa:commerce-admission && npm run qa:payment-events && npm run qa:commerce-enquiry && npm run qa:shop-photo-rights && npm run qa:puja-directory && npm run qa:visual-source && npm run qa:structured-truth",
     "qa:release": "npm run qa:reports-workflow && npm run qa:payments && npm run qa:pdf-generation && npm run qa:storage && npm run qa:delivery && npm run qa:audit-security && npm run qa:automation && npm run qa:production-safety && npm run qa:release-state",
     "qa:prod-db-readonly": "node scripts/qa-production-db-readonly.mjs",
     "qa:final-closure": "node scripts/qa-final-code-closure.mjs",
@@ -63,7 +63,8 @@
     "qa:commerce-enquiry": "node scripts/qa-commerce-enquiry.mjs",
     "qa:shop-photo-rights": "node scripts/qa-shop-photo-rights.mjs",
     "qa:puja-directory": "node --experimental-strip-types scripts/qa-puja-directory.mjs",
-    "qa:visual-source": "node scripts/qa-visual-refresh.mjs"
+    "qa:visual-source": "node scripts/qa-visual-refresh.mjs",
+    "qa:structured-truth": "node scripts/qa-structured-truth.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.3",
