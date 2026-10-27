@@ -49,7 +49,7 @@ export function AdminManualReportPrices(){
    {manual.map(report=>{const row=rates[report.slug];return <article key={report.slug} className="rounded-xl border border-[#e4cbb1] bg-white p-5">
     <p className="font-cinzel font-bold">{report.name.en}</p>
     <p className="mt-2 text-sm">{row?.available&&row.pricePaise!==null?"₹"+(row.pricePaise/100).toFixed(2):"Unpriced / unpublished"}</p>
-    <button onClick={()=>setEdit({reportSlug:report.slug,pricePaise:null,available:false,deliveryDays:null,note:"",...row})} className="mt-3 rounded-lg border border-[#b57b81] px-4 py-2 text-sm font-bold">Set rate</button>
+    <button onClick={()=>setEdit({...{pricePaise:null,available:false,deliveryDays:null,note:""},...row,reportSlug:report.slug})} className="mt-3 rounded-lg border border-[#b57b81] px-4 py-2 text-sm font-bold">Set rate</button>
    </article>})}
   </div>
  </div>;
