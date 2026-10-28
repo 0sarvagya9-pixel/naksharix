@@ -19,6 +19,20 @@ assert.ok(ui.includes('secureFetch("/api/admin/puja-offerings"')&&ui.includes("P
 assert.ok(index.includes("getPublishedPujaOffers()")&&listings.includes("offerings[topic.id]")&&detail.includes('const offering=(await getPublishedPujaOffers())[item.id]'),"Missing public price integration");
 assert.ok(db.includes('error.code==="P2021"')&&db.includes("return {}"),"Missing-table fallback must not fake prices");
 assert.ok(listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "'),"Published Puja offers must show Book Now");
+const bookingClient=read("components/puja/booking-request-client.tsx");
+const bookingApi=read("app/api/puja/bookings/route.ts");
+assert.ok(bookingClient.includes("expectedPricePaise:pricePaise") &&
+  bookingApi.includes("expectedPricePaise:z.number().int().min(100).max(100000000).optional()") &&
+  bookingApi.includes("offer.pricePaise!==input.expectedPricePaise") &&
+  bookingApi.includes('Refresh and review the new price before submitting.'), "PUJA_PRICE_STALE_SUBMISSION_MUST_FAIL_CLOSED");
+assert.ok(bookingClient.includes("confirmedQuotePaise")&&bookingClient.includes("quotedPricePaise")&&
+  !bookingClient.includes("Listed fee ₹1,100."),"BOOKING_COPY_MUST_FOLLOW_SERVER_QUOTE");
+assert.ok(!detail.includes("₹1,100 is the listed service fee.")&&detail.includes("published fee shown above"),
+  "PUJA_DETAIL_MUST_NOT_CONTRADICT_ADMIN_PRICE");
+assert.ok(ui.includes('ResilientEditorialImage')&&ui.includes('fallbackSrc={topic.graphic}')&&
+  !ui.includes('import Image from "next/image"'), "ADMIN_PHOTO_MUST_FALLBACK_IF_COMMONS_UNAVAILABLE");
+assert.ok(ui.includes("pricePaise:110000,durationMinutes:null,available:false")&&
+  ui.includes("Existing saved rates are preserved"),"UNPUBLISHED_OWNER_1100_DRAFT_MISSING");
 console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;OWNER_PRICES_MANAGED=YES;PAYMENTS_GATED_UNTIL_PARTNER_CONFIRMED");
 
 const gatewayOrder=read("app/api/payments/razorpay/order/route.ts");

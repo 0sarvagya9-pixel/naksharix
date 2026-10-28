@@ -1,11 +1,11 @@
 "use client";
 import { useEffect,useMemo,useState,type FormEvent } from "react";
-import Image from "next/image";
+import { ResilientEditorialImage } from "@/components/puja/resilient-editorial-image";
 import { editorialPujaPhotos, pujaEditorialPhoto } from "@/lib/puja/editorial-photos";
 import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { secureFetch } from "@/lib/security/csrf";
 type Offer={topicId:string;pricePaise:number|null;durationMinutes:number|null;available:boolean;note:string};
-function blank(topicId:string):Offer{return {topicId,pricePaise:null,durationMinutes:null,available:false,note:""}}
+function blank(topicId:string):Offer{return {topicId,pricePaise:110000,durationMinutes:null,available:false,note:""}}
 export function AdminPujaOfferEditor(){
  const [saved,setSaved]=useState<Record<string,Offer>>({});
  const [query,setQuery]=useState("");
@@ -48,6 +48,7 @@ export function AdminPujaOfferEditor(){
   {notice?<p role="status" className="mt-4 rounded-xl bg-[#eff9f0] p-4 text-sm text-[#31592d]">{notice}</p>:null}
   {draft?<form onSubmit={save} className="mt-6 max-w-2xl space-y-4 rounded-2xl border border-[#d8b58d] bg-white p-6">
    <h2 className="font-cinzel text-xl font-bold text-[#402832]">{pujaTopics.find(p=>p.id===draft.topicId)?.name}</h2>
+   <p className="text-xs leading-6 text-[#6b535e]">New drafts start at ₹1,100 and remain unpublished. Existing saved rates are preserved. Current Razorpay Puja checkout supports exactly ₹1,100 and requires verified operator, scheduled ceremony and payment readiness; another saved fee cannot be charged through this checkout.</p>
    <label className="block text-sm font-bold">Approved fee (INR)
      <input inputMode="decimal" type="number" step=".01" min="1" max="1000000" value={draft.pricePaise===null?"":(draft.pricePaise/100).toFixed(2)}
        onChange={e=>{const n=Math.round(Number(e.target.value)*100);setDraft({...draft,pricePaise:e.target.value.trim()&&Number.isSafeInteger(n)&&n>=100&&n<=100000000?n:null})}}
@@ -71,7 +72,7 @@ export function AdminPujaOfferEditor(){
     const topicSpecific=Boolean(editorialPujaPhotos[topic.id]);
     return <div key={topic.id} className="rounded-xl border border-[#ead4bb] bg-white p-4">
     {photo?<div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-lg bg-[#f4e8d9]">
-      <Image src={photo.src} alt={"Representative photo for "+topic.name} width={480} height={300} unoptimized
+      <ResilientEditorialImage src={photo.src} fallbackSrc={topic.graphic} alt={"Representative photo for "+topic.name} width={480} height={300}
         className="h-full w-full object-cover" />
     </div>:null}
     <p className={"text-xs font-semibold "+(topicSpecific?"text-[#3d6b46]":"text-[#89452e]")}>

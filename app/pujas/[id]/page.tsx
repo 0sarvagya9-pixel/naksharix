@@ -45,7 +45,7 @@ export default async function PujaTopicPage({params}:Props) {
               <p className="mt-2 text-3xl font-bold text-[#752939]">{displayPujaPrice(offering.pricePaise)}</p>
               {offering.durationMinutes ? <p className="mt-2 text-sm text-[#5f4d54]">Estimated duration: {offering.durationMinutes} minutes</p>:null}
               {offering.note ? <p className="mt-2 text-sm leading-6 text-[#5f4d54]">{offering.note}</p>:null}
-              <p className="mt-2 text-xs text-[#80656a]">₹1,100 is the listed service fee. Book now to request a date; pay securely only after the Pandit and ceremony time are confirmed.</p>
+              <p className="mt-2 text-xs text-[#80656a]">The published fee shown above is Admin-approved for this Puja. Book Now requests a preferred date; payment stays disabled until a verified Pandit, ceremony time and supported ₹1,100 checkout fee are confirmed. No payment is collected by requesting a date.</p>
             </> : <p className="text-sm font-semibold text-[#684e58]">Service fee not published yet.</p>}
           </div>
           <div className="mt-7 space-y-4 text-sm leading-7 text-[#634e52]">

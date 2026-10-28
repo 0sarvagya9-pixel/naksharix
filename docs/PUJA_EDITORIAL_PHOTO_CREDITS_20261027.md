@@ -152,3 +152,12 @@ These are editorial examples, **not** evidence of a Naksharix-performed ceremony
 - **vivah-mangala-puja** (Vivah Mangala Puja): [Commons source](https://commons.wikimedia.org/wiki/File:Hindu_wedding_fire_ceremony.jpg), Appaiah, [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/). Actual Hindu wedding fire ceremony; not a Naksharix customer or booking.
 
 **76/94** Puja topic IDs have curated subject-related photos; **18/94** still use real licensed category fallbacks. Curated images are not necessarily a photograph of the *exact* named ceremony; names such as Pradosh, Archana and related rites must not claim that a pictured devotional act was that specific ritual. Image filenames, authors, rights and source URLs must be kept together. No production deployment or commerce activation in this change.
+
+
+## 2026-10-28 additional two theme-specific ritual references (78/94)
+
+The photographer pages and CC BY-SA 4.0 licenses for these files were inspected. Both examples show a related *general* ritual, **not** proof of Naksharix performing the exact bookable rite:
+- **rudra-homa**: [Homa_yagya_during_Maha_Shivaratri_in_Nepal-070A2847.jpg](https://commons.wikimedia.org/wiki/File:Homa_yagya_during_Maha_Shivaratri_in_Nepal-070A2847.jpg), Bijay Chaurasia, CC BY-SA 4.0. Shiva-themed Homa during Maha Shivaratri, not independently authenticated as an exact Rudra Homa.
+- **tripindi-shraddha**: [A_man_and_a_Brahmin_performing_Shraddha_ceremony_in_Nepal.jpg](https://commons.wikimedia.org/wiki/File:A_man_and_a_Brahmin_performing_Shraddha_ceremony_in_Nepal.jpg), 9n2nk, CC BY-SA 4.0. A documented general Shraddha rite, not evidence of a specific Tripindi Shraddha.
+
+**78 / 94** Puja topics now have topic-related photo references; **16 / 94** still use attributed category photography. Exact named rites, unique delivery images and real partner availability are not proven from this image registry. No client images, live payments, vendor assets or production systems were changed.

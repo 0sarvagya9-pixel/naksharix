@@ -9,6 +9,7 @@ export const dynamic="force-dynamic";
 const inputSchema=z.object({
  topicId:z.string().regex(/^[a-z0-9-]{1,100}$/),
  preferredDate:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+ expectedPricePaise:z.number().int().min(100).max(100000000).optional(),
  city:z.string().trim().min(2).max(100),
  devoteeName:z.string().trim().min(2).max(120),
  gotra:z.string().trim().max(100).nullable(),
@@ -43,6 +44,9 @@ export async function POST(request:Request){
   const offer=await prisma.pujaOffering.findUnique({where:{topicId:input.topicId}});
   if(!offer?.available||!offer.pricePaise||offer.pricePaise<100)
     return fail("This Puja has no published service offer. Request an enquiry instead.",422);
+  // Do not record a different fee than the one the devotee actually viewed.
+  if(input.expectedPricePaise!==undefined&&offer.pricePaise!==input.expectedPricePaise)
+    return fail("The published Puja fee changed. Refresh and review the new price before submitting.",409);
   const limited=await rateLimit("puja-booking-request:"+user.id,4,86400);
   if(!limited.allowed)return fail("Daily Puja request limit reached.",429);
   const booking=await prisma.pujaBookingRequest.create({
