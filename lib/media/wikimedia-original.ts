@@ -4,7 +4,7 @@
 export function wikimediaOriginalForThumbnail(value: string): string | null {
   try {
     const url = new URL(value);
-    if (url.protocol !== "https:" || url.hostname !== "thumb.wikimedia.org" ||
+    if (url.protocol !== "https:" || !["thumb.wikimedia.org", "upload.wikimedia.org"].includes(url.hostname) ||
         url.username || url.password || url.port || url.search || url.hash) return null;
     const match = /^\/wikipedia\/commons\/thumb\/([a-f0-9])\/([a-f0-9]{2})\/([^/]+)\/[0-9]+px-[^/]+$/i.exec(url.pathname);
     if (!match) return null;
