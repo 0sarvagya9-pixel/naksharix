@@ -20,9 +20,11 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
   ),[query,category]);
 
   return <main className="star-field min-h-screen bg-[#fffaf3] pb-20">
-    <section className="relative overflow-hidden border-b border-[#e6be7e]/35 bg-[linear-gradient(120deg,#1e132a,#51252b_60%,#2e172d)] text-white">
-      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-14 md:grid-cols-[1.15fr_.85fr] md:items-center md:py-20 lg:px-8">
-        <div>
+    <section className="relative isolate overflow-hidden border-b border-[#e6be7e]/35 bg-[#301a2c] text-white">
+      <Image src="/naksharix/ganesh-hero-light-saffron.jpg" alt="" fill priority sizes="100vw" className="absolute inset-0 -z-20 object-cover object-[76%_42%]" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#261323]/95 via-[#33172a]/88 to-[#31182b]/25" aria-hidden="true" />
+      <div className="mx-auto flex min-h-[540px] max-w-7xl items-center px-5 py-14 md:min-h-[580px] md:py-20 lg:px-8">
+        <div className="max-w-2xl">
           <p className="text-xs font-bold uppercase tracking-[.22em] text-[#f8d389]">Naksharix • Sacred traditions</p>
           <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Explore Puja <span className="text-[#ffcf80]">Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
@@ -36,10 +38,6 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
             </Link>
           </div>
           <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> Information only • No unverified paid bookings</p>
-        </div>
-        <div className="overflow-hidden rounded-[28px] border border-[#f6c776]/35 shadow-2xl">
-          <Image src="/naksharix/ganesh-hero-light-saffron.jpg" alt="Illustrative Ganesh-themed devotional artwork" width={850} height={650}
-            priority className="aspect-[4/3] w-full object-cover"/>
         </div>
       </div>
     </section>

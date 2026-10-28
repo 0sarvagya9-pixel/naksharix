@@ -73,7 +73,7 @@ export default function LearnPage() {
       <EditorialServiceBanner eyebrow="THE LEARNING LIBRARY"
         headline="Wisdom starts with curiosity"
         caption="Learn the foundations of Kundli, Panchang, Nakshatras and Dasha in four self-study lessons. No paid course or qualification is implied."
-        image="/naksharix/editorial-learning.svg" imageAlt="Original illustration of an open astrology study book"
+        image="https://commons.wikimedia.org/wiki/Special:FilePath/Kundali_01a.png" imageAlt="Traditional CC0 Kundli diagram for the learning library"
         link="/free-calculators" linkLabel="Explore the free calculators" />
       <Section>
         <div className="mx-auto max-w-5xl">
@@ -87,14 +87,14 @@ export default function LearnPage() {
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
             {lessons.map((lesson) => (
               <article id={lesson.id} key={lesson.id}
-                className="rounded-2xl border border-[#D4AF37]/25 bg-[#061D3C]/80 p-6">
-                <span className="text-xs font-bold tracking-[0.2em] text-[#FFD700]">LESSON {lesson.number}</span>
-                <h2 className="mt-2 font-cinzel text-2xl font-black">{lesson.name}</h2>
-                <p className="mt-3 text-sm leading-7 naksh-muted-text">{lesson.summary}</p>
-                <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-7 naksh-muted-text">
+                className="rounded-2xl border border-[#e4bf86] bg-[#fffaf3] p-6 shadow-sm">
+                <span className="text-xs font-bold tracking-[0.2em] text-[#8d3742]">LESSON {lesson.number}</span>
+                <h2 className="mt-2 font-cinzel text-2xl font-black text-[#422a31]">{lesson.name}</h2>
+                <p className="mt-3 text-sm leading-7 text-[#5f4b52]">{lesson.summary}</p>
+                <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-7 text-[#5f4b52] marker:text-[#9b3548]">
                   {lesson.ideas.map((idea) => <li key={idea}>{idea}</li>)}
                 </ul>
-                <Link href={lesson.href} className="mt-5 inline-block rounded-lg border border-[#D4AF37]/40 px-4 py-2 text-sm font-semibold text-[#FFD700] hover:bg-[#D4AF37]/10">
+                <Link href={lesson.href} className="mt-5 inline-block rounded-lg bg-[#f4c77c] px-4 py-3 text-sm font-bold text-[#41202b] hover:bg-[#ffdc9f]">
                   {lesson.action}
                 </Link>
               </article>
