@@ -29,6 +29,18 @@ for(const s of ["partner.reviewStatus !== \"VERIFIED\"","!booking.scheduledAt","
   assert.ok(gatewayOrder.includes(s),"PUJA_PAYMENT_ACCEPTANCE_GUARD_MISSING="+s);
 assert.ok(gatewayWebhook.includes('event.event==="refund.processed"')&&gatewayWebhook.includes('status:"REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
 assert.ok(bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"'),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");
+assert.ok(bookingPage.includes('reviewStatus:"VERIFIED"')&&bookingPage.includes('evidenceUrl:{not:null}')&&
+  bookingPage.includes('pricePaise:110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
+  bookingPage.includes('getRazorpayReadiness().enabled'),"PUJA_CHECKOUT_UI_PARTNER_PRICE_OR_CREDENTIAL_GUARD_MISSING");
+assert.ok(bookingPage.includes('["PENDING","FAILED"].includes(payment.status)')&&
+  bookingPage.includes('paymentSettled=bookingPayments.some')&&
+  bookingPage.includes('"REFUNDED"')&&
+  bookingPage.includes('retryable&&checkoutEnabled'),"PUJA_CHECKOUT_FAILED_PENDING_RESUME_OR_DUPLICATE_GUARD_MISSING");
+const checkoutClient=read("components/razorpay-checkout-button.tsx");
+assert.ok(checkoutClient.includes("Unable to reach the payment server")&&
+  checkoutClient.includes("Payment confirmation is pending")&&
+  checkoutClient.includes("do not pay twice")&&
+  checkoutClient.includes('} finally {\n          setLoading(false);'),"RAZORPAY_CLIENT_FAILURE_OR_DUPLICATE_CHARGE_GUIDANCE_MISSING");
 
 const pricingPage=read("app/pricing/page.tsx");
 const pricingContent=read("components/pricing-content.tsx");
