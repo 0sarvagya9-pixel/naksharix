@@ -28,7 +28,7 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(page.getByRole("heading", { level: 1, name: /Your universe/i })).toBeVisible();
     await page.getByRole("button", { name: "Next featured destination" }).click();
     await expect(page.getByRole("heading", { level: 1, name: /Celebrate/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Explore Puja services" })).toHaveAttribute("href", "/pujas");
+    await expect(page.locator(".nx-ed-hero-copy").getByRole("link", { name: "Explore Puja services", exact: true })).toHaveAttribute("href", "/pujas");
     await page.getByRole("button", { name: "Show slide 4" }).click();
     await expect(page.getByRole("heading", { level: 1, name: /Real questions/i })).toBeVisible();
     await expect(page.getByRole("link", { name: "View consultations" })).toHaveAttribute("href", "/consultation");
