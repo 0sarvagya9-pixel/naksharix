@@ -172,3 +172,12 @@ One existing Kashi Vishwanath URL had an incorrect Wikimedia MD5 path (`4/4c` ra
 - **vastu-shanti-puja**: [Commons source](https://commons.wikimedia.org/wiki/File:Griha-Pravesh-ritual.JPG); Aruna (ml.wikipedia); [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Boiling milk during Griha Pravesh, not an authenticated Vastu Shanti ceremony.
 
 **Coverage: 81 / 94 Puja IDs with curated subject-related references; 13 with licensed category-photo fallbacks.** Several curated entries are related thematic documentation, not photographs of the exact named ceremony. This change supplies no authentic Naksharix supplier/Pandit-service photographs or evidence of actual fulfilment; no production checkout activation or database writes.
+
+
+## 2026-10-28 further documented ritual-subject photographs (84/94)
+
+- **naamkaran-sanskar** — [Wikimedia Commons source](https://commons.wikimedia.org/wiki/File:Namadheyam.jpg), Sumip1990, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Photographed Indian Namakaranam ritual; not evidence of a Naksharix customer or delivery.
+- **vidyarambh-puja** — [Wikimedia Commons source](https://commons.wikimedia.org/wiki/File:Sssm_aksharabhyasam.jpg), MYADAM ABHILASH, [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Photographed Aksharabhyasam school ceremony involving families/children, related to Vidyarambh; not Naksharix services.
+- **lingashtakam-archana** — [Wikimedia Commons source](https://commons.wikimedia.org/wiki/File:Hindu_priest_offering_prayers_to_Shiva_linga_in_the_Rameshwara_Temple_at_Keladi.jpg), Manjeshpv, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Actual Hindu priest offering prayers to Shiva linga; not proof of a specific Lingashtakam recital or Archana.
+
+These are editorial documentary images with attribution, not Naksharix-operated rituals, endorsements, client records or proof of delivery. Images depicting children and identifiable people require context-sensitive usage and any applicable personality-rights review independently of the photo license. Curated subject-related mapping increases to **84/94**, with **10/94** remaining covered by explicitly labeled real licensed category photographs. The canonical Commons path hash QA remains active; no production release, DB write, partner, stock or payment change in this update.
