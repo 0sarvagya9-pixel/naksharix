@@ -9,6 +9,7 @@ import { rateLimit } from "@/lib/rate-limit";
 export const dynamic="force-dynamic";
 const schema=z.object({
  items:z.array(z.object({productId:z.string().regex(/^[a-zA-Z0-9-]{1,128}$/),quantity:z.number().int().min(1).max(10)}).strict()).min(1).max(20),
+ expectedSubtotalPaise:z.number().int().min(0).max(1000000000).optional(),
  customerName:z.string().trim().min(2).max(120),
  customerPhone:z.string().trim().regex(/^[+0-9() -]{8,20}$/),
  deliveryAddress:z.string().trim().min(12).max(350),
@@ -50,6 +51,10 @@ export async function POST(request:Request){
   const lines=canonical.filter((item):item is NonNullable<typeof item>=>item!==null);
   const subtotal=lines.reduce((amount,item)=>amount+item.lineTotalPaise,0);
   if(!Number.isSafeInteger(subtotal)||subtotal>1000000000)return fail("Order value exceeds limit.",422);
+  // A user must not submit an order after an administrator changes the price.
+  // The canonical server-owned subtotal remains the only persisted amount.
+  if(input.expectedSubtotalPaise!==undefined&&input.expectedSubtotalPaise!==subtotal)
+    return fail("Cart prices changed. Refresh the cart and review the current prices before ordering.",409);
   const lim=await rateLimit("shop-order-intent:"+user.id,5,86400);
   if(!lim.allowed)return fail("Daily order request limit reached.",429);
   const order=await prisma.shopOrder.create({
