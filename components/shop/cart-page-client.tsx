@@ -80,7 +80,7 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
      <h2 className="font-cinzel text-xl font-bold text-[#632638]">Cart summary</h2>
      <p className="mt-4 text-sm">{valid.reduce((sum,l)=>sum+l.quantity,0)} selected items</p>
      <p className="mt-3 text-xl font-bold">{unpriced?"Final price pending verification":formatter.format(total/100)}</p>
-     {unpriced?<p className="mt-3 text-sm leading-6 text-[#674f56]">Some products do not yet have approved selling prices. No totals or charges are invented.</p>:<p className="mt-3 text-sm leading-6 text-[#674f56]">Product subtotal only; shipping, applicable tax and final availability must still be confirmed.</p>}
+     {unpriced?<p className="mt-3 text-sm leading-6 text-[#674f56]">Some products do not yet have approved selling prices. No totals or charges are invented.</p>:<p className="mt-3 text-sm leading-6 text-[#674f56]">Market-compared product subtotal only; shipping, applicable tax, exact contents, and final availability must still be confirmed before any payment.</p>}
      <p className="mt-5 rounded-lg border border-[#ebcfad] bg-white p-3 text-sm">Secure checkout is not enabled until supplier fulfilment and refund operations are verified. Request a quote for each item above.</p>
      {ticket ? <div role="status" className="mt-5 rounded-xl border border-[#bfdeb9] bg-white p-4 text-sm">
        <p className="font-semibold">Request received. No payment was taken.</p>

@@ -292,7 +292,7 @@ const assetPaths = [...new Set([
 ])];
 const catalogueChecks = [
   ...topicRecords.map(item => ({ path: "/pujas/" + encodeURIComponent(item.id), kind: "puja", marker: item.name })),
-  ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Price awaiting verification" })),
+  ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Market-compared listing price." })),
   {path:"/cart",kind:"cart",marker:"Your cart"},
   ...assetPaths.map(path => ({ path, kind: "svg", marker: "<svg" }))
 ];
