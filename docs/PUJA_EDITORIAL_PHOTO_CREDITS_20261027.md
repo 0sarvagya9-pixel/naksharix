@@ -29,3 +29,6 @@ The following are real *representative* photographs curated from Wikimedia Commo
 - **karwa-chauth-puja** — [Karva Chauth Celebration](https://commons.wikimedia.org/wiki/File:Karva_Chauth_Celebration.jpg), Suthar.jagdishlal87, CC BY 4.0, 3000 × 4000.
 - **ganesh-chaturthi-puja** — [Ganesh chaturthi puja](https://commons.wikimedia.org/wiki/File:Ganesh_chaturthi_puja.jpg), Geetyadav 999, CC BY-SA 4.0, 3000 × 4000. Replaces generic Ganesh photo.
 Curation of five additional topic IDs expands the 13 pre-existing topic mappings to 18 of 94, with a distinct new photo replacing one older mapping. The category photo fallbacks cover the rest without pretending to show exact rituals. The 94/94 distinct ceremony-photo request is **not complete**: additional independently licensed topic-specific photo evidence or owner-supplied rights-cleared photography is still required; the readiness dashboard exposes this shortfall.
+
+- **holika-dahan-ritual** — [Holika Dahan 2024](https://commons.wikimedia.org/wiki/File:Holika_Dahan_2024.jpg), Mayank clicks, CC0 1.0, 4200 × 3456. This is a real Holika Dahan event photograph.
+The photo-registry topic-specific mappings now cover **19/94** topics. They do not yet supply 94 unique ceremony photographs.
