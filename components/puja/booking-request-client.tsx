@@ -24,13 +24,13 @@ export function PujaRequestClient({topicId,name,pricePaise}:{topicId:string;name
  const labelClass="block text-sm font-bold text-[#4c303b]";
  const inputClass="mt-2 block min-h-11 w-full rounded-lg border border-[#d8b58c] bg-white px-3 text-[#392733] focus-visible:outline-[#a43c51]";
  return <div className="mx-auto max-w-3xl px-5 py-12 text-[#3c2830]">
-  <p className="text-xs font-bold uppercase tracking-[.2em] text-[#913648]">Owner-approved Puja request</p>
+  <p className="text-xs font-bold uppercase tracking-[.2em] text-[#913648]">Puja booking · Pending confirmation</p>
   <h1 className="mt-3 font-cinzel text-3xl font-bold">{name}</h1>
   <p className="mt-4 text-2xl font-bold text-[#7b293d]">{new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(pricePaise/100)}</p>
-  <p className="mt-3 text-sm leading-7 text-[#655159]">Published service fee only. Select a preferred date and enter private Sankalp details. A priest, local muhurat and booking are confirmed by the operator after review. No payment is collected here.</p>
+  <p className="mt-3 text-sm leading-7 text-[#655159]">Listed fee ₹1,100. Book Now requests your preferred date and securely saves Sankalp details. A verified Pandit and final muhurat must be assigned before Razorpay payment becomes available. You are not charged at this stage.</p>
   {bookingId?<div role="status" className="mt-6 rounded-xl border border-[#b9d5a9] bg-[#f4fff0] p-5">
     <p className="font-bold">Puja request received: #{bookingId}</p>
-    <p className="mt-2 text-sm">Your preferred date is not a confirmed appointment.</p>
+    <p className="mt-2 text-sm">Your date request is pending confirmation. Razorpay payment opens only after a verified Pandit and ceremony time are assigned. No charge was made.</p>
     <Link className="mt-4 inline-block font-bold text-[#762a3b] underline" href="/puja-bookings">Track My Puja Requests</Link>
   </div>:<form onSubmit={submit} className="mt-7 space-y-5 rounded-2xl border border-[#e2c4a1] bg-white p-6 shadow-sm">
    <label className={labelClass}>Devotee&apos;s full name<input required minLength={2} maxLength={120} value={devoteeName} onChange={e=>setDevoteeName(e.target.value)} className={inputClass}/></label>
@@ -40,7 +40,7 @@ export function PujaRequestClient({topicId,name,pricePaise}:{topicId:string;name
    <label className={labelClass}>Gotra (optional)<input maxLength={100} value={gotra} onChange={e=>setGotra(e.target.value)} className={inputClass}/></label>
    <label className={labelClass}>Private Sankalp requirements<textarea required minLength={10} maxLength={1500} rows={4} value={sankalpNote} onChange={e=>setSankalpNote(e.target.value)} className={inputClass} placeholder="Names, intention, preferred language, family details to share privately."/></label>
    {error?<p role="alert" className="text-sm font-bold text-[#97314b]">{error}</p>:null}
-   <button type="submit" disabled={busy} className="w-full rounded-xl bg-[#7e2940] px-5 py-3 font-bold text-white disabled:opacity-50">{busy?"Submitting…":"Request Puja booking — no online payment"}</button>
+   <button type="submit" disabled={busy} className="w-full rounded-xl bg-[#7e2940] px-5 py-3 font-bold text-white disabled:opacity-50">{busy?"Submitting…":"Book Now — Request a Date"}</button>
   </form>}
  </div>;
 }

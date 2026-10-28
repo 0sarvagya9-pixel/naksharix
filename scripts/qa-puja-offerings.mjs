@@ -18,5 +18,5 @@ assert.ok(!/\b(?:razorpay|payment\.create|checkoutSession|prisma\.payment\.creat
 assert.ok(ui.includes('secureFetch("/api/admin/puja-offerings"')&&ui.includes("Publish price"),"Missing editable Admin Puja prices");
 assert.ok(index.includes("getPublishedPujaOffers()")&&listings.includes("offerings[topic.id]")&&detail.includes('const offering=(await getPublishedPujaOffers())[item.id]'),"Missing public price integration");
 assert.ok(db.includes('error.code==="P2021"')&&db.includes("return {}"),"Missing-table fallback must not fake prices");
-assert.ok(listings.includes('"Request booking" : "Enquire"')&&detail.includes('"Request booking for "'),"Published price must allow genuine booking enquiry");
-console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;DEFAULT_PRICES=NONE;PAYMENTS=OFF");
+assert.ok(listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "'),"Published Puja offers must show Book Now");
+console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;OWNER_PRICES_MANAGED=YES;PAYMENTS_GATED_UNTIL_PARTNER_CONFIRMED");

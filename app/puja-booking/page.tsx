@@ -4,7 +4,7 @@ import { findPujaTopic } from "@/lib/puja/service-catalogue";
 import { getPublishedPujaOffers } from "@/lib/puja/offerings";
 import { PujaRequestClient } from "@/components/puja/booking-request-client";
 export const dynamic="force-dynamic";
-export const metadata:Metadata={title:"Request Puja Booking | Naksharix",robots:{index:false,follow:false}};
+export const metadata:Metadata={title:"Book Puja | Naksharix",robots:{index:false,follow:false}};
 export default async function PujaBookingPage({searchParams}:{searchParams:Promise<{item?:string}>}){
  const {item}=await searchParams;
  const topic=item?findPujaTopic(item):undefined;

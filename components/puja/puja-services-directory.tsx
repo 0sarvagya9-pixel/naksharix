@@ -29,7 +29,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Explore Puja <span className="text-[#ffcf80]">Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
             Browse {pujaTopics.length} traditional Puja topics across deities, ceremonies and festivals.
-            Send a private enquiry to discuss local practice and arrangements.
+            Select a Puja and request your preferred ceremony date. Pandit assignment and muhurat are confirmed before payment.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <a href="#puja-directory" className="rounded-xl bg-[#f6c776] px-6 py-3 font-bold text-[#351b20]">Explore Puja Topics</a>
@@ -37,7 +37,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
               <CalendarDays size={17}/> Festival calendar
             </Link>
           </div>
-          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> Information only • No unverified paid bookings</p>
+          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> ₹1,100 listed fee • Confirmation before payment</p>
         </div>
       </div>
     </section>
@@ -79,7 +79,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
             </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
             <Link href={offerings[topic.id] ? "/puja-booking?item="+encodeURIComponent(topic.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
-              {offerings[topic.id] ? "Request booking" : "Enquire"} <ArrowRight size={16}/>
+              {offerings[topic.id] ? "Book Now" : "Enquire"} <ArrowRight size={16}/>
             </Link>
           </div>
         </article>)}
@@ -97,8 +97,8 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
       <div className="mt-12 grid gap-5 rounded-2xl border border-[#d0a36c]/30 bg-[#fff4e6] p-7 md:grid-cols-3">
         {[
           ["01","Explore","Choose a traditional Puja, festival date, or ceremony topic."],
-          ["02","Enquire","Describe your city and needs through a private support ticket."],
-          ["03","Confirm","A staff member reviews custom, time, operator and pricing separately."]
+          ["02","Book Now","Enter Sankalp details and your preferred date securely."],
+          ["03","Confirm","A verified Pandit and ceremony time must be assigned before payment."]
         ].map(([step,title,copy])=><div key={step} className="flex gap-4">
           <b className="font-cinzel text-2xl text-[#8e3641]">{step}</b>
           <div><h3 className="font-bold text-[#412831]">{title}</h3><p className="mt-2 text-sm leading-6 text-[#665056]">{copy}</p></div>
