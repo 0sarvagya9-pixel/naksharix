@@ -75,7 +75,7 @@ export function AdminPujaOfferEditor(){
         className="h-full w-full object-cover" />
     </div>:null}
     <p className={"text-xs font-semibold "+(topicSpecific?"text-[#3d6b46]":"text-[#89452e]")}>
-      {topicSpecific?"Topic-specific licensed photo":"Category photo — exact ceremony image needed"}
+      {topicSpecific?"Curated topic-related licensed photo (not service evidence)":"Category photo — exact ceremony image needed"}
     </p>
     {photo?<a href={photo.source} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs underline text-[#664a52]">
       {photo.author} · {photo.license} · source
