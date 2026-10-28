@@ -125,3 +125,19 @@ These source URLs, photographer/license metadata and photographed subjects were 
 - **guru-graha-shanti-puja**: [Brihaspati.jpg](https://commons.wikimedia.org/wiki/File:Brihaspati.jpg), photograph of a 13th-century Brihaspati sculpture at the British Museum by Redtigerxyz, **CC BY-SA 3.0**. A relevant deity sculpture, not evidence of service delivery.
 
 **Current mapping count: 63/94**, remaining **31/94** with sourced category imagery. The count represents curated thematic references (including shrine and art photographs), not verified exact ceremonies, priest partners, supplier goods or 63 unique performed rituals.
+
+## 2026-10-28: nine curated graha-related subject references (72/94)
+Nine Puja topic IDs now receive verified and named planetary subjects: Mangal, Budha, Sukra (Venus), Rahu, Ketu, Shani, Surya, Mangal Dosh, and Grahan Shanti. These are **representative photographs, not Naksharix-performed ceremonies**. The Mangal Dosh entry intentionally reuses the same photographed Mars idol as Mangal Graha; Grahan Shanti reuses a real photographed Navagraha Puja scene.
+
+Source and rights:
+- [Mangal Graha (Mars), Shani Shingnapur](https://commons.wikimedia.org/wiki/File:Mangal_Graha_(Mars)_at_Navagraha_mandapam,_Shani_Shingnapur.jpg) — K.Venkataramana, CC0 1.0.
+- [Budha Graha (Mercury), Shani Shingnapur](https://commons.wikimedia.org/wiki/File:Budha_Graha_(Mercury)_at_navagraha_mandapam,_Shani_Shingnapur.jpg) — K.Venkataramana, CC0 1.0.
+- [Sukra Graha (Venus), Shani Shingnapur](https://commons.wikimedia.org/wiki/File:Sukra_graha_(Venus)_at_navagraha_mandapam,_Shani_Shingnapur.jpg) — K.Venkataramana, CC0 1.0.
+- [Rahu Graha, Shani Shingnapur](https://commons.wikimedia.org/wiki/File:Rahu_graha_at_navagraha_mandapam,_Shani_Shingnapur.jpg) — K.Venkataramana, CC0 1.0.
+- [Ketu Graha, Shani Shingnapur](https://commons.wikimedia.org/wiki/File:Ketu_graha_at_navagraha_mandapam,_Shani_Shingnapur.jpg) — K.Venkataramana, CC0 1.0.
+- [Shani oil offering, Shani Shingnapur](https://commons.wikimedia.org/wiki/File:Pouring_Til_oil_on_the_Shani_idol_at_Shani_Shingnapur,_maharastra.jpg) — K.Venkataramana, CC0 1.0.
+- [Suryadeva, Surendrapuri shrine](https://commons.wikimedia.org/wiki/File:Suryadeva.jpg) — photograph Arkrishna, derivative Redtigerxyz, CC BY-SA 3.0.
+- **Mangal Dosh** — same Mangal Graha statue as linked above, because no exact Mangal Dosh ritual photo has been sourced.
+- **Grahan Shanti** — [Navagraha Pooja](https://commons.wikimedia.org/wiki/File:Navagraha_Pooja.jpg), RHKalpana, CC BY-SA 4.0. Related Navagraha housewarming ritual, **not proof of a specific eclipse-shanti ceremony**.
+
+**Coverage:** 72/94 Puja topics have topic-curated reference imagery; 22 topics continue with real, credited category images. Many 'curated' photos depict a shrine, idol, or related ritual rather than exact performed Puja; some topics deliberately share photos. These records must not be converted into Pandit availability, service delivery, partner agreement or temple affiliation claims.
