@@ -75,7 +75,21 @@ sha256sum "$EVIDENCE_DIR/schema-backup.sql" | tee "$EVIDENCE_DIR/schema-backup.s
 
 psql "$POSTGRES_ADMIN_URL" -v ON_ERROR_STOP=1 -c 'DROP DATABASE IF EXISTS naksharix_restore_rehearsal;'
 psql "$POSTGRES_ADMIN_URL" -v ON_ERROR_STOP=1 -c 'CREATE DATABASE naksharix_restore_rehearsal;'
-psql "$RESTORE_URL" -v ON_ERROR_STOP=1 -f "$EVIDENCE_DIR/schema-backup.sql" \
+# pg_dump from a newer GitHub runner client may emit a session-only setting
+# introduced in PostgreSQL 17. The disposable target is PostgreSQL 16.
+# Keep the exact, SHA-verified backup untouched; strip ONLY the known,
+# compatibility-only SET from the separate restore input. All DDL remains intact.
+restore_sql="$EVIDENCE_DIR/schema-restore-compatible.sql"
+if grep -Fxq 'SET transaction_timeout = 0;' "$EVIDENCE_DIR/schema-backup.sql"; then
+  sed '/^SET transaction_timeout = 0;$/d' "$EVIDENCE_DIR/schema-backup.sql" > "$restore_sql"
+  echo 'POSTGRES_16_SESSION_SETTING_COMPAT=SET_transaction_timeout_omitted' | tee "$EVIDENCE_DIR/restore-compatibility.txt"
+else
+  cp "$EVIDENCE_DIR/schema-backup.sql" "$restore_sql"
+  echo 'POSTGRES_16_SESSION_SETTING_COMPAT=not_needed' | tee "$EVIDENCE_DIR/restore-compatibility.txt"
+fi
+test -s "$restore_sql"
+sha256sum "$restore_sql" | tee "$EVIDENCE_DIR/schema-restore-compatible.sha256"
+psql "$RESTORE_URL" -v ON_ERROR_STOP=1 -f "$restore_sql" \
   2>&1 | tee "$EVIDENCE_DIR/restore-apply.log"
 
 # Compare semantic definitions, not generated catalog names. PostgreSQL exposes
