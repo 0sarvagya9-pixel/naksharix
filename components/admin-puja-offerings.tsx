@@ -1,6 +1,6 @@
 "use client";
 import { useEffect,useMemo,useState,type FormEvent } from "react";
-import Image from "next/image";
+import { ResilientEditorialImage } from "@/components/puja/resilient-editorial-image";
 import { editorialPujaPhotos, pujaEditorialPhoto } from "@/lib/puja/editorial-photos";
 import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { secureFetch } from "@/lib/security/csrf";
@@ -72,7 +72,7 @@ export function AdminPujaOfferEditor(){
     const topicSpecific=Boolean(editorialPujaPhotos[topic.id]);
     return <div key={topic.id} className="rounded-xl border border-[#ead4bb] bg-white p-4">
     {photo?<div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-lg bg-[#f4e8d9]">
-      <Image src={photo.src} alt={"Representative photo for "+topic.name} width={480} height={300} unoptimized
+      <ResilientEditorialImage src={photo.src} fallbackSrc={topic.graphic} alt={"Representative photo for "+topic.name} width={480} height={300}
         className="h-full w-full object-cover" />
     </div>:null}
     <p className={"text-xs font-semibold "+(topicSpecific?"text-[#3d6b46]":"text-[#89452e]")}>
