@@ -34,6 +34,21 @@ const download = source("app/api/report-requests/[id]/download/route.ts");
 const env = source("lib/env.ts");
 const provider = source("lib/astrology/provider.ts");
 
+const aiQuota = source("lib/ai/anonymous-quota.ts");
+const aiRoute = source("app/api/ai/chat/route.ts");
+assert(aiQuota.includes('createHmac("sha256", secret)') &&
+  aiQuota.includes("pg_advisory_xact_lock") &&
+  aiQuota.includes("tx.auditLog.count") &&
+  aiQuota.includes("tx.auditLog.create") &&
+  aiQuota.includes("if (count >= 20) return false") &&
+  aiQuota.includes("ipStored: false") &&
+  !aiQuota.includes("rawIp,"),
+  "Anonymous AI quota is shared and stores only keyed IP digest", "privacy-safe distributed rate limiting");
+assert(aiRoute.includes("sharedRedisConfigured()") &&
+  aiRoute.includes("claimAnonymousAiQuota(request)") &&
+  aiRoute.includes("rateLimitMessage(language), 429") &&
+  aiRoute.indexOf("claimAnonymousAiQuota(request)") < aiRoute.indexOf("chatWithAstrologerAIStrict("),
+  "AI provider cannot be called before shared rate-limit claim succeeds", "no memory fallback for paid AI");
 assert(schema.includes("model AuditLog") && schema.includes("model ReportStatusHistory"), "Audit and status history models exist", "Prisma audit trail");
 assert(audit.includes("writeAuditLog") && audit.includes("writeReportStatusHistory"), "Audit helpers exist", "safe centralized writes");
 assert(!audit.includes("birthPlace") && !audit.includes("generatedPdfBytes"), "Audit helper does not log sensitive fields", "metadata is bounded");
