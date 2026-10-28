@@ -43,6 +43,13 @@ assert.ok(read("components/shop-coming-soon-content.tsx").includes("Market-compa
  read("app/shop/[slug]/page.tsx").includes("Market-compared listing price")&&
  read("components/shop/cart-page-client.tsx").includes("Market-compared product subtotal"),
  "SHOP_PRICING_TERMS_DISCLOSURE_MISSING");
+const homeServer=read("app/page.tsx");
+const homeClient=read("components/home/editorial-home.tsx");
+assert.ok(homeServer.includes("getShopCatalogue()")&&homeServer.includes("featuredShopPrices[product.id]")&&
+  homeServer.includes("<EditorialHome featuredShopPrices={featuredShopPrices}")&&
+  homeClient.includes("featuredShopPrices[item.id]")&&
+  homeClient.includes("Selling price · no online charge"),"HOMEPAGE_PRICES_NOT_CANONICAL_WITH_SHOP");
+
 assert.ok(ledger.includes("not supplier quotes")&&ledger.includes("unspecified contents/report"),
  "MARKET_REFERENCE_MUST_NOT_CLAIM_SUPPLIER_CERTAINTY");
 console.log("SHOP_MARKET_PRICE_QA=PASS;SKUS=12;PUBLIC_LIST_PRICES=INR;OWNER_BENCHMARK=2026-10-28;PAYMENT=UNPAID_MANUAL;SUPPLIER_AUTHENTICITY=NOT_ATTESTED");
