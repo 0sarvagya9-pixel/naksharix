@@ -165,6 +165,9 @@ export function EditorialHome() {
               </Link>
             </div>
             <div className="nx-ed-hero-note"><ShieldCheck size={16} aria-hidden="true" /> Transparent tools · Private account features · No guaranteed predictions</div>
+            {active===3 ? <p className="mt-2 text-xs text-[#ffe6c3]">Representative consultation exhibition photo: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Astrologer.jpg" target="_blank" rel="noopener noreferrer">Ravikiran · CC BY-SA 4.0</a></p> : null}
+            {active===4 ? <p className="mt-2 text-xs text-[#ffe6c3]">Reference item photograph: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Rudraksha_mala.jpg" target="_blank" rel="noopener noreferrer">Janak Bhatta · CC BY-SA 4.0</a></p> : null}
+            {active===1 ? <p className="mt-2 text-xs text-[#ffe6c3]">Representative ritual photo: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Griha_Pravesh_Puja_Ceremony.jpg" target="_blank" rel="noopener noreferrer">AditiChintarevula · CC0</a></p> : null}
           </div>
           <div className="nx-ed-slider-controls" aria-label="Featured destinations">
             <button type="button" onClick={() => advance(-1)} aria-label="Previous featured destination"><ArrowLeft size={18}/></button>
@@ -213,6 +216,7 @@ export function EditorialHome() {
                 <div className="nx-ed-card-body">
                   <h3>{item.label}</h3>
                   <p>{item.copy}</p>
+                  {item.href === "/consultation" ? <p className="text-xs">Representative exhibition photo · <a href="https://commons.wikimedia.org/wiki/File:Astrologer.jpg" target="_blank" rel="noopener noreferrer" className="underline">Ravikiran · CC BY-SA 4.0</a></p>:null}
                   {item.href === "/pujas" && pujaEditorialPhoto("rudrabhishek","shiva") ? <p className="text-xs">Representative ritual image · <a href={pujaEditorialPhoto("rudrabhishek","shiva")!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto("rudrabhishek","shiva")!.author} · {pujaEditorialPhoto("rudrabhishek","shiva")!.license}</a></p> : null}
                   {item.href === "/shop" && referencePhotoForProduct("rudraksha-mala") ? <p className="text-xs">Reference photo, not exact stock · <a href={referencePhotoForProduct("rudraksha-mala")!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{referencePhotoForProduct("rudraksha-mala")!.credit} · {referencePhotoForProduct("rudraksha-mala")!.licenseName}</a></p> : null}
                   <Link href={item.href} className="nx-ed-text-link">{item.cta}<ArrowRight size={17} aria-hidden="true"/></Link>

@@ -85,3 +85,6 @@ assert.ok(read("app/consultation/page.tsx").includes("upload.wikimedia.org"),"CO
 assert.ok(read("components/puja/puja-services-directory.tsx").includes("object-[76%_42%]"),"PUJA_SEAMLESS_FULL_BANNER_MISSING");
 const chatUX=read("components/ai-astrologer-chat.tsx");
 assert.ok(chatUX.includes("!event.shiftKey && !event.isComposing")&&chatUX.includes("!consent ? <label"),"AI_SEND_KEYBOARD_OR_CONSENT_ERROR");
+
+assert.ok(read("components/home/editorial-service-banner.tsx").includes("imageCredit ?")&&
+  read("app/consultation/page.tsx").includes("imageCredit={{label:"),"CONSULTATION_CC_ATTRIBUTION_MISSING");
