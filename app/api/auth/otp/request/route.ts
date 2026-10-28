@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { prisma } from "@/lib/db";
@@ -7,48 +6,37 @@ import {
   normalizeAuthEmail
 } from "@/lib/auth/otp-service";
 import { getEmailReadiness } from "@/lib/email/email-service";
-import { rateLimit } from "@/lib/rate-limit";
+import { claimPublicAuthQuota, trustedPublicClientIp } from "@/lib/auth/public-quota";
 
 const requestSchema = z.object({
   email: z.string().email()
 });
-
-function keyForEmail(email: string) {
-  return createHash("sha256")
-    .update(normalizeAuthEmail(email))
-    .digest("hex");
-}
 
 export async function POST(request: Request) {
   try {
     const body = await validateJson(request, requestSchema);
     const email = normalizeAuthEmail(body.email);
 
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      "local";
-
-    const ipLimit = await rateLimit(
-      `otp-email-request-ip:${ip}`,
-      8,
-      600
-    );
-
-    if (!ipLimit.allowed) {
+    const ipAllowed = await claimPublicAuthQuota({
+      scope: "otp-request-ip",
+      key: trustedPublicClientIp(request),
+      limit: 8,
+      windowSeconds: 600
+    });
+    if (!ipAllowed) {
       return fail(
         "Too many verification-code requests. Please try again later.",
         429
       );
     }
 
-    const emailLimit = await rateLimit(
-      `otp-email-request-destination:${keyForEmail(email)}`,
-      4,
-      600
-    );
-
-    if (!emailLimit.allowed) {
+    const emailAllowed = await claimPublicAuthQuota({
+      scope: "otp-request-destination",
+      key: email,
+      limit: 4,
+      windowSeconds: 600
+    });
+    if (!emailAllowed) {
       return fail(
         "Please wait before requesting another verification code.",
         429

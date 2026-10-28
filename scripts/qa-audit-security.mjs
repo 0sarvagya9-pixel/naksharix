@@ -69,6 +69,39 @@ assert(download.includes("report_pdf.download_denied") && download.includes("rep
 assert(env.includes('ASTROLOGY_PROVIDER === "mock"') && provider.includes('env.NODE_ENV === "production"'), "Mock astrology is rejected in production", "configuration and runtime guard");
 assert(env.includes('ALLOW_AI_DIAGNOSTICS must remain false in production'), "AI diagnostics fail closed in production", "no production diagnostic provider calls");
 
+const authQuota=source("lib/auth/public-quota.ts");
+const authRoutes=[
+  ["app/api/auth/signup/route.ts","signup-ip",5,3600],
+  ["app/api/auth/login/route.ts","login-ip",8,60],
+  ["app/api/auth/otp/request/route.ts","otp-request-ip",8,600],
+  ["app/api/auth/otp/verify/route.ts","otp-verify-ip",15,600]
+];
+assert(authQuota.includes("pg_advisory_xact_lock")&&
+  authQuota.includes('createHmac("sha256",secret)')&&
+  authQuota.includes("tx.auditLog.count")&&
+  authQuota.includes("tx.auditLog.create")&&
+  authQuota.includes("if(count >= input.limit) return false")&&
+  authQuota.includes("piiStored: false")&&
+  authQuota.includes("x-vercel-forwarded-for"),
+  "Public auth rate limits use shared keyed-pseudonymous audit records", "no process-local auth counter");
+for(const [file,scope,limit,windowSeconds] of authRoutes){
+  const sourceText=source(file);
+  assert(sourceText.includes("claimPublicAuthQuota({")&&
+    sourceText.includes('scope: "'+scope+'"')&&
+    sourceText.includes("limit: "+limit)&&
+    sourceText.includes("windowSeconds: "+windowSeconds)&&
+    !sourceText.includes('from "@/lib/rate-limit"'),
+    "Shared auth quota: "+scope, "no bypass by another serverless instance");
+}
+for(const scope of ["otp-request-destination","otp-verify-destination"]){
+  const route=source(scope==="otp-request-destination"?
+    "app/api/auth/otp/request/route.ts":"app/api/auth/otp/verify/route.ts");
+  assert(route.includes('scope: "'+scope+'"')&&
+    route.includes("key: email")&&
+    !route.includes("keyForEmail"),
+    "OTP email destination HMAC quota: "+scope, "no raw address in database");
+}
+
 const counts = results.reduce((acc, result) => {
   acc[result.status] = (acc[result.status] ?? 0) + 1;
   return acc;

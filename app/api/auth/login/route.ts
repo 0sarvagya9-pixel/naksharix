@@ -5,16 +5,20 @@ import { ok, fail, handleApiError, validateJson } from "@/lib/api";
 import { loginSchema } from "@/lib/validations/auth";
 import { verifyPassword } from "@/lib/auth/password";
 import { setAuthCookie } from "@/lib/auth/jwt";
-import { rateLimit } from "@/lib/rate-limit";
+import { claimPublicAuthQuota, trustedPublicClientIp } from "@/lib/auth/public-quota";
 import { createSession } from "@/lib/auth/session";
 import { env } from "@/lib/env";
 import type { EffectiveRole } from "@/lib/auth/token";
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-forwarded-for") ?? "local";
-    const limited = await rateLimit(`login:${ip}`, 8, 60);
-    if (!limited.allowed) return fail("Too many login attempts. Please try again soon.", 429);
+    const allowed = await claimPublicAuthQuota({
+      scope: "login-ip",
+      key: trustedPublicClientIp(request),
+      limit: 8,
+      windowSeconds: 60
+    });
+    if (!allowed) return fail("Too many login attempts. Please try again soon.", 429);
 
     const body = await validateJson(request, loginSchema);
     const loginMode = body.loginMode as EffectiveRole;

@@ -59,6 +59,33 @@ try {
     assert.equal(res.status, 403, JSON.stringify(body));
     assert.equal(body.details?.code, "EMAIL_VERIFICATION_REQUIRED");
   });
+  await check("public login rate limiting uses shared PostgreSQL and does not leak raw IP", async () => {
+    const fixtureIp="203.0.113.42";
+    const digest=createHmac("sha256",process.env.JWT_SECRET)
+      .update("auth-quota-v1:login-ip:"+fixtureIp).digest("hex");
+    const body={email:"qa-no-account-"+unique+"@example.test",password,roleIntent:"USER",loginMode:"USER"};
+    const headers={"content-type":"application/json","x-csrf-token":csrf,
+      cookie:csrfCookie,"x-forwarded-for":fixtureIp};
+    try {
+      for(let n=0;n<8;n++){
+        const res=await req("/api/auth/login",{method:"POST",headers,body:JSON.stringify(body)});
+        assert.equal(res.status,401,"Login attempt "+(n+1)+" must still be within quota");
+      }
+      const blocked=await req("/api/auth/login",{method:"POST",headers,body:JSON.stringify(body)});
+      assert.equal(blocked.status,429,"Ninth login attempt must be rejected across DB-backed instances");
+      const records=await prisma.auditLog.findMany({where:{
+        action:"auth.rate.attempt",targetType:"login-ip",targetId:digest
+      }});
+      assert.equal(records.length,8,"Rejected attempt cannot create a ninth quota record");
+      assert.ok(records.every(x=>!JSON.stringify(x).includes(fixtureIp)),
+        "Audit records must never store plaintext source IP");
+    } finally {
+      await prisma.auditLog.deleteMany({where:{
+        action:"auth.rate.attempt",targetType:"login-ip",targetId:digest
+      }});
+    }
+  });
+
   await check("wrong OTP rejected then test-only OTP hash injected in disposable DB", async () => {
     const res = await post("/api/auth/otp/verify", { email, code: "000000" });
     assert.equal(res.status, 400);
