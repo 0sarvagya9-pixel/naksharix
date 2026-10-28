@@ -38,6 +38,14 @@ assert.ok(productDetail.includes('chosen.imageRights === "LICENSED"') && product
 assert.ok(ui.includes('product.galleryImages[0].imageRights === "LICENSED"'),"SHOP_CARD_LICENSE_LABEL_MISSING");
 const cart=read("components/shop/cart-page-client.tsx");
 assert.ok(cart.includes('import Image from "next/image"') && cart.includes("p.galleryImages?.[0]?.url"),"CART_PRODUCT_PHOTOS_MISSING");
+const cartControls=read("components/shop/quote-cart-controls.tsx");
+for(const invariant of ["list[index].quantity>=10","list.length>=20","writeCart(list)","setResult(\"unavailable\")","Maximum 10 of this product per cart.","Cart could not be saved in this browser."]){
+  assert.ok(cartControls.includes(invariant),"CART_CONTROL_DUPLICATE_OR_STORAGE_GUARD_MISSING="+invariant);
+}
+for(const invariant of ['setOrderId(id);', 'try{writeCart([]);setLines([])}catch', 'Do not place the same order twice.', 'Cart changes could not be saved']){
+  assert.ok(cart.includes(invariant),"CART_ACCEPTED_ORDER_OR_STORAGE_FAILURE_HANDLING_MISSING="+invariant);
+}
+
 const reviewForm=read("components/consultation-review-form.tsx");
 assert.ok(reviewForm.includes("Rate your consultation") && reviewForm.includes("Submit rating") && reviewForm.includes("aria-pressed={rating === value}"),"ACCESSIBLE_CUSTOMER_RATINGS_MISSING");
 assert.ok(read("app/api/consultation-bookings/review/route.ts").includes("rating: z.coerce.number().int().min(1).max(5)"),"RATINGS_MUST_BE_INTEGERS");
