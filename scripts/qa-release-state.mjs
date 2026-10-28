@@ -83,6 +83,8 @@ if (requiredFiles.every(exists)) {
   assert(vercel?.env?.AI_ASTROLOGER_ENABLED === "true", "Vercel configuration enables the public AI feature flag", "Gemini key readiness is still checked at runtime");
 
   const envSource = read("lib/env.ts");
+  assert(vercel?.env?.NEXT_PUBLIC_APP_URL === "https://www.naksharix.com",
+    "Vercel deploy-time canonical host matches the live www domain", "vercel.json env overrides source defaults");
   assert(envSource.includes('NEXT_PUBLIC_APP_URL: z.string().url().default("https://www.naksharix.com")'),
     "Public canonical host defaults to the live www domain", "no apex-redirect sitemap canonical URLs");
   assert(read("app/sitemap.ts").includes('${env.NEXT_PUBLIC_APP_URL}${route}') &&
