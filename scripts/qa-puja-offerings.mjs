@@ -20,6 +20,11 @@ assert.ok(index.includes("getPublishedPujaOffers()")&&listings.includes("offerin
 assert.ok(db.includes('error.code==="P2021"')&&db.includes("return {}"),"Missing-table fallback must not fake prices");
 assert.ok(listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "'),"Published Puja offers must show Book Now");
 const bookingClient=read("components/puja/booking-request-client.tsx");
+const bookingApi=read("app/api/puja/bookings/route.ts");
+assert.ok(bookingClient.includes("expectedPricePaise:pricePaise") &&
+  bookingApi.includes("expectedPricePaise:z.number().int().min(100).max(100000000).optional()") &&
+  bookingApi.includes("offer.pricePaise!==input.expectedPricePaise") &&
+  bookingApi.includes("new price before submitting.",409), "PUJA_PRICE_STALE_SUBMISSION_MUST_FAIL_CLOSED");
 assert.ok(bookingClient.includes("confirmedQuotePaise")&&bookingClient.includes("quotedPricePaise")&&
   !bookingClient.includes("Listed fee ₹1,100."),"BOOKING_COPY_MUST_FOLLOW_SERVER_QUOTE");
 assert.ok(!detail.includes("₹1,100 is the listed service fee.")&&detail.includes("published fee shown above"),
