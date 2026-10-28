@@ -29,10 +29,10 @@ export default async function PujaTopicPage({params}:Props) {
         <div className="overflow-hidden rounded-3xl border border-[#ddba80]/35 bg-[#fff2e4]">
           <ResilientEditorialImage src={pujaEditorialImage(item.id,item.graphic,item.category)}
             fallbackSrc={item.graphic}
-            alt={pujaEditorialPhoto(item.id,item.category) ? "photograph of a related ritual" : item.category+" category illustration"}
+            alt={pujaEditorialPhoto(item.id,item.category) ? "Representative ritual, deity artwork or shrine photo related to "+item.name : item.category+" category illustration"}
             width={860} height={610} className="aspect-[4/3] w-full object-cover"/>
           {pujaEditorialPhoto(item.id,item.category) ? <div className="bg-white px-4 py-3 text-xs leading-5 text-[#5d4551]">
-            Representative image, not a Naksharix ceremony. Photo: <a href={pujaEditorialPhoto(item.id,item.category)!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(item.id,item.category)!.author}</a>{" · "}<a href={pujaEditorialPhoto(item.id,item.category)!.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(item.id,item.category)!.license}</a>.
+            Representative image (ritual, deity art or shrine); not a Naksharix ceremony. Photo: <a href={pujaEditorialPhoto(item.id,item.category)!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(item.id,item.category)!.author}</a>{" · "}<a href={pujaEditorialPhoto(item.id,item.category)!.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(item.id,item.category)!.license}</a>.
           </div>:null}
         </div>
         <div className="rounded-3xl border border-[#ddba80]/35 bg-white p-7 text-[#402a2d] md:p-10">
