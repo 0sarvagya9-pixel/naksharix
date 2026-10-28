@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { env } from "@/lib/env";
+import { getRazorpayReadiness } from "@/lib/payments/readiness";
 import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/jwt";
@@ -15,11 +16,19 @@ export default async function MyPujas(){
    <Link className="mt-3 inline-block text-[#8c3044] underline" href="/login">Sign in</Link></main>;
  let rows:Awaited<ReturnType<typeof prisma.pujaBookingRequest.findMany>>=[];
  let payments:Awaited<ReturnType<typeof prisma.payment.findMany>>=[];
+ let verifiedPartnerIds=new Set<string>();
+ let publishedOfferIds=new Set<string>();
  let missing=false;
  try{
    rows=await prisma.pujaBookingRequest.findMany({where:{userId:user.id},orderBy:{createdAt:"desc"},take:50});
    payments=await prisma.payment.findMany({where:{userId:user.id,purpose:"PUJA_BOOKING"},
      orderBy:{createdAt:"desc"},take:100});
+   const [partners,offers]=await Promise.all([
+     prisma.pujaPartner.findMany({where:{id:{in:rows.flatMap(row=>row.partnerId?[row.partnerId]:[])},reviewStatus:"VERIFIED",evidenceUrl:{not:null}},select:{id:true}}),
+     prisma.pujaOffering.findMany({where:{topicId:{in:rows.map(row=>row.topicId)},available:true,pricePaise:110000},select:{topicId:true}})
+   ]);
+   verifiedPartnerIds=new Set(partners.map(partner=>partner.id));
+   publishedOfferIds=new Set(offers.map(offer=>offer.topicId));
  }
  catch(e){if(e instanceof Prisma.PrismaClientKnownRequestError&&e.code==="P2021")missing=true;else throw e}
  return <main className="min-h-screen bg-[#fffbf5] px-5 py-12 text-[#432b34]">
@@ -36,17 +45,24 @@ export default async function MyPujas(){
     <p className="mt-2 text-sm">Confirmed ceremony: {row.scheduledAt?row.scheduledAt.toLocaleString("en-IN"):"Not yet scheduled"}</p>
     <p className="mt-2 text-sm">Pandit assignment: {row.partnerId?"Partner assigned":"Pending verification"}</p>
     {(()=>{
-      const payment=payments.find(pay=>{
+      const bookingPayments=payments.filter(pay=>{
         const meta=pay.metadata;
         return !!meta&&typeof meta==="object"&&!Array.isArray(meta)&&meta.pujaBookingId===row.id;
       });
+      const payment=bookingPayments[0];
+      const paymentSettled=bookingPayments.some(pay=>["PAID","REFUNDED","ADMIN_BYPASS","FREE"].includes(pay.status));
       const confirmed=["CONFIRMED","SCHEDULED"].includes(row.status)&&!!row.partnerId&&!!row.scheduledAt;
+      const verified=confirmed&&verifiedPartnerIds.has(row.partnerId||"")&&publishedOfferIds.has(row.topicId)&&row.quotedPricePaise===110000;
+      const retryable=!paymentSettled&&(!payment||["PENDING","FAILED"].includes(payment.status));
+      const checkoutEnabled=env.PUJA_PAYMENTS_ENABLED==="true"&&getRazorpayReadiness().enabled;
       return <div className="mt-4 rounded-xl border border-[#e8cbaa] bg-[#fff8ed] p-4">
         <p className="text-sm font-semibold">Razorpay payment: {payment?.status||"NOT CHARGED"}</p>
-        {!payment&&confirmed&&env.PUJA_PAYMENTS_ENABLED==="true"?
-          <div className="mt-3"><RazorpayCheckoutButton payload={{purpose:"PUJA_BOOKING",bookingId:row.id}} label="Pay ₹1,100 securely with Razorpay" successHref="/puja-bookings"/></div>:null}
+        {verified&&retryable&&checkoutEnabled?
+          <div className="mt-3"><RazorpayCheckoutButton payload={{purpose:"PUJA_BOOKING",bookingId:row.id}} label={payment?.status==="FAILED"?"Retry ₹1,100 Razorpay payment":payment?.status==="PENDING"?"Resume ₹1,100 Razorpay checkout":"Pay ₹1,100 securely with Razorpay"} successHref="/puja-bookings"/></div>:null}
         {!confirmed?<p className="mt-2 text-xs">Payment opens only after a verified Pandit and ceremony date/time are confirmed. No advance charge is taken.</p>:null}
-        {confirmed&&env.PUJA_PAYMENTS_ENABLED!=="true"?<p className="mt-2 text-xs">Online Puja payment is currently unavailable. Contact support before paying.</p>:null}
+        {confirmed&&!verified&&!paymentSettled?<p className="mt-2 text-xs">Payment is paused until the partner evidence and current ₹1,100 offering are verified. No charge is taken.</p>:null}
+        {verified&&retryable&&!checkoutEnabled?<p className="mt-2 text-xs">Online Puja payment is currently unavailable. Contact support before paying.</p>:null}
+        {paymentSettled?<p className="mt-2 text-xs">Payment history is recorded; another checkout will not be opened for this booking.</p>:null}
       </div>;
     })()}
     {row.status==="COMPLETED"&&row.evidenceUrl?<a href={row.evidenceUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-[#7c2a3d] underline">View completion evidence</a>:null}
