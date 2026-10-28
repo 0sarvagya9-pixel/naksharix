@@ -65,3 +65,14 @@ These 19 added **topic-related representative photographs** have personally insp
 - **ekadashi-vishnu-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Vishnu_Puja_At_Home_With_Devotees_-_Howrah_20170708130101.jpg) — Biswarup Ganguly — CC BY 3.0.
 
 **Curation coverage: 41 of 94 topic IDs have manually chosen images; 53 use category-relevant representative photographs.** The 41 mappings do not mean 41 unique verified performances, and stock photo reuse is not proof of fulfilment.
+
+
+## 2026-10-28 additional topic photo rights (five source-backed references)
+The following five override image references were checked against the Commons file record. They are representative photographs (or photographed religious art), **not** photos of an actual Naksharix-delivered Puja, Pandit, supplier or stock item:
+- **shiv-parvati-puja:** [Shiv Parvati 1](https://commons.wikimedia.org/wiki/File:Shiv_Parvati_1.jpg), Jerrypaul123, CC0 1.0. Photographed museum sculpture depicting Shiva and Parvati, **not an actual performed Puja**; this replaces an unrelated Shiva-only category image.
+- **hanuman-puja:** [Hanuman puja in mymensingh](https://commons.wikimedia.org/wiki/File:Hanuman_puja_in_mymensingh.jpg), Dip Paul, CC BY-SA 4.0. Actual Hanuman-themed temple ritual reference.
+- **dhanvantari-puja:** [धनत्रयोदशीला धन्वंतरी पूजन](https://commons.wikimedia.org/wiki/File:धनत्रयोदशीला_धन्वंतरी_पूजन.jpg), आर्या जोशी, CC BY-SA 4.0. Actual Dhanvantari Puja during Diwali.
+- **dhanteras-puja:** [Dhanteras wheat flour diya](https://commons.wikimedia.org/wiki/File:Diya_made_out_of_wheat_flour_on_the_ocassion_of_%27Dhanteras%27_or_the_festival_of_money.jpg), Akku09102004, CC BY-SA 4.0. A diya used in Dhanteras festivities, **not a claim to depict the whole Puja**.
+- **dussehra-ayudha-puja:** [Ayudha Pooja](https://commons.wikimedia.org/wiki/File:Ayudha_Pooja.jpg), Balasubramanian G Velu, CC BY-SA 2.0. Equipment worship and associated Vijayadashami practice; no real Naksharix service shown.
+
+**New curation coverage:** 46/94 Puja topics have curated topic-relevant reference photographs; the other 48 still use correctly labeled real category photographs. Some more-specific entries depict thematic art or ritual components rather than a ceremony. Distinct photos and real operator evidence remain separate requirements. No change to Puja booking or charging policies.
