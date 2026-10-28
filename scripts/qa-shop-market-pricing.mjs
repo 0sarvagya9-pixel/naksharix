@@ -34,12 +34,32 @@ for(const id of Object.keys(expected))assert.ok(catalog.includes('product("'+id+
 assert.ok(catalog.includes("marketPriceForSeed(id)")&&catalog.includes("unitPricePaise: marketPricePaise")&&catalog.includes("formatSeedPrice(marketPricePaise)"),"SHOP_PRICE_SEED_NOT_CANONICAL");
 assert.ok(store.includes("shopCatalogueSnapshot.findUnique")&&store.includes("if (!snapshot) return { products: shopProducts")&&store.includes("(snapshot.products as unknown as ShopProduct[])"),"ADMIN_PRICES_MUST_BE_PRESERVED_OVER_SEEDS");
 assert.ok(admin.includes("unitPricePaise: editing.unitPricePaise ?? null"),"ADMIN_PRICE_OVERRIDE_LOST");
+assert.ok(admin.includes("applyMissingMarketPrices")&&
+  admin.includes("if(hasPrice(product)||marketPricePaise===null)return product;")&&
+  admin.includes("Fill Missing Market Prices"),"ADMIN_EXPLICIT_PRICE_SEED_MERGE_NOT_GATED");
 assert.ok(orders.includes("product.unitPricePaise*item.quantity")&&orders.includes('status:"REQUESTED"')&&
  orders.includes('paymentStatus:"UNPAID"')&&orders.includes("onlineCheckoutAvailable:false"),"PRICE_SECURITY_OR_UNPAID_ORDER_GUARD_LOST");
 assert.ok(read("components/shop-coming-soon-content.tsx").includes("Market-compared item price")&&
  read("app/shop/[slug]/page.tsx").includes("Market-compared listing price")&&
  read("components/shop/cart-page-client.tsx").includes("Market-compared product subtotal"),
  "SHOP_PRICING_TERMS_DISCLOSURE_MISSING");
-assert.ok(ledger.includes("nor proof of our source costs")&&ledger.includes("exact bundled items"),
+const cartControls=read("components/shop/quote-cart-controls.tsx");
+assert.ok(cartControls.includes('function add(goToCart=false)')&&
+  cartControls.includes('if(goToCart)router.push("/cart")')&&
+  cartControls.includes('onClick={()=>add(true)}')&&
+  cartControls.includes("Order Now")&&
+  cartControls.includes("unpaid order request")&&
+  cartControls.includes('if(index>=0&&list[index].quantity>=10)')&&
+  cartControls.includes('if(index<0&&list.length>=20)'),
+  "ONE_CLICK_ORDER_NOW_MUST_PRESERVE_CART_LIMITS_AND_NO_PAYMENT_DISCLOSURE");
+
+const homeServer=read("app/page.tsx");
+const homeClient=read("components/home/editorial-home.tsx");
+assert.ok(homeServer.includes("getShopCatalogue()")&&homeServer.includes("featuredShopPrices[product.id]")&&
+  homeServer.includes("<EditorialHome featuredShopPrices={featuredShopPrices}")&&
+  homeClient.includes("featuredShopPrices[item.id]")&&
+  homeClient.includes("Selling price · no online charge"),"HOMEPAGE_PRICES_NOT_CANONICAL_WITH_SHOP");
+
+assert.ok(ledger.includes("not supplier quotes")&&ledger.includes("unspecified contents/report"),
  "MARKET_REFERENCE_MUST_NOT_CLAIM_SUPPLIER_CERTAINTY");
 console.log("SHOP_MARKET_PRICE_QA=PASS;SKUS=12;PUBLIC_LIST_PRICES=INR;OWNER_BENCHMARK=2026-10-28;PAYMENT=UNPAID_MANUAL;SUPPLIER_AUTHENTICITY=NOT_ATTESTED");

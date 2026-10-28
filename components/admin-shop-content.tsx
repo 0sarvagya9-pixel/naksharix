@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { secureFetch } from "@/lib/security/csrf";
+import { marketPriceForSeed, formatSeedPrice } from "@/lib/shop/market-price-seeds";
 import {
   categoryLabel,
   emptyShopProduct,
@@ -153,6 +154,19 @@ export function AdminShopContent() {
     void persist(products.filter((item) => item.id !== product.id), "Product deleted from published catalogue.");
   }
 
+  function applyMissingMarketPrices() {
+    const unpriced=products.filter(product=>!hasPrice(product)&&marketPriceForSeed(product.id)!==null);
+    if(!unpriced.length){setNotice("All matching seed products already have a selling price.");return;}
+    if(!window.confirm(`Apply researched INR market list prices to ${unpriced.length} unpriced seed products? Existing Admin prices will be preserved. This does not enable online payments or certify supplier stock.`))return;
+    const next=products.map(product=>{
+      const marketPricePaise=marketPriceForSeed(product.id);
+      if(hasPrice(product)||marketPricePaise===null)return product;
+      const priceLabel=formatSeedPrice(marketPricePaise);
+      return {...product,unitPricePaise:marketPricePaise,priceLabel:{en:priceLabel,hi:priceLabel,hinglish:priceLabel},updatedAt:new Date().toISOString()};
+    });
+    void persist(next, `Market list prices applied to ${unpriced.length} previously unpriced products; existing custom prices preserved.`);
+  }
+
   function resetSeed() {
     if (!window.confirm("Reset the published Shop catalogue to seed products?")) return;
     void persist(shopProducts, "Published seed catalogue restored.");
@@ -167,11 +181,12 @@ export function AdminShopContent() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">Admin Catalogue</p>
               <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382]">Shop Product Management</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[#a8b3c7]">
-                Manage product photographs, approved prices and catalogue visibility for carts and manual order requests. Online payments remain disabled. Changes are audited across administrator sessions.
+                Manage the 12 market-compared INR selling prices, real stock-photo evidence and catalogue visibility for carts and unpaid order requests. Market benchmarks do not certify exact items. Online payments remain disabled. Changes are audited across administrator sessions.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button onClick={startAdd} className="bg-[#009b72] text-white hover:bg-[#008766]"><Plus className="h-4 w-4" /> Add Product</Button>
+              <Button variant="outline" onClick={applyMissingMarketPrices} disabled={saving}>Fill Missing Market Prices</Button>
               <Button variant="outline" onClick={resetSeed}>Restore Seed</Button>
             </div>
           </div>
@@ -338,7 +353,7 @@ function ProductForm({ editing, setEditing, saveProduct }: { editing: FormState 
               </div>
             ))}
           </section>
-          <Field label="Approved sale price in INR (numeric, leave blank until verified)"
+          <Field label="Selling price in INR (market seed by default; Admin may override)"
             value={editing.unitPricePaise ? (editing.unitPricePaise / 100).toFixed(2) : ""}
             onChange={(value) => {
               const rupees = Number(value);

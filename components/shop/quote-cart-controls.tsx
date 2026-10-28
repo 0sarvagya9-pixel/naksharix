@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
 
 export const SHOP_CART_STORAGE_KEY="naksharix-product-cart-v1";
@@ -18,7 +19,8 @@ export function writeCart(lines:CartLine[]){
 type CartResult="idle"|"added"|"limit"|"full"|"unavailable";
 export function AddToCartButton({productId}:{productId:string}){
   const [result,setResult]=useState<CartResult>("idle");
-  function add(){
+  const router=useRouter();
+  function add(goToCart=false){
     const list=readCart();
     const index=list.findIndex(line=>line.productId===productId);
     if(index>=0&&list[index].quantity>=10){setResult("limit");return}
@@ -28,6 +30,7 @@ export function AddToCartButton({productId}:{productId:string}){
     try{
       writeCart(list);
       setResult("added");
+      if(goToCart)router.push("/cart");
     }catch{
       setResult("unavailable");
     }
@@ -37,12 +40,17 @@ export function AddToCartButton({productId}:{productId:string}){
     result==="unavailable"?"Cart could not be saved in this browser. Please enable storage and retry.":null;
   return <div className="w-full space-y-2">
     <div className="flex w-full flex-wrap gap-2">
-      <button type="button" onClick={add} aria-label="Add product to cart"
+      <button type="button" onClick={()=>add(false)} aria-label="Add product to cart"
         className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-[#822c40] px-4 py-3 font-bold text-white transition hover:bg-[#671f31] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d39942]">
         <ShoppingCart className="h-4 w-4"/>{result==="added"?"Added to cart":result==="limit"?"Quantity limit reached":result==="full"?"Cart full":"Add to cart"}
       </button>
-      {["added","limit","full"].includes(result)?<a className="inline-flex min-h-12 items-center rounded-xl border border-[#cfaf85] px-3 text-sm font-bold text-[#743042]" href="/cart">View cart</a>:null}
+      <button type="button" onClick={()=>add(true)} aria-label="Order item now, no online payment"
+        className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl border border-[#d9ac5a] bg-[#fff1d6] px-4 py-3 text-sm font-bold text-[#692a38] transition hover:bg-[#ffe4b6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d39942]">
+        Order Now
+      </button>
+            {["added","limit","full"].includes(result)?<a className="inline-flex min-h-12 items-center rounded-xl border border-[#cfaf85] px-3 text-sm font-bold text-[#743042]" href="/cart">View cart</a>:null}
     </div>
+    <p className="text-xs text-[#6d5058]">Order Now opens your cart to place an unpaid order request; no online payment is collected.</p>
     {message?<p role="status" aria-live="polite" className="text-sm font-medium text-[#7d3445]">{message}</p>:null}
   </div>;
 }
