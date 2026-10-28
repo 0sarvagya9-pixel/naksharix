@@ -10,22 +10,18 @@ import {
   prepareEmailVerificationOtp,
   replaceEmailVerificationOtpRecord
 } from "@/lib/auth/otp-service";
-import { rateLimit } from "@/lib/rate-limit";
+import { claimPublicAuthQuota, trustedPublicClientIp } from "@/lib/auth/public-quota";
 
 export async function POST(request: NextRequest) {
   try {
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      "local";
+    const signupAllowed = await claimPublicAuthQuota({
+      scope: "signup-ip",
+      key: trustedPublicClientIp(request),
+      limit: 5,
+      windowSeconds: 3600
+    });
 
-    const signupLimit = await rateLimit(
-      `signup-ip:${ip}`,
-      5,
-      3600
-    );
-
-    if (!signupLimit.allowed) {
+    if (!signupAllowed) {
       return fail(
         "Too many signup attempts. Please try again later.",
         429
