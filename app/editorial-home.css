@@ -50,8 +50,8 @@
   background: linear-gradient(90deg, rgba(12,13,28,.94) 0%, rgba(13,18,30,.88) 34%, rgba(17,20,32,.49) 72%, rgba(17,19,31,.38) 100%),
     linear-gradient(0deg, rgba(13,15,26,.88), transparent 35%);
 }
-.nx-ed-hero-inner { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 365px; align-items: center; gap: 3rem; padding-block: 7.3rem 6.5rem; }
-.nx-ed-hero-copy { max-width: 760px; z-index: 1; }
+.nx-ed-hero-inner { position: relative; display: grid; grid-template-columns: minmax(0,1fr); align-items: center; gap: 1.5rem; padding-block: 7.3rem 6.5rem; }
+.nx-ed-hero-copy { max-width: 870px; z-index: 1; }
 .nx-ed-hero h1 {
   font-family: var(--font-cinzel), Georgia, serif; margin: 1.35rem 0 1.5rem;
   max-width: 770px; font-size: clamp(2.7rem, 5.3vw, 5.8rem); font-weight: 700;
@@ -140,8 +140,8 @@
 .nx-ed-text-link:hover { gap: .95rem; }
 .nx-ed-cosmos-split { background: #f0e4d7; }
 .nx-ed-cosmos-inner { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); min-height: 580px; align-items: stretch; }
-.nx-ed-cosmos-photo { position: relative; margin-left: calc((min(100vw, 1340px) - 100vw) / 2); min-height: 510px; overflow: hidden; background: #3e2e36; }
-.nx-ed-cosmos-photo img { object-fit: cover; transition: transform .8s; }
+.nx-ed-cosmos-photo { position: relative; margin-left: 0; min-height: 510px; overflow: hidden; background: radial-gradient(circle,#f9dfb6,#e3b776); }
+.nx-ed-cosmos-photo img { object-fit: contain; object-position: center; transition: transform .8s; }
 .nx-ed-cosmos-photo:hover img { transform: scale(1.035); }
 .nx-ed-cosmos-photo-label { position: absolute; bottom: 2rem; left: max(2rem, calc((100vw - 1340px) / 2)); display: flex; align-items: center; gap: .6rem; color: #fff; font-size: .8rem; background: rgba(23,21,28,.55); border-radius: 4px; padding: .9rem 1.1rem; backdrop-filter: blur(8px); }
 .nx-ed-cosmos-copy { display: flex; flex-direction: column; justify-content: center; padding: 4.5rem clamp(2rem,5vw,5.5rem); }
@@ -151,7 +151,7 @@
 .nx-ed-zodiac-grid { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: .5rem; margin: 1.7rem 0 2rem; }
 .nx-ed-zodiac-grid a { display: grid; align-items: center; justify-items: center; gap: .2rem; padding: .5rem .15rem; min-width: 0; color: #49373e; border: 1px solid #d9c7b5; background: rgba(255,255,255,.43); border-radius: 5px; transition: background .22s, transform .22s; }
 .nx-ed-zodiac-grid a:hover { background: #fffcf7; transform: translateY(-3px); }
-.nx-ed-zodiac-grid a span { font-size: clamp(1.3rem,2vw,1.8rem); line-height: 1.3; color: #ab623e; }
+.nx-ed-zodiac-grid a img { display:block; width:clamp(32px,3.5vw,52px); height:clamp(32px,3.5vw,52px); object-fit:contain; }
 .nx-ed-zodiac-grid a small { font-size: .62rem; }
 .nx-ed-journey { background: #fffaf5; }
 .nx-ed-journey-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1.25rem; }
@@ -188,9 +188,7 @@
 @keyframes nx-ed-kenburns { from { transform: scale(1.02); } to { transform: scale(1.095); } }
 
 @media (max-width: 1100px) {
-  .nx-ed-hero-inner { grid-template-columns: minmax(0,1fr) 265px; gap: 1rem; }
-  .nx-ed-hero-aside { height: 310px; }
-  .nx-ed-floating-caption { left: -25px; }
+  .nx-ed-hero-inner { grid-template-columns: minmax(0,1fr); gap: 1rem; }
   .nx-ed-cosmos-photo { margin-left: 0; }
   .nx-ed-cosmos-copy { padding-inline: 2.2rem; }
 }
@@ -198,7 +196,6 @@
   .nx-ed-container { width: min(100% - 2rem, 760px); }
   .nx-ed-hero { min-height: 645px; }
   .nx-ed-hero-inner { display: flex; align-items: center; padding-block: 6rem 6rem; }
-  .nx-ed-hero-aside { display: none; }
   .nx-ed-hero-wash { background: linear-gradient(90deg,rgba(16,17,29,.92),rgba(15,17,29,.55)),linear-gradient(0deg,rgba(16,17,29,.75),transparent 50%); }
   .nx-ed-service-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .nx-ed-service-card:last-child { grid-column: 1 / -1; }
@@ -292,3 +289,10 @@ main.star-field > .nx-ed-inner-banner:first-child { padding-top: 0 !important; }
 .naksharix-home-shell header { background: rgba(18, 21, 35, 0.98) !important; }
 
 footer .naksh-brand-subtitle { color: #71351f !important; }
+
+/* Service-led hero photography and legible editorial imagery */
+.nx-ed-hero-photo .nx-ed-photo { object-fit: cover; object-position:center 44%; }
+.nx-ed-hero-wash { background: linear-gradient(90deg,rgba(26,14,27,.94),rgba(34,16,30,.84) 44%,rgba(46,22,35,.42)); }
+.nx-ed-cosmos-photo-label { color:#fff; background:rgba(52,25,36,.85); }
+.nx-ed-service-card .nx-ed-card-image img { object-fit:cover; object-position:center; }
+@media(max-width:850px){.nx-ed-cosmos-photo {min-height:350px;} .nx-ed-hero-photo .nx-ed-photo {object-position:65% center;}}

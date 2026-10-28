@@ -71,3 +71,10 @@ const productionHealth = read("app/api/cron/production-health/route.ts");
 for (const [name, route] of [["health",publicHealth],["production-health",productionHealth]]) {
   assert.ok(route.includes("sharedRedisConfigured()") && route.includes("redisPing()") && !route.includes("getRedis()"),"REDIS_TRANSPORT_HEALTH_MONITOR_MISSING_"+name);
 }
+
+const homeHero=read("components/home/editorial-home.tsx");
+const heroCss=read("app/editorial-home.css");
+assert.ok(!homeHero.includes("ANCIENT FRAMEWORKS")&&!homeHero.includes('className="nx-ed-hero-aside"'),"HERO_FLOATING_WHEEL_NOT_REMOVED");
+for(const title of ["SACRED TRADITIONS","BIRTH CHART","PERSONAL GUIDANCE","SPIRITUAL SHOP","PANCHANG"])assert.ok(homeHero.includes(title),"HERO_MISSING_SERVICE="+title);
+assert.ok(homeHero.includes('"/zodiac-signs/"+sign.toLowerCase()+".svg"'),"ZODIAC_SYMBOL_ART_MISSING");
+assert.ok(heroCss.includes(".nx-ed-cosmos-photo img { object-fit: contain"),"ZODIAC_CROPPING_REGRESSION");
