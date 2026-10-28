@@ -50,11 +50,12 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
     if(!response.ok)throw new Error(body.error||"Order request failed.");
     const id=body.data?.order?.id;
     if(typeof id!=="string")throw new Error("Order was not confirmed by the server.");
-    setOrderId(id);writeCart([]);setLines([]);
+    setOrderId(id);
+    try{writeCart([]);setLines([])}catch{setIssue("Order was saved, but this browser could not clear the local cart. Do not place the same order twice. Track it under My Orders.")}
   }catch(e){setIssue(e instanceof Error?e.message:"Order request failed.")}
   finally{setPending(false)}
  }
- function update(id:string,qty:number){const next=lines.filter(l=>l.productId!==id);if(qty>0)next.push({productId:id,quantity:Math.min(10,qty)});writeCart(next);setLines(next)}
+ function update(id:string,qty:number){const next=lines.filter(l=>l.productId!==id);if(qty>0)next.push({productId:id,quantity:Math.min(10,qty)});try{writeCart(next);setLines(next);setIssue("")}catch{setIssue("Cart changes could not be saved in this browser. Please enable storage and retry.")}}
  return <div className="mx-auto max-w-5xl px-5 py-12">
   <p className="text-xs font-extrabold uppercase tracking-[.21em] text-[#9d453c]">Spiritual catalogue</p>
   <h1 className="mt-3 font-cinzel text-4xl font-bold text-[#35232b]">Your cart</h1>
