@@ -29,3 +29,15 @@ for(const s of ["partner.reviewStatus !== \"VERIFIED\"","!booking.scheduledAt","
   assert.ok(gatewayOrder.includes(s),"PUJA_PAYMENT_ACCEPTANCE_GUARD_MISSING="+s);
 assert.ok(gatewayWebhook.includes('event.event==="refund.processed"')&&gatewayWebhook.includes('status:"REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
 assert.ok(bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"'),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");
+
+const pricingPage=read("app/pricing/page.tsx");
+const pricingContent=read("components/pricing-content.tsx");
+assert.ok(pricingPage.includes("getPublishedPujaOffers()") &&
+  pricingPage.includes('displayPujaPrice(prices[0])') &&
+  pricingContent.includes("pujaPriceLabel"),"PUBLIC_PRICING_MUST_FOLLOW_APPROVED_DB_FEES");
+assert.ok(pricingContent.includes('href: "/pujas"')&&
+  pricingContent.includes('href: "/shop"')&&
+  pricingContent.includes("unpaid cart and order requests"),"PRICING_MUST_DESCRIBE_REAL_COMMERCE_STATE");
+assert.ok(gatewayWebhook.includes("if(transition.count===0)") &&
+  gatewayWebhook.includes("razorpay_puja_refund_duplicate_ignored"),"REFUND_WEBHOOK_MUST_BE_IDEMPOTENT");
+assert.ok(read("components/ai-astrologer-chat.tsx").includes("!json.data.answer.trim()"),"AI_CHAT_MUST_REJECT_EMPTY_PROVIDER_TEXT");

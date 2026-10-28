@@ -114,9 +114,15 @@ export async function POST(request: NextRequest) {
     if(event.event==="refund.processed"&&refund?.payment_id&&refund.status==="processed"){
       const original=await prisma.payment.findUnique({where:{providerPaymentId:refund.payment_id}});
       if(original&&original.purpose==="PUJA_BOOKING"&&Number(refund.amount)===Math.round(Number(original.amount)*100)){
-        await prisma.payment.updateMany({
+        const transition=await prisma.payment.updateMany({
           where:{id:original.id,status:"PAID"},data:{status:"REFUNDED"}
         });
+        // Refund webhooks can be retried. Only the first completed payment
+        // transition may update its booking and emit a status audit.
+        if(transition.count===0) {
+          logger.info("razorpay_puja_refund_duplicate_ignored", {paymentId:original.id});
+          return ok({received:true});
+        }
         const meta=original.metadata as Record<string,unknown>|null;
         if(typeof meta?.pujaBookingId==="string"){
           await prisma.pujaBookingRequest.updateMany({
