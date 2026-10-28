@@ -106,6 +106,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                   <p className="text-lg font-extrabold text-[#722536]">{product.unitPricePaise
                     ? new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(product.unitPricePaise/100)
                     : "Price awaiting verification"}</p>
+                  <p className="text-xs leading-5 text-[#745864]">Market-compared item price · order request only; shipping/taxes and exact supplied specifications confirmed before payment.</p>
                   <AddToCartButton productId={product.id} />
                   <Link href={"/shop/"+encodeURIComponent(product.slug)} className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#d2ae87] text-sm font-semibold text-[#773344] hover:bg-[#fff3e8]">
                     <ShoppingBag className="h-4 w-4" /> View details
