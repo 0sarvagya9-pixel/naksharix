@@ -151,7 +151,7 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
 
   browser-audit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 50
     # Playwright image provides matched Chromium, Firefox and WebKit binaries.
     # Keep all three project browsers and avoid flaky multi-browser downloads.
