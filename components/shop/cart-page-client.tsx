@@ -44,6 +44,7 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
   try{
     const response=await secureFetch("/api/commerce/orders",{method:"POST",headers:{"Content-Type":"application/json"},
      body:JSON.stringify({items:valid.map(l=>({productId:l.productId,quantity:l.quantity})),
+       expectedSubtotalPaise:total,
        customerName:buyerName.trim(),customerPhone:buyerPhone.trim(),deliveryAddress:address.trim(),
        deliveryCity:city.trim(),deliveryState:stateName.trim(),postalCode:postalCode.trim(),customerNote:message.trim()})});
     const body=await response.json();
