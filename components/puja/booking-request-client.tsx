@@ -12,7 +12,7 @@ export function PujaRequestClient({topicId,name,pricePaise}:{topicId:string;name
   e.preventDefault();if(busy)return;setBusy(true);setError("");
   try{
    const response=await secureFetch("/api/puja/bookings",{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({topicId,city:city.trim(),preferredDate,devoteeName:devoteeName.trim(),
+    body:JSON.stringify({topicId,expectedPricePaise:pricePaise,city:city.trim(),preferredDate,devoteeName:devoteeName.trim(),
       gotra:gotra.trim()||null,sankalpNote:sankalpNote.trim(),customerPhone:customerPhone.trim()})});
    const body=await response.json();
    if(!response.ok)throw Error(body.error||"Booking request failed");
