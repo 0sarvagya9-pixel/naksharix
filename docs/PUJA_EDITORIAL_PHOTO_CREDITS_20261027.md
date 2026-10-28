@@ -37,3 +37,6 @@ The photo-registry topic-specific mappings now cover **19/94** topics. They do n
 - **chhath-surya-arghya** — [Chhath Puja ritual](https://commons.wikimedia.org/wiki/File:Chhath_Puja_ritual.jpg), Sntshkumar750, CC BY-SA 4.0, 4160 × 3120.
 - **mundan-sanskar** — [Hindu baby first head shave](https://commons.wikimedia.org/wiki/File:Hindu_baby_first_head_shave_choulopan_chudakarana_sanskara.jpg), Whitney Lauren, CC BY 2.0, 1280 × 853. This is the *childbirth-life-stage rite*, not a mourning-related hair shaving event.
 Updated total: **22 of 94** individual topic mappings. The other topics continue to display category-relevant representative photos with truthful attributions, not made-up unique events.
+
+## Owner/Admin review
+The Puja offering editor now displays a preview, source/license credit and a **Needs topic-specific photograph** checkbox. It is a *review filter*, not a file uploader or proof of actual priest fulfilment. The category fallback is explicit; publishing a fee is not the same as having a verified priest or a ceremony-specific image.

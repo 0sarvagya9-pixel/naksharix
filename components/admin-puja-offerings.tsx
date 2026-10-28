@@ -1,5 +1,7 @@
 "use client";
 import { useEffect,useMemo,useState,type FormEvent } from "react";
+import Image from "next/image";
+import { editorialPujaPhotos, pujaEditorialPhoto } from "@/lib/puja/editorial-photos";
 import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { secureFetch } from "@/lib/security/csrf";
 type Offer={topicId:string;pricePaise:number|null;durationMinutes:number|null;available:boolean;note:string};
@@ -7,6 +9,7 @@ function blank(topicId:string):Offer{return {topicId,pricePaise:null,durationMin
 export function AdminPujaOfferEditor(){
  const [saved,setSaved]=useState<Record<string,Offer>>({});
  const [query,setQuery]=useState("");
+ const [needsExactPhoto,setNeedsExactPhoto]=useState(false);
  const [draft,setDraft]=useState<Offer|null>(null);
  const [busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  useEffect(()=>{let active=true;fetch("/api/admin/puja-offerings",{cache:"no-store"}).then(async r=>{
@@ -14,7 +17,10 @@ export function AdminPujaOfferEditor(){
  }).then(rows=>{if(active)setSaved(Object.fromEntries(rows.map(o=>[o.topicId,o])))})
  .catch(e=>{if(active)setError(e instanceof Error?e.message:"Unable to load prices.")});
  return()=>{active=false}},[]);
- const results=useMemo(()=>pujaTopics.filter(p=>(p.name+" "+p.category+" "+p.deity).toLowerCase().includes(query.toLowerCase())),[query]);
+ const results=useMemo(()=>pujaTopics.filter(topic=>
+   (topic.name+" "+topic.category+" "+topic.deity).toLowerCase().includes(query.toLowerCase()) &&
+   (!needsExactPhoto || !editorialPujaPhotos[topic.id])
+ ),[query,needsExactPhoto]);
  async function save(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(!draft||busy)return;
   if(draft.available&&draft.pricePaise===null){setError("Set an approved INR price before publishing.");return}
@@ -29,6 +35,14 @@ export function AdminPujaOfferEditor(){
  return <div className="mt-8">
   <label className="block max-w-lg text-sm font-semibold text-[#432b34]">Search Puja
     <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Shiva, Lakshmi, Homa..." className="mt-2 block w-full rounded-xl border border-[#dcc3ab] bg-white px-4 py-3"/>
+  </label>
+  <p className="mt-4 max-w-3xl text-sm leading-6 text-[#63454c]">
+    {Object.keys(editorialPujaPhotos).length} / {pujaTopics.length} Puja topics have individually curated, licensed photographs.
+    The remaining topics use category-relevant real reference photos, not evidence of a ceremony actually performed by Naksharix.
+  </p>
+  <label className="mt-3 flex items-center gap-3 text-sm font-semibold text-[#582d3b]">
+    <input type="checkbox" checked={needsExactPhoto} onChange={e=>setNeedsExactPhoto(e.target.checked)} />
+    Show Pujas that still need a topic-specific photograph
   </label>
   {error?<p role="alert" className="mt-4 rounded-xl bg-[#fff0f0] p-4 text-sm text-[#8e2342]">{error}</p>:null}
   {notice?<p role="status" className="mt-4 rounded-xl bg-[#eff9f0] p-4 text-sm text-[#31592d]">{notice}</p>:null}
@@ -53,7 +67,19 @@ export function AdminPujaOfferEditor(){
     <button type="button" onClick={()=>setDraft(null)} className="rounded-xl border border-[#c9ad93] px-6 py-3 font-bold">Cancel</button></div>
   </form>:null}
   <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-   {results.map(topic=>{const offer=saved[topic.id];return <div key={topic.id} className="rounded-xl border border-[#ead4bb] bg-white p-4">
+   {results.map(topic=>{const offer=saved[topic.id];const photo=pujaEditorialPhoto(topic.id,topic.category);
+    const topicSpecific=Boolean(editorialPujaPhotos[topic.id]);
+    return <div key={topic.id} className="rounded-xl border border-[#ead4bb] bg-white p-4">
+    {photo?<div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-lg bg-[#f4e8d9]">
+      <Image src={photo.src} alt={"Representative photo for "+topic.name} width={480} height={300} unoptimized
+        className="h-full w-full object-cover" />
+    </div>:null}
+    <p className={"text-xs font-semibold "+(topicSpecific?"text-[#3d6b46]":"text-[#89452e]")}>
+      {topicSpecific?"Topic-specific licensed photo":"Category photo — exact ceremony image needed"}
+    </p>
+    {photo?<a href={photo.source} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs underline text-[#664a52]">
+      {photo.author} · {photo.license} · source
+    </a>:null}
     <p className="font-semibold text-[#462832]">{topic.name}</p>
     <p className="mt-2 text-sm text-[#6b535e]">{offer?.available&&offer.pricePaise!==null?"₹"+(offer.pricePaise/100).toFixed(2)+" · Published":"Not published"}</p>
     <button type="button" className="mt-3 rounded-lg border border-[#a87a7f] px-4 py-2 text-sm font-bold text-[#762a3c]" onClick={()=>{setError("");setDraft({...blank(topic.id),...offer,topicId:topic.id})}}>Set rate</button>

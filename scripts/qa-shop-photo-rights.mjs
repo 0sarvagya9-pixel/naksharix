@@ -99,3 +99,9 @@ assert.ok(sourceCoverage.includes("puja-photo-coverage") &&
 assert.ok(home.includes('href={"/shop/"+item.id}') &&
   home.includes('View item / Add to Cart')&&home.includes('href={"/pujas/"+item.id}')&&
   home.includes('Book Now <ArrowRight'),"HOMEPAGE_FEATURED_COMMERCE_LINKS_STALE");
+
+const adminPujaPhotos=read("components/admin-puja-offerings.tsx");
+for(const marker of ["needsExactPhoto","Show Pujas that still need a topic-specific photograph",
+  "pujaEditorialPhoto(topic.id,topic.category)","photo.author","photo.license"]){
+  assert.ok(adminPujaPhotos.includes(marker),"ADMIN_PUJA_PHOTO_CURATION_UI_MISSING="+marker);
+}
