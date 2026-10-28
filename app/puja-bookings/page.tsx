@@ -7,6 +7,7 @@ import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { findPujaTopic } from "@/lib/puja/service-catalogue";
+import { effectivePujaPrice } from "@/lib/puja/offerings";
 export const dynamic="force-dynamic";
 export const metadata:Metadata={title:"My Puja Requests | Naksharix",robots:{index:false,follow:false}};
 export default async function MyPujas(){
@@ -25,10 +26,11 @@ export default async function MyPujas(){
      orderBy:{createdAt:"desc"},take:100});
    const [partners,offers]=await Promise.all([
      prisma.pujaPartner.findMany({where:{id:{in:rows.flatMap(row=>row.partnerId?[row.partnerId]:[])},reviewStatus:"VERIFIED",evidenceUrl:{not:null}},select:{id:true}}),
-     prisma.pujaOffering.findMany({where:{topicId:{in:rows.map(row=>row.topicId)},available:true,pricePaise:110000},select:{topicId:true}})
+     prisma.pujaOffering.findMany({where:{topicId:{in:rows.map(row=>row.topicId)}},select:{topicId:true,available:true,pricePaise:true}})
    ]);
    verifiedPartnerIds=new Set(partners.map(partner=>partner.id));
-   publishedOfferIds=new Set(offers.map(offer=>offer.topicId));
+   const byTopic=new Map(offers.map(offer=>[offer.topicId,offer]));
+   publishedOfferIds=new Set(rows.filter(row=>effectivePujaPrice(byTopic.get(row.topicId))===110000).map(row=>row.topicId));
  }
  catch(e){if(e instanceof Prisma.PrismaClientKnownRequestError&&e.code==="P2021")missing=true;else throw e}
  return <main className="min-h-screen bg-[#fffbf5] px-5 py-12 text-[#432b34]">
