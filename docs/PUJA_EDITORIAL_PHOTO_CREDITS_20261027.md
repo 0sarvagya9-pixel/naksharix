@@ -118,3 +118,10 @@ These source URLs, photographer/license metadata and photographed subjects were 
 - **akshaya-tritiya-puja**: [Akshaya Tritiya img](https://commons.wikimedia.org/wiki/File:Akshaya_Tritiya_img.jpg). Anugya..Chidar; CC BY-SA 4.0. Festival deity display photograph, **not** a performed Puja.
 
 **Current mapping count after this change:** 61/94 topic IDs have curated relevant references; 33/94 still use credited real category photographs. The curated references include temples, deity idols, representative rituals, and some reused sources; these are not 61 distinct actual service fulfilment photographs. Exact operator pictures and permissions are independent requirements.
+
+
+## 2026-10-28: specific Navagraha shrine/deity photography
+- **chandra-graha-shanti-puja**: [Chandra Graha at Shani Shingnapur](https://commons.wikimedia.org/wiki/File:Chandra_Graha_(Moon)_at_navagraha_mandapam,_Shani_Shingnapur.jpg), real Chandra Graha shrine statue photo by K.Venkataramana, **CC0 1.0**. This is temple imagery, not a performed Naksharix graha-shanti ritual.
+- **guru-graha-shanti-puja**: [Brihaspati.jpg](https://commons.wikimedia.org/wiki/File:Brihaspati.jpg), photograph of a 13th-century Brihaspati sculpture at the British Museum by Redtigerxyz, **CC BY-SA 3.0**. A relevant deity sculpture, not evidence of service delivery.
+
+**Current mapping count: 63/94**, remaining **31/94** with sourced category imagery. The count represents curated thematic references (including shrine and art photographs), not verified exact ceremonies, priest partners, supplier goods or 63 unique performed rituals.
