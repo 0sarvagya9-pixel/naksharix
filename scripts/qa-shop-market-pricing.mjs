@@ -43,6 +43,16 @@ assert.ok(read("components/shop-coming-soon-content.tsx").includes("Market-compa
  read("app/shop/[slug]/page.tsx").includes("Market-compared listing price")&&
  read("components/shop/cart-page-client.tsx").includes("Market-compared product subtotal"),
  "SHOP_PRICING_TERMS_DISCLOSURE_MISSING");
+const cartControls=read("components/shop/quote-cart-controls.tsx");
+assert.ok(cartControls.includes('function add(goToCart=false)')&&
+  cartControls.includes('if(goToCart)router.push("/cart")')&&
+  cartControls.includes('onClick={()=>add(true)}')&&
+  cartControls.includes("Order Now")&&
+  cartControls.includes("unpaid order request")&&
+  cartControls.includes('if(index>=0&&list[index].quantity>=10)')&&
+  cartControls.includes('if(index<0&&list.length>=20)'),
+  "ONE_CLICK_ORDER_NOW_MUST_PRESERVE_CART_LIMITS_AND_NO_PAYMENT_DISCLOSURE");
+
 const homeServer=read("app/page.tsx");
 const homeClient=read("components/home/editorial-home.tsx");
 assert.ok(homeServer.includes("getShopCatalogue()")&&homeServer.includes("featuredShopPrices[product.id]")&&
