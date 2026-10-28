@@ -11,7 +11,10 @@ export async function POST(request: NextRequest) {
     const payload = await request.text();
     const signature = request.headers.get("x-razorpay-signature");
     if (!verifyRazorpayWebhookSignature(payload, signature)) return fail("Invalid webhook signature", 400);
-    const event = JSON.parse(payload) as { event?: string; payload?: { payment?: { entity?: { id?: string; order_id?: string; status?: string; amount?: number; currency?: string } } } };
+    const event = JSON.parse(payload) as { event?: string; payload?: {
+      payment?: { entity?: { id?: string; order_id?: string; status?: string; amount?: number; currency?: string } };
+      refund?: { entity?: { id?: string; payment_id?: string; amount?: number; status?: string } }
+    } };
     const payment = event.payload?.payment?.entity;
     if (event.event === "payment.captured" && payment?.order_id && payment.id) {
       const existingPayment = await prisma.payment.findUnique({ where: { providerOrderId: payment.order_id } });
@@ -103,6 +106,26 @@ export async function POST(request: NextRequest) {
           targetId: existingPayment.id,
           metadata: { provider: "razorpay", event: event.event }
         });
+      }
+    }
+    // A signed, fully processed refund is the only event that may mark a captured
+    // Puja charge refunded; never infer a refund from a cancellation request.
+    const refund=event.payload?.refund?.entity;
+    if(event.event==="refund.processed"&&refund?.payment_id&&refund.status==="processed"){
+      const original=await prisma.payment.findUnique({where:{providerPaymentId:refund.payment_id}});
+      if(original&&original.purpose==="PUJA_BOOKING"&&Number(refund.amount)===Math.round(Number(original.amount)*100)){
+        await prisma.payment.updateMany({
+          where:{id:original.id,status:"PAID"},data:{status:"REFUNDED"}
+        });
+        const meta=original.metadata as Record<string,unknown>|null;
+        if(typeof meta?.pujaBookingId==="string"){
+          await prisma.pujaBookingRequest.updateMany({
+            where:{id:meta.pujaBookingId,userId:original.userId,status:{notIn:["COMPLETED","CANCELED"]}},
+            data:{status:"CANCELED"}
+          });
+        }
+        await writeAuditLog({actor:{id:original.userId,role:"USER"},action:"puja.payment.refunded",targetType:"Payment",
+          targetId:original.id,metadata:{refundId:refund.id,verifiedWebhook:true}});
       }
     }
     logger.info("razorpay_webhook_processed", { event: event.event ?? "unknown" });

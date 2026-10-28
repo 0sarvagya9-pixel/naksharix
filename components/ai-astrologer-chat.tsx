@@ -82,7 +82,7 @@ export function AiAstrologerChat() {
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
       void submit();
     }
@@ -188,7 +188,11 @@ export function AiAstrologerChat() {
                     {labels.send}
                   </Button>
                 </div>
-                {status ? <p className="mt-3 rounded-lg border border-amber-300/25 bg-amber-300/10 px-3 py-2 text-sm text-amber-100" role="alert">{status}</p> : null}
+                {!consent ? <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-lg border border-amber-400/40 bg-[#fff8e9] p-3 text-sm font-semibold leading-6 text-[#4b2931]">
+                  <input type="checkbox" checked={consent} onChange={(event) => { setConsent(event.target.checked); setStatus(""); }} className="mt-1 h-4 w-4 shrink-0 accent-[#853548]" />
+                  {labels.consent}
+                </label> : null}
+                {status ? <p className="mt-3 rounded-lg border border-amber-300/25 bg-[#fff8e9] px-3 py-2 text-sm font-semibold text-[#6b2e3b]" role="alert">{status}</p> : null}
               </form>
             </CardContent>
           </Card>
@@ -215,10 +219,7 @@ export function AiAstrologerChat() {
 
             <Card className="inner-card border-[#263957] bg-[#0f1c3a]/82">
               <CardContent className="p-5">
-                <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-[#cbd5e1]">
-                  <input type="checkbox" checked={consent} onChange={(event) => { setConsent(event.target.checked); setStatus(""); }} className="mt-1 h-4 w-4 accent-[#b8862e]" />
-                  <span>{labels.consent}</span>
-                </label>
+                <p className="text-sm font-semibold leading-6 text-[#f3d382]">{consent ? "AI processing consent accepted" : "Privacy consent required before sending"}</p>
                 <p className="mt-4 text-xs leading-5 text-[#94a3b8]">{labels.privacy}</p>
               </CardContent>
             </Card>
@@ -253,7 +254,7 @@ function chatLabels(locale: "en" | "hi" | "hinglish") {
     thinking: "उत्तर तैयार हो रहा है…",
     inputLabel: "अपना प्रश्न लिखें",
     placeholder: "उदाहरण: मेरे करियर के अगले चरण के लिए किन बातों पर ध्यान दूँ?",
-    shortcut: "भेजने के लिए Ctrl/⌘ + Enter",
+    shortcut: "भेजने के लिए Enter · नई पंक्ति Shift+Enter",
     send: "भेजें",
     error: "अभी उत्तर नहीं मिल पाया। कृपया कुछ देर बाद फिर प्रयास करें।",
     consentRequired: "आगे बढ़ने से पहले गोपनीयता और AI processing की सहमति दें।",
@@ -278,7 +279,7 @@ function chatLabels(locale: "en" | "hi" | "hinglish") {
     thinking: "Answer prepare ho raha hai…",
     inputLabel: "Apna question likhein",
     placeholder: "Example: Mere career ke next phase me kis direction par focus karna chahiye?",
-    shortcut: "Send ke liye Ctrl/⌘ + Enter",
+    shortcut: "Enter se send · Shift+Enter new line",
     send: "Send",
     error: "Abhi answer nahi mil paaya. Thodi der baad dobara try karein.",
     consentRequired: "Continue karne se pehle privacy aur AI processing consent dein.",
@@ -303,7 +304,7 @@ function chatLabels(locale: "en" | "hi" | "hinglish") {
     thinking: "Preparing a response…",
     inputLabel: "Write your question",
     placeholder: "Example: What should I focus on in the next phase of my career?",
-    shortcut: "Ctrl/⌘ + Enter to send",
+    shortcut: "Enter to send · Shift+Enter for a new line",
     send: "Send",
     error: "A response is not available right now. Please try again later.",
     consentRequired: "Please accept the privacy and AI-processing notice before continuing.",

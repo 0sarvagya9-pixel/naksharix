@@ -41,7 +41,7 @@ export default async function PujaTopicPage({params}:Props) {
               <p className="mt-2 text-3xl font-bold text-[#752939]">{displayPujaPrice(offering.pricePaise)}</p>
               {offering.durationMinutes ? <p className="mt-2 text-sm text-[#5f4d54]">Estimated duration: {offering.durationMinutes} minutes</p>:null}
               {offering.note ? <p className="mt-2 text-sm leading-6 text-[#5f4d54]">{offering.note}</p>:null}
-              <p className="mt-2 text-xs text-[#80656a]">Operator, date and final inclusion remain subject to confirmation. No payment taken on this page.</p>
+              <p className="mt-2 text-xs text-[#80656a]">₹1,100 is the listed service fee. Book now to request a date; pay securely only after the Pandit and ceremony time are confirmed.</p>
             </> : <p className="text-sm font-semibold text-[#684e58]">Service fee not published yet.</p>}
           </div>
           <div className="mt-7 space-y-4 text-sm leading-7 text-[#634e52]">
@@ -50,7 +50,7 @@ export default async function PujaTopicPage({params}:Props) {
           </div>
           <Link href={offering ? "/puja-booking?item="+encodeURIComponent(item.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
             className="mt-8 inline-flex min-h-12 items-center gap-3 rounded-xl bg-[#f1c67c] px-6 py-3 font-bold text-[#311a1f]">
-            {offering ? "Request booking for " : "Enquire about "}{item.name} <ArrowRight size={18}/>
+            {offering ? "Book Now — " : "Enquire about "}{item.name} <ArrowRight size={18}/>
           </Link>
         </div>
       </div>

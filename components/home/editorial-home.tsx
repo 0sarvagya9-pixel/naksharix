@@ -10,40 +10,18 @@ import {
   Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
 } from "lucide-react";
 
-const STARRY_SKY = "/naksharix/ganesh-hero-light-saffron.jpg";
-const GOLDEN_HORIZON = "/naksharix/zodiac-wheel-gold.jpg";
-
-const heroSlides = [
-  {
-    eyebrow: "NAKSHARIX  /  VEDIC DISCOVERY",
-    heading: "Your universe,",
-    accent: "your way forward.",
-    body: "Explore Vedic astrology with beautiful digital tools, clear explanations and thoughtful ways to seek guidance.",
-    image: STARRY_SKY,
-    alt: "Devotional Ganesha editorial artwork with traditional temple motifs",
-    main: { label: "Generate free Kundli", href: "/kundli" },
-    secondary: { label: "Explore astrology tools", href: "/free-calculators" }
-  },
-  {
-    eyebrow: "TODAY  /  PANCHANG & HOROSCOPE",
-    heading: "A little clarity",
-    accent: "for each new day.",
-    body: "Read the Panchang for your location, understand the day’s traditional context and discover the zodiac.",
-    image: GOLDEN_HORIZON,
-    alt: "Zodiac wheel editorial artwork",
-    main: { label: "View today’s Panchang", href: "/panchang" },
-    secondary: { label: "Today’s horoscope", href: "/daily-horoscope" }
-  },
-  {
-    eyebrow: "GUIDANCE  /  A PERSONAL JOURNEY",
-    heading: "Ask deeper",
-    accent: "questions.",
-    body: "Browse approved astrologer profiles, request a consultation or send a private written enquiry for staff review.",
-    image: "/naksharix/ganesh-hero-light-saffron.jpg",
-    alt: "Warm saffron-toned traditional devotional artwork",
-    main: { label: "Find a consultation", href: "/consultation" },
-    secondary: { label: "Ask a written question", href: "/ask-astrologer" }
-  }
+const STARRY_SKY="/naksharix/ganesh-hero-light-saffron.jpg";
+const GOLDEN_HORIZON="/naksharix/zodiac-wheel-gold.jpg";
+const CONSULTATION_PHOTO="https://upload.wikimedia.org/wikipedia/commons/0/04/Astrologer.jpg";
+const KUNDLI_PHOTO="https://upload.wikimedia.org/wikipedia/commons/2/2d/Kundali_02.png";
+const REPORT_PHOTO="https://upload.wikimedia.org/wikipedia/commons/5/57/Kundali_01.png";
+const heroSlides=[
+{eyebrow:"NAKSHARIX / VEDIC DISCOVERY",heading:"Your universe,",accent:"your way forward.",body:"Explore free Kundli, astrology reports and guidance designed for thoughtful discovery.",image:STARRY_SKY,main:{label:"Generate free Kundli",href:"/kundli"},secondary:{label:"Explore astrology tools",href:"/free-calculators"}},
+{eyebrow:"SACRED TRADITIONS / PUJA",heading:"Celebrate",accent:"sacred traditions.",body:"Explore 94 Puja traditions and preferred dates; ceremony availability is confirmed separately.",image:pujaEditorialImage("griha-pravesh-puja",STARRY_SKY,"family"),main:{label:"Explore Puja services",href:"/pujas"},secondary:{label:"Festival calendar",href:"/puja-calendar"}},
+{eyebrow:"BIRTH CHART / REPORTS",heading:"Discover more",accent:"in your chart.",body:"Explore Kundli, compatibility, numerology and personalized report options.",image:REPORT_PHOTO,main:{label:"Explore reports",href:"/reports"},secondary:{label:"Create free Kundli",href:"/kundli"}},
+{eyebrow:"PERSONAL GUIDANCE / CONSULTATION",heading:"Real questions,",accent:"thoughtful guidance.",body:"Browse approved astrologer profiles, session formats and written guidance options.",image:CONSULTATION_PHOTO,main:{label:"View consultations",href:"/consultation"},secondary:{label:"Ask a question",href:"/ask-astrologer"}},
+{eyebrow:"SPIRITUAL SHOP / DISCOVER",heading:"Curated finds",accent:"for your practice.",body:"Discover Rudraksha malas, yantras and spiritual accessories with clear product details.",image:referencePhotoForProduct("rudraksha-mala")?.url||STARRY_SKY,main:{label:"Explore the Shop",href:"/shop"},secondary:{label:"My Orders",href:"/shop/orders"}},
+{eyebrow:"PANCHANG / DAILY WISDOM",heading:"A little clarity",accent:"for every day.",body:"Understand Panchang, horoscopes and the traditional calendar for your location.",image:GOLDEN_HORIZON,main:{label:"Today's Panchang",href:"/panchang"},secondary:{label:"Daily Horoscope",href:"/daily-horoscope"}}
 ] as const;
 
 const quickLinks = [
@@ -58,15 +36,15 @@ const quickLinks = [
 const services = [
   {
     number:"01",label:"Personal Kundli",copy:"Explore the traditional birth chart with time- and location-based inputs.",
-    href:"/kundli",cta:"Create free Kundli",image:"/naksharix/editorial-kundli.svg",alt:"Original illustrated Vedic birth-chart grid"
+    href:"/kundli",cta:"Create free Kundli",image:KUNDLI_PHOTO,alt:"Traditional Kundli chart reference, CC0"
   },
   {
     number:"02",label:"Expert Consultations",copy:"Read approved astrologer profiles and available session formats.",
-    href:"/consultation",cta:"Explore consultations",image:"/naksharix/editorial-consultation.svg",alt:"Original artwork illustrating a person in consultation"
+    href:"/consultation",cta:"Explore consultations",image:CONSULTATION_PHOTO,alt:"Representative astrology consultation exhibition photograph"
   },
   {
     number:"03",label:"Personal Reports",copy:"Browse available personalized Kundli, match-making and numerology topics.",
-    href:"/reports",cta:"View astrology reports",image:"/naksharix/editorial-reports.svg",alt:"Original illustrated report and zodiac diagram"
+    href:"/reports",cta:"View astrology reports",image:REPORT_PHOTO,alt:"Traditional Kundli chart reference, CC0"
   },
   {
     number:"04",label:"Traditional Puja",copy:"Browse 94 Puja topics and request written availability confirmation.",
@@ -74,11 +52,11 @@ const services = [
   },
   {
     number:"05",label:"Kundli Matching",copy:"Compare traditional chart inputs and learn about Guna Milan.",
-    href:"/matchmaking",cta:"Check compatibility",image:"/naksharix/editorial-kundli.svg",alt:"Vedic birth chart geometry illustration"
+    href:"/matchmaking",cta:"Check compatibility",image:"https://upload.wikimedia.org/wikipedia/commons/1/1a/Kundali_02a.png",alt:"Traditional North Indian Kundli chart, CC0"
   },
   {
     number:"06",label:"Your Daily Panchang",copy:"Understand the five traditional Panchang elements for a chosen place.",
-    href:"/panchang",cta:"Explore Panchang",image:"/naksharix/editorial-panchang.svg",alt:"Original calendar illustration with ritual dates"
+    href:"/panchang",cta:"Explore Panchang",image:pujaEditorialImage("griha-pravesh-puja",STARRY_SKY,"family"),alt:"Representative ritual photograph"
   },
   {
     number:"07",label:"Spiritual Catalogue",copy:"Discover Rudraksha, malas and yantras with clear item enquiries.",
@@ -86,7 +64,7 @@ const services = [
   },
   {
     number:"08",label:"Free Learning",copy:"Start with original introductory lessons on charts, planets and Panchang.",
-    href:"/learn",cta:"Start learning",image:"/naksharix/editorial-learning.svg",alt:"Illustration of an open traditional learning book"
+    href:"/learn",cta:"Start learning",image:"https://upload.wikimedia.org/wikipedia/commons/0/05/Kundali_01a.png",alt:"Traditional Kundli diagram, CC0"
   }
 ] as const;
 
@@ -168,7 +146,7 @@ export function EditorialHome() {
           {heroSlides.map((item, index) => (
             <div className={"nx-ed-hero-photo " + (index === active ? "is-active" : "")} key={item.eyebrow}>
               <Image src={item.image} alt="" fill priority={index === 0}
-                sizes="100vw" quality={75} className="nx-ed-photo" />
+                sizes="100vw" quality={75} unoptimized className="nx-ed-photo" />
             </div>
           ))}
         </div>
@@ -187,12 +165,9 @@ export function EditorialHome() {
               </Link>
             </div>
             <div className="nx-ed-hero-note"><ShieldCheck size={16} aria-hidden="true" /> Transparent tools · Private account features · No guaranteed predictions</div>
-          </div>
-          <div className="nx-ed-hero-aside" aria-hidden="true">
-            <div className="nx-ed-floating-wheel">
-              <Image src="/naksharix/zodiac-wheel-gold.jpg" alt="" fill sizes="(max-width: 1000px) 0px, 320px" quality={68} />
-            </div>
-            <div className="nx-ed-floating-caption"><span>ANCIENT FRAMEWORKS</span><strong>Modern exploration</strong></div>
+            {active===3 ? <p className="mt-2 text-xs text-[#ffe6c3]">Representative consultation exhibition photo: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Astrologer.jpg" target="_blank" rel="noopener noreferrer">Ravikiran · CC BY-SA 4.0</a></p> : null}
+            {active===4 ? <p className="mt-2 text-xs text-[#ffe6c3]">Reference item photograph: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Rudraksha_mala.jpg" target="_blank" rel="noopener noreferrer">Janak Bhatta · CC BY-SA 4.0</a></p> : null}
+            {active===1 ? <p className="mt-2 text-xs text-[#ffe6c3]">Representative ritual photo: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Griha_Pravesh_Puja_Ceremony.jpg" target="_blank" rel="noopener noreferrer">AditiChintarevula · CC0</a></p> : null}
           </div>
           <div className="nx-ed-slider-controls" aria-label="Featured destinations">
             <button type="button" onClick={() => advance(-1)} aria-label="Previous featured destination"><ArrowLeft size={18}/></button>
@@ -235,12 +210,13 @@ export function EditorialHome() {
               <article className="nx-ed-service-card" key={item.href}>
                 <Link href={item.href} className="nx-ed-card-image" aria-label={item.cta}>
                   <Image src={item.image} alt={item.alt} fill sizes="(max-width: 700px) 100vw, (max-width: 1080px) 50vw, 33vw"
-                    quality={75} unoptimized={item.href === "/pujas" || item.href === "/shop"} />
+                    quality={75} unoptimized />
                   <span className="nx-ed-card-number">{item.number}</span>
                 </Link>
                 <div className="nx-ed-card-body">
                   <h3>{item.label}</h3>
                   <p>{item.copy}</p>
+                  {item.href === "/consultation" ? <p className="text-xs">Representative exhibition photo · <a href="https://commons.wikimedia.org/wiki/File:Astrologer.jpg" target="_blank" rel="noopener noreferrer" className="underline">Ravikiran · CC BY-SA 4.0</a></p>:null}
                   {item.href === "/pujas" && pujaEditorialPhoto("rudrabhishek","shiva") ? <p className="text-xs">Representative ritual image · <a href={pujaEditorialPhoto("rudrabhishek","shiva")!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto("rudrabhishek","shiva")!.author} · {pujaEditorialPhoto("rudrabhishek","shiva")!.license}</a></p> : null}
                   {item.href === "/shop" && referencePhotoForProduct("rudraksha-mala") ? <p className="text-xs">Reference photo, not exact stock · <a href={referencePhotoForProduct("rudraksha-mala")!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{referencePhotoForProduct("rudraksha-mala")!.credit} · {referencePhotoForProduct("rudraksha-mala")!.licenseName}</a></p> : null}
                   <Link href={item.href} className="nx-ed-text-link">{item.cta}<ArrowRight size={17} aria-hidden="true"/></Link>
@@ -254,7 +230,7 @@ export function EditorialHome() {
       <section className="nx-ed-cosmos-split" aria-labelledby="nx-ed-horoscope-title">
         <div className="nx-ed-container nx-ed-cosmos-inner">
           <div className="nx-ed-cosmos-photo">
-            <Image src={GOLDEN_HORIZON} alt="Illustrated Hindu calendar and Panchang" fill sizes="(max-width: 850px) 100vw, 45vw" quality={75}/>
+            <Image src={GOLDEN_HORIZON} alt="Complete golden zodiac wheel" fill sizes="(max-width: 850px) 100vw, 45vw" quality={85} />
             <div className="nx-ed-cosmos-photo-label"><Sun size={18} aria-hidden="true"/> A moment for reflection, every day</div>
           </div>
           <div className="nx-ed-cosmos-copy">
@@ -264,7 +240,7 @@ export function EditorialHome() {
             <div className="nx-ed-zodiac-grid" aria-label="Choose your zodiac sign">
               {zodiac.map(([sign, glyph]) => (
                 <Link href={"/horoscope/" + sign.toLowerCase()} key={sign} aria-label={sign + " horoscope"}>
-                  <span aria-hidden="true">{glyph}</span><small>{sign}</small>
+                  <Image src={"/zodiac-signs/"+sign.toLowerCase()+".svg"} alt="" aria-hidden="true" width={50} height={50} unoptimized /><small>{sign}</small>
                 </Link>
               ))}
             </div>

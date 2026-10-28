@@ -19,7 +19,8 @@ const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
   z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
   z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
-  z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) })
+  z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) }),
+  z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1) })
 ]);
 
 type CheckoutBody = z.infer<typeof schema>;
@@ -32,6 +33,8 @@ export async function POST(request: NextRequest) {
     if (limited) return limited;
     const body = await validateJson(request, schema);
     if (body.purpose === "SUBSCRIPTION" && env.SUBSCRIPTIONS_ENABLED !== "true") return fail("Not found", 404);
+    if (body.purpose === "PUJA_BOOKING" && env.PUJA_PAYMENTS_ENABLED !== "true")
+      return fail("Puja payment is not yet enabled. A verified Pandit and confirmed schedule are required.", 503);
     if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
     const readiness = getRazorpayReadiness();
     if (!readiness.enabled || !razorpay) return fail(readiness.reason, 503);
@@ -169,6 +172,7 @@ async function findReusablePayment(body: CheckoutBody, userId: string) {
 
 function checkoutIdentity(body: CheckoutBody) {
   if (body.purpose === "CONSULTATION") return { key: "bookingId", value: body.bookingId };
+  if (body.purpose === "PUJA_BOOKING") return { key: "pujaBookingId", value: body.bookingId };
   if (body.purpose === "SUBSCRIPTION") return null;
   if (body.reportRequestId) return { key: "reportRequestId", value: body.reportRequestId };
   if (body.savedReportId) return { key: "savedReportId", value: body.savedReportId };
@@ -180,6 +184,17 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
     const plan = getSubscriptionPlan(body.plan);
     if (!plan) return null;
     return { name: `${plan.name} Plan`, amount: plan.amount, metadata: { plan: plan.id, interval: plan.interval } };
+  }
+  if (body.purpose === "PUJA_BOOKING") {
+    const booking = await prisma.pujaBookingRequest.findUnique({ where: { id: body.bookingId } });
+    if (!booking || booking.userId !== userId || !booking.partnerId || !booking.scheduledAt) return null;
+    if (!["CONFIRMED","SCHEDULED"].includes(booking.status)) return null;
+    const partner = await prisma.pujaPartner.findUnique({ where: { id: booking.partnerId } });
+    if (!partner || partner.reviewStatus !== "VERIFIED" || !partner.evidenceUrl) return null;
+    const offer = await prisma.pujaOffering.findUnique({ where: { topicId: booking.topicId } });
+    if (!offer?.available || offer.pricePaise !== booking.quotedPricePaise || booking.quotedPricePaise !== 110000) return null;
+    return { name: "Verified Puja Booking", amount: booking.quotedPricePaise / 100,
+      metadata: { pujaBookingId: booking.id, pujaTopicId: booking.topicId, verifiedPartnerId: partner.id } };
   }
   if (body.purpose === "CONSULTATION") {
     const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });

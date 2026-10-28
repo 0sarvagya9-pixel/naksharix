@@ -5,7 +5,9 @@ const keys=["kundli","consultation","reports","learning","panchang","puja","taro
 for(const k of keys)assert.ok(existsSync("public/naksharix/editorial-"+k+".svg"),"MISSING_RELEVANT_ART="+k);
 for(const p of ["app/horoscope/page.tsx","app/tarot/page.tsx","app/matchmaking/page.tsx","app/puja-calendar/page.tsx","app/free-calculators/page.tsx","app/consultation/page.tsx","app/reports/page.tsx","app/learn/page.tsx","app/shop/page.tsx","app/puja-enquiry/page.tsx","app/kundli/page.tsx","app/numerology/page.tsx","app/blog/page.tsx","app/astrologers/page.tsx"]){
   const s=read(p);
-  assert.ok(s.includes("editorial-")||s.includes("rudraksha-mala-illustration.svg"),"HERO_NOT_CONTEXTUAL="+p);
+  assert.ok(s.includes("editorial-")||s.includes("rudraksha-mala-illustration.svg")||
+    s.includes("commons.wikimedia.org/wiki/Special:FilePath")||s.includes("upload.wikimedia.org"),
+    "HERO_NOT_CONTEXTUAL="+p);
   assert.ok(!/star-filled night sky above mountains|Golden sunrise over mountains|Milky Way sky above snowy mountains/i.test(s),"IRRELEVANT_PHOTO="+p);
 }
 const home=read("components/home/editorial-home.tsx");
@@ -32,7 +34,8 @@ assert.ok(!read("app/shop/[slug]/page.tsx").includes('text-[#e1d6dd]'), "SHOP_DE
 // The premium redesign must not regress into unreadable navy panels or cartoon hero art.
 const premium=read("app/premium-ux-20261027.css");
 const calendar=read("app/puja-calendar/page.tsx");
-assert.ok(home.includes('const STARRY_SKY = "/naksharix/ganesh-hero-light-saffron.jpg"'),"CARTOON_HERO_RETURNED");
+assert.ok(home.includes('STARRY_SKY="/naksharix/ganesh-hero-light-saffron.jpg"')&&
+  !home.includes("ANCIENT FRAMEWORKS")&&home.includes('SACRED TRADITIONS / PUJA'),"HERO_SLIDES_NOT_SERVICE_LED");
 assert.ok(premium.includes("header nav > a") && premium.includes("color:#432b34!important") && premium.includes("header nav > a[aria-current"),"HEADER_CONTRAST_UNSAFE");
 assert.ok(calendar.includes("nx-puja-calendar") && calendar.includes("text-[#fffaf2]") && calendar.includes("text-[#f8e9de]") && calendar.includes("bg-[#fff8ee]"),"CALENDAR_DARK_ON_DARK_REGRESSION");
 const shop=read("components/shop-coming-soon-content.tsx");

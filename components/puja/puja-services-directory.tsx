@@ -20,14 +20,16 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
   ),[query,category]);
 
   return <main className="star-field min-h-screen bg-[#fffaf3] pb-20">
-    <section className="relative overflow-hidden border-b border-[#e6be7e]/35 bg-[linear-gradient(120deg,#1e132a,#51252b_60%,#2e172d)] text-white">
-      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-14 md:grid-cols-[1.15fr_.85fr] md:items-center md:py-20 lg:px-8">
-        <div>
+    <section className="relative isolate overflow-hidden border-b border-[#e6be7e]/35 bg-[#301a2c] text-white">
+      <Image src="/naksharix/ganesh-hero-light-saffron.jpg" alt="" fill priority sizes="100vw" className="absolute inset-0 -z-20 object-cover object-[76%_42%]" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#261323]/95 via-[#33172a]/88 to-[#31182b]/25" aria-hidden="true" />
+      <div className="mx-auto flex min-h-[540px] max-w-7xl items-center px-5 py-14 md:min-h-[580px] md:py-20 lg:px-8">
+        <div className="max-w-2xl">
           <p className="text-xs font-bold uppercase tracking-[.22em] text-[#f8d389]">Naksharix • Sacred traditions</p>
           <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Explore Puja <span className="text-[#ffcf80]">Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
             Browse {pujaTopics.length} traditional Puja topics across deities, ceremonies and festivals.
-            Send a private enquiry to discuss local practice and arrangements.
+            Select a Puja and request your preferred ceremony date. Pandit assignment and muhurat are confirmed before payment.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <a href="#puja-directory" className="rounded-xl bg-[#f6c776] px-6 py-3 font-bold text-[#351b20]">Explore Puja Topics</a>
@@ -35,11 +37,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
               <CalendarDays size={17}/> Festival calendar
             </Link>
           </div>
-          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> Information only • No unverified paid bookings</p>
-        </div>
-        <div className="overflow-hidden rounded-[28px] border border-[#f6c776]/35 shadow-2xl">
-          <Image src="/naksharix/ganesh-hero-light-saffron.jpg" alt="Illustrative Ganesh-themed devotional artwork" width={850} height={650}
-            priority className="aspect-[4/3] w-full object-cover"/>
+          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> ₹1,100 listed fee • Confirmation before payment</p>
         </div>
       </div>
     </section>
@@ -81,7 +79,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
             </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
             <Link href={offerings[topic.id] ? "/puja-booking?item="+encodeURIComponent(topic.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
-              {offerings[topic.id] ? "Request booking" : "Enquire"} <ArrowRight size={16}/>
+              {offerings[topic.id] ? "Book Now" : "Enquire"} <ArrowRight size={16}/>
             </Link>
           </div>
         </article>)}
@@ -99,8 +97,8 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
       <div className="mt-12 grid gap-5 rounded-2xl border border-[#d0a36c]/30 bg-[#fff4e6] p-7 md:grid-cols-3">
         {[
           ["01","Explore","Choose a traditional Puja, festival date, or ceremony topic."],
-          ["02","Enquire","Describe your city and needs through a private support ticket."],
-          ["03","Confirm","A staff member reviews custom, time, operator and pricing separately."]
+          ["02","Book Now","Enter Sankalp details and your preferred date securely."],
+          ["03","Confirm","A verified Pandit and ceremony time must be assigned before payment."]
         ].map(([step,title,copy])=><div key={step} className="flex gap-4">
           <b className="font-cinzel text-2xl text-[#8e3641]">{step}</b>
           <div><h3 className="font-bold text-[#412831]">{title}</h3><p className="mt-2 text-sm leading-6 text-[#665056]">{copy}</p></div>

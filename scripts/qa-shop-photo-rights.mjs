@@ -71,3 +71,20 @@ const productionHealth = read("app/api/cron/production-health/route.ts");
 for (const [name, route] of [["health",publicHealth],["production-health",productionHealth]]) {
   assert.ok(route.includes("sharedRedisConfigured()") && route.includes("redisPing()") && !route.includes("getRedis()"),"REDIS_TRANSPORT_HEALTH_MONITOR_MISSING_"+name);
 }
+
+const homeHero=read("components/home/editorial-home.tsx");
+const heroCss=read("app/editorial-home.css");
+assert.ok(!homeHero.includes("ANCIENT FRAMEWORKS")&&!homeHero.includes('className="nx-ed-hero-aside"'),"HERO_FLOATING_WHEEL_NOT_REMOVED");
+for(const title of ["SACRED TRADITIONS","BIRTH CHART","PERSONAL GUIDANCE","SPIRITUAL SHOP","PANCHANG"])assert.ok(homeHero.includes(title),"HERO_MISSING_SERVICE="+title);
+assert.ok(homeHero.includes('"/zodiac-signs/"+sign.toLowerCase()+".svg"'),"ZODIAC_SYMBOL_ART_MISSING");
+assert.ok(heroCss.includes(".nx-ed-cosmos-photo img { object-fit: contain"),"ZODIAC_CROPPING_REGRESSION");
+
+const learningPage=read("app/learn/page.tsx");
+assert.ok(learningPage.includes("bg-[#fffaf3]")&&learningPage.includes("text-[#422a31]")&&learningPage.includes("text-[#5f4b52]"),"LEARN_CARDS_READABILITY_MISSING");
+assert.ok(read("app/consultation/page.tsx").includes("upload.wikimedia.org"),"CONSULTATION_PHOTOGRAPH_MISSING");
+assert.ok(read("components/puja/puja-services-directory.tsx").includes("object-[76%_42%]"),"PUJA_SEAMLESS_FULL_BANNER_MISSING");
+const chatUX=read("components/ai-astrologer-chat.tsx");
+assert.ok(chatUX.includes("!event.shiftKey && !event.nativeEvent.isComposing")&&chatUX.includes("!consent ? <label"),"AI_SEND_KEYBOARD_OR_CONSENT_ERROR");
+
+assert.ok(read("components/home/editorial-service-banner.tsx").includes("imageCredit ?")&&
+  read("app/consultation/page.tsx").includes("imageCredit={{label:"),"CONSULTATION_CC_ATTRIBUTION_MISSING");

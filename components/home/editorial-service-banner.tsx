@@ -10,10 +10,11 @@ type Props = {
   imageAlt: string;
   link: string;
   linkLabel: string;
+  imageCredit?: { label: string; source: string; license?: string };
 };
 
 /** Editorial imagery never substitutes for a verified provider, person or offering. */
-export function EditorialServiceBanner({ eyebrow, headline, caption, image, imageAlt, link, linkLabel }: Props) {
+export function EditorialServiceBanner({ eyebrow, headline, caption, image, imageAlt, link, linkLabel, imageCredit }: Props) {
   return (
     <section className="nx-ed-inner-banner" aria-label={eyebrow}>
       <div className="nx-ed-inner-banner-photo" aria-hidden="true">
@@ -26,6 +27,7 @@ export function EditorialServiceBanner({ eyebrow, headline, caption, image, imag
           <h2>{headline}</h2>
           <p>{caption}</p>
           <Link href={link}>{linkLabel}<ArrowRight size={16} aria-hidden="true"/></Link>
+          {imageCredit ? <p className="mt-3 text-xs text-[#f9dfba]">Representative image · <a href={imageCredit.source} target="_blank" rel="noopener noreferrer" className="underline">{imageCredit.label}{imageCredit.license ? " · "+imageCredit.license : ""}</a></p> : null}
         </div>
         <span className="sr-only">{imageAlt}</span>
       </div>

@@ -18,5 +18,14 @@ assert.ok(!/\b(?:razorpay|payment\.create|checkoutSession|prisma\.payment\.creat
 assert.ok(ui.includes('secureFetch("/api/admin/puja-offerings"')&&ui.includes("Publish price"),"Missing editable Admin Puja prices");
 assert.ok(index.includes("getPublishedPujaOffers()")&&listings.includes("offerings[topic.id]")&&detail.includes('const offering=(await getPublishedPujaOffers())[item.id]'),"Missing public price integration");
 assert.ok(db.includes('error.code==="P2021"')&&db.includes("return {}"),"Missing-table fallback must not fake prices");
-assert.ok(listings.includes('"Request booking" : "Enquire"')&&detail.includes('"Request booking for "'),"Published price must allow genuine booking enquiry");
-console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;DEFAULT_PRICES=NONE;PAYMENTS=OFF");
+assert.ok(listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "'),"Published Puja offers must show Book Now");
+console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;OWNER_PRICES_MANAGED=YES;PAYMENTS_GATED_UNTIL_PARTNER_CONFIRMED");
+
+const gatewayOrder=read("app/api/payments/razorpay/order/route.ts");
+const gatewayWebhook=read("app/api/payments/razorpay/webhook/route.ts");
+const bookingPage=read("app/puja-bookings/page.tsx");
+assert.ok(prisma.includes("PUJA_BOOKING")&&read("lib/env.ts").includes('PUJA_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false")'),"PUJA_GATEWAY_MUST_DEFAULT_DISABLED");
+for(const s of ["partner.reviewStatus !== \"VERIFIED\"","!booking.scheduledAt","booking.quotedPricePaise !== 110000","pujaBookingId: booking.id"])
+  assert.ok(gatewayOrder.includes(s),"PUJA_PAYMENT_ACCEPTANCE_GUARD_MISSING="+s);
+assert.ok(gatewayWebhook.includes('event.event==="refund.processed"')&&gatewayWebhook.includes('status:"REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
+assert.ok(bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"'),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");

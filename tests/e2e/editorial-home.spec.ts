@@ -14,7 +14,9 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(page.locator(".nx-reference-promo")).toBeVisible();
     await expect(main.locator(".nx-ed-journey-card")).toHaveCount(3);
     await expect(main.locator(".nx-ed-zodiac-grid a")).toHaveCount(12);
-    await expect(main.locator(".nx-ed-hero-photo")).toHaveCount(3);
+    await expect(main.locator(".nx-ed-hero-photo")).toHaveCount(6);
+    await expect(main.locator(".nx-ed-slider-dots button")).toHaveCount(6);
+    await expect(main.locator(".nx-ed-hero-aside")).toHaveCount(0);
     await expect(main.locator(".nx-ed-photo").first()).toHaveAttribute("alt", "");
     const source = await main.textContent();
     expect(source).not.toMatch(/guaranteed result|trusted by millions|1M\+|98% accuracy|verified temple partners/i);
@@ -25,13 +27,14 @@ test.describe("Naksharix editorial photo homepage", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { level: 1, name: /Your universe/i })).toBeVisible();
     await page.getByRole("button", { name: "Next featured destination" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: /A little clarity/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: "View today’s Panchang" })).toHaveAttribute("href", "/panchang");
-    await page.getByRole("button", { name: "Show slide 3" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: /Ask deeper/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Find a consultation" })).toHaveAttribute("href", "/consultation");
+    await expect(page.getByRole("heading", { level: 1, name: /Celebrate/i })).toBeVisible();
+    await expect(page.locator(".nx-ed-hero-copy").getByRole("link", { name: "Explore Puja services", exact: true })).toHaveAttribute("href", "/pujas");
+    await page.getByRole("button", { name: "Show slide 4" }).click();
+    await expect(page.getByRole("heading", { level: 1, name: /Real questions/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: "View consultations" })).toHaveAttribute("href", "/consultation");
     await page.getByRole("button", { name: "Previous featured destination" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: /A little clarity/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: /Discover more/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Explore reports" })).toHaveAttribute("href", "/reports");
   });
 
   test("public service pages are full-width while account tools retain focused workspaces", async ({ page }) => {
