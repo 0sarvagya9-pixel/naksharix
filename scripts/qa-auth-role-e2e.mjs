@@ -773,6 +773,7 @@ try {
     const original=saved.products;
     const priced=original.map(p=>p.id===sku.id?{...p,unitPricePaise:129900}:p);
     let orderId;
+    const extraOrderIds=[];
     try {
       const setPrice=await post(catalogueUrl,{expectedVersion:saved.version,products:priced},adminCookie,"PUT");
       assert.equal(setPrice.status,200,await setPrice.text());
@@ -787,6 +788,14 @@ try {
       orderId=body.data.order.id;assert.equal(body.data.order.subtotalPaise,259800);
       assert.equal(body.data.order.paymentStatus,"UNPAID");
       assert.equal(body.data.charged,false);
+      // Verify real persisted 24-hour quota using a disposable CI database.
+      for(let n=0;n<4;n++){
+        const extra=await post("/api/commerce/orders",input,userCookie);
+        assert.equal(extra.status,201,"Shop request "+(n+2)+" should fit quota");
+        extraOrderIds.push((await extra.json()).data.order.id);
+      }
+      const overLimit=await post("/api/commerce/orders",input,userCookie);
+      assert.equal(overLimit.status,429,"Sixth Shop request must be denied without a write");
       const userOrders=await req("/api/commerce/orders",{headers:{cookie:userCookie}});
       assert.ok((await userOrders.json()).data.orders.some(o=>o.id===orderId));
       const adminRead=await req("/api/admin/shop-orders",{headers:{cookie:adminCookie}});
@@ -804,7 +813,7 @@ try {
         {...patch,expectedVersion:2,status:"DISPATCHED"},adminCookie,"PATCH");
       assert.equal(dispatchWithoutTracking.status,422);
     } finally {
-      if(orderId)await prisma.shopOrder.deleteMany({where:{id:orderId}});
+      if(orderId||extraOrderIds.length)await prisma.shopOrder.deleteMany({where:{id:{in:[...(orderId?[orderId]:[]),...extraOrderIds]}}});
       const stateRes=await req(catalogueUrl,{headers:{cookie:adminCookie}});
       const state=(await stateRes.json()).data;
       const reset=await post(catalogueUrl,{expectedVersion:state.version,products:original},adminCookie,"PUT");
@@ -819,6 +828,7 @@ try {
       city:"Indore",devoteeName:"QA Devotee",gotra:null,
       sankalpNote:"This is a synthetic Puja test. No ceremony to be performed.",customerPhone:"+91 9876543210"};
     let bookingId,partnerId;
+    const extraBookingIds=[];
     try {
       const anon=await post("/api/puja/bookings",request);assert.equal(anon.status,401);
       const unopened=await post("/api/puja/bookings",request,userCookie);assert.equal(unopened.status,422);
@@ -830,6 +840,13 @@ try {
       bookingId=body.data.booking.id;
       assert.equal(body.data.confirmed,false);assert.equal(body.data.panditAssigned,false);
       assert.equal(body.data.booking.quotedPricePaise,199900);
+      for(let n=0;n<3;n++){
+        const extra=await post("/api/puja/bookings",request,userCookie);
+        assert.equal(extra.status,201,"Puja request "+(n+2)+" should fit quota");
+        extraBookingIds.push((await extra.json()).data.booking.id);
+      }
+      const overLimit=await post("/api/puja/bookings",request,userCookie);
+      assert.equal(overLimit.status,429,"Fifth Puja request must be denied without a write");
       const ownerList=await req("/api/puja/bookings",{headers:{cookie:userCookie}});
       assert.ok((await ownerList.json()).data.bookings.some(p=>p.id===bookingId));
       const adminList=await req("/api/admin/puja-bookings",{headers:{cookie:adminCookie}});
@@ -855,7 +872,7 @@ try {
       const latest=await prisma.pujaBookingRequest.findUniqueOrThrow({where:{id:bookingId}});
       assert.equal(latest.status,"SCHEDULED");assert.ok(latest.scheduledAt);
     } finally {
-      if(bookingId)await prisma.pujaBookingRequest.deleteMany({where:{id:bookingId}});
+      if(bookingId||extraBookingIds.length)await prisma.pujaBookingRequest.deleteMany({where:{id:{in:[...(bookingId?[bookingId]:[]),...extraBookingIds]}}});
       if(partnerId)await prisma.pujaPartner.deleteMany({where:{id:partnerId}});
       await prisma.pujaOffering.deleteMany({where:{topicId}});
     }
