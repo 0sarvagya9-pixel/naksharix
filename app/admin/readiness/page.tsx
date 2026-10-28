@@ -7,6 +7,7 @@ import { requireAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getEmailReadiness } from "@/lib/email/email-service";
+import { AdminEmailAcceptanceTest } from "@/components/admin/admin-email-acceptance-test";
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
@@ -127,6 +128,7 @@ export default async function AdminReadinessPage() {
             </Card>
           ))}
         </div>
+        <AdminEmailAcceptanceTest enabled={email.emailEnabled} />
         <section className="mt-10" aria-labelledby="commercial-readiness-heading">
           <h2 id="commercial-readiness-heading" className="font-cinzel text-2xl font-bold">Commerce and fulfilment readiness</h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 naksh-muted-text">
