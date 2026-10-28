@@ -120,11 +120,11 @@ export function emptyShopProduct(): ShopProduct {
     imageUrl: "",
     imageAlt: text(""),
     galleryImages: [],
-    unitPricePaise: marketPricePaise,
+    unitPricePaise: null,
     priceLabel: {
-      en: marketPricePaise === null ? "Price on request" : formatSeedPrice(marketPricePaise),
-      hi: marketPricePaise === null ? "मूल्य उपलब्ध नहीं" : formatSeedPrice(marketPricePaise),
-      hinglish: marketPricePaise === null ? "Price on request" : formatSeedPrice(marketPricePaise)
+      en: "Price on request",
+      hi: "Price on request",
+      hinglish: "Price on request"
     },
     status: "active",
     featured: false,
@@ -158,11 +158,11 @@ function product(id: string, category: string, purpose: string, en: string, hi: 
     imageEvidenceUrl: referencePhotoForProduct(id)?.evidenceUrl,
     imageAlt: { en: referencePhotoForProduct(id)?.alt || `${en} product visual`, hi: referencePhotoForProduct(id)?.alt || `${hi} उत्पाद visual`, hinglish: referencePhotoForProduct(id)?.alt || `${hinglish} product visual` },
     galleryImages: referencePhotoForProduct(id) ? [referencePhotoForProduct(id)!] : [],
-    unitPricePaise: null,
+    unitPricePaise: marketPricePaise,
     priceLabel: {
-      en: "Price on request",
-      hi: "Price on request",
-      hinglish: "Price on request"
+      en: marketPricePaise === null ? "Price on request" : formatSeedPrice(marketPricePaise),
+      hi: marketPricePaise === null ? "मूल्य उपलब्ध नहीं" : formatSeedPrice(marketPricePaise),
+      hinglish: marketPricePaise === null ? "Price on request" : formatSeedPrice(marketPricePaise)
     },
     status: "active",
     featured: ["5-mukhi-rudraksha", "dhan-yog-bracelet", "shri-yantra", "career-growth-combo"].includes(id),
