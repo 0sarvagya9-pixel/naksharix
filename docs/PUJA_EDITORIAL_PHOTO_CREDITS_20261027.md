@@ -32,3 +32,8 @@ Curation of five additional topic IDs expands the 13 pre-existing topic mappings
 
 - **holika-dahan-ritual** — [Holika Dahan 2024](https://commons.wikimedia.org/wiki/File:Holika_Dahan_2024.jpg), Mayank clicks, CC0 1.0, 4200 × 3456. This is a real Holika Dahan event photograph.
 The photo-registry topic-specific mappings now cover **19/94** topics. They do not yet supply 94 unique ceremony photographs.
+
+- **annapurna-puja** — [Annapurna mata pooja](https://commons.wikimedia.org/wiki/File:Annapurna_mata_pooja.jpg), Suresh Khole, CC BY-SA 4.0, 4632 × 3474.
+- **chhath-surya-arghya** — [Chhath Puja ritual](https://commons.wikimedia.org/wiki/File:Chhath_Puja_ritual.jpg), Sntshkumar750, CC BY-SA 4.0, 4160 × 3120.
+- **mundan-sanskar** — [Hindu baby first head shave](https://commons.wikimedia.org/wiki/File:Hindu_baby_first_head_shave_choulopan_chudakarana_sanskara.jpg), Whitney Lauren, CC BY 2.0, 1280 × 853. This is the *childbirth-life-stage rite*, not a mourning-related hair shaving event.
+Updated total: **22 of 94** individual topic mappings. The other topics continue to display category-relevant representative photos with truthful attributions, not made-up unique events.
