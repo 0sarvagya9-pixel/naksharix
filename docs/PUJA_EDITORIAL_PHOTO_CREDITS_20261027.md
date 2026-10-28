@@ -161,3 +161,14 @@ The photographer pages and CC BY-SA 4.0 licenses for these files were inspected.
 - **tripindi-shraddha**: [A_man_and_a_Brahmin_performing_Shraddha_ceremony_in_Nepal.jpg](https://commons.wikimedia.org/wiki/File:A_man_and_a_Brahmin_performing_Shraddha_ceremony_in_Nepal.jpg), 9n2nk, CC BY-SA 4.0. A documented general Shraddha rite, not evidence of a specific Tripindi Shraddha.
 
 **78 / 94** Puja topics now have topic-related photo references; **16 / 94** still use attributed category photography. Exact named rites, unique delivery images and real partner availability are not proven from this image registry. No client images, live payments, vendor assets or production systems were changed.
+
+
+## 2026-10-28 Commons path integrity and three further sourced photographs (81/94)
+
+One existing Kashi Vishwanath URL had an incorrect Wikimedia MD5 path (`4/4c` rather than `b/b1`) and could not reliably load; corrected the exact path without changing the credited subject. The Puja QA now validates the MD5 directory for every curated Wikimedia photo against its licensed source filename, not only the filename itself.
+
+- **kumari-puja**: [Commons source](https://commons.wikimedia.org/wiki/File:KUMARI_PUJA.jpg); Iamsantanubose; [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Documentary image of Kumari Puja involving minors at Adyapith Temple; unrelated to Naksharix, permission and sensitive reuse should be considered.
+- **maha-lakshmi-homa**: [Commons source](https://commons.wikimedia.org/wiki/File:1_Brahmin_performing_homa_fire_yajna_sacrifice,_offerings_in_a_Hindu_ritual.jpg); Onkar Hoysala; [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/). Photo depicts Devarasamaradhane Homa, NOT a specifically identified Maha Lakshmi Homa.
+- **vastu-shanti-puja**: [Commons source](https://commons.wikimedia.org/wiki/File:Griha-Pravesh-ritual.JPG); Aruna (ml.wikipedia); [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Boiling milk during Griha Pravesh, not an authenticated Vastu Shanti ceremony.
+
+**Coverage: 81 / 94 Puja IDs with curated subject-related references; 13 with licensed category-photo fallbacks.** Several curated entries are related thematic documentation, not photographs of the exact named ceremony. This change supplies no authentic Naksharix supplier/Pandit-service photographs or evidence of actual fulfilment; no production checkout activation or database writes.
