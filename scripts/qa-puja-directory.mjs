@@ -12,7 +12,7 @@ console.log("PUJA_DIRECTORY_QA=PASS;TOPICS="+pujaTopics.length+";PAID_BOOKING=OF
 
 const photosSource = (await import("node:fs")).readFileSync("lib/puja/editorial-photos.ts","utf8");
 const topicPhotoIds=[...photosSource.matchAll(/^\s*"([a-z0-9-]+)": \{src:/gm)].map(m=>m[1]);
-assert.equal(topicPhotoIds.length,50,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
+assert.equal(topicPhotoIds.length,54,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
 assert.ok(topicPhotoIds.every(id=>pujaTopics.some(topic=>topic.id===id)),"PHOTO_MAP_UNKNOWN_PUJA_ID");
 assert.equal(new Set(topicPhotoIds).size,topicPhotoIds.length,"PHOTO_MAP_DUPLICATE_PUJA_ID");
 
@@ -40,3 +40,7 @@ const resilient=await (await import("node:fs/promises")).readFile("components/pu
 assert.ok(resilient.includes("wikimediaOriginalForThumbnail(src)")&&
   !resilient.includes('src.replace("https://thumb.wikimedia.org/"'),
   "BROKEN_COMMONS_MIRROR_REINTRODUCED");
+
+for(const id of ["ganapati-homa","kashi-vishwanath-smaran-puja","lalita-sahasranama-archana","narasimha-puja"]){
+  assert.ok(topicPhotoIds.includes(id),"NEW_PUJA_EDITORIAL_LICENSED_PHOTO_MISSING="+id);
+}
