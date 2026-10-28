@@ -4,6 +4,7 @@ import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { getPublishedPujaOffers } from "@/lib/puja/offerings";
 import { getPublishedManualReportOffers } from "@/lib/reports/manual-offerings";
 import { pujaTopics } from "@/lib/puja/service-catalogue";
+import { editorialPujaPhotos, pujaEditorialPhoto } from "@/lib/puja/editorial-photos";
 import { manualReports } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 
@@ -105,6 +106,18 @@ export async function getCommercialReadiness(): Promise<CommercialReadiness> {
       detail: "Cannot verify published Puja prices.", actionHref: "/admin/puja-offerings" });
   }
 
+  const exactPhotos = pujaTopics.filter(topic => Boolean(editorialPujaPhotos[topic.id]));
+  const visiblePhotos = pujaTopics.filter(topic => Boolean(pujaEditorialPhoto(topic.id, topic.category)));
+  const uniqueSources = new Set(visiblePhotos.map(topic => pujaEditorialPhoto(topic.id,topic.category)!.source));
+  checks.push({
+    key: "puja-photo-coverage", title: "Puja-specific real photography",
+    status: exactPhotos.length === pujaTopics.length ? "ready" : "action_required",
+    detail: exactPhotos.length + " / " + pujaTopics.length +
+      " Puja topics have a curated topic-specific licensed photo; " + visiblePhotos.length +
+      " / " + pujaTopics.length + " have representative photo coverage across " + uniqueSources.size +
+      " distinct Commons sources. Category fallbacks are not photos of the exact ceremony.",
+    actionHref: "/admin/puja-offerings"
+  });
   if (partnerResult.status === "fulfilled") {
     checks.push({ key: "puja-partners", title: "Admin-reviewed Puja partners",
       status: partnerResult.value > 0 ? "ready" : "action_required",

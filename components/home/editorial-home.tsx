@@ -77,7 +77,7 @@ const zodiac = [
 const journeys = [
   {
     label: "Puja & traditions", eyebrow: "TRADITIONS",
-    desc: "Explore customary practices and submit an enquiry. Ceremony services and partner availability require confirmation.",
+    desc: "Explore 94 Puja traditions and request a preferred date. A verified Pandit and ceremony time are confirmed separately.",
     href: "/pujas", cta: "Explore Puja directory",
     image: "/naksharix/ganesh-hero-light-saffron.jpg",
     alt: "Traditional Ganesh devotional art"
@@ -91,10 +91,10 @@ const journeys = [
   },
   {
     label: "Spiritual catalogue", eyebrow: "CURATED DISCOVERY",
-    desc: "Browse spiritual products and make an enquiry. Online checkout and delivery are not active.",
+    desc: "Explore products, add listed items to your cart and submit an unpaid order request. Confirm exact supplied items before fulfilment.",
     href: "/shop", cta: "View catalogue",
-    image: "/shop/rudraksha-mala-illustration.svg",
-    alt: "Illustrative Rudraksha mala artwork"
+    image: referencePhotoForProduct("rudraksha-mala")?.url || "/shop/rudraksha-mala-illustration.svg",
+    alt: "Licensed Rudraksha mala reference photograph; not the exact stock item"
   }
 ] as const;
 
@@ -282,7 +282,7 @@ export function EditorialHome() {
               { id:"rudraksha-mala", name:"Rudraksha Mala" }
             ].map(item=>(
               <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1d1328] text-white shadow-xl">
-                <Link href={"/commerce-enquiry?kind=SHOP&item="+item.id} className="block overflow-hidden" aria-label={"Enquire about "+item.name}>
+                <Link href={"/shop/"+item.id} className="block overflow-hidden" aria-label={"View "+item.name+" details and add to cart"}>
                   <Image src={referencePhotoForProduct(item.id)?.url || "/shop/"+item.id+"-illustration.svg"} alt={referencePhotoForProduct(item.id)?.alt || item.name+" illustration"}
                     width={540} height={390} unoptimized className="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105"/>
                 </Link>
@@ -292,9 +292,9 @@ export function EditorialHome() {
                   {referencePhotoForProduct(item.id) ? <a href={referencePhotoForProduct(item.id)!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-[11px] leading-5 underline text-[#f3dcb9]">
                     {referencePhotoForProduct(item.id)!.credit} · {referencePhotoForProduct(item.id)!.licenseName}
                   </a> : null}
-                  <Link href={"/commerce-enquiry?kind=SHOP&item="+item.id}
+                  <Link href={"/shop/"+item.id}
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
-                    Enquire <ArrowRight size={16}/>
+                    View item / Add to Cart <ArrowRight size={16}/>
                   </Link>
                 </div>
               </article>
@@ -320,8 +320,8 @@ export function EditorialHome() {
               { id:"griha-pravesh-puja", name:"Griha Pravesh Puja", category:"family" }
             ].map(item=>(
               <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1c1427] text-white">
-                <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
-                  aria-label={"Enquire about "+item.name}>
+                <Link href={"/pujas/"+item.id}
+                  aria-label={"Book Now — "+item.name}>
                   <Image src={pujaEditorialImage(item.id,"/pujas/"+item.category+"-illustration.svg",item.category)} alt={item.name+" representative ritual photo"}
                     width={540} height={335} unoptimized className="aspect-[16/10] w-full object-cover transition duration-300 hover:scale-105" />
                 </Link>
@@ -331,9 +331,9 @@ export function EditorialHome() {
                   {pujaEditorialPhoto(item.id,item.category) ? <a className="mt-2 inline-block text-[11px] leading-5 text-[#f2dab7] underline" href={pujaEditorialPhoto(item.id,item.category)!.source} target="_blank" rel="noopener noreferrer">
                     {pujaEditorialPhoto(item.id,item.category)!.author} · {pujaEditorialPhoto(item.id,item.category)!.license}
                   </a> : null}
-                  <Link href={"/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
+                  <Link href={"/pujas/"+item.id}
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
-                    Enquire <ArrowRight size={16}/>
+                    Book Now <ArrowRight size={16}/>
                   </Link>
                 </div>
               </article>
