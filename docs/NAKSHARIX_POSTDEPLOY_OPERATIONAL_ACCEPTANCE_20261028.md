@@ -29,3 +29,8 @@ The repository's admin Readiness page now includes an **explicit, POST-only, CSR
 7. End-to-end authenticated user flow tests, real payment capture, webhook and refund acceptance, and courier integrations require controlled test accounts or merchant/provider authorization. Do not charge or mark completed by inference.
 
 Only the authorized Vercel deployment already recorded above has been promoted to production. This feature PR does not redeploy automatically, activate payments, provision paid services or edit production database data.
+
+
+## Canonical public URL source fix (separate deployment required)
+
+The live website redirects apex `https://naksharix.com/` to `https://www.naksharix.com/`, but the prior `NEXT_PUBLIC_APP_URL` source default was apex, so its public sitemap/robots/canonical tags could advertise a redirecting host. This PR changes the **default** to `https://www.naksharix.com` and tests that sitemap, robots and SEO metadata use the same value. The production Vercel environment had no explicit `NEXT_PUBLIC_APP_URL` variable at the time of inspection. The existing live deployment is unchanged until a separately authorized production redeploy. This does not submit a sitemap or certify Google indexing.
