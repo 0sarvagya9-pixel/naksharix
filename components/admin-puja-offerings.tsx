@@ -5,7 +5,7 @@ import { editorialPujaPhotos, pujaEditorialPhoto } from "@/lib/puja/editorial-ph
 import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { secureFetch } from "@/lib/security/csrf";
 type Offer={topicId:string;pricePaise:number|null;durationMinutes:number|null;available:boolean;note:string};
-function blank(topicId:string):Offer{return {topicId,pricePaise:null,durationMinutes:null,available:false,note:""}}
+function blank(topicId:string):Offer{return {topicId,pricePaise:110000,durationMinutes:null,available:true,note:"Standard service fee. Confirm Pandit and time before payment."}}
 export function AdminPujaOfferEditor(){
  const [saved,setSaved]=useState<Record<string,Offer>>({});
  const [query,setQuery]=useState("");
@@ -62,7 +62,7 @@ export function AdminPujaOfferEditor(){
        className="mt-2 block w-full rounded-lg border border-[#d8b58d] p-3"/>
    </label>
    <label className="flex items-center gap-3 text-sm font-bold"><input type="checkbox" checked={draft.available} onChange={e=>setDraft({...draft,available:e.target.checked})}/>
-     Publish price (only if you can actually offer this Puja)</label>
+     Publish price / enable Puja requests (Pandit and muhurat still require confirmation before any payment)</label>
    <div className="flex flex-wrap gap-3"><button disabled={busy} className="rounded-xl bg-[#762a3c] px-6 py-3 font-bold text-white">{busy?"Saving...":"Save offer"}</button>
     <button type="button" onClick={()=>setDraft(null)} className="rounded-xl border border-[#c9ad93] px-6 py-3 font-bold">Cancel</button></div>
   </form>:null}
@@ -81,7 +81,7 @@ export function AdminPujaOfferEditor(){
       {photo.author} · {photo.license} · source
     </a>:null}
     <p className="font-semibold text-[#462832]">{topic.name}</p>
-    <p className="mt-2 text-sm text-[#6b535e]">{offer?.available&&offer.pricePaise!==null?"₹"+(offer.pricePaise/100).toFixed(2)+" · Published":"Not published"}</p>
+    <p className="mt-2 text-sm text-[#6b535e]">{!offer?"₹1,100.00 · Owner-approved default request fee":offer.available&&offer.pricePaise!==null?"₹"+(offer.pricePaise/100).toFixed(2)+" · Admin published":"Booking requests held by Admin"}</p>
     <button type="button" className="mt-3 rounded-lg border border-[#a87a7f] px-4 py-2 text-sm font-bold text-[#762a3c]" onClick={()=>{setError("");setDraft({...blank(topic.id),...offer,topicId:topic.id})}}>Set rate</button>
    </div>})}
   </div>
