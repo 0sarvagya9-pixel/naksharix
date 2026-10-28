@@ -16,6 +16,7 @@ const envSchema = z.object({
   AI_REPORT_GENERATOR_ENABLED: z.enum(["true", "false"]).default("false"),
   ALLOW_AI_DIAGNOSTICS: z.enum(["true", "false"]).default("false"),
   SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false"),
+  PUJA_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false"),
   REDIS_URL: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
