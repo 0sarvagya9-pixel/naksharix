@@ -1,8 +1,8 @@
 name: Production Acceptance
 
+# Deploy approval is separate from GitHub source merges.
+# Run this workflow manually against the exact deployed release branch/commit only.
 on:
-  push:
-    branches: [complete-production-polish]
   workflow_dispatch:
 
 permissions:
@@ -98,7 +98,7 @@ jobs:
             if (data?.services?.databaseSchema?.ready !== true || data?.services?.databaseSchema?.missingCount !== 0) throw new Error("Release held: learning/puja tables or indexes missing");
             if (data?.capabilities?.subscriptionsEnabled !== false) throw new Error("Subscriptions unexpectedly active");
             if (data?.capabilities?.aiReportGeneratorEnabled !== false) throw new Error("AI report generator unexpectedly active");
-            if (data?.capabilities?.shopMode !== "informational_enquiry_only") throw new Error("Shop scope changed");
+            if (data?.capabilities?.shopMode !== "market_priced_unpaid_order_requests") throw new Error("Shop unpaid order scope changed");
             if (data?.privacy?.analyticsQueryStringExcluded !== true) throw new Error("Analytics privacy marker missing");
           '
 
@@ -128,17 +128,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for route in shop reports consultation pricing signup login verify-email learn puja-enquiry ask-astrologer; do
+          for route in shop reports consultation pricing signup login verify-email learn pujas puja-calendar cart; do
             curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 \
               "${BASE_URL}/${route}" -o "production-evidence/${route}.html"
           done
           grep -qi 'Spiritual Catalogue' production-evidence/shop.html
-          grep -qi 'Ask Availability' production-evidence/shop.html
-          if grep -Eqi 'Add to Cart|Buy Now' production-evidence/shop.html; then
-            echo "Unsupported ecommerce controls are visible." >&2
+          grep -Eqi 'Add to cart' production-evidence/shop.html
+          if grep -Eqi 'Pay with Razorpay|Buy Now|Complete payment' production-evidence/shop.html; then
+            echo "Unapproved Shop payment control is visible." >&2
             exit 1
           fi
-          grep -qi 'AI Astrologer is available' production-evidence/pricing.html
+          grep -qi 'Services and Pricing' production-evidence/pricing.html
 
       - name: Verify robots and sitemap feature truth
         shell: bash
@@ -150,7 +150,10 @@ jobs:
             "${BASE_URL}/sitemap.xml" -o production-evidence/sitemap.xml
           grep -q '/shop' production-evidence/sitemap.xml
           grep -q '/consultation' production-evidence/sitemap.xml
-          grep -q '/ai-astrologer' production-evidence/sitemap.xml
+          if grep -q '/ai-astrologer' production-evidence/sitemap.xml; then
+            echo "Private/feature-gated AI route leaked to sitemap." >&2
+            exit 1
+          fi
 
       - name: Summarize production acceptance
         run: |
