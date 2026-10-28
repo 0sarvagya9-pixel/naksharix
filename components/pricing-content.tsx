@@ -97,7 +97,7 @@ export function PricingContent({ pujaPriceLabel }: { pujaPriceLabel: string }) {
       </div>
 
       <p className="mx-auto mt-8 max-w-3xl text-center text-sm leading-6 naksh-muted-text">
-        AI Astrologer is a separate guided experience with consent. Shop supports an unpaid cart and order requests, not automatic online checkout. Puja booking requests do not guarantee an assigned Pandit, ceremony time or immediate payment. Public subscriptions are not active.
+        AI Astrologer is available as a separate guided experience with consent when the provider is configured. Shop supports an unpaid cart and order requests, not automatic online checkout. Puja booking requests do not guarantee an assigned Pandit, ceremony time or immediate payment. Public subscriptions are not active.
       </p>
     </Section>
   );
