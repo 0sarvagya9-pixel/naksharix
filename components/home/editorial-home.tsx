@@ -13,8 +13,8 @@ import {
 const STARRY_SKY="/naksharix/ganesh-hero-light-saffron.jpg";
 const GOLDEN_HORIZON="/naksharix/zodiac-wheel-gold.jpg";
 const CONSULTATION_PHOTO="https://upload.wikimedia.org/wikipedia/commons/0/04/Astrologer.jpg";
-const KUNDLI_PHOTO="https://commons.wikimedia.org/wiki/Special:FilePath/Kundali_02.png";
-const REPORT_PHOTO="https://commons.wikimedia.org/wiki/Special:FilePath/Kundali_01.png";
+const KUNDLI_PHOTO="https://upload.wikimedia.org/wikipedia/commons/2/2d/Kundali_02.png";
+const REPORT_PHOTO="https://upload.wikimedia.org/wikipedia/commons/5/57/Kundali_01.png";
 const heroSlides=[
 {eyebrow:"NAKSHARIX / VEDIC DISCOVERY",heading:"Your universe,",accent:"your way forward.",body:"Explore free Kundli, astrology reports and guidance designed for thoughtful discovery.",image:STARRY_SKY,main:{label:"Generate free Kundli",href:"/kundli"},secondary:{label:"Explore astrology tools",href:"/free-calculators"}},
 {eyebrow:"SACRED TRADITIONS / PUJA",heading:"Celebrate",accent:"sacred traditions.",body:"Explore 94 Puja traditions and preferred dates; ceremony availability is confirmed separately.",image:pujaEditorialImage("griha-pravesh-puja",STARRY_SKY,"family"),main:{label:"Explore Puja services",href:"/pujas"},secondary:{label:"Festival calendar",href:"/puja-calendar"}},
@@ -52,7 +52,7 @@ const services = [
   },
   {
     number:"05",label:"Kundli Matching",copy:"Compare traditional chart inputs and learn about Guna Milan.",
-    href:"/matchmaking",cta:"Check compatibility",image:"https://commons.wikimedia.org/wiki/Special:FilePath/Kundali_02a.png",alt:"Traditional North Indian Kundli chart, CC0"
+    href:"/matchmaking",cta:"Check compatibility",image:"https://upload.wikimedia.org/wikipedia/commons/1/1a/Kundali_02a.png",alt:"Traditional North Indian Kundli chart, CC0"
   },
   {
     number:"06",label:"Your Daily Panchang",copy:"Understand the five traditional Panchang elements for a chosen place.",
@@ -64,7 +64,7 @@ const services = [
   },
   {
     number:"08",label:"Free Learning",copy:"Start with original introductory lessons on charts, planets and Panchang.",
-    href:"/learn",cta:"Start learning",image:"https://commons.wikimedia.org/wiki/Special:FilePath/Kundali_01a.png",alt:"Traditional Kundli diagram, CC0"
+    href:"/learn",cta:"Start learning",image:"https://upload.wikimedia.org/wikipedia/commons/0/05/Kundali_01a.png",alt:"Traditional Kundli diagram, CC0"
   }
 ] as const;
 
