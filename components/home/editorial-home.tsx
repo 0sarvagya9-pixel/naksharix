@@ -108,7 +108,7 @@ function SectionTitle({ eyebrow, title, copy }: { eyebrow: string; title: string
   );
 }
 
-export function EditorialHome() {
+export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Record<string,number|null>}) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [manuallyPaused, setManuallyPaused] = useState(false);
@@ -273,7 +273,7 @@ export function EditorialHome() {
       <section className="nx-ed-section" aria-label="Featured spiritual products">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="SACRED ESSENTIALS" title="Explore the spiritual catalogue."
-            copy="Browse real reference photographs of devotional items. Exact stock, specifications and final prices are confirmed before dispatch." />
+            copy="Explore real photographed references and published INR prices. Exact stock, shipping, tax and fulfilment terms are confirmed before dispatch." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { id:"5-mukhi-rudraksha", name:"5 Mukhi Rudraksha" },
@@ -288,6 +288,10 @@ export function EditorialHome() {
                 </Link>
                 <div className="p-5">
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
+                  {featuredShopPrices[item.id] ? <p className="mt-2 text-xl font-extrabold text-[#f5cc82]">
+                    {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(featuredShopPrices[item.id]!/100)}
+                    <span className="ml-2 text-xs font-medium text-[#e2ced8]">Selling price · no online charge</span>
+                  </p> : <p className="mt-2 text-xs text-[#e2ced8]">See current selling price in Shop</p>}
                   <p className="mt-2 text-xs text-[#e2ced8]">Real licensed reference photo • Exact supplied item may differ</p>
                   {referencePhotoForProduct(item.id) ? <a href={referencePhotoForProduct(item.id)!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-[11px] leading-5 underline text-[#f3dcb9]">
                     {referencePhotoForProduct(item.id)!.credit} · {referencePhotoForProduct(item.id)!.licenseName}
