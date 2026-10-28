@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { wikimediaOriginalForThumbnail } from "@/lib/media/wikimedia-original";
 import { useEffect, useState } from "react";
 
 /** Images from Commons are external references, never proof of Naksharix fulfilment.
@@ -19,9 +20,7 @@ export function ResilientEditorialImage({
 }) {
   const [currentSrc, setCurrentSrc] = useState(src);
   useEffect(() => { setCurrentSrc(src); }, [src]);
-  const mirror = src.startsWith("https://thumb.wikimedia.org/")
-    ? src.replace("https://thumb.wikimedia.org/", "https://upload.wikimedia.org/")
-    : null;
+  const mirror = wikimediaOriginalForThumbnail(src);
   const isIllustration = currentSrc === fallbackSrc && src !== fallbackSrc;
   return (
     <div className="relative h-full w-full">
