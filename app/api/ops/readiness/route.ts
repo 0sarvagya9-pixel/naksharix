@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
+import { sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getEmailReadiness } from "@/lib/email/email-service";
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getReportStorageReadiness } from "@/lib/storage/report-storage";
@@ -44,7 +45,7 @@ export async function GET() {
         missingCount: email.missing.length
       },
       redis: {
-        configured: Boolean(env.REDIS_URL)
+        configured: sharedRedisConfigured()
       },
       monitoring: {
         provider: monitoring.provider,
