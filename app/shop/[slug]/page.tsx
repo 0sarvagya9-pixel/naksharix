@@ -54,7 +54,7 @@ export default async function ProductDetails({params}:Props) {
             ? new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(product.unitPricePaise/100)
             : "Price awaiting verification"}</p>
           <p className="mt-2 text-sm leading-6 text-[#67545a]">Market-compared listing price. Your order is an unpaid request; shipping, taxes, exact item specification and delivery require staff confirmation.</p>
-          <div className="mt-5 max-w-xs"><AddToCartButton productId={product.id} /></div
+          <div className="mt-5 max-w-xs"><AddToCartButton productId={product.id} /></div>
           {illustrated?<p className="mt-5 text-xs leading-6 text-[#756267]">
             Original illustrative artwork, not a photograph of supplied physical stock.
           </p>:null}
