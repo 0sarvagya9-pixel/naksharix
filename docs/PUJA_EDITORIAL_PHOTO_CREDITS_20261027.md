@@ -76,3 +76,15 @@ The following five override image references were checked against the Commons fi
 - **dussehra-ayudha-puja:** [Ayudha Pooja](https://commons.wikimedia.org/wiki/File:Ayudha_Pooja.jpg), Balasubramanian G Velu, CC BY-SA 2.0. Equipment worship and associated Vijayadashami practice; no real Naksharix service shown.
 
 **New curation coverage:** 46/94 Puja topics have curated topic-relevant reference photographs; the other 48 still use correctly labeled real category photographs. Some more-specific entries depict thematic art or ritual components rather than a ceremony. Distinct photos and real operator evidence remain separate requirements. No change to Puja booking or charging policies.
+
+
+## 2026-10-28 additional image research: four clearly labeled thematic photos
+
+Sources inspected for actual photographic subject, author and explicit Commons license. They are **editorial references only**, not performed or booked ceremonies by Naksharix.
+
+- **bilva-archana**: [Bilva fruit and leaves to Shiva Linga](https://commons.wikimedia.org/wiki/File:Bilva_fruit_and_leaves_to_Shiva_Linga.jpg) — Netalloy — CC BY-SA 3.0. Actual offerings, not evidence of Naksharix's priest.
+- **maha-gauri-puja**: [Maha Gauri](https://commons.wikimedia.org/wiki/File:Maha_Gauri.jpg) — Dhanush n m — CC BY-SA 4.0. Photograph of deity idol, **not a photograph of Maha Gauri Puja being performed**.
+- **annaprashan-sanskar**: [Annaprashan offerings](https://commons.wikimedia.org/wiki/File:Annaprashan_offerings.jpg) — Jean-Etienne Minh-Duy Poirrier — CC BY-SA 2.0. Photo of actual ritual offerings, no stock or service claim.
+- **chandi-homa**: [Homa or Yajna at rural village home](https://commons.wikimedia.org/wiki/File:Homa_or_Yajna_at_a_rural_village_home_during_puja.jpg) — Prititunna — CC BY-SA 4.0. Photograph of a **Durga Puja** Homa, only a related fire-ritual illustration; cannot establish an exact Chandi Homa.
+
+Updated topic-level curated references **50/94**; other **44 topics** still use attributed category photographs. The registry does not imply 50 unique verified services. Correct product inventory photographs, signed vendor permissions, image authenticity and actual Puja delivery remain separate operator requirements.
