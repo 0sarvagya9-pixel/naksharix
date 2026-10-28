@@ -1,5 +1,7 @@
-/** Prevent borrowing a valid license URL to disguise an unrelated product photo.
- * This is structural provenance checking, NOT confirmation of supplier inventory. */
+import { createHash } from "node:crypto";
+
+/** Structural proof check only, NOT product authenticity, supplier consent,
+ * fulfilment, or verified image ownership. */
 export function matchesExternalPhotoProof(imageUrl:string,proofUrl:string,rights:"OWNED"|"LICENSED"|"SUPPLIER_AUTHORIZED"):boolean {
  try {
   const image=new URL(imageUrl),proof=new URL(proofUrl);
@@ -10,12 +12,26 @@ export function matchesExternalPhotoProof(imageUrl:string,proofUrl:string,rights
        /^(?:127\.|10\.|192\.168\.|169\.254\.)/.test(host)) return false;
   }
   if(proof.hostname==="commons.wikimedia.org"){
-    if(!["thumb.wikimedia.org","upload.wikimedia.org"].includes(image.hostname))return false;
-    const proofName=decodeURIComponent(proof.pathname.split("File:").slice(1).join("File:")).replace(/ /g,"_");
-    const imageName=decodeURIComponent(image.pathname.split("/").at(-1)||"").replace(/^\d+px-/,"");
-    return proofName.length>0 && proofName===imageName;
+    // A legitimate Commons title does not prove an unrelated or broken image
+    // URL. Verify the exact filename AND its Commons MD5 directory.
+    if(!["thumb.wikimedia.org","upload.wikimedia.org"].includes(image.hostname) ||
+       image.search||image.hash||proof.search||proof.hash ||
+       !proof.pathname.startsWith("/wiki/File:")) return false;
+    const proofName=decodeURIComponent(proof.pathname.slice("/wiki/File:".length)).replace(/ /g,"_");
+    if(!proofName||proofName.includes("/")||proofName.includes("\\")||
+       /[\u0000-\u001f]/.test(proofName)) return false;
+    const md5=createHash("md5").update(proofName,"utf8").digest("hex");
+    const stem="/wikipedia/commons/"+md5[0]+"/"+md5.slice(0,2)+"/"+proofName;
+    const thumbStem="/wikipedia/commons/thumb/"+md5[0]+"/"+md5.slice(0,2)+"/"+proofName+"/";
+    const imagePath=decodeURIComponent(image.pathname);
+    if(image.hostname==="thumb.wikimedia.org")
+      return imagePath.startsWith(thumbStem)&&new RegExp("^[1-9][0-9]{0,4}px-").test(imagePath.slice(thumbStem.length))&&
+        imagePath.slice(thumbStem.length).replace(/^[1-9][0-9]{0,4}px-/,"")===proofName;
+    return imagePath===stem || (imagePath.startsWith(thumbStem) &&
+      new RegExp("^[1-9][0-9]{0,4}px-").test(imagePath.slice(thumbStem.length)) &&
+      imagePath.slice(thumbStem.length).replace(/^[1-9][0-9]{0,4}px-/,"")===proofName);
   }
-  if(rights==="SUPPLIER_AUTHORIZED")return true; // Owner confirms supplier permission; endpoint identity still must be public HTTPS.
+  if(rights==="SUPPLIER_AUTHORIZED")return true; // Owner confirms supplier permission independently.
   return image.hostname===proof.hostname || image.hostname.endsWith("."+proof.hostname);
  }catch{return false}
 }
