@@ -141,3 +141,14 @@ Source and rights:
 - **Grahan Shanti** — [Navagraha Pooja](https://commons.wikimedia.org/wiki/File:Navagraha_Pooja.jpg), RHKalpana, CC BY-SA 4.0. Related Navagraha housewarming ritual, **not proof of a specific eclipse-shanti ceremony**.
 
 **Coverage:** 72/94 Puja topics have topic-curated reference imagery; 22 topics continue with real, credited category images. Many 'curated' photos depict a shrine, idol, or related ritual rather than exact performed Puja; some topics deliberately share photos. These records must not be converted into Pandit availability, service delivery, partner agreement or temple affiliation claims.
+
+
+## 2026-10-28 follow-up — four further rights-verified subject photographs (76/94)
+
+These are editorial examples, **not** evidence of a Naksharix-performed ceremony, contracted Pandit, scheduled slot or actual fulfilment. Individual credits and license links are displayed at the Puja cards and detail pages. No Shop product photographs are changed.
+- **sudarshan-homa** (Sudarshana Homa): [Commons source](https://commons.wikimedia.org/wiki/File:Sudarshana_homam.j.jpg), Venkatasubramaniyaiyer, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Photograph labeled Sudarshana Homa; not a Naksharix performance.
+- **pradosh-vrat-puja** (Pradosh Vrat Puja): [Commons source](https://commons.wikimedia.org/wiki/File:Shiva_Abhishekam.jpg), SaiKrishna281197, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Real Shiva Abhishekam; does not establish performance at Pradosh time.
+- **siddhivinayak-archana** (Siddhivinayak Archana): [Commons source](https://commons.wikimedia.org/wiki/File:Shri_siddhivinayak.jpg), Ankursoni003, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Photographed Siddhivinayak idol, not a performed Archana.
+- **vivah-mangala-puja** (Vivah Mangala Puja): [Commons source](https://commons.wikimedia.org/wiki/File:Hindu_wedding_fire_ceremony.jpg), Appaiah, [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/). Actual Hindu wedding fire ceremony; not a Naksharix customer or booking.
+
+**76/94** Puja topic IDs have curated subject-related photos; **18/94** still use real licensed category fallbacks. Curated images are not necessarily a photograph of the *exact* named ceremony; names such as Pradosh, Archana and related rites must not claim that a pictured devotional act was that specific ritual. Image filenames, authors, rights and source URLs must be kept together. No production deployment or commerce activation in this change.
