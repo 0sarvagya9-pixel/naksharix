@@ -9,6 +9,7 @@ import { env } from "@/lib/env";
 import { getPaidReport } from "@/lib/paid-reports";
 import { razorpay } from "@/lib/payments/razorpay";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
+import { effectivePujaPrice } from "@/lib/puja/offerings";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { getReportPricing } from "@/lib/reports/pricing";
 import { getSubscriptionPlan } from "@/lib/revenue";
@@ -192,7 +193,7 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
     const partner = await prisma.pujaPartner.findUnique({ where: { id: booking.partnerId } });
     if (!partner || partner.reviewStatus !== "VERIFIED" || !partner.evidenceUrl) return null;
     const offer = await prisma.pujaOffering.findUnique({ where: { topicId: booking.topicId } });
-    if (!offer?.available || offer.pricePaise !== booking.quotedPricePaise || booking.quotedPricePaise !== 110000) return null;
+    if (effectivePujaPrice(offer) !== booking.quotedPricePaise || booking.quotedPricePaise !== 110000) return null;
     return { name: "Verified Puja Booking", amount: booking.quotedPricePaise / 100,
       metadata: { pujaBookingId: booking.id, pujaTopicId: booking.topicId, verifiedPartnerId: partner.id } };
   }
