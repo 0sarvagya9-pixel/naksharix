@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ResilientShopPhoto } from "@/components/shop/resilient-shop-photo";
 import { PackageSearch, Search, ShieldCheck, Sparkles, ShoppingBag } from "lucide-react";
 import { AddToCartButton } from "@/components/shop/quote-cart-controls";
 import { Button } from "@/components/ui/button";
@@ -71,10 +71,10 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
             <Card key={product.id} className="inner-card flex h-full flex-col transition hover:-translate-y-1 hover:border-[#dca956]/50">
               <CardContent className="flex h-full flex-col p-6">
                 <div className="mb-5 overflow-hidden rounded-xl border border-[#D4AF37]/20 bg-[#fff2e2]">
-                  <Image
+                  <ResilientShopPhoto
                     src={safeProductVisual(product)}
                     alt={product.galleryImages?.[0]?.alt || product.imageAlt[locale] || product.name[locale]}
-                    width={640} height={420} unoptimized
+                    width={640} height={420} showFallbackLabel
                     className="h-48 w-full object-contain p-3"
                   />
                   {product.galleryImages?.[0]?.evidenceUrl ? <div className="px-3 pb-3 text-center text-xs leading-5 text-[#57424b]">

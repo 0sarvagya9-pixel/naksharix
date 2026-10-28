@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ResilientShopPhoto } from "@/components/shop/resilient-shop-photo";
 import { secureFetch } from "@/lib/security/csrf";
 import type { ShopProduct } from "@/lib/manual-catalogue";
 import { readCart, writeCart, type CartLine } from "@/components/shop/quote-cart-controls";
@@ -65,7 +65,7 @@ export function CartPageClient({products}:{products:ShopProduct[]}){
    <section aria-label="Selected products" className="space-y-4">
    {valid.map(line=>{const p=productMap.get(line.productId)!;return <article key={p.id} className="flex flex-wrap items-center gap-5 rounded-2xl border border-[#e6cbb0] bg-white p-5 shadow-sm">
     <Link href={"/shop/"+encodeURIComponent(p.slug)} aria-label={"View "+p.name.en} className="block h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-[#e6cbb0] bg-[#fff8ef] p-1">
-      <Image src={p.galleryImages?.[0]?.url || p.imageUrl || "/shop/combo-placeholder.svg"} alt={p.galleryImages?.[0]?.alt || p.imageAlt.en || p.name.en} width={144} height={144} unoptimized className="h-full w-full rounded-lg object-contain"/>
+      <ResilientShopPhoto src={p.galleryImages?.[0]?.url || p.imageUrl || "/shop/combo-placeholder.svg"} alt={p.galleryImages?.[0]?.alt || p.imageAlt.en || p.name.en} width={144} height={144} className="h-full w-full rounded-lg object-contain"/>
     </Link>
     <div className="min-w-0 flex-1"><Link href={"/shop/"+encodeURIComponent(p.slug)} className="text-lg font-bold text-[#70283b] hover:underline">{p.name.en}</Link>
     <p className="mt-1 text-sm text-[#635159]">{p.category}</p>

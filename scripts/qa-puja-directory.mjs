@@ -12,7 +12,7 @@ console.log("PUJA_DIRECTORY_QA=PASS;TOPICS="+pujaTopics.length+";PAID_BOOKING=OF
 
 const photosSource = (await import("node:fs")).readFileSync("lib/puja/editorial-photos.ts","utf8");
 const topicPhotoIds=[...photosSource.matchAll(/^\s*"([a-z0-9-]+)": \{src:/gm)].map(m=>m[1]);
-assert.equal(topicPhotoIds.length,50,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
+assert.equal(topicPhotoIds.length,56,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
 assert.ok(topicPhotoIds.every(id=>pujaTopics.some(topic=>topic.id===id)),"PHOTO_MAP_UNKNOWN_PUJA_ID");
 assert.equal(new Set(topicPhotoIds).size,topicPhotoIds.length,"PHOTO_MAP_DUPLICATE_PUJA_ID");
 
@@ -23,3 +23,31 @@ for(const id of ["bilva-archana","maha-gauri-puja","annaprashan-sanskar","chandi
     record.includes("creativecommons.org/licenses/") && record.includes("author:"),
     "PUJA_IMAGE_SOURCE_RIGHTS_INCOMPLETE="+id);
 }
+
+const { wikimediaOriginalForThumbnail }=await import("../lib/media/wikimedia-original.ts");
+assert.equal(
+  wikimediaOriginalForThumbnail("https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Rudrabhishake_Structure.jpg/960px-Rudrabhishake_Structure.jpg"),
+  "https://upload.wikimedia.org/wikipedia/commons/4/4c/Rudrabhishake_Structure.jpg",
+  "COMMONS_ORIGINAL_THUMB_PATH_MUST_DISCARD_THUMB_SEGMENT"
+);
+assert.equal(
+  wikimediaOriginalForThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Rudrabhishake_Structure.jpg/960px-Rudrabhishake_Structure.jpg"),
+  "https://upload.wikimedia.org/wikipedia/commons/4/4c/Rudrabhishake_Structure.jpg",
+  "UPLOAD_HOST_THUMB_FALLBACK_MUST_RETAIN_COMMONS_ORIGINAL"
+);
+for (const unsafe of [
+  "https://thumb.wikimedia.org.evil.invalid/wikipedia/commons/thumb/4/4c/X.jpg/960px-X.jpg",
+  "http://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/X.jpg/960px-X.jpg",
+  "https://thumb.wikimedia.org/wikipedia/commons/4/4c/X.jpg",
+  "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/X.jpg/960px-X.jpg?source=unknown",
+]) assert.equal(wikimediaOriginalForThumbnail(unsafe),null,"INVALID_COMMONS_THUMB_ACCEPTED");
+const resilient=await (await import("node:fs/promises")).readFile("components/puja/resilient-editorial-image.tsx","utf8");
+assert.ok(resilient.includes("wikimediaOriginalForThumbnail(src)")&&
+  !resilient.includes('src.replace("https://thumb.wikimedia.org/"'),
+  "BROKEN_COMMONS_MIRROR_REINTRODUCED");
+
+for(const id of ["ganapati-homa","kashi-vishwanath-smaran-puja","lalita-sahasranama-archana","narasimha-puja"]){
+  assert.ok(topicPhotoIds.includes(id),"NEW_PUJA_EDITORIAL_LICENSED_PHOTO_MISSING="+id);
+}
+
+for(const id of ["lakshmi-narayan-puja","nav-chandi-puja"]) assert.ok(topicPhotoIds.includes(id),"ADDITIONAL_COMMONS_PHOTO_MISSING="+id);
