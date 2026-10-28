@@ -4,7 +4,7 @@ import { fail,handleApiError,ok,validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
-import { rateLimit } from "@/lib/rate-limit";
+
 
 export const dynamic="force-dynamic";
 const schema=z.object({
@@ -55,15 +55,28 @@ export async function POST(request:Request){
   // The canonical server-owned subtotal remains the only persisted amount.
   if(input.expectedSubtotalPaise!==undefined&&input.expectedSubtotalPaise!==subtotal)
     return fail("Cart prices changed. Refresh the cart and review the current prices before ordering.",409);
-  const lim=await rateLimit("shop-order-intent:"+user.id,5,86400);
-  if(!lim.allowed)return fail("Daily order request limit reached.",429);
-  const order=await prisma.shopOrder.create({
-   data:{userId:user.id,items:lines,customerName:input.customerName,customerPhone:input.customerPhone,
-    deliveryAddress:input.deliveryAddress,deliveryCity:input.deliveryCity,deliveryState:input.deliveryState,
-    postalCode:input.postalCode,customerNote:input.customerNote,subtotalPaise:subtotal,status:"REQUESTED",
-    paymentStatus:"UNPAID",fulfillmentMode:"MANUAL_CONFIRMATION"},
-   select:{id:true,status:true,paymentStatus:true,subtotalPaise:true,createdAt:true}
+  // Cross-instance abuse protection with no new table or Redis provisioning:
+  // a transaction-scoped advisory lock serializes count + persist per user.
+  // Failure to acquire/query the DB fails closed before an order is created.
+  const order=await prisma.$transaction(async tx=>{
+    await tx.$queryRaw<Array<{locked:string}>>`
+      SELECT pg_advisory_xact_lock(
+        hashtext(${user.id}),hashtext('naksharix-shop-request-v1')
+      )::text AS locked
+    `;
+    const recent=await tx.shopOrder.count({where:{
+      userId:user.id,createdAt:{gte:new Date(Date.now()-86400_000)}
+    }});
+    if(recent>=5)return null;
+    return tx.shopOrder.create({
+      data:{userId:user.id,items:lines,customerName:input.customerName,customerPhone:input.customerPhone,
+        deliveryAddress:input.deliveryAddress,deliveryCity:input.deliveryCity,deliveryState:input.deliveryState,
+        postalCode:input.postalCode,customerNote:input.customerNote,subtotalPaise:subtotal,status:"REQUESTED",
+        paymentStatus:"UNPAID",fulfillmentMode:"MANUAL_CONFIRMATION"},
+      select:{id:true,status:true,paymentStatus:true,subtotalPaise:true,createdAt:true}
+    });
   });
+  if(!order)return fail("Daily order request limit reached.",429);
   return ok({order,charged:false,onlineCheckoutAvailable:false,
     nextStep:"Owner confirms delivery charge, applicable taxes, product specifications, fulfilment, and payment method."},
     {status:201});

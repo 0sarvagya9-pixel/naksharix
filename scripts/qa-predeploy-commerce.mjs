@@ -22,7 +22,9 @@ const puja=read("app/api/puja/bookings/route.ts");
 const adminPuja=read("app/api/admin/puja-bookings/route.ts");
 assert.ok(orders.includes("getCurrentUser()")&&orders.includes("getShopCatalogue()")&&
  orders.includes('paymentStatus:"UNPAID"')&&orders.includes("Number.isSafeInteger(subtotal)"),"Order price/payment invariant absent");
-assert.ok(orders.includes("new Set(productIds).size")&&orders.includes("rateLimit("),"Duplicate/rate limit absent");
+assert.ok(orders.includes("new Set(productIds).size")&&orders.includes("pg_advisory_xact_lock")&&
+ orders.includes("tx.shopOrder.count")&&orders.includes("tx.shopOrder.create")&&
+ orders.includes("if(recent>=5)return null"),"Duplicate/rate limit absent");
 const cartClient=read("components/shop/cart-page-client.tsx");
 assert.ok(cartClient.includes("expectedSubtotalPaise:total") &&
   orders.includes("expectedSubtotalPaise:z.number().int().min(0).max(1000000000).optional()") &&
@@ -35,11 +37,22 @@ assert.ok(adminOrders.includes("getAdminApiUser()")&&adminOrders.includes("updat
 assert.ok(adminOrders.includes("paymentCollected:false")&&adminOrders.includes("onlinePaymentVerified:false"),
  "Never claim an unverified gateway charge");
 assert.ok(puja.includes("getCurrentUser()")&&puja.includes("getPuja")===false&&
- puja.includes("pujaOffering.findUnique")&&puja.includes("rateLimit(")&&puja.includes("preferredDate"),
+ puja.includes("pujaOffering.findUnique")&&puja.includes("pg_advisory_xact_lock")&&puja.includes("tx.pujaBookingRequest.count")&&
+ puja.includes("tx.pujaBookingRequest.create")&&puja.includes("if(recent>=4)return null")&&
+ puja.includes("preferredDate"),
  "Puja booking must read real published offer and validate preferred date");
 assert.ok(adminPuja.includes("getAdminApiUser()")&&adminPuja.includes('reviewStatus!=="VERIFIED"')&&
  adminPuja.includes("updateMany")&&adminPuja.includes("adminActionLog.create"),
  "Puja admin needs verified partner and optimistic concurrency");
+assert.ok(
+ !orders.includes('from "@/lib/rate-limit"') &&
+ !puja.includes('from "@/lib/rate-limit"') &&
+ orders.includes("prisma.$transaction") &&
+ puja.includes("prisma.$transaction") &&
+ orders.includes("Daily order request limit reached.") &&
+ puja.includes("Daily Puja request limit reached."),
+ "COMMERCIAL_REQUEST_QUOTA_MUST_BE_DB_SERIALIZED_ACROSS_INSTANCES"
+);
 assert.ok(read("components/shop/cart-page-client.tsx").includes('secureFetch("/api/commerce/orders"')&&
  read("app/orders/page.tsx").includes("userId:user.id"),"Customer shop order flow missing");
 assert.ok(read("components/puja/booking-request-client.tsx").includes('secureFetch("/api/puja/bookings"')&&
