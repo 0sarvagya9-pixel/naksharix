@@ -47,6 +47,9 @@ export async function POST(request:Request){
   // Do not record a different fee than the one the devotee actually viewed.
   if(input.expectedPricePaise!==undefined&&offer.pricePaise!==input.expectedPricePaise)
     return fail("The published Puja fee changed. Refresh and review the new price before submitting.",409);
+  // Snapshot the validated non-null fee before entering the DB callback; an
+  // asynchronous closure must never weaken the type or the accepted quote.
+  const quotedPricePaise:number=offer.pricePaise;
   // Shared Postgres lock + persisted count enforce this quota across every
   // serverless instance; no per-instance memory limit or Redis dependency.
   const booking=await prisma.$transaction(async tx=>{
@@ -60,7 +63,7 @@ export async function POST(request:Request){
     }});
     if(recent>=4)return null;
     return tx.pujaBookingRequest.create({
-      data:{userId:user.id,topicId:input.topicId,quotedPricePaise:offer.pricePaise,preferredDate:when,
+      data:{userId:user.id,topicId:input.topicId,quotedPricePaise,preferredDate:when,
         city:input.city,devoteeName:input.devoteeName,gotra:input.gotra||null,
         sankalpNote:input.sankalpNote,customerPhone:input.customerPhone,status:"REQUESTED"},
       select:{id:true,status:true,topicId:true,preferredDate:true,quotedPricePaise:true,createdAt:true}
