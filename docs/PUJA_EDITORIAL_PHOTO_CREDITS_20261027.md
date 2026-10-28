@@ -181,3 +181,10 @@ One existing Kashi Vishwanath URL had an incorrect Wikimedia MD5 path (`4/4c` ra
 - **lingashtakam-archana** — [Wikimedia Commons source](https://commons.wikimedia.org/wiki/File:Hindu_priest_offering_prayers_to_Shiva_linga_in_the_Rameshwara_Temple_at_Keladi.jpg), Manjeshpv, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Actual Hindu priest offering prayers to Shiva linga; not proof of a specific Lingashtakam recital or Archana.
 
 These are editorial documentary images with attribution, not Naksharix-operated rituals, endorsements, client records or proof of delivery. Images depicting children and identifiable people require context-sensitive usage and any applicable personality-rights review independently of the photo license. Curated subject-related mapping increases to **84/94**, with **10/94** remaining covered by explicitly labeled real licensed category photographs. The canonical Commons path hash QA remains active; no production release, DB write, partner, stock or payment change in this update.
+
+
+## 2026-10-28 Saraswati Homa representative Yagna photograph (85/94)
+
+- **saraswati-homa**: [Spiritual Yagna Offering to Goddess Saraswati 29](https://commons.wikimedia.org/wiki/File:Spiritual_Yagna_Offering_to_Goddess_Saraswati_29.jpg), photographer **Sumita Roy Dutta**, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Wikimedia describes an observed Saraswati Puja with an associated Yagna/fire offering in India on 2 February 2025. The 960px image shows worship and a fire, not a Naksharix operator, delivery, partner or independently verified exact Saraswati Homa booking. Attribution is rendered alongside this card and service page.
+
+Current mapping **85/94** curated subject-related images, remaining **9/94** documented real-category photographic fallbacks. All 94 topics continue to show a real representative photo when delivery succeeds; the HTML image fallback remains labeled as illustration. No exact service delivery photographs or inventories are certified. No payment or production deployment changes.
