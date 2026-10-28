@@ -29,6 +29,8 @@ assert.ok(bookingClient.includes("confirmedQuotePaise")&&bookingClient.includes(
   !bookingClient.includes("Listed fee ₹1,100."),"BOOKING_COPY_MUST_FOLLOW_SERVER_QUOTE");
 assert.ok(!detail.includes("₹1,100 is the listed service fee.")&&detail.includes("published fee shown above"),
   "PUJA_DETAIL_MUST_NOT_CONTRADICT_ADMIN_PRICE");
+assert.ok(ui.includes('ResilientEditorialImage')&&ui.includes('fallbackSrc={topic.graphic}')&&
+  !ui.includes('import Image from "next/image"'), "ADMIN_PHOTO_MUST_FALLBACK_IF_COMMONS_UNAVAILABLE");
 assert.ok(ui.includes("pricePaise:110000,durationMinutes:null,available:false")&&
   ui.includes("Existing saved rates are preserved"),"UNPUBLISHED_OWNER_1100_DRAFT_MISSING");
 console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;OWNER_PRICES_MANAGED=YES;PAYMENTS_GATED_UNTIL_PARTNER_CONFIRMED");
