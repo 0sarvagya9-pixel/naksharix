@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { pujaTopics, pujaCategories, findPujaTopic } from "../lib/puja/service-catalogue.ts";
 assert.ok(pujaTopics.length >= 90, "PUJA_TYPES_INCOMPLETE");
 assert.equal(new Set(pujaTopics.map(p=>p.id)).size, pujaTopics.length);
@@ -12,7 +13,7 @@ console.log("PUJA_DIRECTORY_QA=PASS;TOPICS="+pujaTopics.length+";PAID_BOOKING=OF
 
 const photosSource = (await import("node:fs")).readFileSync("lib/puja/editorial-photos.ts","utf8");
 const topicPhotoIds=[...photosSource.matchAll(/^\s*"([a-z0-9-]+)": \{src:/gm)].map(m=>m[1]);
-assert.equal(topicPhotoIds.length,78,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
+assert.equal(topicPhotoIds.length,81,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
 assert.ok(topicPhotoIds.every(id=>pujaTopics.some(topic=>topic.id===id)),"PHOTO_MAP_UNKNOWN_PUJA_ID");
 assert.equal(new Set(topicPhotoIds).size,topicPhotoIds.length,"PHOTO_MAP_DUPLICATE_PUJA_ID");
 // Licensed editorial examples are not proof of exact named rites or Naksharix service provision.
@@ -81,7 +82,7 @@ for(const id of ["mahamrityunjaya-puja","durga-saptashati-path","shat-chandi-puj
  * A CC license page cannot be used as proof for a different image filename.
  */
 const photoRecords=[...photosSource.matchAll(/^\s*"([a-z0-9-]+)": \{src:"([^"]+)",source:"([^"]+)",author:"([^"]+)",license:"([^"]+)",licenseUrl:"([^"]+)"\}/gm)];
-assert.equal(photoRecords.length,78,"PUJA_PHOTO_RECORDS_INCOMPLETE");
+assert.equal(photoRecords.length,81,"PUJA_PHOTO_RECORDS_INCOMPLETE");
 for(const [,id,src,source,author,license,licenseUrl] of photoRecords){
   const imageUrl=new URL(src),proofUrl=new URL(source);
   assert.ok(["thumb.wikimedia.org","upload.wikimedia.org"].includes(imageUrl.hostname)&&
@@ -93,6 +94,15 @@ for(const [,id,src,source,author,license,licenseUrl] of photoRecords){
   const photoName=decodeURIComponent(imageUrl.pathname.includes("/thumb/")?parts.at(-2):parts.at(-1));
   const proofName=decodeURIComponent(proofUrl.pathname.slice("/wiki/File:".length)).replace(/ /g,"_");
   assert.equal(photoName,proofName,"PUJA_PHOTO_NOT_MATCHING_LICENSE_PROOF="+id);
+  // An incorrect Commons MD5 directory produces a broken image even if the
+  // source filename and license record agree. Verify actual canonical path.
+  const imgPath=imageUrl.pathname.split("/");
+  const imageRoot=imgPath.indexOf("commons");
+  const offset=imgPath[imageRoot+1]==="thumb"?2:1;
+  const observedHash=imgPath[imageRoot+offset]+"/"+imgPath[imageRoot+offset+1];
+  const md5=createHash("md5").update(photoName,"utf8").digest("hex");
+  assert.equal(observedHash,md5[0]+"/"+md5.slice(0,2),"PUJA_COMMONS_HASH_DIRECTORY_INVALID="+id);
+
 }
 
 for(const id of ["chandra-graha-shanti-puja","guru-graha-shanti-puja"])
