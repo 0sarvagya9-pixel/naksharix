@@ -4,6 +4,7 @@ import { fail,handleApiError,ok,validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { findPujaTopic } from "@/lib/puja/service-catalogue";
+import { effectivePujaPrice } from "@/lib/puja/offerings";
 import { rateLimit } from "@/lib/rate-limit";
 export const dynamic="force-dynamic";
 const inputSchema=z.object({
@@ -39,14 +40,16 @@ export async function POST(request:Request){
   const now=new Date();
   if(when.valueOf()+86400000<=now.valueOf()||when.valueOf()>now.valueOf()+366*86400000)
     return fail("Choose a future date within the next year.",422);
-  // The owner must publish this exact Puja and approved service fee first.
+  // All catalogued Puja services carry the owner-approved ₹1,100 default.
+  // An explicit Admin-disabled offering is never resurrected by that default.
   const offer=await prisma.pujaOffering.findUnique({where:{topicId:input.topicId}});
-  if(!offer?.available||!offer.pricePaise||offer.pricePaise<100)
-    return fail("This Puja has no published service offer. Request an enquiry instead.",422);
+  const pricePaise=effectivePujaPrice(offer);
+  if(pricePaise===null)
+    return fail("This Puja has been disabled by Admin. Request support instead.",422);
   const limited=await rateLimit("puja-booking-request:"+user.id,4,86400);
   if(!limited.allowed)return fail("Daily Puja request limit reached.",429);
   const booking=await prisma.pujaBookingRequest.create({
-   data:{userId:user.id,topicId:input.topicId,quotedPricePaise:offer.pricePaise,preferredDate:when,
+   data:{userId:user.id,topicId:input.topicId,quotedPricePaise:pricePaise,preferredDate:when,
     city:input.city,devoteeName:input.devoteeName,gotra:input.gotra||null,
     sankalpNote:input.sankalpNote,customerPhone:input.customerPhone,status:"REQUESTED"},
    select:{id:true,status:true,topicId:true,preferredDate:true,quotedPricePaise:true,createdAt:true}
