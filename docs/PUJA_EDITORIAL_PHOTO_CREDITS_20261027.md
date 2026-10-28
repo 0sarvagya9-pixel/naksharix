@@ -107,3 +107,21 @@ The browser image fallback now maps `thumb.wikimedia.org/wikipedia/commons/thumb
 - **nav-chandi-puja**: [Nav Chandi Mandir.jpg](https://commons.wikimedia.org/wiki/File:Nav_Chandi_Mandir.jpg), Swapnil Kaustubh, CC BY-SA 4.0. Temple/shrine photo named Nav Chandi, **not evidence that a Nav Chandi Puja was performed**.
 
 **Verified topic image mappings: 56/94; 38 topic IDs still use licensed category references.** Attribution on every presented Commons photo is mandatory. Actual fulfilment, supplier photos, fees for physical products and Pandit agreements remain distinct unverifiable external requirements.
+
+
+## 2026-10-28: five independently checked ritual references (61/94)
+These source URLs, photographer/license metadata and photographed subjects were inspected directly on Wikimedia Commons. The following subjects are **not evidence of any Naksharix-delivered ceremony**:
+- **mahamrityunjaya-puja**: [Mahamrityunjaya temple front facade (6133259805)](https://commons.wikimedia.org/wiki/File:Mahamrityunjaya_temple_front_facade_(6133259805).jpg). Varun Shiv Kapur; CC BY 2.0. Photograph of Jageshwar temple facade, **not** the specific Puja.
+- **durga-saptashati-path**: [Durga puja in Mithila](https://commons.wikimedia.org/wiki/File:Durga_puja_in_Mithila.jpg). Pranayvikas; CC0 1.0. Real photographed Durga Puja and Chandi Path; service provider is unrelated to Naksharix.
+- **shat-chandi-puja**: [Chandi Path Yagna 01](https://commons.wikimedia.org/wiki/File:Chandi_Path_Yagna_01.jpg). Goutam1962; CC BY-SA 4.0. Real Chandi Path Yagna photo; not verification that it is Shat Chandi or an affiliated service.
+- **baglamukhi-puja**: [Baglamukhi temple](https://commons.wikimedia.org/wiki/File:Baglamukhi_temple.jpg). Hemant banswal; CC BY-SA 4.0. Temple photograph, **not** performed Baglamukhi Puja.
+- **akshaya-tritiya-puja**: [Akshaya Tritiya img](https://commons.wikimedia.org/wiki/File:Akshaya_Tritiya_img.jpg). Anugya..Chidar; CC BY-SA 4.0. Festival deity display photograph, **not** a performed Puja.
+
+**Current mapping count after this change:** 61/94 topic IDs have curated relevant references; 33/94 still use credited real category photographs. The curated references include temples, deity idols, representative rituals, and some reused sources; these are not 61 distinct actual service fulfilment photographs. Exact operator pictures and permissions are independent requirements.
+
+
+## 2026-10-28: specific Navagraha shrine/deity photography
+- **chandra-graha-shanti-puja**: [Chandra Graha at Shani Shingnapur](https://commons.wikimedia.org/wiki/File:Chandra_Graha_(Moon)_at_navagraha_mandapam,_Shani_Shingnapur.jpg), real Chandra Graha shrine statue photo by K.Venkataramana, **CC0 1.0**. This is temple imagery, not a performed Naksharix graha-shanti ritual.
+- **guru-graha-shanti-puja**: [Brihaspati.jpg](https://commons.wikimedia.org/wiki/File:Brihaspati.jpg), photograph of a 13th-century Brihaspati sculpture at the British Museum by Redtigerxyz, **CC BY-SA 3.0**. A relevant deity sculpture, not evidence of service delivery.
+
+**Current mapping count: 63/94**, remaining **31/94** with sourced category imagery. The count represents curated thematic references (including shrine and art photographs), not verified exact ceremonies, priest partners, supplier goods or 63 unique performed rituals.
