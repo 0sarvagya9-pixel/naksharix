@@ -73,11 +73,18 @@ export function RazorpayCheckoutButton({
       return;
     }
 
-    const orderResponse = await secureFetch("/api/payments/razorpay/order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    let orderResponse: Response;
+    try {
+      orderResponse = await secureFetch("/api/payments/razorpay/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      setLoading(false);
+      setStatus("Unable to reach the payment server. Please try again.");
+      return;
+    }
     const orderJson = await orderResponse.json().catch(() => null);
     if (!orderResponse.ok) {
       setLoading(false);
@@ -109,24 +116,24 @@ export function RazorpayCheckoutButton({
       theme: { color: "#A6772A" },
       handler: async (response: RazorpayResponse) => {
         setStatus(tr("verifyingPayment"));
-        const verifyResponse = await secureFetch("/api/payments/razorpay/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(response)
-        });
-        setLoading(false);
-
-        if (!verifyResponse.ok) {
-          setStatus(tr("paymentsComingSoon"));
-          return;
-        }
-
-        setStatus(tr("paymentVerified"));
-        const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
-        if (target) {
-          router.push(target);
-        } else {
-          router.refresh();
+        try {
+          const verifyResponse = await secureFetch("/api/payments/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response)
+          });
+          if (!verifyResponse.ok) {
+            setStatus("Payment confirmation is pending. Check your payment history before trying again; do not pay twice.");
+            return;
+          }
+          setStatus(tr("paymentVerified"));
+          const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
+          if (target) router.push(target);
+          else router.refresh();
+        } catch {
+          setStatus("Payment confirmation could not be checked. Check payment history before trying again; do not pay twice.");
+        } finally {
+          setLoading(false);
         }
       },
       modal: {
@@ -136,7 +143,12 @@ export function RazorpayCheckoutButton({
         }
       }
     });
-    checkout.open();
+    try {
+      checkout.open();
+    } catch {
+      setLoading(false);
+      setStatus("Unable to open Razorpay checkout. No payment was initiated in this window.");
+    }
   }
 
   return (
