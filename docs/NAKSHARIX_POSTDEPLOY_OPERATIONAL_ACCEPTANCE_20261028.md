@@ -34,3 +34,10 @@ Only the authorized Vercel deployment already recorded above has been promoted t
 ## Canonical public URL source fix (separate deployment required)
 
 The live website redirects apex `https://naksharix.com/` to `https://www.naksharix.com/`, but the prior `NEXT_PUBLIC_APP_URL` source default was apex, so its public sitemap/robots/canonical tags could advertise a redirecting host. This PR changes the **default** to `https://www.naksharix.com` and tests that sitemap, robots and SEO metadata use the same value. The production Vercel project environment had no explicit `NEXT_PUBLIC_APP_URL` variable, **but `vercel.json` supplied an explicit apex URL** that overrides the source default. Both `vercel.json` and `lib/env.ts` now use `https://www.naksharix.com`. This is the actual source of the mismatched sitemap and canonical tags. The existing live deployment is unchanged until a separately authorized production redeploy. This does not submit a sitemap or certify Google indexing.
+
+
+## Redis-independent admin email rate limit and honest Redis readiness
+
+The admin email acceptance route now serializes count-and-claim operations using a Postgres transaction-scoped advisory lock and a time-windowed `AdminActionLog` count (2 per signed-in Admin per hour). Its existing `AdminActionLog` table is present in the 43-table production schema, so no new schema migration is required. Audit attempts are recorded before calling Resend; if the DB claim fails, **no external email request is made**. Attempts that fail at the provider still consume their quota to prevent abuse. All Vercel instances share the same database ledger. This does not make other routes' local fallback distributed.
+
+Public `/api/ops/readiness` now calls the existing `sharedRedisConfigured()` helper instead of checking only `REDIS_URL`, so correctly configured Upstash REST credentials will no longer be falsely reported as missing. This is source-only and requires the next approved deploy. No Redis provider is provisioned by this patch.
