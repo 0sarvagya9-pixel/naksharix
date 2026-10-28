@@ -23,3 +23,20 @@ for(const id of ["bilva-archana","maha-gauri-puja","annaprashan-sanskar","chandi
     record.includes("creativecommons.org/licenses/") && record.includes("author:"),
     "PUJA_IMAGE_SOURCE_RIGHTS_INCOMPLETE="+id);
 }
+
+const { wikimediaOriginalForThumbnail }=await import("../lib/media/wikimedia-original.ts");
+assert.equal(
+  wikimediaOriginalForThumbnail("https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Rudrabhishake_Structure.jpg/960px-Rudrabhishake_Structure.jpg"),
+  "https://upload.wikimedia.org/wikipedia/commons/4/4c/Rudrabhishake_Structure.jpg",
+  "COMMONS_ORIGINAL_THUMB_PATH_MUST_DISCARD_THUMB_SEGMENT"
+);
+for (const unsafe of [
+  "https://thumb.wikimedia.org.evil.invalid/wikipedia/commons/thumb/4/4c/X.jpg/960px-X.jpg",
+  "http://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/X.jpg/960px-X.jpg",
+  "https://thumb.wikimedia.org/wikipedia/commons/4/4c/X.jpg",
+  "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/X.jpg/960px-X.jpg?source=unknown",
+]) assert.equal(wikimediaOriginalForThumbnail(unsafe),null,"INVALID_COMMONS_THUMB_ACCEPTED");
+const resilient=await (await import("node:fs/promises")).readFile("components/puja/resilient-editorial-image.tsx","utf8");
+assert.ok(resilient.includes("wikimediaOriginalForThumbnail(src)")&&
+  !resilient.includes('src.replace("https://thumb.wikimedia.org/"'),
+  "BROKEN_COMMONS_MIRROR_REINTRODUCED");
