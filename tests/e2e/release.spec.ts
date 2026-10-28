@@ -274,7 +274,7 @@ test.describe("Naksharix release browser QA", () => {
     ]);
     expect(readinessData.environment).toBe(releaseData.environment);
     expect(["preview", "production", "development", "test"]).toContain(readinessData.environment);
-    expect(readinessData.capabilities.shopMode).toBe("informational_enquiry_only");
+    expect(readinessData.capabilities.shopMode).toBe("market_priced_unpaid_order_requests");
   });
 
   test("pricing exposes only active services", async ({ page }) => {

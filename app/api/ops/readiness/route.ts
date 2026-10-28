@@ -33,7 +33,7 @@ export async function GET() {
       },
       subscriptionsEnabled: env.SUBSCRIPTIONS_ENABLED === "true",
       aiReportGeneratorEnabled: env.AI_REPORT_GENERATOR_ENABLED === "true",
-      shopMode: "informational_enquiry_only"
+      shopMode: "market_priced_unpaid_order_requests"
     },
     services: {
       databaseSchema: { ready: schema?.ready ?? false, missingCount: schema?.missingCount ?? 2 },
