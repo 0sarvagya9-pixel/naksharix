@@ -30,7 +30,7 @@ for(const s of ["partner.reviewStatus !== \"VERIFIED\"","!booking.scheduledAt","
 assert.ok(gatewayWebhook.includes('event.event==="refund.processed"')&&gatewayWebhook.includes('status:"REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
 assert.ok(bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"'),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");
 assert.ok(bookingPage.includes('reviewStatus:"VERIFIED"')&&bookingPage.includes('evidenceUrl:{not:null}')&&
-  bookingPage.includes('pricePaise:110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
+  bookingPage.includes('effectivePujaPrice(byTopic.get(row.topicId))===110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
   bookingPage.includes('getRazorpayReadiness().enabled'),"PUJA_CHECKOUT_UI_PARTNER_PRICE_OR_CREDENTIAL_GUARD_MISSING");
 assert.ok(bookingPage.includes('["PENDING","FAILED"].includes(payment.status)')&&
   bookingPage.includes('paymentSettled=bookingPayments.some')&&
@@ -41,6 +41,18 @@ assert.ok(checkoutClient.includes("Unable to reach the payment server")&&
   checkoutClient.includes("Payment confirmation is pending")&&
   checkoutClient.includes("do not pay twice")&&
   checkoutClient.includes('} finally {\n          setLoading(false);'),"RAZORPAY_CLIENT_FAILURE_OR_DUPLICATE_CHARGE_GUIDANCE_MISSING");
+
+const bookingRoute=read("app/api/puja/bookings/route.ts");
+assert.ok(db.includes("STANDARD_PUJA_PRICE_PAISE=110000")&&
+  db.includes("pujaTopics.map")&&
+  db.includes("if(pricePaise===null){delete offers[row.topicId]")&&
+  db.includes('error.code==="P2021"')&&
+  bookingRoute.includes("effectivePujaPrice(offer)")&&
+  bookingRoute.includes("quotedPricePaise:pricePaise")&&
+  gatewayOrder.includes("effectivePujaPrice(offer) !== booking.quotedPricePaise")&&
+  bookingPage.includes("effectivePujaPrice(byTopic.get(row.topicId))===110000"),"UNIVERSAL_1100_PUJA_RATE_OR_SERVER_UI_PARITY_MISSING");
+assert.ok(ui.includes("Owner-approved default request fee")&&
+  ui.includes("Booking requests held by Admin"),"ADMIN_STANDARD_RATE_OR_DISABLE_DISCLOSURE_MISSING");
 
 const pricingPage=read("app/pricing/page.tsx");
 const pricingContent=read("components/pricing-content.tsx");
