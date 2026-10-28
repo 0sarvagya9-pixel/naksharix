@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CalendarDays,Search,ShieldCheck,ArrowRight } from "lucide-react";
 import { pujaTopics,pujaCategories } from "@/lib/puja/service-catalogue";
 import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-photos";
+import { ResilientEditorialImage } from "@/components/puja/resilient-editorial-image";
 import type { PublicPujaOffer } from "@/lib/puja/offerings";
 
 export function PujaServicesDirectory({offerings}:{offerings:Record<string,PublicPujaOffer>}) {
@@ -64,7 +65,10 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
       {results.length?<div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {results.slice(0,visibleCount).map(topic=><article key={topic.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#d0a766]/35 bg-white transition hover:-translate-y-1 hover:border-[#f4ca7f]">
           <div className="relative aspect-[16/10] overflow-hidden bg-[#fff1de]">
-            <Image src={pujaEditorialImage(topic.id,topic.graphic,topic.category)} alt={pujaEditorialPhoto(topic.id,topic.category) ? "Representative ritual photograph for "+topic.name : topic.category+" category illustration"} width={640} height={400} unoptimized
+            <ResilientEditorialImage src={pujaEditorialImage(topic.id,topic.graphic,topic.category)}
+              fallbackSrc={topic.graphic}
+              alt={pujaEditorialPhoto(topic.id,topic.category) ? "related ritual photograph for "+topic.name : topic.category+" category illustration"}
+              width={640} height={400}
               className="h-full w-full object-cover transition-transform group-hover:scale-105"/>
             <span className="absolute left-3 top-3 rounded-full bg-[#271325]/90 px-3 py-1 text-xs font-bold text-[#f9da9e]">{topic.category}</span>
           </div>

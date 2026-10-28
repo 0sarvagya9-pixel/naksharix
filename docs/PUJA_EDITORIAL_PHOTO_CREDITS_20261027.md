@@ -20,3 +20,23 @@ This removes illustrated art from the public listing for every Puja topic, using
 - Homa: [Source](https://commons.wikimedia.org/wiki/File:Yajna.jpg) — Gaurav Dhwaj Khadka — [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
 - Festival: [Source](https://commons.wikimedia.org/wiki/File:Diwali_worship.jpg) — Moneysha26 — [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
 These photo categories cover 94/94 topics, with 13 more-specific topic photo overrides. Credit/source/license are visible on Puja cards and detail pages. Replace generic category images with stronger Puja-specific photography when supported by licensing evidence.
+
+## 2026-10-28 new individually researched licensed photograph overrides
+The following are real *representative* photographs curated from Wikimedia Commons file pages, not proof of actual Naksharix ceremonies:
+- **kali-puja** — [Kali Puja – Worship of Goddess Kali 02](https://commons.wikimedia.org/wiki/File:Kali_Puja_-_Worship_of_Goddess_Kali_02.jpg), Shoot stufz, CC BY-SA 4.0, 3072 × 4096.
+- **saraswati-puja / vasant-panchami-puja** — [Saraswati Puja at home](https://commons.wikimedia.org/wiki/File:Saraswati_Puja_at_home.jpg), Dionxco, CC BY-SA 4.0, 4608 × 3456. Two related topics share one truthful photograph.
+- **satyanarayan-katha** — [Satyanarayana Pooja](https://commons.wikimedia.org/wiki/File:Satyanarayana_Pooja.jpg), Prathvi Acharya, CC BY-SA 4.0, 1894 × 4096.
+- **karwa-chauth-puja** — [Karva Chauth Celebration](https://commons.wikimedia.org/wiki/File:Karva_Chauth_Celebration.jpg), Suthar.jagdishlal87, CC BY 4.0, 3000 × 4000.
+- **ganesh-chaturthi-puja** — [Ganesh chaturthi puja](https://commons.wikimedia.org/wiki/File:Ganesh_chaturthi_puja.jpg), Geetyadav 999, CC BY-SA 4.0, 3000 × 4000. Replaces generic Ganesh photo.
+Curation of five additional topic IDs expands the 13 pre-existing topic mappings to 18 of 94, with a distinct new photo replacing one older mapping. The category photo fallbacks cover the rest without pretending to show exact rituals. The 94/94 distinct ceremony-photo request is **not complete**: additional independently licensed topic-specific photo evidence or owner-supplied rights-cleared photography is still required; the readiness dashboard exposes this shortfall.
+
+- **holika-dahan-ritual** — [Holika Dahan 2024](https://commons.wikimedia.org/wiki/File:Holika_Dahan_2024.jpg), Mayank clicks, CC0 1.0, 4200 × 3456. This is a real Holika Dahan event photograph.
+The photo-registry topic-specific mappings now cover **19/94** topics. They do not yet supply 94 unique ceremony photographs.
+
+- **annapurna-puja** — [Annapurna mata pooja](https://commons.wikimedia.org/wiki/File:Annapurna_mata_pooja.jpg), Suresh Khole, CC BY-SA 4.0, 4632 × 3474.
+- **chhath-surya-arghya** — [Chhath Puja ritual](https://commons.wikimedia.org/wiki/File:Chhath_Puja_ritual.jpg), Sntshkumar750, CC BY-SA 4.0, 4160 × 3120.
+- **mundan-sanskar** — [Hindu baby first head shave](https://commons.wikimedia.org/wiki/File:Hindu_baby_first_head_shave_choulopan_chudakarana_sanskara.jpg), Whitney Lauren, CC BY 2.0, 1280 × 853. This is the *childbirth-life-stage rite*, not a mourning-related hair shaving event.
+Updated total: **22 of 94** individual topic mappings. The other topics continue to display category-relevant representative photos with truthful attributions, not made-up unique events.
+
+## Owner/Admin review
+The Puja offering editor now displays a preview, source/license credit and a **Needs topic-specific photograph** checkbox. It is a *review filter*, not a file uploader or proof of actual priest fulfilment. The category fallback is explicit; publishing a fee is not the same as having a verified priest or a ceremony-specific image.

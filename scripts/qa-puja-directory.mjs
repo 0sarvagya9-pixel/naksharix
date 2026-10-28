@@ -9,3 +9,9 @@ for(const category of pujaCategories.slice(1))assert.ok(pujaTopics.some(p=>p.cat
 assert.equal(findPujaTopic("rudrabhishek")?.name,"Rudrabhishek");
 assert.equal(findPujaTopic("fake-paid-puja"),undefined);
 console.log("PUJA_DIRECTORY_QA=PASS;TOPICS="+pujaTopics.length+";PAID_BOOKING=OFF");
+
+const photosSource = (await import("node:fs")).readFileSync("lib/puja/editorial-photos.ts","utf8");
+const topicPhotoIds=[...photosSource.matchAll(/^\s*"([a-z0-9-]+)": \{src:/gm)].map(m=>m[1]);
+assert.equal(topicPhotoIds.length,22,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
+assert.ok(topicPhotoIds.every(id=>pujaTopics.some(topic=>topic.id===id)),"PHOTO_MAP_UNKNOWN_PUJA_ID");
+assert.equal(new Set(topicPhotoIds).size,topicPhotoIds.length,"PHOTO_MAP_DUPLICATE_PUJA_ID");

@@ -88,3 +88,27 @@ assert.ok(chatUX.includes("!event.shiftKey && !event.nativeEvent.isComposing")&&
 
 assert.ok(read("components/home/editorial-service-banner.tsx").includes("imageCredit ?")&&
   read("app/consultation/page.tsx").includes("imageCredit={{label:"),"CONSULTATION_CC_ATTRIBUTION_MISSING");
+
+const pujaPhotoMap=read("lib/puja/editorial-photos.ts");
+const sourceCoverage=read("lib/ops/commercial-readiness.ts");
+for(const id of ["kali-puja","saraswati-puja","satyanarayan-katha","karwa-chauth-puja","ganesh-chaturthi-puja","vasant-panchami-puja"]){
+  assert.ok(pujaPhotoMap.includes('"'+id+'": {src:"https://'),"CURATED_PUJA_IMAGE_MISSING="+id);
+}
+assert.ok(sourceCoverage.includes("puja-photo-coverage") &&
+  sourceCoverage.includes("Category fallbacks are not photos of the exact ceremony."),"PUJA_IMAGE_COMPLETENESS_MUST_BE_TRUTHFUL");
+assert.ok(home.includes('href={"/shop/"+item.id}') &&
+  home.includes('View item / Add to Cart')&&home.includes('href={"/pujas/"+item.id}')&&
+  home.includes('Book Now <ArrowRight'),"HOMEPAGE_FEATURED_COMMERCE_LINKS_STALE");
+
+const adminPujaPhotos=read("components/admin-puja-offerings.tsx");
+for(const marker of ["needsExactPhoto","Show Pujas that still need a topic-specific photograph",
+  "pujaEditorialPhoto(topic.id,topic.category)","photo.author","photo.license"]){
+  assert.ok(adminPujaPhotos.includes(marker),"ADMIN_PUJA_PHOTO_CURATION_UI_MISSING="+marker);
+}
+
+const resilientPuja=read("components/puja/resilient-editorial-image.tsx");
+assert.ok(resilientPuja.includes('src.replace("https://thumb.wikimedia.org/", "https://upload.wikimedia.org/")')&&
+ resilientPuja.includes("setCurrentSrc(fallbackSrc)")&&resilientPuja.includes("Representative photo unavailable · illustration"),"WIKIMEDIA_IMAGE_FAILURE_FALLBACK_MISSING");
+for(const page of ["components/puja/puja-services-directory.tsx","app/pujas/[id]/page.tsx"]){
+ assert.ok(read(page).includes("<ResilientEditorialImage"),"PUJA_IMAGE_FALLBACK_NOT_CONNECTED="+page);
+}
