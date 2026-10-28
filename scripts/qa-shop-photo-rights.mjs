@@ -105,3 +105,10 @@ for(const marker of ["needsExactPhoto","Show Pujas that still need a topic-speci
   "pujaEditorialPhoto(topic.id,topic.category)","photo.author","photo.license"]){
   assert.ok(adminPujaPhotos.includes(marker),"ADMIN_PUJA_PHOTO_CURATION_UI_MISSING="+marker);
 }
+
+const resilientPuja=read("components/puja/resilient-editorial-image.tsx");
+assert.ok(resilientPuja.includes('src.replace("https://thumb.wikimedia.org/", "https://upload.wikimedia.org/")')&&
+ resilientPuja.includes("setCurrentSrc(fallbackSrc)")&&resilientPuja.includes("Representative photo unavailable · illustration"),"WIKIMEDIA_IMAGE_FAILURE_FALLBACK_MISSING");
+for(const page of ["components/puja/puja-services-directory.tsx","app/pujas/[id]/page.tsx"]){
+ assert.ok(read(page).includes("<ResilientEditorialImage"),"PUJA_IMAGE_FALLBACK_NOT_CONNECTED="+page);
+}
