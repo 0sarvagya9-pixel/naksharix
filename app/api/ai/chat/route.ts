@@ -4,7 +4,9 @@ import { fail, ok, handleApiError, validateJson } from "@/lib/api";
 import { buildMemory, isGeminiConfigured, parseAstrologyChat } from "@/lib/ai/gemini";
 import { chatWithAstrologerAIStrict, isGeminiChatProviderError } from "@/lib/ai/gemini-chat";
 import { aiFeatureParkedResponse, isAiAstrologerEnabled } from "@/lib/ai/feature-status";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
+import { sharedRedisConfigured } from "@/lib/cache/redis-cache";
+import { claimAnonymousAiQuota } from "@/lib/ai/anonymous-quota";
 import { readLanguageFromRequest, toAiLanguage, translatedApiMessage } from "@/lib/server-language";
 
 const schema = z.object({
@@ -22,8 +24,16 @@ export async function POST(request: NextRequest) {
     const body = await validateJson(request, schema);
     language = readLanguageFromRequest(request, body.language);
     const aiLanguage = toAiLanguage(language);
-    const limitResponse = await checkRateLimit({ request, key: "ai-chat", limit: 20, windowSeconds: 60 * 60 * 24, language });
-    if (limitResponse) return limitResponse;
+    if (sharedRedisConfigured()) {
+      // A configured Redis provider remains the low-latency shared counter;
+      // provider failure is not downgraded to a local memory counter.
+      const limitResponse = await checkRateLimit({ request, key: "ai-chat", limit: 20, windowSeconds: 60 * 60 * 24, language });
+      if (limitResponse) return limitResponse;
+    } else {
+      // Without Redis, a serialized, HMAC-anonymized DB audit claim protects
+      // all server instances before any chargeable external AI inference.
+      if (!await claimAnonymousAiQuota(request)) return fail(rateLimitMessage(language), 429);
+    }
     if (!isGeminiConfigured()) return fail(translatedApiMessage(language, "aiChatNotConfigured"), 503);
 
     const parsed = parseAstrologyChat(body.messages, body.kundliContext);
