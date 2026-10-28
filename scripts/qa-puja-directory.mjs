@@ -12,7 +12,7 @@ console.log("PUJA_DIRECTORY_QA=PASS;TOPICS="+pujaTopics.length+";PAID_BOOKING=OF
 
 const photosSource = (await import("node:fs")).readFileSync("lib/puja/editorial-photos.ts","utf8");
 const topicPhotoIds=[...photosSource.matchAll(/^\s*"([a-z0-9-]+)": \{src:/gm)].map(m=>m[1]);
-assert.equal(topicPhotoIds.length,56,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
+assert.equal(topicPhotoIds.length,61,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
 assert.ok(topicPhotoIds.every(id=>pujaTopics.some(topic=>topic.id===id)),"PHOTO_MAP_UNKNOWN_PUJA_ID");
 assert.equal(new Set(topicPhotoIds).size,topicPhotoIds.length,"PHOTO_MAP_DUPLICATE_PUJA_ID");
 
@@ -51,3 +51,11 @@ for(const id of ["ganapati-homa","kashi-vishwanath-smaran-puja","lalita-sahasran
 }
 
 for(const id of ["lakshmi-narayan-puja","nav-chandi-puja"]) assert.ok(topicPhotoIds.includes(id),"ADDITIONAL_COMMONS_PHOTO_MISSING="+id);
+
+for(const id of ["mahamrityunjaya-puja","durga-saptashati-path","shat-chandi-puja","baglamukhi-puja","akshaya-tritiya-puja"]){
+  assert.ok(topicPhotoIds.includes(id),"LICENSED_RITUAL_PHOTO_NOT_MAPPED="+id);
+  const row=photosSource.split("\n").find(line=>line.startsWith('  "'+id+'": {src:'));
+  assert.ok(row && row.includes("commons.wikimedia.org/wiki/File:") &&
+    row.includes('author:') && row.includes('licenseUrl:'),
+    "RITUAL_PHOTO_PROVENANCE_NOT_COMPLETE="+id);
+}
