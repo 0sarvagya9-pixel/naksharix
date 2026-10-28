@@ -7,7 +7,7 @@ const envSchema = z.object({
   NEXTAUTH_SECRET: z.string().min(32).optional(),
   NEXTAUTH_URL: z.string().url().optional(),
   JWT_SECRET: z.string().min(32).optional(),
-  NEXT_PUBLIC_APP_URL: z.string().url().default("https://naksharix.com"),
+  NEXT_PUBLIC_APP_URL: z.string().url().default("https://www.naksharix.com"),
   NEXT_PUBLIC_APP_NAME: z.string().default("Naksharix"),
   NEXT_PUBLIC_WHATSAPP_NUMBER: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
