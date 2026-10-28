@@ -40,6 +40,6 @@ assert.ok(read("components/shop-coming-soon-content.tsx").includes("Market-compa
  read("app/shop/[slug]/page.tsx").includes("Market-compared listing price")&&
  read("components/shop/cart-page-client.tsx").includes("Market-compared product subtotal"),
  "SHOP_PRICING_TERMS_DISCLOSURE_MISSING");
-assert.ok(ledger.includes("not proof of our source costs")&&ledger.includes("exact bundled items"),
+assert.ok(ledger.includes("nor proof of our source costs")&&ledger.includes("exact bundled items"),
  "MARKET_REFERENCE_MUST_NOT_CLAIM_SUPPLIER_CERTAINTY");
 console.log("SHOP_MARKET_PRICE_QA=PASS;SKUS=12;PUBLIC_LIST_PRICES=INR;OWNER_BENCHMARK=2026-10-28;PAYMENT=UNPAID_MANUAL;SUPPLIER_AUTHENTICITY=NOT_ATTESTED");
