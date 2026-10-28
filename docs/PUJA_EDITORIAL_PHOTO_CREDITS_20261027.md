@@ -40,3 +40,28 @@ Updated total: **22 of 94** individual topic mappings. The other topics continue
 
 ## Owner/Admin review
 The Puja offering editor now displays a preview, source/license credit and a **Needs topic-specific photograph** checkbox. It is a *review filter*, not a file uploader or proof of actual priest fulfilment. The category fallback is explicit; publishing a fee is not the same as having a verified priest or a ceremony-specific image.
+
+## 2026-10-28 additional rights-verified Puja photograph research
+These 19 added **topic-related representative photographs** have personally inspected Wikimedia Commons author and Creative Commons licensing pages. A thematic image is not an independently authenticated record of the exact bookable service, date, Pandit or Naksharix ceremony; especially for prayers/homa variants that cannot be distinguished by photograph.
+
+- **tulsi-vivah-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Tulsi_Vivah.jpg) — Antrabhardwaj2 — CC BY-SA 4.0.
+- **govardhan-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Govardhan_Puja.jpg) — Milan Madhav Das — CC BY-SA 4.0.
+- **navratri-kalash-sthapana** — [Source / license](https://commons.wikimedia.org/wiki/File:Navratri_Puja.jpg) — Vyom.Y — CC BY-SA 4.0.
+- **krishna-janmashtami-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Janmashtmi.jpg) — Shraddhasinghuikey — CC BY-SA 4.0.
+- **raksha-bandhan-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:RakshaBandhan.jpg) — Satyam Kumar — CC BY-SA 4.0.
+- **kartik-purnima-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Tulsi_Vivah_Celebration.jpg) — आर्या जोशी — CC BY-SA 4.0.
+- **ram-navami-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Sri_Rama_Navami_Edurukolu_At_Bhadrachalam_Temple_19.jpg) — Iharishs — CC BY-SA 4.0.
+- **sita-ram-kalyanam** — [Source / license](https://commons.wikimedia.org/wiki/File:Sri_Rama_Navami_Edurukolu_At_Bhadrachalam_Temple_01.jpg) — Iharishs — CC BY-SA 4.0.
+- **upanayan-sanskar** — [Source / license](https://commons.wikimedia.org/wiki/File:Upanayan_rituals.jpg) — Nayan j Nath — CC BY-SA 4.0.
+- **pitru-tarpan** — [Source / license](https://commons.wikimedia.org/wiki/File:TARPAN_RITUAL.jpg) — Susovan Chakraborty5 — CC BY-SA 4.0.
+- **bhoomi-pujan** — [Source / license](https://commons.wikimedia.org/wiki/File:Bhoomipujahkht.jpg) — Harekrishnaheritage — CC BY-SA 4.0.
+- **samuhik-havan** — [Source / license](https://commons.wikimedia.org/wiki/File:Hawan_by_priests.jpg) — Snay015 — CC BY-SA 4.0.
+- **makar-sankranti-surya-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Offering_to_God_sun_on_the_festival_of_makar_Sankranti_in_India.jpg) — Sovopatel — CC BY-SA 4.0.
+- **agnihotra-havan** — [Source / license](https://commons.wikimedia.org/wiki/File:Fire_ritual.jpg) — Nilimajhapate — CC BY-SA 4.0.
+- **gayatri-havan** — [Source / license](https://commons.wikimedia.org/wiki/File:Havan_image_at_Gobind_Sadan.jpg) — Harman015 — CC BY-SA 4.0.
+- **durga-ashtami-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:2025_Durga_Puja_IMG_20260303_224831.jpg) — Arkadeep12345 — CC BY-SA 4.0.
+- **durga-navami-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Durga_Puja_Preparations.jpg) — Dey.sandip — CC BY 3.0.
+- **vishnu-sahasranama-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Vishnu_Puja_-_Howrah_2012-12-16_2051.JPG) — Biswarup Ganguly — CC BY 3.0.
+- **ekadashi-vishnu-puja** — [Source / license](https://commons.wikimedia.org/wiki/File:Vishnu_Puja_At_Home_With_Devotees_-_Howrah_20170708130101.jpg) — Biswarup Ganguly — CC BY 3.0.
+
+**Curation coverage: 41 of 94 topic IDs have manually chosen images; 53 use category-relevant representative photographs.** The 41 mappings do not mean 41 unique verified performances, and stock photo reuse is not proof of fulfilment.
