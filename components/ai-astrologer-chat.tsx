@@ -62,7 +62,7 @@ export function AiAstrologerChat() {
       });
       const json = await response.json().catch(() => null);
 
-      if (!response.ok || typeof json?.data?.answer !== "string") {
+      if (!response.ok || typeof json?.data?.answer !== "string" || !json.data.answer.trim()) {
         setStatus(json?.error || labels.error);
         return;
       }
