@@ -12,6 +12,14 @@ console.log("PUJA_DIRECTORY_QA=PASS;TOPICS="+pujaTopics.length+";PAID_BOOKING=OF
 
 const photosSource = (await import("node:fs")).readFileSync("lib/puja/editorial-photos.ts","utf8");
 const topicPhotoIds=[...photosSource.matchAll(/^\s*"([a-z0-9-]+)": \{src:/gm)].map(m=>m[1]);
-assert.equal(topicPhotoIds.length,46,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
+assert.equal(topicPhotoIds.length,50,"TOPIC_SPECIFIC_PHOTO_COVERAGE_OUT_OF_SYNC");
 assert.ok(topicPhotoIds.every(id=>pujaTopics.some(topic=>topic.id===id)),"PHOTO_MAP_UNKNOWN_PUJA_ID");
 assert.equal(new Set(topicPhotoIds).size,topicPhotoIds.length,"PHOTO_MAP_DUPLICATE_PUJA_ID");
+
+for(const id of ["bilva-archana","maha-gauri-puja","annaprashan-sanskar","chandi-homa"]){
+  assert.ok(topicPhotoIds.includes(id),"NEW_PUJA_TOPIC_IMAGE_MISSING="+id);
+  const record=photosSource.match(new RegExp('"'+id+'": \\{src:"https:[^\\n]+'))?.[0];
+  assert.ok(record && record.includes("commons.wikimedia.org/wiki/File:") &&
+    record.includes("creativecommons.org/licenses/") && record.includes("author:"),
+    "PUJA_IMAGE_SOURCE_RIGHTS_INCOMPLETE="+id);
+}
