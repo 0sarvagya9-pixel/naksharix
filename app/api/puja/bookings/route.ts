@@ -4,7 +4,7 @@ import { fail,handleApiError,ok,validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { findPujaTopic } from "@/lib/puja/service-catalogue";
-import { rateLimit } from "@/lib/rate-limit";
+
 export const dynamic="force-dynamic";
 const inputSchema=z.object({
  topicId:z.string().regex(/^[a-z0-9-]{1,100}$/),
@@ -47,14 +47,26 @@ export async function POST(request:Request){
   // Do not record a different fee than the one the devotee actually viewed.
   if(input.expectedPricePaise!==undefined&&offer.pricePaise!==input.expectedPricePaise)
     return fail("The published Puja fee changed. Refresh and review the new price before submitting.",409);
-  const limited=await rateLimit("puja-booking-request:"+user.id,4,86400);
-  if(!limited.allowed)return fail("Daily Puja request limit reached.",429);
-  const booking=await prisma.pujaBookingRequest.create({
-   data:{userId:user.id,topicId:input.topicId,quotedPricePaise:offer.pricePaise,preferredDate:when,
-    city:input.city,devoteeName:input.devoteeName,gotra:input.gotra||null,
-    sankalpNote:input.sankalpNote,customerPhone:input.customerPhone,status:"REQUESTED"},
-   select:{id:true,status:true,topicId:true,preferredDate:true,quotedPricePaise:true,createdAt:true}
+  // Shared Postgres lock + persisted count enforce this quota across every
+  // serverless instance; no per-instance memory limit or Redis dependency.
+  const booking=await prisma.$transaction(async tx=>{
+    await tx.$queryRaw<Array<{locked:string}>>`
+      SELECT pg_advisory_xact_lock(
+        hashtext(${user.id}),hashtext('naksharix-puja-request-v1')
+      )::text AS locked
+    `;
+    const recent=await tx.pujaBookingRequest.count({where:{
+      userId:user.id,createdAt:{gte:new Date(Date.now()-86400_000)}
+    }});
+    if(recent>=4)return null;
+    return tx.pujaBookingRequest.create({
+      data:{userId:user.id,topicId:input.topicId,quotedPricePaise:offer.pricePaise,preferredDate:when,
+        city:input.city,devoteeName:input.devoteeName,gotra:input.gotra||null,
+        sankalpNote:input.sankalpNote,customerPhone:input.customerPhone,status:"REQUESTED"},
+      select:{id:true,status:true,topicId:true,preferredDate:true,quotedPricePaise:true,createdAt:true}
+    });
   });
+  if(!booking)return fail("Daily Puja request limit reached.",429);
   return ok({booking,confirmed:false,panditAssigned:false,paymentCollected:false,
     nextStep:"Owner verifies Pandit availability and local muhurat before confirming."},{status:201});
  }catch(error){
