@@ -30,6 +30,11 @@ assert.equal(
   "https://upload.wikimedia.org/wikipedia/commons/4/4c/Rudrabhishake_Structure.jpg",
   "COMMONS_ORIGINAL_THUMB_PATH_MUST_DISCARD_THUMB_SEGMENT"
 );
+assert.equal(
+  wikimediaOriginalForThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Rudrabhishake_Structure.jpg/960px-Rudrabhishake_Structure.jpg"),
+  "https://upload.wikimedia.org/wikipedia/commons/4/4c/Rudrabhishake_Structure.jpg",
+  "UPLOAD_HOST_THUMB_FALLBACK_MUST_RETAIN_COMMONS_ORIGINAL"
+);
 for (const unsafe of [
   "https://thumb.wikimedia.org.evil.invalid/wikipedia/commons/thumb/4/4c/X.jpg/960px-X.jpg",
   "http://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/X.jpg/960px-X.jpg",
