@@ -31,6 +31,23 @@ assert(deliverRoute.includes("READY_FOR_DELIVERY") && deliverRoute.includes("DEL
 assert(deliverRoute.includes("emailSentAt") && deliverRoute.includes("deliveryStatus"), "Delivery route stores delivery metadata", "real delivery state");
 assert(adminActions.includes("/deliver") && adminActions.includes("Send Email"), "Admin action calls delivery route", "admin-triggered delivery");
 
+const adminEmailRoute = source("app/api/admin/email-test/route.ts");
+const adminEmailUi = source("components/admin/admin-email-acceptance-test.tsx");
+const readinessPage = source("app/admin/readiness/page.tsx");
+assert(adminEmailRoute.includes("getAdminApiUser()") &&
+  adminEmailRoute.includes('if (!admin) return fail("Not found", 404)') &&
+  adminEmailRoute.includes("env.ADMIN_EMAIL") &&
+  adminEmailRoute.includes('to: env.ADMIN_EMAIL') &&
+  !adminEmailRoute.includes("request.json()"), "Email smoke is admin-only and cannot send to arbitrary addresses", "fixed recipient");
+assert(adminEmailRoute.includes("getEmailReadiness()") &&
+  adminEmailRoute.includes('rateLimit("admin-email-smoke:" + admin.id, 2, 3600)') &&
+  adminEmailRoute.includes("if (!result.sent)") &&
+  adminEmailRoute.includes("providerAccepted: true"), "Email smoke is readiness gated, throttled and honest about provider acceptance", "no fake delivered status");
+assert(adminEmailUi.includes('secureFetch("/api/admin/email-test", { method: "POST" })') &&
+  adminEmailUi.includes("Check your configured Admin mailbox") &&
+  readinessPage.includes("<AdminEmailAcceptanceTest enabled={email.emailEnabled} />"),
+  "Email acceptance button requires explicit secure admin interaction", "no background sending");
+
 const counts = results.reduce((acc, result) => {
   acc[result.status] = (acc[result.status] ?? 0) + 1;
   return acc;
