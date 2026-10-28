@@ -25,6 +25,21 @@ const entries=[...photos.matchAll(/^\s*"([a-z0-9-]+)":\s*\{url:/gm)].map(m=>m[1]
 assert.equal(entries.length,12,"REAL_SEED_PHOTO_COUNT_NOT_12");
 assert.equal(new Set(entries).size,12,"REAL_SEED_PHOTO_IDS_DUPLICATED");
 assert.ok(photos.includes("thumb.wikimedia.org") && photos.includes("commons.wikimedia.org") && photos.includes("licenseUrl:"),"PHOTO_PROVENANCE_MISSING");
+const { matchesExternalPhotoProof }=await import("../lib/shop/photo-rights.ts");
+const licensedPhotos=[...photos.matchAll(/^\s*"([a-z0-9-]+)":\s*\{url:"([^"]+)",alt:"[^"]+",imageRights:"LICENSED",evidenceUrl:"([^"]+)"/gm)];
+assert.equal(licensedPhotos.length,12,"SHOP_SOURCE_PHOTO_PROOF_RECORD_COUNT_MISMATCH");
+for(const [,id,url,proof] of licensedPhotos){
+  assert.ok(matchesExternalPhotoProof(url,proof,"LICENSED"),"SHOP_COMMONS_PROOF_INVALID="+id);
+  assert.equal(matchesExternalPhotoProof(url.replace(/\/commons\/thumb\/[a-f0-9]\/\w{2}\//,"/commons/thumb/0/00/"),proof,"LICENSED"),false,
+    "SHOP_COMMONS_HASH_DIRECTORY_MUST_MATCH_FILENAME="+id);
+  assert.equal(matchesExternalPhotoProof(url,proof.replace("File:","File:Unrelated_"),"LICENSED"),false,
+    "SHOP_UNRELATED_LICENSE_PROOF_ACCEPTED="+id);
+  assert.equal(matchesExternalPhotoProof(url+"?source=untrusted",proof,"LICENSED"),false,
+    "SHOP_COMMONS_QUERY_URL_UNTRUSTED="+id);
+}
+assert.ok(read("lib/shop/photo-rights.ts").includes('createHash("md5")') &&
+  read("lib/shop/photo-rights.ts").includes("image.hostname===\"thumb.wikimedia.org\""),
+  "SHOP_COMMONS_FILENAME_HASH_GUARD_MISSING");
 assert.ok(store.includes("photoFallbackForLegacySeed") && store.includes("product.imageRights"),"STORED_ADMIN_IMAGES_NOT_PRESERVED");
 assert.ok(productDetail.includes("Real reference photograph, not verified Naksharix stock") &&
   productDetail.includes("chosen.credit") && productDetail.includes("chosen.licenseUrl"),"PRODUCT_IMAGE_RIGHTS_DISCLOSURE_MISSING");

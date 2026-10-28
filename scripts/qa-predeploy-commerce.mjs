@@ -23,6 +23,12 @@ const adminPuja=read("app/api/admin/puja-bookings/route.ts");
 assert.ok(orders.includes("getCurrentUser()")&&orders.includes("getShopCatalogue()")&&
  orders.includes('paymentStatus:"UNPAID"')&&orders.includes("Number.isSafeInteger(subtotal)"),"Order price/payment invariant absent");
 assert.ok(orders.includes("new Set(productIds).size")&&orders.includes("rateLimit("),"Duplicate/rate limit absent");
+const cartClient=read("components/shop/cart-page-client.tsx");
+assert.ok(cartClient.includes("expectedSubtotalPaise:total") &&
+  orders.includes("expectedSubtotalPaise:z.number().int().min(0).max(1000000000).optional()") &&
+  orders.includes("input.expectedSubtotalPaise!==subtotal") &&
+  orders.includes('review the current prices before ordering.",409'),
+  "SHOP_STALE_CART_TOTAL_MUST_REJECT_BEFORE_PERSISTENCE");
 assert.ok(adminOrders.includes("getAdminApiUser()")&&adminOrders.includes("updateMany")&&
  adminOrders.includes("expectedVersion")&&adminOrders.includes("adminActionLog.create"),
  "Shop admin role/concurrency/audit missing");
