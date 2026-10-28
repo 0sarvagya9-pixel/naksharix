@@ -19,6 +19,13 @@ assert.ok(ui.includes('secureFetch("/api/admin/puja-offerings"')&&ui.includes("P
 assert.ok(index.includes("getPublishedPujaOffers()")&&listings.includes("offerings[topic.id]")&&detail.includes('const offering=(await getPublishedPujaOffers())[item.id]'),"Missing public price integration");
 assert.ok(db.includes('error.code==="P2021"')&&db.includes("return {}"),"Missing-table fallback must not fake prices");
 assert.ok(listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "'),"Published Puja offers must show Book Now");
+const bookingClient=read("components/puja/booking-request-client.tsx");
+assert.ok(bookingClient.includes("confirmedQuotePaise")&&bookingClient.includes("quotedPricePaise")&&
+  !bookingClient.includes("Listed fee ₹1,100."),"BOOKING_COPY_MUST_FOLLOW_SERVER_QUOTE");
+assert.ok(!detail.includes("₹1,100 is the listed service fee.")&&detail.includes("published fee shown above"),
+  "PUJA_DETAIL_MUST_NOT_CONTRADICT_ADMIN_PRICE");
+assert.ok(ui.includes("pricePaise:110000,durationMinutes:null,available:false")&&
+  ui.includes("Existing saved rates are preserved"),"UNPUBLISHED_OWNER_1100_DRAFT_MISSING");
 console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;OWNER_PRICES_MANAGED=YES;PAYMENTS_GATED_UNTIL_PARTNER_CONFIRMED");
 
 const gatewayOrder=read("app/api/payments/razorpay/order/route.ts");
