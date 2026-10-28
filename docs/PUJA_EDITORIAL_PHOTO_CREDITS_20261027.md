@@ -98,6 +98,12 @@ Four inspected Commons originals, image subjects and license versions:
 - **lalita-sahasranama-archana**: [Lalitha sahasra nama parayana at ahoratram](https://commons.wikimedia.org/wiki/File:Lalitha_sahasra_nama_parayana_at_ahoratram.JPG), photographed collective Sahasranama recitation, by Pavan santhosh.s, CC BY-SA 3.0. Related prayer, not confirmation of actual Naksharix archana.
 - **narasimha-puja**: [Narasimha deity at ISKCON Mayapur 05](https://commons.wikimedia.org/wiki/File:Narasimha_deity_at_ISKCON_Mayapur_05.jpg), deity photo by Pinakpani, CC BY-SA 4.0. Idol photograph; no claim that a Puja was performed or inventory/temple partnered with Naksharix.
 
-Curated topic references are now **54/94**; **40/94** use clearly attributed category photos, which do not prove exact Puja photos or real priest availability. Several mappings among the curated 54 share a source or are topical related subjects rather than actual ceremonies. Do not market this number as distinct ceremony photos.
+Curated topic references are now **56/94**; **38/94** use clearly attributed category photos, which do not prove exact Puja photos or real priest availability. Several mappings among the curated 56 share a source or are topical related subjects rather than actual ceremonies. Do not market this number as distinct ceremony photos.
 
 The browser image fallback now maps `thumb.wikimedia.org/wikipedia/commons/thumb/<hash>/<file>/<size>-<file>` to the actual `upload.wikimedia.org/wikipedia/commons/<hash>/<file>`, without naively swapping the host while retaining the unusable `thumb` suffix. A failed original still falls back to the existing disclosed local illustration. This is a source-code fix; actual production image delivery requires after-deploy verification. Rights and subject relevance do not establish actual Naksharix service fulfilment.
+
+### Two further deity/shrine photo references (not performed Puja photos)
+- **lakshmi-narayan-puja**: [LakshmiNarayan.jpg](https://commons.wikimedia.org/wiki/File:LakshmiNarayan.jpg), NaskarSoumallya, CC BY-SA 4.0. Actual photographed Lakshmi Narayan deity image, not Naksharix priest/delivered Puja.
+- **nav-chandi-puja**: [Nav Chandi Mandir.jpg](https://commons.wikimedia.org/wiki/File:Nav_Chandi_Mandir.jpg), Swapnil Kaustubh, CC BY-SA 4.0. Temple/shrine photo named Nav Chandi, **not evidence that a Nav Chandi Puja was performed**.
+
+**Verified topic image mappings: 56/94; 38 topic IDs still use licensed category references.** Attribution on every presented Commons photo is mandatory. Actual fulfilment, supplier photos, fees for physical products and Pandit agreements remain distinct unverifiable external requirements.
