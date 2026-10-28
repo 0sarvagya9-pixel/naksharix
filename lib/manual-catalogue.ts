@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
+import { marketPriceForSeed, formatSeedPrice } from "@/lib/shop/market-price-seeds";
 
 export type CatalogueText = Record<Locale, string>;
 export type ProductStatus = "active" | "inactive";
@@ -119,11 +120,11 @@ export function emptyShopProduct(): ShopProduct {
     imageUrl: "",
     imageAlt: text(""),
     galleryImages: [],
-    unitPricePaise: null,
+    unitPricePaise: marketPricePaise,
     priceLabel: {
-      en: "Price on request",
-      hi: "Price on request",
-      hinglish: "Price on request"
+      en: marketPricePaise === null ? "Price on request" : formatSeedPrice(marketPricePaise),
+      hi: marketPricePaise === null ? "मूल्य उपलब्ध नहीं" : formatSeedPrice(marketPricePaise),
+      hinglish: marketPricePaise === null ? "Price on request" : formatSeedPrice(marketPricePaise)
     },
     status: "active",
     featured: false,
@@ -138,6 +139,7 @@ export function emptyShopProduct(): ShopProduct {
 
 function product(id: string, category: string, purpose: string, en: string, hi: string, hinglish: string, descEn: string, descHi: string, descHinglish: string): ShopProduct {
   const now = "2026-05-24T00:00:00.000Z";
+  const marketPricePaise = marketPriceForSeed(id);
   const purposeTag = purpose.toLowerCase().replace(/\s+/g, "-");
   return {
     id,
