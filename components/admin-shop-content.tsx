@@ -23,6 +23,7 @@ export function AdminShopContent() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
+  const [reviewFilter, setReviewFilter] = useState<"all" | "needs-price" | "needs-supplier-photo">("all");
   const [editing, setEditing] = useState<FormState | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -49,13 +50,27 @@ export function AdminShopContent() {
     return () => { active = false; };
   }, []);
 
+  const hasPrice = (item: ShopProduct) =>
+    Number.isSafeInteger(item.unitPricePaise) && (item.unitPricePaise ?? 0) >= 100;
+  const hasSupplierPhotoEvidence = (item: ShopProduct) =>
+    (item.galleryImages || []).some(image =>
+      (image.imageRights === "OWNED" || image.imageRights === "SUPPLIER_AUTHORIZED") &&
+      /^https:\/\//.test(image.evidenceUrl)) ||
+    ((item.imageRights === "OWNED" || item.imageRights === "SUPPLIER_AUTHORIZED") &&
+      /^https:\/\//.test(item.imageEvidenceUrl || ""));
+  const pricedCount = products.filter(hasPrice).length;
+  const supplierEvidenceCount = products.filter(hasSupplierPhotoEvidence).length;
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter((product) => {
       const haystack = `${product.name.en} ${product.category} ${product.purpose} ${product.tags.join(" ")}`.toLowerCase();
-      return (!q || haystack.includes(q)) && (category === "all" || product.category === category) && (status === "all" || product.status === status);
+      return (!q || haystack.includes(q)) && (category === "all" || product.category === category) &&
+        (status === "all" || product.status === status) &&
+        (reviewFilter === "all" || (reviewFilter === "needs-price" && !hasPrice(product)) ||
+          (reviewFilter === "needs-supplier-photo" && !hasSupplierPhotoEvidence(product)));
     });
-  }, [category, products, query, status]);
+  }, [category, products, query, status, reviewFilter]);
 
   async function persist(nextProducts: ShopProduct[], message: string): Promise<boolean> {
     if (saving) return false;
@@ -168,6 +183,12 @@ export function AdminShopContent() {
             </div>
           </div>
 
+
+          <p className="mt-4 text-sm leading-6 text-[#f0d8ba]" role="status">
+            Catalogue readiness: {pricedCount}/{products.length} products have a saved positive INR price;
+            {" "}{supplierEvidenceCount}/{products.length} have owner/supplier-authorized image-rights evidence.
+            Licensed reference photographs do not count as actual stock photos.
+          </p>
           {notice ? <div className="mt-4 rounded-xl border border-[#00f5a0]/30 bg-[#00f5a0]/10 px-4 py-3 text-sm text-[#00f5a0]">{notice}</div> : null}
           {error ? <div className="mt-4 rounded-xl border border-[#ea580c]/40 bg-[#ea580c]/10 px-4 py-3 text-sm text-[#fbbf24]">{error}</div> : null}
         </div>
@@ -178,7 +199,7 @@ export function AdminShopContent() {
               <CardTitle className="font-cinzel text-2xl text-[#f3d382]">Products</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-3 lg:grid-cols-[1fr_180px_160px]">
+              <div className="grid gap-3 lg:grid-cols-[1fr_180px_150px_210px]">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94a3b8]" />
                   <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products..." className="border-[#263957] bg-[#0c1830] pl-9" />
@@ -191,6 +212,12 @@ export function AdminShopContent() {
                   <option value="all">All status</option>
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
+                </select>
+                <select value={reviewFilter} onChange={(event) => setReviewFilter(event.target.value as typeof reviewFilter)} aria-label="Product readiness filter"
+                  className="h-10 rounded-md border border-[#263957] bg-[#0c1830] px-3 text-sm text-white">
+                  <option value="all">All photo/price states</option>
+                  <option value="needs-price">Needs approved price</option>
+                  <option value="needs-supplier-photo">Needs actual stock photo evidence</option>
                 </select>
               </div>
 

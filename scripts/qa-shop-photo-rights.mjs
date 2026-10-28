@@ -112,3 +112,9 @@ assert.ok(resilientPuja.includes('src.replace("https://thumb.wikimedia.org/", "h
 for(const page of ["components/puja/puja-services-directory.tsx","app/pujas/[id]/page.tsx"]){
  assert.ok(read(page).includes("<ResilientEditorialImage"),"PUJA_IMAGE_FALLBACK_NOT_CONNECTED="+page);
 }
+
+const shopAdminReadiness=read("components/admin-shop-content.tsx");
+for(const phrase of ["hasSupplierPhotoEvidence","needs-supplier-photo","Needs approved price","supplierEvidenceCount",
+  "Licensed reference photographs do not count as actual stock photos."]){
+  assert.ok(shopAdminReadiness.includes(phrase),"ADMIN_SHOP_OWNER_DATA_REVIEW_MISSING="+phrase);
+}
