@@ -2,7 +2,7 @@ import { fail, ok } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
 import { getEmailReadiness, sendEmail } from "@/lib/email/email-service";
-import { rateLimit } from "@/lib/rate-limit";
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +18,35 @@ export async function POST() {
   if (!readiness.emailEnabled) return fail("Transactional email adapter is not ready.", 503);
 
   try {
-    const limit = await rateLimit("admin-email-smoke:" + admin.id, 2, 3600);
-    if (!limit.allowed) return fail("Email acceptance test rate limit reached.", 429);
+    // A transaction-scoped Postgres advisory lock serializes the audit count
+    // across ALL Vercel instances. Do not rely on in-memory cache when Redis
+    // is missing; a failed DB transaction must never send an email.
+    const claim = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw<Array<{ locked: string }>>`
+        SELECT pg_advisory_xact_lock(
+          hashtext(${admin.id}), hashtext('naksharix-email-smoke-v1')
+        )::text AS locked
+      `;
+      const recent = await tx.adminActionLog.count({
+        where: {
+          adminId: admin.id,
+          action: "email.smoke.attempt",
+          createdAt: { gte: new Date(Date.now() - 3600_000) }
+        }
+      });
+      if (recent >= 2) return false;
+      await tx.adminActionLog.create({
+        data: {
+          adminId: admin.id,
+          action: "email.smoke.attempt",
+          targetType: "OperationalEmailTest",
+          targetId: "configured-admin-mailbox",
+          metadata: { recipientSource: "ADMIN_EMAIL", provider: "resend" }
+        }
+      });
+      return true;
+    });
+    if (!claim) return fail("Email acceptance test rate limit reached.", 429);
     const result = await sendEmail({
       to: env.ADMIN_EMAIL,
       subject: "NAKSHARIX admin email delivery verification",

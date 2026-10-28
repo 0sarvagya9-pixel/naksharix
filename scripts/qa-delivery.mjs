@@ -40,13 +40,23 @@ assert(adminEmailRoute.includes("getAdminApiUser()") &&
   adminEmailRoute.includes('to: env.ADMIN_EMAIL') &&
   !adminEmailRoute.includes("request.json()"), "Email smoke is admin-only and cannot send to arbitrary addresses", "fixed recipient");
 assert(adminEmailRoute.includes("getEmailReadiness()") &&
-  adminEmailRoute.includes('rateLimit("admin-email-smoke:" + admin.id, 2, 3600)') &&
+  adminEmailRoute.includes("prisma.$transaction") &&
+  adminEmailRoute.includes("pg_advisory_xact_lock") &&
+  adminEmailRoute.includes('action: "email.smoke.attempt"') &&
+  adminEmailRoute.includes("recent >= 2") &&
+  !adminEmailRoute.includes('import { rateLimit }') &&
   adminEmailRoute.includes("if (!result.sent)") &&
   adminEmailRoute.includes("providerAccepted: true"), "Email smoke is readiness gated, throttled and honest about provider acceptance", "no fake delivered status");
 assert(adminEmailUi.includes('secureFetch("/api/admin/email-test", { method: "POST" })') &&
   adminEmailUi.includes("Check your configured Admin mailbox") &&
   readinessPage.includes("<AdminEmailAcceptanceTest enabled={email.emailEnabled} />"),
   "Email acceptance button requires explicit secure admin interaction", "no background sending");
+
+const opsReady = source("app/api/ops/readiness/route.ts");
+assert(opsReady.includes("sharedRedisConfigured()") &&
+  opsReady.includes('from "@/lib/cache/redis-cache"') &&
+  !opsReady.includes("Boolean(env.REDIS_URL)"),
+  "Redis readiness detects both TCP and Upstash REST configurations", "no false unconfigured status");
 
 const counts = results.reduce((acc, result) => {
   acc[result.status] = (acc[result.status] ?? 0) + 1;
