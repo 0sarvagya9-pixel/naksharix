@@ -51,6 +51,11 @@ for (const locale of nativeGuides) {
     assert.ok(!links.some((tag) => nativeGuides.some((code) => langValue(tag, code))), "Draft published alternate links");
   }
 }
+const sellers = await fetch(base + "/ads.txt");
+assert.equal(sellers.status, 200, "Google AdSense ads.txt unavailable at public root");
+assert.equal(sellers.headers.get("content-type")?.includes("text/plain"), true, "ads.txt must be plaintext");
+assert.equal((await sellers.text()).trim(), "google.com, pub-7848529669366564, DIRECT, f08c47fec0942fa0",
+  "Public ads.txt publisher ID does not match owner's AdSense account");
 const sitemap = await fetch(base + "/sitemap.xml");
 assert.equal(sitemap.status, 200, "Sitemap unavailable");
 const xml = await sitemap.text();
