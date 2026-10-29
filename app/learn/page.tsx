@@ -100,6 +100,26 @@ export default function LearnPage() {
               </article>
             ))}
           </div>
+          <section className="mt-10 rounded-2xl border border-[#e4bf86] bg-[#fffaf3] p-6" aria-labelledby="deeper-reading">
+            <h2 id="deeper-reading" className="font-cinzel text-2xl font-black text-[#422a31]">Explore in-depth free guides</h2>
+            <p className="mt-2 text-sm leading-7 text-[#5f4b52]">
+              Start with a question, learn the traditional method, then try its calculator. No account or purchase is required to read these guides.
+            </p>
+            <ul className="mt-4 grid gap-3 md:grid-cols-2">
+              {[
+                { href: "/blog/lagna-vs-rashi", label: "Lagna vs Rashi: what is different?" },
+                { href: "/blog/kundli-matching-score", label: "What does a Guna Milan score mean?" },
+                { href: "/blog/panchang-five-elements", label: "The five elements of Panchang" },
+                { href: "/blog/vimshottari-dasha-timeline", label: "How a Dasha timeline works" },
+                { href: "/blog/lo-shu-grid-beginners", label: "Understanding the Lo Shu grid" },
+                { href: "/blog/tarot-reflection", label: "Tarot questions for reflection" }
+              ].map((guide) => (
+                <li key={guide.href}>
+                  <Link href={guide.href} className="block rounded-xl border border-[#d7ab73] p-4 text-sm font-semibold text-[#532d34] underline underline-offset-4 hover:bg-[#ffefd8]">{guide.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </section>
           <LearningSelfCheck />
           <LearningProgress />
           <div className="mt-8 rounded-xl border border-[#D4AF37]/20 p-5 text-sm leading-7 naksh-muted-text">
