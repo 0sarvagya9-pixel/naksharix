@@ -61,9 +61,10 @@ export function middleware(request: NextRequest) {
   }
 
   if (!isProtectedPath(pathname)) {
-    if (pathname === "/hi" || pathname.startsWith("/hi/")) {
+    const languageMatch = pathname.match(/^\/(hi|mr|bn|es|fr)(?:\/|$)/);
+    if (languageMatch) {
       const requestHeaders = new Headers(request.headers);
-      requestHeaders.set("x-naksharix-route-locale", "hi");
+      requestHeaders.set("x-naksharix-route-locale", languageMatch[1]);
       return NextResponse.next({ request: { headers: requestHeaders } });
     }
     return NextResponse.next();
@@ -89,6 +90,10 @@ export const config = {
     "/profile/:path*",
     "/my-readings/:path*",
     "/saved-reports/:path*",
-    "/hi/:path*"
+    "/hi/:path*",
+    "/mr/:path*",
+    "/bn/:path*",
+    "/es/:path*",
+    "/fr/:path*"
   ]
 };

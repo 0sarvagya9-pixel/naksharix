@@ -8,8 +8,8 @@ import { safeServerTranslation } from "@/lib/i18n-server";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Naksharix Hindi - ज्योतिष, राशिफल और कुंडली",
-  description: "Naksharix Hindi में राशिफल, कुंडली, अंक ज्योतिष, टैरो रीडिंग, पंचांग, डिजिटल रिपोर्ट और consultation booking देखें।",
+  title: "फ्री कुंडली, राशिफल और वैदिक ज्योतिष हिंदी में",
+  description: "हिंदी में फ्री जन्म कुंडली, राशि और नक्षत्र की जानकारी, कुंडली मिलान, राशिफल, पंचांग और पारंपरिक वैदिक ज्योतिष समझें।",
   path: "/hi",
   keywords: ["Hindi Astrology", "Hindi Horoscope", "Kundli Hindi", "Tarot Hindi"]
 });
@@ -23,17 +23,17 @@ export default function HindiHomePage() {
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix Hindi</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black">{safeServerTranslation("hi", "tagline")}</h1>
+            <h1 className="mt-3 font-cinzel text-4xl font-black">फ्री कुंडली, राशिफल और वैदिक ज्योतिष</h1>
             <p className="mt-4 max-w-3xl naksh-muted-text">{safeServerTranslation("hi", "heroCopy")}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild>
-                <Link href="/signup">
+                <Link href="/hi/free-kundli">
                   <Sparkles className="h-4 w-4" />
                   {safeServerTranslation("hi", "generateFreeKundli")}
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/consultation">ज्योतिषी से सलाह लें</Link>
+                <Link href="/hi/learn/kundli-explained">कुंडली के बारे में पढ़ें</Link>
               </Button>
             </div>
           </div>

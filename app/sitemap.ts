@@ -8,6 +8,7 @@ import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { seoLandingPages } from "@/lib/seo-pages";
 import { zodiacSigns } from "@/lib/zodiac";
 import { publishedSeoAlternates } from "@/lib/seo-localization";
+import { kundliGuideLanguages, kundliGuidePath } from "@/lib/kundli-education";
 
 const staticRoutes = [
   "",
@@ -85,6 +86,7 @@ type SitemapEntry = { route: string; priority: number; frequency: SitemapFrequen
 export default function sitemap(): MetadataRoute.Sitemap {
   const publicRoutes = isAiAstrologerReady() ? [...staticRoutes, "/ai-astrologer"] : staticRoutes;
   const routes: SitemapEntry[] = [
+    ...kundliGuideLanguages.map((language): SitemapEntry => ({ route: kundliGuidePath(language), priority: 0.81, frequency: "monthly" })),
     ...publicRoutes.map((route): SitemapEntry => ({
       route,
       priority: route === "" ? 1 : legalRoute(route) ? 0.5 : route === "/shop" ? 0.72 : route === "/ai-astrologer" ? 0.76 : 0.8,
@@ -102,12 +104,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...blogPosts.map((post): SitemapEntry => ({ route: `/blog/${post.slug}`, priority: 0.72, frequency: "monthly" }))
   ];
 
-  return routes.map(({ route, priority, frequency }) => {
+  // The static routes and growthPages registry overlap. A URL must appear
+  // exactly once or search engines receive inconsistent priorities/frequencies.
+  const uniqueRoutes = new Map<string, SitemapEntry>();
+  for (const entry of routes) {
+    if (!uniqueRoutes.has(entry.route)) uniqueRoutes.set(entry.route, entry);
+  }
+  return [...uniqueRoutes.values()].map(({ route, priority, frequency }) => {
     const languages = publishedSeoAlternates(route, env.NEXT_PUBLIC_APP_URL);
     return {
       url: `${env.NEXT_PUBLIC_APP_URL}${route}`,
       ...(languages ? { alternates: { languages } } : {}),
-      // Do not fabricate modification dates for routes without known source timestamps.
       changeFrequency: frequency,
       priority
     };

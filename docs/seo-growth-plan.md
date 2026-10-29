@@ -53,3 +53,22 @@ Build a metadata inventory and route index/noindex table before adding more SEO 
   Search Console indexing/monitoring evidence. No auto-translation thin pages.
 - Remaining external SEO acceptance: Search Console property control, sitemap
   submission, crawl/index evidence, regional keyword research, CWV field data.
+
+## 2026-10-29 verified-language educational expansion
+- New useful, language-complete Kundli explanatory pages: English, Hindi, Marathi,
+  Bengali, Spanish and French. Every version explains Lagna, Rashi, Nakshatra,
+  Dasha, birth data accuracy and uncertainty, and has its own natural-language
+  FAQ, canonical and reciprocal six-language hreflang cluster.
+- This is a **six-language educational guide**, not full website/application
+  translation. Calculator UI and payment processes remain independently scoped.
+- Do not extrapolate guide-local language support into availability of
+  consultation, commerce, shipping or native-language support for every workflow.
+- Four of the 37 additional planned language codes (mr, bn, es, fr) now have
+  educational guides. The remaining **33** do not have indexable translations.
+  The larger site-wide localization backlog stays open pending original content,
+  qualified native editorial review and regional legal/business verification.
+- Added actual HTTP assertions for the full six-language cluster, SSR lang,
+  sitemap uniqueness and exact reciprocal links. Search Console discovery and
+  rankings require postdeployment monitoring; rankings cannot be guaranteed.
+- Translations supplied here are editorial drafts generated for implementation;
+  qualified native review is recommended before international marketing.

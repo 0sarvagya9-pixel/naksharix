@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 const links = [
   { href: "/horoscope/all-signs/today", label: "Today horoscope" },
   { href: "/kundli", label: "Free kundli" },
+  { href: "/learn/kundli-explained", label: "Understanding a Kundli" },
   { href: "/matchmaking", label: "Kundli matching" },
   { href: "/reports", label: "Premium reports" }
 ];
