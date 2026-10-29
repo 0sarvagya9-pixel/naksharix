@@ -32,7 +32,7 @@ export async function getThreePhaseAcceptance(commercial: CommercialReadiness): 
   const email = getEmailReadiness(), monitor = getMonitoringReadiness();
   const [history, ping] = await Promise.allSettled([
     // Fixed trusted SQL constant; never contains input, and never writes schema.
-    prisma.$queryRawUnsafe<Array<{ present: boolean }>>("SELECT to_regclass('public._prisma_migrations') IS NOT NULL AS present"),
+    prisma.$queryRaw<Array<{ present: boolean }>>`SELECT to_regclass('public._prisma_migrations') IS NOT NULL AS present`,
     sharedRedisConfigured() ? redisPing() : Promise.resolve(false)
   ]);
   const migrationsPresent = history.status === "fulfilled" && history.value[0]?.present === true;
