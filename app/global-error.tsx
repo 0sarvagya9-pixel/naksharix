@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <html lang="en">
@@ -9,7 +11,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
             <h1 style={{ marginTop: 0 }}>Something went wrong</h1>
             <p>We could not load this page. No private details are displayed here.</p>
             <button type="button" onClick={reset} style={{ marginTop: 12, cursor: "pointer", border: 0, borderRadius: 8, padding: "12px 20px", background: "#722b3c", color: "#fff", fontWeight: 700 }}>Try again</button>
-            <p style={{ marginTop: 22, fontSize: 13 }}>If the problem continues, return to <a href="/" style={{ color: "#722b3c" }}>Naksharix home</a>.</p>
+            <p style={{ marginTop: 22, fontSize: 13 }}>If the problem continues, return to <Link href="/" style={{ color: "#722b3c" }}>Naksharix home</Link>.</p>
           </section>
         </main>
       </body>
