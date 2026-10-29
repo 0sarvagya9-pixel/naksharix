@@ -11,6 +11,7 @@ import { AdminEmailAcceptanceTest } from "@/components/admin/admin-email-accepta
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
+import { getThreePhaseAcceptance } from "@/lib/ops/three-phase-acceptance";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +46,7 @@ export default async function AdminReadinessPage() {
   const email = getEmailReadiness();
   const monitoring = getMonitoringReadiness();
   const commercial = await getCommercialReadiness();
+  const unified = await getThreePhaseAcceptance(commercial);
   const emailStatus: Status = email.emailEnabled ? "ok" : "missing";
 
   const checks: Check[] = [
@@ -128,6 +130,34 @@ export default async function AdminReadinessPage() {
             </Card>
           ))}
         </div>
+        <section className="mt-10" aria-labelledby="unified-release-heading">
+          <h2 id="unified-release-heading" className="font-cinzel text-2xl font-bold">Phase 1 + 2 + 3 acceptance</h2>
+          <p className="mt-3 text-sm leading-6 naksh-muted-text">
+            Read-only facts and external proof requirements. Code deployment never substitutes for Google review, verified suppliers, inbox delivery or retained backups.
+          </p>
+          <div className="mt-5 space-y-6">
+            {unified.phases.map(phase => (
+              <section key={phase.id} aria-label={phase.title} className="rounded-2xl border border-[#e0bc8a]/35 p-5">
+                <h3 className="text-xl font-semibold">{phase.title} — {phase.ready ? "VERIFIED" : "OPEN"}</h3>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {phase.checks.map(entry => (
+                    <article key={entry.key} className="rounded-xl border border-[#e0bc8a]/30 p-4">
+                      <h4 className="font-semibold">{entry.title}</h4>
+                      <p className={entry.status === "verified" ? "mt-1 text-xs font-bold text-[#00f5a0]" : "mt-1 text-xs font-bold text-[#f9d18c]"}>
+                        {entry.status === "verified" ? "SOURCE / SERVICE EVIDENCE" : entry.status === "action_required" ? "ACTION REQUIRED" : "EXTERNAL PROOF REQUIRED"}
+                      </p>
+                      <p className="mt-2 break-words text-sm leading-6 naksh-muted-text">{entry.evidence}</p>
+                      {entry.href ? <Link href={entry.href} className="mt-3 inline-block text-sm underline">Open management page</Link> : null}
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+          <p className="mt-4 text-sm font-semibold text-[#f9d18c]">
+            All three phases independently verified: {unified.allPhasesVerified ? "YES" : "NO"}.
+          </p>
+        </section>
         <AdminEmailAcceptanceTest enabled={email.emailEnabled} />
         <section className="mt-10" aria-labelledby="commercial-readiness-heading">
           <h2 id="commercial-readiness-heading" className="font-cinzel text-2xl font-bold">Commerce and fulfilment readiness</h2>
