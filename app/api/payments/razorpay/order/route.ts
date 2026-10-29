@@ -75,6 +75,8 @@ export async function POST(request: NextRequest) {
     if (reusable && (Number(reusable.amount) !== item.amount || reusable.currency !== "INR"))
       return fail("An earlier order has a different amount. Contact support before trying to pay again.", 409);
     if (reusable?.status === "PAID") return fail("This checkout item is already paid.", 409);
+    if (reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
+      return fail("An old payment attempt needs merchant reconciliation. Check payment history or contact support before paying again.", 409);
     if (reusable?.status === "PENDING" && reusable.providerOrderId) {
       return ok({
         keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -173,7 +175,7 @@ async function findReusablePayment(body: CheckoutBody, userId: string) {
       metadata: { path: [identity.key], equals: identity.value }
     },
     orderBy: { createdAt: "desc" },
-    select: { id: true, status: true, providerOrderId: true, amount: true, currency: true }
+    select: { id: true, status: true, providerOrderId: true, amount: true, currency: true, createdAt: true }
   });
 }
 
