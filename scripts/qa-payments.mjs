@@ -30,7 +30,7 @@ const pricing = source("lib/reports/pricing.ts");
 const checkoutButton = source("components/razorpay-checkout-button.tsx");
 
 assert(razorpayReadiness.includes("NEXT_PUBLIC_RAZORPAY_KEY_ID") && razorpayReadiness.includes("RAZORPAY_WEBHOOK_SECRET"), "Razorpay readiness validates required env", "checkout disabled until env is complete");
-assert(razorpayReadiness.includes('scope: "reports_and_consultations"'), "Razorpay readiness covers active services", "reports and consultations");
+assert(razorpayReadiness.includes('scope: "one_merchant_for_reports_consultations_confirmed_puja_and_shop"') && razorpayReadiness.includes("merchantKeyPairMatches"), "Razorpay readiness covers active services", "all categories use one matching Razorpay key pair");
 assert(razorpayOrder.includes("getRazorpayReadiness") && razorpayOrder.includes("return fail(readiness.reason, 503)"), "Razorpay route has disabled readiness fallback", "no provider/env means no checkout");
 assert(razorpayOrder.includes('purpose: z.literal("CONSULTATION")') && razorpayOrder.includes("booking.userId !== userId"), "Consultation checkout is server-owned", "booking ownership and price are resolved on the server");
 assert(razorpayOrder.includes("reportRequestId") && razorpayOrder.includes("getReportPricing"), "Razorpay order links real report requests to server pricing", "client amount is not trusted");
