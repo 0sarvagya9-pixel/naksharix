@@ -4,7 +4,7 @@ const read = (p) => readFileSync(p, "utf8");
 const cache = read("lib/redis.ts");
 const cacheIndex = read("lib/cache/index.ts");
 assert.ok(cache.includes("const value = await factory()") && cache.includes("return value;"), "Cache factory path missing");
-assert.equal((cache.match(/await factory\(\)/g) || []).length, 2, "Redis cache must run factory no more than once per request path");
+assert.equal((cache.match(/await factory\(\)/g) || []).length, 1, "Redis cache must have one awaited factory invocation in the Redis code path");
 assert.ok(cache.includes("const value = await factory();\n  try {"), "Factory must be outside cache-write retry handling");
 assert.ok(cacheIndex.includes("cached !== null"), "False and zero cache values must remain hits");
 const instrumentation = read("instrumentation.ts");
