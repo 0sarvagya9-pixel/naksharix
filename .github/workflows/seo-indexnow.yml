@@ -1,0 +1,46 @@
+name: NAKSHARIX SEO IndexNow discovery
+
+# Only public guide additions/changes from the authoritative release branch.
+# Do NOT schedule spammy resubmission and do NOT submit private/order/checkout URLs.
+on:
+  push:
+    branches:
+      - complete-production-polish
+    paths:
+      - '.github/workflows/seo-indexnow.yml'
+      - 'scripts/seo/submit-indexnow.mjs'
+      - 'public/ef1d79191967d8cf6d2404e50e8017c1.txt'
+      - 'lib/blog-content.ts'
+      - 'app/blog/**'
+      - 'app/learn/page.tsx'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: naksharix-seo-indexnow
+  cancel-in-progress: true
+
+jobs:
+  notify-indexnow:
+    if: github.repository == '0sarvagya9-pixel/naksharix'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate fixed public URLs and no sensitive paths
+        run: node scripts/seo/submit-indexnow.mjs --validate-only
+      - name: Wait for exact production release, verify ownership and notify IndexNow
+        run: node scripts/seo/submit-indexnow.mjs
+      - name: State what has and has not been verified
+        run: |
+          echo 'INDEXNOW_SUBMISSION_ATTEMPTED=YES'
+          echo 'GOOGLE_INDEXING=NOT_CERTIFIED'
+          echo 'BING_INDEXING=NOT_CERTIFIED'
+          echo 'REAL_ORGANIC_TRAFFIC=NOT_MEASURED'

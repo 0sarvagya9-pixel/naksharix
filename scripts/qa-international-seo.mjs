@@ -103,4 +103,36 @@ assert.ok(editorial.includes("not a guarantee") && editorial.includes("not valid
   "Editorial content lacks explicit uncertainty or responsible use safeguards");
 console.log("EDITORIAL_GROWTH_QA=PASS;ORIGINAL_GUIDES=7;SECTIONS=28;BASIC_INTERNAL_LINKS=PASS");
 
+
+// Search discovery must submit only public educational URLs after production release identity.
+const indexNow = read("scripts/seo/submit-indexnow.mjs");
+const indexNowFlow = read(".github/workflows/seo-indexnow.yml");
+const indexNowKey = "ef1d79191967d8cf6d2404e50e8017c1";
+assert.equal(read("public/" + indexNowKey + ".txt").trim(), indexNowKey, "IndexNow public proof mismatch");
+for (const code of [
+  "INDEXNOW_EXACT_RELEASE=PASS", "RELEASE_SHA_NOT_LIVE_NO_SUBMISSION",
+  "INDEXNOW_PUBLIC_KEY_VERIFICATION_FAILED", "INDEXNOW_SITEMAP_CHECK=PASS",
+  "NON_INDEXABLE_URL=", "INDEXNOW_SUBMISSION_ACCEPTED=YES",
+  "https://api.indexnow.org/indexnow", "GOOGLE_INDEXED=UNKNOWN",
+  "SEARCH_TRAFFIC_GAIN=NOT_MEASURED", "NOT_AUTHORIZED_PRODUCTION_BRANCH"
+]) assert.ok(indexNow.includes(code), "IndexNow public safe submission missing: " + code);
+for (const path of [
+  "/blog/daily-horoscope-personalization", "/blog/kundli-matching-score",
+  "/blog/tarot-reflection", "/blog/lagna-vs-rashi",
+  "/blog/panchang-five-elements", "/blog/lo-shu-grid-beginners",
+  "/blog/vimshottari-dasha-timeline"
+]) assert.ok(indexNow.includes('"' + path + '"'), "IndexNow guide missing: " + path);
+assert.ok(indexNowFlow.includes("branches:\n      - complete-production-polish") &&
+  indexNowFlow.includes("timeout-minutes: 20") &&
+  indexNowFlow.includes("contents: read") &&
+  !indexNowFlow.includes("schedule:") &&
+  !indexNowFlow.includes("pull_request:"),
+  "IndexNow workflow must run only on legitimate production changes; no schedule or PR spam");
+assert.ok(!indexNow.includes("process.env.DATABASE_URL") &&
+  !indexNow.includes("NEXT_PUBLIC_APP_URL") &&
+  !indexNow.includes("RAZORPAY") &&
+  !indexNow.includes("pagead2.googlesyndication"),
+  "Search-discovery task must not read database, payment or ads configuration");
+console.log("INDEXNOW_STATIC_DISCOVERY=PASS;HOST_KEY_PUBLIC=YES;PRODUCTION_ONLY=YES;PRIVATE_URLS=NO");
+
 console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
