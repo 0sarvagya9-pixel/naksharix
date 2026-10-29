@@ -49,61 +49,67 @@ export async function reconcileProcessedRefund(refund: {
     return;
   }
   const meta = (original.metadata as Record<string, unknown> | null) ?? {};
-  const transition = await prisma.payment.updateMany({
-    where: { id: original.id, status: "PAID", providerPaymentId: refund.payment_id },
-    data: {
-      status: "REFUNDED",
-      metadata: { ...meta, verifiedRefundId: refund.id, refundVerifiedBy: "signed_webhook" } as Prisma.InputJsonObject
-    }
-  });
-  if (transition.count !== 1) return; // duplicate/refunded/waived must not change entitlements
 
-  if (original.purpose === "SHOP_ORDER" && typeof meta.shopOrderId === "string") {
-    await prisma.shopOrder.updateMany({
-      where: { id: meta.shopOrderId, userId: original.userId, paymentStatus: "PAID" },
-      data: { paymentStatus: "REFUNDED" }
+  // Single atomic transition. A callback retry after a dependent-record error
+  // must re-run the WHOLE transaction, not leave a refunded payment with a
+  // still-paid digital entitlement or an uncanceled shop order.
+  const transitioned = await prisma.$transaction(async (tx) => {
+    const updated = await tx.payment.updateMany({
+      where: { id: original.id, status: "PAID", providerPaymentId: refund.payment_id },
+      data: {
+        status: "REFUNDED",
+        metadata: { ...meta, verifiedRefundId: refund.id, refundVerifiedBy: "signed_webhook" } as Prisma.InputJsonObject
+      }
     });
-    await prisma.shopOrder.updateMany({
-      where: { id: meta.shopOrderId, userId: original.userId,
-        status: { in: ["REQUESTED", "CONFIRMED", "PACKING"] } },
-      data: { status: "CANCELED" }
-    });
-  }
-  if (original.purpose === "PUJA_BOOKING" && typeof meta.pujaBookingId === "string") {
-    await prisma.pujaBookingRequest.updateMany({
-      where: { id: meta.pujaBookingId, userId: original.userId,
-        status: { notIn: ["COMPLETED", "CANCELED"] } },
-      data: { status: "CANCELED" }
-    });
-  }
-  if (original.purpose === "CONSULTATION" && typeof meta.bookingId === "string") {
-    await prisma.consultationBooking.updateMany({
-      where: { id: meta.bookingId, userId: original.userId, paymentStatus: "PAID" },
-      data: { paymentStatus: "REFUNDED" }
-    });
-    await prisma.consultationBooking.updateMany({
-      where: { id: meta.bookingId, userId: original.userId,
-        status: { in: ["REQUESTED", "PAYMENT_PENDING", "ACCEPTED", "CONFIRMED"] } },
-      data: { status: "CANCELED" }
-    });
-  }
-  if (["KUNDLI_REPORT", "YEARLY_REPORT", "MATCH_REPORT"].includes(original.purpose)) {
-    await prisma.purchasedReport.updateMany({
-      where: { paymentId: original.id, userId: original.userId },
-      data: { status: "REFUNDED" }
-    });
-    // Refund flags apply even if a PDF was already delivered. Keep completed
-    // delivery history intact, but revoke subsequent paid download permission.
-    await prisma.reportRequest.updateMany({
-      where: { paymentId: original.id, userId: original.userId },
-      data: { paymentStatus: "REFUNDED" }
-    });
-    await prisma.reportRequest.updateMany({
-      where: { paymentId: original.id, userId: original.userId,
-        status: { notIn: ["DELIVERED", "SENT", "CANCELLED"] } },
-      data: { status: "CANCELLED" }
-    });
-  }
+    if (updated.count !== 1) return false;
+
+    if (original.purpose === "SHOP_ORDER" && typeof meta.shopOrderId === "string") {
+      await tx.shopOrder.updateMany({
+        where: { id: meta.shopOrderId, userId: original.userId, paymentStatus: "PAID" },
+        data: { paymentStatus: "REFUNDED" }
+      });
+      await tx.shopOrder.updateMany({
+        where: { id: meta.shopOrderId, userId: original.userId,
+          status: { in: ["REQUESTED", "CONFIRMED", "PACKING"] } },
+        data: { status: "CANCELED" }
+      });
+    }
+    if (original.purpose === "PUJA_BOOKING" && typeof meta.pujaBookingId === "string") {
+      await tx.pujaBookingRequest.updateMany({
+        where: { id: meta.pujaBookingId, userId: original.userId,
+          status: { notIn: ["COMPLETED", "CANCELED"] } },
+        data: { status: "CANCELED" }
+      });
+    }
+    if (original.purpose === "CONSULTATION" && typeof meta.bookingId === "string") {
+      await tx.consultationBooking.updateMany({
+        where: { id: meta.bookingId, userId: original.userId, paymentStatus: "PAID" },
+        data: { paymentStatus: "REFUNDED" }
+      });
+      await tx.consultationBooking.updateMany({
+        where: { id: meta.bookingId, userId: original.userId,
+          status: { in: ["REQUESTED", "PAYMENT_PENDING", "ACCEPTED", "CONFIRMED"] } },
+        data: { status: "CANCELED" }
+      });
+    }
+    if (["KUNDLI_REPORT", "YEARLY_REPORT", "MATCH_REPORT"].includes(original.purpose)) {
+      await tx.purchasedReport.updateMany({
+        where: { paymentId: original.id, userId: original.userId },
+        data: { status: "REFUNDED" }
+      });
+      await tx.reportRequest.updateMany({
+        where: { paymentId: original.id, userId: original.userId },
+        data: { paymentStatus: "REFUNDED" }
+      });
+      await tx.reportRequest.updateMany({
+        where: { paymentId: original.id, userId: original.userId,
+          status: { notIn: ["DELIVERED", "SENT", "CANCELLED"] } },
+        data: { status: "CANCELLED" }
+      });
+    }
+    return true;
+  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  if (!transitioned) return;
   await writeAuditLog({
     actor: { id: original.userId, role: "USER" },
     action: "payment.razorpay_full_refund_verified",
