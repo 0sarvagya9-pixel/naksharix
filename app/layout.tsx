@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Cinzel, Cinzel_Decorative, Inter, Poppins } from "next/font/google";
 import "@/app/globals.css";
 import "@/app/accessibility-overrides.css";
@@ -31,6 +31,8 @@ export const metadata: Metadata = {
     path: "/",
     keywords: ["Vedic Astrology", "Daily Horoscope", "Kundli Matching", "Astrology Consultations"]
   }),
+  // Never inherit the homepage canonical on child routes without their own metadata.
+  alternates: {},
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   title: {
     default: "Naksharix - Vedic Astrology Tools, Reports and Consultations",
@@ -55,14 +57,15 @@ import { AppBackgroundScene } from "@/components/background/app-background-scene
 import { PremiumGlassShell } from "@/components/layout/premium-glass-shell";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const initialLocale = normalizeLocale(cookieStore.get("naksharix-language")?.value);
+  const [cookieStore, requestHeaders] = await Promise.all([cookies(), headers()]);
+  const routeLocale = requestHeaders.get("x-naksharix-route-locale") === "hi" ? "hi" : undefined;
+  const initialLocale = routeLocale ?? normalizeLocale(cookieStore.get("naksharix-language")?.value);
   const htmlLang = initialLocale === "hi" ? "hi" : initialLocale === "hinglish" ? "hi-Latn" : "en";
 
   return (
     <html lang={htmlLang} suppressHydrationWarning>
       <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
-        <LanguageProvider initialLocale={initialLocale}>
+        <LanguageProvider initialLocale={initialLocale} routeLocale={routeLocale}>
           <AppBackgroundScene />
           <PremiumGlassShell>
             <MainNav />

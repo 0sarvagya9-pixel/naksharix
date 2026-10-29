@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { env } from "@/lib/env";
+import { publishedSeoAlternates } from "@/lib/seo-localization";
 
 type SeoInput = {
   title: string;
@@ -18,11 +19,12 @@ function normalizeTitle(title: string) {
 export function seo({ title, description, path = "/", image = "/og.svg", keywords = [], type = "website" }: SeoInput): Metadata {
   const normalizedTitle = normalizeTitle(title);
   const url = new URL(path, env.NEXT_PUBLIC_APP_URL).toString();
+  const languages = publishedSeoAlternates(path, env.NEXT_PUBLIC_APP_URL);
   return {
     title: normalizedTitle,
     description,
     keywords: ["Astrology", "Horoscope", "Kundli", "Numerology", "Tarot Reading", "Panchang", "Naksharix", ...keywords],
-    alternates: { canonical: url },
+    alternates: { canonical: url, ...(languages ? { languages } : {}) },
     openGraph: {
       title: normalizedTitle,
       description,
