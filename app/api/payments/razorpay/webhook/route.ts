@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { finalizePaidPayment, verifyRazorpayWebhookSignature } from "@/lib/revenue";
+import { reconcileCapturedPurpose, reconcileProcessedRefund } from "@/lib/payments/purpose-reconciliation";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +21,7 @@ export async function POST(request: NextRequest) {
       const existingPayment = await prisma.payment.findUnique({ where: { providerOrderId: payment.order_id } });
       if (existingPayment && payment.status === "captured" && Number(payment.amount) === Math.round(Number(existingPayment.amount) * 100) && (payment.currency ?? "").toUpperCase() === existingPayment.currency.toUpperCase()) {
         const paid = await finalizePaidPayment(payment.order_id, payment.id, { verifiedBy: "webhook", event: event.event, gatewayStatus: payment.status });
+        if (paid) await reconcileCapturedPurpose(paid);
         const metadata = (paid?.metadata as Record<string, unknown> | null) ?? {};
         const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
         const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
@@ -108,31 +110,9 @@ export async function POST(request: NextRequest) {
         });
       }
     }
-    // A signed, fully processed refund is the only event that may mark a captured
-    // Puja charge refunded; never infer a refund from a cancellation request.
-    const refund=event.payload?.refund?.entity;
-    if(event.event==="refund.processed"&&refund?.payment_id&&refund.status==="processed"){
-      const original=await prisma.payment.findUnique({where:{providerPaymentId:refund.payment_id}});
-      if(original&&original.purpose==="PUJA_BOOKING"&&Number(refund.amount)===Math.round(Number(original.amount)*100)){
-        const transition=await prisma.payment.updateMany({
-          where:{id:original.id,status:"PAID"},data:{status:"REFUNDED"}
-        });
-        // Refund webhooks can be retried. Only the first completed payment
-        // transition may update its booking and emit a status audit.
-        if(transition.count===0) {
-          logger.info("razorpay_puja_refund_duplicate_ignored", {paymentId:original.id});
-          return ok({received:true});
-        }
-        const meta=original.metadata as Record<string,unknown>|null;
-        if(typeof meta?.pujaBookingId==="string"){
-          await prisma.pujaBookingRequest.updateMany({
-            where:{id:meta.pujaBookingId,userId:original.userId,status:{notIn:["COMPLETED","CANCELED"]}},
-            data:{status:"CANCELED"}
-          });
-        }
-        await writeAuditLog({actor:{id:original.userId,role:"USER"},action:"puja.payment.refunded",targetType:"Payment",
-          targetId:original.id,metadata:{refundId:refund.id,verifiedWebhook:true}});
-      }
+    // One signed full-refund path for EVERY purchase category, same merchant.
+    if (event.event === "refund.processed" && event.payload?.refund?.entity) {
+      await reconcileProcessedRefund(event.payload.refund.entity);
     }
     logger.info("razorpay_webhook_processed", { event: event.event ?? "unknown" });
     return ok({ received: true });
