@@ -44,7 +44,7 @@ gate(shopPage.includes('payload={{purpose:"SHOP_ORDER",shopOrderId:order.id}}') 
   shopPage.includes('env.SHOP_PAYMENTS_ENABLED==="true"'), "shop checkout visible only after approval");
 gate(adminShop.includes('current.paymentStatus!=="PAID"') &&
   adminShop.includes("Supplier evidence URL") &&
-  adminShop.includes("captured payment"), "shop cannot dispatch unpaid product");
+  adminShop.includes("Captured Razorpay payment"), "shop cannot dispatch unpaid product");
 gate(order.includes('purpose: body.purpose as PaymentPurpose') &&
   order.includes('provider: "RAZORPAY"') &&
   order.includes('metadata: { ...item.metadata') &&
