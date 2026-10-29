@@ -17,6 +17,7 @@ assert.ok(globalError.includes('role="alert"') && globalError.includes('onClick=
 const nav = read("components/main-nav.tsx");
 const layout = read("app/layout.tsx");
 assert.ok(nav.includes("setOpen(false);\n  }, [pathname]"), "Mobile navigation may remain open after route change");
+assert.ok(nav.includes('locale === "hi" ? "पूजा"') && nav.includes('{navText(item.label)}'), "Shared nav Hindi labels must translate without claiming full website translation");
 assert.ok(nav.includes('aria-label="Navigation menu"') && nav.includes("overscroll-contain"), "Mobile dialog accessibility regression");
 assert.ok(layout.includes('href="#main-content"') && layout.includes('id="main-content"'), "Missing keyboard skip-to-content link");
 console.log("PHASE1_FOUNDATION=PASS;CACHE_SINGLE_INVOCATION=YES;PRIVATE_ERROR_DATA_LOGGED=NO;MOBILE_A11Y=YES");

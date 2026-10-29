@@ -7,6 +7,7 @@ import { Menu, X, ShoppingCart } from "lucide-react";
 import { AuthProfileMenu } from "@/components/auth-profile-menu";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useLanguage } from "@/components/language-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -85,6 +86,20 @@ const dropdownStyle = {
 
 export function MainNav() {
   const pathname = usePathname();
+  const { locale, tr } = useLanguage();
+  const navText = (label: string) => label === "Puja"
+    ? locale === "hi" ? "पूजा" : "Puja"
+    : ({
+        Home: "navHome", Reports: "navReports", Consultation: "consult",
+        Shop: "navShop", Kundli: "navKundli", Horoscope: "horoscope",
+        Panchang: "navPanchang", More: "navMore"
+      } as Record<string, string>)[label]
+      ? tr(({
+        Home: "navHome", Reports: "navReports", Consultation: "consult",
+        Shop: "navShop", Kundli: "navKundli", Horoscope: "horoscope",
+        Panchang: "navPanchang", More: "navMore"
+      } as Record<string, string>)[label])
+      : label;
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -113,8 +128,8 @@ export function MainNav() {
   return (
     <div className="sticky top-0 z-50 w-full">
       <div className="nx-reference-promo">
-        <span>NAKSHARIX • Vedic astrology tools, traditional knowledge and private guidance</span>
-        <Link href="/pujas">Explore Puja Services <span aria-hidden="true">→</span></Link>
+        <span>{locale === "hi" ? "NAKSHARIX • वैदिक ज्योतिष, पारंपरिक ज्ञान और व्यक्तिगत मार्गदर्शन" : "NAKSHARIX • Vedic astrology tools, traditional knowledge and private guidance"}</span>
+        <Link href="/pujas">{locale === "hi" ? "पूजा सेवाएँ देखें" : "Explore Puja Services"} <span aria-hidden="true">→</span></Link>
       </div>
       <header
         className="w-full transition-all duration-300"
@@ -133,7 +148,7 @@ export function MainNav() {
 
           <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex" aria-label="Primary navigation">
             {navLinks.map((item) => item.label === "Horoscope" ? (
-              <HoroscopeMenu key={item.href} pathname={pathname} />
+              <HoroscopeMenu key={item.href} pathname={pathname} label={navText("Horoscope")} />
             ) : (
               <Link
                 key={item.href}
@@ -141,10 +156,10 @@ export function MainNav() {
                 aria-current={isActive(pathname, item.href, item.active) ? "page" : undefined}
                 className={navLinkClass(isActive(pathname, item.href, item.active))}
               >
-                {item.label}
+                {navText(item.label)}
               </Link>
             ))}
-            <MoreMenu />
+            <MoreMenu label={navText("More")} />
           </nav>
 
           <div className="ml-auto flex flex-shrink-0 items-center gap-1 border-l border-[rgba(126,39,37,0.15)] pl-2 sm:gap-2 sm:pl-3">
@@ -193,7 +208,7 @@ export function MainNav() {
                 </Button>
               </div>
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e5c5a5] bg-[#fff6e9] p-3">
-                <p className="text-xs font-semibold text-[#794051]">Choose language</p>
+                <p className="text-xs font-semibold text-[#794051]">{locale === "hi" ? "भाषा चुनें" : "Choose language"}</p>
                 <LanguageSwitcher className="!block w-20" />
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
@@ -208,7 +223,7 @@ export function MainNav() {
                     onClick={() => setOpen(false)}
                     className="rounded-xl border border-[rgba(148,67,56,0.16)] bg-[#fffcf8] px-4 py-3 text-sm font-semibold text-[#4e3038] hover:bg-[#fff0e4]"
                   >
-                    {item.label}
+                    {navText(item.label)}
                   </Link>
                 ))}
               </div>
@@ -220,11 +235,11 @@ export function MainNav() {
   );
 }
 
-function HoroscopeMenu({ pathname }: { pathname: string }) {
+function HoroscopeMenu({ pathname, label }: { pathname: string; label: string }) {
   const active = pathname.includes("horoscope") || pathname.includes("zodiac");
   return (
     <div className="group relative">
-      <Link href="/daily-horoscope" className={navLinkClass(active)}>Horoscope</Link>
+      <Link href="/daily-horoscope" className={navLinkClass(active)}>{label}</Link>
       <div className="invisible absolute left-1/2 top-[120%] z-[1000] w-[480px] -translate-x-1/2 translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
         <div className="grid grid-cols-[160px_1fr] gap-4 text-left">
           <MenuColumn title="Horoscopes" links={horoscopeOptions} />
@@ -240,10 +255,10 @@ function HoroscopeMenu({ pathname }: { pathname: string }) {
   );
 }
 
-function MoreMenu() {
+function MoreMenu({ label }: { label: string }) {
   return (
     <div className="group relative">
-      <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">More</button>
+      <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">{label}</button>
       <div className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
         <div className="grid grid-cols-3 gap-4 text-left">
           <MenuColumn title="Explore" links={exploreLinks} />
