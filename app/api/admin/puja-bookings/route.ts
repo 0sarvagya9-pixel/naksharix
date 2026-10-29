@@ -39,6 +39,11 @@ export async function PATCH(request:Request){
   if(existing.version!==input.expectedVersion)return fail("Request changed in another session.",409);
   if(input.status!==existing.status&&!(moves[existing.status]||[]).includes(input.status))
    return fail("Invalid Puja booking status transition.",422);
+  if(input.status==="CANCELED"){
+    const paid=await prisma.payment.findFirst({where:{userId:existing.userId,purpose:"PUJA_BOOKING",
+      status:"PAID",metadata:{path:["pujaBookingId"],equals:existing.id}},select:{id:true}});
+    if(paid)return fail("Verify the Razorpay refund before canceling this paid Puja.",409);
+  }
   const partnerId=input.partnerId||existing.partnerId;
   if(["CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED"].includes(input.status)){
    if(!partnerId)return fail("A VERIFIED Puja partner must be assigned before confirmation.",422);
