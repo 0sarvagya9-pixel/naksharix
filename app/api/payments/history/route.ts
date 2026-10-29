@@ -10,7 +10,7 @@ export async function GET() {
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
       take: 25,
-      include: { invoice: true, purchasedReport: true, subscription: true }
+      include: { invoice: true, purchasedReport: true, subscription: true, reportRequest: { select: { id: true, status: true } } }
     });
     return ok({ payments });
   } catch (error) {
