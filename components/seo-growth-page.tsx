@@ -40,13 +40,15 @@ export function SeoGrowthPage({ page }: { page: GrowthPage }) {
             <CardContent className="p-6">
               <h2 className="font-cinzel text-2xl font-black">{page.h2}</h2>
               <p className="mt-4 leading-7 naksh-muted-text">{page.description}</p>
-              <div className="mt-5 grid gap-3">
-                {["Free guidance first", "Premium report upgrade", "AI follow-up questions"].map((item) => (
-                  <p key={item} className="flex gap-2 rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm naksh-muted-text">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-[#FFD700]" />{item}
-                  </p>
-                ))}
-              </div>
+              {page.highlights?.length ? (
+                <div className="mt-5 grid gap-3">
+                  {page.highlights.map((item) => (
+                    <p key={item} className="flex gap-2 rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 text-sm naksh-muted-text">
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-[#FFD700]" />{item}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
             </CardContent>
           </Card>
           <div className="grid gap-4">
@@ -60,6 +62,16 @@ export function SeoGrowthPage({ page }: { page: GrowthPage }) {
             ))}
           </div>
         </div>
+        {page.sections?.length ? (
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {page.sections.map((section) => (
+              <section key={section.heading} className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/75 p-6">
+                <h2 className="text-xl font-bold">{section.heading}</h2>
+                <p className="mt-4 text-sm leading-7 naksh-muted-text">{section.body}</p>
+              </section>
+            ))}
+          </div>
+        ) : null}
       </Section>
     </main>
   );

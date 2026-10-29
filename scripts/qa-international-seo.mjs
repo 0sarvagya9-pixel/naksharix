@@ -26,4 +26,11 @@ assert.ok(layout.includes('requestHeaders.get("x-naksharix-route-locale")') &&
   middleware.includes('"/hi/:path*"'), "Hindi route lang not guaranteed at SSR");
 assert.ok(provider.includes("routeLocale ?? normalizeLocale(") &&
   switcher.includes("publishedDestinationForLocale("), "Wrong client locale navigation");
+
+const growth = read("lib/growth-pages.ts");
+const growthView = read("components/seo-growth-page.tsx");
+assert.ok(growth.includes('heading: "Which birth details matter?"') && growth.includes('heading: "What does a score out of 36 mean?"'), "Primary high-intent pages need substantive guidance");
+assert.ok(growth.includes("you do not need to calculate latitude and longitude yourself"), "Birthplace instructions must not ask visitors for internal coordinates");
+assert.ok(!growthView.includes('"AI follow-up questions"'), "No global misleading AI upsell on all SEO pages");
+assert.ok(sitemap.includes("const uniqueRoutes = new Map<string, SitemapEntry>()"), "Duplicate sitemap URLs not deduplicated");
 console.log("SEO_LOCALE_GATE=PASS;PUBLISHED_TRANSLATED_PAIRS=3;UNREVIEWED_LOCALES_NOT_INDEXED=YES");
