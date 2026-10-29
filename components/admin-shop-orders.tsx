@@ -4,7 +4,7 @@ import { secureFetch } from "@/lib/security/csrf";
 type Order={id:string;userId:string;items:unknown;customerName:string;customerPhone:string;
  deliveryCity:string;deliveryState:string;deliveryAddress:string;postalCode:string;
  subtotalPaise:number;shippingPaise:number|null;taxPaise:number|null;totalPaise:number|null;
- status:string;paymentStatus:string;trackingReference:string|null;adminNote:string;version:number;createdAt:string};
+ status:string;paymentStatus:string;trackingReference:string|null;fulfillmentEvidenceUrl:string|null;adminNote:string;version:number;createdAt:string};
 const money=(p:number)=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(p/100);
 export function AdminShopOrders(){
  const [orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState("");
@@ -19,7 +19,7 @@ export function AdminShopOrders(){
    const response=await secureFetch("/api/admin/shop-orders",{method:"PATCH",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({id:editing.id,expectedVersion:editing.version,status:editing.status,
       shippingPaise:editing.shippingPaise,taxPaise:editing.taxPaise,
-      trackingReference:editing.trackingReference,adminNote:editing.adminNote})});
+      trackingReference:editing.trackingReference,fulfillmentEvidenceUrl:editing.fulfillmentEvidenceUrl,adminNote:editing.adminNote})});
    const result=await response.json();
    if(!response.ok)throw Error(result.error||"Could not update order.");
    setOrders(old=>old.map(row=>row.id===editing.id?result.data.order:row));
@@ -28,7 +28,7 @@ export function AdminShopOrders(){
  }
  return <div className="mx-auto max-w-7xl space-y-5 px-5 py-12 text-[#3c2730]">
   <h1 className="font-cinzel text-3xl font-bold">Customer Shop Orders</h1>
-  <p className="max-w-3xl text-sm leading-6">Owner dispatch workflow. Confirm delivery costs, applicable taxes, and payment method manually. Admin status changes never fabricate a Razorpay transaction.</p>
+  <p className="max-w-3xl text-sm leading-6">One Razorpay merchant checkout is offered only after supplier evidence, final shipping/tax quote and owner confirmation. Dispatch additionally requires a captured payment; admin changes never fabricate a transaction.</p>
   {error?<p role="alert" className="rounded-lg bg-[#fff0f0] p-4 text-[#8d2d45]">{error}</p>:null}
   {notice?<p role="status" className="rounded-lg bg-[#edf9ed] p-4 text-[#365d36]">{notice}</p>:null}
   {editing?<form onSubmit={save} className="max-w-2xl space-y-3 rounded-2xl border border-[#d4b796] bg-white p-6">
@@ -48,6 +48,11 @@ export function AdminShopOrders(){
       <input maxLength={140} className="mt-2 block w-full rounded-lg border p-3" value={editing.trackingReference??""}
         onChange={e=>setEditing({...editing,trackingReference:e.target.value})}/>
     </label>
+    <label className="block text-sm font-bold">Verified supplier / exact SKU fulfilment evidence (HTTPS URL)
+      <input type="url" maxLength={500} className="mt-2 block w-full rounded-lg border p-3" value={editing.fulfillmentEvidenceUrl??""}
+        onChange={e=>setEditing({...editing,fulfillmentEvidenceUrl:e.target.value||null})}/>
+    </label>
+    <p className="text-xs">Confirm exact SKU, stock and dispatch capability. Approval requires the evidence URL, detailed notes and final shipping/tax amounts; no payment is created by this admin form.</p>
     <label className="block text-sm font-bold">Owner fulfilment notes
       <textarea maxLength={1500} rows={4} className="mt-2 block w-full rounded-lg border p-3" value={editing.adminNote}
         onChange={e=>setEditing({...editing,adminNote:e.target.value})}/>
