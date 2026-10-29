@@ -8,6 +8,7 @@ import { getRazorpayReadiness } from "@/lib/payments/readiness";
 import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
+import { getThreePhaseAcceptance } from "@/lib/ops/three-phase-acceptance";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export async function GET() {
   const payments = getRazorpayReadiness();
   const monitoring = getMonitoringReadiness();
   const commercial = await getCommercialReadiness();
+  const unified = await getThreePhaseAcceptance(commercial);
 
   return ok({
     app: {
@@ -62,10 +64,12 @@ export async function GET() {
       monitoring: {
         provider: monitoring.provider,
         sentryConfigured: monitoring.sentryConfigured,
+        sentryTransportConfigured: monitoring.sentryTransportConfigured,
         safeMetadataOnly: monitoring.safeMetadataOnly
       }
     },
     commercial,
+    unified,
     checkedAt: new Date().toISOString()
   }, { status: database === "ok" ? 200 : 503 });
 }
