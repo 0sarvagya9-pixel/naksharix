@@ -14,19 +14,19 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children, initialLocale = "en" }: { children: React.ReactNode; initialLocale?: Locale }) {
+export function LanguageProvider({ children, initialLocale = "en", routeLocale }: { children: React.ReactNode; initialLocale?: Locale; routeLocale?: Locale }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
     const cookieLocale = document.cookie.match(/(?:^|;\s*)naksharix-language=([^;]+)/)?.[1];
     const savedLocale = window.localStorage.getItem("naksharix-language");
-    const nextLocale = normalizeLocale(cookieLocale ?? savedLocale ?? initialLocale);
+    const nextLocale = routeLocale ?? normalizeLocale(cookieLocale ?? savedLocale ?? initialLocale);
 
-    updateLocale(nextLocale, !cookieLocale);
-    window.localStorage.setItem("naksharix-language", nextLocale);
+    updateLocale(nextLocale, !cookieLocale && !routeLocale);
+    if (!routeLocale) window.localStorage.setItem("naksharix-language", nextLocale);
 
     const listener = (event: StorageEvent) => {
-      if (event.key === "naksharix-language") updateLocale(normalizeLocale(event.newValue), true);
+      if (!routeLocale && event.key === "naksharix-language") updateLocale(normalizeLocale(event.newValue), true);
     };
     window.addEventListener("storage", listener);
     return () => window.removeEventListener("storage", listener);

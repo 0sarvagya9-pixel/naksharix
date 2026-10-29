@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { useLanguage } from "@/components/language-provider";
 import { cn } from "@/lib/utils";
+import { publishedDestinationForLocale } from "@/lib/seo-localization";
 
 export function LanguageSwitcher({ className }: { className?: string }) {
   const { locale, setLocale } = useLanguage();
@@ -26,8 +27,16 @@ export function LanguageSwitcher({ className }: { className?: string }) {
   }, []);
 
   function choose(nextLocale: Locale) {
-    setLocale(nextLocale);
     setOpen(false);
+    const path = window.location.pathname;
+    const publishedRoute = publishedDestinationForLocale(path, nextLocale);
+    const destination = publishedRoute ?? (path.startsWith("/hi/") && nextLocale !== "hi" ? "/" : undefined);
+    if (destination && destination !== path) {
+      setLocale(nextLocale);
+      window.location.assign(destination + window.location.search + window.location.hash);
+      return;
+    }
+    setLocale(nextLocale);
   }
 
   return (

@@ -7,6 +7,7 @@ import { manualReports, shopProducts } from "@/lib/manual-catalogue";
 import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { seoLandingPages } from "@/lib/seo-pages";
 import { zodiacSigns } from "@/lib/zodiac";
+import { publishedSeoAlternates } from "@/lib/seo-localization";
 
 const staticRoutes = [
   "",
@@ -101,12 +102,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...blogPosts.map((post): SitemapEntry => ({ route: `/blog/${post.slug}`, priority: 0.72, frequency: "monthly" }))
   ];
 
-  return routes.map(({ route, priority, frequency }) => ({
-    url: `${env.NEXT_PUBLIC_APP_URL}${route}`,
-    lastModified: new Date(),
-    changeFrequency: frequency,
-    priority
-  }));
+  return routes.map(({ route, priority, frequency }) => {
+    const languages = publishedSeoAlternates(route, env.NEXT_PUBLIC_APP_URL);
+    return {
+      url: `${env.NEXT_PUBLIC_APP_URL}${route}`,
+      ...(languages ? { alternates: { languages } } : {}),
+      // Do not fabricate modification dates for routes without known source timestamps.
+      changeFrequency: frequency,
+      priority
+    };
+  });
 }
 
 function featuredAstrologerRoutes() {

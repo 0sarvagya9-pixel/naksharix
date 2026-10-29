@@ -21,6 +21,8 @@ jobs:
           CSRF_EXIT=$?
           node scripts/qa-i18n-safety.mjs >> static-audit.log 2>&1
           I18N_EXIT=$?
+          node scripts/qa-international-seo.mjs >> static-audit.log 2>&1
+          SEO_EXIT=$?
           node scripts/qa-source-hygiene.mjs >> static-audit.log 2>&1
           HYGIENE_EXIT=$?
           node scripts/qa-release-state.mjs >> static-audit.log 2>&1
@@ -28,7 +30,7 @@ jobs:
           node scripts/qa-final-code-closure.mjs >> static-audit.log 2>&1
           FINAL_EXIT=$?
           cat static-audit.log
-          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ] || [ "$RELEASE_STATE_EXIT" -ne 0 ] || [ "$FINAL_EXIT" -ne 0 ]; then
+          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$SEO_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ] || [ "$RELEASE_STATE_EXIT" -ne 0 ] || [ "$FINAL_EXIT" -ne 0 ]; then
             exit 1
           fi
       - name: Upload static audit log
@@ -136,6 +138,10 @@ jobs:
               node scripts/qa-auth-role-e2e.mjs >> http-smoke.log 2>&1
               SMOKE_EXIT=$?
             fi
+          fi
+          if [ "$SMOKE_EXIT" -eq 0 ]; then
+            node scripts/qa-seo-http.mjs >> http-smoke.log 2>&1
+            SMOKE_EXIT=$?
           fi
           cat http-smoke.log
           exit "$SMOKE_EXIT"

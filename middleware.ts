@@ -61,6 +61,11 @@ export function middleware(request: NextRequest) {
   }
 
   if (!isProtectedPath(pathname)) {
+    if (pathname === "/hi" || pathname.startsWith("/hi/")) {
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set("x-naksharix-route-locale", "hi");
+      return NextResponse.next({ request: { headers: requestHeaders } });
+    }
     return NextResponse.next();
   }
 
@@ -83,6 +88,7 @@ export const config = {
     "/astrologer/:path*",
     "/profile/:path*",
     "/my-readings/:path*",
-    "/saved-reports/:path*"
+    "/saved-reports/:path*",
+    "/hi/:path*"
   ]
 };
