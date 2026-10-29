@@ -23,8 +23,8 @@ const lessons = [
       "The twelve houses traditionally represent themes such as identity, resources, relationships and work.",
       "Graha signs and house placements are inputs to interpretation, not guarantees about events."
     ],
-    href: "/kundli",
-    action: "Open the Kundli tool"
+    href: "/learn/kundli-explained",
+    action: "Read the Kundli explanation"
   },
   {
     id: "panchang",

@@ -4,9 +4,9 @@ import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Naksharix - Vedic Astrology Tools, Reports and Consultations",
+  title: "Free Kundli, Horoscope & Vedic Astrology Tools",
   description:
-    "Explore Kundli, Panchang, horoscope, numerology, tarot, saved digital reports, verified premium access, and astrologer consultation booking on Naksharix.",
+    "Create a free Janam Kundli, understand your Vedic birth chart, explore daily horoscope, Panchang, Guna Milan and traditional astrology tools on Naksharix.",
   path: "/",
   keywords: ["Naksharix", "Kundli", "Panchang", "Horoscope", "Vedic Astrology", "Numerology", "Tarot", "Astrology Consultation"],
 });

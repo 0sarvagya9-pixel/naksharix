@@ -48,4 +48,12 @@ assert.ok(hreflang.includes("kundliGuideLanguages.map("), "Guide hreflang must i
 assert.ok(layout.includes('const htmlLang = documentLanguage;'), "HTML language is still controlled by visitor cookie");
 assert.ok(middleware.includes('"/mr/:path*"') && middleware.includes('"/bn/:path*"') && middleware.includes('"/es/:path*"') && middleware.includes('"/fr/:path*"'), "Localized SSR middleware absent");
 
+
+const homepage=read("app/page.tsx");
+const mainKundli=read("app/kundli/page.tsx");
+const hindiHome=read("app/hi/page.tsx");
+assert.ok(homepage.includes('title: "Free Kundli, Horoscope & Vedic Astrology Tools"'), "Homepage must address its core organic search intent");
+assert.ok(mainKundli.includes('title: "Free Kundli Online | Janam Kundali & Vedic Birth Chart"') && !mainKundli.includes("Generate a premium Naksharix Kundli"), "Free Kundli SEO must match free product");
+assert.ok(hindiHome.includes("फ्री कुंडली, राशिफल और वैदिक ज्योतिष") && hindiHome.includes('href="/hi/free-kundli"'), "Hindi home must use native core search intent and direct useful route");
+
 console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
