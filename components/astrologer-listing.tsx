@@ -82,7 +82,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-[#FFD700]">
                 <Star className="h-4 w-4 fill-current" />
-                {(astrologer.rating || 0).toFixed(1)} {tr("rating")} | {astrologer.experienceYears}+ {tr("years")} | INR {astrologer.pricePerMinute} / 30-minute booking
+                {(astrologer.rating || 0).toFixed(1)} {tr("rating")} | {astrologer.experienceYears}+ {tr("years")} | {astrologer.pricePerSession !== null && astrologer.pricePerSession !== undefined ? `INR ${astrologer.pricePerSession} / 30-minute session` : `INR ${astrologer.pricePerMinute}/min · 30-minute session total INR ${(astrologer.pricePerMinute * 30).toFixed(2)}`}
               </div>
               <p className="flex items-center gap-2 text-sm text-emerald-200"><Circle className="h-2 w-2 fill-current" /> {astrologer.status ?? tr("onlineForDemoBookings")}</p>
               <div className="flex flex-wrap gap-2 text-xs">
