@@ -191,6 +191,7 @@ jobs:
             sleep 1
           done
           node scripts/qa-http-smoke.mjs
+          node scripts/qa-seo-http.mjs
           npx playwright test --config=tests/e2e/playwright.config.ts --workers=1 --project=chromium-desktop
 
   gate-6-mobile-companion:

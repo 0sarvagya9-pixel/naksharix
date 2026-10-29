@@ -139,6 +139,10 @@ jobs:
               SMOKE_EXIT=$?
             fi
           fi
+          if [ "$SMOKE_EXIT" -eq 0 ]; then
+            node scripts/qa-seo-http.mjs >> http-smoke.log 2>&1
+            SMOKE_EXIT=$?
+          fi
           cat http-smoke.log
           exit "$SMOKE_EXIT"
       - name: Upload HTTP smoke log
