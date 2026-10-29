@@ -19,6 +19,8 @@ jobs:
           set +e
           node scripts/qa-csrf-coverage.mjs > static-audit.log 2>&1
           CSRF_EXIT=$?
+          node scripts/qa-phase1-foundation.mjs >> static-audit.log 2>&1
+          PHASE1_EXIT=$?
           node scripts/qa-i18n-safety.mjs >> static-audit.log 2>&1
           I18N_EXIT=$?
           node scripts/qa-international-seo.mjs >> static-audit.log 2>&1
@@ -34,7 +36,7 @@ jobs:
           node scripts/qa-final-code-closure.mjs >> static-audit.log 2>&1
           FINAL_EXIT=$?
           cat static-audit.log
-          if [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$SEO_EXIT" -ne 0 ] || [ "$ADSENSE_EXIT" -ne 0 ] || [ "$ADS_LAUNCH_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ] || [ "$RELEASE_STATE_EXIT" -ne 0 ] || [ "$FINAL_EXIT" -ne 0 ]; then
+          if [ "$PHASE1_EXIT" -ne 0 ] || [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$SEO_EXIT" -ne 0 ] || [ "$ADSENSE_EXIT" -ne 0 ] || [ "$ADS_LAUNCH_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ] || [ "$RELEASE_STATE_EXIT" -ne 0 ] || [ "$FINAL_EXIT" -ne 0 ]; then
             exit 1
           fi
       - name: Upload static audit log

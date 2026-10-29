@@ -103,6 +103,11 @@ export function MainNav() {
     };
   }, [open]);
 
+  useEffect(() => {
+    // Close the mobile dialog after client-side navigation (including back).
+    setOpen(false);
+  }, [pathname]);
+
   if (pathname.startsWith("/astrologer")) return null;
 
   return (
@@ -179,8 +184,8 @@ export function MainNav() {
         </div>
 
         {open ? (
-          <div className="fixed inset-0 z-[100] bg-black/10 backdrop-blur-sm xl:hidden" role="dialog" aria-modal="true">
-            <aside id="naksharix-mobile-sidebar" className="ml-auto h-full w-[min(88vw,380px)] overflow-y-auto border-l border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.98)] p-5 shadow-2xl">
+          <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm xl:hidden" role="dialog" aria-modal="true" aria-label="Navigation menu">
+            <aside id="naksharix-mobile-sidebar" className="ml-auto h-full w-[min(88vw,380px)] overflow-y-auto overscroll-contain border-l border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.98)] p-5 shadow-2xl">
               <div className="flex items-center justify-between">
                 <BrandLogo className="max-w-[12rem]" />
                 <Button variant="outline" size="icon" className="border-[rgba(20,20,20,0.08)] bg-white text-[#3a3a3c]" aria-label="Close navigation menu" onClick={() => setOpen(false)}>

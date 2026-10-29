@@ -25,11 +25,18 @@ export async function cached<T>(key: string, ttlSeconds: number, factory: () => 
   if (!redis) return factory();
   try {
     const hit = await redis.get(key);
-    if (hit) return JSON.parse(hit) as T;
-    const value = await factory();
-    await redis.set(key, JSON.stringify(value), "EX", ttlSeconds);
-    return value;
+    if (hit !== null) return JSON.parse(hit) as T;
   } catch {
-    return factory();
+    // A cache read failure must not prevent the primary operation.
   }
+
+  // Execute the real operation exactly once. A Redis write failure must
+  // never duplicate an expensive generation or a potentially stateful call.
+  const value = await factory();
+  try {
+    await redis.set(key, JSON.stringify(value), "EX", Math.max(1, Math.floor(ttlSeconds)));
+  } catch {
+    // Cache is best effort; the successful result remains authoritative.
+  }
+  return value;
 }
