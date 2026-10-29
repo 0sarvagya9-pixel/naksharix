@@ -58,14 +58,16 @@ import { PremiumGlassShell } from "@/components/layout/premium-glass-shell";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [cookieStore, requestHeaders] = await Promise.all([cookies(), headers()]);
-  const routeLocale = requestHeaders.get("x-naksharix-route-locale") === "hi" ? "hi" : undefined;
-  const initialLocale = routeLocale ?? normalizeLocale(cookieStore.get("naksharix-language")?.value);
-  const htmlLang = initialLocale === "hi" ? "hi" : initialLocale === "hinglish" ? "hi-Latn" : "en";
+  const requestedLanguage = requestHeaders.get("x-naksharix-route-locale");
+  const documentLanguage = ["hi", "mr", "bn", "es", "fr"].includes(requestedLanguage ?? "") ? requestedLanguage! : "en";
+  const routeLocale = documentLanguage === "hi" ? "hi" : undefined;
+  const initialLocale = routeLocale ?? (documentLanguage !== "en" ? "en" : normalizeLocale(cookieStore.get("naksharix-language")?.value));
+  const htmlLang = documentLanguage;
 
   return (
     <html lang={htmlLang} suppressHydrationWarning>
       <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
-        <LanguageProvider initialLocale={initialLocale} routeLocale={routeLocale}>
+        <LanguageProvider initialLocale={initialLocale} routeLocale={routeLocale} documentLanguage={documentLanguage}>
           <AppBackgroundScene />
           <PremiumGlassShell>
             <MainNav />

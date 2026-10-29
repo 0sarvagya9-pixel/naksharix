@@ -8,6 +8,7 @@ import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { seoLandingPages } from "@/lib/seo-pages";
 import { zodiacSigns } from "@/lib/zodiac";
 import { publishedSeoAlternates } from "@/lib/seo-localization";
+import { kundliGuideLanguages, kundliGuidePath } from "@/lib/kundli-education";
 
 const staticRoutes = [
   "",
@@ -85,6 +86,7 @@ type SitemapEntry = { route: string; priority: number; frequency: SitemapFrequen
 export default function sitemap(): MetadataRoute.Sitemap {
   const publicRoutes = isAiAstrologerReady() ? [...staticRoutes, "/ai-astrologer"] : staticRoutes;
   const routes: SitemapEntry[] = [
+    ...kundliGuideLanguages.map((language): SitemapEntry => ({ route: kundliGuidePath(language), priority: 0.81, frequency: "monthly" })),
     ...publicRoutes.map((route): SitemapEntry => ({
       route,
       priority: route === "" ? 1 : legalRoute(route) ? 0.5 : route === "/shop" ? 0.72 : route === "/ai-astrologer" ? 0.76 : 0.8,

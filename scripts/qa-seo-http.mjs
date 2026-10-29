@@ -8,6 +8,8 @@ const pairs = [
   ["/free-kundli", "/hi/free-kundli"],
   ["/kundli-matching", "/hi/kundli-milan"]
 ];
+const nativeGuides = ["en", "hi", "mr", "bn", "es", "fr"];
+const guidePath = (language) => language === "en" ? "/learn/kundli-explained" : "/" + language + "/learn/kundli-explained";
 const langValue = (tag, code) => new RegExp('\\bhrefLang="' + code + '"', "i").test(tag);
 
 for (const [en, hi] of pairs) {
@@ -28,6 +30,19 @@ for (const [en, hi] of pairs) {
     assert.ok(html.includes('href="' + absolute(path) + '"'), "Self canonical missing: " + path);
   }
 }
+for (const locale of nativeGuides) {
+  const path = guidePath(locale);
+  const response = await fetch(base + path, { headers: { Cookie: "naksharix-language=hi" } });
+  assert.equal(response.status, 200, "Guide unavailable " + path);
+  const html = await response.text();
+  assert.ok(new RegExp('<html[^>]*\\blang="' + locale + '"', "i").test(html), "Wrong SSR guide language " + locale);
+  assert.ok(html.includes('<h1') && html.includes('<h2'), "Guide missing depth " + locale);
+  const links = [...html.matchAll(/<link\\b[^>]*\\brel="alternate"[^>]*>/gi)].map((x) => x[0]);
+  for (const code of nativeGuides) {
+    assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + absolute(guidePath(code)) + '"')),
+      "Missing reciprocal guide hreflang " + locale + " to " + code);
+  }
+}
 const sitemap = await fetch(base + "/sitemap.xml");
 assert.equal(sitemap.status, 200, "Sitemap unavailable");
 const xml = await sitemap.text();
@@ -35,6 +50,9 @@ for (const [en, hi] of pairs) {
   for (const link of [absolute(en), absolute(hi)]) {
     assert.ok(xml.includes(link), "Sitemap missing localized URL: " + link);
   }
+}
+for (const locale of nativeGuides) {
+  assert.ok(xml.includes(absolute(guidePath(locale))), "Guide missing from sitemap: " + locale);
 }
 assert.ok(xml.includes('hreflang="hi"') && xml.includes('hreflang="x-default"'),
   "Sitemap lacks localized alternates");

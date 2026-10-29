@@ -14,7 +14,7 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children, initialLocale = "en", routeLocale }: { children: React.ReactNode; initialLocale?: Locale; routeLocale?: Locale }) {
+export function LanguageProvider({ children, initialLocale = "en", routeLocale, documentLanguage = "en" }: { children: React.ReactNode; initialLocale?: Locale; routeLocale?: Locale; documentLanguage?: string }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export function LanguageProvider({ children, initialLocale = "en", routeLocale }
 
   function updateLocale(nextLocale: Locale, persist = true) {
     setLocaleState(nextLocale);
-    document.documentElement.lang = nextLocale === "hi" ? "hi" : nextLocale === "hinglish" ? "hi-Latn" : "en";
+    document.documentElement.lang = documentLanguage;
     if (persist) {
       window.localStorage.setItem("naksharix-language", nextLocale);
       document.cookie = `naksharix-language=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;

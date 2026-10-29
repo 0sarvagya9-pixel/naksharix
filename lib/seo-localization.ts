@@ -1,3 +1,5 @@
+import { kundliGuideLanguages, kundliGuidePath } from "@/lib/kundli-education";
+
 /** Only actual, published translations may be listed as hreflang alternates. */
 export const publishedSeoPairs = [
   { en: "/", hi: "/hi" },
@@ -12,6 +14,13 @@ export const seoLocaleExpansion = {
 } as const;
 
 export function publishedSeoAlternates(path: string, siteUrl: string): Record<string, string> | undefined {
+  if (kundliGuideLanguages.some((language) => kundliGuidePath(language) === path)) {
+    const origin = siteUrl.replace(/\/+$/, "");
+    return Object.fromEntries([
+      ...kundliGuideLanguages.map((language) => [language, origin + kundliGuidePath(language)]),
+      ["x-default", origin + kundliGuidePath("en")]
+    ]);
+  }
   const pair = publishedSeoPairs.find((item) => item.en === path || item.hi === path);
   if (!pair) return undefined;
   const origin = siteUrl.replace(/\/+$/, "");
@@ -19,6 +28,9 @@ export function publishedSeoAlternates(path: string, siteUrl: string): Record<st
 }
 
 export function publishedDestinationForLocale(path: string, locale: "en" | "hi" | "hinglish"): string | undefined {
+  if (kundliGuideLanguages.some((language) => kundliGuidePath(language) === path)) {
+    return kundliGuidePath(locale === "hi" ? "hi" : "en");
+  }
   const pair = publishedSeoPairs.find((item) => item.en === path || item.hi === path);
   return pair ? (locale === "hi" ? pair.hi : pair.en) : undefined;
 }
