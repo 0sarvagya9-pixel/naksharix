@@ -98,7 +98,7 @@ assert.ok(article.includes("post.sections.map") && article.includes("post.relate
 assert.ok(learning.includes("/blog/lagna-vs-rashi") && learning.includes("/blog/panchang-five-elements"),
   "Learning library must link the new high-intent articles");
 assert.ok(sitemap.includes("blogPosts.map((post)"), "Blog articles must stay discoverable in the sitemap");
-assert.ok(editorial.includes("not a certainty") && editorial.includes("not validated") &&
+assert.ok(editorial.includes("not a guarantee") && editorial.includes("not validated") &&
   editorial.includes("qualified professional advice"),
   "Editorial content lacks explicit uncertainty or responsible use safeguards");
 console.log("EDITORIAL_GROWTH_QA=PASS;ORIGINAL_GUIDES=7;SECTIONS=28;BASIC_INTERNAL_LINKS=PASS");
