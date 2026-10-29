@@ -92,10 +92,16 @@ export async function reconcileProcessedRefund(refund: {
       where: { paymentId: original.id, userId: original.userId },
       data: { status: "REFUNDED" }
     });
+    // Refund flags apply even if a PDF was already delivered. Keep completed
+    // delivery history intact, but revoke subsequent paid download permission.
+    await prisma.reportRequest.updateMany({
+      where: { paymentId: original.id, userId: original.userId },
+      data: { paymentStatus: "REFUNDED" }
+    });
     await prisma.reportRequest.updateMany({
       where: { paymentId: original.id, userId: original.userId,
         status: { notIn: ["DELIVERED", "SENT", "CANCELLED"] } },
-      data: { paymentStatus: "REFUNDED", status: "CANCELLED" }
+      data: { status: "CANCELLED" }
     });
   }
   await writeAuditLog({
