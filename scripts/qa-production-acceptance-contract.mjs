@@ -18,7 +18,9 @@ assert.ok(shop.includes("<AddToCartButton")&&workflow.includes("grep -Eqi 'Add t
  workflow.includes("Pay with Razorpay|Buy Now|Complete payment")&&
  order.includes('paymentStatus:"UNPAID"')&&order.includes("onlineCheckoutAvailable:false"),
  "SHOP_MANUAL_ORDER_MUST_NOT_BE_REJECTED_OR_ENABLE_PAYMENT");
-assert.ok(workflow.includes("Private/feature-gated AI route leaked to sitemap.")&&
- !workflow.includes("grep -q '/ai-astrologer' production-evidence/sitemap.xml\n\n"),
+assert.ok(workflow.includes('Boolean(data?.ready) !== hasAi') &&
+ workflow.includes("production-evidence/ai-status.json") &&
+ workflow.includes("AI readiness/sitemap mismatch") &&
+ !workflow.includes("Private/feature-gated AI route leaked to sitemap."),
  "FEATURE_GATED_AI_SITEMAP_ACCEPTANCE_WRONG");
 console.log("PRODUCTION_ACCEPTANCE_MANUAL_GATE=PASS;AUTO_DEPLOY=NO;POSTDEPLOY_SHA_CHECK=YES;MARKET_PRICE_ORDER_REQUESTS=YES");
