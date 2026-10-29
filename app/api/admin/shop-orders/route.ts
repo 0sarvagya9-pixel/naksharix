@@ -43,6 +43,8 @@ export async function PATCH(request:Request){
   if(current.version!==input.expectedVersion)return fail("Order changed in another session.",409);
   const legal=moves[current.status]||[];
   if(input.status!==current.status&&!legal.includes(input.status))return fail("Invalid order status transition.",422);
+  if(input.status==="CANCELED"&&current.paymentStatus==="PAID")
+    return fail("Issue and verify the full Razorpay refund before canceling a paid order.",409);
   const shipping=input.shippingPaise??current.shippingPaise;
   const tax=input.taxPaise??current.taxPaise;
   if(["CONFIRMED","PACKING","DISPATCHED","DELIVERED"].includes(input.status)&&(shipping===null||tax===null))
