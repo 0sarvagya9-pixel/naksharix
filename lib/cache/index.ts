@@ -23,7 +23,7 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds: number) {
 
 export async function cacheGetOrSet<T>(key: string, ttlSeconds: number, factory: () => Promise<T>) {
   const cached = await cacheGet<T>(key);
-  if (cached) return { value: cached, cacheStatus: "HIT" as const };
+  if (cached !== null) return { value: cached, cacheStatus: "HIT" as const };
   const value = await factory();
   await cacheSet(key, value, ttlSeconds);
   return { value, cacheStatus: "MISS" as const };

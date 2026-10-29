@@ -68,11 +68,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={htmlLang} suppressHydrationWarning>
       <body className={cn("naksh-page-bg font-sans", cinzel.variable, cinzelDecorative.variable, poppins.variable, inter.variable)}>
+        <a href="#main-content" className="sr-only fixed left-4 top-4 z-[9999] rounded-lg bg-white px-4 py-3 font-semibold text-[#72273a] shadow-lg focus:not-sr-only focus:outline focus:outline-2 focus:outline-offset-2">Skip to main content</a>
         <LanguageProvider initialLocale={initialLocale} routeLocale={routeLocale} documentLanguage={documentLanguage}>
           <AppBackgroundScene />
           <PremiumGlassShell>
             <MainNav />
-            <main className="flex-grow">
+            <main id="main-content" tabIndex={-1} className="flex-grow">
               {children}
             </main>
             <Footer />

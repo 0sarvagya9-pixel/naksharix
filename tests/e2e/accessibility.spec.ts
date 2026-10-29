@@ -26,3 +26,25 @@ test.describe("Naksharix WCAG release audit", () => {
     });
   }
 });
+
+
+test("keyboard users can skip repeated navigation", async ({ page, browserName }) => {
+  test.skip(browserName === "webkit", "Mobile Safari keyboard focus differs from desktop tab navigation");
+  await page.goto(absolute("/"), { waitUntil: "domcontentloaded" });
+  const skip = page.getByRole("link", { name: "Skip to main content" });
+  await page.keyboard.press("Tab");
+  await expect(skip).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#main-content")).toBeFocused();
+});
+
+test("mobile navigation opens and navigates without leaving the drawer open", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "Mobile viewport only");
+  await page.goto(absolute("/"), { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Open navigation menu" }).click();
+  const dialog = page.getByRole("dialog", { name: "Navigation menu" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("link", { name: "Shop", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page).toHaveURL(/\/shop(?:\?|$)/);
+});
