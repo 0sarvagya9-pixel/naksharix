@@ -47,7 +47,7 @@ export default function FreeKundliHindiPage() {
         </Card>
         <div className="mt-8 flex flex-wrap gap-3">
           <Button asChild><Link href="/kundli">कुंडली बनाएं</Link></Button>
-          <Button variant="outline" asChild><Link href="/reports">विस्तृत रिपोर्ट देखें</Link></Button>
+          <Button variant="outline" asChild><Link href="/hi/learn/kundli-explained">कुंडली समझने की मार्गदर्शिका</Link></Button>
         </div>
         <SeoInternalLinks title="कुंडली और ज्योतिष के अन्य उपयोगी पेज" />
       </Section>

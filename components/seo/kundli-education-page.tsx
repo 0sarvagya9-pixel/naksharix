@@ -24,11 +24,11 @@ export function KundliEducationPage({ locale }: { locale: KundliGuideLanguage })
         <article className="mx-auto max-w-5xl" lang={locale}>
           <nav aria-label="Language versions" className="mb-8 flex flex-wrap gap-2">
             {kundliGuideLanguages.map((code) => (
-              <Link key={code} href={kundliGuidePath(code)} hrefLang={code}
+              <a key={code} href={kundliGuidePath(code)} hrefLang={code}
                 aria-current={code === locale ? "page" : undefined}
                 className={"rounded-md border px-3 py-2 text-sm "+(code === locale ? "border-[#FFD700] bg-[#FFD700]/10" : "border-[#D4AF37]/30 hover:border-[#FFD700]")}>
                 {kundliEducation[code].label}
-              </Link>
+              </a>
             ))}
           </nav>
           <header>

@@ -33,7 +33,7 @@ export default function HindiHomePage() {
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/consultation">ज्योतिषी से सलाह लें</Link>
+                <Link href="/hi/learn/kundli-explained">कुंडली के बारे में पढ़ें</Link>
               </Button>
             </div>
           </div>

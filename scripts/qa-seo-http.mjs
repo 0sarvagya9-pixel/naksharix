@@ -37,7 +37,7 @@ for (const locale of nativeGuides) {
   const html = await response.text();
   assert.ok(new RegExp('<html[^>]*\\blang="' + locale + '"', "i").test(html), "Wrong SSR guide language " + locale);
   assert.ok(html.includes('<h1') && html.includes('<h2'), "Guide missing depth " + locale);
-  const links = [...html.matchAll(/<link\\b[^>]*\\brel="alternate"[^>]*>/gi)].map((x) => x[0]);
+  const links = [...html.matchAll(/<link\b[^>]*\brel="alternate"[^>]*>/gi)].map((x) => x[0]);
   for (const code of nativeGuides) {
     assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + absolute(guidePath(code)) + '"')),
       "Missing reciprocal guide hreflang " + locale + " to " + code);
@@ -54,6 +54,8 @@ for (const [en, hi] of pairs) {
 for (const locale of nativeGuides) {
   assert.ok(xml.includes(absolute(guidePath(locale))), "Guide missing from sitemap: " + locale);
 }
+const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+assert.equal(locs.length, new Set(locs).size, "Sitemap contains duplicate URLs");
 assert.ok(xml.includes('hreflang="hi"') && xml.includes('hreflang="x-default"'),
   "Sitemap lacks localized alternates");
 console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=6;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES");

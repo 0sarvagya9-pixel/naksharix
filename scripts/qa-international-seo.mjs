@@ -22,7 +22,7 @@ assert.ok(sitemap.includes("publishedSeoAlternates(route, env.NEXT_PUBLIC_APP_UR
 assert.ok(!sitemap.includes("lastModified: new Date()"), "Fabricated last-modified dates");
 assert.ok(layout.includes("alternates: {}"), "Accidental inherited homepage canonical");
 assert.ok(layout.includes('requestHeaders.get("x-naksharix-route-locale")') &&
-  middleware.includes('requestHeaders.set("x-naksharix-route-locale", "hi")') &&
+  middleware.includes('requestHeaders.set("x-naksharix-route-locale", languageMatch[1])') &&
   middleware.includes('"/hi/:path*"'), "Hindi route lang not guaranteed at SSR");
 assert.ok(provider.includes("routeLocale ?? normalizeLocale(") &&
   switcher.includes("publishedDestinationForLocale("), "Wrong client locale navigation");
@@ -39,7 +39,7 @@ const guidePage = read("app/[language]/learn/kundli-explained/page.tsx");
 const guideContent = read("components/seo/kundli-education-page.tsx");
 const hreflang = read("lib/seo-localization.ts");
 for (const locale of ["en", "hi", "mr", "bn", "es", "fr"]) {
-  assert.ok(guide.includes(locale + ": {"), "Missing native education content: " + locale);
+  assert.ok(guide.includes('"' + locale + '": {'), "Missing native education content: " + locale);
   assert.ok(guide.includes('locale === "en" ? "/learn/kundli-explained"'), "Guide URLs do not have stable English fallback");
 }
 assert.ok(guidePage.includes("generateStaticParams") && guidePage.includes("notFound()"), "Localized routes must reject unknown languages");
@@ -48,4 +48,4 @@ assert.ok(hreflang.includes("kundliGuideLanguages.map("), "Guide hreflang must i
 assert.ok(layout.includes('const htmlLang = documentLanguage;'), "HTML language is still controlled by visitor cookie");
 assert.ok(middleware.includes('"/mr/:path*"') && middleware.includes('"/bn/:path*"') && middleware.includes('"/es/:path*"') && middleware.includes('"/fr/:path*"'), "Localized SSR middleware absent");
 
-console.log("SEO_LOCALE_GATE=PASS;PUBLISHED_TRANSLATED_PAIRS=3;UNREVIEWED_LOCALES_NOT_INDEXED=YES");
+console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
