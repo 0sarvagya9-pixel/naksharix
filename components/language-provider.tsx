@@ -36,7 +36,11 @@ export function LanguageProvider({ children, initialLocale = "en", routeLocale, 
 
   function updateLocale(nextLocale: Locale, persist = true) {
     setLocaleState(nextLocale);
-    document.documentElement.lang = documentLanguage;
+    // Keep the language of a dedicated native-language page stable, while
+    // retaining the user's original Hindi/Hinglish UI switch on English pages.
+    document.documentElement.lang = documentLanguage === "en"
+      ? (nextLocale === "hi" ? "hi" : nextLocale === "hinglish" ? "hi-Latn" : "en")
+      : documentLanguage;
     if (persist) {
       window.localStorage.setItem("naksharix-language", nextLocale);
       document.cookie = `naksharix-language=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;

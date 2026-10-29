@@ -63,9 +63,10 @@ Build a metadata inventory and route index/noindex table before adding more SEO 
   translation. Calculator UI and payment processes remain independently scoped.
 - Do not extrapolate guide-local language support into availability of
   consultation, commerce, shipping or native-language support for every workflow.
-- Five other language codes are not false-indexed by the guide; the wider
-  37-language expansion backlog remains open until actual complete translations
-  and native editorial/legal review exist for additional pages.
+- Four of the 37 additional planned language codes (mr, bn, es, fr) now have
+  educational guides. The remaining **33** do not have indexable translations.
+  The larger site-wide localization backlog stays open pending original content,
+  qualified native editorial review and regional legal/business verification.
 - Added actual HTTP assertions for the full six-language cluster, SSR lang,
   sitemap uniqueness and exact reciprocal links. Search Console discovery and
   rankings require postdeployment monitoring; rankings cannot be guaranteed.

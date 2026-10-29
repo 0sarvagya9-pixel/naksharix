@@ -46,6 +46,7 @@ assert.ok(guidePage.includes("generateStaticParams") && guidePage.includes("notF
 assert.ok(guideContent.includes("hrefLang={code}") && guideContent.includes('lang={locale}'), "Native guide needs user-accessible language links and language markup");
 assert.ok(hreflang.includes("kundliGuideLanguages.map("), "Guide hreflang must include only completed native-language content");
 assert.ok(layout.includes('const htmlLang = documentLanguage;'), "HTML language is still controlled by visitor cookie");
+assert.ok(provider.includes('documentLanguage === "en"') && provider.includes('nextLocale === "hinglish" ? "hi-Latn"'), "English UI must retain Hinglish language attribute while native guides remain route-specific");
 assert.ok(middleware.includes('"/mr/:path*"') && middleware.includes('"/bn/:path*"') && middleware.includes('"/es/:path*"') && middleware.includes('"/fr/:path*"'), "Localized SSR middleware absent");
 
 
