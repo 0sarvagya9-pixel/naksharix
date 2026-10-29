@@ -55,8 +55,9 @@ export async function getThreePhaseAcceptance(commercial: CommercialReadiness): 
     item("redis", "Distributed Redis provider", redisReady ? "verified" : "action_required",
       redisReady ? "Shared Redis responded to PING." : "Distributed Redis is not proven reachable; process memory is not a cross-instance security quota."),
     item("monitoring", "Central error monitoring", "external_evidence_required",
-      monitor.sentryConfigured ? "Sentry DSN exists, but no SDK transport or received alert is verified."
-        : "Privacy-safe structured console telemetry exists, but no centralized alert transport/owner receipt is verified."),
+      monitor.sentryTransportConfigured
+        ? "Privacy-minimized Sentry transport configured; actual provider receipt and on-call alert remain unverified."
+        : "Privacy-safe structured console telemetry exists, but no verified centralized alert delivery."),
     item("analytics", "Consent-aware analytics", "external_evidence_required",
       env.NEXT_PUBLIC_GA_ID ? "Analytics identifier configured; verify consent, browser delivery and dashboard measurement."
         : "No verified analytics identifier, regional consent or actual dashboard data."),

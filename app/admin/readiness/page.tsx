@@ -82,7 +82,7 @@ export default async function AdminReadinessPage() {
       name: "Exception monitoring",
       status: monitoring.sentryConfigured ? "unknown" : "missing",
       note: monitoring.sentryConfigured
-        ? "Sentry configuration present; SDK transport and alert delivery still require verification."
+        ? "Sentry DSN present; check transport readiness and independently verify provider receipt and actual alert delivery."
         : "Safe console logger is available; central exception alerting is not confirmed."
     },
     {

@@ -1,4 +1,5 @@
 import "server-only";
+import { safeSentryTransportConfigured } from "@/lib/monitoring/sentry-transport";
 
 type LogLevel = "info" | "warn" | "error";
 
@@ -35,11 +36,12 @@ export const logger = {
 
 export function getMonitoringReadiness() {
   return {
-    provider: "console_safe_logger",
+    provider: safeSentryTransportConfigured() ? "safe_sentry_envelope" : "console_safe_logger",
     sentryConfigured: Boolean(process.env.SENTRY_DSN),
+    sentryTransportConfigured: safeSentryTransportConfigured(),
     safeMetadataOnly: true,
-    reason: process.env.SENTRY_DSN
-      ? "Sentry DSN is present but there is no active sending SDK; console-only monitoring and alerting unverified."
-      : "Safe structured console logging is active. Sentry SDK and central paging have not been configured."
+    reason: safeSentryTransportConfigured()
+      ? "Privacy-minimized Sentry envelope transport configured; provider receipt and on-call alert delivery are NOT verified."
+      : "Safe structured console logging is active. No verified Sentry transport or central paging."
   };
 }

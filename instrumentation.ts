@@ -16,6 +16,8 @@ export const onRequestError: Instrumentation.onRequestError = async (_error, _re
     logger.error("next.request.failure", {
       route: safeRoute, renderSource: source, routeType: type
     });
+    const { reportSafeRequestFailure } = await import("@/lib/monitoring/sentry-transport");
+    await reportSafeRequestFailure({ route: safeRoute, renderSource: source, routeType: type });
   } catch {
     // Instrumentation must not convert a failed request into a new failure.
   }

@@ -50,6 +50,7 @@ export async function GET() {
       monitoring: {
         provider: monitoring.provider,
         sentryConfigured: monitoring.sentryConfigured,
+        sentryTransportConfigured: monitoring.sentryTransportConfigured,
         safeMetadataOnly: monitoring.safeMetadataOnly
       },
       reportStorage: {
