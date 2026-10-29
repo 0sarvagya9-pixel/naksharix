@@ -71,11 +71,6 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
               {part.paragraphs.map((paragraph) => (
                 <p key={paragraph} className="mt-4 leading-8 naksh-muted-text">{paragraph}</p>
               ))}
-              {"points" in part && part.points?.length ? (
-                <ul className="mt-4 list-disc space-y-2 pl-5 leading-7 naksh-muted-text">
-                  {part.points.map((point) => <li key={point}>{point}</li>)}
-                </ul>
-              ) : null}
             </section>
           ))}
         </div>
