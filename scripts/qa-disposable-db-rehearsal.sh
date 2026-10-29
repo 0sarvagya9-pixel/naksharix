@@ -55,6 +55,23 @@ test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/feature-table-count.txt")" = "2"
 test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/feature-index-count.txt")" = "3"
 echo 'feature_sql_migrations_disposable_only=PASS' | tee "$EVIDENCE_DIR/feature-migration-gate.txt"
 
+# Only ephemeral localhost PostgreSQL: also validate the new payment extension
+# is idempotent, non-destructive and compatible with the generated Prisma schema.
+# Never route this script to Neon or a production connection.
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261029_unified_razorpay_commerce.sql \
+  2>&1 | tee "$EVIDENCE_DIR/unified-payment-migration-first.log"
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261029_unified_razorpay_commerce.sql \
+  2>&1 | tee "$EVIDENCE_DIR/unified-payment-migration-repeat.log"
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc "
+SELECT
+ (SELECT count(*) FROM pg_type t JOIN pg_enum e ON e.enumtypid=t.oid WHERE t.typname='PaymentPurpose' AND e.enumlabel='SHOP_ORDER')
+ +(SELECT count(*) FROM pg_type t JOIN pg_enum e ON e.enumtypid=t.oid WHERE t.typname='ReportPaymentStatus' AND e.enumlabel='REFUNDED')
+ +(SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='ShopOrder' AND column_name='fulfillmentEvidenceUrl');" \
+ | tee "$EVIDENCE_DIR/unified-payment-schema-count.txt"
+test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/unified-payment-schema-count.txt")" = "3"
+echo 'unified_payment_additive_migration_disposable_only=PASS' | tee "$EVIDENCE_DIR/unified-payment-schema-gate.txt"
+
+
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc \
   "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('User','Session','OtpToken');" \
   | tee "$EVIDENCE_DIR/source-required-table-count.txt"
@@ -157,6 +174,7 @@ test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/restore-otp-index-count.txt")" = "1"
   echo "environment=disposable_postgresql"
   echo "source_schema_materialized=PASS"
   echo "feature_migrations_verified_on_disposable_legacy_schema=PASS"
+  echo "unified_payment_additive_migration_disposable_only=PASS"
   echo "schema_backup_created=PASS"
   echo "separate_restore_database_created=PASS"
   echo "restore_apply=PASS"
