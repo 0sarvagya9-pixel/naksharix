@@ -1,0 +1,57 @@
+name: NAKSHARIX Free Public Uptime Monitoring
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: naksharix-public-health
+  cancel-in-progress: false
+
+jobs:
+  site-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run public synthetic health and AdSense seller checks
+        id: check
+        continue-on-error: true
+        run: node scripts/ops/check-public-endpoints.mjs
+      - name: Report sustained outage or recovery to a single GitHub issue
+        if: always() && steps.check.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CHECK_RESULT: ${{ steps.check.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          incident_title='[uptime] NAKSHARIX public monitoring incident'
+          incident=$(gh issue list --state open --limit 100 --json number,title \
+            --jq '.[] | select(.title == "[uptime] NAKSHARIX public monitoring incident") | .number' | head -n 1)
+          if [ "$CHECK_RESULT" = "success" ]; then
+            if [ -n "$incident" ]; then
+              gh issue comment "$incident" --body 'Synthetic health has recovered. The check did not access private user or payment data.'
+              gh issue close "$incident" --reason completed
+            fi
+          elif [ -n "$incident" ]; then
+            gh issue comment "$incident" --body 'Public health is still failing. Inspect this scheduled run and production runtime logs. Do not paste customer information.'
+          else
+            gh issue create --title "$incident_title" \
+              --body 'Persistent public health or database degradation detected after three attempts. Inspect GitHub Actions and Vercel runtime logs. No private data was accessed.'
+          fi
+      - name: Fail the workflow when public health is degraded
+        if: always() && steps.check.outcome == 'failure'
+        run: exit 1
