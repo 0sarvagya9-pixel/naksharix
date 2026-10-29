@@ -17,8 +17,8 @@ for (const route of paths) {
   assert.ok(read(name).includes('from "@/lib/seo"'), "Missing translated metadata at " + route);
 }
 assert.ok(!registry.includes('{ en: "/daily-horoscope", hi: "/hi/aaj-ka-rashifal" }'), "False daily forecast translation");
-assert.ok(seo.includes("publishedSeoAlternates(path, env.NEXT_PUBLIC_APP_URL)"), "Missing reciprocal HTML hreflang");
-assert.ok(sitemap.includes("publishedSeoAlternates(route, env.NEXT_PUBLIC_APP_URL)"), "Missing sitemap alternate URLs");
+assert.ok(seo.includes("publishedSeoAlternates(path, origin)"), "Missing origin-aligned HTML hreflang");
+assert.ok(sitemap.includes("publishedSeoAlternates(route, seoOrigin)"), "Missing origin-aligned sitemap alternates");
 assert.ok(!sitemap.includes("lastModified: new Date()"), "Fabricated last-modified dates");
 assert.ok(layout.includes("alternates: {}"), "Accidental inherited homepage canonical");
 assert.ok(layout.includes('requestHeaders.get("x-naksharix-route-locale")') &&
