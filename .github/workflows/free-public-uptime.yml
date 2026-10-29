@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
+  # Validate an actual public check when the workflow or checker changes.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/free-public-uptime.yml'
+      - 'scripts/ops/check-public-endpoints.mjs'
 
 permissions:
   contents: read
