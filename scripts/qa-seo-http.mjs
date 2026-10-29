@@ -12,7 +12,7 @@ const langValue = (tag, code) => new RegExp('\\bhrefLang="' + code + '"', "i").t
 for (const [en, hi] of pairs) {
   for (const [path, locale] of [[en, "en"], [hi, "hi"]]) {
     const response = await fetch(base + path, {
-      headers: { Cookie: "naksharix-language=" + (locale === "hi" ? "en" : "en") }
+      headers: { Cookie: "naksharix-language=en" }
     });
     assert.equal(response.status, 200, "Localized route unavailable: " + path);
     const html = await response.text();
@@ -20,6 +20,7 @@ for (const [en, hi] of pairs) {
     assert.ok(foundHtml, "HTML lang missing: " + path);
     assert.equal(foundHtml[1], locale, "SSR HTML language not tied to URL: " + path);
     const links = [...html.matchAll(/<link\b[^>]*\brel="alternate"[^>]*>/gi)].map((m) => m[0]);
+    if (path === "/") console.log("SEO_ROOT_LINK_EVIDENCE=" + JSON.stringify([...html.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]).filter((tag) => /alternate|canonical|hrefLang/i.test(tag)).slice(0,20)));
     for (const [code, target] of [["en", en], ["hi", hi], ["x-default", en]]) {
       assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + canonical + target + '"')),
         "Missing reciprocal " + code + " hreflang on " + path);
