@@ -3,6 +3,9 @@ import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/jwt";
+import { env } from "@/lib/env";
+import { getRazorpayReadiness } from "@/lib/payments/readiness";
+import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 export const dynamic="force-dynamic";
 export const metadata:Metadata={title:"Track My Orders | Naksharix",robots:{index:false,follow:false}};
 const money=(p:number)=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(p/100);
@@ -29,6 +32,20 @@ export default async function MyOrdersPage(){
      <p className="mt-3 text-lg font-bold">Product subtotal: {money(order.subtotalPaise)}</p>
      <p className="mt-2 text-sm">Confirmed total: {order.totalPaise!==null?money(order.totalPaise):"Awaiting shipping/tax confirmation"}</p>
      <p className="mt-2 text-sm">Tracking: {order.trackingReference||"Not dispatched"}</p>
+     {order.status==="CONFIRMED" && ["UNPAID","FAILED"].includes(order.paymentStatus) &&
+      order.fulfillmentMode==="MANUAL_CONFIRMATION" &&
+      !!order.fulfillmentEvidenceUrl?.startsWith("https://") && order.adminNote.trim().length>=30 &&
+      order.totalPaise!==null && order.totalPaise>0 &&
+      order.shippingPaise!==null && order.taxPaise!==null &&
+      order.totalPaise===order.subtotalPaise+order.shippingPaise+order.taxPaise ? (
+       env.SHOP_PAYMENTS_ENABLED==="true" && getRazorpayReadiness().enabled ?
+         <div className="mt-4 max-w-sm"><RazorpayCheckoutButton
+           payload={{purpose:"SHOP_ORDER",shopOrderId:order.id}}
+           label={`Pay confirmed total ${money(order.totalPaise)} with Razorpay`} successHref="/orders"/></div> :
+         <p className="mt-3 text-sm">Final quote confirmed; secure Shop checkout is not activated. Contact support before sending money.</p>
+     ) : null}
+     {order.paymentStatus==="PAID"?<p className="mt-2 text-sm font-semibold">Payment captured and recorded. Track dispatch above.</p>:null}
+     {order.paymentStatus==="REFUNDED"?<p className="mt-2 text-sm font-semibold">Full refund confirmed by signed Razorpay webhook.</p>:null}
      <details className="mt-4"><summary className="cursor-pointer font-semibold">Order items</summary>
        <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded-lg bg-[#fff8ee] p-4 text-xs">{JSON.stringify(order.items,null,2)}</pre>
      </details>
