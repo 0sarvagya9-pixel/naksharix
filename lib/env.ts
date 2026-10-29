@@ -23,6 +23,11 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_SITE_VERIFICATION: z.string().optional(),
+  ADSENSE_SITE_APPROVED: z.enum(["true", "false"]).default("false"),
+  ADSENSE_CMP_VERIFIED: z.enum(["true", "false"]).default("false"),
+  ADSENSE_ENABLE_SERVING: z.enum(["true", "false"]).default("false"),
+  ADSENSE_SLOT_KUNDLI_GUIDE: z.string().optional(),
+  ADSENSE_SLOT_KUNDLI_LEARNING: z.string().optional(),
   ADMIN_EMAIL: z.string().email().optional(),
   ADMIN_PASSWORD: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
@@ -83,5 +88,10 @@ export function validateProductionEnv() {
   if (env.AI_ASTROLOGER_ENABLED === "true" && !geminiConfigured) issues.push("A real Gemini key is required when AI_ASTROLOGER_ENABLED=true");
   if (env.AI_REPORT_GENERATOR_ENABLED === "true" && !geminiConfigured) issues.push("A real Gemini key is required when AI_REPORT_GENERATOR_ENABLED=true");
   if (env.ALLOW_AI_DIAGNOSTICS === "true") issues.push("ALLOW_AI_DIAGNOSTICS must remain false in production");
+  if (env.ADSENSE_ENABLE_SERVING === "true") {
+    if (env.ADSENSE_SITE_APPROVED !== "true") issues.push("AdSense serving requires site approval evidence");
+    if (env.ADSENSE_CMP_VERIFIED !== "true") issues.push("AdSense serving requires certified CMP verification");
+    if (!env.ADSENSE_SLOT_KUNDLI_GUIDE && !env.ADSENSE_SLOT_KUNDLI_LEARNING) issues.push("AdSense serving requires at least one verified ad slot");
+  }
   if (issues.length) throw new Error(`Invalid production environment:\n${issues.join("\n")}`);
 }

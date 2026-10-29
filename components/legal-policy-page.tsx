@@ -161,6 +161,11 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
           "Information may be shared with service providers only as needed to operate hosting, authentication, payment processing, email delivery, monitoring, and consultations. Approved astrologers should receive only the information needed for the booked service.",
       },
       {
+        title: "Advertising and Cookies",
+        body:
+          "If advertising is activated after site approval, Google and advertising partners may use cookies or similar technologies for ad delivery, measurement, and fraud prevention, subject to applicable privacy controls. Our public educational pages may contain labelled sponsored advertisements; private account data and birth details are not supplied to advertisers as targeting input. Regional consent messaging and choices are subject to the configured certified CMP where required. Learn more at /advertising or contact support.",
+      },
+      {
         title: "Retention, Security, and Deletion",
         body:
           "Data is retained as needed for account operation, service delivery, payment records, fraud prevention, legal obligations, and dispute handling. Security controls reduce risk but no online system can guarantee absolute security. Contact support to request correction or deletion of eligible data.",

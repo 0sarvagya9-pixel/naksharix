@@ -5,6 +5,7 @@ import { Section } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { GrowthPage } from "@/lib/growth-pages";
+import { EducationalAd } from "@/components/adsense/educational-ad";
 
 export function SeoGrowthPage({ page }: { page: GrowthPage }) {
   return (
@@ -71,6 +72,9 @@ export function SeoGrowthPage({ page }: { page: GrowthPage }) {
               </section>
             ))}
           </div>
+        ) : null}
+        {page.sections?.length && page.sections.length >= 2 && page.slug === "free-kundli" ? (
+          <EducationalAd placement="kundli-learning" />
         ) : null}
       </Section>
     </main>

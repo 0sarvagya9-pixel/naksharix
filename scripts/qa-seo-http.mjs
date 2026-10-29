@@ -56,6 +56,13 @@ assert.equal(sellers.status, 200, "Google AdSense ads.txt unavailable at public 
 assert.equal(sellers.headers.get("content-type")?.includes("text/plain"), true, "ads.txt must be plaintext");
 assert.equal((await sellers.text()).trim(), "google.com, pub-7848529669366564, DIRECT, f08c47fec0942fa0",
   "Public ads.txt publisher ID does not match owner's AdSense account");
+for (const guidePath of ["/learn/kundli-explained", "/free-kundli"]) {
+  const content = await fetch(base + guidePath);
+  assert.equal(content.status, 200, "Educational SEO page absent");
+  const body = await content.text();
+  assert.ok(!body.includes("pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"),
+    "AdSense loader must stay absent from unapproved QA site");
+}
 const sitemap = await fetch(base + "/sitemap.xml");
 assert.equal(sitemap.status, 200, "Sitemap unavailable");
 const xml = await sitemap.text();

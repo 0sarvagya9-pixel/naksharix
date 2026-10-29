@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Section } from "@/components/section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
+import { EducationalAd } from "@/components/adsense/educational-ad";
 import { env } from "@/lib/env";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { kundliEducation, kundliGuideLanguages, kundliGuidePath, indexableKundliGuideLanguages, isIndexableKundliGuideLanguage, type KundliGuideLanguage } from "@/lib/kundli-education";
@@ -64,6 +65,7 @@ export function KundliEducationPage({ locale }: { locale: KundliGuideLanguage })
             </div>
           </section>
           <p className="mt-10 border-l-2 border-[#FFD700] pl-4 text-sm leading-7 naksh-muted-text">{page.caution}</p>
+          {isIndexable ? <EducationalAd placement="kundli-guide" /> : null}
         </article>
       </Section>
     </main>

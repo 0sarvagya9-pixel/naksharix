@@ -64,6 +64,8 @@ export function Footer() {
             © {new Date().getFullYear()} Naksharix. All rights reserved.
           </p>
           <p style={{ fontSize: 11, color: "#525866" }}>
+            <Link href="/advertising" className="underline underline-offset-2">Advertising &amp; privacy</Link>
+            {" · "}
             Explore traditional astrology, reports, consultations, Puja information and spiritual products
           </p>
         </div>
