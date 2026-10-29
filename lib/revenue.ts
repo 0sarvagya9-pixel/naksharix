@@ -60,7 +60,13 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
   if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.FAILED) return null;
 
   const invoiceNumber = `NXR-${new Date().getFullYear()}-${payment.id.slice(-8).toUpperCase()}`;
-  const taxAmount = Number(payment.amount) * 0.18;
+  const md = (payment.metadata as Record<string, unknown> | null) ?? {};
+  // Only the customer-visible, owner-confirmed Shop tax may populate a tax figure.
+  // Never invent 18% GST for all spiritual services or digital reports.
+  const verifiedTaxPaise = payment.purpose === PaymentPurpose.SHOP_ORDER &&
+    Number.isSafeInteger(md.shopTaxPaise) && Number(md.shopTaxPaise) >= 0
+    ? Number(md.shopTaxPaise) : 0;
+  const taxAmount = verifiedTaxPaise / 100;
   const existingMetadata = (payment.metadata as Record<string, unknown> | null) ?? {};
   const mergedMetadata = { ...existingMetadata, ...metadata } as Prisma.InputJsonObject;
 
@@ -106,7 +112,7 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
           paymentId: paid.id,
           reportType: paid.purpose,
           title: reportTitle(paid.purpose),
-          status: "READY",
+          status: "PURCHASED_AWAITING_DETAILS",
           metadata: (paid.metadata as Prisma.InputJsonValue | null) ?? undefined
         }
       });
@@ -141,5 +147,5 @@ function reportTitle(purpose: PaymentPurpose) {
 }
 
 function buildInvoiceHtml(number: string, amount: number, currency: string, purpose: PaymentPurpose) {
-  return `<h1>Naksharix Invoice ${number}</h1><p>Purpose: ${purpose}</p><p>Amount: ${currency} ${amount.toFixed(2)}</p><p>GST estimate: ${currency} ${(amount * 0.18).toFixed(2)}</p>`;
+  return `<h1>Naksharix Payment Receipt ${number}</h1><p>Purpose: ${purpose}</p><p>Amount paid: ${currency} ${amount.toFixed(2)}</p><p>This is a payment receipt, not a tax invoice. Applicable GST or other tax breakdown must be issued under the verified merchant tax policy.</p>`;
 }

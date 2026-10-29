@@ -14,7 +14,7 @@ import { useLanguage } from "@/components/language-provider";
 import { errorClass, isBlank, scrollToFirstError, type FieldErrors } from "@/lib/form-validation";
 
 type Slot = { id: string; dayOfWeek: number; startTime: string; endTime: string; consultationType: string; isActive: boolean };
-type Props = { astrologerId: string; astrologerName: string; userEmail?: string | null; userName?: string | null; slots: Slot[] };
+type Props = { astrologerId: string; astrologerName: string; userEmail?: string | null; userName?: string | null; slots: Slot[]; sessionPrice: number | null };
 
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -30,7 +30,7 @@ function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
-export function ConsultationRequestForm({ astrologerId, astrologerName, userEmail, userName, slots }: Props) {
+export function ConsultationRequestForm({ astrologerId, astrologerName, userEmail, userName, slots, sessionPrice }: Props) {
   const { requiredMessage, tr } = useLanguage();
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
@@ -64,6 +64,7 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
     setStatus(tr("creatingBookingRequest"));
     setLoading(true);
 
+    if (sessionPrice === null) { setStatus("This consultation is not priced or approved."); return; }
     const response = await secureFetch("/api/consultation-bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -137,7 +138,7 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
           router.push(redirectTo);
         } else {
           const verifyJson = await verifyResponse.json();
-          setStatus(verifyJson.error ?? "Payment verification failed.");
+          setStatus(verifyJson.error ?? "Payment confirmation is pending; check payment history and do not pay again.");
         }
       },
       modal: {
@@ -155,6 +156,7 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
       <CardHeader>
         <CardTitle className="font-cinzel">{tr("bookConsultation")} - {astrologerName}</CardTitle>
         <p className="text-sm naksh-muted-text">{tr("consultationConfirmationCopy")}</p>
+        <p className="text-sm font-semibold">30-minute session total: {sessionPrice === null ? "Not priced / booking unavailable" : new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(sessionPrice)}. Checkout uses the one Naksharix Razorpay account.</p>
       </CardHeader>
       <CardContent>
         {!userEmail ? (
@@ -232,7 +234,7 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
               placeholder={tr("consultationQuestionPlaceholder")}
             />
           </Field>
-          <Button disabled={loading || !userEmail || !slots.length}>
+          <Button disabled={loading || !userEmail || !slots.length || sessionPrice === null}>
             <CalendarClock className="h-4 w-4" />
             {loading ? "Processing..." : tr("bookConsultation")}
           </Button>

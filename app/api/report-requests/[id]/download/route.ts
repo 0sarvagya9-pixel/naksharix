@@ -6,6 +6,7 @@ import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog } from "@/lib/reports/report-audit";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 import { loadReportPdf } from "@/lib/storage/report-storage";
+import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 
 type Params = Promise<{ id: string }>;
 
@@ -27,6 +28,13 @@ export async function GET(request: Request, { params }: { params: Params }) {
     });
     logger.warn("report_pdf_download_denied", { reportRequestId: reportRequest.id, actorId: user.id });
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  // A refunded fixed-price order cannot retain its paid PDF entitlement.
+  // Unpriced manual-review PDFs are a separate operator-delivery contract.
+  if (!isAdmin(user) && !reportRequest.adminBypass &&
+      getManualReportCheckout(reportRequest.reportSlug) &&
+      reportRequest.paymentStatus !== "PAID") {
+    return NextResponse.json({ error: "A verified, non-refunded purchase is required for this report." }, { status: 403 });
   }
   if (!reportRequest.generatedPdfSize || (!reportRequest.generatedPdfBytes && !reportRequest.generatedPdfStorageKey)) {
     return NextResponse.json({ error: "No generated PDF is available for this request." }, { status: 404 });

@@ -175,6 +175,9 @@ try {
     const body = await res.json();
     assert.equal(res.status, 200, JSON.stringify(body));
     assert.equal(body.data.profile.status, "APPROVED");
+    // Disposable CI fixture only: verified positive rate is required before any booking.
+    await prisma.astrologerProfile.update({ where: { id: astroProfileId },
+      data: { consultationPrice: 10, pricePerSession: null } });
     const view = await req("/astrologers");
     assert.equal(view.status, 200);
     assert.ok((await view.text()).includes("QA Astrologer"));
@@ -246,6 +249,7 @@ try {
     assert.equal(res.status, 201, JSON.stringify(body));
     assert.equal(body.data.booking.paymentStatus, "PENDING");
     assert.equal(body.data.booking.status, "REQUESTED");
+    assert.equal(Number(body.data.booking.amount), 300, "30 minutes × INR 10/min must quote INR 300");
     assert.equal(body.data.booking.scheduledAt, "2027-01-05T05:30:00.000Z");
     bookingId = body.data.booking.id;
     const b = await prisma.consultationBooking.findUniqueOrThrow({ where: { id: bookingId } });
@@ -829,7 +833,8 @@ try {
       const adminRows=(await adminRead.json()).data.orders;
       const row=adminRows.find(o=>o.id===orderId);assert.ok(row&&row.status==="REQUESTED");
       const patch={id:orderId,expectedVersion:row.version,status:"CONFIRMED",shippingPaise:0,taxPaise:0,
-        trackingReference:null,adminNote:"Verified QA-only owner acknowledgement"};
+        trackingReference:null,fulfillmentEvidenceUrl:"https://example.org/qa-supplier-only-not-real",
+        adminNote:"Disposable CI fixture only: source, stock, exact SKU and final dispatch proof are mocked."};
       const denied=await post("/api/admin/shop-orders",patch,userCookie,"PATCH");assert.equal(denied.status,403);
       const confirmed=await post("/api/admin/shop-orders",patch,adminCookie,"PATCH");
       const confirmedBody=await confirmed.json();assert.equal(confirmed.status,200,JSON.stringify(confirmedBody));

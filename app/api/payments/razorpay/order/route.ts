@@ -20,7 +20,8 @@ const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
   z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
   z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) }),
-  z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1) })
+  z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1) }),
+  z.object({ purpose: z.literal("SHOP_ORDER"), shopOrderId: z.string().min(1) })
 ]);
 
 type CheckoutBody = z.infer<typeof schema>;
@@ -33,6 +34,8 @@ export async function POST(request: NextRequest) {
     if (limited) return limited;
     const body = await validateJson(request, schema);
     if (body.purpose === "SUBSCRIPTION" && env.SUBSCRIPTIONS_ENABLED !== "true") return fail("Not found", 404);
+    if (body.purpose === "SHOP_ORDER" && env.SHOP_PAYMENTS_ENABLED !== "true")
+      return fail("Shop payment is unavailable until the owner approves exact supplier proof and final delivery terms.", 503);
     if (body.purpose === "PUJA_BOOKING" && env.PUJA_PAYMENTS_ENABLED !== "true")
       return fail("Puja payment is not yet enabled. A verified Pandit and confirmed schedule are required.", 503);
     if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
@@ -69,7 +72,11 @@ export async function POST(request: NextRequest) {
     }
 
     const reusable = await findReusablePayment(body, user.id);
+    if (reusable && (Number(reusable.amount) !== item.amount || reusable.currency !== "INR"))
+      return fail("An earlier order has a different amount. Contact support before trying to pay again.", 409);
     if (reusable?.status === "PAID") return fail("This checkout item is already paid.", 409);
+    if (reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
+      return fail("An old payment attempt needs merchant reconciliation. Check payment history or contact support before paying again.", 409);
     if (reusable?.status === "PENDING" && reusable.providerOrderId) {
       return ok({
         keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -162,20 +169,26 @@ async function findReusablePayment(body: CheckoutBody, userId: string) {
   return prisma.payment.findFirst({
     where: {
       userId,
+      provider: "RAZORPAY",
+      purpose: body.purpose as PaymentPurpose,
       status: { in: ["PENDING", "PAID"] },
       metadata: { path: [identity.key], equals: identity.value }
     },
     orderBy: { createdAt: "desc" },
-    select: { id: true, status: true, providerOrderId: true, amount: true, currency: true }
+    select: { id: true, status: true, providerOrderId: true, amount: true, currency: true, createdAt: true }
   });
 }
 
 function checkoutIdentity(body: CheckoutBody) {
   if (body.purpose === "CONSULTATION") return { key: "bookingId", value: body.bookingId };
   if (body.purpose === "PUJA_BOOKING") return { key: "pujaBookingId", value: body.bookingId };
+  if (body.purpose === "SHOP_ORDER") return { key: "shopOrderId", value: body.shopOrderId };
   if (body.purpose === "SUBSCRIPTION") return null;
   if (body.reportRequestId) return { key: "reportRequestId", value: body.reportRequestId };
   if (body.savedReportId) return { key: "savedReportId", value: body.savedReportId };
+  // Prevent repeated accidental charges for the same fixed-price report.
+  // Additional customized copies require an explicit owner-assisted purchase intent.
+  if ("reportId" in body) return { key: "reportId", value: body.reportId };
   return null;
 }
 
@@ -196,12 +209,27 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
     return { name: "Verified Puja Booking", amount: booking.quotedPricePaise / 100,
       metadata: { pujaBookingId: booking.id, pujaTopicId: booking.topicId, verifiedPartnerId: partner.id } };
   }
+  if (body.purpose === "SHOP_ORDER") {
+    const order = await prisma.shopOrder.findUnique({ where: { id: body.shopOrderId } });
+    if (!order || order.userId !== userId || order.status !== "CONFIRMED" ||
+        !["UNPAID", "FAILED"].includes(order.paymentStatus) ||
+        order.fulfillmentMode !== "MANUAL_CONFIRMATION" ||
+        !order.fulfillmentEvidenceUrl?.startsWith("https://") ||
+        order.adminNote.trim().length < 30 ||
+        order.shippingPaise === null || order.taxPaise === null ||
+        !order.totalPaise || order.totalPaise < 100 ||
+        order.totalPaise !== order.subtotalPaise + order.shippingPaise + order.taxPaise) return null;
+    return { name: "Owner-confirmed Shop Order", amount: order.totalPaise / 100,
+      metadata: { shopOrderId: order.id, shopFulfillmentProof: true, shopTaxPaise: order.taxPaise } };
+  }
   if (body.purpose === "CONSULTATION") {
     const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });
     if (!booking || booking.userId !== userId) return null;
     if (["PAID", "ADMIN_BYPASS", "REFUNDED"].includes(booking.paymentStatus)) return null;
     if (["CANCELED", "COMPLETED", "REJECTED"].includes(booking.status)) return null;
-    return { name: "Astrology Consultation", amount: Number(booking.amount), metadata: { bookingId: booking.id } };
+    const amount = Number(booking.amount);
+    if (!Number.isFinite(amount) || amount < 1 || Math.round(amount * 100) !== amount * 100) return null;
+    return { name: "Astrology Consultation", amount, metadata: { bookingId: booking.id } };
   }
   const report = getPaidReport(body.reportId);
   if (!report || report.purpose !== body.purpose) return null;

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { finalizePaidPayment, verifyRazorpayCapturedPayment, verifyRazorpayPaymentSignature } from "@/lib/revenue";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
+import { reconcileCapturedPurpose } from "@/lib/payments/purpose-reconciliation";
 
 const schema = z.object({
   razorpay_order_id: z.string().min(1),
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
 
     const payment = await finalizePaidPayment(body.razorpay_order_id, body.razorpay_payment_id, { verifiedBy: "client", gatewayStatus: "captured" });
     if (!payment) return fail("Payment no longer eligible for capture", 409);
+    await reconcileCapturedPurpose(payment);
     const metadata = (payment?.metadata as Record<string, unknown> | null) ?? {};
     const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
     const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;

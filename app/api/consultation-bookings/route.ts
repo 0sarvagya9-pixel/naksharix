@@ -8,6 +8,7 @@ import { sendConsultationBookingEmail } from "@/lib/consultations/booking-email"
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { consultationSlotWeekday, parseConsultationSlotTime } from "@/lib/consultations/slot-time";
+import { CONSULTATION_SESSION_MINUTES, getConsultationSessionPrice } from "@/lib/consultations/pricing";
 
 const schema = z.object({
   astrologerProfileId: z.string().min(1),
@@ -27,11 +28,16 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUser();
     if (!user) return fail("Please sign in to book a consultation", 401);
     const body = await validateJson(request, schema);
+    if (body.customerEmail.toLowerCase() !== user.email.toLowerCase())
+      return fail("Consultation confirmation email must match your signed-in account.", 403);
 
     const profile = await prisma.astrologerProfile.findFirst({
       where: { id: body.astrologerProfileId, status: "APPROVED" }
     });
     if (!profile) return fail("Astrologer profile not found", 404);
+    const sessionPrice = getConsultationSessionPrice(Number(profile.consultationPrice),
+      profile.pricePerSession === null ? null : Number(profile.pricePerSession));
+    if (sessionPrice === null) return fail("This astrologer has no verified positive session fee.", 422);
 
     const slot = await prisma.availabilitySlot.findFirst({
       where: {
@@ -75,13 +81,13 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           mode: mode as ConsultationMode,
           scheduledAt,
-          durationMins: 30,
+          durationMins: CONSULTATION_SESSION_MINUTES,
           birthName: body.customerName,
           birthDate: body.birthDate ? new Date(body.birthDate) : null,
           birthTime: body.birthTime || null,
           birthPlace: body.birthPlace || null,
           question: body.question,
-          amount: adminBypass ? 0 : profile.consultationPrice,
+          amount: adminBypass ? 0 : sessionPrice,
           status: adminBypass ? "CONFIRMED" : "REQUESTED",
           paymentStatus: adminBypass ? "ADMIN_BYPASS" : "PENDING",
           metadata: {
@@ -91,7 +97,9 @@ export async function POST(request: NextRequest) {
             adminBypass,
             bookingDate: body.bookingDate,
             startTime: slot.startTime,
-            slotId: body.slotId
+            slotId: body.slotId,
+            displayedSessionPrice: sessionPrice,
+            pricingRule: profile.pricePerSession !== null ? "per_session" : "per_minute_times_30"
           }
         }
       });

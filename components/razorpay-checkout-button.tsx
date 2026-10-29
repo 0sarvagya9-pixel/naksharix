@@ -16,7 +16,8 @@ type CheckoutPayload =
       savedReportId?: string;
       reportRequestId?: string;
     }
-  | { purpose: "PUJA_BOOKING"; bookingId: string };
+  | { purpose: "PUJA_BOOKING"; bookingId: string }
+  | { purpose: "SHOP_ORDER"; shopOrderId: string };
 
 type RazorpayResponse = {
   razorpay_order_id: string;
@@ -164,6 +165,7 @@ export function RazorpayCheckoutButton({
 
 function getAdminBypassTarget(payload: CheckoutPayload) {
   if (payload.purpose === "PUJA_BOOKING") return "/puja-bookings";
+  if (payload.purpose === "SHOP_ORDER") return "/orders";
   if (payload.purpose === "SUBSCRIPTION") return `/report-request/new?plan=${payload.plan.toLowerCase()}&mode=admin`;
   return "/report-request/new?plan=premium&mode=admin";
 }

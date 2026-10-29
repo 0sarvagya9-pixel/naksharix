@@ -76,6 +76,7 @@ enum PaymentPurpose {
   MATCH_REPORT
   CONSULTATION
   PUJA_BOOKING
+  SHOP_ORDER
   WALLET_TOPUP
 }
 
@@ -89,6 +90,7 @@ enum ReportPaymentStatus {
   ADMIN_BYPASS
   PENDING
   FAILED
+  REFUNDED
 }
 
 enum ReportRequestStatus {
@@ -924,6 +926,7 @@ model ShopOrder {
   paymentStatus     String   @default("UNPAID")
   fulfillmentMode   String   @default("MANUAL_CONFIRMATION")
   trackingReference String?
+  fulfillmentEvidenceUrl String?
   adminNote         String   @default("")
   version           Int      @default(1)
   createdAt         DateTime @default(now())

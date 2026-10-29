@@ -41,7 +41,12 @@ const bookingPage=read("app/puja-bookings/page.tsx");
 assert.ok(prisma.includes("PUJA_BOOKING")&&read("lib/env.ts").includes('PUJA_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false")'),"PUJA_GATEWAY_MUST_DEFAULT_DISABLED");
 for(const s of ["partner.reviewStatus !== \"VERIFIED\"","!booking.scheduledAt","booking.quotedPricePaise !== 110000","pujaBookingId: booking.id"])
   assert.ok(gatewayOrder.includes(s),"PUJA_PAYMENT_ACCEPTANCE_GUARD_MISSING="+s);
-assert.ok(gatewayWebhook.includes('event.event==="refund.processed"')&&gatewayWebhook.includes('status:"REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
+const sharedRefund=read("lib/payments/purpose-reconciliation.ts");
+assert.ok(gatewayWebhook.includes('event.event === "refund.processed"')&&
+  gatewayWebhook.includes("reconcileProcessedRefund")&&
+  gatewayWebhook.includes("verifyRazorpayWebhookSignature")&&
+  sharedRefund.includes('original.purpose === "PUJA_BOOKING"')&&
+  sharedRefund.includes('status: "REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
 assert.ok(bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"'),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");
 assert.ok(bookingPage.includes('reviewStatus:"VERIFIED"')&&bookingPage.includes('evidenceUrl:{not:null}')&&
   bookingPage.includes('pricePaise:110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
@@ -64,6 +69,8 @@ assert.ok(pricingPage.includes("getPublishedPujaOffers()") &&
 assert.ok(pricingContent.includes('href: "/pujas"')&&
   pricingContent.includes('href: "/shop"')&&
   pricingContent.includes("unpaid cart and order requests"),"PRICING_MUST_DESCRIBE_REAL_COMMERCE_STATE");
-assert.ok(gatewayWebhook.includes("if(transition.count===0)") &&
-  gatewayWebhook.includes("razorpay_puja_refund_duplicate_ignored"),"REFUND_WEBHOOK_MUST_BE_IDEMPOTENT");
+assert.ok(sharedRefund.includes("prisma.$transaction(async (tx) =>") &&
+  sharedRefund.includes("if (updated.count !== 1) return false;") &&
+  sharedRefund.includes('status: "REFUNDED"') &&
+  sharedRefund.includes("Prisma.TransactionIsolationLevel.Serializable"),"REFUND_WEBHOOK_MUST_BE_IDEMPOTENT");
 assert.ok(read("components/ai-astrologer-chat.tsx").includes("!json.data.answer.trim()"),"AI_CHAT_MUST_REJECT_EMPTY_PROVIDER_TEXT");

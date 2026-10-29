@@ -9,6 +9,9 @@ on:
       - scripts/qa-disposable-db-rehearsal.sh
       - deploy/sql/20261026-learning-progress.sql
       - deploy/sql/20261026-puja-partner-registry.sql
+      - deploy/sql/20261029_unified_razorpay_commerce.sql
+      - lib/payments/**
+      - scripts/qa-unified-razorpay.mjs
       - lib/ops/schema-readiness.ts
       - .github/workflows/database-baseline-rehearsal.yml
   workflow_dispatch:
@@ -60,6 +63,7 @@ jobs:
         run: |
           npm run qa:reports-workflow
           npm run qa:payments
+          npm run qa:unified-payments
           npm run qa:storage
           npm run qa:audit-security
           npm run qa:final-closure
