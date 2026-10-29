@@ -3,10 +3,12 @@ import { Section } from "@/components/section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { env } from "@/lib/env";
-import { kundliEducation, kundliGuideLanguages, kundliGuidePath, type KundliGuideLanguage } from "@/lib/kundli-education";
+import { kundliEducation, kundliGuideLanguages, kundliGuidePath, indexableKundliGuideLanguages, isIndexableKundliGuideLanguage, type KundliGuideLanguage } from "@/lib/kundli-education";
 
 export function KundliEducationPage({ locale }: { locale: KundliGuideLanguage }) {
   const page = kundliEducation[locale];
+  const isIndexable = isIndexableKundliGuideLanguage(locale);
+  const navigationLanguages = isIndexable ? indexableKundliGuideLanguages : kundliGuideLanguages;
   const url = env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "") + kundliGuidePath(locale);
   const schema = {
     "@context": "https://schema.org",
@@ -23,7 +25,7 @@ export function KundliEducationPage({ locale }: { locale: KundliGuideLanguage })
       <Section>
         <article className="mx-auto max-w-5xl" lang={locale}>
           <nav aria-label="Language versions" className="mb-8 flex flex-wrap gap-2">
-            {kundliGuideLanguages.map((code) => (
+            {navigationLanguages.map((code) => (
               <a key={code} href={kundliGuidePath(code)} hrefLang={code}
                 aria-current={code === locale ? "page" : undefined}
                 className={"rounded-md border px-3 py-2 text-sm "+(code === locale ? "border-[#FFD700] bg-[#FFD700]/10" : "border-[#D4AF37]/30 hover:border-[#FFD700]")}>
@@ -31,6 +33,7 @@ export function KundliEducationPage({ locale }: { locale: KundliGuideLanguage })
               </a>
             ))}
           </nav>
+          {!isIndexable ? <p role="note" className="mb-6 rounded-lg border p-4 text-sm">Translation preview; native editorial review is pending.</p> : null}
           <header>
             <p className="text-sm font-semibold uppercase tracking-wide text-[#FFD700]">NAKSHARIX · Kundli learning</p>
             <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-5xl">{page.heading}</h1>

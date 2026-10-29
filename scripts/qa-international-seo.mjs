@@ -57,4 +57,15 @@ assert.ok(homepage.includes('title: "Free Kundli, Horoscope & Vedic Astrology To
 assert.ok(mainKundli.includes('title: "Free Kundli Online | Janam Kundali & Vedic Birth Chart"') && !mainKundli.includes("Generate a premium Naksharix Kundli"), "Free Kundli SEO must match free product");
 assert.ok(hindiHome.includes("फ्री कुंडली, राशिफल और वैदिक ज्योतिष") && hindiHome.includes('href="/hi/free-kundli"'), "Hindi home must use native core search intent and direct useful route");
 
+const editor = read("lib/kundli-education.ts");
+const localizedRoute = read("app/[language]/learn/kundli-explained/page.tsx");
+assert.ok(editor.includes('indexableKundliGuideLanguages = ["en", "hi"]'), "Only existing baseline languages are indexable until reviewed");
+assert.ok(localizedRoute.includes("robots: { index: false, follow: true }"), "Language drafts must be noindex");
+assert.ok(sitemap.includes("indexableKundliGuideLanguages.map("), "Sitemap must include indexable guides only");
+assert.ok(hreflang.includes("indexableKundliGuideLanguages.map("), "No unreviewed language in hreflang");
+for (const route of ["commerce-enquiry", "ask-astrologer", "puja-enquiry"]) {
+  assert.ok(read("app/" + route + "/page.tsx").includes("robots: { index: false, follow: true }"), "Private enquiry exposed to indexing: " + route);
+  assert.ok(!sitemap.includes('"/' + route + '"'), "Private intake present in sitemap: " + route);
+}
+
 console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");

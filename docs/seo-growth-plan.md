@@ -72,3 +72,12 @@ Build a metadata inventory and route index/noindex table before adding more SEO 
   rankings require postdeployment monitoring; rankings cannot be guaranteed.
 - Translations supplied here are editorial drafts generated for implementation;
   qualified native review is recommended before international marketing.
+
+## SEO publishing safety gate — 29 October 2026
+- Four newly drafted translations (Marathi, Bengali, Spanish, French) require independent native-speaker review before being declared indexable.
+- New draft routes remain reachable for review, but send noindex,follow and are excluded from sitemap and hreflang.
+- English/Hindi baseline guide routes remain indexable and mutually annotated.
+- Private commerce, puja and written-astrology enquiry forms now have noindex,follow metadata and are excluded from the sitemap.
+- Metadata avoids claiming provider-verified Panchang or currently unavailable AI remedies without evidence.
+- Promote a language explicitly in indexableKundliGuideLanguages only after linguistic, cultural, accessibility and legal/claim review.
+- Search Console access, actual rankings, provider configuration, backups and supplier fulfillment are separate release-acceptance tasks.

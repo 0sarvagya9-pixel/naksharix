@@ -10,7 +10,7 @@ import { env } from "@/lib/env";
 
 export const metadata: Metadata = seo({
   title: "Astrology Services - Horoscope, Kundli, Numerology, Tarot Reading and Panchang",
-  description: "Explore Naksharix Astrology services including Horoscope, Kundli, Numerology, Tarot Reading, Panchang, AI guidance, and premium cosmic reports.",
+  description: "Explore Vedic astrology guides, free Kundli, horoscope, Panchang, numerology, tarot and available report topics with clear limitations.",
   path: "/astrology",
   keywords: ["Astrology", "Astrology Services", "AI Astrology", "Vedic Astrology"]
 });
@@ -37,7 +37,7 @@ export default function AstrologySeoIndexPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix SEO Hub</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black sm:text-5xl">Astrology Services</h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 naksh-muted-text">
-          Discover premium astrology tools for Horoscope, Kundli, Numerology, Tarot Reading, Panchang, compatibility, AI remedies, and personalized cosmic guidance.
+          Explore traditional astrology topics and available Kundli, Horoscope, Numerology, Tarot, Panchang and compatibility tools. Paid features and availability are described on their own pages.
         </p>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {seoLandingPages.map(({ slug, keyword, description, icon: Icon }) => (

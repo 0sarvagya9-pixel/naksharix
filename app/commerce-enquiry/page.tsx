@@ -10,11 +10,11 @@ import { seo } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = seo({
+export const metadata: Metadata = { ...seo({
   title: "Product and Puja Availability Enquiry",
   description: "Request private review of a Naksharix catalogue item or upcoming Hindu Puja. Staff confirm prices and actual availability separately; no payment is taken.",
   path: "/commerce-enquiry"
-});
+}), robots: { index: false, follow: true } };
 export default async function CommerceEnquiryPage({
   searchParams
 }: { searchParams: Promise<{ kind?: string; item?: string }> }) {
