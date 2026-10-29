@@ -15,6 +15,17 @@ type Payment = {
   createdAt: string;
   invoice?: { id: string; number: string } | null;
   purchasedReport?: { title: string; status: string } | null;
+  metadata?: { reportId?: string; savedReportId?: string } | null;
+  reportRequest?: { id: string; status: string } | null;
+};
+
+const manualSlugForPaidReport: Record<string, string> = {
+  "kundli-pro": "premium-kundli",
+  "marriage-report": "couple-kundli",
+  "career-report": "career-report",
+  "finance-report": "wealth-report",
+  "numerology-report": "numerology-lo-shu-report",
+  "yearly-ai": "yearly-horoscope-report"
 };
 
 export function PaymentHistory() {
@@ -41,9 +52,18 @@ export function PaymentHistory() {
               <p className="font-medium">{payment.purchasedReport?.title ?? payment.purpose}</p>
               <p className="text-sm naksh-muted-text">{payment.currency} {payment.amount} - {payment.status}</p>
             </div>
+            {payment.status === "PAID" && !payment.reportRequest &&
+             !payment.metadata?.savedReportId && payment.metadata?.reportId &&
+             manualSlugForPaidReport[payment.metadata.reportId] ? (
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/report-request/new?plan=PREMIUM&reportSlug=${encodeURIComponent(manualSlugForPaidReport[payment.metadata.reportId])}&orderId=${encodeURIComponent(payment.id)}`}>
+                  Complete purchased report details
+                </Link>
+              </Button>
+            ) : null}
             {payment.invoice ? (
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/api/invoices/${payment.invoice.id}`} target="_blank"><ReceiptText className="h-4 w-4" /> Invoice</Link>
+                <Link href={`/api/invoices/${payment.invoice.id}`} target="_blank"><ReceiptText className="h-4 w-4" /> Payment receipt</Link>
               </Button>
             ) : null}
           </div>
