@@ -1,5 +1,5 @@
 import "server-only";
-import { randomUUID } from "node:crypto";
+// Web Crypto works in both Node and Edge instrumented builds.
 
 export type SafeRequestFailure = { route: string; renderSource: string; routeType: string };
 
@@ -35,7 +35,7 @@ export async function reportSafeRequestFailure(details: SafeRequestFailure): Pro
   const route = /^[a-z0-9/[\]_.-]{1,120}$/i.test(details.route) ? details.route : "redacted";
   const renderSource = /^[a-z_]{1,32}$/i.test(details.renderSource) ? details.renderSource : "unknown";
   const routeType = /^[a-z_]{1,32}$/i.test(details.routeType) ? details.routeType : "unknown";
-  const eventId = randomUUID().replaceAll("-", "");
+  const eventId = crypto.randomUUID().replaceAll("-", "");
   const event = {
     event_id: eventId,
     timestamp: Date.now() / 1000,
