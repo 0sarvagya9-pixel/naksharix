@@ -9,6 +9,7 @@ const pairs = [
   ["/kundli-matching", "/hi/kundli-milan"]
 ];
 const nativeGuides = ["en", "hi", "mr", "bn", "es", "fr"];
+const approvedGuides = ["en", "hi"];
 const guidePath = (language) => language === "en" ? "/learn/kundli-explained" : "/" + language + "/learn/kundli-explained";
 const langValue = (tag, code) => new RegExp('\\bhrefLang="' + code + '"', "i").test(tag);
 
@@ -38,9 +39,16 @@ for (const locale of nativeGuides) {
   assert.ok(new RegExp('<html[^>]*\\blang="' + locale + '"', "i").test(html), "Wrong SSR guide language " + locale);
   assert.ok(html.includes('<h1') && html.includes('<h2'), "Guide missing depth " + locale);
   const links = [...html.matchAll(/<link\b[^>]*\brel="alternate"[^>]*>/gi)].map((x) => x[0]);
-  for (const code of nativeGuides) {
-    assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + absolute(guidePath(code)) + '"')),
-      "Missing reciprocal guide hreflang " + locale + " to " + code);
+  if (approvedGuides.includes(locale)) {
+    for (const code of approvedGuides) {
+      assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + absolute(guidePath(code)) + '"')),
+        "Missing reciprocal approved guide hreflang " + locale + " to " + code);
+    }
+  } else {
+    assert.ok(/<meta[^>]+name="robots"[^>]+content="noindex,\s*follow"/i.test(html) ||
+      /<meta[^>]+name="robots"[^>]+content="follow,\s*noindex"/i.test(html),
+      "Unreviewed language must be noindex: " + locale);
+    assert.ok(!links.some((tag) => nativeGuides.some((code) => langValue(tag, code))), "Draft published alternate links");
   }
 }
 const sitemap = await fetch(base + "/sitemap.xml");
@@ -51,8 +59,14 @@ for (const [en, hi] of pairs) {
     assert.ok(xml.includes(link), "Sitemap missing localized URL: " + link);
   }
 }
-for (const locale of nativeGuides) {
-  assert.ok(xml.includes(absolute(guidePath(locale))), "Guide missing from sitemap: " + locale);
+for (const locale of approvedGuides) {
+  assert.ok(xml.includes(absolute(guidePath(locale))), "Approved guide missing from sitemap: " + locale);
+}
+for (const locale of nativeGuides.filter((x) => !approvedGuides.includes(x))) {
+  assert.ok(!xml.includes("<loc>" + absolute(guidePath(locale)) + "</loc>"), "Unreviewed guide sitemap leak: " + locale);
+}
+for (const route of ["/commerce-enquiry", "/ask-astrologer", "/puja-enquiry"]) {
+  assert.ok(!xml.includes("<loc>" + absolute(route) + "</loc>"), "Private intake sitemap leak: " + route);
 }
 const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
 assert.equal(locs.length, new Set(locs).size, "Sitemap contains duplicate URLs");

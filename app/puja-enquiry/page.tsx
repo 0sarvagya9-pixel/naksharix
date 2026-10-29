@@ -10,11 +10,11 @@ import { prisma } from "@/lib/db";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = seo({
+export const metadata: Metadata = { ...seo({
   title: "Traditional Puja Information & Enquiries",
   description: "Learn about traditional puja practices and submit an enquiry for review. No temple booking or performance is promised.",
   path: "/puja-enquiry"
-});
+}), robots: { index: false, follow: true } };
 
 const traditions = [
   {

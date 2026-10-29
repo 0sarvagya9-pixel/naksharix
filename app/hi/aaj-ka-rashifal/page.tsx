@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { SeoInternalLinks } from "@/components/seo/internal-links";
 import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 
 export const metadata: Metadata = seo({
   title: "आज का राशिफल – दैनिक राशिफल हिंदी | Naksharix",
@@ -21,7 +22,7 @@ export default function AajKaRashifalPage() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "आज का राशिफल",
-    url: `${env.NEXT_PUBLIC_APP_URL}/hi/aaj-ka-rashifal`,
+    url: `${canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)}/hi/aaj-ka-rashifal`,
     inLanguage: "hi-IN"
   };
   const topics = ["प्रेम और रिश्ते", "करियर और काम", "धन और बजट", "स्वास्थ्य और दिनचर्या", "परिवार और संवाद", "दिन की योजना"];

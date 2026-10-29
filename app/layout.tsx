@@ -15,6 +15,7 @@ import { SchemaMarkup } from "@/components/schema-markup";
 import { LanguageProvider } from "@/components/language-provider";
 import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { normalizeLocale } from "@/lib/i18n";
 
 if (process.env.VERCEL_ENV === "production") validateProductionEnv();
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   }),
   // Never inherit the homepage canonical on child routes without their own metadata.
   alternates: {},
-  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
+  metadataBase: new URL(canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)),
   title: {
     default: "Naksharix - Vedic Astrology Tools, Reports and Consultations",
     template: `%s | ${env.NEXT_PUBLIC_APP_NAME}`

@@ -234,3 +234,9 @@ export const kundliGuideLanguages = Object.keys(kundliEducation) as KundliGuideL
 export function kundliGuidePath(locale: KundliGuideLanguage): string {
   return locale === "en" ? "/learn/kundli-explained" : `/${locale}/learn/kundli-explained`;
 }
+
+/** Indexable guide translations: other completed drafts await independent native review. */
+export const indexableKundliGuideLanguages = ["en", "hi"] as const;
+export function isIndexableKundliGuideLanguage(locale: string): boolean {
+  return indexableKundliGuideLanguages.some((candidate) => candidate === locale);
+}

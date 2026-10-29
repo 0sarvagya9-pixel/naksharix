@@ -7,11 +7,11 @@ import { getCurrentUser } from "@/lib/auth/jwt";
 import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = seo({
+export const metadata: Metadata = { ...seo({
   title: "Ask a Written Astrology Question | Private Enquiry",
   description: "Submit a private written astrology enquiry to Naksharix support for review. No expert response or delivery time is guaranteed.",
   path: "/ask-astrologer"
-});
+}), robots: { index: false, follow: true } };
 
 export default async function AskAstrologerPage() {
   const user = await getCurrentUser();

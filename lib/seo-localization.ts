@@ -1,4 +1,4 @@
-import { kundliGuideLanguages, kundliGuidePath } from "@/lib/kundli-education";
+import { kundliGuideLanguages, kundliGuidePath, indexableKundliGuideLanguages } from "@/lib/kundli-education";
 
 /** Only actual, published translations may be listed as hreflang alternates. */
 export const publishedSeoPairs = [
@@ -15,9 +15,10 @@ export const seoLocaleExpansion = {
 
 export function publishedSeoAlternates(path: string, siteUrl: string): Record<string, string> | undefined {
   if (kundliGuideLanguages.some((language) => kundliGuidePath(language) === path)) {
+    if (!indexableKundliGuideLanguages.some((language) => kundliGuidePath(language) === path)) return undefined;
     const origin = siteUrl.replace(/\/+$/, "");
     return Object.fromEntries([
-      ...kundliGuideLanguages.map((language) => [language, origin + kundliGuidePath(language)]),
+      ...indexableKundliGuideLanguages.map((language) => [language, origin + kundliGuidePath(language)]),
       ["x-default", origin + kundliGuidePath("en")]
     ]);
   }

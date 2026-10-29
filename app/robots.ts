@@ -1,9 +1,11 @@
 import { MetadataRoute } from "next";
 import { isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { env } from "@/lib/env";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 
 export default function robots(): MetadataRoute.Robots {
   const aiReady = isAiAstrologerReady();
+  const seoOrigin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
 
   return {
     rules: {
@@ -65,7 +67,7 @@ export default function robots(): MetadataRoute.Robots {
         "/chatbot"
       ]
     },
-    host: env.NEXT_PUBLIC_APP_URL,
-    sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`
+    host: seoOrigin,
+    sitemap: `${seoOrigin}/sitemap.xml`
   };
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { env } from "@/lib/env";
 import { publishedSeoAlternates } from "@/lib/seo-localization";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 
 type SeoInput = {
   title: string;
@@ -18,8 +19,9 @@ function normalizeTitle(title: string) {
 
 export function seo({ title, description, path = "/", image = "/og.svg", keywords = [], type = "website" }: SeoInput): Metadata {
   const normalizedTitle = normalizeTitle(title);
-  const url = new URL(path, env.NEXT_PUBLIC_APP_URL).toString();
-  const languages = publishedSeoAlternates(path, env.NEXT_PUBLIC_APP_URL);
+  const origin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
+  const url = new URL(path, origin).toString();
+  const languages = publishedSeoAlternates(path, origin);
   return {
     title: normalizedTitle,
     description,

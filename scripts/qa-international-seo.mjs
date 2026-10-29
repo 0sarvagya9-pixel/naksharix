@@ -17,8 +17,8 @@ for (const route of paths) {
   assert.ok(read(name).includes('from "@/lib/seo"'), "Missing translated metadata at " + route);
 }
 assert.ok(!registry.includes('{ en: "/daily-horoscope", hi: "/hi/aaj-ka-rashifal" }'), "False daily forecast translation");
-assert.ok(seo.includes("publishedSeoAlternates(path, env.NEXT_PUBLIC_APP_URL)"), "Missing reciprocal HTML hreflang");
-assert.ok(sitemap.includes("publishedSeoAlternates(route, env.NEXT_PUBLIC_APP_URL)"), "Missing sitemap alternate URLs");
+assert.ok(seo.includes("publishedSeoAlternates(path, origin)"), "Missing origin-aligned HTML hreflang");
+assert.ok(sitemap.includes("publishedSeoAlternates(route, seoOrigin)"), "Missing origin-aligned sitemap alternates");
 assert.ok(!sitemap.includes("lastModified: new Date()"), "Fabricated last-modified dates");
 assert.ok(layout.includes("alternates: {}"), "Accidental inherited homepage canonical");
 assert.ok(layout.includes('requestHeaders.get("x-naksharix-route-locale")') &&
@@ -44,7 +44,7 @@ for (const locale of ["en", "hi", "mr", "bn", "es", "fr"]) {
 }
 assert.ok(guidePage.includes("generateStaticParams") && guidePage.includes("notFound()"), "Localized routes must reject unknown languages");
 assert.ok(guideContent.includes("hrefLang={code}") && guideContent.includes('lang={locale}'), "Native guide needs user-accessible language links and language markup");
-assert.ok(hreflang.includes("kundliGuideLanguages.map("), "Guide hreflang must include only completed native-language content");
+assert.ok(hreflang.includes("indexableKundliGuideLanguages.map("), "Guide hreflang must include only reviewed language editions");
 assert.ok(layout.includes('const htmlLang = documentLanguage;'), "HTML language is still controlled by visitor cookie");
 assert.ok(provider.includes('documentLanguage === "en"') && provider.includes('nextLocale === "hinglish" ? "hi-Latn"'), "English UI must retain Hinglish language attribute while native guides remain route-specific");
 assert.ok(middleware.includes('"/mr/:path*"') && middleware.includes('"/bn/:path*"') && middleware.includes('"/es/:path*"') && middleware.includes('"/fr/:path*"'), "Localized SSR middleware absent");
@@ -56,5 +56,24 @@ const hindiHome=read("app/hi/page.tsx");
 assert.ok(homepage.includes('title: "Free Kundli, Horoscope & Vedic Astrology Tools"'), "Homepage must address its core organic search intent");
 assert.ok(mainKundli.includes('title: "Free Kundli Online | Janam Kundali & Vedic Birth Chart"') && !mainKundli.includes("Generate a premium Naksharix Kundli"), "Free Kundli SEO must match free product");
 assert.ok(hindiHome.includes("फ्री कुंडली, राशिफल और वैदिक ज्योतिष") && hindiHome.includes('href="/hi/free-kundli"'), "Hindi home must use native core search intent and direct useful route");
+
+const editor = read("lib/kundli-education.ts");
+const localizedRoute = read("app/[language]/learn/kundli-explained/page.tsx");
+assert.ok(editor.includes('indexableKundliGuideLanguages = ["en", "hi"]'), "Only existing baseline languages are indexable until reviewed");
+assert.ok(localizedRoute.includes("robots: { index: false, follow: true }"), "Language drafts must be noindex");
+assert.ok(sitemap.includes("indexableKundliGuideLanguages.map("), "Sitemap must include indexable guides only");
+assert.ok(hreflang.includes("indexableKundliGuideLanguages.map("), "No unreviewed language in hreflang");
+for (const route of ["commerce-enquiry", "ask-astrologer", "puja-enquiry"]) {
+  assert.ok(read("app/" + route + "/page.tsx").includes("robots: { index: false, follow: true }"), "Private enquiry exposed to indexing: " + route);
+  assert.ok(!sitemap.includes('"/' + route + '"'), "Private intake present in sitemap: " + route);
+}
+
+const seoOrigin = read("lib/seo-origin.ts");
+assert.ok(seoOrigin.includes('url.hostname = "www.naksharix.com"'), "Canonical SEO host must match verified Vercel www redirect");
+assert.ok(seo.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)"), "SEO metadata host mismatch");
+assert.ok(sitemap.includes("const seoOrigin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)"), "Sitemap host mismatch");
+assert.ok(read("app/robots.ts").includes("sitemap: `${seoOrigin}/sitemap.xml`"), "robots sitemap host mismatch");
+assert.ok(read("components/schema-markup.tsx").includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)"), "Organization JSON-LD host mismatch");
+assert.ok(layout.includes("new URL(canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL))"), "Root metadataBase host mismatch");
 
 console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");

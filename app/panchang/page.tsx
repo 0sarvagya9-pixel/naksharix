@@ -10,7 +10,7 @@ import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
   title: "Today Panchang | Naksharix",
-  description: "Calculate provider-verified Panchang fields including tithi, nakshatra, yoga, karana, Vaar, Rahu Kaal, Yamaganda, Gulika Kaal, and Abhijit Muhurat.",
+  description: "Explore traditional Panchang calculations for chosen dates and places, including tithi, nakshatra, yoga, karana and Rahu Kaal. Results depend on location and calculation conventions.",
   path: "/panchang",
   keywords: ["Panchang", "Today Panchang", "Tithi", "Rahu Kaal", "Abhijit Muhurat"]
 });

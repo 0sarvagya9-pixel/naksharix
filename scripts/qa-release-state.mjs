@@ -87,10 +87,18 @@ if (requiredFiles.every(exists)) {
     "Vercel deploy-time canonical host matches the live www domain", "vercel.json env overrides source defaults");
   assert(envSource.includes('NEXT_PUBLIC_APP_URL: z.string().url().default("https://www.naksharix.com")'),
     "Public canonical host defaults to the live www domain", "no apex-redirect sitemap canonical URLs");
-  assert(read("app/sitemap.ts").includes('${env.NEXT_PUBLIC_APP_URL}${route}') &&
-    read("app/robots.ts").includes("sitemap: `${env.NEXT_PUBLIC_APP_URL}/sitemap.xml`") &&
-    read("lib/seo.ts").includes("env.NEXT_PUBLIC_APP_URL"),
-    "Sitemap, robots and page metadata derive from the same canonical URL", "single canonical host");
+  const canonicalSource = read("lib/seo-origin.ts");
+  const sitemapSource = read("app/sitemap.ts");
+  const robotsSource = read("app/robots.ts");
+  const seoSource = read("lib/seo.ts");
+  assert(canonicalSource.includes('url.hostname = "www.naksharix.com"') &&
+    sitemapSource.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)") &&
+    sitemapSource.includes('url: `${seoOrigin}${route}`') &&
+    robotsSource.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)") &&
+    robotsSource.includes("sitemap: `${seoOrigin}/sitemap.xml`") &&
+    seoSource.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)") &&
+    seoSource.includes("publishedSeoAlternates(path, origin)"),
+    "Sitemap, robots and page metadata derive from the verified www canonical host", "consistent canonical origin");
 
   assert(releaseRoute.includes("VERCEL_GIT_COMMIT_SHA") && releaseRoute.includes("VERCEL_GIT_COMMIT_REF"), "Release endpoint exposes exact non-sensitive deployment identity", "/api/release");
   assert(!releaseRoute.includes("GEMINI_API_KEY") && !releaseRoute.includes("DATABASE_URL"), "Release endpoint exposes no provider secrets", "identity only");

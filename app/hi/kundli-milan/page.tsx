@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { SeoInternalLinks } from "@/components/seo/internal-links";
 import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 
 export const metadata: Metadata = seo({
   title: "कुंडली मिलान – विवाह गुण मिलान हिंदी | Naksharix",
@@ -21,7 +22,7 @@ export default function KundliMilanHindiPage() {
     "@context": "https://schema.org",
     "@type": "Service",
     name: "कुंडली मिलान",
-    url: `${env.NEXT_PUBLIC_APP_URL}/hi/kundli-milan`,
+    url: `${canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)}/hi/kundli-milan`,
     inLanguage: "hi-IN",
     provider: { "@type": "Organization", name: "Naksharix" }
   };

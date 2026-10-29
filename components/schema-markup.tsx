@@ -1,11 +1,12 @@
 import Script from "next/script";
 import { env } from "@/lib/env";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 
 /** Grounded public structured data only: no invented stock, prices, native app,
  * searchable site endpoint, unverified AI capabilities or supplier offers.
  */
 export function SchemaMarkup() {
-  const siteUrl = env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  const siteUrl = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
