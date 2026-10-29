@@ -14,4 +14,5 @@ assert.ok(/^[a-z0-9.-]+,\s+pub-\d{16},\s+DIRECT,\s+[0-9a-f]{16}$/.test(expected)
 // supported Google site ownership verification method.
 const layout = readFileSync("app/layout.tsx", "utf8");
 assert.ok(!layout.includes("adsbygoogle.js"), "Auto ads must not be enabled by the ownership-only change");
+assert.ok(readFileSync("lib/adsense.ts", "utf8").includes('ADSENSE_ENABLE_SERVING === "true"'), "Global activation gate missing");
 console.log("ADSENSE_OWNER_ADS_TXT=PASS;PUBLISHER_ID=EXPECTED;AUTO_ADS=NOT_ENABLED");
