@@ -179,11 +179,11 @@ export const kundliEducation = {
       ],
       [
         "¿Predice una Kundli mi futuro con certeza?",
-        "No. La astrología védica es una tradición interpretativa y no un método científicamente probado para predecir sucesos personales."
+        "No. La astrología védica es una tradición interpretativa y no un procedimiento científicamente probado para predecir sucesos personales."
       ],
       [
         "¿Por qué dos cartas pueden ser distintas?",
-        "Pueden variar el ayanamsha, el huso horario, el sistema de casas o el método usado para Rahu y Ketu."
+        "Pueden variar el ayanamsha, el huso horario, el sistema de casas o la convención utilizada para Rahu y Ketu."
       ]
     ],
     "cta": "Crear una Kundli gratuita",
