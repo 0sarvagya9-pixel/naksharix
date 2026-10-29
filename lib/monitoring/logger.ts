@@ -36,7 +36,8 @@ export const logger = {
 
 export function getMonitoringReadiness() {
   return {
-    provider: safeSentryTransportConfigured() ? "safe_sentry_envelope" : "console_safe_logger",
+    provider: "console_safe_logger",
+    optionalSentryTransport: safeSentryTransportConfigured() ? "privacy_minimized_envelope" : "not_configured",
     sentryConfigured: Boolean(process.env.SENTRY_DSN),
     sentryTransportConfigured: safeSentryTransportConfigured(),
     safeMetadataOnly: true,
