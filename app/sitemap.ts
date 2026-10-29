@@ -8,6 +8,7 @@ import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { seoLandingPages } from "@/lib/seo-pages";
 import { zodiacSigns } from "@/lib/zodiac";
 import { publishedSeoAlternates } from "@/lib/seo-localization";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { indexableKundliGuideLanguages, kundliGuidePath } from "@/lib/kundli-education";
 
 const staticRoutes = [
@@ -107,10 +108,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const entry of routes) {
     if (!uniqueRoutes.has(entry.route)) uniqueRoutes.set(entry.route, entry);
   }
+  const seoOrigin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
   return [...uniqueRoutes.values()].map(({ route, priority, frequency }) => {
-    const languages = publishedSeoAlternates(route, env.NEXT_PUBLIC_APP_URL);
+    const languages = publishedSeoAlternates(route, seoOrigin);
     return {
-      url: `${env.NEXT_PUBLIC_APP_URL}${route}`,
+      url: `${seoOrigin}${route}`,
       ...(languages ? { alternates: { languages } } : {}),
       changeFrequency: frequency,
       priority

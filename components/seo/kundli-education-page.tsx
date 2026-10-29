@@ -3,13 +3,14 @@ import { Section } from "@/components/section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { env } from "@/lib/env";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { kundliEducation, kundliGuideLanguages, kundliGuidePath, indexableKundliGuideLanguages, isIndexableKundliGuideLanguage, type KundliGuideLanguage } from "@/lib/kundli-education";
 
 export function KundliEducationPage({ locale }: { locale: KundliGuideLanguage }) {
   const page = kundliEducation[locale];
   const isIndexable = isIndexableKundliGuideLanguage(locale);
   const navigationLanguages = isIndexable ? indexableKundliGuideLanguages : kundliGuideLanguages;
-  const url = env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "") + kundliGuidePath(locale);
+  const url = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL) + kundliGuidePath(locale);
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -17,7 +18,7 @@ export function KundliEducationPage({ locale }: { locale: KundliGuideLanguage })
     description: page.description,
     url,
     inLanguage: locale,
-    isPartOf: { "@type": "WebSite", name: "Naksharix", url: env.NEXT_PUBLIC_APP_URL }
+    isPartOf: { "@type": "WebSite", name: "Naksharix", url: canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL) }
   };
   return (
     <main className="star-field">

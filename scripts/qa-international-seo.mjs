@@ -68,4 +68,12 @@ for (const route of ["commerce-enquiry", "ask-astrologer", "puja-enquiry"]) {
   assert.ok(!sitemap.includes('"/' + route + '"'), "Private intake present in sitemap: " + route);
 }
 
+const seoOrigin = read("lib/seo-origin.ts");
+assert.ok(seoOrigin.includes('url.hostname = "www.naksharix.com"'), "Canonical SEO host must match verified Vercel www redirect");
+assert.ok(seo.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)"), "SEO metadata host mismatch");
+assert.ok(sitemap.includes("const seoOrigin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)"), "Sitemap host mismatch");
+assert.ok(read("app/robots.ts").includes("sitemap: `${seoOrigin}/sitemap.xml`"), "robots sitemap host mismatch");
+assert.ok(read("components/schema-markup.tsx").includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)"), "Organization JSON-LD host mismatch");
+assert.ok(layout.includes("new URL(canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL))"), "Root metadataBase host mismatch");
+
 console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");

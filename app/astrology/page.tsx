@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { seoLandingPages } from "@/lib/seo-pages";
 import { seo } from "@/lib/seo";
 import { env } from "@/lib/env";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 
 export const metadata: Metadata = seo({
   title: "Astrology Services - Horoscope, Kundli, Numerology, Tarot Reading and Panchang",
@@ -24,7 +25,7 @@ export default function AstrologySeoIndexPage() {
       "@type": "ListItem",
       position: index + 1,
       name: page.keyword,
-      url: `${env.NEXT_PUBLIC_APP_URL}/astrology/${page.slug}`
+      url: `${canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)}/astrology/${page.slug}`
     }))
   };
 

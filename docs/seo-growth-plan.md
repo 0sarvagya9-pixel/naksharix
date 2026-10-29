@@ -81,3 +81,11 @@ Build a metadata inventory and route index/noindex table before adding more SEO 
 - Metadata avoids claiming provider-verified Panchang or currently unavailable AI remedies without evidence.
 - Promote a language explicitly in indexableKundliGuideLanguages only after linguistic, cultural, accessibility and legal/claim review.
 - Search Console access, actual rankings, provider configuration, backups and supplier fulfillment are separate release-acceptance tasks.
+
+## Verified production canonical host reconciliation
+- Verified Vercel project domains: naksharix.com redirects to www.naksharix.com, while www.naksharix.com is verified and has no redirect.
+- Live inspection before this repair: robots and sitemap were pointing to https://naksharix.com, a redirecting host.
+- SEO canonical origin is now derived by canonicalSeoOrigin and normalizes only the exact naksharix.com hostname to https://www.naksharix.com while leaving localhost and preview hostnames unchanged.
+- Applied to page metadata, hreflang, sitemap entries, robots sitemap/host, root metadataBase and public Organization/WebSite/page JSON-LD.
+- Operational NEXT_PUBLIC_APP_URL is not rewritten: OAuth, session, payment callbacks, webhooks and other external service integrations remain untouched.
+- Deployment acceptance: verify generated canonical, www sitemap, www robots, alternate hreflang, and Search Console preferred canonical after the exact release reaches production.

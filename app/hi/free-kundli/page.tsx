@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { SeoInternalLinks } from "@/components/seo/internal-links";
 import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
 
 export const metadata: Metadata = seo({
   title: "फ्री कुंडली – जन्म कुंडली ऑनलाइन हिंदी | Naksharix",
@@ -21,7 +22,7 @@ export default function FreeKundliHindiPage() {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     name: "फ्री कुंडली",
-    url: `${env.NEXT_PUBLIC_APP_URL}/hi/free-kundli`,
+    url: `${canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)}/hi/free-kundli`,
     applicationCategory: "LifestyleApplication",
     inLanguage: "hi-IN"
   };
