@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ResilientShopPhoto } from "@/components/shop/resilient-shop-photo";
-import { PackageSearch, Search, ShieldCheck, Sparkles, ShoppingBag } from "lucide-react";
+import { PackageSearch, Search, Sparkles, ShoppingBag } from "lucide-react";
 import { AddToCartButton } from "@/components/shop/quote-cart-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,23 +32,15 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
     <main className="inner-page-shell star-field min-h-screen bg-[#fffaf3]">
       <Section>
         <div className="inner-section overflow-hidden rounded-3xl border border-[#ecd7c3] p-6 md:p-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.72fr] lg:items-center">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{labels.eyebrow}</p>
-              <h1 className="mt-3 font-cinzel text-4xl font-black text-[#8c2e3b] sm:text-5xl">{labels.title}</h1>
-              <p className="mt-4 max-w-3xl text-lg leading-8 text-[#6b565b]">{labels.subtitle}</p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild className="bg-[#922f40] text-white hover:bg-[#762436]"><a href="#catalogue">{labels.explore}</a></Button>
-                <Button variant="outline" asChild><Link href="/contact">{labels.contact}</Link></Button>
-              </div>
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#bd8638]">{labels.eyebrow}</p>
+              <h1 className="mt-2 font-cinzel text-3xl font-black text-[#8c2e3b] sm:text-4xl">{labels.title}</h1>
+              <p className="mt-3 text-base leading-7 text-[#6b565b]">{labels.subtitle}</p>
             </div>
-            <div className="rounded-3xl border border-[#ecd7c3] bg-[#fff8ed] p-6">
-              <ShieldCheck className="h-10 w-10 text-[#8c2e3b]" />
-              <h2 className="mt-5 font-cinzel text-2xl font-bold text-[#8c2e3b]">{labels.safetyTitle}</h2>
-              <p className="mt-3 text-sm leading-6 text-[#6b565b]">{labels.safetyCopy}</p>
-              <div className="mt-5 flex flex-wrap gap-2">
-                {labels.safetyItems.map((item) => <span key={item} className="rounded-full border border-[#dca956]/25 bg-[#fbf0de] px-3 py-1 text-xs text-[#8c2e3b]">{item}</span>)}
-              </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild className="bg-[#922f40] text-white hover:bg-[#762436]"><a href="#catalogue">{labels.explore}</a></Button>
+              <Button variant="outline" asChild><Link href="/cart">View cart</Link></Button>
             </div>
           </div>
         </div>
@@ -106,7 +98,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                   <p className="text-lg font-extrabold text-[#722536]">{product.unitPricePaise
                     ? new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(product.unitPricePaise/100)
                     : "Price awaiting verification"}</p>
-                  <p className="text-xs leading-5 text-[#745864]">Market-compared item price · order request only; shipping/taxes and exact supplied specifications confirmed before payment.</p>
+                  <p className="text-xs leading-5 text-[#745864]">Listed selling price · checkout shows your full payable total.</p>
                   <AddToCartButton productId={product.id} />
                   <Link href={"/shop/"+encodeURIComponent(product.slug)} className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#d2ae87] text-sm font-semibold text-[#773344] hover:bg-[#fff3e8]">
                     <ShoppingBag className="h-4 w-4" /> View details
@@ -148,14 +140,14 @@ function shopLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") return {
     eyebrow: "Spiritual Catalogue",
     title: "Naksharix आध्यात्मिक कैटलॉग",
-    subtitle: "रुद्राक्ष, ब्रेसलेट, यंत्र, माला और symbolic remedy items की जानकारी देखें। आप कार्ट में आइटम जोड़ सकते हैं; ऑनलाइन पेमेंट तब तक नहीं होगा जब तक सप्लायर, कीमत और डिलीवरी सत्यापित न हों।",
+    subtitle: "रुद्राक्ष, ब्रेसलेट, यंत्र, माला और symbolic remedy items की देखें, कार्ट में जोड़ें और सुरक्षित चेकआउट से ऑर्डर करें।",
     explore: "कैटलॉग देखें", contact: "उत्पाद सहायता", safetyTitle: "जानकारी पहले, बिक्री बाद में", safetyCopy: "यह एक वास्तविक informational catalogue है। खरीद, stock, authenticity और fulfilment की पुष्टि support द्वारा अलग से की जाती है।", safetyItems: ["Add to cart", "Price confirmation", "Faith-based items", "No guaranteed outcomes"],
     searchPlaceholder: "उत्पाद खोजें...", categoryLabel: "श्रेणी", allCategories: "सभी श्रेणियाँ", details: "विवरण और उपयोग", howToUse: "कैसे उपयोग करें", care: "देखभाल", askAvailability: "उत्पाद सहायता", noResults: "इस filter में कोई catalogue item नहीं मिला।", reset: "Filter reset करें", footerNote: "ये items आस्था और चिंतन के सहायक साधन हैं। चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं और किसी परिणाम की गारंटी नहीं देते।"
   };
   if (locale === "hinglish") return {
-    eyebrow: "Spiritual Catalogue", title: "Naksharix Spiritual Catalogue", subtitle: "Rudraksha, bracelets, yantras, mala aur symbolic remedy items ki information dekhein. Items ko cart mein add kar sakte hain, lekin supplier, price aur delivery verify hone tak payment checkout band hai.", explore: "Explore Catalogue", contact: "Product support", safetyTitle: "Information first, sale only after confirmation", safetyCopy: "Yeh real informational catalogue hai. Purchase, stock, authenticity aur fulfilment support se separately confirm hota hai.", safetyItems: ["Add to cart", "Price confirmation", "Faith-based items", "No guaranteed outcomes"], searchPlaceholder: "Search products...", categoryLabel: "Category", allCategories: "All categories", details: "Details and use", howToUse: "How to use", care: "Care", askAvailability: "Product support", noResults: "Is filter me koi catalogue item nahi mila.", reset: "Reset Filters", footerNote: "Ye items faith aur reflection support ke liye hain. Medical, legal, financial ya professional advice ka replacement nahi hain aur kisi result ki guarantee nahi dete."
+    eyebrow: "Spiritual Catalogue", title: "Naksharix Spiritual Catalogue", subtitle: "Rudraksha, bracelets, yantras aur mala kharidein. Cart mein add karein aur secure checkout se order karein.", explore: "Explore Catalogue", contact: "Product support", safetyTitle: "Information first, sale only after confirmation", safetyCopy: "Yeh real informational catalogue hai. Purchase, stock, authenticity aur fulfilment support se separately confirm hota hai.", safetyItems: ["Add to cart", "Price confirmation", "Faith-based items", "No guaranteed outcomes"], searchPlaceholder: "Search products...", categoryLabel: "Category", allCategories: "All categories", details: "Details and use", howToUse: "How to use", care: "Care", askAvailability: "Product support", noResults: "Is filter me koi catalogue item nahi mila.", reset: "Reset Filters", footerNote: "Ye items faith aur reflection support ke liye hain. Medical, legal, financial ya professional advice ka replacement nahi hain aur kisi result ki guarantee nahi dete."
   };
   return {
-    eyebrow: "Spiritual Catalogue", title: "Naksharix Spiritual Catalogue", subtitle: "Explore spiritual products, view approved prices, add items to your cart, and request confirmed purchase terms. Payments are not collected before fulfilment approval.", explore: "Explore Catalogue", contact: "Product support", safetyTitle: "Information first, sale only after confirmation", safetyCopy: "This is a real informational catalogue. Purchase, stock, authenticity, and fulfilment are confirmed separately by support.", safetyItems: ["Add to cart", "Price confirmation", "Faith-based items", "No guaranteed outcomes"], searchPlaceholder: "Search products...", categoryLabel: "Category", allCategories: "All categories", details: "Details and use", howToUse: "How to use", care: "Care", askAvailability: "Product support", noResults: "No catalogue items match these filters.", reset: "Reset Filters", footerNote: "These items are faith-based aids for reflection. They do not replace medical, legal, financial, or professional advice and do not guarantee outcomes."
+    eyebrow: "Spiritual Catalogue", title: "Naksharix Spiritual Catalogue", subtitle: "Shop Rudraksha, Yantras, Malas and spiritual accessories. Add to cart and checkout securely.", explore: "Explore Catalogue", contact: "Product support", safetyTitle: "Information first, sale only after confirmation", safetyCopy: "Your order, payment and shipping updates are available in My Orders.", safetyItems: ["Add to cart", "Price confirmation", "Faith-based items", "No guaranteed outcomes"], searchPlaceholder: "Search products...", categoryLabel: "Category", allCategories: "All categories", details: "Details and use", howToUse: "How to use", care: "Care", askAvailability: "Product support", noResults: "No catalogue items match these filters.", reset: "Reset Filters", footerNote: "These items are faith-based aids for reflection. They do not replace medical, legal, financial, or professional advice and do not guarantee outcomes."
   };
 }
