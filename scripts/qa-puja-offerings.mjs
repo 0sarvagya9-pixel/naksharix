@@ -8,6 +8,7 @@ const index=read("app/pujas/page.tsx");
 const detail=read("app/pujas/[id]/page.tsx");
 const listings=read("components/puja/puja-services-directory.tsx");
 const db=read("lib/puja/offerings.ts");
+assert.ok(db.includes("no payment is collected before confirmation")&&db.includes("note:/(verified Pandit availability"),"LEGACY_PUJA_NOTE_MUST_NOT_MISLEAD_PUBLIC");
 const sql=read("docs/sql/20261027_puja_offering.sql");
 assert.match(prisma,/model PujaOffering \{/);
 assert.ok(sql.includes('CREATE TABLE IF NOT EXISTS "PujaOffering"'),"Additive SQL migration missing");
@@ -18,7 +19,7 @@ assert.ok(!/\b(?:razorpay|payment\.create|checkoutSession|prisma\.payment\.creat
 assert.ok(ui.includes('secureFetch("/api/admin/puja-offerings"')&&ui.includes("Publish price"),"Missing editable Admin Puja prices");
 assert.ok(index.includes("getPublishedPujaOffers()")&&listings.includes("offerings[topic.id]")&&detail.includes('const offering=(await getPublishedPujaOffers())[item.id]'),"Missing public price integration");
 assert.ok(db.includes('error.code==="P2021"')&&db.includes("return {}"),"Missing-table fallback must not fake prices");
-assert.ok(listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "'),"Published Puja offers must show Book Now");
+assert.ok(listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "')&&listings.includes("listed service fee · secure checkout"),"Published Puja offers must show Book Now and current checkout");
 const bookingClient=read("components/puja/booking-request-client.tsx");
 const bookingApi=read("app/api/puja/bookings/route.ts");
 assert.ok(bookingClient.includes("expectedPricePaise:pricePaise") &&
