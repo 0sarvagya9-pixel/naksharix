@@ -44,13 +44,13 @@ export function AddToCartButton({productId}:{productId:string}){
         className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-[#822c40] px-4 py-3 font-bold text-white transition hover:bg-[#671f31] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d39942]">
         <ShoppingCart className="h-4 w-4"/>{result==="added"?"Added to cart":result==="limit"?"Quantity limit reached":result==="full"?"Cart full":"Add to cart"}
       </button>
-      <button type="button" onClick={()=>add(true)} aria-label="Order item now, no online payment"
+      <button type="button" onClick={()=>add(true)} aria-label="Order item now"
         className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl border border-[#d9ac5a] bg-[#fff1d6] px-4 py-3 text-sm font-bold text-[#692a38] transition hover:bg-[#ffe4b6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d39942]">
         Order Now
       </button>
             {["added","limit","full"].includes(result)?<a className="inline-flex min-h-12 items-center rounded-xl border border-[#cfaf85] px-3 text-sm font-bold text-[#743042]" href="/cart">View cart</a>:null}
     </div>
-    <p className="text-xs text-[#6d5058]">Order Now opens your cart to place an unpaid order request; no online payment is collected.</p>
+    <p className="text-xs text-[#6d5058]">Order Now opens your cart for delivery details and secure checkout.</p>
     {message?<p role="status" aria-live="polite" className="text-sm font-medium text-[#7d3445]">{message}</p>:null}
   </div>;
 }
