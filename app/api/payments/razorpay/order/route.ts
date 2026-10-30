@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const body = await validateJson(request, schema);
     if (body.purpose === "SUBSCRIPTION" && env.SUBSCRIPTIONS_ENABLED !== "true") return fail("Not found", 404);
     if (body.purpose === "SHOP_ORDER" && env.SHOP_PAYMENTS_ENABLED !== "true")
-      return fail("Shop payment is unavailable until the owner approves exact supplier proof and final delivery terms.", 503);
+      return fail("Shop online payments are temporarily unavailable. Your order remains saved.", 503);
     if (body.purpose === "PUJA_BOOKING" && env.PUJA_PAYMENTS_ENABLED !== "true")
       return fail("Puja payment is not yet enabled. A verified Pandit and confirmed schedule are required.", 503);
     if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
@@ -213,14 +213,12 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
     const order = await prisma.shopOrder.findUnique({ where: { id: body.shopOrderId } });
     if (!order || order.userId !== userId || order.status !== "CONFIRMED" ||
         !["UNPAID", "FAILED"].includes(order.paymentStatus) ||
-        order.fulfillmentMode !== "MANUAL_CONFIRMATION" ||
-        !order.fulfillmentEvidenceUrl?.startsWith("https://") ||
-        order.adminNote.trim().length < 30 ||
+        !["SELLER_FULFILLED", "MANUAL_CONFIRMATION"].includes(order.fulfillmentMode) ||
         order.shippingPaise === null || order.taxPaise === null ||
-        !order.totalPaise || order.totalPaise < 100 ||
+        !Number.isSafeInteger(order.totalPaise) || !order.totalPaise || order.totalPaise < 100 ||
         order.totalPaise !== order.subtotalPaise + order.shippingPaise + order.taxPaise) return null;
-    return { name: "Owner-confirmed Shop Order", amount: order.totalPaise / 100,
-      metadata: { shopOrderId: order.id, shopFulfillmentProof: true, shopTaxPaise: order.taxPaise } };
+    return { name: "Naksharix Shop Order", amount: order.totalPaise / 100,
+      metadata: { shopOrderId: order.id, shopTaxPaise: order.taxPaise } };
   }
   if (body.purpose === "CONSULTATION") {
     const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });
