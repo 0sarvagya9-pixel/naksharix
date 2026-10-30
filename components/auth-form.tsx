@@ -133,7 +133,9 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     if (process.env.NODE_ENV === "development") {
       console.info("[Naksharix Google login]", { selectedMode: roleIntent, loginMode: selectedLoginMode });
     }
-    signIn("google", { callbackUrl: `/auth/google-complete?role=${selectedLoginMode}` });
+    const redirectTo = safeInternalAuthPath(new URLSearchParams(window.location.search).get("redirectTo"));
+    const resume = redirectTo ? "&redirectTo=" + encodeURIComponent(redirectTo) : "";
+    signIn("google", { callbackUrl: `/auth/google-complete?role=${selectedLoginMode}${resume}` });
   }
 
   return (
