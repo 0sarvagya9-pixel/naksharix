@@ -11,7 +11,7 @@ export async function getPublishedPujaOffers():Promise<Record<string,PublicPujaO
     });
     const known=new Set(pujaTopics.map(p=>p.id));
     return Object.fromEntries(rows.filter(x=>known.has(x.topicId)&&x.pricePaise!==null).map(x=>[
-      x.topicId,{topicId:x.topicId,pricePaise:x.pricePaise!,durationMinutes:x.durationMinutes,note:x.note}
+      x.topicId,{topicId:x.topicId,pricePaise:x.pricePaise!,durationMinutes:x.durationMinutes,note:/(verified Pandit availability|no payment is collected before confirmation|payment stays disabled until a verified Pandit)/i.test(x.note)?"":x.note}
     ]));
   }catch(error){
     if(error instanceof Prisma.PrismaClientKnownRequestError && error.code==="P2021")return {};
