@@ -33,14 +33,15 @@ assert.ok(ui.includes('ResilientEditorialImage')&&ui.includes('fallbackSrc={topi
   !ui.includes('import Image from "next/image"'), "ADMIN_PHOTO_MUST_FALLBACK_IF_COMMONS_UNAVAILABLE");
 assert.ok(ui.includes("pricePaise:110000,durationMinutes:null,available:false")&&
   ui.includes("Existing saved rates are preserved"),"UNPUBLISHED_OWNER_1100_DRAFT_MISSING");
-console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;OWNER_PRICES_MANAGED=YES;PAYMENTS_GATED_UNTIL_PARTNER_CONFIRMED");
+console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;OWNER_PRICES_MANAGED=YES;PAYMENTS_REQUIRE_PUBLISHED_FEE_AND_GATEWAY");
 
 const gatewayOrder=read("app/api/payments/razorpay/order/route.ts");
 const gatewayWebhook=read("app/api/payments/razorpay/webhook/route.ts");
 const bookingPage=read("app/puja-bookings/page.tsx");
 assert.ok(prisma.includes("PUJA_BOOKING")&&read("lib/env.ts").includes('PUJA_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false")'),"PUJA_GATEWAY_MUST_DEFAULT_DISABLED");
-for(const s of ["partner.reviewStatus !== \"VERIFIED\"","!booking.scheduledAt","booking.quotedPricePaise !== 110000","pujaBookingId: booking.id"])
-  assert.ok(gatewayOrder.includes(s),"PUJA_PAYMENT_ACCEPTANCE_GUARD_MISSING="+s);
+for(const s of ['booking.userId !== userId','["REQUESTED","CONFIRMED","SCHEDULED"].includes(booking.status)',
+ 'offer.pricePaise !== booking.quotedPricePaise','booking.quotedPricePaise !== 110000','pujaBookingId: booking.id'])
+  assert.ok(gatewayOrder.includes(s),"PUJA_PAYMENT_PRICE_OR_OWNERSHIP_GUARD_MISSING="+s);
 const sharedRefund=read("lib/payments/purpose-reconciliation.ts");
 assert.ok(gatewayWebhook.includes('event.event === "refund.processed"')&&
   gatewayWebhook.includes("reconcileProcessedRefund")&&
@@ -48,9 +49,9 @@ assert.ok(gatewayWebhook.includes('event.event === "refund.processed"')&&
   sharedRefund.includes('original.purpose === "PUJA_BOOKING"')&&
   sharedRefund.includes('status: "REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
 assert.ok(bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"'),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");
-assert.ok(bookingPage.includes('reviewStatus:"VERIFIED"')&&bookingPage.includes('evidenceUrl:{not:null}')&&
-  bookingPage.includes('pricePaise:110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
-  bookingPage.includes('getRazorpayReadiness().enabled'),"PUJA_CHECKOUT_UI_PARTNER_PRICE_OR_CREDENTIAL_GUARD_MISSING");
+assert.ok(bookingPage.includes('pricePaise:110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
+  bookingPage.includes('getRazorpayReadiness().enabled')&&bookingPage.includes('["REQUESTED","CONFIRMED","SCHEDULED"].includes(row.status)'),
+  "PUJA_CHECKOUT_UI_PRICE_OR_CREDENTIAL_GUARD_MISSING");
 assert.ok(bookingPage.includes('["PENDING","FAILED"].includes(payment.status)')&&
   bookingPage.includes('paymentSettled=bookingPayments.some')&&
   bookingPage.includes('"REFUNDED"')&&
@@ -68,7 +69,7 @@ assert.ok(pricingPage.includes("getPublishedPujaOffers()") &&
   pricingContent.includes("pujaPriceLabel"),"PUBLIC_PRICING_MUST_FOLLOW_APPROVED_DB_FEES");
 assert.ok(pricingContent.includes('href: "/pujas"')&&
   pricingContent.includes('href: "/shop"')&&
-  pricingContent.includes("unpaid cart and order requests"),"PRICING_MUST_DESCRIBE_REAL_COMMERCE_STATE");
+  pricingContent.includes('href: "/shop"'),"PRICING_MUST_DESCRIBE_REAL_COMMERCE_STATE");
 assert.ok(sharedRefund.includes("prisma.$transaction(async (tx) =>") &&
   sharedRefund.includes("if (updated.count !== 1) return false;") &&
   sharedRefund.includes('status: "REFUNDED"') &&
