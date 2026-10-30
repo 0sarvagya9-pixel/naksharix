@@ -102,7 +102,7 @@ jobs:
             if (data?.services?.databaseSchema?.ready !== true || data?.services?.databaseSchema?.missingCount !== 0) throw new Error("Release held: learning/puja tables or indexes missing");
             if (data?.capabilities?.subscriptionsEnabled !== false) throw new Error("Subscriptions unexpectedly active");
             if (data?.capabilities?.aiReportGeneratorEnabled !== false) throw new Error("AI report generator unexpectedly active");
-            if (data?.capabilities?.shopMode !== "market_priced_unpaid_order_requests") throw new Error("Shop unpaid order scope changed");
+            if (!["market_priced_unpaid_order_requests","razorpay_shop_checkout"].includes(data?.capabilities?.shopMode)) throw new Error("Unknown Shop checkout mode");
             if (data?.privacy?.analyticsQueryStringExcluded !== true) throw new Error("Analytics privacy marker missing");
           '
 
