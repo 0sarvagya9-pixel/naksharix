@@ -57,7 +57,7 @@ const cartControls=read("components/shop/quote-cart-controls.tsx");
 for(const invariant of ["list[index].quantity>=10","list.length>=20","writeCart(list)","setResult(\"unavailable\")","Maximum 10 of this product per cart.","Cart could not be saved in this browser."]){
   assert.ok(cartControls.includes(invariant),"CART_CONTROL_DUPLICATE_OR_STORAGE_GUARD_MISSING="+invariant);
 }
-for(const invariant of ['setOrderId(id);', 'try{writeCart([]);setLines([])}catch', 'Do not place the same order twice.', 'Cart changes could not be saved']){
+for(const invariant of ['setOrderId(order.id);', 'try{writeCart([]);setLines([]);}', 'do not submit a duplicate order.', 'Cart could not be saved']){
   assert.ok(cart.includes(invariant),"CART_ACCEPTED_ORDER_OR_STORAGE_FAILURE_HANDLING_MISSING="+invariant);
 }
 
@@ -71,7 +71,7 @@ assert.ok(productDetail.includes("<ResilientShopPhoto")&&ui.includes("<Resilient
 const reviewForm=read("components/consultation-review-form.tsx");
 assert.ok(reviewForm.includes("Rate your consultation") && reviewForm.includes("Submit rating") && reviewForm.includes("aria-pressed={rating === value}"),"ACCESSIBLE_CUSTOMER_RATINGS_MISSING");
 assert.ok(read("app/api/consultation-bookings/review/route.ts").includes("rating: z.coerce.number().int().min(1).max(5)"),"RATINGS_MUST_BE_INTEGERS");
-console.log("SHOP_VISUAL_AND_IMAGE_RIGHTS_QA=PASS;LICENSED_PHOTO_REFERENCES=12;UNLICENSED_EXTERNAL_PHOTOS=HELD;LIVE_CHECKOUT=NO");
+console.log("SHOP_VISUAL_AND_IMAGE_RIGHTS_QA=PASS;LICENSED_PHOTO_REFERENCES=12;UNLICENSED_EXTERNAL_PHOTOS=HELD;CHECKOUT_GATED_BY_RAZORPAY=YES");
 
 // Admin-only commercial readiness must distinguish genuine published owner data
 // from proof of supplier stock, contracts, delivery and payments.

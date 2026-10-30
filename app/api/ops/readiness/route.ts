@@ -7,6 +7,7 @@ import { getReportStorageReadiness } from "@/lib/storage/report-storage";
 import { getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 import { isAiAstrologerEnabled, isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
+import { getRazorpayReadiness } from "@/lib/payments/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export async function GET() {
       },
       subscriptionsEnabled: env.SUBSCRIPTIONS_ENABLED === "true",
       aiReportGeneratorEnabled: env.AI_REPORT_GENERATOR_ENABLED === "true",
-      shopMode: "market_priced_unpaid_order_requests"
+      shopMode: env.SHOP_PAYMENTS_ENABLED==="true"&&getRazorpayReadiness().enabled ? "razorpay_shop_checkout" : "market_priced_unpaid_order_requests"
     },
     services: {
       databaseSchema: { ready: schema?.ready ?? false, missingCount: schema?.missingCount ?? 2 },

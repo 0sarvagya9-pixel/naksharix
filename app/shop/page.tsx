@@ -8,7 +8,7 @@ import { seo } from "@/lib/seo";
 export const metadata: Metadata = {
   ...seo({
     title: "Spiritual Catalogue | Rudraksha, Yantra, Mala and Symbolic Remedy Items",
-    description: "Explore Naksharix catalogue information for rudraksha, bracelets, yantras, malas, and symbolic remedy items. Availability and fulfilment are confirmed separately; no automatic product checkout is active.",
+    description: "Explore Naksharix catalogue information for rudraksha, bracelets, yantras, malas, and symbolic remedy items. Browse prices, add products to your cart and place orders with secure Razorpay checkout.",
     path: "/shop",
     keywords: ["Spiritual Catalogue", "Rudraksha", "Yantra", "Mala", "Astrology Remedy Items"]
   }),
@@ -21,9 +21,9 @@ export default async function ShopPage() {
   const catalogue = await getShopCatalogue();
   return <><EditorialServiceBanner eyebrow="SPIRITUAL DISCOVERY"
     headline="Objects of tradition and intention"
-    caption="Explore the Naksharix catalogue and enquire about availability. Product checkout and guaranteed delivery are not active."
+    caption="Shop Rudraksha, Yantras and spiritual essentials. Browse products, add to cart and checkout securely."
     image={referencePhotoForProduct("rudraksha-mala")?.url || "/shop/rudraksha-mala-illustration.svg"} imageAlt="Licensed representative Rudraksha prayer bead photograph"
-    link="/contact" linkLabel="Ask about an item" />
+    link="/cart" linkLabel="View your cart" />
     {referencePhotoForProduct("rudraksha-mala") ? <p className="mx-auto max-w-7xl px-5 py-2 text-xs text-[#674957]">
       Banner shows a licensed reference photograph, not a verified Naksharix SKU. Photo: <a href={referencePhotoForProduct("rudraksha-mala")!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{referencePhotoForProduct("rudraksha-mala")!.credit} · {referencePhotoForProduct("rudraksha-mala")!.licenseName}</a>.
     </p> : null}

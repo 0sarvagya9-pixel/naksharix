@@ -28,8 +28,14 @@ export async function reconcileCapturedPurpose(payment: Payment) {
       data: { status: "CONFIRMED", paymentStatus: "PAID" }
     });
   }
-  // Puja has no separate payment-status field; the Payment ledger is authoritative.
-  // Never mutate a Puja booking's appointment/partner details on a callback.
+  if (payment.purpose === "PUJA_BOOKING" && typeof meta.pujaBookingId === "string") {
+    await prisma.pujaBookingRequest.updateMany({
+      where: { id: meta.pujaBookingId, userId: payment.userId, status: "REQUESTED" },
+      data: { status: "CONFIRMED" }
+    });
+  }
+  // Confirmation is a paid booking, not a claim that an exact ceremony
+  // time or individual Pandit has already been assigned.
 }
 
 /** Only signed Razorpay refund.processed with the exact FULL original amount

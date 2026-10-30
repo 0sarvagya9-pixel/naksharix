@@ -37,18 +37,22 @@ assert.ok(admin.includes("unitPricePaise: editing.unitPricePaise ?? null"),"ADMI
 assert.ok(admin.includes("applyMissingMarketPrices")&&
   admin.includes("if(hasPrice(product)||marketPricePaise===null)return product;")&&
   admin.includes("Fill Missing Market Prices"),"ADMIN_EXPLICIT_PRICE_SEED_MERGE_NOT_GATED");
-assert.ok(orders.includes("product.unitPricePaise*item.quantity")&&orders.includes('status:"REQUESTED"')&&
- orders.includes('paymentStatus:"UNPAID"')&&orders.includes("onlineCheckoutAvailable:false"),"PRICE_SECURITY_OR_UNPAID_ORDER_GUARD_LOST");
-assert.ok(read("components/shop-coming-soon-content.tsx").includes("Market-compared item price")&&
- read("app/shop/[slug]/page.tsx").includes("Market-compared listing price")&&
- read("components/shop/cart-page-client.tsx").includes("Market-compared product subtotal"),
- "SHOP_PRICING_TERMS_DISCLOSURE_MISSING");
+assert.ok(orders.includes("product.unitPricePaise*item.quantity")&&
+ orders.includes('paymentStatus:"UNPAID"')&&orders.includes('status:checkoutReady?"CONFIRMED":"REQUESTED"')&&
+ orders.includes("shippingPaise:0,taxPaise:0,totalPaise:subtotal")&&
+ orders.includes('env.SHOP_PAYMENTS_ENABLED==="true"'),
+ "SERVER_PRICED_CHECKOUT_OR_DEFAULT_UNPAID_GUARD_LOST");
+assert.ok(read("components/shop-coming-soon-content.tsx").includes("Listed selling price")&&
+ read("components/shop/cart-page-client.tsx").includes("Total payable")&&
+ read("components/shop/cart-page-client.tsx").includes("Sign in to checkout")&&
+ read("components/shop/cart-page-client.tsx").includes('payload={{purpose:"SHOP_ORDER",shopOrderId:orderId}}'),
+ "CUSTOMER_DIRECT_CHECKOUT_JOURNEY_MISSING");
 const cartControls=read("components/shop/quote-cart-controls.tsx");
 assert.ok(cartControls.includes('function add(goToCart=false)')&&
   cartControls.includes('if(goToCart)router.push("/cart")')&&
   cartControls.includes('onClick={()=>add(true)}')&&
   cartControls.includes("Order Now")&&
-  cartControls.includes("unpaid order request")&&
+  cartControls.includes("secure checkout")&&
   cartControls.includes('if(index>=0&&list[index].quantity>=10)')&&
   cartControls.includes('if(index<0&&list.length>=20)'),
   "ONE_CLICK_ORDER_NOW_MUST_PRESERVE_CART_LIMITS_AND_NO_PAYMENT_DISCLOSURE");
@@ -62,4 +66,4 @@ assert.ok(homeServer.includes("getShopCatalogue()")&&homeServer.includes("featur
 
 assert.ok(ledger.includes("not supplier quotes")&&ledger.includes("unspecified contents/report"),
  "MARKET_REFERENCE_MUST_NOT_CLAIM_SUPPLIER_CERTAINTY");
-console.log("SHOP_MARKET_PRICE_QA=PASS;SKUS=12;PUBLIC_LIST_PRICES=INR;OWNER_BENCHMARK=2026-10-28;PAYMENT=UNPAID_MANUAL;SUPPLIER_AUTHENTICITY=NOT_ATTESTED");
+console.log("SHOP_MARKET_PRICE_QA=PASS;SKUS=12;SERVER_PRICED=YES;SECURE_CHECKOUT_GATE=YES;OWNER_FULFILS_ORDERS=YES");

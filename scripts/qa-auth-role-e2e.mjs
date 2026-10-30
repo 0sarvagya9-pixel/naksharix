@@ -853,7 +853,7 @@ try {
     }
   });
 
-  await check("real Puja booking requires published price and verified priest, supports private tracking", async () => {
+  await check("real Puja booking supports owner-managed ceremony and private tracking", async () => {
     const topicId="rudrabhishek",offerUrl="/api/admin/puja-offerings";
     const offerInput={topicId,pricePaise:199900,durationMinutes:90,available:true,note:"Disposable CI-only service offering"};
     const request={topicId,preferredDate:new Date(Date.now()+5*86400000).toISOString().slice(0,10),
@@ -887,18 +887,14 @@ try {
       const patch={id:bookingId,expectedVersion:row.version,status:"CONFIRMED",partnerId:null,
         scheduledAt:null,adminNote:"CI synthetic verification only",evidenceUrl:null};
       const unauthorized=await post("/api/admin/puja-bookings",patch,userCookie,"PATCH");assert.equal(unauthorized.status,403);
-      const noPartner=await post("/api/admin/puja-bookings",patch,adminCookie,"PATCH");assert.equal(noPartner.status,422);
-      const partner=await prisma.pujaPartner.create({data:{
-        name:"QA disposable verified priest",region:"Indore",traditions:["Shiva"],reviewStatus:"VERIFIED"
-      }});
-      partnerId=partner.id;
-      const approvedBooking=await post("/api/admin/puja-bookings",{...patch,partnerId},adminCookie,"PATCH");
-      const confirmed=(await approvedBooking.json());assert.equal(approvedBooking.status,200,JSON.stringify(confirmed));
+      const ownerManaged=await post("/api/admin/puja-bookings",patch,adminCookie,"PATCH");
+      const confirmed=await ownerManaged.json();assert.equal(ownerManaged.status,200,JSON.stringify(confirmed));
       assert.equal(confirmed.data.booking.status,"CONFIRMED");
-      const stale=await post("/api/admin/puja-bookings",{...patch,partnerId},adminCookie,"PATCH");
+      assert.equal(confirmed.data.booking.partnerId,null);
+      const stale=await post("/api/admin/puja-bookings",patch,adminCookie,"PATCH");
       assert.equal(stale.status,409);
       const scheduled=await post("/api/admin/puja-bookings",
-        {...patch,partnerId,expectedVersion:2,status:"SCHEDULED",
+        {...patch,expectedVersion:2,status:"SCHEDULED",
           scheduledAt:new Date(Date.now()+5*86400000).toISOString()},adminCookie,"PATCH");
       assert.equal(scheduled.status,200,await scheduled.text());
       const latest=await prisma.pujaBookingRequest.findUniqueOrThrow({where:{id:bookingId}});

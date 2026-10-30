@@ -58,7 +58,7 @@ assert.ok(read("components/shop/cart-page-client.tsx").includes('secureFetch("/a
 assert.ok(read("components/puja/booking-request-client.tsx").includes('secureFetch("/api/puja/bookings"')&&
  read("app/puja-bookings/page.tsx").includes("userId:user.id"),"Customer Puja booking flow missing");
 assert.ok(read("scripts/qa-auth-role-e2e.mjs").includes("real Shop order request")&&
- read("scripts/qa-auth-role-e2e.mjs").includes("real Puja booking requires"),"Disposable HTTP acceptance missing");
+ read("scripts/qa-auth-role-e2e.mjs").includes("real Puja booking supports owner-managed ceremony"),"Disposable HTTP acceptance missing");
 const reportAdmin=read("app/api/admin/manual-report-offerings/route.ts");
 const reportUI=read("components/reports-content.tsx");
 assert.ok(reportAdmin.includes("getAdminApiUser()")&&reportAdmin.includes("getManualReportCheckout(input.reportSlug)")&&

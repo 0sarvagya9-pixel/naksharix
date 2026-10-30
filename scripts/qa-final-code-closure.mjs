@@ -100,11 +100,14 @@ assert(login.includes("EMAIL_VERIFICATION_REQUIRED"), "Login blocks marked unver
 assert(pkg.scripts["qa:final-closure"] === "node scripts/qa-final-code-closure.mjs", "Final closure QA registered", "package script available");
 assert(pkg.scripts["qa:prod-db-readonly"] === "node scripts/qa-production-db-readonly.mjs", "Production DB read-only QA registered", "manual evidence command available");
 
-assert(shopSource.includes("AddToCartButton") && shopContent.includes("quote-cart-controls"), "Shop quote cart UI exists", "local-only client cart without payment");
-assert(source("components/shop/cart-page-client.tsx").includes("No payment is charged") &&
-  source("components/shop/cart-page-client.tsx").includes("Secure checkout is not enabled"), "Cart visibly discloses non-payment scope", "all checkout remains held");
+assert(shopSource.includes("AddToCartButton") && shopContent.includes("quote-cart-controls"), "Shop cart UI exists", "stored cart does not charge by itself");
+assert(source("components/shop/cart-page-client.tsx").includes("Sign in to checkout") &&
+  source("components/shop/cart-page-client.tsx").includes("Total payable") &&
+  source("components/shop/cart-page-client.tsx").includes('payload={{purpose:"SHOP_ORDER",shopOrderId:orderId}}') &&
+  source("app/api/payments/razorpay/order/route.ts").includes('order.totalPaise !== order.subtotalPaise + order.shippingPaise + order.taxPaise'),
+  "Cart offers server-priced Razorpay checkout after account sign-in", "no hidden amount or skipped gateway verification");
 assert(source("components/shop/quote-cart-controls.tsx").includes("localStorage") &&
-  !/razorpay|stripe|paymentIntent|checkoutSession|order\.create/.test(source("components/shop/quote-cart-controls.tsx")), "Cart cannot take payment or create an order", "saved draft only");
+  !/razorpay|stripe|paymentIntent|checkoutSession|order\.create/.test(source("components/shop/quote-cart-controls.tsx")), "Cart storage does not charge by itself", "server-authenticated checkout owns payment");
 assert(!/Pay with Razorpay|Buy Now/i.test(shopSource), "Shop paid controls not active", "quote-only not chargeable");
 
 assert(env.includes('SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false")'), "Subscriptions default disabled", "locked scope preserved");

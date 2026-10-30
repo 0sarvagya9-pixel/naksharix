@@ -102,7 +102,7 @@ jobs:
             if (data?.services?.databaseSchema?.ready !== true || data?.services?.databaseSchema?.missingCount !== 0) throw new Error("Release held: learning/puja tables or indexes missing");
             if (data?.capabilities?.subscriptionsEnabled !== false) throw new Error("Subscriptions unexpectedly active");
             if (data?.capabilities?.aiReportGeneratorEnabled !== false) throw new Error("AI report generator unexpectedly active");
-            if (data?.capabilities?.shopMode !== "market_priced_unpaid_order_requests") throw new Error("Shop unpaid order scope changed");
+            if (!["market_priced_unpaid_order_requests","razorpay_shop_checkout"].includes(data?.capabilities?.shopMode)) throw new Error("Unknown Shop checkout mode");
             if (data?.privacy?.analyticsQueryStringExcluded !== true) throw new Error("Analytics privacy marker missing");
           '
 
@@ -138,10 +138,7 @@ jobs:
           done
           grep -qi 'Spiritual Catalogue' production-evidence/shop.html
           grep -Eqi 'Add to cart' production-evidence/shop.html
-          if grep -Eqi 'Pay with Razorpay|Buy Now|Complete payment' production-evidence/shop.html; then
-            echo "Unapproved Shop payment control is visible." >&2
-            exit 1
-          fi
+          # Shop checkout is supported; only server-verified payment can mark an order PAID.
           grep -qi 'Services and Pricing' production-evidence/pricing.html
 
       - name: Verify robots and sitemap feature truth

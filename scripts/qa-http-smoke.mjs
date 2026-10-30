@@ -292,8 +292,8 @@ const assetPaths = [...new Set([
 ])];
 const catalogueChecks = [
   ...topicRecords.map(item => ({ path: "/pujas/" + encodeURIComponent(item.id), kind: "puja", marker: item.name })),
-  ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Market-compared listing price." })),
-  {path:"/cart",kind:"cart",marker:"Your cart"},
+  ...productSlugs.map(slug => ({ path: "/shop/" + encodeURIComponent(slug), kind: "shop", marker: "Listed selling price." })),
+  {path:"/cart",kind:"cart",marker:"Shopping cart"},
   ...assetPaths.map(path => ({ path, kind: "svg", marker: "<svg" }))
 ];
 let catalogueNext = 0;

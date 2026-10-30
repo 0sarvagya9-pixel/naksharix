@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/jwt";
+import { safeInternalAuthPath } from "@/lib/auth/safe-redirect";
 
 
-type SearchParams = Promise<{ role?: string }>;
+type SearchParams = Promise<{ role?: string; redirectTo?: string }>;
 
 export default async function GoogleCompletePage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
@@ -54,5 +55,6 @@ export default async function GoogleCompletePage({ searchParams }: { searchParam
 
 
   if (user.role === "ASTROLOGER" || user.role === "CONSULTANT") redirect("/astrologer/dashboard");
-  redirect("/dashboard");
+  const redirectTo = safeInternalAuthPath(params.redirectTo);
+  redirect(redirectTo || "/dashboard");
 }

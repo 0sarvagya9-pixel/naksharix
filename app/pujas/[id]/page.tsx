@@ -45,12 +45,12 @@ export default async function PujaTopicPage({params}:Props) {
               <p className="mt-2 text-3xl font-bold text-[#752939]">{displayPujaPrice(offering.pricePaise)}</p>
               {offering.durationMinutes ? <p className="mt-2 text-sm text-[#5f4d54]">Estimated duration: {offering.durationMinutes} minutes</p>:null}
               {offering.note ? <p className="mt-2 text-sm leading-6 text-[#5f4d54]">{offering.note}</p>:null}
-              <p className="mt-2 text-xs text-[#80656a]">The published fee shown above is Admin-approved for this Puja. Book Now requests a preferred date; payment stays disabled until a verified Pandit, ceremony time and supported ₹1,100 checkout fee are confirmed. No payment is collected by requesting a date.</p>
+              <p className="mt-2 text-xs text-[#80656a]">Book Now saves your preferred date and opens secure checkout. The final ceremony schedule is coordinated after booking.</p>
             </> : <p className="text-sm font-semibold text-[#684e58]">Service fee not published yet.</p>}
           </div>
           <div className="mt-7 space-y-4 text-sm leading-7 text-[#634e52]">
             <p className="flex gap-3"><CalendarDays size={19} className="mt-1 shrink-0 text-[#9e4952]"/> Confirm dates and local muhurat from your city&apos;s Panchang.</p>
-            <p className="flex gap-3"><ShieldCheck size={19} className="mt-1 shrink-0 text-[#9e4952]"/> Temple, pandit, materials, price and completion details require separate written confirmation.</p>
+            <p className="flex gap-3"><ShieldCheck size={19} className="mt-1 shrink-0 text-[#9e4952]"/> Naksharix coordinates the ceremony arrangements after booking.</p>
           </div>
           <Link href={offering ? "/puja-booking?item="+encodeURIComponent(item.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+item.id)}
             className="mt-8 inline-flex min-h-12 items-center gap-3 rounded-xl bg-[#f1c67c] px-6 py-3 font-bold text-[#311a1f]">

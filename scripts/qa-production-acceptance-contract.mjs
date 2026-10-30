@@ -10,14 +10,15 @@ assert.ok(workflow.includes("workflow_dispatch:")&&!workflow.includes("branches:
   "PRODUCTION_ACCEPTANCE_MUST_NOT_RUN_AUTOMATICALLY_BEFORE_DEPLOY_PERMISSION");
 assert.ok(workflow.includes("EXPECTED_SHA: ${{ github.sha }}")&&
  workflow.includes("Wait for the exact release deployment"),"PRODUCTION_EXACT_SHA_GATE_REMOVED");
-assert.ok(readiness.includes('shopMode: "market_priced_unpaid_order_requests"')&&
- workflow.includes('shopMode !== "market_priced_unpaid_order_requests"')&&
- e2e.includes('shopMode).toBe("market_priced_unpaid_order_requests")'),
- "UNPAID_SHOP_CAPABILITY_NOT_CONSISTENT");
+assert.ok(readiness.includes('"razorpay_shop_checkout"')&&
+ workflow.includes('"razorpay_shop_checkout"')&&
+ e2e.includes('"razorpay_shop_checkout"'),
+ "SHOP_CHECKOUT_CAPABILITY_NOT_CONSISTENT");
 assert.ok(shop.includes("<AddToCartButton")&&workflow.includes("grep -Eqi 'Add to cart'")&&
- workflow.includes("Pay with Razorpay|Buy Now|Complete payment")&&
- order.includes('paymentStatus:"UNPAID"')&&order.includes("onlineCheckoutAvailable:false"),
- "SHOP_MANUAL_ORDER_MUST_NOT_BE_REJECTED_OR_ENABLE_PAYMENT");
+ order.includes('paymentStatus:"UNPAID"')&&
+ order.includes('shippingPaise:0,taxPaise:0,totalPaise:subtotal')&&
+ read("components/shop/cart-page-client.tsx").includes("Sign in to checkout"),
+ "SHOP_ORDER_TOTAL_AND_CHECKOUT_LOGIN_NOT_VERIFIED");
 assert.ok(workflow.includes('Boolean(data?.ready) !== hasAi') &&
  workflow.includes("production-evidence/ai-status.json") &&
  workflow.includes("AI readiness/sitemap mismatch") &&

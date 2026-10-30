@@ -4,6 +4,8 @@ import { fail,handleApiError,ok,validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
+import { env } from "@/lib/env";
+import { getRazorpayReadiness } from "@/lib/payments/readiness";
 
 
 export const dynamic="force-dynamic";
@@ -33,7 +35,7 @@ export async function GET(){
 }
 export async function POST(request:Request){
  try{
-  const user=await getCurrentUser();if(!user)return fail("Sign in before placing an order request.",401);
+  const user=await getCurrentUser();if(!user)return fail("Sign in to checkout. Your cart will stay saved in this browser.",401);
   const input=await validateJson(request,schema);
   const productIds=input.items.map(i=>i.productId);
   if(new Set(productIds).size!==productIds.length)return fail("Duplicate cart item.",422);
@@ -68,17 +70,23 @@ export async function POST(request:Request){
       userId:user.id,createdAt:{gte:new Date(Date.now()-86400_000)}
     }});
     if(recent>=5)return null;
+    const checkoutReady=env.SHOP_PAYMENTS_ENABLED==="true" && getRazorpayReadiness().enabled;
     return tx.shopOrder.create({
       data:{userId:user.id,items:lines,customerName:input.customerName,customerPhone:input.customerPhone,
         deliveryAddress:input.deliveryAddress,deliveryCity:input.deliveryCity,deliveryState:input.deliveryState,
-        postalCode:input.postalCode,customerNote:input.customerNote,subtotalPaise:subtotal,status:"REQUESTED",
-        paymentStatus:"UNPAID",fulfillmentMode:"MANUAL_CONFIRMATION"},
+        postalCode:input.postalCode,customerNote:input.customerNote,subtotalPaise:subtotal,
+        // Displayed selling prices are the full online payable totals for this
+        // launch. No undisclosed shipping/tax is added at checkout.
+        shippingPaise:0,taxPaise:0,totalPaise:subtotal,
+        status:checkoutReady?"CONFIRMED":"REQUESTED",
+        paymentStatus:"UNPAID",fulfillmentMode:"SELLER_FULFILLED"},
       select:{id:true,status:true,paymentStatus:true,subtotalPaise:true,createdAt:true}
     });
   });
   if(!order)return fail("Daily order request limit reached.",429);
-  return ok({order,charged:false,onlineCheckoutAvailable:false,
-    nextStep:"Owner confirms delivery charge, applicable taxes, product specifications, fulfilment, and payment method."},
+  return ok({order,charged:false,
+    onlineCheckoutAvailable:env.SHOP_PAYMENTS_ENABLED==="true"&&getRazorpayReadiness().enabled,
+    nextStep:order.status==="CONFIRMED"?"Pay the displayed total securely with Razorpay.":"Order saved. Payment will be available after checkout activation."},
     {status:201});
  }catch(error){
   if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2021")return fail("Order storage not yet provisioned.",503);
