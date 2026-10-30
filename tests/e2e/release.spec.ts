@@ -186,7 +186,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.getByPlaceholder("Search products...").fill("Shri Yantra");
     await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true })).toBeVisible();
     await page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add product to cart" }).click();
-    await page.getByRole("link", { name: "View cart" }).click();
+    await page.getByRole("link", { name: "View cart" }).first().click();
     await expect(page).toHaveURL(/\/cart$/);
     await expect(page.getByRole("heading", { name: "Shopping cart" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Shri Yantra", exact: true })).toBeVisible();
