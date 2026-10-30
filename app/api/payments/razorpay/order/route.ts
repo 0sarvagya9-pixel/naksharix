@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (body.purpose === "SHOP_ORDER" && env.SHOP_PAYMENTS_ENABLED !== "true")
       return fail("Shop online payments are temporarily unavailable. Your order remains saved.", 503);
     if (body.purpose === "PUJA_BOOKING" && env.PUJA_PAYMENTS_ENABLED !== "true")
-      return fail("Puja payment is not yet enabled. A verified Pandit and confirmed schedule are required.", 503);
+      return fail("Puja online checkout is temporarily unavailable. Your booking can still be saved.", 503);
     if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
     const readiness = getRazorpayReadiness();
     if (!readiness.enabled || !razorpay) return fail(readiness.reason, 503);
@@ -200,14 +200,14 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
   }
   if (body.purpose === "PUJA_BOOKING") {
     const booking = await prisma.pujaBookingRequest.findUnique({ where: { id: body.bookingId } });
-    if (!booking || booking.userId !== userId || !booking.partnerId || !booking.scheduledAt) return null;
-    if (!["CONFIRMED","SCHEDULED"].includes(booking.status)) return null;
-    const partner = await prisma.pujaPartner.findUnique({ where: { id: booking.partnerId } });
-    if (!partner || partner.reviewStatus !== "VERIFIED" || !partner.evidenceUrl) return null;
+    // Booking and ceremony logistics are fulfilled by the owner. Customers
+    // pay the published fee; a preferred date is not represented as a final muhurat.
+    if (!booking || booking.userId !== userId || !["REQUESTED","CONFIRMED","SCHEDULED"].includes(booking.status)) return null;
     const offer = await prisma.pujaOffering.findUnique({ where: { topicId: booking.topicId } });
-    if (!offer?.available || offer.pricePaise !== booking.quotedPricePaise || booking.quotedPricePaise !== 110000) return null;
-    return { name: "Verified Puja Booking", amount: booking.quotedPricePaise / 100,
-      metadata: { pujaBookingId: booking.id, pujaTopicId: booking.topicId, verifiedPartnerId: partner.id } };
+    if (!offer?.available || offer.pricePaise !== booking.quotedPricePaise ||
+        booking.quotedPricePaise !== 110000 || booking.quotedPricePaise < 100) return null;
+    return { name: "Naksharix Puja Booking", amount: booking.quotedPricePaise / 100,
+      metadata: { pujaBookingId: booking.id, pujaTopicId: booking.topicId } };
   }
   if (body.purpose === "SHOP_ORDER") {
     const order = await prisma.shopOrder.findUnique({ where: { id: body.shopOrderId } });
