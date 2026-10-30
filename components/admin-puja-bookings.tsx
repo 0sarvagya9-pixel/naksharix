@@ -23,13 +23,13 @@ export function AdminPujaBookings(){
       scheduledAt:editing.scheduledAt,adminNote:editing.adminNote,evidenceUrl:editing.evidenceUrl})});
    const result=await response.json();if(!response.ok)throw Error(result.error||"Unable to save");
    setBookings(rows=>rows.map(row=>row.id===editing.id?result.data.booking:row));
-   setEditing(null);setNotice("Booking updated. No payment was charged.");
+   setEditing(null);setNotice("Booking updated. Payment status is managed separately by Razorpay.");
   }catch(e){setError(e instanceof Error?e.message:"Could not update booking")}
   finally{setBusy(false)}
  }
  return <div className="mx-auto max-w-7xl space-y-5 px-5 py-12 text-[#3d2631]">
    <h1 className="font-cinzel text-3xl font-bold">Puja requests & delivery</h1>
-   <p className="max-w-3xl text-sm leading-6">Private Sankalp and contact details. Assign only a verified Pandit partner and confirm the actual ceremony date before marking booked or performed.</p>
+   <p className="max-w-3xl text-sm leading-6">Manage customer bookings and private Sankalp details. Naksharix may coordinate the ceremony directly or select an approved external partner.</p>
    {error?<p role="alert" className="rounded-lg bg-[#fff0f0] p-4 text-[#9b3247]">{error}</p>:null}
    {notice?<p role="status" className="rounded-lg bg-[#eef9ec] p-4 text-[#345c34]">{notice}</p>:null}
    {editing?<form className="max-w-2xl space-y-4 rounded-2xl border border-[#d8b589] bg-white p-6" onSubmit={save}>
@@ -39,9 +39,9 @@ export function AdminPujaBookings(){
        {["REQUESTED","CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED","CANCELED","REJECTED"].map(x=><option key={x}>{x}</option>)}
       </select>
     </label>
-    <label className="block text-sm font-bold">Verified Pandit/Puja partner
+    <label className="block text-sm font-bold">External Pandit/Puja partner (optional)
      <select value={editing.partnerId??""} onChange={e=>setEditing({...editing,partnerId:e.target.value||null})} className="mt-2 block w-full rounded-lg border p-3">
-      <option value="">Unassigned</option>{partners.map(p=><option key={p.id} value={p.id}>{p.name} — {p.region}</option>)}
+      <option value="">Handled by Naksharix / owner</option>{partners.map(p=><option key={p.id} value={p.id}>{p.name} — {p.region}</option>)}
      </select>
     </label>
     <label className="block text-sm font-bold">Confirmed ceremony date/time (ISO, with timezone)
