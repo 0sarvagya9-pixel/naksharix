@@ -62,7 +62,7 @@ const homeClient=read("components/home/editorial-home.tsx");
 assert.ok(homeServer.includes("getShopCatalogue()")&&homeServer.includes("featuredShopPrices[product.id]")&&
   homeServer.includes("<EditorialHome featuredShopPrices={featuredShopPrices}")&&
   homeClient.includes("featuredShopPrices[item.id]")&&
-  homeClient.includes("Selling price · no online charge"),"HOMEPAGE_PRICES_NOT_CANONICAL_WITH_SHOP");
+  homeClient.includes("Selling price · secure checkout"),"HOMEPAGE_PRICES_NOT_CANONICAL_WITH_SHOP");
 
 assert.ok(ledger.includes("not supplier quotes")&&ledger.includes("unspecified contents/report"),
  "MARKET_REFERENCE_MUST_NOT_CLAIM_SUPPLIER_CERTAINTY");
