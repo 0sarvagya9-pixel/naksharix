@@ -44,11 +44,12 @@ export async function PATCH(request:Request){
       status:"PAID",metadata:{path:["pujaBookingId"],equals:existing.id}},select:{id:true}});
     if(paid)return fail("Verify the Razorpay refund before canceling this paid Puja.",409);
   }
+  // The owner coordinates the ceremony and may perform it directly.
+  // If a named external partner is selected, it must still be an approved registry entry.
   const partnerId=input.partnerId||existing.partnerId;
-  if(["CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED"].includes(input.status)){
-   if(!partnerId)return fail("A VERIFIED Puja partner must be assigned before confirmation.",422);
+  if(partnerId){
    const provider=await prisma.pujaPartner.findUnique({where:{id:partnerId}});
-   if(provider?.reviewStatus!=="VERIFIED")return fail("Selected Puja partner is not verified.",422);
+   if(provider?.reviewStatus!=="VERIFIED")return fail("Selected external Puja partner is not verified.",422);
   }
   const when=input.scheduledAt?new Date(input.scheduledAt):existing.scheduledAt;
   if(["SCHEDULED","IN_PROGRESS","COMPLETED"].includes(input.status)&&(!when||Number.isNaN(when.valueOf())))
@@ -74,7 +75,7 @@ export async function PATCH(request:Request){
    return booking;
   },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});
   if(!result)return fail("Concurrent Puja request update.",409);
-  return ok({booking:result,paid:false,operatorVerified:true});
+  return ok({booking:result,paymentVerified:false,partnerAssigned:Boolean(result.partnerId)});
  }catch(error){
   if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2021")return fail("Booking schema not provisioned.",503);
   return handleApiError(error);
