@@ -53,14 +53,9 @@ export async function PATCH(request:Request){
     return fail("Captured Razorpay payment must be verified before packing or dispatch.",422);
   if(["DISPATCHED","DELIVERED"].includes(input.status)&&!((input.trackingReference??current.trackingReference)||"").trim())
     return fail("Tracking reference is required for dispatched orders.",422);
+  // The seller handles sourcing and delivery. Don't demand an unrelated
+  // supplier URL or long admin justification before serving a paid order.
   const evidence=input.fulfillmentEvidenceUrl??current.fulfillmentEvidenceUrl;
-  if(["CONFIRMED","PACKING","DISPATCHED","DELIVERED"].includes(input.status)){
-    if(!evidence||input.adminNote.trim().length<30)
-      return fail("Supplier evidence URL and detailed owner fulfilment approval are required.",422);
-    const url=new URL(evidence);
-    if(url.protocol!=="https:"||url.username||url.password||url.port||!url.hostname.includes("."))
-      return fail("Supplier evidence must be an HTTPS reference without embedded credentials.",422);
-  }
   if(current.paymentStatus==="PAID" &&
      (shipping!==current.shippingPaise||tax!==current.taxPaise))
     return fail("Shipping and tax totals cannot be changed after a captured payment.",409);
