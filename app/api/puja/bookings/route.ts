@@ -31,7 +31,7 @@ export async function GET(){
 }
 export async function POST(request:Request){
  try{
-  const user=await getCurrentUser();if(!user)return fail("Sign in to request a Puja.",401);
+  const user=await getCurrentUser();if(!user)return fail("Sign in to book your Puja. You can return to this page afterward.",401);
   const input=await validateJson(request,inputSchema);
   if(!findPujaTopic(input.topicId))return fail("Unknown Puja service.",422);
   const when=new Date(input.preferredDate+"T00:00:00.000Z");
@@ -71,7 +71,7 @@ export async function POST(request:Request){
   });
   if(!booking)return fail("Daily Puja request limit reached.",429);
   return ok({booking,confirmed:false,panditAssigned:false,paymentCollected:false,
-    nextStep:"Owner verifies Pandit availability and local muhurat before confirming."},{status:201});
+    nextStep:"Continue to secure Razorpay payment. The final ceremony time will be coordinated after booking."},{status:201});
  }catch(error){
   if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2021")return fail("Puja booking storage not provisioned.",503);
   return handleApiError(error);
