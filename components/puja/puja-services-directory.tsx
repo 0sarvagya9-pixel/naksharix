@@ -79,7 +79,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
             <p className="mt-3 flex-1 text-sm leading-6 text-[#6c5459]">{topic.description}.</p>
             {offerings[topic.id] ? <p className="mt-3 text-lg font-extrabold text-[#842c3e]">
               {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(offerings[topic.id].pricePaise/100)}
-              <span className="ml-2 text-xs font-normal text-[#67515a]">listed service fee · subject to booking confirmation</span>
+              <span className="ml-2 text-xs font-normal text-[#67515a]">listed service fee · secure checkout</span>
             </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
             <Link href={offerings[topic.id] ? "/puja-booking?item="+encodeURIComponent(topic.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
@@ -102,7 +102,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
         {[
           ["01","Explore","Choose a traditional Puja, festival date, or ceremony topic."],
           ["02","Book Now","Enter Sankalp details and your preferred date securely."],
-          ["03","Confirm","A verified Pandit and ceremony time must be assigned before payment."]
+          ["03","Pay securely","Naksharix coordinates the ceremony date and time after booking."]
         ].map(([step,title,copy])=><div key={step} className="flex gap-4">
           <b className="font-cinzel text-2xl text-[#8e3641]">{step}</b>
           <div><h3 className="font-bold text-[#412831]">{title}</h3><p className="mt-2 text-sm leading-6 text-[#665056]">{copy}</p></div>

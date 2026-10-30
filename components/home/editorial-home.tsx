@@ -47,7 +47,7 @@ const services = [
     href:"/reports",cta:"View astrology reports",image:REPORT_PHOTO,alt:"Traditional Kundli chart reference, CC0"
   },
   {
-    number:"04",label:"Traditional Puja",copy:"Browse 94 Puja topics and request written availability confirmation.",
+    number:"04",label:"Traditional Puja",copy:"Explore 94 Puja traditions and book your preferred date.",
     href:"/pujas",cta:"Explore Puja directory",image:pujaEditorialImage("rudrabhishek","/naksharix/editorial-puja.svg","shiva"),alt:"Licensed representative photograph of Shiva Puja ritual context"
   },
   {
@@ -77,7 +77,7 @@ const zodiac = [
 const journeys = [
   {
     label: "Puja & traditions", eyebrow: "TRADITIONS",
-    desc: "Explore 94 Puja traditions and request a preferred date. A verified Pandit and ceremony time are confirmed separately.",
+    desc: "Explore Puja traditions, book your preferred date and pay securely. Naksharix coordinates the ceremony.",
     href: "/pujas", cta: "Explore Puja directory",
     image: "/naksharix/ganesh-hero-light-saffron.jpg",
     alt: "Traditional Ganesh devotional art"
@@ -91,7 +91,7 @@ const journeys = [
   },
   {
     label: "Spiritual catalogue", eyebrow: "CURATED DISCOVERY",
-    desc: "Explore products, add listed items to your cart and submit an unpaid order request. Confirm exact supplied items before fulfilment.",
+    desc: "Explore products, add items to your cart and complete secure checkout. Naksharix handles fulfilment.",
     href: "/shop", cta: "View catalogue",
     image: referencePhotoForProduct("rudraksha-mala")?.url || "/shop/rudraksha-mala-illustration.svg",
     alt: "Licensed Rudraksha mala reference photograph; not the exact stock item"
@@ -290,7 +290,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
                   {featuredShopPrices[item.id] ? <p className="mt-2 text-xl font-extrabold text-[#f5cc82]">
                     {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(featuredShopPrices[item.id]!/100)}
-                    <span className="ml-2 text-xs font-medium text-[#e2ced8]">Selling price · no online charge</span>
+                    <span className="ml-2 text-xs font-medium text-[#e2ced8]">Selling price · secure checkout</span>
                   </p> : <p className="mt-2 text-xs text-[#e2ced8]">See current selling price in Shop</p>}
                   <p className="mt-2 text-xs text-[#e2ced8]">Real licensed reference photo • Exact supplied item may differ</p>
                   {referencePhotoForProduct(item.id) ? <a href={referencePhotoForProduct(item.id)!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-[11px] leading-5 underline text-[#f3dcb9]">
@@ -390,7 +390,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
           </Link>
         </div>
       </section>
-      <p className="nx-ed-footnote">Astrology is a cultural and reflective practice; outcomes are not guaranteed. Some consultation, puja and product services are enquiries only and depend on real provider availability.</p>
+      <p className="nx-ed-footnote">Astrology is a cultural and reflective practice; outcomes are not guaranteed. Naksharix coordinates booked Puja schedules and manages product fulfilment.</p>
     </div>
   );
 }
