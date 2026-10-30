@@ -31,8 +31,8 @@ const services = [
     id: "pujas",
     title: "Puja Booking Requests",
     price: "Published fee on each Puja",
-    description: "Browse traditional Puja services, request a preferred date and submit private Sankalp information. A real verified Pandit and time must be assigned before any online charge.",
-    features: ["94 traditional Puja topics", "Book Now with preferred date", "My Pujas tracking", "No charge before confirmation"],
+    description: "Choose your Puja, enter private Sankalp details, and pay securely at the published fee. Naksharix coordinates ceremony arrangements.",
+    features: ["94 traditional Puja topics", "Book Now with preferred date", "My Pujas tracking", "Secure Razorpay checkout"],
     href: "/pujas",
     cta: "Explore Pujas",
     icon: CalendarDays
@@ -41,8 +41,8 @@ const services = [
     id: "shop",
     title: "Spiritual Shop",
     price: "Owner-approved prices only",
-    description: "Browse a spiritual catalogue, add listed products to the cart and submit an unpaid order request. Supplier stock and the exact supplied item must be confirmed before fulfilment.",
-    features: ["Product reference photos", "Add to Cart", "My Orders tracking", "No automatic payment on order request"],
+    description: "Browse listed products, add them to cart and place an order at the displayed total. Naksharix manages fulfilment.",
+    features: ["Product reference photos", "Add to Cart", "My Orders tracking", "Secure Razorpay checkout"],
     href: "/shop",
     cta: "Explore Shop",
     icon: ShoppingBag
@@ -97,7 +97,7 @@ export function PricingContent({ pujaPriceLabel }: { pujaPriceLabel: string }) {
       </div>
 
       <p className="mx-auto mt-8 max-w-3xl text-center text-sm leading-6 naksh-muted-text">
-        AI Astrologer is available as a separate guided experience with consent when the provider is configured. Shop supports an unpaid cart and order requests, not automatic online checkout. Puja booking requests do not guarantee an assigned Pandit, ceremony time or immediate payment. Public subscriptions are not active.
+        AI Astrologer is available as a separate guided experience with consent when the provider is configured. Shop supports priced orders and Razorpay checkout. Puja booking accepts your preferred date, with ceremony timing coordinated afterward. Public subscriptions are not active.
       </p>
     </Section>
   );
