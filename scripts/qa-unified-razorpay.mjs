@@ -38,13 +38,14 @@ gate(schema.includes("SHOP_ORDER") && schema.includes("REFUNDED") &&
 gate(!/\bDROP\s+(?:TABLE|SCHEMA)|\bTRUNCATE\b|\bDELETE\s+FROM\b/i.test(migration), "migration non-destructive");
 gate(order.includes('purpose: z.literal("SHOP_ORDER")') &&
   order.includes('paymentStatus) ||') && order.includes('order.totalPaise !== order.subtotalPaise + order.shippingPaise + order.taxPaise') &&
-  order.includes("order.fulfillmentEvidenceUrl?.startsWith") && order.includes('order.status !== "CONFIRMED"'),
-  "owner supplier proof and server-owned shop order amount");
+  order.includes('order.status !== "CONFIRMED"') &&
+  order.includes('["SELLER_FULFILLED", "MANUAL_CONFIRMATION"].includes(order.fulfillmentMode)'),
+  "seller-operated Shop flow with server-owned immutable total");
 gate(shopPage.includes('payload={{purpose:"SHOP_ORDER",shopOrderId:order.id}}') &&
   shopPage.includes('env.SHOP_PAYMENTS_ENABLED==="true"'), "shop checkout visible only after approval");
 gate(adminShop.includes('current.paymentStatus!=="PAID"') &&
-  adminShop.includes("Supplier evidence URL") &&
-  adminShop.includes("Captured Razorpay payment"), "shop cannot dispatch unpaid product");
+  adminShop.includes("Captured Razorpay payment") &&
+  adminShop.includes('input.status==="CANCELED"&&current.paymentStatus==="PAID"'), "shop cannot dispatch unpaid product or silently cancel paid purchase");
 gate(order.includes('purpose: body.purpose as PaymentPurpose') &&
   order.includes('provider: "RAZORPAY"') &&
   order.includes('metadata: { ...item.metadata') &&
