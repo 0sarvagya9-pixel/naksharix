@@ -38,7 +38,7 @@ export default async function MyPujas(){
     <p className="mt-2 text-sm">Preferred date: {row.preferredDate.toLocaleDateString("en-IN")} · City: {row.city}</p>
     <p className="mt-2 text-sm">Published fee at request: ₹{(row.quotedPricePaise/100).toFixed(2)}</p>
     <p className="mt-2 text-sm">Confirmed ceremony: {row.scheduledAt?row.scheduledAt.toLocaleString("en-IN"):"Not yet scheduled"}</p>
-    <p className="mt-2 text-sm">Ceremony coordinator: {row.partnerId?"Assigned":"To be assigned"}</p>
+    <p className="mt-2 text-sm">Ceremony coordinator: {row.partnerId?"Approved external partner":row.status==="REQUESTED"?"Naksharix coordination pending":"Naksharix owner team"}</p>
     {(()=>{
       const bookingPayments=payments.filter(pay=>{
         const meta=pay.metadata;
