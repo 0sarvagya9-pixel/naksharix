@@ -6,7 +6,16 @@ const manualToPaidReportId: Record<string, string> = {
   "career-report": "career-report",
   "wealth-report": "finance-report",
   "numerology-lo-shu-report": "numerology-report",
-  "yearly-horoscope-report": "yearly-ai"
+  "yearly-horoscope-report": "yearly-ai",
+  "love-report": "love-relationship-report",
+  "baby-name-report": "baby-name-personalized",
+  "sade-sati-report": "sade-sati-personalized",
+  "manglik-kaal-sarp-report": "manglik-kaal-sarp-personalized",
+  "name-correction-report": "name-correction-personalized",
+  "transit-report": "transit-personalized",
+  "rahu-ketu-report": "rahu-ketu-personalized",
+  "jupiter-transit-report": "jupiter-transit-personalized",
+  "fortune-report": "fortune-personalized"
 };
 
 export type ManualReportCheckout = {
