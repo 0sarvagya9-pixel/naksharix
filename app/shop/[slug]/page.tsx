@@ -30,7 +30,13 @@ export async function generateMetadata({params}:Props):Promise<Metadata> {
 }
 export default async function ProductDetails({params}:Props) {
   const {slug}=await params;
-  const product=await productBySlug(slug);
+  const catalogue=await getShopCatalogue();
+  if (!catalogue.storageReady) return <main role="alert" className="mx-auto min-h-[60vh] max-w-3xl px-5 py-20 text-[#412831]">
+    <h1 className="font-cinzel text-3xl font-bold">Product details temporarily unavailable</h1>
+    <p className="mt-4 leading-7">We cannot verify this item or its current price right now. No order or payment will be taken until the catalogue is available.</p>
+    <Link href="/shop" className="mt-6 inline-block font-bold text-[#8e3442] underline">Return to Shop</Link>
+  </main>;
+  const product=catalogue.products.find(p=>p.slug===slug && p.status==="active");
   if (!product) notFound();
   const image=imageFor(product);
   const illustrated=!(product.galleryImages?.length) && (image.endsWith("-illustration.svg")||image.endsWith("-placeholder.svg"));
@@ -44,16 +50,16 @@ export default async function ProductDetails({params}:Props) {
           <h1 className="mt-4 font-cinzel text-3xl font-black md:text-5xl">{product.name.en}</h1>
           <p className="mt-5 text-base leading-8 text-[#634e52]">{product.longDescription.en}</p>
           <div className="mt-7 rounded-xl border border-[#e8c78f]/35 p-4">
-            <p className="font-semibold text-[#8e3442]">Product information and quotation</p>
+            <p className="font-semibold text-[#8e3442]">Product details and secure checkout</p>
             <p className="mt-2 text-sm leading-7 text-[#67545a]">
-              The product&apos;s exact material, specification, authenticity, price, dispatch and delivery terms are confirmed by staff before purchase.
-              No automatic online checkout is active.
+              Review the displayed selling price and add this item to your cart to place an order.
+              Naksharix manages fulfilment, with final item details and delivery updates provided through your order.
             </p>
           </div>
           <p className="mt-5 text-2xl font-bold text-[#762536]">{product.unitPricePaise
             ? new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(product.unitPricePaise/100)
             : "Price awaiting verification"}</p>
-          <p className="mt-2 text-sm leading-6 text-[#67545a]">Listed selling price. Your order is an unpaid request; shipping, taxes, exact item specification and delivery require staff confirmation.</p>
+          <p className="mt-2 text-sm leading-6 text-[#67545a]">Listed selling price includes delivery. Review your total in the cart, place your order and pay securely with Razorpay.</p>
           <div className="mt-5 max-w-xs"><AddToCartButton productId={product.id} /></div>
           {illustrated?<p className="mt-5 text-xs leading-6 text-[#756267]">
             Original illustrative artwork, not a photograph of supplied physical stock.
