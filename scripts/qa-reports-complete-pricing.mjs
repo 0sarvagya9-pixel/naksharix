@@ -52,6 +52,12 @@ assert.ok(order.includes('getPaidReport(body.reportId)')&&order.includes("amount
 assert.ok(request.includes("payment.status === PaymentStatus.PAID")&&request.includes("metadata.reportId === checkout.reportId"),"Paid detail form must bind order to report");
 assert.ok(create.includes("payment.status === PaymentStatus.PAID")&&create.includes("metadata.reportId === checkout.reportId"),"Creation must verify capture ownership");
 assert.ok(index.includes("15 clearly priced personalized reports"),"English customer message advertises accurate count");
+const payButton=read("components/razorpay-checkout-button.tsx");
+const authForm=read("components/auth-form.tsx");
+assert.ok(payButton.includes("userResponse?.status === 401") &&
+  payButton.includes("router.push(`/login?redirectTo=${encodeURIComponent(resume)}`)") &&
+  authForm.includes('safeInternalAuthPath(searchParams?.get("redirectTo")'),
+  "Logged-out checkout returns to the same report through safe sign-in without initiating payment");
 const manualOfferSource=read("lib/reports/manual-offerings.ts");
 assert.ok(manualOfferSource.includes("if(!allowed.size)return {};") &&
   manualOfferSource.indexOf("if(!allowed.size)return {};") < manualOfferSource.indexOf("prisma.manualReportOffering.findMany"),
