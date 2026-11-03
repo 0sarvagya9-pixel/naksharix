@@ -60,6 +60,15 @@ export function RazorpayCheckoutButton({
 
     const userResponse = await fetch("/api/auth/me", { cache: "no-store" }).catch(() => null);
     const userJson = userResponse?.ok ? await userResponse.json().catch(() => null) : null;
+    if (userResponse?.status === 401) {
+      setLoading(false);
+      setStatus(tr("signInToPay"));
+      // Resume the same public report or product after sign-in; never place a
+      // charge before authentication, and never trust an external redirect.
+      const resume = window.location.pathname + window.location.search;
+      router.push(`/login?redirectTo=${encodeURIComponent(resume)}`);
+      return;
+    }
     if (canBypassPayment(userJson?.data?.user)) {
       setLoading(false);
       setStatus(tr("adminTestingModePaymentBypassed"));
