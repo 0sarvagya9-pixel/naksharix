@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { isTransientDatabaseError, retryTransientDatabaseRead } from "../lib/db-transient.ts";
+import { isTransientDatabaseError, retryTransientDatabaseRead, neonRuntimeDatabaseUrl } from "../lib/db-transient.ts";
 
 const read = (path) => readFileSync(path, "utf8");
 for (const code of ["P1001", "P1002", "P1008", "P1017"]) {
@@ -29,6 +29,18 @@ await assert.rejects(() => retryTransientDatabaseRead(async () => {
 }), /Application error/);
 assert.equal(attempts, 1, "NEVER_RETRY_UNRELATED_ERRORS");
 
+const sample = neonRuntimeDatabaseUrl("postgresql://test:dummy@ep-test-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require");
+assert.ok(sample, "NEON_URL_EXPECTED");
+const parsed = new URL(sample);
+assert.equal(parsed.searchParams.get("connect_timeout"), "15", "NEON_CONNECT_TIMEOUT");
+assert.equal(parsed.searchParams.get("pool_timeout"), "15", "NEON_POOL_TIMEOUT");
+assert.equal(parsed.searchParams.get("sslmode"), "require", "NEON_SSL_PRESERVED");
+const operator = new URL(neonRuntimeDatabaseUrl("postgresql://test:dummy@ep-test-pooler.c-8.us-east-1.aws.neon.tech/neondb?connect_timeout=23&pool_timeout=24"));
+assert.equal(operator.searchParams.get("connect_timeout"), "23", "OPERATOR_CONNECT_TIMEOUT_PRESERVED");
+assert.equal(operator.searchParams.get("pool_timeout"), "24", "OPERATOR_POOL_TIMEOUT_PRESERVED");
+assert.equal(neonRuntimeDatabaseUrl("postgresql://test:dummy@db.example.com/test"), undefined, "DO_NOT_REWRITE_NON_NEON_DB");
+assert.equal(neonRuntimeDatabaseUrl("invalid-url"), undefined, "INVALID_URL_FAIL_CLOSED");
+assert.ok(read("lib/db.ts").includes("datasourceUrl: neonDatasourceUrl"), "NEON_TIMEOUT_NOT_WIRED");
 const shopStore = read("lib/shop/catalogue-store.ts");
 const pujaStore = read("lib/puja/offerings.ts");
 assert.ok(shopStore.includes("retryTransientDatabaseRead") &&
