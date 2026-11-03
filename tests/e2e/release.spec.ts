@@ -276,6 +276,14 @@ test.describe("Naksharix release browser QA", () => {
     expect(["market_priced_unpaid_order_requests","razorpay_shop_checkout"]).toContain(readinessData.capabilities.shopMode);
   });
 
+  test("all fifteen premium report cards display fixed verified checkout prices", async ({ page }) => {
+    await page.goto(absolute("/reports"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { level: 1, name: "Premium Astrology Reports" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Pay INR [0-9,]+$/ })).toHaveCount(15);
+    await expect(page.getByText("Fee confirmation required")).toHaveCount(0);
+    await expect(page.getByText("15 clearly priced personalized reports")).toBeVisible();
+  });
+
   test("pricing exposes only active services", async ({ page }) => {
     await page.goto(absolute("/pricing"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { level: 1, name: "Services and Pricing" })).toBeVisible();
