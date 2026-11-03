@@ -41,6 +41,10 @@ assert.equal(operator.searchParams.get("pool_timeout"), "24", "OPERATOR_POOL_TIM
 assert.equal(neonRuntimeDatabaseUrl("postgresql://test:dummy@db.example.com/test"), undefined, "DO_NOT_REWRITE_NON_NEON_DB");
 assert.equal(neonRuntimeDatabaseUrl("invalid-url"), undefined, "INVALID_URL_FAIL_CLOSED");
 assert.ok(read("lib/db.ts").includes("datasourceUrl: neonDatasourceUrl"), "NEON_TIMEOUT_NOT_WIRED");
+const api = read("lib/api.ts");
+assert.ok(api.includes("if (isTransientDatabaseError(error))") &&
+  api.includes('return fail("Service temporarily unavailable. Check your order or payment history before trying again.", 503)'),
+  "TRANSIENT_DATABASE_API_MUST_RESPOND_503_WITH_NO_FALSE_PAYMENT_CLAIM");
 const shopStore = read("lib/shop/catalogue-store.ts");
 const pujaStore = read("lib/puja/offerings.ts");
 assert.ok(shopStore.includes("retryTransientDatabaseRead") &&
