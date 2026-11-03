@@ -14,7 +14,7 @@ const noticeForEmail=(outcome:string|undefined)=>outcome==="provider_accepted"
  : " Customer email was not confirmed; status is saved and visible in their account.";
 export function AdminShopOrders(){
  const [orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState("");
- const [editing,setEditing]=useState<Order|null>(null),[saving,setSaving]=useState(false);
+ const [editing,setEditing]=useState<Order|null>(null),[saving,setSaving]=useState(false),[retrying,setRetrying]=useState<string|null>(null);
  useEffect(()=>{let active=true;fetch("/api/admin/shop-orders",{cache:"no-store"}).then(async response=>{
   const body=await response.json();if(!response.ok)throw Error(body.error||"Unable to read orders");return body.data.orders as Order[];
  }).then(items=>{if(active)setOrders(items)}).catch(e=>{if(active)setError(e instanceof Error?e.message:"Order system not available.")});
@@ -32,7 +32,21 @@ export function AdminShopOrders(){
    setEditing(null);setNotice("Order status saved and available in My Orders."+noticeForEmail(result.data.notification?.outcome));
   }catch(e){setError(e instanceof Error?e.message:"Failed to update.")}finally{setSaving(false)}
  }
- return <div className="mx-auto max-w-7xl space-y-5 px-5 py-12 text-[#3c2730]">
+ async function retryEmail(order:Order){
+  if(retrying)return;
+  setRetrying(order.id);setError("");setNotice("");
+  try{
+   const response=await secureFetch("/api/admin/fulfilment-notification",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({kind:"shop",id:order.id,expectedVersion:order.version})
+   });
+   const data=await response.json();
+   if(!response.ok)throw Error(data.error||"Could not retry notification.");
+   setNotice("Order status notification retry recorded."+noticeForEmail(data.data?.notification?.outcome));
+  }catch(e){setError(e instanceof Error?e.message:"Email retry failed.");}
+  finally{setRetrying(null);}
+ }
+ return <div className="mx-auto max-w-7xl space-y-5 py-12 text-[#3c2730] px-5">
   <h1 className="font-cinzel text-3xl font-bold">Customer Shop Orders</h1>
   <p className="max-w-3xl text-sm leading-6">Manage customer orders, exact SKU sourcing, packing, dispatch tracking and delivery. Only genuine fulfilment status changes are communicated to customers; recording a status is not independent evidence of delivery.</p>
   {error?<p role="alert" className="rounded-lg bg-[#fff0f0] p-4 text-[#8d2d45]">{error}</p>:null}
@@ -77,7 +91,14 @@ export function AdminShopOrders(){
       <p className="mt-2 text-sm">Status: <strong>{order.status}</strong> · Payment: <strong>{order.paymentStatus}</strong></p>
       <p className="mt-2 text-sm">Subtotal {money(order.subtotalPaise)} · Total {order.totalPaise!==null?money(order.totalPaise):"Pending shipping and tax"}</p>
       <details className="mt-3 text-sm"><summary className="cursor-pointer font-bold">View line items</summary><pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs">{JSON.stringify(order.items,null,2)}</pre></details>
-      <button type="button" onClick={()=>setEditing({...order})} className="mt-4 rounded-lg border border-[#c89c8a] px-5 py-2 text-sm font-bold text-[#742838]">Manage order</button>
+      <div className="mt-4 flex flex-wrap gap-2">
+       <button type="button" onClick={()=>setEditing({...order})} className="rounded-lg border border-[#c89c8a] px-5 py-2 text-sm font-bold text-[#742838]">Manage order</button>
+       {["CONFIRMED","PACKING","DISPATCHED","DELIVERED","CANCELED"].includes(order.status)?
+        <button type="button" disabled={retrying!==null} onClick={()=>retryEmail(order)}
+         className="rounded-lg border border-[#c89c8a] px-4 py-2 text-sm font-semibold text-[#742838] disabled:opacity-60">
+          {retrying===order.id?"Retrying email…":"Retry status email"}
+        </button>:null}
+      </div>
     </article>)}
   </div>
   {!orders.length?<p className="rounded-xl border p-6">No customer order requests yet.</p>:null}
