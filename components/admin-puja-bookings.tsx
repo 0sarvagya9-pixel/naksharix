@@ -12,7 +12,7 @@ export function AdminPujaBookings(){
  const [bookings,setBookings]=useState<Booking[]>([]);
  const [partners,setPartners]=useState<Partner[]>([]);
  const [editing,setEditing]=useState<Booking|null>(null);
- const [error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
+ const [error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[retrying,setRetrying]=useState<string|null>(null);
  useEffect(()=>{let active=true;fetch("/api/admin/puja-bookings",{cache:"no-store"}).then(async r=>{
   const result=await r.json();if(!r.ok)throw Error(result.error||"Unable to load bookings");return result.data as {bookings:Booking[];partners:Partner[]};
  }).then(data=>{if(active){setBookings(data.bookings);setPartners(data.partners)}})
@@ -31,6 +31,22 @@ export function AdminPujaBookings(){
     : "Booking status saved. The customer can track it in My Puja Requests; email delivery was not confirmed.");
   }catch(e){setError(e instanceof Error?e.message:"Could not update booking")}
   finally{setBusy(false)}
+ }
+ async function retryEmail(booking:Booking){
+  if(retrying)return;
+  setRetrying(booking.id);setError("");setNotice("");
+  try{
+   const response=await secureFetch("/api/admin/fulfilment-notification",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({kind:"puja",id:booking.id,expectedVersion:booking.version})
+   });
+   const data=await response.json();
+   if(!response.ok)throw Error(data.error||"Could not retry notification.");
+   setNotice(data.data?.notification?.outcome==="provider_accepted"
+    ? "Puja status email accepted by provider. Inbox receipt is not guaranteed."
+    : "Puja status email was not confirmed; booking remains visible in the customer's account.");
+  }catch(e){setError(e instanceof Error?e.message:"Email retry failed.");}
+  finally{setRetrying(null);}
  }
  return <div className="mx-auto max-w-7xl space-y-5 px-5 py-12 text-[#3d2631]">
    <h1 className="font-cinzel text-3xl font-bold">Puja requests & delivery</h1>
@@ -76,7 +92,14 @@ export function AdminPujaBookings(){
      <details className="mt-3 rounded-lg bg-[#fff7ed] p-3 text-xs"><summary className="cursor-pointer font-bold">Private Sankalp details</summary>
       <p className="mt-3">Gotra: {b.gotra||"Not supplied"}</p><p className="mt-2 whitespace-pre-wrap">{b.sankalpNote}</p>
      </details>
-     <button type="button" onClick={()=>setEditing({...b})} className="mt-4 rounded-lg border border-[#bd8e83] px-4 py-2 text-sm font-bold text-[#762c3d]">Manage Puja</button>
+     <div className="mt-4 flex flex-wrap gap-2">
+      <button type="button" onClick={()=>setEditing({...b})} className="rounded-lg border border-[#bd8e83] px-4 py-2 text-sm font-bold text-[#762c3d]">Manage Puja</button>
+      {["CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED","CANCELED","REJECTED"].includes(b.status)?
+       <button type="button" disabled={retrying!==null} onClick={()=>retryEmail(b)}
+        className="rounded-lg border border-[#bd8e83] px-4 py-2 text-sm font-semibold text-[#762c3d] disabled:opacity-60">
+        {retrying===b.id?"Retrying email…":"Retry status email"}
+       </button>:null}
+     </div>
     </article>)}
    </div>
  </div>;
