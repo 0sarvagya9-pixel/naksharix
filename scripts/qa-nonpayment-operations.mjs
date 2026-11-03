@@ -30,7 +30,7 @@ assert.ok(send.includes("input.status === input.oldStatus") &&
   send.includes("provider_accepted") &&
   send.includes("catch {") &&
   send.includes("not a payment receipt") &&
-  send.includes("provider API acceptance") === false,
+  send.includes("Provider API acceptance does not guarantee actual inbox placement"),
   "Status email must only be attempted on a transition, never claim payment or inbox delivery");
 for (const [file, kind] of [[shop,"shop"],[puja,"puja"]]) {
   assert.ok(file.includes('import { notifyCustomerOfFulfilmentChange }') &&
