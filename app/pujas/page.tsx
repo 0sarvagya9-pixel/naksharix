@@ -5,7 +5,7 @@ import { getPublishedPujaOffers } from "@/lib/puja/offerings";
 
 export const metadata:Metadata=seo({
   title:"Traditional Puja Directory | Shiva, Devi, Navagraha and Festivals",
-  description:"Explore traditional Hindu Puja types by deity, festival and occasion. Request a private review; priest availability and muhurat must be confirmed.",
+  description:"Explore traditional Hindu Puja types by deity, festival and occasion. Book a preferred date and securely pay a published fee; Naksharix coordinates ceremony arrangements afterward.",
   path:"/pujas", keywords:["Hindu Puja","Puja Directory","Rudrabhishek","Navagraha Shanti","Lakshmi Puja"]
 });
 export const dynamic="force-dynamic";
