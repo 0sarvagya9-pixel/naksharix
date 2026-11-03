@@ -3,7 +3,9 @@ import "server-only";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/monitoring/logger";
 
-const geminiModel = "gemini-1.5-flash";
+// Use the same supported model selected by the validated server environment.
+// The legacy hard-coded 1.5 Flash endpoint was retired and returned HTTP 404.
+const geminiModel = env.GEMINI_MODEL;
 const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
 
 type GeminiResponse = {
