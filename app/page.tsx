@@ -19,7 +19,8 @@ export default async function HomePage() {
   const featuredShopPrices: Record<string, number | null> = {};
   try {
     const shop = await getShopCatalogue();
-    for (const product of shop.products) {
+    // Unavailable storage is not proof that old seed prices are current.
+    if (shop.storageReady) for (const product of shop.products) {
       if (["5-mukhi-rudraksha", "dhan-yog-bracelet", "shri-yantra", "rudraksha-mala"].includes(product.id)) {
         featuredShopPrices[product.id] = product.status === "active" ? product.unitPricePaise ?? null : null;
       }

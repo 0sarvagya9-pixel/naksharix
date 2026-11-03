@@ -1,6 +1,7 @@
 import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { isTransientDatabaseError, retryTransientDatabaseRead } from "@/lib/db-transient";
 import { shopProducts, type ShopProduct } from "@/lib/manual-catalogue";
 import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
 function photoFallbackForLegacySeed(product:ShopProduct):ShopProduct {
@@ -21,9 +22,9 @@ export type ShopCatalogueState = {
 
 export async function getShopCatalogue(): Promise<ShopCatalogueState> {
   try {
-    const snapshot = await prisma.shopCatalogueSnapshot.findUnique({
+    const snapshot = await retryTransientDatabaseRead(() => prisma.shopCatalogueSnapshot.findUnique({
       where: { id: SHOP_CATALOGUE_ID }
-    });
+    }));
     if (!snapshot) return { products: shopProducts, version: 0, storageReady: true };
     if (!Array.isArray(snapshot.products)) throw new Error("Invalid saved shop catalogue shape");
     return { products: (snapshot.products as unknown as ShopProduct[]).map(photoFallbackForLegacySeed), version: snapshot.version, storageReady: true };
@@ -32,6 +33,11 @@ export async function getShopCatalogue(): Promise<ShopCatalogueState> {
     // Admin writes fail closed while storage is not provisioned; never fall back to localStorage.
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
       return { products: shopProducts, version: 0, storageReady: false };
+    }
+    // If Neon is unreachable, never sell from potentially outdated seed prices.
+    // Public pages can render a clear temporary outage state instead of HTTP 500.
+    if (isTransientDatabaseError(error)) {
+      return { products: [], version: 0, storageReady: false };
     }
     throw error;
   }

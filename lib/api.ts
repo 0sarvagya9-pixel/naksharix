@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z, ZodError } from "zod";
 import { logger } from "@/lib/monitoring/logger";
+import { isTransientDatabaseError } from "@/lib/db-transient";
 import { sanitizeInput } from "@/lib/security/sanitize";
 
 export type ApiResult<T> = { data: T } | { error: string; details?: unknown };
@@ -37,6 +38,11 @@ export async function validateJson<TSchema extends z.ZodTypeAny>(request: Reques
 export function handleApiError(error: unknown) {
   if (error instanceof ZodError) {
     return fail("Validation failed", 422, error.flatten());
+  }
+  if (isTransientDatabaseError(error)) {
+    // A gateway request may already be in flight; never assert that no money moved.
+    logger.error("database_temporarily_unavailable", { name: error instanceof Error ? error.name : "unknown" });
+    return fail("Service temporarily unavailable. Check your order or payment history before trying again.", 503);
   }
   logger.error("api_error", { name: error instanceof Error ? error.name : "unknown" });
   return fail("We could not complete that request right now. Please try again shortly.", 500);

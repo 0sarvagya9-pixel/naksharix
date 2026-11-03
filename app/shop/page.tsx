@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ShopComingSoonContent } from "@/components/shop-coming-soon-content";
 import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
@@ -19,6 +20,11 @@ export const dynamic = "force-dynamic";
 
 export default async function ShopPage() {
   const catalogue = await getShopCatalogue();
+  if (!catalogue.storageReady) return <main role="alert" className="mx-auto min-h-[60vh] max-w-3xl px-5 py-20 text-[#412831]">
+    <h1 className="font-cinzel text-3xl font-bold">Shop temporarily unavailable</h1>
+    <p className="mt-4 text-base leading-7">We cannot verify current catalogue prices right now. Ordering and checkout are paused for your protection. Your saved cart is not erased.</p>
+    <Link href="/shop" className="mt-6 inline-block rounded-lg bg-[#8b3343] px-5 py-3 font-bold text-white">Retry Shop</Link>
+  </main>;
   return <><EditorialServiceBanner eyebrow="SPIRITUAL DISCOVERY"
     headline="Objects of tradition and intention"
     caption="Shop Rudraksha, Yantras and spiritual essentials. Browse products, add to cart and checkout securely."
