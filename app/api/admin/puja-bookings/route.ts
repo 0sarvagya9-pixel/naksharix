@@ -3,6 +3,7 @@ import { z } from "zod";
 import { fail,handleApiError,ok,validateJson } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
+import { notifyCustomerOfFulfilmentChange } from "@/lib/notifications/fulfilment-updates";
 export const dynamic="force-dynamic";
 const statuses=["REQUESTED","CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED","CANCELED","REJECTED"] as const;
 const moves:Record<string,readonly string[]>={
@@ -75,7 +76,13 @@ export async function PATCH(request:Request){
    return booking;
   },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});
   if(!result)return fail("Concurrent Puja request update.",409);
-  return ok({booking:result,paymentVerified:false,partnerAssigned:Boolean(result.partnerId)});
+  // Provider mail acceptance is informational and is never used to claim
+  // actual ceremony completion, scheduling, or a confirmed inbox delivery.
+  const notification=await notifyCustomerOfFulfilmentChange({
+   kind:"puja",userId:result.userId,reference:result.id,
+   oldStatus:existing.status,status:result.status
+  });
+  return ok({booking:result,notification,paymentVerified:false,partnerAssigned:Boolean(result.partnerId)});
  }catch(error){
   if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2021")return fail("Booking schema not provisioned.",503);
   return handleApiError(error);
