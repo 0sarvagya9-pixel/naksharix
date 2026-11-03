@@ -4,7 +4,11 @@ export const BASE_URL = "https://www.naksharix.com";
 const ADS_SELLER = "google.com, pub-7848529669366564, DIRECT, f08c47fec0942fa0";
 
 export async function checkPublicEndpoints(fetcher = fetch, base = BASE_URL) {
-  const endpoints = ["/api/health", "/api/release", "/ads.txt", "/", "/kundli", "/advertising"];
+  const endpoints = [
+    "/api/health", "/api/release", "/api/ops/readiness", "/ads.txt",
+    "/", "/kundli", "/shop", "/pujas", "/puja-calendar",
+    "/reports", "/consultation", "/advertising", "/robots.txt", "/sitemap.xml"
+  ];
   const results = [];
   for (const path of endpoints) {
     let passed = false;
@@ -25,8 +29,28 @@ export async function checkPublicEndpoints(fetcher = fetch, base = BASE_URL) {
           passed = data?.environment === "production" &&
             data?.branch === "complete-production-polish" &&
             /^[a-f0-9]{40}$/.test(data?.commitSha ?? "");
+        } else if (path === "/api/ops/readiness") {
+          const data = JSON.parse(body).data;
+          passed = data?.environment === "production" &&
+            data?.services?.databaseSchema?.ready === true &&
+            data?.services?.email?.enabled === true &&
+            data?.services?.reportStorage?.enabled === true;
         } else if (path === "/ads.txt") {
           passed = body.trim() === ADS_SELLER;
+        } else if (path === "/robots.txt") {
+          passed = body.includes("Sitemap: https://www.naksharix.com/sitemap.xml") &&
+            body.includes("Disallow: /admin") && body.includes("Disallow: /api");
+        } else if (path === "/sitemap.xml") {
+          passed = body.includes("https://www.naksharix.com/reports") &&
+            body.includes("https://www.naksharix.com/shop") &&
+            !body.includes("<loc>https://www.naksharix.com/admin");
+        } else if (path === "/reports") {
+          passed = body.includes("Premium Astrology Reports") &&
+            body.includes("15 clearly priced personalized reports");
+        } else if (path === "/pujas") {
+          passed = body.includes("Puja Directory") && body.includes("Book Now");
+        } else if (path === "/shop") {
+          passed = body.includes("Spiritual Catalogue") && body.includes("Add to cart");
         } else {
           passed = body.length > 300 && !/Authentication Required/i.test(body);
         }

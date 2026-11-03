@@ -132,8 +132,10 @@ export async function getCommercialReadiness(): Promise<CommercialReadiness> {
     const eligible = manualReports.filter(item => !getManualReportCheckout(item.slug)).length;
     const published = Object.keys(reportResult.value).length;
     checks.push({ key: "manual-report-prices", title: "Manual specialist report pricing",
-      status: published === eligible && eligible > 0 ? "ready" : "action_required",
-      detail: published + " / " + eligible + " non-gateway manual report types have an approved offer. Existing gateway-priced report amounts remain untouched.",
+      status: eligible === 0 || published === eligible ? "ready" : "action_required",
+      detail: eligible===0
+        ? "All " + manualReports.length + " published report types have canonical fixed fees and verified checkout mappings. No manual-only price editor entries are required."
+        : published + " / " + eligible + " non-gateway manual report types have an approved offer. Canonical checkout prices cannot be overridden by manual offers.",
       actionHref: "/admin/manual-report-prices" });
   } else {
     checks.push({ key: "manual-report-prices", title: "Manual specialist report pricing", status: "unknown",

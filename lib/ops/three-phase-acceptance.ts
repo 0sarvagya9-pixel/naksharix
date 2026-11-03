@@ -73,7 +73,7 @@ export async function getThreePhaseAcceptance(commercial: CommercialReadiness): 
     item("operator-slots", "Pandit and astrologer capacity", "external_evidence_required",
       "Verify real partner identity, provider contract, available slot, booking confirmation and service completion independently.", "/admin/puja-partners"),
     item("manual-reports", "Specialist report fulfillment", "external_evidence_required",
-      "Approved fees, sample requirements, real report operator and delivery SLA need actual business acceptance.", "/admin/manual-report-prices"),
+      "All 15 report types have published fees. Real generated PDF content, report operator, delivery timeline and customer download/email receipt need actual business acceptance.", "/admin/report-requests"),
     item("email-payment", "Real transactional email, payment and refund", "external_evidence_required",
       email.emailEnabled
         ? "Email adapter configured. Actual received message, gateway capture/webhook replay, refund and rollback still require controlled acceptance."

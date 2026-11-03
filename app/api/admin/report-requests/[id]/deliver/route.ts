@@ -16,6 +16,10 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     const { id } = await params;
     const reportRequest = await prisma.reportRequest.findUnique({ where: { id } });
     if (!reportRequest) return fail("Report request not found", 404);
+    // An admin retry must not resend a completed report email.
+    if (reportRequest.status === ReportRequestStatus.DELIVERED && reportRequest.deliveryStatus === "email_sent") {
+      return ok({ reportRequest, delivery: { sent: false, skipped: true, reason: "Already recorded as sent; no duplicate email attempted." } });
+    }
     if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
       return fail("Verified payment or authorized admin bypass is required before delivering a paid report.", 409);
     }
@@ -41,7 +45,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
         oldStatus: reportRequest.status,
         newStatus: ReportRequestStatus.READY_FOR_DELIVERY,
         actor: admin,
-        note: "Email delivery not configured; secure download remains available.",
+        note: "Email delivery was not accepted by the provider; secure download remains available.",
         metadata: { deliveryMode: "secure_download_only", storageDriver: reportRequest.generatedPdfStorageDriver ?? "database" }
       });
       await writeAuditLog({

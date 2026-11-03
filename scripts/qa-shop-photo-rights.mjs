@@ -81,7 +81,7 @@ const readinessApi=read("app/api/admin/readiness/route.ts");
 for(const marker of ["getShopCatalogue()","getPublishedPujaOffers()","getPublishedManualReportOffers()","prisma.pujaPartner.count","to_regclass", "readyForAutomaticPayments: false", "imageRights === \"SUPPLIER_AUTHORIZED\""]) {
   assert.ok(commercial.includes(marker),"ADMIN_COMMERCE_READINESS_GATE_MISSING="+marker);
 }
-assert.ok(readinessPage.includes("getCommercialReadiness") && readinessPage.includes("Automatic Shop/Puja payments: DISABLED"),"ADMIN_READINESS_UI_MISSING");
+assert.ok(readinessPage.includes("getCommercialReadiness") && readinessPage.includes("Fulfilment acceptance: confirm actual item dispatch"),"ADMIN_READINESS_UI_MISSING");
 assert.ok(readinessApi.includes("const commercial = await getCommercialReadiness()") && readinessApi.includes("    commercial,"),"ADMIN_READINESS_API_MISSING");
 
 const redisCache=read("lib/cache/redis-cache.ts");
