@@ -30,7 +30,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Explore Puja <span className="text-[#ffcf80]">Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
             Browse {pujaTopics.length} traditional Puja topics across deities, ceremonies and festivals.
-            Select a Puja and request your preferred ceremony date. Pandit assignment and muhurat are confirmed before payment.
+            Choose a Puja and your preferred date, then use secure checkout for published offers. Naksharix coordinates the final ceremony timing afterward.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <a href="#puja-directory" className="rounded-xl bg-[#f6c776] px-6 py-3 font-bold text-[#351b20]">Explore Puja Topics</a>
@@ -38,7 +38,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
               <CalendarDays size={17}/> Festival calendar
             </Link>
           </div>
-          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> ₹1,100 listed fee • Confirmation before payment</p>
+          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> ₹1,100 published fee • Secure checkout • Ceremony time coordinated afterward</p>
         </div>
       </div>
     </section>
@@ -47,7 +47,8 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-[#8e3641]">Traditional practices</p>
           <h2 id="puja-catalogue-heading" className="mt-2 font-cinzel text-3xl font-bold text-[#412831]">Puja Directory</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">The topics listed below do not imply temple assignments or priest availability.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">The topics listed below do not imply temple assignments or priest availability. Final ceremony arrangements are coordinated separately after booking.</p>
+          {!Object.keys(offerings).length ? <p role="status" className="mt-3 rounded-lg border border-[#d6aa70] bg-[#fff2df] p-3 text-sm text-[#69434b]">Puja prices and online bookings are currently unavailable. Please return when published offers can be verified.</p> : null}
         </div>
         <span role="status" className="rounded-full border border-[#e2b575]/35 px-4 py-2 text-sm text-[#84303d]">Showing {Math.min(visibleCount,results.length)} of {results.length} topics</span>
       </div>
