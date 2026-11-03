@@ -6,6 +6,12 @@ type Order={id:string;userId:string;items:unknown;customerName:string;customerPh
  subtotalPaise:number;shippingPaise:number|null;taxPaise:number|null;totalPaise:number|null;
  status:string;paymentStatus:string;trackingReference:string|null;fulfillmentEvidenceUrl:string|null;adminNote:string;version:number;createdAt:string};
 const money=(p:number)=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(p/100);
+const nextStatuses:Record<string,string[]>={REQUESTED:["CONFIRMED","CANCELED"],CONFIRMED:["PACKING","CANCELED"],
+ PACKING:["DISPATCHED","CANCELED"],DISPATCHED:["DELIVERED"],DELIVERED:[],CANCELED:[]};
+const noticeForEmail=(outcome:string|undefined)=>outcome==="provider_accepted"
+ ? " Email accepted by provider (inbox delivery not yet verified)."
+ : outcome==="not_needed" ? " No status notification was needed."
+ : " Customer email was not confirmed; status is saved and visible in their account.";
 export function AdminShopOrders(){
  const [orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const [editing,setEditing]=useState<Order|null>(null),[saving,setSaving]=useState(false);
@@ -23,12 +29,12 @@ export function AdminShopOrders(){
    const result=await response.json();
    if(!response.ok)throw Error(result.error||"Could not update order.");
    setOrders(old=>old.map(row=>row.id===editing.id?result.data.order:row));
-   setEditing(null);setNotice("Order updated. Payment has not been automatically verified.");
+   setEditing(null);setNotice("Order status saved and available in My Orders."+noticeForEmail(result.data.notification?.outcome));
   }catch(e){setError(e instanceof Error?e.message:"Failed to update.")}finally{setSaving(false)}
  }
  return <div className="mx-auto max-w-7xl space-y-5 px-5 py-12 text-[#3c2730]">
   <h1 className="font-cinzel text-3xl font-bold">Customer Shop Orders</h1>
-  <p className="max-w-3xl text-sm leading-6">One Razorpay merchant checkout is offered only after supplier evidence, final shipping/tax quote and owner confirmation. Dispatch additionally requires a captured payment; admin changes never fabricate a transaction.</p>
+  <p className="max-w-3xl text-sm leading-6">Manage customer orders, exact SKU sourcing, packing, dispatch tracking and delivery. Only genuine fulfilment status changes are communicated to customers; recording a status is not independent evidence of delivery.</p>
   {error?<p role="alert" className="rounded-lg bg-[#fff0f0] p-4 text-[#8d2d45]">{error}</p>:null}
   {notice?<p role="status" className="rounded-lg bg-[#edf9ed] p-4 text-[#365d36]">{notice}</p>:null}
   {editing?<form onSubmit={save} className="max-w-2xl space-y-3 rounded-2xl border border-[#d4b796] bg-white p-6">
@@ -36,7 +42,10 @@ export function AdminShopOrders(){
     <p className="text-sm">Items subtotal: {money(editing.subtotalPaise)}</p>
     <label className="block text-sm font-bold">Status
       <select className="mt-2 block w-full rounded-lg border p-3" value={editing.status} onChange={e=>setEditing({...editing,status:e.target.value})}>
-        {["REQUESTED","CONFIRMED","PACKING","DISPATCHED","DELIVERED","CANCELED"].map(value=><option key={value} value={value}>{value}</option>)}
+        {(()=>{
+          const current=orders.find(row=>row.id===editing.id)?.status??editing.status;
+          return [current,...(nextStatuses[current]??[])].map(value=><option key={value} value={value}>{value}</option>);
+        })()}
       </select>
     </label>
     {(["shippingPaise","taxPaise"] as const).map(field=><label key={field} className="block text-sm font-bold">{field==="shippingPaise"?"Shipping INR":"Tax INR"}
@@ -48,11 +57,11 @@ export function AdminShopOrders(){
       <input maxLength={140} className="mt-2 block w-full rounded-lg border p-3" value={editing.trackingReference??""}
         onChange={e=>setEditing({...editing,trackingReference:e.target.value})}/>
     </label>
-    <label className="block text-sm font-bold">Verified supplier / exact SKU fulfilment evidence (HTTPS URL)
+    <label className="block text-sm font-bold">Supplier / dispatch evidence (optional HTTPS URL)
       <input type="url" maxLength={500} className="mt-2 block w-full rounded-lg border p-3" value={editing.fulfillmentEvidenceUrl??""}
         onChange={e=>setEditing({...editing,fulfillmentEvidenceUrl:e.target.value||null})}/>
     </label>
-    <p className="text-xs">Confirm exact SKU, stock and dispatch capability. Approval requires the evidence URL, detailed notes and final shipping/tax amounts; no payment is created by this admin form.</p>
+    <p className="text-xs">Confirm the actual SKU and dispatch capability. Add supporting evidence when available. Shipping and tax must be recorded before acceptance. Status changes are limited to valid next steps.</p>
     <label className="block text-sm font-bold">Owner fulfilment notes
       <textarea maxLength={1500} rows={4} className="mt-2 block w-full rounded-lg border p-3" value={editing.adminNote}
         onChange={e=>setEditing({...editing,adminNote:e.target.value})}/>
