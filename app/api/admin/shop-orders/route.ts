@@ -3,6 +3,7 @@ import { z } from "zod";
 import { fail,handleApiError,ok,validateJson } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
+import { notifyCustomerOfFulfilmentChange } from "@/lib/notifications/fulfilment-updates";
 export const dynamic="force-dynamic";
 const statuses=["REQUESTED","CONFIRMED","PACKING","DISPATCHED","DELIVERED","CANCELED"] as const;
 const moves:Record<string,readonly string[]>={
@@ -78,7 +79,13 @@ export async function PATCH(request:Request){
    return record;
   },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});
   if(!updated)return fail("Concurrent order change detected.",409);
-  return ok({order:updated,paymentCollected:false,onlinePaymentVerified:false});
+  // Status is persisted before the notification attempt: provider outages never
+  // undo a valid owner update or make the browser retry a successful transition.
+  const notification=await notifyCustomerOfFulfilmentChange({
+   kind:"shop",userId:updated.userId,reference:updated.id,
+   oldStatus:current.status,status:updated.status
+  });
+  return ok({order:updated,notification,paymentCollected:false,onlinePaymentVerified:false});
  }catch(error){
   if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2021")return fail("Order schema not provisioned.",503);
   return handleApiError(error);
