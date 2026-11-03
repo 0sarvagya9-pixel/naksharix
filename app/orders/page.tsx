@@ -43,7 +43,13 @@ export default async function MyOrdersPage(){
            label={`Pay ${money(order.totalPaise)} with Razorpay`} successHref="/orders"/></div> :
          <p className="mt-3 text-sm">Your order is saved. Online payment will be available shortly.</p>
      ) : null}
-     {order.paymentStatus==="PAID"?<p className="mt-2 text-sm font-semibold">Payment successful. Your order is being prepared.</p>:null}
+     {order.paymentStatus==="PAID"?<p className="mt-2 text-sm font-semibold">{
+       order.status==="DELIVERED"?"Marked delivered by Naksharix. Contact support if your item has not arrived.":
+       order.status==="DISPATCHED"?"Marked dispatched; check your tracking reference above.":
+       order.status==="PACKING"?"Your order is being packed.":
+       order.status==="CANCELED"?"Order canceled. Contact support for the next steps.":
+       "Order confirmed or awaiting fulfilment updates."
+     }</p>:null}
      {order.paymentStatus==="REFUNDED"?<p className="mt-2 text-sm font-semibold">Full refund confirmed by signed Razorpay webhook.</p>:null}
      <details className="mt-4"><summary className="cursor-pointer font-semibold">Order items</summary>
        <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded-lg bg-[#fff8ee] p-4 text-xs">{JSON.stringify(order.items,null,2)}</pre>
