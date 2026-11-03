@@ -82,6 +82,114 @@ export const paidReports = [
     features: ["Life path and destiny number", "Soul urge and personality number", "Name correction guidance", "Daily numerology habits"],
     sample: ["Core number matrix", "Name vibration notes", "Lucky number routine"],
     faqs: ["Can I analyze my business name?", "Does it include mobile numbers?", "Can it suggest spelling changes?"]
+  },
+  {
+    id: "love-relationship-report",
+    purpose: "MATCH_REPORT",
+    name: "Love / Relationship Report",
+    price: "INR 499",
+    amount: 499,
+    priceEnv: "STRIPE_LOVE_RELATIONSHIP_REPORT_PRICE_ID",
+    description: "Personalized relationship patterns, communication themes, timing context and practical supportive guidance. Prepared for manual review.",
+    features: ["Relationship chart themes","Communication and emotional compatibility","Timing context","Practical reflection prompts"],
+    sample: ["Relationship strengths","Areas for open communication","Grounded next steps"],
+    faqs: ["Is this a relationship guarantee?","Does this include marriage timing?"]
+  },
+  {
+    id: "baby-name-personalized",
+    purpose: "KUNDLI_REPORT",
+    name: "Baby Name Report",
+    price: "INR 399",
+    amount: 399,
+    priceEnv: "STRIPE_BABY_NAME_PERSONALIZED_PRICE_ID",
+    description: "Traditional birth-chart-informed baby name options and pronunciation notes, reviewed manually before delivery.",
+    features: ["Birth nakshatra context","Name sound and meaning options","Family preference considerations","Personalized shortlist"],
+    sample: ["Suggested starting sounds","Cultural meaning notes","Shortlist for family review"],
+    faqs: ["Is the final name guaranteed to be lucky?","Can we provide preferred languages?"]
+  },
+  {
+    id: "sade-sati-personalized",
+    purpose: "KUNDLI_REPORT",
+    name: "Sade Sati Report",
+    price: "INR 399",
+    amount: 399,
+    priceEnv: "STRIPE_SADE_SATI_PERSONALIZED_PRICE_ID",
+    description: "A personalized review of traditional Saturn transit periods, caution themes and non-deterministic coping guidance.",
+    features: ["Moon and Saturn context","Transit phase overview","Grounded practical routines","Traditional reflective remedies"],
+    sample: ["Period themes","Helpful routine prompts","Saturn transit context"],
+    faqs: ["Does this predict certain events?","Can it substitute for professional advice?"]
+  },
+  {
+    id: "manglik-kaal-sarp-personalized",
+    purpose: "KUNDLI_REPORT",
+    name: "Manglik / Kaal Sarp Report",
+    price: "INR 499",
+    amount: 499,
+    priceEnv: "STRIPE_MANGLIK_KAAL_SARP_PERSONALIZED_PRICE_ID",
+    description: "Personalized traditional dosha checks, chart context and interpretations, without certain predictions or prescribed guarantees.",
+    features: ["Manglik context review","Kaal Sarp context review","Cancellation factors","Practical and gentle spiritual suggestions"],
+    sample: ["Dosha review summary","Chart context cautions","Remedy considerations"],
+    faqs: ["Will the report guarantee dosha removal?","Are chart details required?"]
+  },
+  {
+    id: "name-correction-personalized",
+    purpose: "KUNDLI_REPORT",
+    name: "Name Correction Report",
+    price: "INR 399",
+    amount: 399,
+    priceEnv: "STRIPE_NAME_CORRECTION_PERSONALIZED_PRICE_ID",
+    description: "Name spelling and numerology-oriented reflective suggestions, based on the details submitted for manual review.",
+    features: ["Current name interpretation","Number pattern context","Spelling options","Practical decision guidance"],
+    sample: ["Name number snapshot","Alternate spelling themes","Practical caveats"],
+    faqs: ["Is a legal name change required?","Can I submit a preferred name?"]
+  },
+  {
+    id: "transit-personalized",
+    purpose: "YEARLY_REPORT",
+    name: "Transit Report",
+    price: "INR 449",
+    amount: 449,
+    priceEnv: "STRIPE_TRANSIT_PERSONALIZED_PRICE_ID",
+    description: "Personalized summary of relevant planetary transit themes and planning suggestions, prepared for a specific period.",
+    features: ["Major transit overview","Context to birth chart","Planning themes","Reflection prompts"],
+    sample: ["Transit themes by period","Areas for caution","Practical choices"],
+    faqs: ["Does this report give exact event guarantees?","Which timeframe is covered?"]
+  },
+  {
+    id: "rahu-ketu-personalized",
+    purpose: "KUNDLI_REPORT",
+    name: "Rahu Ketu Report",
+    price: "INR 399",
+    amount: 399,
+    priceEnv: "STRIPE_RAHU_KETU_PERSONALIZED_PRICE_ID",
+    description: "Traditional lunar-node chart and transit reading focused on patterns, choices and grounded guidance.",
+    features: ["Rahu and Ketu context","House themes","Relevant transit background","Practical reflection prompts"],
+    sample: ["Node axis themes","Potential blind spots","Thoughtful next steps"],
+    faqs: ["Are these certainties?","Can birth details improve the analysis?"]
+  },
+  {
+    id: "jupiter-transit-personalized",
+    purpose: "YEARLY_REPORT",
+    name: "Jupiter Transit Report",
+    price: "INR 399",
+    amount: 399,
+    priceEnv: "STRIPE_JUPITER_TRANSIT_PERSONALIZED_PRICE_ID",
+    description: "Personalized Guru/Jupiter transit themes with practical planning suggestions and traditional context.",
+    features: ["Jupiter transit overview","Relevant chart houses","Learning and growth themes","Practical planning notes"],
+    sample: ["Growth themes","Learning focus","Reflection prompts"],
+    faqs: ["Does this promise gains or promotions?","Is an exact birth time useful?"]
+  },
+  {
+    id: "fortune-personalized",
+    purpose: "KUNDLI_REPORT",
+    name: "Fortune Report",
+    price: "INR 499",
+    amount: 499,
+    priceEnv: "STRIPE_FORTUNE_PERSONALIZED_PRICE_ID",
+    description: "A structured traditional astrology reading of opportunities, personal habits, strengths and caution areas.",
+    features: ["Birth-chart opportunities","Strength patterns","Timing context","Practical focus areas"],
+    sample: ["Strength and caution themes","Grounded planning tips","Reflection checklist"],
+    faqs: ["Are financial results guaranteed?","Is this professional financial advice?"]
   }
 ] as const;
 
