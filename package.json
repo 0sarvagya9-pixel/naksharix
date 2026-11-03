@@ -143,6 +143,7 @@
     "@prisma/config": {
       "deepmerge-ts": "^8.0.2"
     },
-    "follow-redirects": "1.16.1"
+    "follow-redirects": "1.16.2",
+    "qs": "6.16.1"
   }
 }
