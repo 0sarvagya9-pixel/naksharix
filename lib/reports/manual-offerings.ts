@@ -5,10 +5,13 @@ import { manualReports } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 export type PublicManualReportOffer={pricePaise:number;deliveryDays:number|null;note:string};
 export async function getPublishedManualReportOffers():Promise<Record<string,PublicManualReportOffer>>{
+ // All currently published report slugs have fixed canonical checkout prices.
+ // Avoid a needless DB read (and outage) when no manual-only offers remain.
+ const allowed=new Set(manualReports.filter(p=>!getManualReportCheckout(p.slug)).map(p=>p.slug));
+ if(!allowed.size)return {};
  try{
   const rows=await prisma.manualReportOffering.findMany({where:{available:true,pricePaise:{gte:100}},
    select:{reportSlug:true,pricePaise:true,deliveryDays:true,note:true}});
-  const allowed=new Set(manualReports.filter(p=>!getManualReportCheckout(p.slug)).map(p=>p.slug));
   return Object.fromEntries(rows.filter(p=>allowed.has(p.reportSlug)&&p.pricePaise!==null).map(p=>[
    p.reportSlug,{pricePaise:p.pricePaise!,deliveryDays:p.deliveryDays,note:p.note}
   ]));
