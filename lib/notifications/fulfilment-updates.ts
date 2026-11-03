@@ -33,6 +33,10 @@ const statusMessages: Record<FulfilmentKind, Record<string, string>> = {
   }
 };
 
+export function isNotifiableFulfilmentStatus(kind: FulfilmentKind, status: string): boolean {
+  return Object.prototype.hasOwnProperty.call(statusMessages[kind], status);
+}
+
 export async function notifyCustomerOfFulfilmentChange(input: {
   kind: FulfilmentKind;
   userId: string;
