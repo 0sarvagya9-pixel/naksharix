@@ -401,6 +401,207 @@ export const blogPosts = [
         "label": "Understand the birth chart"
       }
     ]
+  },
+  {
+    "slug": "how-to-book-puja-online",
+    "title": "How an Online Puja Request Works: Dates, Coordination and What to Confirm",
+    "description": "A practical guide to puja requests, published prices, preferred and confirmed dates, owner or Pandit coordination, and real completion evidence.",
+    "category": "puja",
+    "tags": [
+      "Puja booking",
+      "Puja calendar",
+      "Ceremony coordination"
+    ],
+    "body": "An online Puja request is not evidence that a priest has been assigned or a ceremony completed. Check the displayed fee, submit accurate preferences, and follow the confirmed service status.",
+    "sections": [
+      {
+        "heading": "Browse the ceremony before choosing a date",
+        "paragraphs": [
+          "Start by reading the ceremony description and any published service price. Similar names may cover different traditions, offerings, recitation lengths and local arrangements; a listing is not a universal contract for items or temple participation.",
+          "The public Puja calendar contains reference dates. These can help you plan questions, but a festival date is not a reserved ceremony slot. For location-sensitive observances, confirm the local Panchang rule and the intended time zone."
+        ]
+      },
+      {
+        "heading": "Preferred dates are requests, not confirmed appointments",
+        "paragraphs": [
+          "When submitting details, give the requested Puja type, city, accessible contact method and one or more workable dates. Keep personal Sankalp details private and do not post names or family information on public pages.",
+          "A coordinator should explicitly confirm the schedule before you rely on it. If no scheduled time is visible in your account, treat the request as awaiting coordination even when a service listing shows a Book Now link."
+        ]
+      },
+      {
+        "heading": "Owner coordination versus an external Pandit",
+        "paragraphs": [
+          "A Puja may be coordinated directly by the Naksharix owner team or with an approved external provider. These are different arrangements. An empty partner field does not necessarily mean your request has been lost, and an administrator-reviewed listing alone is not proof that a priest has accepted a specific date.",
+          "Before the ceremony, verify who will conduct it, the city and venue or remote format, the agreed scope, material responsibilities, duration and contact procedure. Do not assume that prasad, photographs, livestreaming or home delivery are included unless the service terms expressly say so."
+        ]
+      },
+      {
+        "heading": "Check your booking status and supporting evidence",
+        "paragraphs": [
+          "After signing in, My Puja Requests displays the current coordination status and any confirmed ceremony time. A status such as SCHEDULED or IN_PROGRESS reflects an owner record; it is not independent evidence that a ceremony was held.",
+          "Completion should be supported by a genuine note or evidence supplied by the responsible operator. If a completion link is present, verify that it concerns your requested ceremony before accepting it as proof. Do not rely on a spiritual outcome guarantee: religious practices are personal and cannot promise a particular medical, relationship or financial result."
+        ]
+      },
+      {
+        "heading": "If something changes",
+        "paragraphs": [
+          "If the requested date becomes impossible, contact support while the booking is still being coordinated. Keep a copy of any written confirmation and refer to the published service terms for cancellation, rescheduling or service limitations.",
+          "The best customer experience is one where you can see a clear status, know who is responsible for the next action and correct a misunderstanding before the agreed time. A transparent record matters more than a confident but unsupported promise of availability."
+        ]
+      }
+    ],
+    "related": [
+      {
+        "href": "/pujas",
+        "label": "Explore Puja descriptions"
+      },
+      {
+        "href": "/puja-calendar",
+        "label": "Read the Puja calendar"
+      },
+      {
+        "href": "/puja-bookings",
+        "label": "View My Puja Requests"
+      },
+      {
+        "href": "/panchang",
+        "label": "Understand the Panchang"
+      }
+    ]
+  },
+  {
+    "slug": "rudraksha-product-buying-checklist",
+    "title": "Buying Rudraksha and Spiritual Accessories Online: A Practical Checklist",
+    "description": "Check exact product identity, seller photographs, materials, shipping, care and return terms before choosing Rudraksha or a spiritual accessory.",
+    "category": "shop",
+    "tags": [
+      "Rudraksha",
+      "Spiritual Shop",
+      "Buyer Checklist"
+    ],
+    "body": "A spiritual product page should help a buyer identify the exact item and practical delivery terms. Symbolic claims are not proof of material authenticity or guaranteed effects.",
+    "sections": [
+      {
+        "heading": "Identify the exact item rather than a representative category image",
+        "paragraphs": [
+          "A Rudraksha bead, mala, yantra and prayer accessory are different products. Read the item name, size or dimension, count, materials and included components, not only a generic photograph of a product category.",
+          "Some websites use licensed reference photographs to illustrate the type of item sold. A credited reference picture can be legitimate educational imagery, but it is not evidence that the merchant possesses the exact SKU shown. Look for clearly labeled supplier-authorized or owner-taken product photos when exact appearance matters."
+        ]
+      },
+      {
+        "heading": "Understand bead counts and specialist claims",
+        "paragraphs": [
+          "A Mukhi count describes the visible traditional surface divisions of a Rudraksha bead. It does not by itself establish botanical species, origin, treatment, certification or a physical effect. If a seller advertises testing, ask who conducted it and whether the evidence clearly corresponds to the offered item.",
+          "Avoid relying on dramatic promises such as guaranteed luck, cure, job success or immediate relief. A faith-based object may have personal cultural or devotional meaning, but that meaning is separate from independently demonstrated medical, financial or legal outcomes."
+        ]
+      },
+      {
+        "heading": "Check price and delivery information before ordering",
+        "paragraphs": [
+          "The useful price is the final price shown for the chosen item and quantity, with any stated packing, shipping and applicable tax. If the delivery charge or service area has not been confirmed, do not assume that an estimated subtotal is the final payable total.",
+          "Check the merchant's delivery policy for geographic coverage, dispatch timing, courier tracking and undeliverable addresses. The order should stay traceable in your account, with a genuine carrier reference shown after dispatch rather than a fabricated tracking number."
+        ]
+      },
+      {
+        "heading": "Know the return and damage process",
+        "paragraphs": [
+          "Review the published refund, replacement and delivery terms before deciding. The ability to return a naturally variable bead or a used devotional object can depend on the item condition and disclosed category rules.",
+          "Inspect an arriving package for damage and compare it with the ordered SKU. If something differs materially, keep the order reference and supporting photos, then contact the merchant through the official support channel. Do not send OTPs, passwords or card details as proof of purchase."
+        ]
+      },
+      {
+        "heading": "Care and respectful use",
+        "paragraphs": [
+          "Avoid prolonged moisture, abrasive cleaning products and unnecessary physical strain when handling natural beads, strings or metal accessories. Follow any material-specific instructions supplied with the item; an elaborate ritual is not needed to validate a product warranty.",
+          "Choose for personal comfort, tradition and clear merchant evidence. Verify the product you are actually receiving, separate symbolism from factual material claims and make a practical decision based on price and return terms."
+        ]
+      }
+    ],
+    "related": [
+      {
+        "href": "/shop",
+        "label": "Browse the spiritual catalogue"
+      },
+      {
+        "href": "/orders",
+        "label": "Track a Shop order"
+      },
+      {
+        "href": "/delivery-policy",
+        "label": "Read delivery terms"
+      },
+      {
+        "href": "/refund-policy",
+        "label": "Understand refunds and returns"
+      }
+    ]
+  },
+  {
+    "slug": "personalized-astrology-report-delivery-guide",
+    "title": "Personalized Astrology Reports: What Happens After You Choose a Report?",
+    "description": "Understand transparent report pricing, birth-detail privacy, manual review, PDF generation and secure download without exaggerated delivery promises.",
+    "category": "kundli",
+    "tags": [
+      "Astrology Reports",
+      "PDF Kundli",
+      "Data Privacy"
+    ],
+    "body": "A personalized astrology report is a documented reading prepared from submitted details. A listed fee or automated PDF template is not evidence of expert review or guaranteed outcomes.",
+    "sections": [
+      {
+        "heading": "Choose the report whose scope matches your question",
+        "paragraphs": [
+          "Different report names cover distinct topics: a Kundli explanation, compatibility summary, transit overview and numerology reflection are not interchangeable. Read the description and expected components before ordering instead of choosing solely by a dramatic headline.",
+          "A published fee should be visible before checkout. If your goal is simply to understand chart vocabulary, free educational guides and calculators may be sufficient; purchasing is not necessary to learn the basics."
+        ]
+      },
+      {
+        "heading": "Supply birth details with care",
+        "paragraphs": [
+          "A chart may require a birth date, local time, birthplace and the matching time zone. The ascendant and some house positions can change when input time is uncertain, especially near a boundary. Record what you know and distinguish an estimate from a verified record.",
+          "Birth details and report requests are personal. Use the signed-in private submission form, not a public comment or social media post. Consult the privacy policy for how account and astrology information is handled, and avoid entering anyone else's private data without their permission."
+        ]
+      },
+      {
+        "heading": "Generation and human review are separate things",
+        "paragraphs": [
+          "A PDF file can be generated automatically from calculations and predefined explanatory sections, while an operator may separately review the result or respond to a specific question. A generated document should not be described as independently reviewed unless that review actually happened.",
+          "If a specialist report promises manual preparation, the assigned operator and content scope should be verified rather than assumed. A report should clearly identify calculation conventions where relevant and acknowledge limitations rather than offer deterministic predictions."
+        ]
+      },
+      {
+        "heading": "Download and delivery are different checkpoints",
+        "paragraphs": [
+          "After a report is genuinely generated, stored and authorized for the correct account, a secure download may become available. This is distinct from whether an email provider accepted a delivery notification or whether that message reached the recipient's inbox.",
+          "Keep your account credentials private and open report downloads from the signed-in website. If you do not receive an email, first check your own report history and the spam folder, then contact support with the report reference but without a password or payment credentials."
+        ]
+      },
+      {
+        "heading": "Read interpretations responsibly",
+        "paragraphs": [
+          "Astrological guidance is traditionally interpretative, not an instrument that can guarantee medical, relationship, legal or investment outcomes. A useful document should help you formulate questions and reflect on choices rather than frighten you into buying more services.",
+          "When comparing reports, look at the actual input assumptions, chart calculations, explanations, useful structure and corrections process. A longer PDF or a high price is not by itself proof of more accurate predictions or of a qualified human review."
+        ]
+      }
+    ],
+    "related": [
+      {
+        "href": "/reports",
+        "label": "Explore report descriptions and fees"
+      },
+      {
+        "href": "/learn/kundli-explained",
+        "label": "Learn Kundli terms for free"
+      },
+      {
+        "href": "/privacy-policy",
+        "label": "Review personal-data privacy"
+      },
+      {
+        "href": "/support",
+        "label": "Get account support"
+      }
+    ]
   }
 ] as const satisfies readonly EditorialPost[];
 
@@ -429,6 +630,16 @@ export const blogCategories = [
     "slug": "panchang",
     "name": "Panchang",
     "description": "Tithi, nakshatra, rahu kaal, choghadiya, festivals, muhurat, and Hindu calendar guidance."
+  },
+  {
+    "slug": "puja",
+    "name": "Puja and Traditions",
+    "description": "Practical Puja preparation, local calendar rules and transparent ceremony coordination."
+  },
+  {
+    "slug": "shop",
+    "name": "Spiritual Shop Guide",
+    "description": "Product identity, image provenance, delivery terms and responsible buying guidance."
   }
 ] as const;
 

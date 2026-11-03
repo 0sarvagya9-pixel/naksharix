@@ -83,25 +83,35 @@ const article = read("app/blog/[slug]/page.tsx");
 const learning = read("app/learn/page.tsx");
 for (const slug of [
   "daily-horoscope-personalization", "kundli-matching-score", "tarot-reflection",
-  "lagna-vs-rashi", "panchang-five-elements", "lo-shu-grid-beginners", "vimshottari-dasha-timeline"
+  "lagna-vs-rashi", "panchang-five-elements", "lo-shu-grid-beginners", "vimshottari-dasha-timeline",
+  "how-to-book-puja-online", "rudraksha-product-buying-checklist", "personalized-astrology-report-delivery-guide"
 ]) {
   assert.ok(editorial.includes('"' + slug + '"'), "Missing substantive editorial guide: " + slug);
 }
 assert.ok(editorial.includes("sections: readonly EditorialSection[]") &&
   editorial.includes("as const satisfies readonly EditorialPost[]") &&
-  (editorial.match(/"paragraphs": \[/g) || []).length >= 28,
+  (editorial.match(/"paragraphs": \[/g) || []).length >= 43,
   "Guides must have multiple distinct explanatory paragraphs instead of one thin teaser");
 assert.ok(article.includes("post.sections.map") && article.includes("post.related.map") &&
   article.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)") &&
   article.includes('inLanguage: "en"') && article.includes("isAccessibleForFree: true"),
   "Article semantic headings, free tools and canonical JSON-LD absent");
+assert.ok(learning.includes("/blog/how-to-book-puja-online") &&
+  learning.includes("/blog/rudraksha-product-buying-checklist") &&
+  learning.includes("/blog/personalized-astrology-report-delivery-guide") &&
+  read("app/shop/page.tsx").includes("/blog/rudraksha-product-buying-checklist") &&
+  read("app/reports/page.tsx").includes("/blog/personalized-astrology-report-delivery-guide"),
+  "Practical non-payment guides must have genuine internal navigation");
+assert.ok(editorial.includes('"slug": "puja"') && editorial.includes('"slug": "shop"') &&
+  editorial.includes("not evidence") && editorial.includes("independent evidence"),
+  "Shop and Puja guides must distinguish spiritual symbolism from actual fulfilment proof");
 assert.ok(learning.includes("/blog/lagna-vs-rashi") && learning.includes("/blog/panchang-five-elements"),
   "Learning library must link the new high-intent articles");
 assert.ok(sitemap.includes("blogPosts.map((post)"), "Blog articles must stay discoverable in the sitemap");
 assert.ok(editorial.includes("not a guarantee") && editorial.includes("not validated") &&
   editorial.includes("qualified professional advice"),
   "Editorial content lacks explicit uncertainty or responsible use safeguards");
-console.log("EDITORIAL_GROWTH_QA=PASS;ORIGINAL_GUIDES=7;SECTIONS=28;BASIC_INTERNAL_LINKS=PASS");
+console.log("EDITORIAL_GROWTH_QA=PASS;ORIGINAL_GUIDES=10;SECTIONS=43;BASIC_INTERNAL_LINKS=PASS");
 
 
 // Search discovery must submit only public educational URLs after production release identity.

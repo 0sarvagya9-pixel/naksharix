@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { seo } from "@/lib/seo";
 import { ReportsContent } from "@/components/reports-content";
 import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
@@ -19,5 +20,8 @@ export default async function ReportsPage() {
     caption="Explore available traditional chart, matching and numerology report topics. Availability and any applicable pricing are shown in the report workflow."
     image="/naksharix/editorial-reports.svg" imageAlt="Illustrated birth-chart report"
     link="/kundli" linkLabel="Begin with a free Kundli" />
+    <div className="mx-auto max-w-6xl px-5 py-4 text-sm text-[#573d48]">
+      Before choosing a personalized report, <Link href="/blog/personalized-astrology-report-delivery-guide" className="font-semibold underline underline-offset-4">read how birth details, human review, PDF generation and secure delivery differ</Link>.
+    </div>
     <ReportsContent manualOfferings={manualOfferings}/></>;
 }
