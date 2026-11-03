@@ -117,6 +117,12 @@ console.log("EDITORIAL_GROWTH_QA=PASS;ORIGINAL_GUIDES=10;SECTIONS=43;BASIC_INTER
 // Search discovery must submit only public educational URLs after production release identity.
 const indexNow = read("scripts/seo/submit-indexnow.mjs");
 const indexNowFlow = read(".github/workflows/seo-indexnow.yml");
+for (const slug of [
+  "how-to-book-puja-online","rudraksha-product-buying-checklist",
+  "personalized-astrology-report-delivery-guide"
+]) {
+  assert.ok(indexNow.includes('"/blog/' + slug + '"'), "Newly published original guide missing from indexable discovery: " + slug);
+}
 const indexNowKey = "ef1d79191967d8cf6d2404e50e8017c1";
 assert.equal(read("public/" + indexNowKey + ".txt").trim(), indexNowKey, "IndexNow public proof mismatch");
 for (const code of [
