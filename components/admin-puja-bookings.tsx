@@ -5,6 +5,9 @@ type Partner={id:string;name:string;region:string};
 type Booking={id:string;userId:string;topicId:string;quotedPricePaise:number;preferredDate:string;city:string;
  devoteeName:string;gotra:string|null;sankalpNote:string;customerPhone:string;status:string;
  partnerId:string|null;scheduledAt:string|null;adminNote:string;evidenceUrl:string|null;version:number;createdAt:string};
+const nextStatuses:Record<string,string[]>={REQUESTED:["CONFIRMED","CANCELED","REJECTED"],
+ CONFIRMED:["SCHEDULED","CANCELED"],SCHEDULED:["IN_PROGRESS","CANCELED"],
+ IN_PROGRESS:["COMPLETED"],COMPLETED:[],CANCELED:[],REJECTED:[]};
 export function AdminPujaBookings(){
  const [bookings,setBookings]=useState<Booking[]>([]);
  const [partners,setPartners]=useState<Partner[]>([]);
@@ -23,7 +26,9 @@ export function AdminPujaBookings(){
       scheduledAt:editing.scheduledAt,adminNote:editing.adminNote,evidenceUrl:editing.evidenceUrl})});
    const result=await response.json();if(!response.ok)throw Error(result.error||"Unable to save");
    setBookings(rows=>rows.map(row=>row.id===editing.id?result.data.booking:row));
-   setEditing(null);setNotice("Booking updated. Payment status is managed separately by Razorpay.");
+   setEditing(null);setNotice(result.data.notification?.outcome==="provider_accepted"
+    ? "Booking status saved. Email accepted by provider; inbox delivery is not guaranteed."
+    : "Booking status saved. The customer can track it in My Puja Requests; email delivery was not confirmed.");
   }catch(e){setError(e instanceof Error?e.message:"Could not update booking")}
   finally{setBusy(false)}
  }
@@ -36,7 +41,10 @@ export function AdminPujaBookings(){
     <h2 className="text-xl font-bold">{editing.topicId} — #{editing.id.slice(0,12)}</h2>
     <label className="block text-sm font-bold">Status
       <select value={editing.status} onChange={e=>setEditing({...editing,status:e.target.value})} className="mt-2 block w-full rounded-lg border p-3">
-       {["REQUESTED","CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED","CANCELED","REJECTED"].map(x=><option key={x}>{x}</option>)}
+       {(()=>{
+         const current=bookings.find(row=>row.id===editing.id)?.status??editing.status;
+         return [current,...(nextStatuses[current]??[])].map(x=><option key={x} value={x}>{x}</option>);
+       })()}
       </select>
     </label>
     <label className="block text-sm font-bold">External Pandit/Puja partner (optional)
@@ -64,7 +72,7 @@ export function AdminPujaBookings(){
      <p className="font-bold text-[#7e2b3c]">{b.topicId} · {b.status}</p>
      <p className="mt-2 text-sm">Devotee: {b.devoteeName} · {b.city} · {b.customerPhone}</p>
      <p className="mt-2 text-sm">Requested date: {b.preferredDate.slice(0,10)} · Fee: ₹{(b.quotedPricePaise/100).toFixed(2)}</p>
-     <p className="mt-2 text-sm">Confirmed: {b.scheduledAt||"Not scheduled"} · Partner {b.partnerId||"Not assigned"}</p>
+     <p className="mt-2 text-sm">Confirmed: {b.scheduledAt?new Date(b.scheduledAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"}):"Not scheduled"} · Coordinator: {b.partnerId?"Approved external partner":"Naksharix owner team"}</p>
      <details className="mt-3 rounded-lg bg-[#fff7ed] p-3 text-xs"><summary className="cursor-pointer font-bold">Private Sankalp details</summary>
       <p className="mt-3">Gotra: {b.gotra||"Not supplied"}</p><p className="mt-2 whitespace-pre-wrap">{b.sankalpNote}</p>
      </details>
