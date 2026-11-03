@@ -906,29 +906,27 @@ try {
     }
   });
 
-  await check("manual report fee publication preserves gateway amounts and can be unpublished", async () => {
+  await check("gateway-priced report catalogue rejects manual admin price overrides", async () => {
     const endpoint="/api/admin/manual-report-offerings";
     assert.equal((await req(endpoint)).status,403);
     assert.equal((await req(endpoint,{headers:{cookie:userCookie}})).status,403);
-    const offer={reportSlug:"love-report",pricePaise:159900,available:true,deliveryDays:5,
-      note:"Synthetic manual specialist report rate; does not accept online payment"};
-    const blocked=await post(endpoint,{...offer,reportSlug:"premium-kundli"},adminCookie,"PUT");
-    assert.equal(blocked.status,422);
-    const missing=await post(endpoint,{...offer,pricePaise:null},adminCookie,"PUT");
-    assert.equal(missing.status,422);
-    try{
-      const publish=await post(endpoint,offer,adminCookie,"PUT");
-      assert.equal(publish.status,200,await publish.text());
-      const reportPage=await req("/reports");
-      assert.equal(reportPage.status,200);
-      assert.match(await reportPage.text(),/₹1,599/);
-      const remove=await post(endpoint,{...offer,available:false},adminCookie,"PUT");
-      assert.equal(remove.status,200,await remove.text());
-      const after=await req("/reports");assert.equal(after.status,200);
-      assert.doesNotMatch(await after.text(),/₹1,599/);
-    }finally{
-      await prisma.manualReportOffering.deleteMany({where:{reportSlug:"love-report"}});
+    const attempt={reportSlug:"love-report",pricePaise:159900,available:true,deliveryDays:5,
+      note:"Synthetic override must never replace canonical merchant charge"};
+    // All 15 published report types now have canonical gateway prices; the
+    // legacy manual editor must not override any of them, even for admins.
+    for(const slug of ["premium-kundli","love-report","baby-name-report","sade-sati-report","fortune-report"]){
+      const blocked=await post(endpoint,{...attempt,reportSlug:slug},adminCookie,"PUT");
+      assert.equal(blocked.status,422,"Manual editor unexpectedly repriced "+slug+": "+await blocked.text());
     }
+    const missing=await post(endpoint,{...attempt,pricePaise:null},adminCookie,"PUT");
+    assert.equal(missing.status,422);
+    const reportPage=await req("/reports");
+    assert.equal(reportPage.status,200);
+    const html=await reportPage.text();
+    assert.match(html,/INR 499/);
+    assert.doesNotMatch(html,/₹1,599/);
+    const unauthorizedOffer=await prisma.manualReportOffering.findFirst({where:{reportSlug:"love-report"}});
+    assert.equal(unauthorizedOffer,null,"Admin price override must never persist");
   });
 
   await check("unpaid paid-report request blocks PDF generation and email delivery", async () => {
