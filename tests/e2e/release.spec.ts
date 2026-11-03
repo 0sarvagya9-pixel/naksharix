@@ -282,6 +282,9 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("button", { name: /^Pay INR [0-9,]+$/ })).toHaveCount(15);
     await expect(page.getByText("Fee confirmation required")).toHaveCount(0);
     await expect(page.getByText("15 clearly priced personalized reports")).toBeVisible();
+    await page.getByRole("button", { name: "Pay INR 399" }).first().click();
+    await expect(page).toHaveURL(/\\/login\\?redirectTo=%2Freports/i);
+    await expect(page.getByRole("heading", { name: "Login to Naksharix" })).toBeVisible();
   });
 
   test("pricing exposes only active services", async ({ page }) => {
