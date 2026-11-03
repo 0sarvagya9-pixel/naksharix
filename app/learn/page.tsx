@@ -112,7 +112,10 @@ export default function LearnPage() {
                 { href: "/blog/panchang-five-elements", label: "The five elements of Panchang" },
                 { href: "/blog/vimshottari-dasha-timeline", label: "How a Dasha timeline works" },
                 { href: "/blog/lo-shu-grid-beginners", label: "Understanding the Lo Shu grid" },
-                { href: "/blog/tarot-reflection", label: "Tarot questions for reflection" }
+                { href: "/blog/tarot-reflection", label: "Tarot questions for reflection" },
+                { href: "/blog/how-to-book-puja-online", label: "Puja requests: preferred dates versus confirmed ceremonies" },
+                { href: "/blog/rudraksha-product-buying-checklist", label: "Practical Rudraksha product and delivery checklist" },
+                { href: "/blog/personalized-astrology-report-delivery-guide", label: "Personalized reports: privacy, review and secure PDF delivery" }
               ].map((guide) => (
                 <li key={guide.href}>
                   <Link href={guide.href} className="block rounded-xl border border-[#d7ab73] p-4 text-sm font-semibold text-[#532d34] underline underline-offset-4 hover:bg-[#ffefd8]">{guide.label}</Link>
