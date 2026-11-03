@@ -16,6 +16,9 @@ export const DISCOVERY_ROUTES = Object.freeze([
   "/blog/panchang-five-elements",
   "/blog/lo-shu-grid-beginners",
   "/blog/vimshottari-dasha-timeline",
+  "/blog/how-to-book-puja-online",
+  "/blog/rudraksha-product-buying-checklist",
+  "/blog/personalized-astrology-report-delivery-guide",
   "/blog",
   "/learn"
 ]);
