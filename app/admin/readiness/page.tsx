@@ -88,7 +88,7 @@ export default async function AdminReadinessPage() {
     {
       name: "Public Shop scope",
       status: "ok",
-      note: "Server-backed product catalogue, draft cart and unpaid owner-confirmed order requests exist. Automatic Shop payment checkout remains disabled."
+      note: "Server-backed product catalogue, cart, owner-managed order tracking and fulfilment statuses are implemented. This data check does not certify fulfilment or courier delivery."
     },
     {
       name: "Account verification and release parity",
@@ -183,7 +183,7 @@ export default async function AdminReadinessPage() {
             ))}
           </div>
           <p className="mt-5 text-sm font-semibold text-[#f9d18c]">
-            Automatic Shop/Puja payments: DISABLED pending independently verified fulfilment, refunds and payment-provider acceptance.
+            Fulfilment acceptance: confirm actual item dispatch, delivery evidence, Puja completion and customer notification receipt. Source checks alone cannot certify real-world delivery.
           </p>
         </section>
         <Card className="mt-6 glass">
