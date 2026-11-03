@@ -117,8 +117,17 @@ const reportCopy = {
   }
 } as const;
 
-export function localizePaidReport(report: PaidReport, locale: Locale) {
-  return reportCopy[locale][report.id] ?? reportCopy.en[report.id];
+type LocalizedPaidCopy = { name: string; description: string; features: readonly string[] };
+
+export function localizePaidReport(report: PaidReport, locale: Locale): LocalizedPaidCopy {
+  // New canonical report IDs need not have a handcrafted legacy translation.
+  // Prefer an existing localized string, then English, then the actual product
+  // description. Never index an older 7-report locale map unsafely.
+  const localized = reportCopy[locale] as Partial<Record<PaidReport["id"], LocalizedPaidCopy>>;
+  const english = reportCopy.en as Partial<Record<PaidReport["id"], LocalizedPaidCopy>>;
+  return localized[report.id] ?? english[report.id] ?? {
+    name: report.name, description: report.description, features: report.features
+  };
 }
 
 const detailItems = {
@@ -186,5 +195,6 @@ const detailItems = {
 } as const;
 
 export function localizePaidReportDetailItems(report: PaidReport, locale: Locale) {
-  return detailItems[locale][report.id] ?? detailItems.en[report.id];
+  const localized = detailItems[locale] as Partial<Record<PaidReport["id"], { sample: readonly string[]; faqs: readonly string[] }>>;
+  return localized[report.id] ?? detailItems.en[report.id];
 }
