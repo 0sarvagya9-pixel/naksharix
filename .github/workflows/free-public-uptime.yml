@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run public synthetic health and AdSense seller checks
+      - name: Verify 14 live commerce, report, DNS-indexing and AdSense public health paths
         id: check
         continue-on-error: true
         run: node scripts/ops/check-public-endpoints.mjs
