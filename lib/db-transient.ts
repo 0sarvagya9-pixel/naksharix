@@ -12,6 +12,22 @@ export function isTransientDatabaseError(error: unknown): boolean {
     && /can't reach database server|server has closed|connection refused|connection timed out|connect timed out|ECONNREFUSED|ENOTFOUND|EAI_AGAIN/i.test(value.message);
 }
 
+// Respect explicit operator values. Only tune cold-start timeouts for Neon.
+// Never log or return the connection URL to clients.
+export function neonRuntimeDatabaseUrl(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw);
+    if (!["postgres:", "postgresql:"].includes(url.protocol) ||
+        !url.hostname.endsWith(".neon.tech")) return undefined;
+    if (!url.searchParams.has("connect_timeout")) url.searchParams.set("connect_timeout", "15");
+    if (!url.searchParams.has("pool_timeout")) url.searchParams.set("pool_timeout", "15");
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 // A single retry is permitted for SELECT-only operations, never for mutations.
 export async function retryTransientDatabaseRead<T>(read: () => Promise<T>): Promise<T> {
   try {
