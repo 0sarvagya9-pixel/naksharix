@@ -24,8 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
+      # GitHub schedule events execute on default main. Check out the current
+      # authoritative production source rather than old main branch files.
       - uses: actions/checkout@v4
         with:
+          ref: complete-production-polish
           show-progress: false
           persist-credentials: false
       - uses: actions/setup-node@v4
