@@ -52,4 +52,8 @@ assert.ok(order.includes('getPaidReport(body.reportId)')&&order.includes("amount
 assert.ok(request.includes("payment.status === PaymentStatus.PAID")&&request.includes("metadata.reportId === checkout.reportId"),"Paid detail form must bind order to report");
 assert.ok(create.includes("payment.status === PaymentStatus.PAID")&&create.includes("metadata.reportId === checkout.reportId"),"Creation must verify capture ownership");
 assert.ok(index.includes("15 clearly priced personalized reports"),"English customer message advertises accurate count");
+const manualOfferSource=read("lib/reports/manual-offerings.ts");
+assert.ok(manualOfferSource.includes("if(!allowed.size)return {};") &&
+  manualOfferSource.indexOf("if(!allowed.size)return {};") < manualOfferSource.indexOf("prisma.manualReportOffering.findMany"),
+  "Fixed price catalogue must render without a database read of irrelevant manual offers");
 console.log("REPORTS_COMPLETE_PRICING=PASS;15_OF_15_PUBLISHED_PRICED=TRUE;ONE_RAZORPAY_MERCHANT=TRUE;PAYMENT_IDENTITY_UNIQUE=TRUE;SERVER_PRICE_VERIFIED=TRUE");
