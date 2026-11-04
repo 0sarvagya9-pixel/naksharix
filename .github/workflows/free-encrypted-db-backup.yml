@@ -1,110 +1,82 @@
-name: NAKSHARIX Free Encrypted PostgreSQL Backup
+name: NAKSHARIX Encrypted Recovery Watch
 
-# No plaintext DB backup is ever uploaded. Protected credential and separate
-# public encryption recipient must be configured before first successful run.
+# Production-owned Vercel cron performs read-only export, AES-GCM private upload,
+# download verification and isolated restore. This independent job verifies its
+# fresh receipt; configuration alone never qualifies as a successful backup.
 on:
   schedule:
-    - cron: '43 2 * * *'
+    - cron: '43 5 * * *'
   workflow_dispatch:
-  # Exercise the fail-closed backup and alert path when this workflow changes on main.
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/free-encrypted-db-backup.yml'
-
+    paths: ['.github/workflows/free-encrypted-db-backup.yml']
 permissions:
   contents: read
-
 concurrency:
   group: naksharix-free-db-backup
   cancel-in-progress: false
-
 jobs:
-  encrypted-pg-dump:
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    env:
-      BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
-      BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
-    steps:
-      - name: Check protected inputs before accessing production
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -z "${BACKUP_DATABASE_URL:-}" ] || [ -z "${BACKUP_AGE_RECIPIENT:-}" ]; then
-            echo "::error::Missing protected backup database URL or age public recipient; no backup attempted."
-            exit 1
-          fi
-          if [[ "$BACKUP_AGE_RECIPIENT" != age1* ]] || [ "${#BACKUP_AGE_RECIPIENT}" -lt 55 ]; then
-            echo "::error::Invalid age recipient; refusing to export any database data."
-            exit 1
-          fi
-      - name: Install free age encryption tool
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq age
-      - name: Stream PostgreSQL 17 custom-format dump directly into age encryption
-        shell: bash
-        run: |
-          set -euo pipefail
-          umask 077
-          mkdir -p encrypted-backup
-          # The DB URL stays in a masked GitHub Actions environment variable.
-          # Never provide the URL in source, logs, arguments or artifact names.
-          docker run --rm --network host --env BACKUP_DATABASE_URL postgres:17-alpine \
-            sh -ec 'exec pg_dump --dbname="$BACKUP_DATABASE_URL" --format=custom --no-owner --no-privileges' \
-            | age -r "$BACKUP_AGE_RECIPIENT" -o encrypted-backup/naksharix.dump.age
-          test -s encrypted-backup/naksharix.dump.age
-          grep -aq '^age-encryption.org/v1' encrypted-backup/naksharix.dump.age || {
-            echo "::error::Missing encrypted format header; no artifact will be uploaded."
-            exit 1
-          }
-          echo "ENCRYPTED_BACKUP=CREATED;PLAIN_TEXT_ARTIFACT=NO"
-      - name: Upload ciphertext only, retained seven days
-        uses: actions/upload-artifact@v4
-        with:
-          name: naksharix-encrypted-postgres-${{ github.run_id }}
-          path: encrypted-backup/*.dump.age
-          retention-days: 7
-          if-no-files-found: error
-      - name: Assert artifact directory contains no plaintext files
-        shell: bash
-        run: |
-          set -euo pipefail
-          if find encrypted-backup -type f ! -name '*.dump.age' | grep -q .; then
-            echo "::error::Plaintext detected in artifact directory."
-            exit 1
-          fi
-
-  notify-backup-state:
-    name: Surface encrypted-backup job failures without sharing credentials
-    needs: encrypted-pg-dump
-    if: always()
-    runs-on: ubuntu-latest
+  verified-recovery:
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
+      contents: read
       issues: write
     steps:
-      - name: Open one issue on backup failure, close only after a successful encrypted upload
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require a fresh encrypted and independently restored archive
+        id: recovery
+        continue-on-error: true
         shell: bash
+        run: |
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict';
+          let verified=false;
+          for(let attempt=0;attempt<3;attempt++) {
+            try {
+              const response=await fetch('https://www.naksharix.com/api/ops/backup-status',{
+                cache:'no-store',redirect:'error',signal:AbortSignal.timeout(20000)
+              });
+              assert.equal(response.status,200);
+              const {data}=await response.json();
+              assert.equal(data.configured,true);
+              assert.equal(data.operational,true);
+              assert.equal(data.encrypted,true);
+              assert.equal(data.restoreVerified,true);
+              const age=Date.now()-Date.parse(data.lastSuccessfulAt);
+              assert.ok(Number.isFinite(age)&&age>=-300000&&age<36*3600000);
+              console.log('ENCRYPTED_RECOVERY=PASS;RESTORE=VERIFIED;FRESHNESS_LT_36H=YES');
+              console.log('LAST_VERIFIED_AT='+data.lastSuccessfulAt);
+              verified=true;break;
+            } catch {
+              if(attempt<2)await new Promise(resolve=>setTimeout(resolve,10000));
+            }
+          }
+          if(!verified){console.error('ENCRYPTED_RECOVERY=FAIL;NO_FRESH_VERIFIED_RECEIPT');process.exitCode=1;}
+          JS
+      - name: Open one incident or close only after verified recovery
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          BACKUP_RESULT: ${{ needs.encrypted-pg-dump.result }}
+          CHECK_RESULT: ${{ steps.recovery.outcome }}
+        shell: bash
         run: |
           set -euo pipefail
-          incident_title='[backup] NAKSHARIX encrypted backup job failed'
-          issue_number=$(gh issue list --state open --limit 100 --json number,title \
-            --jq '.[] | select(.title == "[backup] NAKSHARIX encrypted backup job failed") | .number' | head -n 1)
-          if [ "$BACKUP_RESULT" = "success" ]; then
-            if [ -n "$issue_number" ]; then
-              gh issue comment "$issue_number" --body 'The latest scheduled workflow uploaded an encrypted PostgreSQL artifact. Independent off-site retention and a clean-room restore are still separate acceptance gates.'
-              gh issue close "$issue_number" --reason completed
+          title='[backup] NAKSHARIX encrypted backup job failed'
+          incident=$(gh issue list --state open --limit 100 --json number,title --jq '.[] | select(.title == "[backup] NAKSHARIX encrypted backup job failed") | .number' | head -n 1)
+          if [ "$CHECK_RESULT" = success ]; then
+            if [ -n "$incident" ]; then
+              gh issue comment "$incident" --body 'Verified a fresh production recovery receipt: read-only PostgreSQL export, private AES-256-GCM archive, downloaded ciphertext validation and successful isolated restore. The deployment-owned daily job retains seven days of archives. This independent checker has no database credentials or decryption keys.'
+              gh issue close "$incident" --reason completed
             fi
-          elif [ -z "$issue_number" ]; then
-            gh issue create --title "$incident_title" --body 'The NAKSHARIX scheduled encrypted PostgreSQL backup did not succeed. Inspect this workflow run. Confirm that BACKUP_DATABASE_URL exists as a protected GitHub Actions secret and BACKUP_AGE_RECIPIENT exists as a public age1 repository variable, without sharing either credential or the offline decryption key in issues or logs. A Neon recovery branch is not an independent encrypted off-site backup. No successful backup is claimed.'
+          elif [ -n "$incident" ]; then
+            gh issue comment "$incident" --body 'No fresh verified encrypted recovery receipt was available after three checks. Inspect production recovery status and protected configuration. Do not publish database credentials, keys or customer data.'
+          else
+            gh issue create --title "$title" --body 'The scheduled recovery monitor could not verify an encrypted archive and isolated restore within 36 hours. Configuration or an in-provider recovery branch is not sufficient. Inspect the deployment-owned daily recovery job; preserve existing archives and the offline key.'
           fi
+      - name: Fail closed on stale or missing recovery evidence
+        if: always() && steps.recovery.outcome != 'success'
+        run: exit 1
