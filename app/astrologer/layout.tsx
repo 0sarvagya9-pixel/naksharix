@@ -15,7 +15,7 @@ export default async function AstrologerLayout({ children }: { children: React.R
   const effectiveRole = user.effectiveRole ?? "USER";
   if (!["ASTROLOGER", "CONSULTANT"].includes(effectiveRole)) redirect("/dashboard");
   return (
-    <div className="astrologer-portal mx-auto flex min-h-screen w-full max-w-[1680px] flex-col lg:flex-row lg:items-start">
+    <div className="astrologer-portal flex min-h-screen w-full flex-col lg:flex-row lg:items-start">
       <AstrologerNavbar />
       <div className="min-w-0 w-full flex-1">{children}</div>
     </div>

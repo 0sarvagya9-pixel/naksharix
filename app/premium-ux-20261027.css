@@ -42,3 +42,73 @@ body.naksh-page-bg header button:focus-visible { outline:3px solid #c69139;outli
   .nx-ed-hero-wash {background:linear-gradient(90deg,rgba(37,15,23,.96),rgba(52,18,30,.79))!important;}
   .nx-ed-hero h1 {font-size:clamp(2.3rem,7vw,4rem);}
 }
+
+
+/* Account/consultation contrast tuning, 2026-11-04. Keep all overrides
+   scoped to the public consultation/home hero, not authenticated screens. */
+.nx-reference-promo {
+  background: #78283d;
+  color: #fff8ee;
+  border-bottom: 1px solid rgba(255, 227, 183, .22);
+}
+.nx-reference-promo a {
+  color: #ffe1ab;
+  text-decoration-thickness: 1.5px;
+}
+.nx-ed-hero {
+  background: #251b29;
+}
+.nx-ed-hero-wash {
+  background:
+    linear-gradient(90deg, rgba(31, 17, 33, .98) 0%, rgba(48, 20, 37, .94) 34%, rgba(60, 28, 41, .60) 66%, rgba(39, 23, 35, .26) 100%),
+    linear-gradient(0deg, rgba(28, 16, 30, .38), transparent 45%) !important;
+}
+.nx-ed-photo {
+  filter: saturate(.87) contrast(1.08) brightness(.96);
+}
+.nx-ed-hero h1 {
+  text-shadow: 0 6px 26px rgba(20, 11, 21, .40);
+}
+.nx-ed-hero h1 em {
+  background: linear-gradient(105deg, #fff4dc, #f2cb8d 65%, #ffe8b7);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+.nx-ed-hero-copy > p {
+  color: #f9eee8;
+  text-shadow: 0 3px 18px rgba(16, 10, 18, .40);
+}
+.nx-ed-button-gold {
+  background: #f0c47e;
+  color: #482535 !important;
+  border: 1px solid #f7d59b;
+}
+.nx-ed-button-gold:hover {
+  background: #ffe1ad;
+  box-shadow: 0 16px 32px rgba(12, 8, 17, .24);
+}
+.nx-ed-button-outline {
+  background: rgba(33, 18, 31, .30);
+  border-color: rgba(255, 244, 227, .78);
+  color: #fffaf4 !important;
+}
+.nx-ed-button-outline:hover {
+  background: rgba(255, 246, 229, .16);
+}
+.nx-ed-hero a:focus-visible,
+.nx-reference-promo a:focus-visible {
+  outline: 3px solid #ffda89;
+  outline-offset: 4px;
+}
+@media (max-width: 850px) {
+  .nx-ed-hero-wash {
+    background: linear-gradient(90deg, rgba(33, 16, 32, .98), rgba(52, 22, 37, .85)) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nx-ed-hero .nx-ed-photo,
+  .nx-ed-hero .nx-ed-button {
+    animation: none !important;
+    transition: none !important;
+  }
+}
