@@ -54,6 +54,7 @@ export async function verifyLiveSeo(fetcher = fetch, origin = CANONICAL_ORIGIN) 
   try {
     const { response, text } = await get("/sitemap.xml");
     const urls = [...text.matchAll(/<loc>\\s*(https:\/\/[^<\\s]+)\\s*<\/loc>/g)].map(x => x[1]);
+    if (process.env.NAKSHARIX_SEO_DIAG === "1") console.log("SEO_XML_CHECK=" + JSON.stringify({ status: response.status, mime: response.headers?.get?.("content-type"), bytes: text.length, locs: urls.length, locAt: text.indexOf("<loc>"), prefix: text.slice(0, 100) }));
     const unique = new Set(urls);
     const bad = urls.filter(url => {
       try {
@@ -76,6 +77,7 @@ export async function verifyLiveSeo(fetcher = fetch, origin = CANONICAL_ORIGIN) 
     try {
       const { response, text } = await get(path);
       const head = text.split(/<\/head>/i)[0];
+      if (process.env.NAKSHARIX_SEO_DIAG === "1") console.log("SEO_HTML_CHECK=" + JSON.stringify({ path, status: response.status, mime: response.headers?.get?.("content-type"), bytes: text.length, titleAt: text.search(/<title\\b/i), headEndAt: text.search(/<\\/head>/i), prefix: text.slice(0, 100) }));
       const canonical = attrValue(locateTag(head, "link", "rel", "canonical"), "href");
       const robots = attrValue(locateTag(head, "meta", "name", "robots"), "content") ?? "";
       const headerRobots = response.headers?.get?.("x-robots-tag") ?? "";
