@@ -25,6 +25,7 @@ for (const token of [
 assert.ok(shell.includes("getCurrentUser()") &&
   shell.includes('["ASTROLOGER", "CONSULTANT"].includes(effectiveRole)') &&
   shell.includes('redirect("/dashboard")') &&
+  shell.includes("robots: { index: false, follow: false }") &&
   shell.includes('<div className="min-w-0 w-full flex-1">'),
   "Sidebar layout must retain owner-only role gate and a responsive content column");
 
