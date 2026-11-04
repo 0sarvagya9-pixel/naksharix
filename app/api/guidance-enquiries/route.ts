@@ -69,8 +69,12 @@ export async function POST(request: Request) {
       select: { id: true, status: true, subject: true, createdAt: true }
     });
 
+    // The enquiry is a genuine support ticket, not a confirmed ceremony or paid service.
+    // Mail is fail-soft and never includes the private question or client details.
+    const notification = await notifySupportTeamOfNewTicket(ticket.id);
     return ok({
       ticket,
+      notification,
       reviewRequired: true,
       expertAssigned: false,
       bookingCreated: false,
