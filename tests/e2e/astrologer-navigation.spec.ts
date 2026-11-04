@@ -36,8 +36,12 @@ test.describe("role-aware navigation and readable profile menu", () => {
       await expect(page.getByRole("menuitem", { name: /Admin Panel/i })).toHaveCount(0);
 
       // User menu is a light accessible popover with dark text, never pale gold on ivory.
-      const foreground = await dashboard.evaluate(node => getComputedStyle(node).color);
-      expect(foreground).not.toBe("rgb(255, 255, 255)");
+      const contrast = await dashboard.evaluate(node => {
+        const style = getComputedStyle(node);
+        return { foreground: style.color, background: style.backgroundColor };
+      });
+      expect(contrast.foreground).toBe("rgb(255, 255, 255)");
+      expect(contrast.background).toBe("rgb(116, 38, 59)");
       await page.keyboard.press("Escape");
       await expect(dashboard).toHaveCount(0);
       await expect(trigger).toBeFocused();
