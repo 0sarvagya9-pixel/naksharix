@@ -25,7 +25,7 @@ export default async function AstrologerDashboardPage() {
     prisma.astrologerProfile.findUnique({
       where: { userId: user.id },
       include: {
-        bookings: { include: { user: { select: { id: true, name: true, email: true } } }, orderBy: { scheduledAt: "asc" }, take: 8 },
+        bookings: { where: { status: { in: ["ACCEPTED", "CONFIRMED"] }, scheduledAt: { gte: new Date() } }, include: { user: { select: { id: true, name: true, email: true } } }, orderBy: { scheduledAt: "asc" }, take: 8 },
         slots: true,
         payouts: true,
         reviews: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 3 }
@@ -36,15 +36,36 @@ export default async function AstrologerDashboardPage() {
   const activeProfile = profile ?? consultantProfile;
   const bookings = profile?.bookings ?? [];
   const now = new Date();
-  const todayKey = now.toDateString();
-  const acceptedBookings = bookings.filter((booking) => booking.status === "ACCEPTED" || booking.status === "CONFIRMED");
-  const todayBookings = acceptedBookings.filter((booking) => booking.scheduledAt.toDateString() === todayKey).length;
-  const upcomingBookings = acceptedBookings.filter((booking) => booking.scheduledAt >= now).length;
-  const pendingBookings = bookings.filter((booking) => booking.status === "PENDING" || booking.status === "REQUESTED" || booking.status === "PAYMENT_PENDING").length;
-  const completedBookings = bookings.filter((booking) => booking.status === "COMPLETED").length;
-  const totalEarnings = bookings
-    .filter((booking) => booking.status === "COMPLETED" && (booking.paymentStatus === "PAID" || booking.paymentStatus === "ADMIN_BYPASS" || booking.paymentStatus === "FREE"))
-    .reduce((sum, booking) => sum + Number(booking.amount), 0);
+  const indiaOffsetMs = 330 * 60 * 1000;
+  const startOfToday = new Date(
+    Math.floor((now.getTime() + indiaOffsetMs) / 86_400_000) * 86_400_000 - indiaOffsetMs
+  );
+  const endOfToday = new Date(startOfToday.getTime() + 86_400_000);
+  // Display rows are intentionally capped; counters and earnings must read the
+  // full authorized profile records rather than just the 8 visible bookings.
+  const bookingScope = profile ? { astrologerProfileId: profile.id } : null;
+  const [todayBookings, upcomingBookings, pendingBookings, completedBookings, totalEarnings] =
+    bookingScope ? await Promise.all([
+      prisma.consultationBooking.count({
+        where: { ...bookingScope, status: { in: ["ACCEPTED", "CONFIRMED"] },
+          scheduledAt: { gte: startOfToday, lt: endOfToday } }
+      }),
+      prisma.consultationBooking.count({
+        where: { ...bookingScope, status: { in: ["ACCEPTED", "CONFIRMED"] },
+          scheduledAt: { gte: now } }
+      }),
+      prisma.consultationBooking.count({
+        where: { ...bookingScope, status: { in: ["PENDING", "REQUESTED", "PAYMENT_PENDING"] } }
+      }),
+      prisma.consultationBooking.count({
+        where: { ...bookingScope, status: "COMPLETED" }
+      }),
+      prisma.consultationBooking.aggregate({
+        where: { ...bookingScope, status: "COMPLETED",
+          paymentStatus: { in: ["PAID", "ADMIN_BYPASS", "FREE"] } },
+        _sum: { amount: true }
+      }).then(result => Number(result._sum.amount ?? 0))
+    ]) : [0, 0, 0, 0, 0];
   const pendingPayout = (profile?.payouts ?? []).filter((payout) => payout.status === "PENDING").reduce((sum, payout) => sum + Number(payout.amount), 0);
   const completedPayout = (profile?.payouts ?? []).filter((payout) => payout.status === "PAID" || payout.status === "COMPLETED").reduce((sum, payout) => sum + Number(payout.amount), 0);
   const hasActiveSlots = (profile?.slots ?? []).some((slot) => slot.isActive && !slot.isHoliday);
@@ -54,30 +75,48 @@ export default async function AstrologerDashboardPage() {
   return (
     <main className="star-field">
       <Section>
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">{isConsultant ? "Consultant Dashboard" : "Astrologer Dashboard"}</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black">Welcome, {activeProfile?.displayName ?? user.name}</h1>
-            <p className="mt-3 max-w-3xl naksh-muted-text">Manage your consultations, availability, earnings, and client requests from one place.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild><Link href="/astrologer/profile">Edit Astrologer Profile</Link></Button>
-            <Button variant="outline" asChild><Link href="/astrologer/availability">Set Availability</Link></Button>
-            <Button variant="outline" asChild><Link href="#bookings">View Bookings</Link></Button>
-            <Button variant="outline" asChild><Link href="/astrologer/earnings">View Earnings</Link></Button>
-            <Button variant="outline" asChild><Link href="#bookings">Start Consultation</Link></Button>
-            <Button variant="outline" asChild><Link href="#reviews">View Reviews</Link></Button>
-            <Button variant="outline" asChild><Link href="/astrologer/earnings">Payout Request</Link></Button>
+        <div className="relative overflow-hidden rounded-[28px] border border-[#d4af37]/25 bg-gradient-to-br from-[#102d4c] via-[#0b2441] to-[#07172b] p-6 shadow-[0_24px_60px_rgba(2,12,30,.25)] sm:p-8">
+          <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-[#d4af37]/10 blur-3xl" />
+          <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+            <div className="max-w-3xl">
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/35 bg-[#d4af37]/15 px-3 py-1.5 text-xs font-bold uppercase tracking-[.12em] text-[#ffe0a0]">
+                  <Star className="h-3.5 w-3.5" aria-hidden="true" /> Professional workspace
+                </span>
+                <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-[#d6e2ee]">
+                  {statusLabel(status)} profile
+                </span>
+              </div>
+              <h1 className="font-cinzel text-3xl font-black leading-tight text-white sm:text-4xl">
+                Welcome, {activeProfile?.displayName ?? user.name}
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#c6d6e6] sm:text-base">
+                {isConsultant ? "Your consultation practice" : "Your astrology practice"} in one place.
+                Review requests, manage availability and prepare for your next session.
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Button asChild><Link href="/astrologer/requests">Review requests</Link></Button>
+              <Button variant="outline" asChild><Link href="/astrologer/availability">Update availability</Link></Button>
+              <Button variant="outline" asChild><Link href="/astrologer/profile">Edit profile</Link></Button>
+            </div>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-cinzel text-xl font-bold text-white">Practice overview</h2>
+            <p className="mt-1 text-sm naksh-muted-text">Live counts for your complete booking history. Today follows IST.</p>
+          </div>
+          <Button variant="outline" asChild><Link href="/astrologer/bookings/upcoming">View upcoming sessions</Link></Button>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           <Metric icon={UserRound} label="Profile Status" value={statusLabel(status)} note={`${completion}% complete`} />
           <Metric icon={CalendarClock} label="Today’s Bookings" value={todayBookings.toString()} note={`${upcomingBookings} upcoming`} />
-          <Metric icon={CalendarClock} label="Upcoming Bookings" value={upcomingBookings.toString()} note="Scheduled consultations" />
+          <Metric icon={CalendarClock} label="Upcoming Bookings" value={upcomingBookings.toString()} note="Accepted future sessions" />
           <Metric icon={MessageCircle} label="Pending Requests" value={pendingBookings.toString()} note={`${completedBookings} completed`} />
           <Metric icon={MessageCircle} label="Completed Consultations" value={completedBookings.toString()} note="Finished sessions" />
-          <Metric icon={IndianRupee} label="Total Earnings" value={`INR ${totalEarnings.toLocaleString("en-IN")}`} note="Lifetime earnings" />
+          <Metric icon={IndianRupee} label="Total Earnings" value={`INR ${totalEarnings.toLocaleString("en-IN")}`} note="Completed eligible sessions" />
           <Metric icon={WalletCards} label="Pending Payout" value={`INR ${pendingPayout.toLocaleString("en-IN")}`} note="Awaiting payout" />
           <Metric icon={Star} label="Rating" value={(activeProfile?.rating ?? 0).toFixed(1)} note={`${activeProfile?.reviewCount ?? 0} reviews`} />
           <Metric icon={UserRound} label="Availability Status" value={hasActiveSlots ? "AVAILABLE" : "NOT AVAILABLE"} note="Chat, call, video controls" />
@@ -162,7 +201,7 @@ export default async function AstrologerDashboardPage() {
 
 function Metric({ icon: Icon, label, value, note }: { icon: typeof UserRound; label: string; value: string; note: string }) {
   return (
-    <Card className="glass">
+    <Card className="glass border-[#d4af37]/20 bg-gradient-to-b from-[#0d2b48]/90 to-[#071e37]/85 transition-colors hover:border-[#d4af37]/45">
       <CardContent className="p-5">
         <Icon className="h-5 w-5 text-[#FFD700]" />
         <p className="mt-4 text-sm naksh-muted-text">{label}</p>
