@@ -5,11 +5,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   ArrowLeft, CalendarCheck2, CalendarClock, CheckCircle2, Clock3,
-  FileText, Headphones, LayoutDashboard, LogOut, Menu, MessageSquare,
+  FileText, Headphones, LayoutDashboard, Menu, MessageSquare,
   Sparkles, Star, UserRound, WalletCards, X
 } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { AuthProfileMenu } from "@/components/auth-profile-menu";
+import { AstrologerLogoutButton } from "@/components/astrologer-logout-button";
 import { cn } from "@/lib/utils";
 
 const groups = [
@@ -149,12 +150,7 @@ export function AstrologerNavbar() {
         </nav>
         <div className="flex shrink-0 items-center justify-between gap-2 border-t border-white/10 bg-[#061328] px-4 py-3">
           <AuthProfileMenu />
-          <Link
-            href="/api/auth/logout"
-            className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-[#d8e1ed] hover:border-[#d4af37]/35 hover:text-white"
-          >
-            <LogOut className="h-4 w-4" aria-hidden="true" /> Logout
-          </Link>
+          <AstrologerLogoutButton />
         </div>
       </aside>
     </>
