@@ -7,11 +7,11 @@ import { calculateInternalTransitSnapshot, calculateUpcomingTransitTimeline } fr
 export const metadata: Metadata = {
   title: "Current Gochar Snapshot | Naksharix",
   description: "Provider-calculated current transit planet positions for general spiritual reflection. Not a personalized transit prediction.",
-  alternates: { canonical: "https://naksharix.com/transits" },
+  alternates: { canonical: "https://www.naksharix.com/transits" },
   openGraph: {
     title: "Current Gochar Snapshot | Naksharix",
     description: "Provider-calculated transit positions with clear source and limitation notes.",
-    url: "https://naksharix.com/transits",
+    url: "https://www.naksharix.com/transits",
     siteName: "Naksharix"
   }
 };
