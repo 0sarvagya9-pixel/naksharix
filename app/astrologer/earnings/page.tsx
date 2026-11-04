@@ -22,10 +22,16 @@ export default async function AstrologerEarningsPage() {
     include: { bookings: true, payouts: { orderBy: { createdAt: "desc" } } }
   });
   const bookings = profile?.bookings ?? [];
-  const completed = bookings.filter((booking) => booking.status === "COMPLETED");
+  // Unpaid completed sessions are not earned revenue. Keep this read-only
+  // summary consistent with the professional dashboard acceptance gate.
+  const completed = bookings.filter(booking =>
+    booking.status === "COMPLETED" &&
+    ["PAID", "ADMIN_BYPASS", "FREE"].includes(booking.paymentStatus));
   const gross = completed.reduce((sum, booking) => sum + Number(booking.amount), 0);
-  const paid = (profile?.payouts ?? []).filter((payout) => payout.status === "PAID").reduce((sum, payout) => sum + Number(payout.amount), 0);
-  const pending = gross - paid;
+  const paid = (profile?.payouts ?? [])
+    .filter(payout => payout.status === "PAID" || payout.status === "COMPLETED")
+    .reduce((sum, payout) => sum + Number(payout.amount), 0);
+  const pending = Math.max(0, gross - paid);
   const chartData = Array.from({ length: 6 }).map((_, index) => {
     const date = new Date();
     date.setMonth(date.getMonth() - (5 - index));
