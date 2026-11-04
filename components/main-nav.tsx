@@ -245,9 +245,10 @@ export function MainNav() {
                     <UserRound className="h-5 w-5" aria-hidden="true" /> My account
                   </Link>
                 ) : (
-                  <Link href="/login" onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl bg-[#76263b] px-4 py-3 text-sm font-bold text-[#fff8ee]">
-                    Sign in
-                  </Link>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link href="/login" onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl bg-[#76263b] px-3 py-3 text-sm font-bold text-[#fff8ee]">Sign in</Link>
+                    <Link href="/profile" onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl border border-[#d8ac8f] bg-[#fff9ef] px-3 py-3 text-sm font-bold text-[#74263b]">My account</Link>
+                  </div>
                 )}
               </div>
               <div className="mt-3 grid gap-2">
