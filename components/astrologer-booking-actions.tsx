@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { CalendarClock, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,6 @@ import { parseConsultationLocalDateTime } from "@/lib/consultations/slot-time";
 export function AstrologerBookingActions({ bookingId, status, paymentStatus }: {
   bookingId: string; status?: string; paymentStatus?: string;
 }) {
-  const router = useRouter();
   const [scheduledAt, setScheduledAt] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -23,7 +21,7 @@ export function AstrologerBookingActions({ bookingId, status, paymentStatus }: {
   const allowed = availableBookingActions(status, paymentStatus);
 
   async function act(action: BookingAction) {
-    if (inFlight.current || !allowed.includes(action)) return;
+    if (inFlight.current || busy || !allowed.includes(action)) return;
     const instant = action === "RESCHEDULE" ? parseConsultationLocalDateTime(scheduledAt) : null;
     if (action === "RESCHEDULE" && (!instant || instant.getTime() <= Date.now())) {
       setFailed(true); setMessage("Choose a valid future date and time in IST (Asia/Kolkata)."); return;
@@ -31,6 +29,7 @@ export function AstrologerBookingActions({ bookingId, status, paymentStatus }: {
     const controller = new AbortController();
     inFlight.current = controller;
     const timeout = setTimeout(() => controller.abort(), 20000);
+    let committed = false;
     setBusy(true); setFailed(false); setMessage(null);
     try {
       const response = await secureFetch("/api/astrologer/bookings/action", {
@@ -44,8 +43,24 @@ export function AstrologerBookingActions({ bookingId, status, paymentStatus }: {
         if (mounted.current) { setFailed(true); setMessage(error); }
         return;
       }
-      if (!payload.data) throw new Error("Invalid response");
-      if (mounted.current) { setMessage("Booking updated. The latest status is being refreshed."); router.refresh(); }
+      // A 200 response alone must not be mistaken for a confirmed mutation.
+      const data = payload.data && typeof payload.data === "object" ? payload.data as Record<string, unknown> : {};
+      const booking = data.booking && typeof data.booking === "object" ? data.booking as Record<string, unknown> : {};
+      const expectedStatuses = action === "COMPLETE" ? ["COMPLETED"] : action === "REJECT" ? ["REJECTED"] : ["ACCEPTED", "CONFIRMED"];
+      if (booking.id !== bookingId || typeof booking.status !== "string" || !expectedStatuses.includes(booking.status)) {
+        throw new Error("Invalid booking confirmation");
+      }
+      if (action === "RESCHEDULE" && (typeof booking.scheduledAt !== "string" || Date.parse(booking.scheduledAt) !== instant?.getTime())) {
+        throw new Error("Invalid reschedule confirmation");
+      }
+      if (mounted.current) {
+        setMessage("Booking updated. Loading the latest booking list…");
+        // Browser evidence showed a fresh RSC response while Chromium retained
+        // the previous controls. A document GET replaces that stale router tree
+        // and also updates counters/status badges. Never replay the POST.
+        window.location.reload();
+        committed = true;
+      }
     } catch {
       if (mounted.current) {
         setFailed(true);
@@ -53,7 +68,8 @@ export function AstrologerBookingActions({ bookingId, status, paymentStatus }: {
       }
     } finally {
       clearTimeout(timeout); inFlight.current = null;
-      if (mounted.current) setBusy(false);
+      // Keep controls disabled after a confirmed write until the GET completes.
+      if (mounted.current && !committed) setBusy(false);
     }
   }
 
