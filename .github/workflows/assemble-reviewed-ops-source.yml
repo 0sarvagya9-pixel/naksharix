@@ -1,0 +1,59 @@
+name: Assemble reviewed nonpayment source once
+on:
+  push:
+    branches: [finish/nonpayment-operations-20261105]
+    paths: [.github/workflows/assemble-reviewed-ops-source.yml]
+permissions:
+  contents: write
+jobs:
+  assemble:
+    if: github.repository == '0sarvagya9-pixel/naksharix' && github.actor == '0sarvagya9-pixel'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify base and exact source package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = b1079a7f46ede013a9906ad465b0065a60c2d82d
+          curl --fail --silent --show-error --max-time 60 --max-filesize 200000 https://sb-2n927zh117cm.vercel.run/source-v1.json.gz -o /tmp/reviewed-source.json.gz
+          echo '19006c042192976bf5091e5ba12a8d9749c7c887c10525f7f1b709cf91b743c8  /tmp/reviewed-source.json.gz' | sha256sum --check
+          python3 - <<'PY'
+          import gzip,json,pathlib
+          raw=gzip.decompress(pathlib.Path('/tmp/reviewed-source.json.gz').read_bytes())
+          assert len(raw)<3000000
+          payload=json.loads(raw)
+          assert payload['base']=='b1079a7f46ede013a9906ad465b0065a60c2d82d'
+          files=payload['files']; assert len(files)==42
+          root=pathlib.Path.cwd().resolve()
+          for name,text in files.items():
+              path=pathlib.Path(name)
+              assert isinstance(text,str) and len(text)<2000000
+              assert not path.is_absolute() and '..' not in path.parts and not name.startswith('.')
+              assert path.suffix in ('.ts','.tsx','.mjs','.css','.json','.md')
+              assert path.parts[0] in ('app','components','docs','lib','scripts','tests','README.md','package.json','package-lock.json')
+              assert not path.is_symlink() and path.resolve().is_relative_to(root)
+              path.parent.mkdir(parents=True,exist_ok=True)
+              path.write_text(text)
+          pathlib.Path('/tmp/source-paths').write_bytes(b'\0'.join(p.encode() for p in files)+b'\0')
+          print('REVIEWED_SOURCE_FILES=42;SECRETS=NOT_INCLUDED;WORKFLOW_PAYLOADS=EXCLUDED')
+          PY
+          git diff --check
+          git add --pathspec-from-file=/tmp/source-paths --pathspec-file-nul
+          git -c user.name='NAKSHARIX Release Automation' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat(operations): booking reliability, private encrypted recovery and consented aggregate analytics'
+      - name: Push feature source only
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$auth"
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $auth"
+          git push origin HEAD:refs/heads/finish/nonpayment-operations-20261105
