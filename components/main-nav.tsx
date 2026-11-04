@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { LayoutDashboard, Menu, X, ShoppingCart, UserRound } from "lucide-react";
 import { AuthProfileMenu } from "@/components/auth-profile-menu";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -101,6 +101,8 @@ export function MainNav() {
       } as Record<string, string>)[label])
       : label;
   const [open, setOpen] = useState(false);
+  const [mobileUser, setMobileUser] = useState<{ effectiveRole?: string | null; role?: string | null } | null>(null);
+  const [mobileAuthReady, setMobileAuthReady] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -122,6 +124,21 @@ export function MainNav() {
     // Close the mobile dialog after client-side navigation (including back).
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    setMobileAuthReady(false);
+    fetch("/api/auth/me", { cache: "no-store", credentials: "same-origin" })
+      .then(async response => response.ok ? (await response.json()).data?.user ?? null : null)
+      .then(value => { if (active) setMobileUser(value); })
+      .catch(() => { if (active) setMobileUser(null); })
+      .finally(() => { if (active) setMobileAuthReady(true); });
+    return () => { active = false; };
+  }, [open]);
+
+  const mobilePortalRole = mobileUser?.effectiveRole ?? mobileUser?.role;
+  const mobileAstrologer = mobilePortalRole === "ASTROLOGER" || mobilePortalRole === "CONSULTANT";
 
   if (pathname.startsWith("/astrologer")) return null;
 
@@ -211,9 +228,27 @@ export function MainNav() {
                 <p className="text-xs font-semibold text-[#794051]">{locale === "hi" ? "भाषा चुनें" : "Choose language"}</p>
                 <LanguageSwitcher className="!block w-20" />
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <Link href="/login" onClick={() => setOpen(false)} className="rounded-xl bg-[#832e3f] px-3 py-3 text-center text-sm font-bold text-white">Sign in</Link>
-                <Link href="/profile" onClick={() => setOpen(false)} className="rounded-xl border border-[#d8ac8f] bg-white px-3 py-3 text-center text-sm font-bold text-[#772d3c]">My account</Link>
+              <div className="mt-4 grid gap-2" aria-label="Mobile account navigation">
+                {!mobileAuthReady ? (
+                  <p className="rounded-xl border border-[#e6c6a9] bg-[#fff8ee] px-4 py-3 text-sm text-[#66454c]" role="status">Checking account…</p>
+                ) : mobileAstrologer ? (
+                  <>
+                    <Link href="/astrologer/dashboard" onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#76263b] px-4 py-3 text-sm font-bold text-[#fff8ee] hover:bg-[#5c1b30]">
+                      <LayoutDashboard className="h-5 w-5" aria-hidden="true" /> Astrologer Dashboard
+                    </Link>
+                    <Link href="/astrologer/profile" onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#d8ac8f] bg-[#fff9ef] px-4 py-3 text-sm font-bold text-[#74263b]">
+                      <UserRound className="h-5 w-5" aria-hidden="true" /> Professional Profile
+                    </Link>
+                  </>
+                ) : mobileUser ? (
+                  <Link href="/profile" onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#76263b] px-4 py-3 text-sm font-bold text-[#fff8ee]">
+                    <UserRound className="h-5 w-5" aria-hidden="true" /> My account
+                  </Link>
+                ) : (
+                  <Link href="/login" onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl bg-[#76263b] px-4 py-3 text-sm font-bold text-[#fff8ee]">
+                    Sign in
+                  </Link>
+                )}
               </div>
               <div className="mt-3 grid gap-2">
                 {[...navLinks, ...moreLinks].map((item) => (
