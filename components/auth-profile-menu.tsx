@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { BookOpen, FileText, LogOut, ShieldCheck, UserRound } from "lucide-react";
+import { BookOpen, FileText, LayoutDashboard, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/language-provider";
 import { isAdmin as canOpenAdminPanel } from "@/lib/auth/permissions";
@@ -25,6 +26,8 @@ type SessionUser = {
 
 export function AuthProfileMenu() {
   const { tr } = useLanguage();
+  const pathname = usePathname();
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -67,6 +70,34 @@ export function AuthProfileMenu() {
     };
   }, []);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (open) {
+      menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    }
+  }, [open]);
+
+  function handleMenuKeys(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Escape") {
+      setOpen(false);
+      triggerRef.current?.focus();
+      return;
+    }
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    const items = Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+    if (!items.length) return;
+    event.preventDefault();
+    const index = items.findIndex(item => item === document.activeElement);
+    const next = event.key === "Home" ? 0 :
+      event.key === "End" ? items.length - 1 :
+      event.key === "ArrowDown" ? (index + 1) % items.length :
+      (index < 0 ? items.length - 1 : index + items.length - 1) % items.length;
+    items[next]?.focus();
+  }
+
   async function handleLogout() {
     setOpen(false);
     await secureFetch("/api/auth/logout", { method: "POST" }).catch(() => null);
@@ -75,7 +106,7 @@ export function AuthProfileMenu() {
 
   if (loading) {
     return (
-      <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label={tr("myProfile")} disabled>
+      <Button variant="ghost" size="icon" className="inline-flex" aria-label={tr("myProfile")} disabled>
         <UserRound className="h-5 w-5" />
       </Button>
     );
@@ -83,7 +114,7 @@ export function AuthProfileMenu() {
 
   if (!user) {
     return (
-      <Button variant="ghost" size="icon" asChild className="hidden sm:inline-flex">
+      <Button variant="ghost" size="icon" asChild className="inline-flex">
         <Link href="/login" aria-label={tr("login")}>
           <UserRound className="h-5 w-5" />
         </Link>
@@ -96,45 +127,75 @@ export function AuthProfileMenu() {
   const displayMeta = getDisplayMeta(user);
   const initials = getInitials(displayName);
   const showAdminPanel = canOpenAdminPanel(user) || Boolean(user.isAdminLogin);
+  const portalRole = user.effectiveRole ?? user.role ?? "USER";
+  // Match the server-side /astrologer/layout.tsx role check; do not present
+  // inaccessible workspace links to regular members or admins in user mode.
+  const showAstrologerDashboard = portalRole === "ASTROLOGER" || portalRole === "CONSULTANT";
+  const portalProfile = showAstrologerDashboard ? "/astrologer/profile" : "/profile";
 
   return (
-    <div ref={menuRef} className="relative hidden min-w-10 flex-shrink-0 sm:block">
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label={displayName}
-        onClick={() => setOpen((value) => !value)}
-        className="grid h-10 w-10 place-items-center rounded-full border border-[#dfbda1] bg-[#fff9f0] p-1 text-sm text-[#8a2e3b] shadow-[0_6px_16px_rgba(92,43,35,0.08)] transition hover:border-[#a43b4b] hover:bg-[#fff0e2] focus:outline-none focus:ring-2 focus:ring-[#a43b4b]/25"
-      >
-        <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-[#dca956]/35 bg-[#dca956]/10 text-xs font-bold text-[#fbc02d]">
-          <AvatarImage src={image} initials={initials} />
-        </span>
-      </button>
-      {open ? (
-        <div
-          role="menu"
-          className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-[#e6c6a9] bg-[#fffaf4]/95 p-2 shadow-[0_18px_50px_rgba(68,36,32,0.20)] backdrop-blur-xl"
+    <div className="flex shrink-0 items-center gap-2">
+      {showAstrologerDashboard ? (
+        <Link
+          href="/astrologer/dashboard"
+          className="hidden min-h-10 items-center gap-2 rounded-xl border border-[#b98656] bg-[#76263b] px-3 py-2 text-xs font-bold text-[#fff8ee] shadow-sm transition hover:border-[#d49b4c] hover:bg-[#5e1b2e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b98656] 2xl:inline-flex"
+          aria-label="Open astrologer dashboard"
         >
-          <div className="border-b border-[#dca956]/20 px-3 py-3">
-            <p className="truncate font-cinzel text-sm font-bold text-[#8e3240]">{displayName}</p>
-            <p className="truncate text-xs naksh-muted-text">{displayMeta}</p>
-          </div>
-          <ProfileLink href="/profile" icon={UserRound} label={tr("myProfile")} onClick={() => setOpen(false)} />
-          <ProfileLink href="/my-readings" icon={BookOpen} label={tr("myReadings")} onClick={() => setOpen(false)} />
-          <ProfileLink href="/saved-reports" icon={FileText} label={tr("savedReports")} onClick={() => setOpen(false)} />
-          {showAdminPanel ? <ProfileLink href="/admin" icon={ShieldCheck} label={tr("adminPanel")} onClick={() => setOpen(false)} /> : null}
-          <button
-            type="button"
-            role="menuitem"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm naksh-muted-text transition hover:bg-[#f7e3d4] hover:text-[#8e3240]"
-          >
-            <LogOut className="h-4 w-4" />
-            {tr("logout")}
-          </button>
-        </div>
+          <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+          Dashboard
+        </Link>
       ) : null}
+      <div ref={menuRef} onKeyDown={handleMenuKeys} className="relative min-w-10 flex-shrink-0">
+        <button
+          ref={triggerRef}
+          type="button"
+          aria-haspopup="menu"
+          aria-controls="naksharix-account-menu"
+          aria-expanded={open}
+          aria-label={`Account menu for ${displayName}`}
+          onClick={() => setOpen((value) => !value)}
+          className="grid h-11 w-11 place-items-center rounded-full border-2 border-[#b77d55] bg-[#fff6e9] p-1 text-sm text-[#6b2639] shadow-[0_6px_20px_rgba(92,43,35,0.13)] transition hover:border-[#8a3244] hover:bg-[#fce5c9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a3244]"
+        >
+          <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-[#b88a67] bg-[#f2d8b0] text-xs font-extrabold text-[#662439]">
+            <AvatarImage src={image} initials={initials} />
+          </span>
+        </button>
+        {open ? (
+          <div
+            role="menu"
+            id="naksharix-account-menu"
+            aria-label="Account navigation"
+            className={`absolute right-0 z-[100] w-[min(19rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-[#d7b6a0] bg-[#fffaf3] p-2 text-[#45252f] shadow-[0_22px_65px_rgba(49,25,35,.25)] ring-1 ring-white/60 ${pathname.startsWith("/astrologer") ? "bottom-full mb-3" : "top-full mt-3"}`}
+          >
+            <div className="rounded-xl bg-gradient-to-r from-[#fff0df] to-[#fffaef] px-3 py-3">
+              <p className="truncate font-cinzel text-sm font-extrabold text-[#77263b]">{displayName}</p>
+              <p className="mt-1 truncate text-xs font-medium text-[#654c51]">{displayMeta}</p>
+            </div>
+            {showAstrologerDashboard ? (
+              <div className="mt-2 rounded-xl border border-[#e4b875] bg-[#fff1d8] p-1">
+                <ProfileLink href="/astrologer/dashboard" icon={LayoutDashboard} label="Astrologer Dashboard" onClick={() => setOpen(false)} featured />
+                <ProfileLink href="/astrologer/profile" icon={UserRound} label="Professional Profile" onClick={() => setOpen(false)} />
+              </div>
+            ) : (
+              <ProfileLink href={portalProfile} icon={UserRound} label={tr("myProfile")} onClick={() => setOpen(false)} />
+            )}
+            <div className="mt-2 border-t border-[#e6d1c0] pt-2">
+              <ProfileLink href="/my-readings" icon={BookOpen} label={tr("myReadings")} onClick={() => setOpen(false)} />
+              <ProfileLink href="/saved-reports" icon={FileText} label={tr("savedReports")} onClick={() => setOpen(false)} />
+              {showAdminPanel ? <ProfileLink href="/admin" icon={ShieldCheck} label={tr("adminPanel")} onClick={() => setOpen(false)} /> : null}
+            </div>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={handleLogout}
+              className="mt-2 flex min-h-11 w-full items-center gap-3 rounded-xl border-t border-[#e6d1c0] px-3 py-2 text-left text-sm font-semibold text-[#693d48] transition hover:bg-[#f4e3d8] hover:text-[#79283b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a04b55]"
+            >
+              <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
+              {tr("logout")}
+            </button>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -162,16 +223,27 @@ function AvatarImage({ src, initials }: { src: string; initials: string }) {
   );
 }
 
-function ProfileLink({ href, icon: Icon, label, onClick }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string; onClick: () => void }) {
+function ProfileLink({
+  href, icon: Icon, label, onClick, featured = false
+}: {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+  featured?: boolean;
+}) {
   return (
     <Link
       role="menuitem"
       href={href}
       onClick={onClick}
-      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm naksh-muted-text transition hover:bg-[#f7e3d4] hover:text-[#8e3240]"
+      className={featured
+        ? "mt-1 flex min-h-11 items-center gap-3 rounded-lg bg-[#74263b] px-3 py-2.5 text-sm font-bold text-white transition hover:bg-[#5d1b2f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b57e44]"
+        : "mt-1 flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-[#573540] transition hover:bg-[#f4e3d8] hover:text-[#79283b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a04b55]"
+      }
     >
-      <Icon className="h-4 w-4" />
-      {label}
+      <Icon className="h-[18px] w-[18px] shrink-0" />
+      <span>{label}</span>
     </Link>
   );
 }
