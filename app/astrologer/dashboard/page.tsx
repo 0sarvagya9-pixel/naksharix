@@ -96,9 +96,9 @@ export default async function AstrologerDashboardPage() {
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
-              <Button asChild><Link href="/astrologer/requests">Review requests</Link></Button>
-              <Button variant="outline" asChild><Link href="/astrologer/availability">Update availability</Link></Button>
-              <Button variant="outline" asChild><Link href="/astrologer/profile">Edit profile</Link></Button>
+              <Button asChild className="nx-portal-action"><Link href="/astrologer/requests">Review requests</Link></Button>
+              <Button variant="outline" asChild className="nx-portal-action"><Link href="/astrologer/availability">Update availability</Link></Button>
+              <Button variant="outline" asChild className="nx-portal-action"><Link href="/astrologer/profile">Edit profile</Link></Button>
             </div>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default async function AstrologerDashboardPage() {
             <h2 className="font-cinzel text-xl font-bold text-white">Practice overview</h2>
             <p className="mt-1 text-sm naksh-muted-text">Live counts for your complete booking history. Today follows IST.</p>
           </div>
-          <Button variant="outline" asChild><Link href="/astrologer/bookings/upcoming">View upcoming sessions</Link></Button>
+          <Button variant="outline" asChild className="nx-portal-action"><Link href="/astrologer/bookings/upcoming">View upcoming sessions</Link></Button>
         </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           <Metric icon={UserRound} label="Profile Status" value={statusLabel(status)} note={`${completion}% complete`} />
@@ -149,7 +149,7 @@ export default async function AstrologerDashboardPage() {
               <p>Total earnings: <span className="text-[#FFFFFF]">INR {totalEarnings.toLocaleString("en-IN")}</span></p>
               <p>Pending payout: <span className="text-[#FFFFFF]">INR {pendingPayout.toLocaleString("en-IN")}</span></p>
               <p>Completed payout: <span className="text-[#FFFFFF]">INR {completedPayout.toLocaleString("en-IN")}</span></p>
-              <Button variant="outline" asChild><Link href="/astrologer/earnings"><WalletCards className="h-4 w-4" /> Payout Request</Link></Button>
+              <Button variant="outline" asChild className="nx-portal-action"><Link href="/astrologer/earnings"><WalletCards className="h-4 w-4" /> Payout Request</Link></Button>
             </CardContent>
           </Card>
           <Card className="glass">
