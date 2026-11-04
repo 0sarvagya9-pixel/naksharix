@@ -4,7 +4,6 @@ import { Sandbox } from "@vercel/sandbox";
 import { get, put, list, del, head } from "@vercel/blob";
 import { backupChecksum, MAX_BACKUP_BYTES, openBackup, sealBackup } from "@/lib/ops/backup-crypto";
 import { EXPORT_WORKER, RESTORE_WORKER } from "@/lib/ops/backup-worker";
-import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/email/email-service";
 
 const PREFIX="naksharix-recovery/v1/";
@@ -125,7 +124,7 @@ export async function runDailyRecovery() {
       const expired=old.blobs.filter(b=>b.uploadedAt.getTime()<cutoff && b.pathname.startsWith(PREFIX+group));
       if(expired.length)await del(expired.map(b=>b.url));
     }
-    await prisma.auditLog.deleteMany({where:{action:"analytics.aggregate",createdAt:{lt:new Date(Date.now()-90*86400000)}}});
+    // Analytics retention is owned by the analytics collector; recovery never writes production rows.
     stage='receipt';
     receipt.emailAccepted=await notify(day,true,`Encrypted private backup uploaded, downloaded, decrypted and restored in an isolated database. Restored tables: ${counts.tables}. Retention: 7 days. No production data was modified.`);
     await put(PREFIX+'receipts/'+day+'.json',JSON.stringify(receipt),{access:'private',addRandomSuffix:false,allowOverwrite:false,contentType:'application/json'});
