@@ -406,6 +406,8 @@ try {
     const created = await post("/api/support/tickets", payload, userCookie);
     const createBody = await created.json();
     assert.equal(created.status, 201, JSON.stringify(createBody));
+    assert.ok(["provider_accepted","provider_unavailable","recipient_missing"].includes(createBody.data.notification),
+      "New support ticket should expose provider acceptance without changing record durability");
     const ticketId = createBody.data.ticket.id;
     assert.equal(createBody.data.ticket.status, "OPEN");
 
@@ -449,10 +451,22 @@ try {
       ticketId, message: "I should not be able to respond as staff.", clientMutationId: randomUUID()
     }, userCookie);
     assert.equal(deniedStaff.status, 404);
+    const staffMutationId = randomUUID();
     const staffReply = await post("/api/admin/support/reply", {
-      ticketId, message: "We have reviewed your account-access request.", clientMutationId: randomUUID()
+      ticketId, message: "We have reviewed your account-access request.", clientMutationId: staffMutationId
     }, adminCookie);
-    assert.equal(staffReply.status, 200, await staffReply.text());
+    const staffNotice = await staffReply.json();
+    assert.equal(staffReply.status, 200, JSON.stringify(staffNotice));
+    assert.ok(["provider_accepted","provider_unavailable","recipient_missing"].includes(staffNotice.data.notification),
+      "Stored staff response should be accompanied by a privacy-safe notification outcome");
+    const staffReplay = await post("/api/admin/support/reply", {
+      ticketId, message: "We have reviewed your account-access request.", clientMutationId: staffMutationId
+    }, adminCookie);
+    const replayNotice = await staffReplay.json();
+    assert.equal(staffReplay.status, 200, JSON.stringify(replayNotice));
+    assert.equal(replayNotice.data.duplicate,true);
+    assert.equal(replayNotice.data.notification,"not_needed",
+      "Replayed staff response must not send a duplicate customer notification");
     const conversation = await prisma.supportTicket.findUniqueOrThrow({ where: { id: ticketId } });
     assert.equal(conversation.messages.length, 3, "reply replay appended a duplicate message");
     assert.equal(conversation.messages[1].author, "USER");

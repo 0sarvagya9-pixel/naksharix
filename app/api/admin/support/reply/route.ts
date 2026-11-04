@@ -3,6 +3,7 @@ import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
 import { appendSupportMessage } from "@/lib/support/append-message";
+import { notifyCustomerOfSupportReply } from "@/lib/notifications/support-updates";
 import { writeAuditLog } from "@/lib/reports/report-audit";
 
 const schema = z.object({
@@ -26,7 +27,8 @@ export async function POST(request: Request) {
     if (result.kind === "closed") return fail("Reopen the ticket before replying.", 409);
     if (result.kind === "full") return fail("Conversation limit reached.", 409);
 
-    if (result.kind !== "ok") return fail("Unable to append support reply.", 409);    if (!result.duplicate) {
+    if (result.kind !== "ok") return fail("Unable to append support reply.", 409);
+    if (!result.duplicate) {
       await writeAuditLog({
         actor: admin,
         action: "support_ticket.staff_replied",
@@ -35,7 +37,11 @@ export async function POST(request: Request) {
         metadata: { replyRecorded: true }
       });
     }
-    return ok({ recorded: true, duplicate: result.duplicate });
+    // Never send a second message for a duplicate client mutation id.
+    // Staff reply is committed before provider acceptance is attempted.
+    const notification = result.duplicate ? "not_needed" :
+      await notifyCustomerOfSupportReply(input.ticketId, input.clientMutationId);
+    return ok({ recorded: true, duplicate: result.duplicate, notification });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
       return fail("Ticket changed at the same time. Retry the reply.", 409);

@@ -20,6 +20,7 @@ export function SupportConversation({ ticketId, messages, status, admin = false,
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const thread = normalizeMessages(messages);
   const closed = status === "CLOSED" || status === "RESOLVED";
 
@@ -28,6 +29,7 @@ export function SupportConversation({ ticketId, messages, status, admin = false,
     if (sending || closed) return;
     setSending(true);
     setError("");
+    setNotice("");
     try {
       const response = await secureFetch(admin ? "/api/admin/support/reply" : "/api/support/tickets/reply", {
         method: "POST",
@@ -39,6 +41,10 @@ export function SupportConversation({ ticketId, messages, status, admin = false,
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Reply could not be sent.");
       setDraft("");
+      // We report only provider acceptance, never claim recipient inbox delivery.
+      if (admin) setNotice(result.data?.notification === "provider_accepted"
+        ? "Reply saved. Email provider accepted a customer notification; inbox delivery is not confirmed."
+        : "Reply saved in the private customer support desk. Email notification was not confirmed.");
       await onSent();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Reply could not be sent.");
@@ -70,6 +76,7 @@ export function SupportConversation({ ticketId, messages, status, admin = false,
           <Button type="submit" disabled={sending || draft.trim().length < 2}>
             {sending ? "Sending..." : "Send reply"}
           </Button>
+          {notice ? <p role="status" className="text-sm text-[#b8f1d2]">{notice}</p> : null}
           {error ? <p role="alert" className="text-sm text-[#fda4af]">{error}</p> : null}
         </form>
       )}

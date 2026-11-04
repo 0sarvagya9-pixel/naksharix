@@ -3,6 +3,7 @@ import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { notifySupportTeamOfNewTicket } from "@/lib/notifications/support-updates";
 
 const createSchema = z.object({
   subject: z.string().trim().min(5).max(140),
@@ -50,7 +51,10 @@ export async function POST(request: Request) {
         messages: true, createdAt: true, updatedAt: true
       }
     });
-    return ok({ ticket }, { status: 201, headers: { "Cache-Control": "private, no-store" } });
+    // Notify the configured owner mailbox only after successful ticket creation.
+    // Mail-provider downtime cannot invalidate or duplicate the saved ticket.
+    const notification = await notifySupportTeamOfNewTicket(ticket.id);
+    return ok({ ticket, notification }, { status: 201, headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     return handleApiError(error);
   }

@@ -57,6 +57,7 @@ export async function sendEmail(input: {
   subject: string;
   text?: string;
   html?: string;
+  idempotencyKey?: string;
 }): Promise<EmailSendResult> {
   const readiness = getEmailReadiness();
   if (!readiness.emailEnabled) {
@@ -69,6 +70,9 @@ export async function sendEmail(input: {
     return { sent: false, reason: "Email body is empty.", missing: [] };
   }
 
+  if (input.idempotencyKey && !/^[a-zA-Z0-9_./-]{1,256}$/.test(input.idempotencyKey)) {
+    return { sent: false, reason: "Invalid email idempotency key.", missing: [] };
+  }
   const payload: Record<string, unknown> = {
     from: env.SMTP_FROM!,
     to: [input.to],
@@ -81,7 +85,8 @@ export async function sendEmail(input: {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.SMTP_PASS!}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      ...(input.idempotencyKey ? { "Idempotency-Key": input.idempotencyKey } : {})
     },
     body: JSON.stringify(payload),
     cache: "no-store"
@@ -93,5 +98,5 @@ export async function sendEmail(input: {
   }
 
   logger.info("email_delivery_completed", { provider: "resend", status: response.status });
-  return { sent: true, reason: "Email delivery completed.", missing: [] };
+  return { sent: true, reason: "Email accepted by provider; inbox delivery is not confirmed.", missing: [] };
 }
