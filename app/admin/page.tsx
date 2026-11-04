@@ -62,7 +62,7 @@ type ConsultationBookingRow = {
     user?: { email?: string | null; name?: string | null } | null;
   } | null;
 };
-const adminMetricKeys: (keyof AdminAnalytics)[] = ["users", "revenue", "appointments", "posts"];
+const adminMetricKeys = ["users", "revenue", "appointments", "posts"] as const;
 const operations = [
   { title: "User Management", copy: "Review roles, subscriptions, account status, and support history.", icon: Users },
   { title: "Kundli Submissions", copy: "Audit birth detail submissions, saved charts, failed calculations, and report upsells.", icon: ShieldCheck },
