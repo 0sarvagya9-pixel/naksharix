@@ -4,8 +4,9 @@ import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 const db=new PrismaClient();
 const base=process.env.PLAYWRIGHT_BASE_URL||'http://127.0.0.1:3000';
-const safe=process.env.CI==='true' && ['localhost','127.0.0.1'].includes(new URL(base).hostname) &&
-  ['localhost','127.0.0.1','postgres'].includes(new URL(process.env.DATABASE_URL||'postgresql://invalid/invalid').hostname);
+const database=new URL(process.env.DATABASE_URL||'postgresql://invalid/invalid');
+const safe=process.env.CI==='true' && new URL(base).protocol==='http:' && ['localhost','127.0.0.1'].includes(new URL(base).hostname) &&
+  ['localhost','127.0.0.1','postgres'].includes(database.hostname) && ['/naksharix','/naksharix_browser'].includes(database.pathname);
 test.describe('real authenticated professional controls',()=>{
   test.skip(!safe,'Disposable CI database and loopback browser server are mandatory.');
   test.afterAll(async()=>{await db.$disconnect();});
@@ -17,9 +18,12 @@ test.describe('real authenticated professional controls',()=>{
       const profile=await db.astrologerProfile.create({data:{userId:owner.id,displayName:'QA Astrologer',status:'APPROVED'}});
       const booking=await db.consultationBooking.create({data:{userId:client.id,astrologerProfileId:profile.id,mode:'CHAT',status:'ACCEPTED',paymentStatus:'PAID',amount:300,scheduledAt:new Date(Date.now()+30*86400000),durationMins:30,question:'Isolated browser acceptance only.'}});
       const csrfResponse=await context.request.get(base+'/api/csrf');const csrf=(await csrfResponse.json()).data.csrfToken;
-      const login=await context.request.post(base+'/api/auth/login',{headers:{'x-csrf-token':csrf,'x-forwarded-for':'198.51.100.'+(40+info.workerIndex)},data:{email:owner.email,password,roleIntent:'ASTROLOGER',loginMode:'ASTROLOGER'}});
+      const csrfCookie=csrfResponse.headers()['set-cookie']?.split(';')[0];expect(csrfCookie).toBeTruthy();
+      const csrfSplit=csrfCookie!.indexOf('=');
+      await context.addCookies([{name:csrfCookie!.slice(0,csrfSplit),value:csrfCookie!.slice(csrfSplit+1),url:base,httpOnly:false,sameSite:'Strict',secure:false}]);
+      const login=await context.request.post(base+'/api/auth/login',{headers:{'x-csrf-token':csrf,cookie:csrfCookie!,'x-forwarded-for':'198.51.100.'+(40+info.workerIndex)},data:{email:owner.email,password,roleIntent:'ASTROLOGER',loginMode:'ASTROLOGER'}});
       expect(login.status()).toBe(200);
-      // The real login response, not a forged JWT. Local HTTP needs a non-secure test cookie.
+      // Actual server-issued cookies only; secure=false is restricted to the guarded local HTTP fixture.
       const session=login.headers()['set-cookie']?.split(';')[0];expect(session).toBeTruthy();
       const split=session!.indexOf('=');await context.addCookies([{name:session!.slice(0,split),value:session!.slice(split+1),url:base,httpOnly:true,sameSite:'Strict',secure:false}]);
       await page.goto('/astrologer/bookings/upcoming',{waitUntil:'domcontentloaded'});
