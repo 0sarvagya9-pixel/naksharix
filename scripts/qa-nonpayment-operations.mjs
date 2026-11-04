@@ -22,6 +22,8 @@ const staffReply = read("app/api/admin/support/reply/route.ts");
 const newTicket = read("app/api/support/tickets/route.ts");
 const guidance = read("app/api/guidance-enquiries/route.ts");
 const supportUi = read("components/support-conversation.tsx");
+const emailProvider = read("lib/email/email-service.ts");
+const reportEmail = read("lib/reports/report-delivery-service.ts");
 
 assert.ok(send.includes('import "server-only";') &&
   send.includes('import { sendEmail } from "@/lib/email/email-service"') &&
@@ -109,7 +111,7 @@ assert.ok(send.includes('export function isNotifiableFulfilmentStatus(') &&
   "Owner UI may retry bounded notification without creating a new order or payment");
 
 assert.ok(supportMail.includes('import "server-only";') &&
-  supportMail.includes("await sendEmail({ to, subject, text })") &&
+  supportMail.includes("await sendEmail({ to, subject, text, idempotencyKey })") &&
   supportMail.includes('new URL(path, env.NEXT_PUBLIC_APP_URL)') &&
   supportMail.includes('select: { user: { select: { email: true } } }') &&
   !supportMail.includes('input.message') && !supportMail.includes('ticket.subject') &&
@@ -117,7 +119,7 @@ assert.ok(supportMail.includes('import "server-only";') &&
   "Support email notifications must be private, owner-bound and inbox-proof neutral");
 assert.ok(staffReply.includes('getAdminApiUser()') &&
   staffReply.includes('result.duplicate ? "not_needed"') &&
-  staffReply.includes('await notifyCustomerOfSupportReply(input.ticketId)') &&
+  staffReply.includes('await notifyCustomerOfSupportReply(input.ticketId, input.clientMutationId)') &&
   newTicket.includes('await notifySupportTeamOfNewTicket(ticket.id)') &&
   guidance.includes('await notifySupportTeamOfNewTicket(ticket.id)') &&
   staffReply.includes('return ok({ recorded: true, duplicate: result.duplicate, notification })') &&
@@ -125,6 +127,14 @@ assert.ok(staffReply.includes('getAdminApiUser()') &&
   "Admin replies and new support/enquiry tickets must notify without duplicate sends or fake delivery");
 assert.ok(newTicket.indexOf('supportTicket.create(') < newTicket.indexOf('notifySupportTeamOfNewTicket(ticket.id)') &&
   guidance.indexOf('supportTicket.create(') < guidance.indexOf('notifySupportTeamOfNewTicket(ticket.id)') &&
-  staffReply.indexOf('appendSupportMessage({') < staffReply.indexOf('notifyCustomerOfSupportReply(input.ticketId)'),
+  staffReply.indexOf('appendSupportMessage({') < staffReply.indexOf('notifyCustomerOfSupportReply(input.ticketId, input.clientMutationId)'),
   "Notifications must happen only after the ticket or staff reply is stored successfully");
+assert.ok(emailProvider.includes('"Idempotency-Key": input.idempotencyKey') &&
+  emailProvider.includes("Invalid email idempotency key.") &&
+  emailProvider.includes("inbox delivery is not confirmed.") &&
+  reportEmail.includes('idempotencyKey: "naksharix/report-delivery/" + input.reportRequestId') &&
+  supportMail.includes('"naksharix/support-reply/" + ticketId + "/" + clientMutationId') &&
+  supportMail.includes('"naksharix/support-new/" + ticketId'),
+  "Resend provider idempotency must cover support and report notifications without sending duplicate emails");
+
 console.log("NONPAYMENT_OPERATIONS_QA=PASS;CUSTOMER_STATUS_EMAIL=FAIL_SOFT;FULFILMENT_GUARDS=RETAINED;DUPLICATE_REPORT_EMAIL=BLOCKED;REPORTS_PRICE_GATE=CORRECT;PUBLIC_MONITOR=14_ENDPOINTS");
