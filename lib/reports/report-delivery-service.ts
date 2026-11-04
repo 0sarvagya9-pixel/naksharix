@@ -17,6 +17,7 @@ export async function sendReportDeliveryEmail(input: {
 
   return sendEmail({
     to: input.to,
+    idempotencyKey: "naksharix/report-delivery/" + input.reportRequestId,
     subject: "Your Naksharix report is ready",
     text: [
       `Namaste ${input.fullName},`,
