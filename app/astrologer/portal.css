@@ -1,0 +1,48 @@
+/* Scoped professional portal theme; public Naksharix pages are unchanged. */
+.astrologer-portal {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 75% 5%, rgba(212,175,55,.08), transparent 32%),
+    linear-gradient(155deg, #09223b 0%, #08182e 47%, #071426 100%);
+  color: #f4f7fb;
+}
+.astrologer-portal .star-field {
+  min-height: 100vh;
+  min-width: 0;
+  background: transparent;
+  color: #f4f7fb;
+}
+.astrologer-portal .glass,
+.astrologer-portal .glass-card {
+  border: 1px solid rgba(212,175,55,.21);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(17,46,75,.95), rgba(10,31,53,.93));
+  box-shadow: 0 14px 36px rgba(0,0,0,.16);
+  color: #eef4fa;
+}
+.astrologer-portal .glass:hover,
+.astrologer-portal .glass-card:hover {
+  transform: none;
+  border-color: rgba(212,175,55,.4);
+  box-shadow: 0 18px 40px rgba(0,0,0,.2);
+}
+.astrologer-portal .naksh-muted-text {
+  color: #b9c9da;
+}
+.astrologer-portal :is(h1,h2,h3,h4) {
+  color: #f4f7fb;
+}
+.astrologer-portal a:focus-visible,
+.astrologer-portal button:focus-visible {
+  outline: 2px solid #f2c86f;
+  outline-offset: 3px;
+}
+.astrologer-portal :is(input,select,textarea) {
+  color: #14263b;
+}
+@media (prefers-reduced-motion: reduce) {
+  .astrologer-portal *, .astrologer-portal *::before, .astrologer-portal *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
