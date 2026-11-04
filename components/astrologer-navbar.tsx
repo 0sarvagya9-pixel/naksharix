@@ -99,7 +99,13 @@ export function AstrologerNavbar() {
         )}
       >
         <div className="shrink-0 border-b border-white/10 px-5 pb-5 pt-6">
-          <BrandLogo />
+          <div className="flex items-center gap-3">
+            <BrandLogo compact />
+            <div className="min-w-0">
+              <p className="font-cinzel text-base font-black tracking-[.15em] text-[#ffe0a0]">NAKSHARIX</p>
+              <p className="mt-1 text-[11px] font-semibold tracking-[.08em] text-[#bdcde0]">ASTROLOGER PORTAL</p>
+            </div>
+          </div>
           <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#d4af37]/25 bg-gradient-to-r from-[#173654] to-[#0d2947] p-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4af37]/15 text-[#f9d77f]"><Sparkles className="h-5 w-5" /></span>
             <div className="min-w-0">
