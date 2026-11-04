@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     // Never send a second message for a duplicate client mutation id.
     // Staff reply is committed before provider acceptance is attempted.
     const notification = result.duplicate ? "not_needed" :
-      await notifyCustomerOfSupportReply(input.ticketId);
+      await notifyCustomerOfSupportReply(input.ticketId, input.clientMutationId);
     return ok({ recorded: true, duplicate: result.duplicate, notification });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
