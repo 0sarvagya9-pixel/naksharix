@@ -43,7 +43,8 @@ export async function GET() {
 const patchSchema = z.object({
   id: z.string().min(1),
   status: z.nativeEnum(ReportRequestStatus),
-  adminNotes: z.string().max(5000).optional()
+  adminNotes: z.string().max(5000).optional(),
+  reviewConfirmed: z.boolean().optional()
 });
 
 export async function PATCH(request: Request) {
@@ -53,9 +54,14 @@ export async function PATCH(request: Request) {
     const body = patchSchema.parse(await request.json());
     const current = await prisma.reportRequest.findUnique({ where: { id: body.id } });
     if (!current) return fail("Report request not found", 404);
+    if (body.status === ReportRequestStatus.READY_FOR_GENERATION && current.status !== body.status) {
+      if (body.reviewConfirmed !== true || (body.adminNotes ?? "").trim().length < 30) {
+        return fail("Explicit admin review confirmation and at least 30 characters of chart/input review notes are required.", 422);
+      }
+    }
     try {
       assertAllowedReportStatusTransition(current.status, body.status, {
-        hasPdf: Boolean(current.generatedPdfBytes && current.generatedPdfSize),
+        hasPdf: Boolean(current.generatedPdfSize && (current.generatedPdfBytes || current.generatedPdfStorageKey)),
         paymentStatus: current.paymentStatus,
         adminBypass: current.adminBypass
       });
@@ -66,7 +72,7 @@ export async function PATCH(request: Request) {
       where: { id: body.id },
       data: {
         status: body.status,
-        adminNotes: body.adminNotes
+        adminNotes: body.adminNotes ?? current.adminNotes
       }
     });
     if (current.status !== reportRequest.status) {
@@ -76,7 +82,7 @@ export async function PATCH(request: Request) {
         newStatus: reportRequest.status,
         actor: admin,
         note: body.adminNotes,
-        metadata: { source: "admin_patch" }
+        metadata: { source: "admin_patch", reviewConfirmed: body.status === ReportRequestStatus.READY_FOR_GENERATION && body.reviewConfirmed === true }
       });
     }
     await writeAuditLog({
