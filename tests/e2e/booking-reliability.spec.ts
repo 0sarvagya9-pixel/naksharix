@@ -56,23 +56,32 @@ test.describe('real authenticated professional controls',()=>{
       await page.unroute('**/api/astrologer/bookings/action');
       await page.route('**/api/astrologer/bookings/action',route=>route.fulfill({status:200,contentType:'application/json',body:'not-json'}));
       await complete.click();await expect(controls.getByRole('alert')).toContainText('could not be confirmed');await expect(complete).toBeEnabled();
+      await page.unroute('**/api/astrologer/bookings/action');
+      await page.route('**/api/astrologer/bookings/action',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:{booking:{id:'different-booking',status:'COMPLETED'}}})}));
+      await complete.click();await expect(controls.getByRole('alert')).toContainText('could not be confirmed');await expect(complete).toBeEnabled();
       expect((await db.consultationBooking.findUniqueOrThrow({where:{id:booking.id}})).status).toBe('ACCEPTED');
       await page.unroute('**/api/astrologer/bookings/action');
-      // A real mutation may use its 20-second client deadline. First confirm
-      // HTTP and persisted state; only then measure the unchanged UI refresh deadline.
-      // Never retry a mutation, synthesize success, or remove the list assertion.
-      const [completion]=await Promise.all([
+      let realMutations=0;
+      page.on('request',request=>{if(new URL(request.url()).pathname==='/api/astrologer/bookings/action' && request.method()==='POST')realMutations++;});
+      // Require a genuine successful mutation followed by a fresh document GET.
+      // Do not replay the POST, relax timeouts, or remove the list assertion.
+      const [completion, refreshedPage]=await Promise.all([
         page.waitForResponse(response=>new URL(response.url()).pathname==='/api/astrologer/bookings/action' && response.request().method()==='POST',{timeout:22000}),
+        page.waitForResponse(response=>new URL(response.url()).pathname==='/astrologer/bookings/upcoming' && response.request().isNavigationRequest(),{timeout:22000}),
         complete.click()
       ]);
       const completionBody=await completion.json();
       const evidence={httpStatus:completion.status(),returnedStatus:completionBody.data?.booking?.status??null,
-        error:typeof completionBody.error==='string'?completionBody.error.slice(0,350):null};
+        refreshStatus:refreshedPage.status(),error:typeof completionBody.error==='string'?completionBody.error.slice(0,350):null};
       await info.attach('booking-completion-response.json',{body:Buffer.from(JSON.stringify(evidence)),contentType:'application/json'});
       expect(completion.status(),JSON.stringify(evidence)).toBe(200);
+      expect(completionBody.data?.booking?.id).toBe(booking.id);
       expect(completionBody.data?.booking?.status).toBe('COMPLETED');
       expect((await db.consultationBooking.findUniqueOrThrow({where:{id:booking.id}})).status).toBe('COMPLETED');
+      expect(refreshedPage.status()).toBe(200);
       await expect(controls).toHaveCount(0);
+      await expect(page.getByText('No upcoming bookings yet.',{exact:true})).toBeVisible();
+      expect(realMutations).toBe(1);
       await page.goto(secureBase+'/astrologer/dashboard');await expect(page.getByRole('heading',{name:/Welcome, QA Astrologer/i})).toBeVisible();
       const dimensions=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
       expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport+2);
