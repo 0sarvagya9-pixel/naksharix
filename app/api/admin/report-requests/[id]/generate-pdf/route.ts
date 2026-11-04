@@ -103,8 +103,13 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       bytes: generated.bytes
     });
 
-    await prisma.reportRequest.update({
-      where: { id: reportRequest.id },
+    const claim = await prisma.reportRequest.updateMany({
+      where: {
+        id: reportRequest.id,
+        status: ReportRequestStatus.READY_FOR_GENERATION,
+        generatedPdfSize: null,
+        generatedPdfStorageKey: null
+      },
       data: {
         generatedPdfBytes: stored.bytes,
         generatedPdfFileName: stored.fileName,
@@ -119,6 +124,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
         status: ReportRequestStatus.GENERATED
       }
     });
+    if (claim.count !== 1) return fail("Report request changed during PDF generation. No existing PDF was overwritten.", 409);
     await writeReportStatusHistory({
       reportRequestId: reportRequest.id,
       oldStatus: reportRequest.status,
