@@ -38,9 +38,13 @@ assert.ok(dashboard.includes("prisma.consultationBooking.count(") &&
 
 assert.ok(theme.includes(".astrologer-portal .glass") &&
   theme.includes(".astrologer-portal .star-field") &&
+  theme.includes("background: linear-gradient(160deg, #153b5b 0%, #0b2845 100%) !important") &&
+  theme.includes("color: #f5f8fc !important") &&
+  theme.includes(".astrologer-portal .nx-portal-action") &&
+  dashboard.includes('className="nx-portal-action"') &&
   theme.includes("prefers-reduced-motion") &&
   !theme.includes("body {") &&
   !theme.includes("html {"),
-  "Astrologer theme should not change public website styling");
+  "Astrologer theme must defeat inline white Card styles, keep CTA legible, and leave public pages unchanged");
 
 console.log("ASTROLOGER_WORKSPACE_QA=PASS;ROLE_GATE=PRESERVED;LEFT_SIDEBAR=RESPONSIVE;KPI_SCOPE=FULL_HISTORY;PUBLIC_THEME=UNCHANGED");
