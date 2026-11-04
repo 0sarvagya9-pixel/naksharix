@@ -76,3 +76,18 @@
     animation-duration: .01ms !important;
   }
 }
+
+/* The public header is not rendered in /astrologer: remove its global top
+   offset and use a compact, full-width professional workspace. */
+.astrologer-portal main.star-field > section:first-child {
+  padding-top: clamp(1.5rem, 3vw, 3rem);
+}
+.astrologer-portal nav[aria-label="Astrologer workspace sections"] {
+  scrollbar-color: #567492 #0b1e36;
+  scrollbar-width: thin;
+}
+@media (max-width: 1023px) {
+  .astrologer-portal main.star-field > section:first-child {
+    padding-top: 1.5rem;
+  }
+}
