@@ -3,6 +3,7 @@ import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { notifySupportTeamOfNewTicket } from "@/lib/notifications/support-updates";
 
 const kindSchema = z.enum(["WRITTEN_GUIDANCE", "PUJA_ENQUIRY"]);
 const schema = z.object({
