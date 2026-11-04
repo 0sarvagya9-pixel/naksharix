@@ -86,6 +86,20 @@ test.describe('real authenticated professional controls',()=>{
       const dimensions=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
       expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport+2);
       await info.attach('authenticated-portal.png',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
+      // Sidebar logout must execute the real CSRF-protected POST, not a GET link.
+      const opener=page.getByRole('button',{name:'Open astrologer navigation',exact:true});
+      if(await opener.isVisible())await opener.click();
+      const logout=page.getByRole('complementary',{name:'Astrologer portal sidebar'}).getByRole('button',{name:'Logout',exact:true});
+      const [signOut]=await Promise.all([
+        page.waitForResponse(response=>new URL(response.url()).pathname==='/api/auth/logout' && response.request().method()==='POST',{timeout:22000}),
+        logout.click()
+      ]);
+      expect(signOut.status()).toBe(200);
+      expect((await signOut.json()).data?.loggedOut).toBe(true);
+      await page.waitForURL(url=>url.pathname==='/login');
+      expect((await context.cookies(secureBase)).some(cookie=>cookie.name==='__Host-naksharix_session')).toBe(false);
+      await page.goto(secureBase+'/astrologer/dashboard');
+      await expect(page).toHaveURL(/\/login(?:\?|$)/);
     }finally {
       for(const id of ids)await db.user.delete({where:{id}}).catch(()=>{});
       proxy.closeAllConnections();await new Promise<void>(resolve=>proxy.close(()=>resolve()));rmSync(directory,{recursive:true,force:true});
