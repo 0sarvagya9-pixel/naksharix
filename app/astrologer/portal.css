@@ -14,20 +14,50 @@
 }
 .astrologer-portal .glass,
 .astrologer-portal .glass-card {
-  border: 1px solid rgba(212,175,55,.21);
+  /* Card.tsx applies inline white glass; required scoped important overrides
+     avoid fixing one portal by changing all commerce cards. */
+  border: 1px solid rgba(222,180,109,.42) !important;
   border-radius: 18px;
-  background: linear-gradient(160deg, rgba(17,46,75,.95), rgba(10,31,53,.93));
-  box-shadow: 0 14px 36px rgba(0,0,0,.16);
-  color: #eef4fa;
+  background: linear-gradient(160deg, #153b5b 0%, #0b2845 100%) !important;
+  box-shadow: 0 14px 36px rgba(0,0,0,.20) !important;
+  color: #f5f8fc !important;
 }
 .astrologer-portal .glass:hover,
 .astrologer-portal .glass-card:hover {
   transform: none;
   border-color: rgba(212,175,55,.4);
-  box-shadow: 0 18px 40px rgba(0,0,0,.2);
+  box-shadow: 0 18px 40px rgba(0,0,0,.25) !important;
 }
 .astrologer-portal .naksh-muted-text {
-  color: #b9c9da;
+  color: #c4d5e7 !important;
+}
+.astrologer-portal .glass :is(h2,h3,h4) {
+  color: #f5f8fc !important;
+}
+.astrologer-portal .glass p,
+.astrologer-portal .glass span {
+  color: inherit;
+}
+.astrologer-portal .glass .naksh-muted-text {
+  color: #c4d5e7 !important;
+}
+.astrologer-portal .glass .text-amber-200 {
+  color: #ffe1a5 !important;
+}
+.astrologer-portal .nx-portal-action {
+  min-height: 44px;
+  background: #f7d79a !important;
+  border: 1px solid #e7b86e !important;
+  color: #39243b !important;
+  font-weight: 750;
+}
+.astrologer-portal .nx-portal-action:hover {
+  background: #ffe6b7 !important;
+  color: #2d2031 !important;
+}
+.astrologer-portal .nx-portal-action:focus-visible {
+  outline: 3px solid #ffe9b9;
+  outline-offset: 3px;
 }
 .astrologer-portal :is(h1,h2,h3,h4) {
   color: #f4f7fb;
