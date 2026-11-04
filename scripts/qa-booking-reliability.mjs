@@ -41,9 +41,12 @@ check('creation and reschedule use identical locking and interval checks', () =>
     assert.ok(text.includes('TransactionIsolationLevel.Serializable'));
   }
 });
-check('async controls recover without blind retry and refresh state', () => {
+check('async controls recover without blind retry and reload confirmed state', () => {
   const text=readFileSync('components/astrologer-booking-actions.tsx','utf8');
-  for (const marker of ['finally {','clearTimeout(timeout)','setBusy(false)','router.refresh()','inFlight.current','controller.abort()','New consultation date and time in IST']) assert.ok(text.includes(marker));
+  for (const marker of ['finally {','clearTimeout(timeout)','setBusy(false)','window.location.reload()','inFlight.current','controller.abort()','New consultation date and time in IST']) assert.ok(text.includes(marker));
+  assert.ok(text.includes('booking.id !== bookingId'));
+  assert.ok(text.includes('expectedStatuses.includes(booking.status)'));
+  assert.ok(text.includes('mounted.current && !committed'));
   assert.ok(readFileSync('lib/security/csrf.ts','utf8').includes('getCsrfToken(init.signal)'));
 });
 console.log('BOOKING_RELIABILITY='+count+'/'+count+'_PASS');
