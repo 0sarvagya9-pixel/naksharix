@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import "./portal.css";
 import { AstrologerNavbar } from "@/components/astrologer-navbar";
 import { getCurrentUser } from "@/lib/auth/jwt";
 
