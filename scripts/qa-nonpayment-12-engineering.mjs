@@ -97,7 +97,7 @@ for(const c of ["shopOrder.count","pujaBookingRequest.count","reportRequest.coun
 }
 assert.ok(admin.includes("Operations — database counts") &&
   admin.includes("not anonymous visitor analytics") &&
-  analytics.includes('visitorAnalytics: "not_configured"'),
+  analytics.includes('visitorAnalytics: "consented_first_party_aggregate"') && analytics.includes("aggregateAnalytics()"),
   "Admin metrics must not fake website visitor counts or external delivery acceptance");
 
 console.log("NONPAYMENT_12_ENGINEERING_REPAIR_QA=PASS;REPORT_REVIEW=GUARDED;AI_DRAFT=NO_FALLBACK;EMAIL_SUITE=OWNER_ONLY;OPS_METRICS=DB_COUNTS;PAYMENT_WRITES=NO");

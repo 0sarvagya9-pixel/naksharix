@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth/jwt";
 import { canBypassPayment } from "@/lib/auth/permissions";
 import { sendConsultationBookingEmail } from "@/lib/consultations/booking-email";
 import { prisma } from "@/lib/db";
+import { hasConsultationConflict, lockConsultationCalendar } from "@/lib/consultations/booking-conflicts";
 import { logger } from "@/lib/monitoring/logger";
 import { consultationSlotWeekday, parseConsultationSlotTime } from "@/lib/consultations/slot-time";
 import { CONSULTATION_SESSION_MINUTES, getConsultationSessionPrice } from "@/lib/consultations/pricing";
@@ -62,17 +63,8 @@ export async function POST(request: NextRequest) {
     const mode = slot.consultationType === "CALL" ? "AUDIO" : slot.consultationType;
 
     const booking = await prisma.$transaction(async (tx) => {
-      const collision = await tx.consultationBooking.findFirst({
-        where: {
-          astrologerProfileId: profile.id,
-          scheduledAt,
-          // A pending payment is already an active reservation. Never issue
-          // a second payable booking for the same consultant/time slot.
-          // Follow-up work must add an explicitly verified hold-expiry flow.
-          status: { in: ["REQUESTED", "ACCEPTED", "CONFIRMED", "COMPLETED"] }
-        },
-        select: { id: true }
-      });
+      await lockConsultationCalendar(tx, profile.id);
+      const collision = await hasConsultationConflict(tx, profile.id, scheduledAt, CONSULTATION_SESSION_MINUTES);
       if (collision) return null;
 
       return tx.consultationBooking.create({

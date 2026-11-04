@@ -1,6 +1,7 @@
 import { fail, handleApiError, ok } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
+import { aggregateAnalytics } from "@/lib/analytics/aggregate";
 
 export async function GET() {
   try {
@@ -20,7 +21,9 @@ export async function GET() {
       prisma.supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
       prisma.pujaPartner.count({ where: { reviewStatus: "VERIFIED" } })
     ]);
+    const traffic = await aggregateAnalytics();
     return ok({
+      traffic,
       users,
       revenue: Number(payments._sum.amount ?? 0),
       paymentCount: payments._count,
@@ -31,7 +34,7 @@ export async function GET() {
         reportsGenerated, reportsDelivered, supportOpen, verifiedPujaPartners,
         source: "production_database_statuses",
         externallyVerifiedFulfilment: false,
-        visitorAnalytics: "not_configured"
+        visitorAnalytics: "consented_first_party_aggregate"
       }
     });
   } catch (error) {

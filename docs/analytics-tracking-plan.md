@@ -1,22 +1,7 @@
-# Analytics Tracking Plan
+# Consented aggregate analytics
 
-## Current Status
+The deployed first-party collector counts public pageviews and allowlisted interactions after explicit consent. It is not Vercel Web Analytics and does not count unique visitors. No actor ID, email, birth data, private route, query string or arbitrary metadata is recorded. Dynamic public detail URLs are reduced to route categories. DNT and Global Privacy Control suppress collection.
 
-Google Analytics loads only when `NEXT_PUBLIC_GA_ID` is configured. No sensitive astrology data should be sent to analytics.
+Visitors can allow or decline in the footer privacy preferences. The choice stays in localStorage; no analytics visitor cookie is issued. Data is aggregated per UTC day, route category and event, retained 90 days, and is available only to authorized administrators at `/admin/operations` and `/api/admin/analytics`. CSRF, origin, strict body validation and per-instance rate protection apply to the collector.
 
-## Safe Events
-
-- `calculator_started`
-- `calculator_completed`
-- `report_cta_clicked`
-- `report_request_intent_reviewed`
-- `horoscope_selector_changed`
-- `contact_cta_clicked`
-
-## Privacy Rule
-
-Never send name, DOB, birth time, birth place, phone, email, question text, or generated astrology output to analytics.
-
-## Next Step
-
-Add a small client event helper with allowlisted event names and non-sensitive metadata only.
+Search Console impressions/clicks and Google indexing remain separate provider evidence. Do not present synthetic QA visits as organic growth or customer conversion.

@@ -35,9 +35,13 @@ assert(legacyGoogleCallback.includes("status: 410") &&
   "Legacy Google callback fails closed", "no arbitrary email linking or session creation");
 
 const payableBooking = source("app/api/consultation-bookings/route.ts");
-assert(payableBooking.includes('"REQUESTED", "ACCEPTED", "CONFIRMED", "COMPLETED"') &&
+const bookingConflict = source("lib/consultations/booking-conflicts.ts");
+assert(payableBooking.includes("hasConsultationConflict(") &&
+  payableBooking.includes("lockConsultationCalendar(") &&
+  bookingConflict.includes("'PENDING', 'REQUESTED', 'PAYMENT_PENDING', 'ACCEPTED', 'CONFIRMED', 'COMPLETED'") &&
+  bookingConflict.includes('GREATEST("durationMins", 1)') &&
   payableBooking.includes("TransactionIsolationLevel.Serializable"),
-  "Unpaid consultation reserves the selected slot", "prevents multiple payable requests at one time");
+  "Unpaid consultation reserves the selected interval", "shared calendar lock and interval overlap guard");
 
 const legacyPages = [
   { route: "app/talk-to-kundli/page.tsx", label: "Legacy Kundli AI", markers: ["permanentRedirect", "/ai-astrologer"] },

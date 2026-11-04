@@ -125,7 +125,7 @@ export default function AdminPage() {
           <Link href="/admin/manual-report-prices">Manual Report Prices</Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/admin/readiness">System Readiness</Link>
+          <Link href="/admin/operations">Operations, Recovery & Traffic</Link>
         </Button>
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-4">

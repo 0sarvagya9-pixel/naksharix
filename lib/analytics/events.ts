@@ -1,19 +1,15 @@
-export type AnalyticsEventName =
-  | "calculator_started"
-  | "calculator_completed"
-  | "report_cta_clicked"
-  | "report_request_intent_reviewed"
-  | "horoscope_selector_changed"
-  | "contact_cta_clicked";
-
-type AnalyticsMetadata = Record<string, string | number | boolean | undefined>;
-
-const blockedMetadataKeys = new Set(["name", "email", "phone", "dateOfBirth", "dob", "timeOfBirth", "birthTime", "birthPlace", "question", "concern", "generatedText"]);
-
-export function trackNaksharixEvent(eventName: AnalyticsEventName, metadata: AnalyticsMetadata = {}) {
-  if (typeof window === "undefined") return;
-  const gtag = (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag;
-  if (!gtag) return;
-  const safeMetadata = Object.fromEntries(Object.entries(metadata).filter(([key]) => !blockedMetadataKeys.has(key)));
-  gtag("event", eventName, safeMetadata);
+import { secureFetch } from "@/lib/security/csrf";
+import { analyticsConsentKey, analyticsEventNames, publicAnalyticsRoute, type AggregateEventName } from "@/lib/analytics/public-routes";
+export type AnalyticsEventName = AggregateEventName;
+type AnalyticsMetadata = Record<string,string|number|boolean|undefined>;
+/** No arbitrary metadata, query strings, identities or birth data leave the browser. */
+export function trackNaksharixEvent(eventName:AnalyticsEventName,_metadata:AnalyticsMetadata={}) {
+  if(typeof window==='undefined'||!analyticsEventNames.includes(eventName))return;
+  const privacy=navigator as Navigator & {globalPrivacyControl?:boolean};
+  if(navigator.doNotTrack==='1'||privacy.globalPrivacyControl)return;
+  try {if(localStorage.getItem(analyticsConsentKey)!=='granted')return;}catch{return;}
+  const path=publicAnalyticsRoute(window.location.pathname);if(!path)return;
+  // Use the original public pathname only for server normalization; never search/hash or referrer.
+  void secureFetch('/api/analytics/aggregate',{method:'POST',headers:{'Content-Type':'application/json'},
+    signal:AbortSignal.timeout(6000),body:JSON.stringify({consent:true,event:eventName,path:window.location.pathname})}).catch(()=>{});
 }

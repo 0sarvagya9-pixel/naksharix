@@ -3,12 +3,15 @@ import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getEmailReadiness } from "@/lib/email/email-service";
-import { isAiAstrologerEnabled, isAiAstrologerReady } from "@/lib/ai/feature-status";
+import { isAiAstrologerEnabled, isAiAstrologerReady, isAiReportGeneratorEnabled, isGeminiKeyConfigured } from "@/lib/ai/feature-status";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 
-export const dynamic = "force-dynamic";
+import { authorizedRecoveryRequest, runDailyRecovery } from "@/lib/ops/daily-recovery";
 
-export async function GET() {
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+export async function GET(request: Request) {
   const checks = {
     app: true,
     database: false,
@@ -16,6 +19,7 @@ export async function GET() {
     redis: "not_configured" as "ok" | "error" | "not_configured",
     email: false,
     ai: false,
+    aiDraft: false,
     lockedScope: false
   };
 
@@ -34,10 +38,10 @@ export async function GET() {
 
   const email = getEmailReadiness();
   checks.email = email.provider === "smtp" && email.emailEnabled;
-  checks.ai = isAiAstrologerEnabled() && isAiAstrologerReady();
+  checks.ai = !isAiAstrologerEnabled() || isAiAstrologerReady();
+  checks.aiDraft = !isAiReportGeneratorEnabled() || isGeminiKeyConfigured();
   checks.lockedScope =
     env.SUBSCRIPTIONS_ENABLED === "false" &&
-    env.AI_REPORT_GENERATOR_ENABLED === "false" &&
     env.ALLOW_AI_DIAGNOSTICS === "false";
 
   const healthy =
@@ -46,14 +50,22 @@ export async function GET() {
     checks.databaseSchema &&
     checks.redis !== "error" &&
     checks.email &&
-    checks.ai &&
+    checks.ai && checks.aiDraft &&
     checks.lockedScope;
+
+  let recovery: unknown = undefined;
+  let recoveryFailed = false;
+  if (process.env.BACKUP_ENABLED === "true" && authorizedRecoveryRequest(request)) {
+    try { recovery = await runDailyRecovery(); }
+    catch { recoveryFailed = true; recovery = { status: "failed" }; }
+  }
 
   return NextResponse.json(
     {
       data: {
-        status: healthy ? "ok" : "degraded",
+        status: healthy && !recoveryFailed ? "ok" : "degraded",
         checks,
+        ...(recovery ? { recovery } : {}),
         deployment: {
           sha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
           branch: process.env.VERCEL_GIT_COMMIT_REF ?? null
@@ -62,7 +74,7 @@ export async function GET() {
       }
     },
     {
-      status: healthy ? 200 : 503,
+      status: healthy && !recoveryFailed ? 200 : 503,
       headers: {
         "Cache-Control": "no-store",
         "X-Robots-Tag": "noindex, nofollow"

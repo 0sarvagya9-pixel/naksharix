@@ -5,7 +5,7 @@ type LogLevel = "info" | "warn" | "error";
 
 type SafeLogMetadata = Record<string, string | number | boolean | null | undefined>;
 
-const blockedKeys = /birth|password|secret|token|pdf|bytes|question|concern|payload|signature/i;
+const blockedKeys = /birth|password|secret|token|pdf|bytes|question|concern|payload|signature|email|phone|address|cookie|authorization|latitude|longitude|^name$|fullname|messagebody/i;
 
 function sanitizeMetadata(metadata: SafeLogMetadata = {}) {
   return Object.fromEntries(
