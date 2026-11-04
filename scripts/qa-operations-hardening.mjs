@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { sealBackup, openBackup, backupChecksum } from '../lib/ops/backup-crypto.ts';
+import { publicAnalyticsRoute } from '../lib/analytics/public-routes.ts';
+const key=randomBytes(32).toString('hex');const plain=Buffer.concat([Buffer.from('PGDMP'),randomBytes(1024)]);
+const encrypted=sealBackup(plain,key);assert.ok(!encrypted.equals(plain));assert.deepEqual(openBackup(encrypted,key),plain);
+assert.notDeepEqual(sealBackup(plain,key),encrypted);
+assert.throws(()=>openBackup(encrypted,randomBytes(32).toString('hex')));
+for(const offset of [0,9,20,27,40,encrypted.length-1]) {const damaged=Buffer.from(encrypted);damaged[offset]^=1;assert.throws(()=>openBackup(damaged,key));}
+assert.throws(()=>sealBackup(Buffer.from('not a postgres archive'),key));
+assert.throws(()=>openBackup(encrypted.subarray(0,20),key));
+assert.equal(backupChecksum(plain),backupChecksum(openBackup(encrypted,key)));
+for(const path of ['/admin','/astrologer/dashboard','/profile','/api/reports/private.pdf','/reports?dob=2000-01-01','/shop#email','/orders','/saved-reports'])assert.equal(publicAnalyticsRoute(path),null);
+assert.equal(publicAnalyticsRoute('/shop/shri-yantra'),'/shop/:public-page');assert.equal(publicAnalyticsRoute('/'),'/');
+const read=p=>readFileSync(p,'utf8');
+const recovery=read('lib/ops/daily-recovery.ts'),worker=read('lib/ops/backup-worker.ts');
+for(const marker of ["access:'private'",'allowOverwrite:false','openBackup(stored,key)','sandbox?.stop()',"process.env.VERCEL_ENV!=='production'",'timingSafeEqual'])assert.ok(recovery.includes(marker));
+for(const marker of ['default_transaction_read_only=on','BACKUP_EXPECTED_SOURCE_HOST','127.0.0.1','pg_restore --exit-on-error','unset PGHOST PGUSER PGPASSWORD'])assert.ok(worker.includes(marker));
+const route=read('app/api/analytics/aggregate/route.ts');assert.ok(route.includes('consent:z.literal(true)'));assert.ok(route.includes('.strict()'));assert.ok(route.includes('rateLimitResponse('));
+const events=read('lib/analytics/events.ts');assert.ok(events.includes('globalPrivacyControl'));assert.ok(events.includes("doNotTrack==='1'"));assert.ok(!events.includes('window.location.search'));assert.ok(!events.includes('Object.entries(metadata)'));
+console.log('OPS_HARDENING=PASS;AES_GCM_TAMPER=REJECTED;PRIVATE_ROUTES=EXCLUDED;CONSENT=REQUIRED;RESTORE_TARGET=LOOPBACK_ONLY');

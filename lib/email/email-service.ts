@@ -81,7 +81,9 @@ export async function sendEmail(input: {
   if (input.text) payload.text = input.text;
   if (input.html) payload.html = input.html;
 
-  const response = await fetch(RESEND_EMAIL_API, {
+  let response: Response;
+  try {
+    response = await fetch(RESEND_EMAIL_API, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.SMTP_PASS!}`,
@@ -89,8 +91,13 @@ export async function sendEmail(input: {
       ...(input.idempotencyKey ? { "Idempotency-Key": input.idempotencyKey } : {})
     },
     body: JSON.stringify(payload),
-    cache: "no-store"
+    cache: "no-store",
+    signal: AbortSignal.timeout(15000)
   });
+  } catch {
+    logger.warn("email_delivery_network_error", { provider: "resend" });
+    return { sent: false, reason: "Email provider is temporarily unavailable.", missing: [] };
+  }
 
   if (!response.ok) {
     logger.warn("email_delivery_provider_rejected", { provider: "resend", status: response.status });

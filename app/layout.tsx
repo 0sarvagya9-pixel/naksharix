@@ -10,6 +10,7 @@ import "@/app/premium-ux-20261027.css";
 import { env, validateProductionEnv } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
+import { AnalyticsPreferences } from "@/components/analytics-preferences";
 import { PwaRegister } from "@/components/pwa-register";
 import { SchemaMarkup } from "@/components/schema-markup";
 import { LanguageProvider } from "@/components/language-provider";
@@ -77,6 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {children}
             </main>
             <Footer />
+            <AnalyticsPreferences />
           </PremiumGlassShell>
         </LanguageProvider>
         <PwaRegister />

@@ -2,15 +2,13 @@ import { AstrologerBookingsList } from "@/components/astrologer-bookings-list";
 import { Section } from "@/components/section";
 import { requireAstroRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
+import { consultationDayBounds } from "@/lib/consultations/slot-time";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
   const user = await requireAstroRole();
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+  const { start, end } = consultationDayBounds();
   const profile = await prisma.astrologerProfile.findUnique({
     where: { userId: user.id },
     include: {

@@ -7,9 +7,9 @@ Naksharix is a production Next.js astrology platform with authenticated Kundli w
 - Authoritative release branch: `complete-production-polish`.
 - Razorpay is the active payment provider for supported report and consultation flows.
 - AI Astrologer can be enabled independently with `AI_ASTROLOGER_ENABLED=true` and a real Gemini key.
-- `AI_REPORT_GENERATOR_ENABLED` remains disabled unless separately approved.
+- `AI_REPORT_GENERATOR_ENABLED` independently controls the authorized professional draft tool; it never silently delivers a paid customer PDF.
 - Public subscriptions remain disabled with `SUBSCRIPTIONS_ENABLED=false`.
-- Shop is informational/enquiry-only. No cart, Buy Now, stock mutation, or generic ecommerce checkout is part of the active scope.
+- Shop includes a real server-priced cart and authenticated order tracking. Gateway execution remains controlled by the established payment feature flags; non-payment releases do not change them.
 - Production database changes are never run automatically by application startup.
 
 ## Local development
@@ -30,7 +30,7 @@ For a disposable local database, create a separate PostgreSQL database and point
 - **AI Astrologer:** Gemini-backed English/Hindi/Hinglish chat with explicit consent and fail-closed provider handling.
 - **Premium reports:** server-owned pricing, Razorpay payment binding, generated PDF storage, protected download, admin delivery workflow, and Resend transactional delivery.
 - **Consultations:** approved astrologer profiles, availability validation, serializable collision protection, booking records, Razorpay-linked payment state, and transactional booking email.
-- **Shop:** searchable spiritual catalogue and availability enquiry only.
+- **Shop:** searchable catalogue, cart, authenticated order requests and owner-managed fulfilment tracking.
 - **Operations:** health/release/readiness endpoints, structured safe logging, production acceptance workflow, Vercel production health cron, DB baseline rehearsal, and evidence artifacts.
 
 ## Important environment variables
@@ -162,3 +162,9 @@ Publishing to Google Play still requires the owner's Google/Expo account authori
 ## Production ownership boundaries
 
 The repository can implement and test code, but these external proofs still require the relevant account owner when applicable: DNS/DMARC changes, Search Console ownership, Neon backup/restore operations, third-party alerting credentials, Google Play publishing, and real mailbox/device acceptance. Secrets must never be pasted into source code, GitHub comments, logs, or chat.
+
+## Current operational acceptance
+
+The authenticated `/admin/operations` screen separates consented aggregate pageviews from business records and displays independent recovery status. Aggregate analytics is opt-in; private routes, URL query strings, visitor identifiers and birth/question data are excluded. Retention is 90 days.
+
+Deployment-owned daily recovery uses the existing production-health cron, a protected `CRON_SECRET`, an AES-256-GCM key, private Blob storage and a disposable PostgreSQL restore environment. Export is read-only; only encrypted archives leave the temporary worker. Archive retention is seven days. `/api/ops/backup-status` reports a fresh verified receipt, not merely configuration. No backup is operational until the first real run and receipt succeed. Preserve the offline recovery key separately from Vercel.

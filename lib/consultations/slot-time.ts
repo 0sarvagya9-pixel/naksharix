@@ -25,3 +25,17 @@ export function formatConsultationSlotTime(scheduledAt: Date): string {
     timeZone: CONSULTATION_TIME_ZONE
   }).format(scheduledAt);
 }
+
+/** Shared IST day range, independent of browser/server timezone; end is exclusive. */
+export function consultationDayBounds(now = new Date()) {
+  if (!Number.isFinite(now.getTime())) throw new RangeError("Invalid consultation date");
+  const offset = 330 * 60000;
+  const start = new Date(Math.floor((now.getTime() + offset) / 86400000) * 86400000 - offset);
+  return { start, end: new Date(start.getTime() + 86400000) };
+}
+
+/** A datetime-local field in this portal is explicitly an IST civil time. */
+export function parseConsultationLocalDateTime(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;
+  return parseConsultationSlotTime(value.slice(0, 10), value.slice(11));
+}

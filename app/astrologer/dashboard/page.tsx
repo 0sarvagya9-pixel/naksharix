@@ -9,6 +9,7 @@ import { Section } from "@/components/section";
 import { requireAstroRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { seo } from "@/lib/seo";
+import { consultationDayBounds, formatConsultationSlotTime } from "@/lib/consultations/slot-time";
 
 export const dynamic = "force-dynamic";
 
@@ -36,11 +37,7 @@ export default async function AstrologerDashboardPage() {
   const activeProfile = profile ?? consultantProfile;
   const bookings = profile?.bookings ?? [];
   const now = new Date();
-  const indiaOffsetMs = 330 * 60 * 1000;
-  const startOfToday = new Date(
-    Math.floor((now.getTime() + indiaOffsetMs) / 86_400_000) * 86_400_000 - indiaOffsetMs
-  );
-  const endOfToday = new Date(startOfToday.getTime() + 86_400_000);
+  const { start: startOfToday, end: endOfToday } = consultationDayBounds(now);
   // Display rows are intentionally capped; counters and earnings must read the
   // full authorized profile records rather than just the 8 visible bookings.
   const bookingScope = profile ? { astrologerProfileId: profile.id } : null;
@@ -178,13 +175,13 @@ export default async function AstrologerDashboardPage() {
                 <div className="grid gap-3 lg:grid-cols-[1fr_1fr]">
                   <div>
                     <p className="font-cinzel font-bold">{booking.user.name}</p>
-                    <p className="text-sm naksh-muted-text">{booking.mode} | {booking.scheduledAt.toLocaleString("en-IN")} | {booking.status}</p>
+                    <p className="text-sm naksh-muted-text">{booking.mode} | {formatConsultationSlotTime(booking.scheduledAt)} | {booking.status}</p>
                     <p className="mt-2 text-sm naksh-muted-text">{booking.question}</p>
                     <p className="mt-2 text-xs text-amber-200">
                       Birth Info: {booking.birthName || "-"} | DOB: {booking.birthDate ? booking.birthDate.toLocaleDateString("en-IN") : "-"} | TOB: {booking.birthTime || "-"} | POB: {booking.birthPlace || "-"}
                     </p>
                   </div>
-                  <AstrologerBookingActions bookingId={booking.id} />
+                  <AstrologerBookingActions bookingId={booking.id} status={booking.status} paymentStatus={booking.paymentStatus} />
                 </div>
                 <div className="mt-4">
                   <AstrologerNoteForm userId={booking.user.id} />

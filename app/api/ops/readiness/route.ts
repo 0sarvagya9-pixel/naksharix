@@ -62,7 +62,10 @@ export async function GET() {
       }
     },
     privacy: {
-      analyticsConfigured: Boolean(env.NEXT_PUBLIC_GA_ID),
+      analyticsConfigured: process.env.FIRST_PARTY_ANALYTICS_DISABLED !== "true",
+      analyticsProvider: "first_party_aggregate",
+      analyticsConsentRequired: true,
+      uniqueVisitorTracking: false,
       analyticsQueryStringExcluded: true,
       sensitiveLogMetadataFiltered: true
     },

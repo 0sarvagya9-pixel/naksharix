@@ -1,4 +1,5 @@
 import { AstrologerBookingActions } from "@/components/astrologer-booking-actions";
+import { formatConsultationSlotTime } from "@/lib/consultations/slot-time";
 import { ConsultationMeetingControl } from "@/components/consultation-meeting-control";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -54,7 +55,7 @@ export function AstrologerBookingsList({
                     <span className="rounded-full border border-[#D4AF37]/25 px-2 py-0.5 text-xs text-[#FFD700]">{booking.status}</span>
                     <span className="rounded-full border border-[#01A361]/25 px-2 py-0.5 text-xs naksh-muted-text">{booking.mode}</span>
                   </div>
-                  <p className="text-sm naksh-muted-text">{booking.scheduledAt.toLocaleString("en-IN")} | {booking.durationMins} min</p>
+                  <p className="text-sm naksh-muted-text">{formatConsultationSlotTime(booking.scheduledAt)} | {booking.durationMins} min</p>
                   <p className="text-sm naksh-muted-text">Email: {customerEmail} | Phone: {customerPhone}</p>
                   <p className="text-sm naksh-muted-text">Payment: {booking.paymentStatus} | Amount: INR {Number(booking.amount ?? 0).toLocaleString("en-IN")}</p>
                   {booking.birthDate || booking.birthTime || booking.birthPlace ? (
@@ -65,7 +66,7 @@ export function AstrologerBookingsList({
                   <p className="text-sm leading-6 text-[#F0F0F0]">{booking.question}</p>
                 </div>
                 <div className="space-y-3">
-                  {showActions ? <AstrologerBookingActions bookingId={booking.id} /> : null}
+                  {showActions ? <AstrologerBookingActions bookingId={booking.id} status={booking.status} paymentStatus={booking.paymentStatus} /> : null}
                   {showActions && ["ACCEPTED", "CONFIRMED"].includes(booking.status) &&
                     ["PAID", "FREE", "ADMIN_BYPASS"].includes(booking.paymentStatus) ?
                     <ConsultationMeetingControl bookingId={booking.id} /> : null}
