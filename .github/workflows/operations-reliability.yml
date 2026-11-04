@@ -1,0 +1,73 @@
+name: Nonpayment Operations Reliability
+on:
+  pull_request:
+  push:
+    branches: [complete-production-polish]
+permissions:
+  contents: read
+jobs:
+  booking-analytics-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naksharix
+        ports: ['5432:5432']
+        options: --health-cmd 'pg_isready -U postgres' --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      CI: 'true'
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix?schema=public
+      JWT_SECRET: isolated-ci-operations-not-a-production-secret-20261105
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      EMAIL_PROVIDER: disabled
+      AI_ASTROLOGER_ENABLED: 'false'
+      AI_REPORT_GENERATOR_ENABLED: 'false'
+      SUBSCRIPTIONS_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run qa:booking-reliability && npm run qa:operations-hardening
+      - name: Prepare disposable database only
+        run: |
+          node -e 'const u=new URL(process.env.DATABASE_URL);if(process.env.CI!=="true"||u.hostname!=="localhost"||u.pathname!=="/naksharix")process.exit(1)'
+          npx prisma db push --skip-generate
+          node scripts/qa-align-disposable-feature-schema.mjs
+      - run: npm run build
+      - name: Run real HTTP conflict and consent tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run start -- -p 3000 >/tmp/ops-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do curl -sf http://127.0.0.1:3000/api/health >/dev/null && break; sleep 1; done
+          node scripts/qa-booking-reliability-http.mjs | tee operations-http.log
+          node scripts/qa-analytics-http.mjs | tee -a operations-http.log
+      - name: Install matching local PostgreSQL tools for clean-room restore
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-16
+      - name: Verify encrypted archive and isolated restore
+        env:
+          PGPASSWORD: postgres
+        run: |
+          export PATH=/usr/lib/postgresql/16/bin:$PATH
+          node --experimental-strip-types scripts/qa-encrypted-restore.mjs | tee encrypted-restore.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nonpayment-operations-evidence
+          path: |
+            operations-http.log
+            encrypted-restore.log
+          if-no-files-found: warn
