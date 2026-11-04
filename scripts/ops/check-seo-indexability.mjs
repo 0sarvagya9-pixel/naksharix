@@ -79,12 +79,12 @@ export async function verifyLiveSeo(fetcher = fetch, origin = CANONICAL_ORIGIN) 
       const canonical = attrValue(locateTag(head, "link", "rel", "canonical"), "href");
       const robots = attrValue(locateTag(head, "meta", "name", "robots"), "content") ?? "";
       const headerRobots = response.headers?.get?.("x-robots-tag") ?? "";
-      const expected = origin + (path === "/" ? "" : path);
+      const expected = origin + path;
       const issue = !response.ok ? "HTTP non-success" :
         /noindex/i.test(robots + " " + headerRobots) ? "unexpected noindex" :
         !/<title>[^<]+<\/title>/i.test(head) ? "missing HTML title" :
         !locateTag(head, "meta", "name", "description") ? "missing meta description" :
-        canonical !== expected ? "incorrect or absent self-canonical" : null;
+        canonical !== expected && !(path === "/" && canonical === origin) ? "incorrect or absent self-canonical" : null;
       collect(path, issue);
     } catch {
       collect(path, "unable to retrieve");
