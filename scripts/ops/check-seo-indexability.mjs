@@ -76,7 +76,9 @@ export async function verifyLiveSeo(fetcher = fetch, origin = CANONICAL_ORIGIN) 
   for (const path of CORE_ROUTES) {
     try {
       const { response, text } = await get(path);
-      const head = text.split(/<\/head>/i)[0];
+      // Next.js streams route metadata after the initial </head>; crawlers receive
+      // it in the full SSR response and browser parsing hoists metadata into head.
+      const head = text;
       if (process.env.NAKSHARIX_SEO_DIAG === "1") console.log("SEO_HTML_CHECK=" + JSON.stringify({ path, status: response.status, mime: response.headers?.get?.("content-type"), bytes: text.length, titleAt: text.search(/<title\b/i), headEndAt: text.search(/<\/head>/i), prefix: text.slice(0, 100) }));
       const canonical = attrValue(locateTag(head, "link", "rel", "canonical"), "href");
       const robots = attrValue(locateTag(head, "meta", "name", "robots"), "content") ?? "";
