@@ -12,6 +12,12 @@ type AdminAnalytics = {
   revenue: number;
   appointments: number;
   posts: number;
+  operational?: {
+    shopOrders: number; shopDelivered: number; pujaRequests: number;
+    pujasCompleted: number; reportsGenerated: number; reportsDelivered: number;
+    supportOpen: number; verifiedPujaPartners: number;
+    source: string; externallyVerifiedFulfilment: false;
+  };
 };
 type AstrologerApprovalRow = {
   id: string;
@@ -56,7 +62,7 @@ type ConsultationBookingRow = {
     user?: { email?: string | null; name?: string | null } | null;
   } | null;
 };
-const adminMetricKeys: (keyof AdminAnalytics)[] = ["users", "revenue", "appointments", "posts"];
+const adminMetricKeys = ["users", "revenue", "appointments", "posts"] as const;
 const operations = [
   { title: "User Management", copy: "Review roles, subscriptions, account status, and support history.", icon: Users },
   { title: "Kundli Submissions", copy: "Audit birth detail submissions, saved charts, failed calculations, and report upsells.", icon: ShieldCheck },
@@ -132,6 +138,27 @@ export default function AdminPage() {
           </Card>
         ))}
       </div>
+      <section className="mt-7" aria-label="Actual non-payment operational metrics">
+        <h2 className="font-cinzel text-2xl font-semibold">Operations — database counts</h2>
+        <p className="mt-2 text-sm naksh-muted-text">These are authenticated production records, not anonymous visitor analytics, courier proof, paid conversions or independent ceremony verification.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {([
+            ["Shop orders", analytics?.operational?.shopOrders],
+            ["Orders marked delivered", analytics?.operational?.shopDelivered],
+            ["Puja requests", analytics?.operational?.pujaRequests],
+            ["Pujas marked completed", analytics?.operational?.pujasCompleted],
+            ["PDFs generated", analytics?.operational?.reportsGenerated],
+            ["Reports marked delivered", analytics?.operational?.reportsDelivered],
+            ["Open support tickets", analytics?.operational?.supportOpen],
+            ["Verified Puja partners", analytics?.operational?.verifiedPujaPartners]
+          ] as const).map(([label, value])=>(
+            <Card key={label}><CardContent className="pt-5">
+              <p className="text-2xl font-black">{value ?? "-"}</p>
+              <p className="text-sm naksh-muted-text">{label}</p>
+            </CardContent></Card>
+          ))}
+        </div>
+      </section>
       <Card className="mt-6 overflow-hidden">
         <CardHeader><CardTitle>Astrologer Approvals</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">

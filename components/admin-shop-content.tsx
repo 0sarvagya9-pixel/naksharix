@@ -181,7 +181,7 @@ export function AdminShopContent() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">Admin Catalogue</p>
               <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382]">Shop Product Management</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[#a8b3c7]">
-                Manage the 12 market-compared INR selling prices, real stock-photo evidence and catalogue visibility for carts and unpaid order requests. Market benchmarks do not certify exact items. Online payments remain disabled. Changes are audited across administrator sessions.
+                Manage market-compared INR display prices, exact-product supplier evidence and catalogue visibility. Market benchmarks and reference photos do not prove physical stock, dispatch or actual delivered-item identity. Payment operations are handled separately. Owner catalogue changes are audited across administrator sessions.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -194,7 +194,7 @@ export function AdminShopContent() {
           <div className="mt-6 rounded-2xl border border-[#263957] bg-[#111f3a]/70 p-4">
             <div className="flex items-start gap-3 text-sm text-[#a8b3c7]">
               <ImagePlus className="mt-0.5 h-5 w-5 shrink-0 text-[#00f5a0]" />
-              <p>Image upload storage will be connected later. Use an image URL, a public path, or leave it blank to show the premium category placeholder.</p>
+              <p>Use the real supplier-authorized or owner-owned HTTPS product image and retain a separate HTTPS rights/evidence link. Licensed reference photographs are illustrations, not evidence of an exact SKU; never label them as actual delivered stock.</p>
             </div>
           </div>
 

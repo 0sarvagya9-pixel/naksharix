@@ -37,20 +37,25 @@ const readinessPage = source("app/admin/readiness/page.tsx");
 assert(adminEmailRoute.includes("getAdminApiUser()") &&
   adminEmailRoute.includes('if (!admin) return fail("Not found", 404)') &&
   adminEmailRoute.includes("env.ADMIN_EMAIL") &&
-  adminEmailRoute.includes('to: env.ADMIN_EMAIL') &&
-  !adminEmailRoute.includes("request.json()"), "Email smoke is admin-only and cannot send to arbitrary addresses", "fixed recipient");
+  adminEmailRoute.includes("env.EMAIL_QA_RECIPIENT") &&
+  adminEmailRoute.includes('modeSchema') &&
+  !adminEmailRoute.includes("to: body.recipient") &&
+  !adminEmailRoute.includes("input.recipient"), "Email smoke is admin-only with fixed server-owned recipients", "no arbitrary destination");
 assert(adminEmailRoute.includes("getEmailReadiness()") &&
   adminEmailRoute.includes("prisma.$transaction") &&
   adminEmailRoute.includes("pg_advisory_xact_lock") &&
-  adminEmailRoute.includes('action: "email.smoke.attempt"') &&
-  adminEmailRoute.includes("recent >= 2") &&
+  adminEmailRoute.includes('email.smoke.suite.attempt') &&
+  adminEmailRoute.includes('recent >= (mode === "suite" ? 1 : 2)') &&
+  adminEmailRoute.includes("idempotencyKey:") &&
   !adminEmailRoute.includes('import { rateLimit }') &&
   adminEmailRoute.includes("if (!result.sent)") &&
-  adminEmailRoute.includes("providerAccepted: true"), "Email smoke is readiness gated, throttled and honest about provider acceptance", "no fake delivered status");
-assert(adminEmailUi.includes('secureFetch("/api/admin/email-test", { method: "POST" })') &&
+  adminEmailRoute.includes("providerAccepted: true") &&
+  adminEmailRoute.includes('Provider acceptance is not proof of inbox delivery.'), "Email smoke/suite is readiness gated, DB-throttled and truthful about provider acceptance", "no fake delivered state");
+assert(adminEmailUi.includes('secureFetch("/api/admin/email-test", {') &&
+  adminEmailUi.includes('submit("suite")') &&
   adminEmailUi.includes("Check your configured Admin mailbox") &&
   readinessPage.includes("<AdminEmailAcceptanceTest enabled={email.emailEnabled} />"),
-  "Email acceptance button requires explicit secure admin interaction", "no background sending");
+  "Email suite requires explicit, authenticated, secure admin interaction", "no background or anonymous sending");
 
 const opsReady = source("app/api/ops/readiness/route.ts");
 assert(opsReady.includes("sharedRedisConfigured()") &&

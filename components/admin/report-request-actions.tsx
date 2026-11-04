@@ -31,6 +31,7 @@ export function ReportRequestActions({
 }) {
   const [status, setStatus] = useState(initialStatus);
   const [adminNotes, setAdminNotes] = useState(initialNotes ?? "");
+  const [reviewConfirmed, setReviewConfirmed] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<"save" | "pdf" | null>(null);
 
@@ -40,7 +41,7 @@ export function ReportRequestActions({
     const response = await secureFetch("/api/admin/report-requests", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: requestId, status, adminNotes })
+      body: JSON.stringify({ id: requestId, status, adminNotes, reviewConfirmed })
     });
     setLoading(null);
     if (!response.ok) {
@@ -48,7 +49,8 @@ export function ReportRequestActions({
       setMessage(json?.error ?? "Unable to save report workflow changes.");
       return;
     }
-    setMessage("Workflow updated.");
+    setMessage("Workflow updated. Approval is recorded in the audit history.");
+    setReviewConfirmed(false);
   }
 
   async function generatePdf() {
@@ -74,7 +76,10 @@ export function ReportRequestActions({
       setMessage(json?.error ?? "Email delivery is not configured. The generated PDF remains available for secure download.");
       return;
     }
-    setMessage("Delivery email sent and request marked delivered.");
+    const delivery = await response.json().catch(() => null);
+    setMessage(delivery?.data?.delivery?.skipped
+      ? "Already recorded as sent; no duplicate email attempted."
+      : "Email provider accepted the report message; recipient inbox delivery is not independently confirmed.");
   }
 
   return (
@@ -91,7 +96,7 @@ export function ReportRequestActions({
         <div className="space-y-2 text-sm text-slate-200">
           <span>PDF actions</span>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" onClick={generatePdf} disabled={loading === "pdf"} variant="secondary">
+            <Button type="button" onClick={generatePdf} disabled={loading !== null || status !== "READY_FOR_GENERATION"} variant="secondary">
               <FileText className="mr-2 h-4 w-4" />
               {loading === "pdf" ? "Generating..." : "Generate PDF"}
             </Button>
@@ -111,15 +116,22 @@ export function ReportRequestActions({
           </div>
         </div>
       </div>
+      {status === "READY_FOR_GENERATION" && initialStatus !== "READY_FOR_GENERATION" ? (
+        <label className="flex items-start gap-2 rounded-lg border border-[#D4AF37]/30 p-3 text-sm">
+          <input type="checkbox" checked={reviewConfirmed} onChange={event => setReviewConfirmed(event.target.checked)}
+            className="mt-1" />
+          <span>I have manually examined the submitted birth date, time, place, calculation limitations and report scope. Approval and detailed notes are required before any PDF may be generated.</span>
+        </label>
+      ) : null}
       <label className="block space-y-2 text-sm text-slate-200">
-        <span>Admin notes</span>
+        <span>Admin notes (at least 30 characters when approving for generation)</span>
         <textarea value={adminNotes} onChange={(event) => setAdminNotes(event.target.value)} rows={4} className="cosmic-textarea" />
       </label>
       <Button type="button" onClick={save} disabled={loading === "save"}>
         <Save className="mr-2 h-4 w-4" />
         {loading === "save" ? "Saving..." : "Save workflow"}
       </Button>
-      {message ? <p className="rounded-md border border-[#D4AF37]/20 bg-[#020612]/70 p-3 text-sm text-slate-200">{message}</p> : null}
+      {message ? <p role="status" className="rounded-md border border-[#D4AF37]/20 bg-[#020612]/70 p-3 text-sm text-slate-200">{message}</p> : null}
     </div>
   );
 }

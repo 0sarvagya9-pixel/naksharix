@@ -26,6 +26,26 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     if (reportRequest.status === ReportRequestStatus.DELIVERED) {
       return fail("Delivered reports cannot be regenerated in place; preserve the customer delivery evidence.", 409);
     }
+    if (reportRequest.status !== ReportRequestStatus.READY_FOR_GENERATION) {
+      return fail("Complete the documented administrator review and move the request to READY_FOR_GENERATION first.", 409);
+    }
+    if (reportRequest.generatedPdfSize || reportRequest.generatedPdfBytes || reportRequest.generatedPdfStorageKey) {
+      return fail("An existing report PDF must not be overwritten; preserve the original delivery evidence.", 409);
+    }
+    const approvedReview = await prisma.reportStatusHistory.findFirst({
+      where: {
+        reportRequestId: reportRequest.id,
+        newStatus: ReportRequestStatus.READY_FOR_GENERATION,
+        actorRole: { in: ["ADMIN", "SUPER_ADMIN"] },
+        note: { not: null }
+      },
+      orderBy: { createdAt: "desc" },
+      select: { note: true }
+    });
+    if (!approvedReview?.note || approvedReview.note.trim().length < 30 ||
+        approvedReview.note !== reportRequest.adminNotes) {
+      return fail("Administrator review history and matching saved review notes are required before generating a PDF.", 422);
+    }
     if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
       return fail("Verified payment or authorized admin bypass is required before generating a paid report.", 409);
     }
@@ -70,7 +90,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       templateId: reportRequest.reportSlug,
       status: "ready_for_generation",
       content,
-      reviewedByAdmin: true
+      reviewedByAdmin: Boolean(approvedReview.note)
     });
 
     if (generated.status !== "generated_internal_unverified" || !generated.bytes?.byteLength) {
@@ -83,8 +103,13 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       bytes: generated.bytes
     });
 
-    await prisma.reportRequest.update({
-      where: { id: reportRequest.id },
+    const claim = await prisma.reportRequest.updateMany({
+      where: {
+        id: reportRequest.id,
+        status: ReportRequestStatus.READY_FOR_GENERATION,
+        generatedPdfSize: null,
+        generatedPdfStorageKey: null
+      },
       data: {
         generatedPdfBytes: stored.bytes,
         generatedPdfFileName: stored.fileName,
@@ -99,6 +124,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
         status: ReportRequestStatus.GENERATED
       }
     });
+    if (claim.count !== 1) return fail("Report request changed during PDF generation. No existing PDF was overwritten.", 409);
     await writeReportStatusHistory({
       reportRequestId: reportRequest.id,
       oldStatus: reportRequest.status,

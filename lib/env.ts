@@ -30,6 +30,7 @@ const envSchema = z.object({
   ADSENSE_SLOT_KUNDLI_GUIDE: z.string().optional(),
   ADSENSE_SLOT_KUNDLI_LEARNING: z.string().optional(),
   ADMIN_EMAIL: z.string().email().optional(),
+  EMAIL_QA_RECIPIENT: z.string().email().optional(),
   ADMIN_PASSWORD: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),

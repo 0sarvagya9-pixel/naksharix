@@ -956,14 +956,34 @@ try {
     const delivery = await post("/api/admin/report-requests/" + reportId + "/deliver", {}, adminCookie);
     assert.equal(delivery.status, 409, await delivery.text());
   });
-  await check("synthetic paid-state fixture creates real PDF with owner-only download", async () => {
+  await check("synthetic paid-state fixture requires explicit admin review, then creates owner-only PDF", async () => {
+    // Disposable QA database only. This update is not a real merchant payment
+    // and has no effect on production payment records.
     await prisma.reportRequest.update({ where: { id: reportId }, data: { paymentStatus: "PAID" } });
-    const pdf = await post("/api/admin/report-requests/" + reportId + "/generate-pdf", {}, adminCookie);
+    const endpoint="/api/admin/report-requests";
+    const generate="/api/admin/report-requests/" + reportId + "/generate-pdf";
+    const withoutReview=await post(generate,{},adminCookie);
+    assert.equal(withoutReview.status,409,"Unreviewed paid report must not generate");
+    const inProgress=await post(endpoint,{id:reportId,status:"IN_PROGRESS",adminNotes:"Review pending"},adminCookie,"PATCH");
+    assert.equal(inProgress.status,200,await inProgress.text());
+    const unapproved=await post(endpoint,{id:reportId,status:"READY_FOR_GENERATION",
+      adminNotes:"Synthetic QA review note describing chart limitations and confirmed birth inputs.",
+      reviewConfirmed:false},adminCookie,"PATCH");
+    assert.equal(unapproved.status,422,"Unapproved chart must not enter generation");
+    const reviewed=await post(endpoint,{id:reportId,status:"READY_FOR_GENERATION",
+      adminNotes:"Reviewed the synthetic birth date, time, location, coordinates and calculation limitations; internal QA only.",
+      reviewConfirmed:true},adminCookie,"PATCH");
+    assert.equal(reviewed.status,200,await reviewed.text());
+    const pdf = await post(generate, {}, adminCookie);
     const result = await pdf.json();
     assert.equal(pdf.status, 200, JSON.stringify(result).slice(0, 600));
     assert.ok(result.data.byteLength > 500, "PDF bytes unexpectedly small");
     const row = await prisma.reportRequest.findUniqueOrThrow({ where: { id: reportId } });
     assert.ok(row.generatedPdfSize > 500 && row.generatedPdfChecksum);
+    const reGenerate=await post(generate,{},adminCookie);
+    assert.equal(reGenerate.status,409,"Regeneration must not overwrite stored report bytes");
+    const unchanged=await prisma.reportRequest.findUniqueOrThrow({where:{id:reportId}});
+    assert.equal(unchanged.generatedPdfChecksum,row.generatedPdfChecksum);
     const owned = await req("/api/report-requests/" + reportId + "/download", { headers: { cookie: userCookie } });
     assert.equal(owned.status, 200, "owner PDF unavailable");
     assert.equal(owned.headers.get("content-type"), "application/pdf");

@@ -14,6 +14,7 @@ export function AiReportGeneratorForm() {
   const { apiLocale, requiredMessage, tr } = useLanguage();
   const [report, setReport] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [isDraft, setIsDraft] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
 
   async function generate(formData: FormData) {
@@ -29,14 +30,29 @@ export function AiReportGeneratorForm() {
     }
     setBusy(true);
     setReport(null);
+    setIsDraft(false);
+    try {
     const response = await secureFetch("/api/ai/report-generator", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(Object.fromEntries(formData.entries()))
     });
     const json = await response.json().catch(() => null);
-    setBusy(false);
-    setReport(response.ok && typeof json?.data?.report === "string" ? json.data.report : tr("errorGeneric"));
+    if (!response.ok || typeof json?.data?.report !== "string") {
+      setReport(typeof json?.error === "string" ? json.error : tr("errorGeneric"));
+      return;
+    }
+    if (json.data.status !== "unreviewed_operator_draft" || json.data.requiresHumanReview !== true) {
+      setReport("No validated professional working draft was produced.");
+      return;
+    }
+    setReport(json.data.report);
+    setIsDraft(true);
+    } catch {
+      setReport("AI provider unavailable. No real professional draft was generated.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -56,6 +72,10 @@ export function AiReportGeneratorForm() {
         <Button disabled={busy}><WandSparkles className="h-4 w-4" />{busy ? tr("generatingAiReport") : tr("generateAiReport")}</Button>
       </form>
       <div className="min-h-80 whitespace-pre-line rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-5 text-sm leading-7 naksh-muted-text">
+        <p className="mb-3 font-semibold text-[#f3d382]">
+          {isDraft ? "Unverified AI working draft — manual chart calculation and professional review required" : "Operator-only AI drafting tool"}
+        </p>
+        <p className="mb-4 text-xs">This draft is not a paid customer report, verified horoscope or delivered PDF. It does not create a purchase or booking.</p>
         {report ?? tr("generatedReportPlaceholder")}
       </div>
     </div>
