@@ -94,7 +94,7 @@ export function AstrologerNavbar() {
         aria-label="Astrologer portal sidebar"
         className={cn(
           "fixed inset-y-0 left-0 z-[70] flex w-[280px] max-w-[85vw] shrink-0 -translate-x-full flex-col border-r border-[#d4af37]/20 bg-[#07162d] text-white shadow-[12px_0_48px_rgba(2,8,24,.55)] transition-transform duration-200",
-          "lg:sticky lg:top-16 lg:z-20 lg:h-[calc(100vh-4rem)] lg:w-[264px] lg:translate-x-0 lg:shadow-none",
+          "lg:sticky lg:top-0 lg:z-20 lg:h-screen lg:w-[264px] lg:translate-x-0 lg:shadow-none",
           mobileOpen && "translate-x-0"
         )}
       >
