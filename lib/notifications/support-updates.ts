@@ -18,10 +18,10 @@ function supportUrl(admin: boolean) {
   return new URL(path, env.NEXT_PUBLIC_APP_URL).toString();
 }
 
-async function deliver(to: string | null | undefined, subject: string, text: string): Promise<SupportMailOutcome> {
+async function deliver(to: string | null | undefined, subject: string, text: string, idempotencyKey: string): Promise<SupportMailOutcome> {
   if (!to) return "recipient_missing";
   try {
-    const result = await sendEmail({ to, subject, text });
+    const result = await sendEmail({ to, subject, text, idempotencyKey });
     if (result.sent) {
       logger.info("support_notification_provider_accepted", { kind: subject.includes("New") ? "new_ticket" : "staff_reply" });
       return "provider_accepted";
@@ -44,11 +44,11 @@ export async function notifySupportTeamOfNewTicket(ticketId: string): Promise<Su
     "",
     "Customer details and message content are available only after you sign in.",
     "Provider acceptance of this message does not prove inbox delivery."
-  ].join("\n"));
+  ].join("\n"), "naksharix/support-new/" + ticketId);
 }
 
 /** Called only for an admin reply persisted once, never for client retry replays. */
-export async function notifyCustomerOfSupportReply(ticketId: string): Promise<SupportMailOutcome> {
+export async function notifyCustomerOfSupportReply(ticketId: string, clientMutationId: string): Promise<SupportMailOutcome> {
   let recipient: string | null | undefined;
   try {
     const ticket = await prisma.supportTicket.findUnique({
@@ -68,5 +68,5 @@ export async function notifyCustomerOfSupportReply(ticketId: string): Promise<Su
     "",
     "We do not include private ticket messages, birth details, OTPs or passwords in this notification.",
     "Provider acceptance of this message does not prove inbox delivery."
-  ].join("\n"));
+  ].join("\n"), "naksharix/support-reply/" + ticketId + "/" + clientMutationId);
 }
