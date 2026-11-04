@@ -1,0 +1,32 @@
+name: AI Output Completion Regression
+on:
+  pull_request:
+    branches: [complete-production-polish]
+    paths:
+      - 'lib/ai/**'
+      - 'scripts/qa-ai-completion.mjs'
+      - '.github/workflows/ai-output-completion.yml'
+  push:
+    branches: [complete-production-polish]
+    paths:
+      - 'lib/ai/**'
+      - 'scripts/qa-ai-completion.mjs'
+      - '.github/workflows/ai-output-completion.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  completion-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Execute chat and report completion regressions without real credentials
+        run: node scripts/qa-ai-completion.mjs
