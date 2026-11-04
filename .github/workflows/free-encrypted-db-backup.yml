@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: '43 2 * * *'
   workflow_dispatch:
+  # Exercise the fail-closed backup and alert path when this workflow changes on main.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/free-encrypted-db-backup.yml'
 
 permissions:
   contents: read
