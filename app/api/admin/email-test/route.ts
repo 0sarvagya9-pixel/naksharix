@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // Owner-only 11-mail suite uses provider rate pacing.
 
 /**
  * Explicitly admin-triggered acceptance probe; never accepts a destination or
