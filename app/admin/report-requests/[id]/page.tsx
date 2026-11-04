@@ -60,7 +60,7 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
               requestId={request.id}
               initialStatus={request.status}
               initialNotes={request.adminNotes}
-              hasPdf={Boolean(request.generatedPdfBytes && request.generatedPdfSize)}
+              hasPdf={Boolean(request.generatedPdfSize && (request.generatedPdfBytes || request.generatedPdfStorageKey))}
             />
           </div>
           <div className="md:col-span-2 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
