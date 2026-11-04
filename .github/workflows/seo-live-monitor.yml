@@ -36,6 +36,8 @@ jobs:
           node-version: '22'
       - name: Verify checker syntax and public SEO signals
         id: check
+        env:
+          NAKSHARIX_SEO_DIAG: "1"
         continue-on-error: true
         run: |
           node --check scripts/ops/check-seo-indexability.mjs
