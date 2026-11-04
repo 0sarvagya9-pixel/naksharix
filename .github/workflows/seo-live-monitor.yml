@@ -1,0 +1,70 @@
+name: NAKSHARIX public SEO indexability monitor
+
+on:
+  schedule:
+    - cron: '21 3 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/seo-live-monitor.yml'
+      - 'scripts/ops/check-seo-indexability.mjs'
+  push:
+    branches: [main, complete-production-polish]
+    paths:
+      - '.github/workflows/seo-live-monitor.yml'
+      - 'scripts/ops/check-seo-indexability.mjs'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: naksharix-public-seo-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  seo-health:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'complete-production-polish' }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify checker syntax and public SEO signals
+        id: check
+        env:
+          NAKSHARIX_SEO_DIAG: "1"
+        continue-on-error: true
+        run: |
+          node --check scripts/ops/check-seo-indexability.mjs
+          node scripts/ops/check-seo-indexability.mjs
+      - name: Open or resolve a single SEO monitoring incident
+        if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CHECK_RESULT: ${{ steps.check.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          title='[seo] NAKSHARIX public indexability monitor failed'
+          incident=$(gh issue list --state open --limit 100 --json number,title \
+            --jq '.[] | select(.title == "[seo] NAKSHARIX public indexability monitor failed") | .number' | head -n 1)
+          if [ "$CHECK_RESULT" = "success" ]; then
+            if [ -n "$incident" ]; then
+              gh issue comment "$incident" --body 'Live robots, sitemap, title, canonical and public indexability checks have recovered. Search Console indexing is an independent provider-controlled signal.'
+              gh issue close "$incident" --reason completed
+            fi
+          elif [ -z "$incident" ]; then
+            gh issue create --title "$title" \
+              --body 'Live technical SEO health failed. Inspect this GitHub Actions run for public route paths only. Do not include user or customer data. Sitemap acceptance does not guarantee Google indexing.'
+          else
+            gh issue comment "$incident" --body 'Technical SEO remains degraded. Review the latest scheduled run.'
+          fi
+      - name: Fail when live SEO is degraded
+        if: always() && steps.check.outcome != 'success'
+        run: exit 1
