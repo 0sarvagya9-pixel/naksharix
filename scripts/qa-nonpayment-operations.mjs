@@ -17,6 +17,11 @@ const monitors = read("scripts/ops/check-public-endpoints.mjs");
 const opsWorkflow = read(".github/workflows/free-public-uptime.yml");
 const backups = read(".github/workflows/free-encrypted-db-backup.yml");
 const retryRoute = read("app/api/admin/fulfilment-notification/route.ts");
+const supportMail = read("lib/notifications/support-updates.ts");
+const staffReply = read("app/api/admin/support/reply/route.ts");
+const newTicket = read("app/api/support/tickets/route.ts");
+const guidance = read("app/api/guidance-enquiries/route.ts");
+const supportUi = read("components/support-conversation.tsx");
 
 assert.ok(send.includes('import "server-only";') &&
   send.includes('import { sendEmail } from "@/lib/email/email-service"') &&
@@ -103,4 +108,23 @@ assert.ok(send.includes('export function isNotifiableFulfilmentStatus(') &&
   adminPuja.includes('kind:"puja",id:booking.id,expectedVersion:booking.version'),
   "Owner UI may retry bounded notification without creating a new order or payment");
 
+assert.ok(supportMail.includes('import "server-only";') &&
+  supportMail.includes("await sendEmail({ to, subject, text })") &&
+  supportMail.includes('new URL(path, env.NEXT_PUBLIC_APP_URL)') &&
+  supportMail.includes('select: { user: { select: { email: true } } }') &&
+  !supportMail.includes('input.message') && !supportMail.includes('ticket.subject') &&
+  supportMail.includes("Provider acceptance of this message does not prove inbox delivery."),
+  "Support email notifications must be private, owner-bound and inbox-proof neutral");
+assert.ok(staffReply.includes('getAdminApiUser()') &&
+  staffReply.includes('result.duplicate ? "not_needed"') &&
+  staffReply.includes('await notifyCustomerOfSupportReply(input.ticketId)') &&
+  newTicket.includes('await notifySupportTeamOfNewTicket(ticket.id)') &&
+  guidance.includes('await notifySupportTeamOfNewTicket(ticket.id)') &&
+  staffReply.includes('return ok({ recorded: true, duplicate: result.duplicate, notification })') &&
+  supportUi.includes('Email provider accepted a customer notification; inbox delivery is not confirmed.'),
+  "Admin replies and new support/enquiry tickets must notify without duplicate sends or fake delivery");
+assert.ok(newTicket.indexOf('supportTicket.create(') < newTicket.indexOf('notifySupportTeamOfNewTicket(ticket.id)') &&
+  guidance.indexOf('supportTicket.create(') < guidance.indexOf('notifySupportTeamOfNewTicket(ticket.id)') &&
+  staffReply.indexOf('appendSupportMessage({') < staffReply.indexOf('notifyCustomerOfSupportReply(input.ticketId)'),
+  "Notifications must happen only after the ticket or staff reply is stored successfully");
 console.log("NONPAYMENT_OPERATIONS_QA=PASS;CUSTOMER_STATUS_EMAIL=FAIL_SOFT;FULFILMENT_GUARDS=RETAINED;DUPLICATE_REPORT_EMAIL=BLOCKED;REPORTS_PRICE_GATE=CORRECT;PUBLIC_MONITOR=14_ENDPOINTS");
