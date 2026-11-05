@@ -14,13 +14,13 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Home", href: "/", active: ["/"] },
-  { label: "Reports", href: "/reports", active: ["/reports"] },
-  { label: "Consultation", href: "/consultation", active: ["/consultation", "/astrologers"] },
-  { label: "Puja", href: "/pujas", active: ["/pujas", "/puja-enquiry", "/puja-calendar"] },
-  { label: "Shop", href: "/shop", active: ["/shop"] },
   { label: "Kundli", href: "/kundli", active: ["/kundli", "/free-kundli"] },
   { label: "Horoscope", href: "/daily-horoscope", active: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope"] },
-  { label: "Panchang", href: "/panchang", active: ["/panchang"] }
+  { label: "Panchang", href: "/panchang", active: ["/panchang"] },
+  { label: "Puja", href: "/pujas", active: ["/pujas", "/puja-enquiry", "/puja-calendar"] },
+  { label: "Reports", href: "/reports", active: ["/reports"] },
+  { label: "Shop", href: "/shop", active: ["/shop"] },
+  { label: "Consultation", href: "/consultation", active: ["/consultation", "/astrologers"] }
 ] as const;
 
 const exploreLinks = [
