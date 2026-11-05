@@ -311,3 +311,23 @@ html.dark body.naksh-page-bg [data-layout="editorial"] .nx-ed-section-title :is(
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Editorial split hero: image fills the right-hand visual zone without
+ * positioning display text on a busy photograph. */
+@media (min-width: 900px) {
+  .nx-editorial .nx-ed-hero { background: #321a28; }
+  .nx-editorial .nx-ed-hero-photo { left: 47%; right: 0; }
+  .nx-editorial .nx-ed-hero-wash {
+    background: linear-gradient(90deg, #321a28 0%, #402032 42%, rgba(50,26,40,.50) 56%, rgba(44,26,40,.08) 100%) !important;
+  }
+  .nx-editorial .nx-ed-hero-copy { max-width: min(630px, 54%); }
+  .nx-editorial .nx-ed-hero-inner { min-height: 590px; }
+}
+@media (max-width: 899px) {
+  .nx-editorial .nx-ed-hero-wash {
+    background: linear-gradient(90deg, rgba(42,18,31,.96), rgba(55,22,36,.83)) !important;
+  }
+  .nx-editorial .nx-ed-hero-inner { padding-block: 3.2rem 5.8rem; }
+  .nx-editorial .nx-ed-hero h1 { font-size: clamp(2.15rem, 8.4vw, 3.3rem); }
+}
