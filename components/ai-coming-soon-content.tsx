@@ -21,22 +21,22 @@ export function AiComingSoonContent() {
   return (
     <main className="inner-page-shell star-field">
       <Section>
-        <div className="inner-section rounded-3xl border border-[#263957] p-6 text-center md:p-10">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-[#dca956]/35 bg-[#142647] text-[#f3d382] shadow-[0_0_34px_rgba(0,245,160,0.14)]">
+        <div className="inner-section rounded-3xl border border-[#e6d4bd] bg-[#fffdf8] p-6 text-center md:p-10">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-[#dac098] bg-[#f5e8d6] text-[#70283d] shadow-[0_0_34px_rgba(0,245,160,0.14)]">
             <Bot className="h-8 w-8" />
           </div>
-          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-[#00f5a0]">{labels.badge}</p>
-          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{labels.title}</h1>
-          <p className="mx-auto mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{labels.subtitle}</p>
+          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-[#81551e]">{labels.badge}</p>
+          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#70283d] sm:text-5xl">{labels.title}</h1>
+          <p className="mx-auto mt-4 max-w-3xl text-lg leading-8 text-[#584c53]">{labels.subtitle}</p>
         </div>
 
         <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
           {cards.map(({ title, href, icon: Icon }) => (
             <Card key={href} className="inner-card transition hover:-translate-y-1 hover:border-[#dca956]/45">
               <CardContent className="flex h-full flex-col p-5">
-                <Icon className="h-6 w-6 text-[#00f5a0]" />
-                <h2 className="mt-4 font-cinzel text-xl font-bold text-[#f3d382]">{title}</h2>
-                <Button className="mt-auto w-full bg-[#009b72] text-white hover:bg-[#008766]" asChild>
+                <Icon className="h-6 w-6 text-[#70283d]" />
+                <h2 className="mt-4 font-cinzel text-xl font-bold text-[#70283d]">{title}</h2>
+                <Button className="mt-auto w-full bg-[#70283d] text-[#fff9f0] hover:bg-[#542032]" asChild>
                   <Link href={href}>{labels.open}</Link>
                 </Button>
               </CardContent>
