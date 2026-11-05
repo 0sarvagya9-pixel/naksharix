@@ -88,7 +88,14 @@ export async function runDailyRecovery() {
       BACKUP_DATABASE_URL:process.env.DIRECT_URL||process.env.DATABASE_URL!,
       BACKUP_EXPECTED_SOURCE_HOST:process.env.BACKUP_EXPECTED_SOURCE_HOST!
     }});
-    if(dump.exitCode!==0)throw new Error('EXPORT_FAILED');
+    if(dump.exitCode!==0) {
+      // Worker stderr contains only an explicit diagnostic enum; never log
+      // raw pg_dump stderr, connection strings, SQL or customer data.
+      const code=(await dump.stderr()).match(/BACKUP_EXPORT_CODE=([A-Z_]+)/)?.[1] || 'UNKNOWN';
+      const allowed=new Set(['CONNECTION_URL','HOST_MISMATCH','CLIENT_MISSING','AUTH','PERMISSION','DNS',
+        'NETWORK','VERSION','PG_OPTIONS','PG_DUMP','ARCHIVE_FILE','ARCHIVE_SIZE','UNKNOWN']);
+      throw new Error('EXPORT_FAILED_'+(allowed.has(code)?code:'UNKNOWN'));
+    }
     const plain=await sandbox.readFileToBuffer({path:'/tmp/naksh-source.dump'});
     if(!plain||plain.length>MAX_BACKUP_BYTES)throw new Error('ARCHIVE_INVALID');
     const key=process.env.BACKUP_ENCRYPTION_KEY!;
@@ -129,9 +136,12 @@ export async function runDailyRecovery() {
     receipt.emailAccepted=await notify(day,true,`Encrypted private backup uploaded, downloaded, decrypted and restored in an isolated database. Restored tables: ${counts.tables}. Retention: 7 days. No production data was modified.`);
     await put(PREFIX+'receipts/'+day+'.json',JSON.stringify(receipt),{access:'private',addRandomSuffix:false,allowOverwrite:false,contentType:'application/json'});
     return {unchanged:false,receipt};
-  }catch {
-    await notify(day,false,`The daily recovery task failed at stage: ${stage}. Production database was not changed. Check the private operations dashboard; no successful restore is claimed.`);
-    throw new Error('BACKUP_FAILED_'+stage.toUpperCase());
+  }catch (error) {
+    const diagnostic=error instanceof Error && /^EXPORT_FAILED_[A-Z_]+$/.test(error.message)
+      ? error.message.slice('EXPORT_FAILED_'.length) : '';
+    const suffix=diagnostic ? ' ('+diagnostic+')' : '';
+    await notify(day,false,`The daily recovery task failed at stage: ${stage}${suffix}. Production database was not changed. Check the private operations dashboard; no successful restore is claimed.`);
+    throw new Error('BACKUP_FAILED_'+stage.toUpperCase()+(diagnostic?'_'+diagnostic:''));
   }finally {
     await sandbox?.stop().catch(()=>{});
     await del(lock.url).catch(()=>{});
