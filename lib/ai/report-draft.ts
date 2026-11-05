@@ -2,6 +2,7 @@ import "server-only";
 
 import { env } from "@/lib/env";
 import { logger } from "@/lib/monitoring/logger";
+import { GeminiOutputError, geminiTextBudget, readCompleteGeminiText } from "@/lib/ai/provider-output";
 
 export type InternalAiReportDraftInput = {
   reportType: string;
@@ -12,7 +13,7 @@ export type InternalAiReportDraftInput = {
 };
 
 export class ReportDraftUnavailableError extends Error {
-  constructor(public readonly reason: "NOT_CONFIGURED" | "PROVIDER_ERROR" | "PROVIDER_EMPTY" | "TIMEOUT") {
+  constructor(public readonly reason: "NOT_CONFIGURED" | "PROVIDER_ERROR" | "PROVIDER_EMPTY" | "TIMEOUT" | "PROVIDER_INCOMPLETE") {
     super("Professional report draft provider unavailable");
     this.name = "ReportDraftUnavailableError";
   }
@@ -51,6 +52,7 @@ export async function generateProfessionalReportDraft(input: InternalAiReportDra
               "Structure the draft: Purpose, Supplied information, Interpretation themes (conditional), Practical considerations,",
               "What must be checked by a human expert, Limitations/disclaimer.",
               "Do not claim the draft is expert reviewed, independently chart verified, or delivered.",
+              "Keep the internal draft within 650 words and finish every section and sentence.",
               "Do not include JSON, Markdown code fences, payment instructions or personal contact details."
             ].join(" ") }]
           },
@@ -67,7 +69,7 @@ export async function generateProfessionalReportDraft(input: InternalAiReportDra
           generationConfig: {
             temperature: 0.3,
             topP: 0.85,
-            maxOutputTokens: 1800
+            ...geminiTextBudget(env.GEMINI_MODEL, "draft")
           }
         })
       }
@@ -82,10 +84,17 @@ export async function generateProfessionalReportDraft(input: InternalAiReportDra
       candidates?: Array<{ finishReason?: string; content?: { parts?: Array<{ text?: string }> } }>;
     };
     if (data.promptFeedback?.blockReason) throw new ReportDraftUnavailableError("PROVIDER_ERROR");
-    const text = (data.candidates?.[0]?.content?.parts ?? []).map(p => p.text ?? "").join("\n")
+    let completeText: string;
+    try { completeText = readCompleteGeminiText(data, 9000); }
+    catch (error) {
+      if (!(error instanceof GeminiOutputError)) throw error;
+      logger.warn("ai_report_draft_incomplete", { failureCategory: error.reason });
+      throw new ReportDraftUnavailableError(error.reason === "EMPTY" ? "PROVIDER_EMPTY" : "PROVIDER_INCOMPLETE");
+    }
+    const text = completeText
       .replace(/```(?:json|markdown|txt)?/gi, "")
       .replace(/```/g, "")
-      .trim().slice(0, 9000);
+      .trim();
     if (text.length < 160) throw new ReportDraftUnavailableError("PROVIDER_EMPTY");
     logger.info("ai_report_draft_provider_accepted", { model: env.GEMINI_MODEL });
     return {

@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import { createServer } from "node:https";
 import { request as forwardRequest } from "node:http";
+import { brotliDecompressSync, gunzipSync, inflateSync } from "node:zlib";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -13,6 +14,7 @@ const base=process.env.PLAYWRIGHT_BASE_URL||'http://127.0.0.1:3000';
 const database=new URL(process.env.DATABASE_URL||'postgresql://invalid/invalid');
 const safe=process.env.CI==='true' && new URL(base).protocol==='http:' && ['localhost','127.0.0.1'].includes(new URL(base).hostname) &&
   ['localhost','127.0.0.1','postgres'].includes(database.hostname) && ['/naksharix','/naksharix_browser'].includes(database.pathname);
+type MutationEvidence={path:string;httpStatus:number;bookingId:string|null;bookingStatus:string|null;loggedOut:boolean};
 test.describe('real authenticated professional controls',()=>{
   test.skip(!safe,'Disposable CI database and loopback browser server are mandatory.');
   test.use({ignoreHTTPSErrors:true}); // Applies only to the generated loopback test certificate.
@@ -23,9 +25,32 @@ test.describe('real authenticated professional controls',()=>{
     const key=join(directory,'key.pem'),cert=join(directory,'cert.pem');
     execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes','-keyout',key,'-out',cert,'-days','1','-subj','/CN=localhost','-addext','subjectAltName=IP:127.0.0.1,DNS:localhost'],{stdio:'ignore',timeout:10000});
     const target=new URL(base);
+    const observed:MutationEvidence[]=[];
     const proxy=createServer({key:readFileSync(key),cert:readFileSync(cert)},(incoming,outgoing)=>{
       const upstream=forwardRequest({hostname:target.hostname,port:target.port||3000,path:incoming.url,method:incoming.method,
         headers:{...incoming.headers,'x-forwarded-proto':'https','x-forwarded-host':incoming.headers.host||''}},response=>{
+        const path=(incoming.url||'').split('?')[0];
+        if(incoming.method==='POST' && ['/api/astrologer/bookings/action','/api/auth/logout'].includes(path)) {
+          // Observe the genuine server response while passing exactly the same
+          // bytes/headers to the browser. Chromium releases old-document bodies
+          // after reload; reading response.json() later is not a reliable oracle.
+          // This does not mock, replay, delay, or replace the successful mutation.
+          const chunks:Buffer[]=[];let length=0;
+          response.on('data',(chunk:Buffer)=>{length+=chunk.length;if(length<=65536)chunks.push(Buffer.from(chunk));});
+          response.on('end',()=>{
+            const evidence:MutationEvidence={path,httpStatus:response.statusCode||502,bookingId:null,bookingStatus:null,loggedOut:false};
+            try {
+              if(length>65536)throw new Error('Evidence exceeded bound');
+              const raw=Buffer.concat(chunks),encoding=response.headers['content-encoding'];
+              const decoded=encoding==='gzip'?gunzipSync(raw):encoding==='br'?brotliDecompressSync(raw):encoding==='deflate'?inflateSync(raw):raw;
+              const body=JSON.parse(decoded.toString());
+              evidence.bookingId=typeof body.data?.booking?.id==='string'?body.data.booking.id:null;
+              evidence.bookingStatus=typeof body.data?.booking?.status==='string'?body.data.booking.status:null;
+              evidence.loggedOut=body.data?.loggedOut===true;
+            } catch { /* Missing evidence fails the assertions below. */ }
+            observed.push(evidence);
+          });
+        }
         outgoing.writeHead(response.statusCode||502,response.headers);response.pipe(outgoing);
       });
       upstream.on('error',()=>{if(!outgoing.headersSent)outgoing.writeHead(502);outgoing.end();});
@@ -56,14 +81,54 @@ test.describe('real authenticated professional controls',()=>{
       await page.unroute('**/api/astrologer/bookings/action');
       await page.route('**/api/astrologer/bookings/action',route=>route.fulfill({status:200,contentType:'application/json',body:'not-json'}));
       await complete.click();await expect(controls.getByRole('alert')).toContainText('could not be confirmed');await expect(complete).toBeEnabled();
+      await page.unroute('**/api/astrologer/bookings/action');
+      await page.route('**/api/astrologer/bookings/action',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:{booking:{id:'different-booking',status:'COMPLETED'}}})}));
+      await complete.click();await expect(controls.getByRole('alert')).toContainText('could not be confirmed');await expect(complete).toBeEnabled();
       expect((await db.consultationBooking.findUniqueOrThrow({where:{id:booking.id}})).status).toBe('ACCEPTED');
       await page.unroute('**/api/astrologer/bookings/action');
-      await complete.click();await expect(controls).toHaveCount(0);
+      let realMutations=0;
+      page.on('request',request=>{if(new URL(request.url()).pathname==='/api/astrologer/bookings/action' && request.method()==='POST')realMutations++;});
+      const [completion, refreshedPage]=await Promise.all([
+        page.waitForResponse(response=>new URL(response.url()).pathname==='/api/astrologer/bookings/action' && response.request().method()==='POST',{timeout:22000}),
+        page.waitForResponse(response=>new URL(response.url()).pathname==='/astrologer/bookings/upcoming' && response.request().isNavigationRequest(),{timeout:22000}),
+        complete.click()
+      ]);
+      const actualCompletion=observed.filter(item=>item.path==='/api/astrologer/bookings/action');
+      expect(actualCompletion).toHaveLength(1);
+      const evidence={httpStatus:completion.status(),returnedStatus:actualCompletion[0]?.bookingStatus??null,refreshStatus:refreshedPage.status()};
+      await info.attach('booking-completion-response.json',{body:Buffer.from(JSON.stringify(evidence)),contentType:'application/json'});
+      expect(completion.status(),JSON.stringify(evidence)).toBe(200);
+      expect(actualCompletion[0].httpStatus).toBe(200);
+      expect(actualCompletion[0].bookingId).toBe(booking.id);
+      expect(actualCompletion[0].bookingStatus).toBe('COMPLETED');
       expect((await db.consultationBooking.findUniqueOrThrow({where:{id:booking.id}})).status).toBe('COMPLETED');
+      expect(refreshedPage.status()).toBe(200);
+      await expect(controls).toHaveCount(0);
+      await expect(page.getByText('No upcoming bookings yet.',{exact:true})).toBeVisible();
+      expect(realMutations).toBe(1);
       await page.goto(secureBase+'/astrologer/dashboard');await expect(page.getByRole('heading',{name:/Welcome, QA Astrologer/i})).toBeVisible();
       const dimensions=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
       expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport+2);
       await info.attach('authenticated-portal.png',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
+      // Sidebar logout must execute the real CSRF-protected POST, not a GET link.
+      const opener=page.getByRole('button',{name:'Open astrologer navigation',exact:true});
+      if(await opener.isVisible())await opener.click();
+      const logout=page.getByRole('complementary',{name:'Astrologer portal sidebar'}).getByRole('button',{name:'Logout',exact:true});
+      // WebKit may discard the document-scoped response event during an
+      // immediate hard navigation. The loopback HTTPS proxy already records
+      // the real POST status/body, so assert that durable server evidence
+      // instead of a fragile browser response event.
+      await Promise.all([
+        page.waitForURL(url=>url.pathname==='/login',{timeout:22000}),
+        logout.click()
+      ]);
+      const actualLogout=observed.filter(item=>item.path==='/api/auth/logout');
+      expect(actualLogout).toHaveLength(1);
+      expect(actualLogout[0].httpStatus).toBe(200);
+      expect(actualLogout[0].loggedOut).toBe(true);
+      expect((await context.cookies(secureBase)).some(cookie=>cookie.name==='__Host-naksharix_session')).toBe(false);
+      await page.goto(secureBase+'/astrologer/dashboard');
+      await expect(page).toHaveURL(/\/login(?:\?|$)/);
     }finally {
       for(const id of ids)await db.user.delete({where:{id}}).catch(()=>{});
       proxy.closeAllConnections();await new Promise<void>(resolve=>proxy.close(()=>resolve()));rmSync(directory,{recursive:true,force:true});

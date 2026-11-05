@@ -67,5 +67,15 @@ export async function setAuthCookie(token: string) {
 
 export async function clearAuthCookie() {
   const cookieStore = await cookies();
-  cookieStore.delete(authCookieName);
+  // A __Host- cookie must be cleared with the same Secure, host-only and
+  // Path=/ attributes as it was issued. cookies().delete(name) did not
+  // remove the browser cookie in the real HTTPS proxy CI acceptance.
+  cookieStore.set(authCookieName, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0)
+  });
 }

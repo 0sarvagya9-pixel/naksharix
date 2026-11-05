@@ -109,3 +109,13 @@
   outline: 3px solid #f2c86f; outline-offset: 2px;
 }
 .astrologer-portal [role="alert"] { color: #ffe0e7 !important; }
+
+/* Professionals should not be covered by the global public footer.
+ * Mobile WebKit formerly scrolled the sidebar logout behind footer and could
+ * not click it; scope this only to authenticated professional routes. */
+body.naksh-page-bg:has(.astrologer-portal) footer { display: none !important; }
+body.naksh-page-bg:has(.astrologer-portal) main#main-content {
+  position: relative;
+  z-index: 20;
+  overflow: visible;
+}

@@ -25,6 +25,7 @@ export function PremiumGlassShell({
     pathname === path || pathname.startsWith(path + "/"));
   const isHome = pathname === "/";
   const isEditorial = !isWorkspace;
+  const isAstrologer = pathname === "/astrologer" || pathname.startsWith("/astrologer/");
 
   return (
     <div
@@ -35,10 +36,12 @@ export function PremiumGlassShell({
           ? isHome
             ? "naksharix-home-shell mx-0 my-0 max-w-none rounded-none"
             : "naksharix-editorial-shell mx-0 my-0 max-w-none rounded-none"
-          : "mx-auto my-6 max-w-[1420px] overflow-hidden rounded-[30px] sm:min-h-[calc(100vh-80px)] md:my-10",
+          : isAstrologer
+            ? "mx-auto my-0 max-w-none overflow-visible rounded-none min-h-screen"
+            : "mx-auto my-6 max-w-[1420px] overflow-hidden rounded-[30px] sm:min-h-[calc(100vh-80px)] md:my-10",
         className
       )}
-      style={isEditorial
+      style={isEditorial || isAstrologer
         ? { background: "transparent", border: "none", boxShadow: "none", backdropFilter: "none" }
         : {
             background: "linear-gradient(135deg, rgba(255,251,246,0.96), rgba(255,245,230,0.90))",

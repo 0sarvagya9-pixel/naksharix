@@ -3,6 +3,7 @@ import "server-only";
 import type { ChatLanguage, ParsedChatContext } from "@/lib/ai/gemini";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/monitoring/logger";
+import { GeminiOutputError, geminiTextBudget, readCompleteGeminiText } from "@/lib/ai/provider-output";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -15,7 +16,7 @@ type GeminiResponse = {
 };
 
 export class GeminiChatProviderError extends Error {
-  readonly code: "NOT_CONFIGURED" | "TIMEOUT" | "HTTP_ERROR" | "BLOCKED" | "EMPTY" | "NETWORK";
+  readonly code: "NOT_CONFIGURED" | "TIMEOUT" | "HTTP_ERROR" | "BLOCKED" | "EMPTY" | "NETWORK" | "INCOMPLETE";
 
   constructor(code: GeminiChatProviderError["code"]) {
     super("Gemini chat provider unavailable");
@@ -50,7 +51,7 @@ Use birth details only when the user provides them. Never invent chart placement
 Keep astrology guidance reflective, non-fatalistic, practical, culturally respectful, and free from guaranteed outcomes.
 Do not provide medical, legal, financial, psychological, or emergency advice. Encourage qualified professional help when appropriate.
 Ask one concise follow-up when information is insufficient.
-For a complete answer, prefer these readable sections when relevant: Personalized summary, Astrology insight, Practical guidance, What can improve accuracy, Gentle disclaimer.`;
+Respect the requested length. For simple questions, answer directly in 3-6 complete sentences; do not prepend headings or a personalized-summary introduction. Keep detailed guidance within 300 words. Never end with an unfinished heading or sentence. Only for detailed personal guidance, use these sections when relevant: Personalized summary, Astrology insight, Practical guidance, What can improve accuracy, Gentle disclaimer.`;
 
   const user = `Known birth details and memory:
 ${input.kundliContext || "No saved birth context provided."}
@@ -85,7 +86,7 @@ Respond to the latest user message. ${languageInstruction}`;
         generationConfig: {
           temperature: 0.55,
           topP: 0.9,
-          maxOutputTokens: 900
+          ...geminiTextBudget(env.GEMINI_MODEL, "chat")
         }
       })
     });
@@ -107,10 +108,13 @@ Respond to the latest user message. ${languageInstruction}`;
       throw new GeminiChatProviderError("BLOCKED");
     }
 
-    const generatedText = data.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text ?? "")
-      .join("\n")
-      .trim();
+    let generatedText: string;
+    try { generatedText = readCompleteGeminiText(data, 12000); }
+    catch (error) {
+      if (!(error instanceof GeminiOutputError)) throw error;
+      logger.warn("Gemini chat response incomplete", { failureCategory: error.reason, modelName: env.GEMINI_MODEL });
+      throw new GeminiChatProviderError(error.reason === "EMPTY" ? "EMPTY" : "INCOMPLETE");
+    }
 
     const answer = cleanGeminiChatText(generatedText ?? "");
     if (!answer) {
