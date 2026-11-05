@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const baseline = [
-  { route: "/", heading: /cosmic journey/i },
+  { route: "/", heading: /Decode your destiny/i },
   { route: "/reports", heading: /premium astrology reports/i },
   { route: "/kundli", heading: /kundli/i },
   { route: "/matchmaking", heading: /matching/i },
