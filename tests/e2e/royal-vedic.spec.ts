@@ -64,6 +64,10 @@ test("light-first theme switch actually changes the page surface", async ({ page
   const after = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   expect(before).not.toBe(after);
   await page.reload({ waitUntil: "domcontentloaded" });
-  const persisted = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  expect(persisted).toBe(after);
+  // The theme hook restores localStorage after hydration; domcontentloaded
+  // can precede the first React effect, especially on slower WebKit devices.
+  await expect.poll(async () => page.evaluate(() => getComputedStyle(document.body).backgroundColor), {
+    message: "Saved theme should be restored after hydration",
+    timeout: 8000
+  }).toBe(after);
 });
