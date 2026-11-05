@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont, type RGB } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import regeneratorRuntime from "@babel/runtime/regenerator";
 import { getPremiumEngineActivationStatus } from "@/lib/astrology/premium-engine/activation-status";
 import type { PremiumReportContentResult } from "@/lib/reports/premium-report-content-engine";
 import { premiumReportAutomationStatus, type PremiumReportGenerationStatus } from "@/lib/reports/premium-report-types";
@@ -87,7 +86,7 @@ async function loadReportFonts(pdf: PDFDocument): Promise<Fonts> {
   // pdf-lib's bundled fontkit needs the Babel regenerator runtime when shaping
   // Devanagari. Its absence previously broke mixed-script premium PDFs.
   const runtimeGlobal = globalThis as typeof globalThis & { regeneratorRuntime?: unknown };
-  runtimeGlobal.regeneratorRuntime ??= regeneratorRuntime;
+  runtimeGlobal.regeneratorRuntime ??= require("@babel/runtime/regenerator");
   pdf.registerFontkit(fontkit);
   const bytes = await readFile(path.join(process.cwd(), "public", "fonts", "NotoSansDevanagari-Regular.ttf"));
   return {
@@ -162,7 +161,7 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
   pdf.setSubject("Admin-reviewed astrological working report; independent chart verification remains required");
   pdf.setLanguage("en-IN");
   const fonts = await loadReportFonts(pdf);
-  let page: PDFPage;
+  let page!: PDFPage;
   let y = TOP;
   const newPage = (cover = false) => {
     page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
