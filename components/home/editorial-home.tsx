@@ -135,7 +135,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
 
   return (
     <div className="nx-editorial">
-      <section className="nx-ed-hero" aria-label="Naksharix featured destinations"
+      <section className="nx-ed-hero nx-ed-hero--reference" aria-label="Naksharix featured destinations"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocusCapture={() => setPaused(true)}
