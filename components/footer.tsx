@@ -26,7 +26,7 @@ export function Footer() {
               {tr("footerCopy")}
             </p>
             <p className="mt-3 text-xs leading-6" style={{ color: "#676d7a" }}>
-              Astrology, numerology, tarot, and consultations are provided for reflection and general guidance. They are not guaranteed outcomes or professional advice.
+              {locale === "hi" ? "ज्योतिष, अंक ज्योतिष, टैरो और परामर्श आत्मचिंतन तथा सामान्य मार्गदर्शन के लिए हैं। ये निश्चित परिणाम या पेशेवर सलाह नहीं हैं।" : "Astrology, numerology, tarot, and consultations are provided for reflection and general guidance. They are not guaranteed outcomes or professional advice."}
             </p>
           </div>
 
@@ -64,9 +64,9 @@ export function Footer() {
             © {new Date().getFullYear()} Naksharix. All rights reserved.
           </p>
           <p style={{ fontSize: 11, color: "#525866" }}>
-            <Link href="/advertising" className="underline underline-offset-2">Advertising &amp; privacy</Link>
+            <Link href="/advertising" className="underline underline-offset-2">{locale === "hi" ? "विज्ञापन और गोपनीयता" : "Advertising & privacy"}</Link>
             {" · "}
-            Explore traditional astrology, reports, consultations, Puja information and spiritual products
+            {locale === "hi" ? "वैदिक ज्योतिष, रिपोर्ट, परामर्श, पूजा और आध्यात्मिक उत्पाद" : "Explore traditional astrology, reports, consultations, Puja information and spiritual products"}
           </p>
         </div>
       </div>
@@ -109,19 +109,19 @@ function footerGroups(locale: Locale) {
       {
         title: "सहायता",
         links: [
-          ["About Us", "/about"],
-          ["Contact", "/contact"],
-          ["FAQ", "/faq"],
-          ["Disclaimer", "/disclaimer"],
+          ["हमारे बारे में", "/about"],
+          ["संपर्क", "/contact"],
+          ["सामान्य प्रश्न", "/faq"],
+          ["अस्वीकरण", "/disclaimer"],
         ],
       },
       {
         title: "कानूनी",
         links: [
-          ["Privacy Policy", "/privacy-policy"],
-          ["Terms & Conditions", "/terms-and-conditions"],
-          ["Refund Policy", "/refund-policy"],
-          ["Delivery Policy", "/delivery-policy"],
+          ["गोपनीयता नीति", "/privacy-policy"],
+          ["नियम और शर्तें", "/terms-and-conditions"],
+          ["वापसी नीति", "/refund-policy"],
+          ["डिलीवरी नीति", "/delivery-policy"],
         ],
       },
     ].map(normalizeGroup);
