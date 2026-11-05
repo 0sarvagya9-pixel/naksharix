@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/jwt";
+import { AdminPortalSidebar } from "@/components/admin-portal-sidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -10,5 +11,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     if (user.role === "ASTROLOGER" || user.role === "CONSULTANT") redirect("/astrologer/dashboard");
     redirect("/dashboard");
   }
-  return children;
+  return <div className="nx-admin-workspace">
+    <AdminPortalSidebar />
+    <div className="nx-admin-content">{children}</div>
+  </div>;
 }
