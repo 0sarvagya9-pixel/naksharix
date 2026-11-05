@@ -114,12 +114,14 @@ test.describe('real authenticated professional controls',()=>{
       const opener=page.getByRole('button',{name:'Open astrologer navigation',exact:true});
       if(await opener.isVisible())await opener.click();
       const logout=page.getByRole('complementary',{name:'Astrologer portal sidebar'}).getByRole('button',{name:'Logout',exact:true});
-      const [signOut]=await Promise.all([
-        page.waitForResponse(response=>new URL(response.url()).pathname==='/api/auth/logout' && response.request().method()==='POST',{timeout:22000}),
+      // WebKit may discard the document-scoped response event during an
+      // immediate hard navigation. The loopback HTTPS proxy already records
+      // the real POST status/body, so assert that durable server evidence
+      // instead of a fragile browser response event.
+      await Promise.all([
+        page.waitForURL(url=>url.pathname==='/login',{timeout:22000}),
         logout.click()
       ]);
-      expect(signOut.status()).toBe(200);
-      await page.waitForURL(url=>url.pathname==='/login');
       const actualLogout=observed.filter(item=>item.path==='/api/auth/logout');
       expect(actualLogout).toHaveLength(1);
       expect(actualLogout[0].httpStatus).toBe(200);
