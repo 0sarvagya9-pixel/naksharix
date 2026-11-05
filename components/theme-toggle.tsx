@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 const storageKey = "naksharix-theme";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(storageKey) as "dark" | "light" | null;
-    const initial = stored ?? "dark";
+    const initial = stored === "dark" ? "dark" : "light";
     setTheme(initial);
     document.documentElement.classList.toggle("dark", initial === "dark");
     setHydrated(true);
