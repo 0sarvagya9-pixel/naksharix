@@ -129,7 +129,7 @@ body.naksh-page-bg [data-layout="editorial"] header a[aria-label="Naksharix home
   min-height:360px;
   background-image:
     linear-gradient(90deg,rgba(250,245,235,.94) 0%,rgba(247,234,217,.08) 24%,rgba(16,21,33,.04)),
-    url('/naksharix/zodiac-wheel-gold.jpg');
+    url('/approved-gallery/hero-astrolabe.jpg');
   background-position:center;
   background-size:cover;
 }
@@ -264,4 +264,41 @@ body.naksh-page-bg [data-layout="editorial"] header a[aria-label="Naksharix home
 }
 @media (prefers-reduced-motion:reduce) {
   .nx-approved-home :is(a,img) { transition:none !important; }
+}
+
+/* The second gallery section and final pale band are exact reusable motifs. */
+.nx-a-extra { padding-top: 4px; }
+.nx-a-extra-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.nx-a-extra-card {
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  border:1px solid #e7ddd1;
+  border-radius:13px;
+  background:white;
+  box-shadow:0 14px 35px rgba(58,37,21,.09);
+  text-decoration:none;
+}
+.nx-a-extra-card > span { font-size:33px; color:#7a1526; }
+.nx-a-extra-card > strong { margin:7px 0; font:700 21px Georgia,serif; color:#172338; }
+.nx-a-extra-card > p { color:#69717e; font-size:12px; line-height:1.6; }
+.nx-a-extra-card > b { display:inline-flex; align-items:center; gap:6px; margin-top:14px; color:#7a1526; font-size:12px; }
+.nx-a-extra-card:hover { border-color:#c89e5c; background:#fffcf7; }
+.nx-a-band {
+  padding:22px 12px;
+  background:#f3e6d5;
+  border-top:1px solid #d9c0a1;
+  text-align:center;
+  color:#674c32;
+  font:16px Georgia,serif;
+}
+@media (max-width:850px) {
+ .nx-a-extra-grid { grid-template-columns:1fr; gap:11px; }
+ .nx-a-extra-card { padding:15px; }
+ .nx-a-extra-card > strong { font-size:18px; }
+ .nx-a-band { font-size:13px; }
 }
