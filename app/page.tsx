@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EditorialHome } from "@/components/home/editorial-home";
+import { ApprovedGalleryHome } from "@/components/home/approved-gallery-home";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { seo } from "@/lib/seo";
 
@@ -30,7 +31,10 @@ export default async function HomePage() {
   }
   return (
     <main className="overflow-hidden bg-[var(--nx-bg)] text-[var(--nx-text)]">
-      <EditorialHome featuredShopPrices={featuredShopPrices} />
+      <ApprovedGalleryHome />
+      <div className="nx-approved-retained">
+        <EditorialHome featuredShopPrices={featuredShopPrices} />
+      </div>
     </main>
   );
 }
