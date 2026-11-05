@@ -29,19 +29,19 @@ export default function AiAstrologerPage() {
   return isAiAstrologerReady() ? <AiAstrologerChat /> : <AiUnavailablePage />;
 }
 
-const ctaClassName = "mt-auto w-full bg-[#006b50] text-white hover:bg-[#00583f]";
+const ctaClassName = "mt-auto w-full bg-[#70283d] text-[#fff9f0] hover:bg-[#542032]";
 
 function AiUnavailablePage() {
   return (
     <main className="inner-page-shell star-field min-h-screen">
       <Section first>
-        <div className="inner-section rounded-3xl border border-[#263957] bg-[#0a1224]/85 p-6 text-center md:p-10">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-[#dca956]/35 bg-[#142647] text-[#f3d382] shadow-[0_0_34px_rgba(0,245,160,0.14)]">
+        <div className="inner-section rounded-3xl border border-[#e6d4bd] bg-[#fffdf8] p-6 text-center md:p-10">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-[#dac098] bg-[#f5e8d6] text-[#70283d] shadow-[0_0_34px_rgba(0,245,160,0.14)]">
             <Bot className="h-8 w-8" />
           </div>
-          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-[#00f5a0]">Temporarily Unavailable</p>
-          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">AI Astrologer</h1>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-[#cbd5e1]">
+          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-[#81551e]">Temporarily Unavailable</p>
+          <h1 className="mt-3 font-cinzel text-4xl font-black text-[#70283d] sm:text-5xl">AI Astrologer</h1>
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-[#584c53]">
             AI guidance is currently offline. Kundli, Panchang, horoscope, numerology, tarot, reports, and consultation booking remain available.
           </p>
         </div>
@@ -59,11 +59,11 @@ function AiUnavailablePage() {
 
 function AlternativeCard({ icon: Icon, title, copy, href, cta }: { icon: typeof Bot; title: string; copy: string; href: string; cta: string }) {
   return (
-    <Card className="inner-card bg-[#0f1c3a]/78 transition hover:-translate-y-1 hover:border-[#dca956]/45">
+    <Card className="inner-card bg-[#fffdf8] transition hover:-translate-y-1 hover:border-[#dca956]/45">
       <CardContent className="flex h-full flex-col p-5">
-        <Icon className="h-6 w-6 text-[#00f5a0]" />
-        <h2 className="mt-4 font-cinzel text-xl font-bold text-[#f3d382]">{title}</h2>
-        <p className="mb-5 mt-2 text-sm leading-6 text-[#cbd5e1]">{copy}</p>
+        <Icon className="h-6 w-6 text-[#70283d]" />
+        <h2 className="mt-4 font-cinzel text-xl font-bold text-[#70283d]">{title}</h2>
+        <p className="mb-5 mt-2 text-sm leading-6 text-[#584c53]">{copy}</p>
         <Button className={ctaClassName} asChild><Link href={href}>{cta}</Link></Button>
       </CardContent>
     </Card>
