@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { calculatePremiumPanchang } from "@/lib/astrology/premium-engine/panchang";
+import { timezoneOffsetForDate, todayInTimezone } from "@/lib/astrology/timezone-offset";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
@@ -16,11 +17,11 @@ export const metadata: Metadata = seo({
 });
 
 const cityPresets = {
-  delhi:   { label: "Delhi, India",        latitude: 28.6139,  longitude: 77.209,   timezone: "+05:30" },
-  mumbai:  { label: "Mumbai, India",        latitude: 19.076,   longitude: 72.8777,  timezone: "+05:30" },
-  newyork: { label: "New York, USA",        latitude: 40.7128,  longitude: -74.006,  timezone: "-04:00" },
-  london:  { label: "London, UK",           latitude: 51.5074,  longitude: -0.1278,  timezone: "+01:00" },
-  sydney:  { label: "Sydney, Australia",    latitude: -33.8688, longitude: 151.2093, timezone: "+10:00" },
+  delhi:   { label: "Delhi, India",        latitude: 28.6139,  longitude: 77.209,   timezone: "Asia/Kolkata" },
+  mumbai:  { label: "Mumbai, India",        latitude: 19.076,   longitude: 72.8777,  timezone: "Asia/Kolkata" },
+  newyork: { label: "New York, USA",        latitude: 40.7128,  longitude: -74.006,  timezone: "America/New_York" },
+  london:  { label: "London, UK",           latitude: 51.5074,  longitude: -0.1278,  timezone: "Europe/London" },
+  sydney:  { label: "Sydney, Australia",    latitude: -33.8688, longitude: 151.2093, timezone: "Australia/Sydney" },
 } as const;
 
 type CityKey = keyof typeof cityPresets;
@@ -33,12 +34,13 @@ export default async function PanchangPage({
   const params = await searchParams;
   const selectedCity = normalizeCity(params?.city);
   const city = cityPresets[selectedCity];
-  const selectedDate = validDate(params?.date) ? params?.date ?? todayInIso() : todayInIso();
+  const selectedDate = validDate(params?.date) ? params!.date! : todayInTimezone(city.timezone);
+  const resolvedOffset = timezoneOffsetForDate(selectedDate, city.timezone);
   const panchang = calculatePremiumPanchang({
     date: selectedDate,
     latitude: city.latitude,
     longitude: city.longitude,
-    timezone: city.timezone,
+    timezone: resolvedOffset,
     place: city.label,
   });
 
@@ -122,7 +124,7 @@ export default async function PanchangPage({
                     >
                       {Object.entries(cityPresets).map(([key, preset]) => (
                         <option key={key} value={key}>
-                          {preset.label} ({preset.timezone})
+                          {preset.label} ({timezoneOffsetForDate(selectedDate, preset.timezone)})
                         </option>
                       ))}
                     </select>
@@ -209,8 +211,4 @@ function normalizeCity(value?: string): CityKey {
 
 function validDate(value?: string) {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
-}
-
-function todayInIso() {
-  return new Date().toISOString().slice(0, 10);
 }

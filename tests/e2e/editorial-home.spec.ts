@@ -5,7 +5,7 @@ test.describe("Naksharix editorial photo homepage", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const main = page.locator(".nx-editorial");
     await expect(main).toBeVisible();
-    await expect(main.getByRole("heading", { level: 1, name: /Your universe/i })).toBeVisible();
+    await expect(main.getByRole("heading", { level: 1, name: /Discover your.*cosmic journey/i })).toBeVisible();
     await expect(main.getByRole("link", { name: /Generate free Kundli/i })).toHaveAttribute("href", "/kundli");
     await expect(main.getByRole("link", { name: /Explore Puja directory/i }).first()).toHaveAttribute("href", "/pujas");
     await expect(main.locator(".nx-ed-service-card")).toHaveCount(8);
@@ -25,7 +25,7 @@ test.describe("Naksharix editorial photo homepage", () => {
   test("hero controls change real destination links", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { level: 1, name: /Your universe/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: /Discover your.*cosmic journey/i })).toBeVisible();
     await page.getByRole("button", { name: "Next featured destination" }).click();
     await expect(page.getByRole("heading", { level: 1, name: /Celebrate/i })).toBeVisible();
     await expect(page.locator(".nx-ed-hero-copy").getByRole("link", { name: "Explore Puja services", exact: true })).toHaveAttribute("href", "/pujas");

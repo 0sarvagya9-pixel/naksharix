@@ -11,7 +11,7 @@ import { birthDetailsSchema } from "@/lib/validations/astrology";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { secureFetch } from "@/lib/security/csrf";
 import { useLanguage } from "@/components/language-provider";
 import type { Locale } from "@/lib/i18n";
@@ -297,7 +297,7 @@ export function KundliForm() {
 }
 
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
-  return <div className="space-y-2"><Label>{label}</Label>{children}{error ? <p className="text-sm text-[#FF4D4F]">{error}</p> : null}</div>;
+  return <div className="space-y-2"><label className="block text-sm font-semibold text-[#482d3a]"><span className="mb-2 block">{label}</span>{children}</label>{error ? <p className="text-sm font-medium text-red-700" role="alert">{error}</p> : null}</div>;
 }
 
 function Meta({ label, value }: { label: string; value?: string }) {

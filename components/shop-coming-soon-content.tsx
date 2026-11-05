@@ -34,7 +34,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
         <div className="inner-section overflow-hidden rounded-3xl border border-[#ecd7c3] p-6 md:p-8">
           <div className="flex flex-wrap items-end justify-between gap-5">
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#bd8638]">{labels.eyebrow}</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#81551e]">{labels.eyebrow}</p>
               <h1 className="mt-2 font-cinzel text-3xl font-black text-[#8c2e3b] sm:text-4xl">{labels.title}</h1>
               <p className="mt-3 text-base leading-7 text-[#6b565b]">{labels.subtitle}</p>
             </div>

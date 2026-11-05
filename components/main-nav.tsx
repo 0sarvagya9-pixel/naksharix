@@ -183,8 +183,8 @@ export function MainNav() {
             <LanguageSwitcher className="w-auto min-w-12" />
             <ThemeToggle />
             <Link href="/cart" aria-label="View shopping cart" className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[#702536] hover:bg-[#fff1e7]"><ShoppingCart size={19}/></Link>
-            <Link href="/orders" className="hidden rounded-lg px-3 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7] sm:inline-flex">My Orders</Link>
-            <Link href="/puja-bookings" className="hidden rounded-lg px-2 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7] lg:inline-flex">My Pujas</Link>
+            <Link href="/orders" className="hidden rounded-lg px-3 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7] sm:inline-flex">{locale === "hi" ? "मेरे ऑर्डर" : "My Orders"}</Link>
+            <Link href="/puja-bookings" className="hidden rounded-lg px-2 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7] lg:inline-flex">{locale === "hi" ? "मेरी पूजाएँ" : "My Pujas"}</Link>
             <AuthProfileMenu />
             <Link
               href="/kundli"
@@ -198,7 +198,7 @@ export function MainNav() {
                 textDecoration: "none"
               }}
             >
-              Get Started
+              {locale === "hi" ? "कुंडली बनाएँ" : "Get Started"}
             </Link>
             <Button
               ref={menuButtonRef}
