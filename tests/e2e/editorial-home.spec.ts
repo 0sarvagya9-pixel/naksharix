@@ -5,7 +5,7 @@ test.describe("Naksharix editorial photo homepage", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const main = page.locator(".nx-editorial");
     await expect(main).toBeVisible();
-    await expect(main.getByRole("heading", { level: 1, name: /Discover your.*cosmic journey/i })).toBeVisible();
+    await expect(main.getByRole("heading", { level: 1, name: /Decode your destiny/i })).toBeVisible();
     await expect(main.getByRole("link", { name: /Generate free Kundli/i })).toHaveAttribute("href", "/kundli");
     await expect(main.getByRole("link", { name: /Explore Puja directory/i }).first()).toHaveAttribute("href", "/pujas");
     await expect(main.locator(".nx-ed-service-card")).toHaveCount(8);
@@ -14,7 +14,9 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(page.locator(".nx-reference-promo")).toBeVisible();
     await expect(main.locator(".nx-ed-journey-card")).toHaveCount(3);
     await expect(main.locator(".nx-ed-zodiac-grid a")).toHaveCount(12);
-    await expect(main.locator(".nx-ed-hero-photo")).toHaveCount(6);
+    await expect(main.locator(".nx-ed-hero-photo")).toHaveCount(1);
+    await expect(main.locator(".nx-ed-hero-wheel")).toHaveCount(1);
+    await expect(main.locator(".nx-ed-heritage-card")).toBeVisible();
     await expect(main.locator(".nx-ed-slider-dots button")).toHaveCount(6);
     await expect(main.locator(".nx-ed-hero-aside")).toHaveCount(0);
     await expect(main.locator(".nx-ed-photo").first()).toHaveAttribute("alt", "");
@@ -25,7 +27,7 @@ test.describe("Naksharix editorial photo homepage", () => {
   test("hero controls change real destination links", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { level: 1, name: /Discover your.*cosmic journey/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: /Decode your destiny/i })).toBeVisible();
     await page.getByRole("button", { name: "Next featured destination" }).click();
     await expect(page.getByRole("heading", { level: 1, name: /Celebrate/i })).toBeVisible();
     await expect(page.locator(".nx-ed-hero-copy").getByRole("link", { name: "Explore Puja services", exact: true })).toHaveAttribute("href", "/pujas");
@@ -64,13 +66,14 @@ test.describe("Naksharix editorial photo homepage", () => {
   test("autoplay can be explicitly paused and resumed", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    const pause = page.getByRole("button", { name: "Pause featured slideshow" });
-    await expect(pause).toBeVisible();
-    await pause.click();
     const play = page.getByRole("button", { name: "Play featured slideshow" });
+    await expect(play).toBeVisible();
     await expect(play).toHaveAttribute("aria-pressed", "true");
     await play.click();
+    const pause = page.getByRole("button", { name: "Pause featured slideshow" });
     await expect(pause).toHaveAttribute("aria-pressed", "false");
+    await pause.click();
+    await expect(play).toHaveAttribute("aria-pressed", "true");
   });
 
   test("free learning self-check has real answers, explanations and no certificate claim", async ({ page }) => {
