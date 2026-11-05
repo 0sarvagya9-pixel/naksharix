@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CalendarDays, HeartHandshake, Hash, MoonStar, Sparkles, SunMedium } from "lucide-react";
-import { pujaEditorialImage } from "@/lib/puja/editorial-photos";
-import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
 
 /**
  * Owner-approved 6 November 2026 gallery: editorial light homepage.
@@ -22,7 +20,7 @@ const cards = [
   {
     title: "Puja & Traditions",
     copy: "Explore cultural rituals and ceremony options",
-    image: pujaEditorialImage("rudrabhishek", "/naksharix/ganesh-hero-light-saffron.jpg", "shiva"),
+    image: "/approved-gallery/puja-ritual.jpg",
     alt: "Representative traditional puja ritual photograph",
     href: "/pujas",
     action: "Explore puja",
@@ -30,7 +28,7 @@ const cards = [
   {
     title: "Spiritual Catalogue",
     copy: "View Rudraksha, malas and yantra collections",
-    image: referencePhotoForProduct("rudraksha-mala")?.url || "/shop/rudraksha-mala-illustration.svg",
+    image: "/approved-gallery/shop-remedies.jpg",
     alt: "Rudraksha mala reference product photograph or illustration",
     href: "/shop",
     action: "Browse catalogue",
@@ -38,7 +36,7 @@ const cards = [
   {
     title: "Personal Reports",
     copy: "Find clear, structured report formats",
-    image: "/naksharix/zodiac-wheel-gold.jpg",
+    image: "/approved-gallery/kundli-report.jpg",
     alt: "Golden zodiac wheel illustrating astrology reports",
     href: "/reports",
     action: "Browse reports",
@@ -46,7 +44,7 @@ const cards = [
   {
     title: "Astrologer Consultations",
     copy: "Compare profiles, session types and availability",
-    image: "/naksharix/editorial-consultation.svg",
+    image: "/approved-gallery/consult-photo.jpg",
     alt: "Consultation illustration",
     href: "/consultation",
     action: "Find guidance",
@@ -105,6 +103,36 @@ export function ApprovedGalleryHome() {
           </div>
         </section>
       </div>
+      <section className="nx-a-section nx-a-extra" aria-labelledby="nx-a-tools-extra">
+        <div className="nx-a-container">
+          <div className="nx-a-section-heading">
+            <span>Explore more</span>
+            <h2 id="nx-a-tools-extra">Tools for everyday reflection</h2>
+            <p>Traditional insights, clearly explained without exaggerated promises.</p>
+          </div>
+          <div className="nx-a-extra-grid">
+            <Link href="/horoscope" className="nx-a-extra-card">
+              <span aria-hidden="true">♈</span>
+              <strong>Zodiac & Horoscope</strong>
+              <p>Explore daily, weekly and yearly horoscope topics.</p>
+              <b>Explore <ArrowRight size={14} aria-hidden="true"/></b>
+            </Link>
+            <Link href="/free-calculators" className="nx-a-extra-card">
+              <span aria-hidden="true">◇</span>
+              <strong>Free calculators</strong>
+              <p>Discover Nakshatra, Lagna and numerology tools.</p>
+              <b>Explore <ArrowRight size={14} aria-hidden="true"/></b>
+            </Link>
+            <Link href="/festival-calendar" className="nx-a-extra-card">
+              <span aria-hidden="true">❖</span>
+              <strong>Festival calendar</strong>
+              <p>Find traditional festival and puja reference dates.</p>
+              <b>Explore <ArrowRight size={14} aria-hidden="true"/></b>
+            </Link>
+          </div>
+        </div>
+      </section>
+      <div className="nx-a-band">✧ &nbsp; Designed for clarity, trust and the joy of discovery &nbsp; ✧</div>
       <div className="nx-a-bridge" aria-hidden="true" />
     </div>
   );
