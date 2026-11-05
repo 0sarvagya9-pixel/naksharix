@@ -196,7 +196,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
               </Link>
               <Link href="/panchang" className="nx-ed-heritage-option">
                 <span className="nx-ed-heritage-option-icon"><Sun size={21} aria-hidden="true"/></span>
-                <span><strong>Today's Panchang</strong><small>Tithi, nakshatra and muhurat</small></span>
+                <span><strong>Today&apos;s Panchang</strong><small>Tithi, nakshatra and muhurat</small></span>
                 <ArrowRight size={17} aria-hidden="true"/>
               </Link>
             </div>
