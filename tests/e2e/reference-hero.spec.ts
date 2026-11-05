@@ -21,11 +21,10 @@ test.describe("NAKSHARIX premium home reference fidelity", () => {
     }
     const image=hero.locator(".nx-ed-hero-photo img").first();
     await expect(image).toHaveAttribute("src",/premium-cosmic-bg-v2/);
-    const loaded=await image.evaluate(node => {
+    await expect.poll(async () => image.evaluate(node => {
       const img=node as HTMLImageElement;
       return img.complete && img.naturalWidth > 0;
-    });
-    expect(loaded,"Premium background must load, not just have an image tag").toBe(true);
+    }), { message: "Premium background must load, not just have an image tag", timeout: 12000 }).toBe(true);
     const panel=hero.locator(".nx-ed-heritage-card");
     const legible=await panel.evaluate(node => {
       const style=getComputedStyle(node);
@@ -52,6 +51,7 @@ test.describe("NAKSHARIX premium home reference fidelity", () => {
     for (const width of [320,375,390,768,1024,1440]) {
       await page.setViewportSize({width,height:850});
       await page.goto("/",{waitUntil:"domcontentloaded"});
+      await expect(page.locator(".nx-ed-hero--reference")).toBeVisible();
       const observed=await page.evaluate(()=>{
         const hero=document.querySelector(".nx-ed-hero--reference");
         const card=document.querySelector(".nx-ed-heritage-card");
