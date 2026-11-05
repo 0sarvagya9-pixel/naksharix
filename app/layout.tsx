@@ -7,6 +7,7 @@ import "@/app/accessibility-overrides.css";
 import "@/app/editorial-home.css";
 import "@/app/reference-redesign.css";
 import "@/app/premium-ux-20261027.css";
+import "@/app/royal-vedic-heritage.css";
 import { env, validateProductionEnv } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f7f7f8",
+  themeColor: "#fff8ee",
   width: "device-width",
   initialScale: 1
 };
