@@ -331,3 +331,20 @@ html.dark body.naksh-page-bg [data-layout="editorial"] .nx-ed-section-title :is(
   .nx-editorial .nx-ed-hero-inner { padding-block: 3.2rem 5.8rem; }
   .nx-editorial .nx-ed-hero h1 { font-size: clamp(2.15rem, 8.4vw, 3.3rem); }
 }
+
+/* Royal contrast audit follow-up: tested against the actual Next.js renderer.
+ * Editorial page titles on wine photographic banners must stay light. */
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-copy h2,
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-copy :is(h1,h3) {
+  color: #fff9ef !important;
+  text-shadow: 0 2px 16px rgba(18, 9, 14, .28);
+}
+body.naksh-page-bg footer .mt-3.text-xs.leading-6[style] {
+  color: #51454a !important;
+}
+body.naksh-page-bg [data-layout="editorial"] [class*="text-[#c98924]"] {
+  color: #81551e !important;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner :is(p,span,a) {
+  color: #fff2df;
+}
