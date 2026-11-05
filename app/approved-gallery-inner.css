@@ -1,0 +1,180 @@
+/*
+ * NAKSHARIX 2026-11-06 owner-approved gallery inner page language.
+ *
+ * This is a visual-only layer: preserve existing real forms, prices, content,
+ * booking flows, accessible names, authenticated portals and backend.
+ *
+ * Page families correspond to preview.js gallery categories, not mock behavior.
+ */
+
+/* Dark navy story panels with subdued real gallery art at right. */
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner {
+  min-height:216px;
+  color:#fff;
+  background:linear-gradient(108deg,#13233a 0%,#263855 58%,#644333 100%);
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-photo {
+  inset:0 0 0 65%;
+  z-index:-1;
+  opacity:.3;
+  background-image:url('/approved-gallery/hero-astrolabe.jpg');
+  background-size:cover;
+  background-position:center;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000);
+  mask-image:linear-gradient(90deg,transparent,#000);
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-photo img {
+  opacity:0;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-shade {
+  background:transparent;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-body {
+  padding-block:30px;
+  min-height:216px;
+  display:flex;
+  align-items:center;
+  width:100%;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-copy > span {
+  font-size:11px;
+  color:#dbb47b;
+  letter-spacing:.14em;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner h2 {
+  margin:10px 0 12px;
+  font-family:Georgia, 'Times New Roman', serif;
+  font-size:clamp(30px,3.4vw,47px);
+  line-height:1.08;
+  font-weight:700;
+  color:#fff !important;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner p {
+  color:#e4dfdc;
+  font-size:14px;
+  line-height:1.5;
+  margin-top:0;
+  max-width:670px;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner a {
+  font-size:12px;
+  color:#f1ce90;
+  margin-top:13px;
+  border-bottom-color:#dbb47b;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner a:hover { color:#fff; }
+
+/* Use the owner-approved artwork exactly, without altering existing SKU,
+ * celebrity portrait or astrologer verification claims. */
+body.naksh-page-bg [data-page-kind="kundli"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/kundli-report.jpg');
+}
+body.naksh-page-bg [data-page-kind="matching"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/consult-photo.jpg');
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/consult-photo.jpg');
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/kundli-report.jpg');
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/shop-remedies.jpg');
+}
+body.naksh-page-bg [data-page-kind="puja"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/puja-ritual.jpg');
+}
+body.naksh-page-bg [data-page-kind="blog"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/kundli-report.jpg');
+}
+
+/* Gallery's cream, navy, gold cards and two-column forms. */
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) {
+  background:#fbf6ef;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-card,.glass,.glass-card,.glass-panel,.luxury-panel) {
+  border:1px solid #e9ded1;
+  border-radius:14px;
+  background:#fffdf9;
+  box-shadow:0 14px 35px rgba(58,37,21,.09);
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(h1,h2,h3,h4) {
+  font-family:Georgia, 'Times New Roman', serif;
+  color:#14233a;
+  letter-spacing:-.03em;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(.glass,.glass-panel,.inner-card) :is(h2,h3,h4) {
+  color:#14233a !important;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(.glass,.glass-panel,.inner-card) :is(p,small) {
+  color:#69717e;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(input,select,textarea) {
+  border-color:#ded7cf;
+  border-radius:7px;
+  color:#172338;
+  background:#fffcfa;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(input,select,textarea):focus-visible {
+  outline:3px solid #b78031;
+  outline-offset:2px;
+}
+/* Use warm surfaces, keep actual submitted values and action handlers intact. */
+body.naksh-page-bg [data-layout="editorial"] button[data-ui="button"][data-variant="default"],
+body.naksh-page-bg [data-layout="editorial"] a[data-ui="button"][data-variant="default"] {
+  background:#7a1526;
+  color:white;
+  border:1px solid #7a1526;
+  border-radius:8px;
+}
+body.naksh-page-bg [data-layout="editorial"] button[data-ui="button"][data-variant="default"]:hover,
+body.naksh-page-bg [data-layout="editorial"] a[data-ui="button"][data-variant="default"]:hover {
+  background:#5f1120;
+}
+/* Photo-led Puja and product listings remain real inventory from source data. */
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child {
+  background-color:#14233a;
+}
+body.naksh-page-bg [data-page-kind="shop"] article,
+body.naksh-page-bg [data-page-kind="puja"] article,
+body.naksh-page-bg [data-page-kind="consultation"] article,
+body.naksh-page-bg [data-page-kind="reports"] article {
+  border-radius:14px;
+  overflow:hidden;
+}
+body.naksh-page-bg [data-page-kind="shop"] article img,
+body.naksh-page-bg [data-page-kind="puja"] article img {
+  object-fit:cover;
+}
+/* The gallery uses a compact dark-blue top and a clear light footer. */
+body.naksh-page-bg [data-layout="editorial"] footer {
+  border-top:1px solid #d9c0a1 !important;
+  background:#f3e6d5 !important;
+  color:#453e42;
+}
+
+/* Portals: the approved dashboard gallery uses navy sidebar and cream cards.
+ * Keep admin/astrologer charts, statuses, counts and role guards live. */
+body.naksh-page-bg [data-page-kind="astrologer"] .astrologer-portal,
+body.naksh-page-bg [data-page-kind="dashboard"] main {
+  background:#f7f4f0;
+}
+body.naksh-page-bg [data-page-kind="dashboard"] :is(.glass-panel,.inner-card,.glass) {
+  border-color:#e7ddd1;
+  background:#fff;
+  box-shadow:0 14px 35px rgba(58,37,21,.09);
+}
+@media (max-width:650px) {
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner { min-height:214px; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-body {
+    min-height:214px;
+    padding:24px 0;
+  }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner h2 { font-size:31px; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner p { font-size:12px; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-photo { inset:0 0 0 45%;opacity:.16; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner a { font-size:11px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.naksh-page-bg [data-layout="editorial"] :is(.nx-ed-inner-banner,img,button) { animation:none !important; }
+}
