@@ -9,6 +9,7 @@ import "@/app/reference-redesign.css";
 import "@/app/premium-ux-20261027.css";
 import "@/app/royal-vedic-heritage.css";
 import "@/app/home-reference-fidelity.css";
+import "@/app/approved-gallery-theme.css";
 import { env, validateProductionEnv } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
