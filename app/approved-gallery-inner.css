@@ -912,3 +912,23 @@ body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .mt-8.grid {
     padding-inline:8px;
   }
 }
+
+
+/* Firefox cart-link stability fix (Playwright trace 42183226279).
+ * A product card translated on hover WHILE global html smooth scrolling was
+ * moving it into view. The click was dispatched during the move and the native
+ * link never received a reliable activation. Keep the real cart link, remove
+ * scroll/hover movement only from Shop, preserve hover border and shadows. */
+html:has(body [data-page-kind="shop"]) {
+  scroll-behavior: auto !important;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid > .inner-card,
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid > .inner-card:hover {
+  transform: none !important;
+  transition-property: border-color, box-shadow !important;
+  transition-duration: 150ms !important;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid a[href="/cart"] {
+  position: relative;
+  z-index: 2;
+}
