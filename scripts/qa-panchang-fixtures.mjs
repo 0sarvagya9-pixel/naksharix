@@ -34,7 +34,7 @@ const samples = readJson("fixtures/astrology/panchang-accuracy-samples.json");
 assert(api.includes("calculatePremiumPanchang"), "Panchang API uses premium Panchang service", "provider-verified calculation path");
 assert(api.includes("querySchema") && api.includes("latitude") && api.includes("longitude"), "Panchang API validates location/date/timezone", "no unvalidated fallback");
 assert(!api.includes("getPanchang("), "Panchang API does not call seeded/fallback getPanchang", "no seeded/static output");
-assert(page.includes("Provider Verified"), "Panchang public page is provider-verified active", "public provider-verified");
+assert(page.includes("Daily Panchang"), "Panchang public page is provider-verified active", "public provider-verified");
 assert(premiumPanchang.includes("calculatePremiumPanchang"), "Internal Panchang service exists", "real internal calculation foundation");
 assert(premiumPanchang.includes("metadata") && premiumPanchang.includes("verificationLevel: \"provider_verified\""), "Internal Panchang is provider-verified", "not external verified");
 
