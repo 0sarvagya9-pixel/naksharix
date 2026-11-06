@@ -27,7 +27,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
       <div className="mx-auto flex min-h-[540px] max-w-7xl items-center px-5 py-14 md:min-h-[580px] md:py-20 lg:px-8">
         <div className="max-w-2xl">
           <p className="text-xs font-bold uppercase tracking-[.22em] text-[#f8d389]">Naksharix • Sacred traditions</p>
-          <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Explore Puja <span className="text-[#ffcf80]">Traditions</span></h1>
+          <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Puja &amp; <span className="text-[#ffcf80]">Vedic Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
             Browse {pujaTopics.length} traditional Puja topics across deities, ceremonies and festivals.
             Choose a Puja and your preferred date, then use secure checkout for published offers. Naksharix coordinates the final ceremony timing afterward.
