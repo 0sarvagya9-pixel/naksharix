@@ -57,6 +57,13 @@ test("light-first theme switch actually changes the page surface", async ({ page
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.evaluate(() => localStorage.removeItem("naksharix-theme"));
   await page.reload({ waitUntil: "domcontentloaded" });
+  // On the approved mobile header the theme control lives inside the
+  // accessible drawer; on desktop it remains visible in the header.
+  const mobileMenu = page.getByRole("button", { name: "Open navigation menu" });
+  if (await mobileMenu.isVisible()) {
+    await mobileMenu.click();
+    await expect(page.getByRole("dialog", { name: "Navigation menu" })).toBeVisible();
+  }
   const button = page.getByRole("button", { name: "Toggle dark and light mode" });
   await expect(button).toBeEnabled();
   const before = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
