@@ -40,9 +40,6 @@ export default function PujaCalendarPage() {
         image={pujaEditorialImage("griha-pravesh-puja","/naksharix/editorial-puja.svg","family")} imageAlt="Representative licensed photograph of a traditional Puja ceremony"
         link="/pujas" linkLabel="Explore all Puja types" />
       <Section>
-        {pujaEditorialPhoto("griha-pravesh-puja","family") ? <p className="mb-4 text-xs leading-5 text-[#634653]">
-          Banner uses a representative ritual photograph, not a Naksharix booking. Photo: <a href={pujaEditorialPhoto("griha-pravesh-puja","family")!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto("griha-pravesh-puja","family")!.author} · {pujaEditorialPhoto("griha-pravesh-puja","family")!.license}</a>.
-        </p> : null}
         <div className="rounded-[1.7rem] border border-[#D6AB67]/55 bg-[linear-gradient(115deg,#421b2b_0%,#702a39_60%,#8b4239_100%)] p-6 text-[#fffaf2] shadow-[0_25px_70px_rgba(65,23,36,.17)] md:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FFD700]">Hindu calendar • India reference</p>
           <h1 className="mt-3 font-cinzel text-3xl font-black text-[#fffaf2] sm:text-5xl">Upcoming Puja Calendar</h1>

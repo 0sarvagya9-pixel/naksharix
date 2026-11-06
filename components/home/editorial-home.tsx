@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { referencePhotoForProduct } from "@/lib/shop/real-photo-seeds";
-import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-photos";
+import { pujaEditorialImage } from "@/lib/puja/editorial-photos";
 import {
   ArrowLeft, ArrowRight, CalendarDays, ChevronRight, CircleHelp,
   Compass, Heart, MoonStar, Pause, Play, ShieldCheck, Sparkles, Sun, Users
@@ -242,7 +242,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
 
       <section className="nx-ed-section nx-ed-services" aria-label="Featured Naksharix services">
         <div className="nx-ed-container">
-          <SectionTitle eyebrow="EXPLORE NAKSHARIX" title="Astrology, made personal." copy="Discover real features—beautifully presented, with straightforward explanations and responsible expectations." />
+          <SectionTitle eyebrow="EXPLORE NAKSHARIX" title="Astrology, made personal." copy="Explore astrology tools and personal guidance at your own pace." />
           <div className="nx-ed-service-grid">
             {services.map((item) => (
               <article className="nx-ed-service-card" key={item.href}>
@@ -254,9 +254,6 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
                 <div className="nx-ed-card-body">
                   <h3>{item.label}</h3>
                   <p>{item.copy}</p>
-                  {item.href === "/consultation" ? <p className="text-xs">Representative exhibition photo · <a href="https://commons.wikimedia.org/wiki/File:Astrologer.jpg" target="_blank" rel="noopener noreferrer" className="underline">Ravikiran · CC BY-SA 4.0</a></p>:null}
-                  {item.href === "/pujas" && pujaEditorialPhoto("rudrabhishek","shiva") ? <p className="text-xs">Representative ritual image · <a href={pujaEditorialPhoto("rudrabhishek","shiva")!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto("rudrabhishek","shiva")!.author} · {pujaEditorialPhoto("rudrabhishek","shiva")!.license}</a></p> : null}
-                  {item.href === "/shop" && referencePhotoForProduct("rudraksha-mala") ? <p className="text-xs">Reference photo, not exact stock · <a href={referencePhotoForProduct("rudraksha-mala")!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{referencePhotoForProduct("rudraksha-mala")!.credit} · {referencePhotoForProduct("rudraksha-mala")!.licenseName}</a></p> : null}
                   <Link href={item.href} className="nx-ed-text-link">{item.cta}<ArrowRight size={17} aria-hidden="true"/></Link>
                 </div>
               </article>
@@ -311,7 +308,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
       <section className="nx-ed-section" aria-label="Featured spiritual products">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="SACRED ESSENTIALS" title="Explore the spiritual catalogue."
-            copy="Explore real photographed references and published INR prices. Exact stock, shipping, tax and fulfilment terms are confirmed before dispatch." />
+            copy="Discover spiritual essentials and browse current prices." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { id:"5-mukhi-rudraksha", name:"5 Mukhi Rudraksha" },
@@ -330,10 +327,6 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
                     {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(featuredShopPrices[item.id]!/100)}
                     <span className="ml-2 text-xs font-medium text-[#e2ced8]">Selling price · secure checkout</span>
                   </p> : <p className="mt-2 text-xs text-[#e2ced8]">See current selling price in Shop</p>}
-                  <p className="mt-2 text-xs text-[#e2ced8]">Real licensed reference photo • Exact supplied item may differ</p>
-                  {referencePhotoForProduct(item.id) ? <a href={referencePhotoForProduct(item.id)!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-[11px] leading-5 underline text-[#f3dcb9]">
-                    {referencePhotoForProduct(item.id)!.credit} · {referencePhotoForProduct(item.id)!.licenseName}
-                  </a> : null}
                   <Link href={"/shop/"+item.id}
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
                     View item / Add to Cart <ArrowRight size={16}/>
@@ -369,10 +362,6 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
                 </Link>
                 <div className="p-5">
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
-                  <p className="mt-2 text-xs text-[#d8c7d9]">Traditional practice • Representative image</p>
-                  {pujaEditorialPhoto(item.id,item.category) ? <a className="mt-2 inline-block text-[11px] leading-5 text-[#f2dab7] underline" href={pujaEditorialPhoto(item.id,item.category)!.source} target="_blank" rel="noopener noreferrer">
-                    {pujaEditorialPhoto(item.id,item.category)!.author} · {pujaEditorialPhoto(item.id,item.category)!.license}
-                  </a> : null}
                   <Link href={"/pujas/"+item.id}
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
                     Book Now <ArrowRight size={16}/>
@@ -428,7 +417,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
           </Link>
         </div>
       </section>
-      <p className="nx-ed-footnote">Astrology is a cultural and reflective practice; outcomes are not guaranteed. Naksharix coordinates booked Puja schedules and manages product fulfilment.</p>
+      <p className="nx-ed-footnote">Explore traditional guidance, spiritual products and thoughtfully curated Puja services.</p>
     </div>
   );
 }
