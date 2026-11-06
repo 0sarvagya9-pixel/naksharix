@@ -92,6 +92,16 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
     }
   });
 
+  test("Puja directory has an approved compact navy banner with the real festival action", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/pujas", { waitUntil: "domcontentloaded" });
+    const header = page.locator('main.star-field > section').first();
+    await expect(page.getByRole("heading", { level: 1, name: /Puja.*Vedic Traditions/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Festival calendar/i }).last()).toHaveAttribute("href", "/puja-calendar");
+    await expect.poll(async () => header.evaluate(node => node.getBoundingClientRect().height)).toBeLessThan(290);
+    await expect(page.locator("#puja-directory")).toBeVisible();
+  });
+
   test("all approved homepage photos load or gracefully show a valid local fallback", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const imgs = page.locator(".nx-approved-home .nx-a-card-image");

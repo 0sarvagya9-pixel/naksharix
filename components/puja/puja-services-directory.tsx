@@ -50,7 +50,10 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">The topics listed below do not imply temple assignments or priest availability. Final ceremony arrangements are coordinated separately after booking.</p>
           {!Object.keys(offerings).length ? <p role="status" className="mt-3 rounded-lg border border-[#d6aa70] bg-[#fff2df] p-3 text-sm text-[#69434b]">Puja prices and online bookings are currently unavailable. Please return when published offers can be verified.</p> : null}
         </div>
-        <span role="status" className="rounded-full border border-[#e2b575]/35 px-4 py-2 text-sm text-[#84303d]">Showing {Math.min(visibleCount,results.length)} of {results.length} topics</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/puja-calendar" className="inline-flex items-center gap-2 rounded-lg border border-[#cbb18d] bg-white px-4 py-2 text-xs font-bold text-[#7a1526]"><CalendarDays size={15} aria-hidden="true"/> Festival calendar</Link>
+          <span role="status" className="rounded-full border border-[#e2b575]/35 px-4 py-2 text-sm text-[#84303d]">Showing {Math.min(visibleCount,results.length)} of {results.length} topics</span>
+        </div>
       </div>
       <label className="relative mt-7 block max-w-xl">
         <span className="sr-only">Search Puja types or deities</span>

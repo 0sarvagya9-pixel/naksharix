@@ -662,3 +662,57 @@ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy
  body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-cards { grid-template-columns:1fr; }
  body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-photo { height:185px; }
 }
+
+/* Keep Puja family hero consistent with the exact approved navy reference.
+ * All actual ceremony photos, prices and booking actions remain in the directory.
+ * The hero's duplicate buttons are surfaced by the live directory/header links. */
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child {
+  background:linear-gradient(108deg,#14233a 0%,#263855 74%,#564338 100%) !important;
+  color:#fff;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > img {
+  opacity:0 !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > div.absolute {
+  background:transparent !important;
+  background-image:none !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > div.mx-auto {
+  min-height:190px !important;
+  padding:20px clamp(15px,3vw,34px) !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child .max-w-2xl {
+  max-width:850px !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child h1 {
+  margin-top:7px !important;
+  font-family:Georgia,'Times New Roman',serif !important;
+  font-size:clamp(30px,3vw,41px) !important;
+  line-height:1.12 !important;
+  color:#fff !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child p.mt-6.max-w-xl {
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+  max-width:750px;
+  margin-top:8px !important;
+  font-size:12px;
+  line-height:1.55;
+  color:#e8e6ea;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child .mt-7,
+body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child p.mt-6.flex {
+  display:none;
+}
+@media(max-width:650px) {
+  body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > div.mx-auto {
+    min-height:197px !important;
+    padding:17px 15px !important;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child h1 {
+    font-size:31px !important;
+    line-height:1.13 !important;
+  }
+}
