@@ -527,3 +527,21 @@ html body.naksh-page-bg header nav[aria-label="Primary navigation"] .nx-nav-drop
     transition:none !important;
   }
 }
+
+
+/* Mobile viewport overlay and wider-screen discovery.
+ * The previous header's backdrop-filter created a containing block for its
+ * fixed child dialog. With an almost opaque ivory header this blur has no
+ * meaningful visual benefit and prevents a truly viewport-sized drawer. */
+body.naksh-page-bg [data-layout="editorial"] header,
+body.naksh-page-bg [data-layout="workspace"] header {
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+/* Keep the approved 1440px nav unchanged; enable the existing More
+ * resources menu only where the complete brand/actions row genuinely fits. */
+@media(min-width:1600px) {
+  body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-more {
+    display:block;
+  }
+}
