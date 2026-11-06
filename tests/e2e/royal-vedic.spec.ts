@@ -60,7 +60,8 @@ test("light-first theme switch actually changes the page surface", async ({ page
   // On the approved mobile header the theme control lives inside the
   // accessible drawer; on desktop it remains visible in the header.
   const mobileMenu = page.getByRole("button", { name: "Open navigation menu" });
-  if (await mobileMenu.isVisible()) {
+  if ((page.viewportSize()?.width ?? 1440) < 1280) {
+    await expect(mobileMenu).toBeVisible();
     await mobileMenu.click();
     await expect(page.getByRole("dialog", { name: "Navigation menu" })).toBeVisible();
   }
@@ -68,6 +69,7 @@ test("light-first theme switch actually changes the page surface", async ({ page
   await expect(button).toBeEnabled();
   const before = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await button.click();
+  await expect.poll(async () => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).not.toBe(before);
   const after = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   expect(before).not.toBe(after);
   await page.reload({ waitUntil: "domcontentloaded" });
