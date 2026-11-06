@@ -45,7 +45,7 @@ const LAST_UPDATED = "12 July 2026";
 const policyPages: Record<PolicyPageKey, PolicyPage> = {
   about: {
     eyebrow: "About Naksharix",
-    title: "Traditional astrology tools, delivered with modern product discipline",
+    title: "Vedic astrology and spiritual guidance for everyday life",
     intro:
       "Naksharix provides Vedic astrology tools, Kundli reports, Panchang, horoscope guidance, numerology, tarot, consultations, and saved digital reports in one account-based experience.",
     badge: "About",
@@ -59,17 +59,17 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "What We Provide",
         body:
-          "Naksharix combines chart calculations, traditional interpretive frameworks, digital reports, and consultation workflows. Some features may be marked as coming soon while they are being validated.",
+          "Naksharix combines chart calculations, traditional interpretive frameworks, digital reports, and consultation workflows. Some services may change or become available over time.",
       },
       {
         title: "How We Build Trust",
         body:
-          "We aim to separate verified calculations from interpretation, avoid fear-based language, disclose unavailable modules, and keep payment and account actions server-verified.",
+          "We explain our services clearly, use secure payment processing, respect personal information, and avoid exaggerated outcome claims.",
       },
       {
         title: "Current Product Scope",
         body:
-          "Core tools, saved reports, premium report payments, and consultation booking are part of the active platform. The AI Astrologer is optional and readiness-gated. The spiritual Shop is an informational catalogue for enquiries only, without public product checkout or shipping promises.",
+          "Our core astrology tools, reports, consultation discovery and spiritual Shop are available online. Eligible products can be ordered through checkout; availability, delivery and fulfilment details are confirmed with each order. AI guidance is offered only when available.",
       },
       {
         title: "Responsible Use",
@@ -153,7 +153,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "AI Features",
         body:
-          "AI Astrologer is a separate opt-in, readiness-gated feature. Its consent flow explains that submitted context may be processed by the configured AI provider, and users should avoid sharing unnecessary sensitive information.",
+          "The optional AI Astrologer may process details you choose to share through its service provider. Avoid entering passwords, financial details or other unnecessary sensitive information.",
       },
       {
         title: "Data Sharing",
@@ -357,7 +357,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "Email Is Supplementary",
         body:
-          "Email delivery may depend on configured email infrastructure and recipient-provider filtering. A missing email does not necessarily mean the report or booking failed; check the Naksharix dashboard first.",
+          "If a confirmation email does not arrive, check your account dashboard for report and booking details, then contact support if needed.",
       },
       {
         title: "Physical Shipping",
@@ -374,7 +374,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
     eyebrow: "Frequently Asked Questions",
     title: "Clear answers about reports, payments, consultations, and privacy",
     intro:
-      "These answers describe the current public product. Features labelled coming soon are not part of the active paid service.",
+      "Find answers about products, payments, bookings, deliveries and account privacy.",
     badge: "Help",
     icon: HelpCircle,
     highlights: [
@@ -416,12 +416,12 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "Is the AI Astrologer active?",
         body:
-          "AI Astrologer is available only when its live readiness check passes. It is a separate opt-in guided experience, not an active public monthly AI subscription.",
+          "The optional AI Astrologer appears when the service is available. Any active access conditions or charges are shown before you use it.",
       },
       {
         title: "Is the shop active?",
         body:
-          "Naksharix offers a spiritual product information catalogue and availability enquiries, but not direct product checkout or guaranteed shipping.",
+          "You can browse priced spiritual products and place eligible orders through the Shop cart. Delivery and fulfilment details are confirmed with each order; please review the checkout information before paying.",
       },
       {
         title: "How do I contact support?",
