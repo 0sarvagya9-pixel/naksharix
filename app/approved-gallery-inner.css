@@ -107,7 +107,7 @@ body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) 
   color:#14233a !important;
 }
 body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(.glass,.glass-panel,.inner-card) :is(p,small) {
-  color:#69717e;
+  color:#4d5360;
 }
 body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(input,select,textarea) {
   border-color:#ded7cf;
@@ -284,4 +284,16 @@ body.naksh-page-bg [data-page-kind="dashboard"] :is(.glass-panel,.inner-card,.gl
  .nx-admin-sidebar nav { display:flex; gap:5px; overflow-x:auto; padding-bottom:3px; }
  .nx-admin-link { flex:none; min-height:38px; white-space:nowrap; }
  .nx-admin-content { padding:14px; }
+}
+
+/* Axe audit: photo caption and empty-state text meet 4.5:1 on actual ivory panels. */
+body.naksh-page-bg [data-page-kind="shop"] .inner-card .mb-5 .text-center p,
+body.naksh-page-bg [data-page-kind="shop"] .inner-card .mb-5 > p {
+  color:#453f47 !important;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .star-field > section > p:first-child {
+  color:#735021;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .star-field .mt-6 > p {
+  color:#424956;
 }
