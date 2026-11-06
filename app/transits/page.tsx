@@ -6,11 +6,11 @@ import { calculateInternalTransitSnapshot, calculateUpcomingTransitTimeline } fr
 
 export const metadata: Metadata = {
   title: "Current Gochar Snapshot | Naksharix",
-  description: "Provider-calculated current transit planet positions for general spiritual reflection. Not a personalized transit prediction.",
+  description: "Planetary transit positions and upcoming changes for traditional reflection.",
   alternates: { canonical: "https://www.naksharix.com/transits" },
   openGraph: {
     title: "Current Gochar Snapshot | Naksharix",
-    description: "Provider-calculated transit positions with clear source and limitation notes.",
+    description: "Explore planetary transits and upcoming changes in Vedic astrology.",
     url: "https://www.naksharix.com/transits",
     siteName: "Naksharix"
   }
@@ -43,11 +43,11 @@ export default function TransitsPage() {
   return (
     <Section className="space-y-8">
       <div className="max-w-4xl space-y-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#f3d382]">Provider-calculated gochar</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#f3d382]">Gochar & Planetary Transits</p>
         <h1 className="font-cinzel text-4xl text-white md:text-5xl">Current Transit Snapshot</h1>
         <p className="max-w-3xl text-slate-300">
-          This page shows a general transit position snapshot calculated by the Naksharix internal astrology engine for a fixed Delhi reference at local noon.
-          It is educational and is not a personalized birth-chart transit prediction.
+          Explore current planetary positions using Delhi as the reference location.
+          For personal guidance, consider your full birth chart.
         </p>
       </div>
 
@@ -72,7 +72,7 @@ export default function TransitsPage() {
 
       <Card className="border-[#dca956]/25 bg-[#0a1224]">
         <CardHeader>
-          <CardTitle className="text-white">Upcoming Provider-Scanned Timeline</CardTitle>
+          <CardTitle className="text-white">Upcoming Planetary Changes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm text-slate-300">
           {timeline.length ? (
@@ -87,18 +87,18 @@ export default function TransitsPage() {
               ))}
             </div>
           ) : (
-            <p>No provider-scanned sign or retrograde changes were detected in the next 45 days for this reference snapshot.</p>
+            <p>No major sign or retrograde changes were found in the next 45 days.</p>
           )}
         </CardContent>
       </Card>
 
       <Card className="border-[#dca956]/25 bg-[#0a1224]">
         <CardHeader>
-          <CardTitle className="text-white">Source & Limits</CardTitle>
+          <CardTitle className="text-white">About these timings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-slate-300">
-          <p>Source: {snapshot.metadata.provider}. Verification level: {snapshot.metadata.verificationLevel}.</p>
-          <p>The timeline is detected by daily provider scans, so exact ingress or station minutes still require external transit fixtures. Personalized transit impact remains Coming Soon until natal overlay rules pass QA.</p>
+          
+          <p>Transit dates are approximate. Personalized guidance is available through a birth-chart consultation.</p>
           <p>Values may vary slightly by source. Use this for spiritual reflection and cross-check critical decisions with a qualified professional.</p>
           <Link href="/reports" className="inline-flex text-[#f3d382] hover:underline">Explore detailed reports</Link>
         </CardContent>

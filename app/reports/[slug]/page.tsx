@@ -78,7 +78,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
               <FileText className="h-6 w-6 text-[#00f5a0]" />
               <p className="mt-4 text-sm text-[#a8b3c7]">{labels.price}</p>
               <p className="mt-2 font-cinzel text-3xl font-black text-[#fbc02d]">{checkout?.price ?? manualFee ?? labels.manualReview}</p>
-              <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{checkout ? labels.paidNote : ownerApprovedManualFee ? "Owner-approved manual service fee. Request handling is confirmed individually; this page does not collect an automatic payment." : labels.manualNote}</p>
+              <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{checkout ? labels.paidNote : ownerApprovedManualFee ? "We will confirm the service details and fee before collecting payment." : labels.manualNote}</p>
             </CardContent>
           </Card>
         </div>
@@ -208,8 +208,8 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
     emailSupport: "Email Support",
     price: "Report fee",
     manualReview: "Manual review",
-    paidNote: "The secure birth-details form opens only after Razorpay payment is captured and verified by the server.",
-    manualNote: "This specialist report does not make an upfront payment claim. The request is saved for manual review.",
+    paidNote: "After secure payment, you can submit your birth details.",
+    manualNote: "Send your request and our team will confirm the next steps.",
     included: "What is included",
     whoShouldRequest: "Who should request this report",
     requiredDetails: "Required details",

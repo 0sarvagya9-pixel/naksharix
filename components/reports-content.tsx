@@ -59,7 +59,7 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
                     {checkout?.price ?? formattedManualPrice ?? labels.manualReview}
                   </p>
                   <p className="mt-2 text-xs text-[#6b7280]">{checkout ? labels.secureCheckout :
-                      manualPrice ? "Owner-approved manual service fee; no online payment is charged until individually confirmed." :
+                      manualPrice ? "We will confirm the service fee before you pay." :
                       labels.manualWorkflow}</p>
                   <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
                     <Button variant="outline" asChild className="border-[#d8af66] bg-white text-[#372630]"><Link href={`/reports/${report.slug}`}>{labels.viewDetails}</Link></Button>
@@ -190,9 +190,9 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     exploreReports: "Explore Reports",
     contactSupport: "Contact Support",
     deliveryTitle: "A secure, transparent workflow",
-    deliveryCopy: "For paid reports, the birth-details form opens only after server-verified payment. Manual-review reports never make an unsupported payment or delivery claim.",
+    deliveryCopy: "Complete secure checkout, then enter your birth details to request a personalized report.",
     manualReview: "Fee confirmation required",
-    secureCheckout: "Razorpay payment with server verification",
+    secureCheckout: "Secure online payment",
     manualWorkflow: "Personalized quote before any payment",
     viewDetails: "View Details",
     pay: "Pay",
@@ -202,7 +202,7 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     stepTwoTitle: "2. Submit secure details",
     stepTwoCopy: "After payment verification, or for a manual request, submit accurate birth place, date, time, and concern.",
     stepThreeTitle: "3. Receive a real deliverable",
-    stepThreeCopy: "A download link appears only when an actual generated PDF is available.",
+    stepThreeCopy: "Download your report when it is ready.",
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."
   };
