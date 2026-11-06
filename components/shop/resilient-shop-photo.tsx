@@ -26,7 +26,7 @@ export function ResilientShopPhoto({
         else if(currentSrc!==fallback)setCurrentSrc(fallback);
       }}/>
     {missing&&showFallbackLabel?<span className="absolute bottom-0 left-0 right-0 bg-[#34212a]/90 px-2 py-1 text-xs font-semibold text-white">
-      Reference photo unavailable · illustration
+      Image unavailable
     </span>:null}
   </div>;
 }

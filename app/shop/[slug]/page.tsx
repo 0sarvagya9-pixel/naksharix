@@ -62,7 +62,7 @@ export default async function ProductDetails({params}:Props) {
           <p className="mt-2 text-sm leading-6 text-[#67545a]">Listed selling price includes delivery. Review your total in the cart, place your order and pay securely with Razorpay.</p>
           <div className="mt-5 max-w-xs"><AddToCartButton productId={product.id} /></div>
           {illustrated?<p className="mt-5 text-xs leading-6 text-[#756267]">
-            Original illustrative artwork, not a photograph of supplied physical stock.
+            Image shown is for reference. Confirm product details before ordering.
           </p>:null}
         </div>
       </div>

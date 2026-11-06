@@ -38,7 +38,7 @@ export function ResilientEditorialImage({
       />
       {isIllustration ? (
         <span className="absolute bottom-0 left-0 right-0 bg-[#351e2d]/90 px-3 py-1.5 text-xs font-semibold text-[#fff4dd]">
-          Representative photo unavailable · illustration
+          Image unavailable
         </span>
       ) : null}
     </div>
