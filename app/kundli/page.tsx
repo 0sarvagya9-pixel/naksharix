@@ -20,8 +20,26 @@ export default function KundliPage() {
         <h1 className="font-cinzel text-4xl font-black text-white">Kundli Generator</h1>
         <p className="mt-3 max-w-2xl text-slate-300">Enter your birth date, exact time and birthplace to explore a traditional Vedic birth chart. The calculations and interpretations depend on the supplied details and method.</p>
         <p className="mt-3 max-w-2xl text-sm text-slate-300">New to Lagna, Rashi, Nakshatra or Dasha? <Link href="/learn/kundli-explained" className="underline underline-offset-4">Read the free Kundli explanation</Link> before interpreting a chart.</p>
-        <div className="mt-8">
-          <KundliForm />
+        <div className="nx-gallery-kundli-grid mt-8">
+          <div className="nx-gallery-kundli-form"><KundliForm /></div>
+          <aside className="nx-gallery-kundli-preview" aria-label="Traditional chart preview before calculation">
+            <p className="nx-gallery-kundli-eyebrow">Traditional chart preview</p>
+            <h2>Your Kundli, at a glance</h2>
+            <div className="nx-gallery-chart-placeholder">
+              <svg viewBox="0 0 320 320" role="img" aria-label="Decorative diamond-grid Vedic chart placeholder, not a calculated result">
+                <rect x="12" y="12" width="296" height="296" rx="3" fill="#fffbf2" stroke="#bd9754" strokeWidth="2" />
+                <path d="M160 12 L308 160 L160 308 L12 160 Z M12 12 L308 308 M308 12 L12 308"
+                  fill="none" stroke="#b88a58" strokeWidth="1.7" />
+                <text x="160" y="174" textAnchor="middle" fill="#be9b59" fontSize="29" fontWeight="700">ॐ</text>
+              </svg>
+              <p>Birth chart appears after you submit your actual details</p>
+            </div>
+            <div className="nx-gallery-kundli-mini">
+              <div><strong>↗</strong><small>Ascendant</small></div>
+              <div><strong>☼</strong><small>Planets</small></div>
+              <div><strong>▧</strong><small>Houses</small></div>
+            </div>
+          </aside>
         </div>
       </Section>
     </main>
