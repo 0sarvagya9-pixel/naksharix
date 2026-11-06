@@ -6,10 +6,10 @@ test.describe("Naksharix editorial photo homepage", () => {
     const main = page.locator(".nx-editorial");
     await expect(main).toBeVisible();
     await expect(page.locator(".nx-approved-home").getByRole("heading", { level: 1, name: /Discover your cosmic journey/i })).toBeVisible();
-    await expect(main.getByRole("link", { name: /Generate free Kundli/i })).toHaveAttribute("href", "/kundli");
+    await expect(page.locator(".nx-approved-home").getByRole("link", { name: /Create Free Kundli/i }).first()).toHaveAttribute("href", "/kundli");
     await expect(main.getByRole("link", { name: /Explore Puja directory/i }).first()).toHaveAttribute("href", "/pujas");
     await expect(main.locator(".nx-ed-service-card")).toHaveCount(8);
-    await expect(main.getByRole("link", { name: "Create free Kundli" }).first()).toHaveAttribute("href", "/kundli");
+    await expect(page.locator(".nx-a-hero").getByRole("link", { name: /Create Free Kundli/i })).toHaveAttribute("href", "/kundli");
     await expect(main.getByRole("link", { name: "Explore Puja directory" }).first()).toBeVisible();
     await expect(page.locator(".nx-reference-promo")).toBeVisible();
     await expect(main.locator(".nx-ed-journey-card")).toHaveCount(3);
@@ -31,7 +31,7 @@ test.describe("Naksharix editorial photo homepage", () => {
     await expect(page.locator(".nx-a-tool")).toHaveCount(6);
     await expect(page.locator(".nx-a-card")).toHaveCount(4);
     await expect(page.locator(".nx-a-hero").getByRole("link", { name: /Create Free Kundli/i })).toHaveAttribute("href", "/kundli");
-    await expect(page.locator(".nx-a-card").getByRole("link", { name: "Browse catalogue" })).toHaveAttribute("href", "/shop");
+    await expect(page.locator(".nx-a-card").getByRole("link", { name: "Browse catalogue" }).first()).toHaveAttribute("href", "/shop");
     await expect(page.getByText("5 Mukhi Rudraksha", { exact: true })).toBeVisible();
   });
 
