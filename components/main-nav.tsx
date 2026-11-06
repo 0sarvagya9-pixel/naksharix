@@ -77,11 +77,9 @@ const horoscopeOptions = [
 ] as const;
 
 const dropdownStyle = {
-  background: "rgba(80, 30, 33, 0.98)",
-  border: "1px solid rgba(255, 255, 255, 0.20)",
-  backdropFilter: "blur(18px) saturate(140%)",
-  WebkitBackdropFilter: "blur(18px) saturate(140%)",
-  boxShadow: "0 22px 60px rgba(0,0,0,0.45)"
+  background: "#12243a",
+  border: "1px solid #94744b",
+  boxShadow: "0 18px 45px rgba(12,23,38,.26)"
 };
 
 export function MainNav() {
@@ -284,13 +282,13 @@ export function MainNav() {
 function HoroscopeMenu({ pathname, label }: { pathname: string; label: string }) {
   const active = pathname.includes("horoscope") || pathname.includes("zodiac");
   return (
-    <div className="group relative">
+    <div className="group relative" data-nav-parent="horoscope">
       <Link href="/daily-horoscope" className={navLinkClass(active)}>{label}</Link>
-      <div className="invisible absolute left-1/2 top-[120%] z-[1000] w-[480px] -translate-x-1/2 translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
+      <div className="nx-nav-dropdown invisible pointer-events-none absolute left-1/2 top-full z-[1000] w-[480px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:opacity-100" role="region" aria-label="Horoscope options" style={dropdownStyle}>
         <div className="grid grid-cols-[160px_1fr] gap-4 text-left">
           <MenuColumn title="Horoscopes" links={horoscopeOptions} />
           <div>
-            <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">Zodiac Signs</p>
+            <p className="nx-nav-dropdown-heading px-2 pb-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-[#f8d394]">Zodiac Signs</p>
             <div className="grid grid-cols-3 gap-1">
               {zodiacSigns.map((item) => <DropdownLink key={item.href} item={item} compact />)}
             </div>
@@ -303,9 +301,9 @@ function HoroscopeMenu({ pathname, label }: { pathname: string; label: string })
 
 function MoreMenu({ label }: { label: string }) {
   return (
-    <div className="nx-gallery-more group relative">
+    <div className="nx-gallery-more group relative" data-nav-parent="more">
       <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">{label}</button>
-      <div className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
+      <div className="nx-nav-dropdown invisible pointer-events-none absolute right-0 top-full z-[1000] w-[460px] max-w-[calc(100vw-24px)] rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:opacity-100" style={dropdownStyle} role="region" aria-label="More site sections">
         <div className="grid grid-cols-3 gap-4 text-left">
           <MenuColumn title="Explore" links={exploreLinks} />
           <MenuColumn title="Tools" links={toolsLinks} />
@@ -319,7 +317,7 @@ function MoreMenu({ label }: { label: string }) {
 function MenuColumn({ title, links }: { title: string; links: readonly { label: string; href: string }[] }) {
   return (
     <div>
-      <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#f2c56b]">{title}</p>
+      <p className="nx-nav-dropdown-heading px-2 pb-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-[#f8d394]">{title}</p>
       <div className="grid gap-0.5">
         {links.map((item) => <DropdownLink key={item.href} item={item} />)}
       </div>
@@ -329,7 +327,7 @@ function MenuColumn({ title, links }: { title: string; links: readonly { label: 
 
 function DropdownLink({ item, compact = false }: { item: { label: string; href: string }; compact?: boolean }) {
   return (
-    <Link href={item.href} className={cn("rounded-lg text-xs font-semibold text-[#fffaf0]/80 transition hover:bg-[rgba(242,197,107,0.10)] hover:text-[#f2c56b]", compact ? "px-2 py-1" : "px-2.5 py-1.5")}>
+    <Link href={item.href} className={cn("nx-nav-dropdown-link block rounded-lg text-xs font-semibold leading-5 text-[#fff7e8] transition-colors hover:bg-white/10 hover:text-[#ffe0a2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f6d68e]", compact ? "px-2 py-2" : "px-2.5 py-2")}>
       {item.label}
     </Link>
   );
