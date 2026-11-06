@@ -145,8 +145,8 @@ export function MainNav() {
   return (
     <div className="sticky top-0 z-50 w-full">
       <div className="nx-reference-promo">
-        <span>{locale === "hi" ? "NAKSHARIX • वैदिक ज्योतिष, पारंपरिक ज्ञान और व्यक्तिगत मार्गदर्शन" : "NAKSHARIX • Vedic astrology tools, traditional knowledge and private guidance"}</span>
-        <Link href="/pujas">{locale === "hi" ? "पूजा सेवाएँ देखें" : "Explore Puja Services"} <span aria-hidden="true">→</span></Link>
+        <span>{locale === "hi" ? "NAKSHARIX • वैदिक ज्योतिष, पारंपरिक ज्ञान और व्यक्तिगत मार्गदर्शन" : "NAKSHARIX  |  Vedic heritage, thoughtfully designed for today"}</span>
+        <Link href="/pujas">{locale === "hi" ? "पूजा सेवाएँ देखें" : "Traditional knowledge"} <span aria-hidden="true">→</span></Link>
       </div>
       <header
         className="w-full transition-all duration-300"
@@ -303,7 +303,7 @@ function HoroscopeMenu({ pathname, label }: { pathname: string; label: string })
 
 function MoreMenu({ label }: { label: string }) {
   return (
-    <div className="group relative">
+    <div className="nx-gallery-more group relative">
       <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">{label}</button>
       <div className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
         <div className="grid grid-cols-3 gap-4 text-left">
