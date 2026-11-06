@@ -59,7 +59,7 @@ function featureLabels(kind: FeatureKind, locale: Locale) {
   if (locale === "hi") {
     const base = {
       badge: "जल्द आ रहा है",
-      safety: "यह सुविधा अभी active booking, payment, live chat, AI response या automatic confirmation नहीं दिखाती। उपलब्ध free tools और manual report catalogue का उपयोग करें।",
+      safety: "यह सुविधा अभी उपलब्ध नहीं है। आप हमारे वर्तमान ज्योतिष टूल और रिपोर्ट देख सकते हैं।",
       cards: {
         kundli: { title: "कुंडली बनाएं", copy: "पूर्ण जन्म विवरण से free Kundli experience शुरू करें।", cta: "कुंडली खोलें" },
         matching: { title: "मिलान करें", copy: "वधू और वर विवरण से compatibility guidance देखें।", cta: "मिलान खोलें" },
@@ -74,7 +74,7 @@ function featureLabels(kind: FeatureKind, locale: Locale) {
   if (locale === "hinglish") {
     const base = {
       badge: "Coming Soon",
-      safety: "Ye feature abhi active booking, payment, live chat, AI response ya automatic confirmation nahi dikhata. Available free tools aur manual report catalogue use karein.",
+      safety: "Ye service filhaal available nahi hai. Aap hamare existing astrology tools aur reports explore kar sakte hain.",
       cards: {
         kundli: { title: "Explore Kundli", copy: "Complete birth details se free Kundli experience start karein.", cta: "Open Kundli" },
         matching: { title: "Try Match Making", copy: "Bride aur groom details se compatibility guidance dekhein.", cta: "Open Matching" },
@@ -88,7 +88,7 @@ function featureLabels(kind: FeatureKind, locale: Locale) {
   }
   const base = {
     badge: "Coming Soon",
-    safety: "This feature is not showing active booking, payment, live chat, AI response, or automatic confirmation yet. Please use the available free tools and manual report catalogue.",
+    safety: "This service is coming soon. In the meantime, explore our available astrology tools and reports.",
     cards: {
       kundli: { title: "Explore Kundli", copy: "Start with a free Kundli experience from complete birth details.", cta: "Open Kundli" },
       matching: { title: "Try Match Making", copy: "Review compatibility guidance from bride and groom details.", cta: "Open Matching" },

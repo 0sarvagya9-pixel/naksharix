@@ -66,7 +66,7 @@ function aiSoonLabels(locale: "en" | "hi" | "hinglish") {
     return {
       badge: "Beta Hold",
       title: "AI Astrologer Jaldi Aa Raha Hai",
-      subtitle: "Hum Naksharix AI Astrologer ki reliability aur safety improve kar rahe hain. Tab tak available Kundli, Matching, Numerology, Reports aur Consultation tools use karein.",
+      subtitle: "AI Astrologer filhaal available nahi hai. Kundli, Matching, Numerology, Reports aur Consultation services explore karein.",
       kundli: "Use Kundli Generator",
       matching: "Try Match Making",
       numerology: "Explore Numerology",
@@ -78,7 +78,7 @@ function aiSoonLabels(locale: "en" | "hi" | "hinglish") {
   return {
     badge: "Beta Hold",
     title: "AI Astrologer Coming Soon",
-    subtitle: "We are improving the reliability and safety of Naksharix AI Astrologer. Until then, use the available Kundli, matching, numerology, report, and consultation tools.",
+    subtitle: "AI Astrologer is not currently available. Explore Kundli, matching, numerology, reports and consultation services in the meantime.",
     kundli: "Use Kundli Generator",
     matching: "Try Match Making",
     numerology: "Explore Numerology",
