@@ -102,6 +102,21 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
     await expect(page.locator("#puja-directory")).toBeVisible();
   });
 
+  test("mobile first-screen layout exposes real report, shop and Puja cards", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const [route, selector] of [
+      ["/reports", "#report-catalogue > div"],
+      ["/shop", ".nx-gallery-shop-grid > div"],
+      ["/pujas", "#puja-directory article"]
+    ] as const) {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      const first = page.locator(selector).first();
+      await expect(first).toBeVisible();
+      const top = await first.evaluate(node => Math.round(node.getBoundingClientRect().top));
+      expect(top, route + " must show first REAL catalogue card within the approved mobile screen").toBeLessThan(844);
+    }
+  });
+
   test("all approved homepage photos load or gracefully show a valid local fallback", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const imgs = page.locator(".nx-approved-home .nx-a-card-image");
