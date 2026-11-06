@@ -8,7 +8,7 @@ import { seo } from "@/lib/seo";
 export const metadata: Metadata = {
   ...seo({
     title: "Astrology Consultations",
-    description: "Book a live consultation with approved Vedic astrologers for chat, phone call, or video session guidance.",
+    description: "Explore Vedic astrology consultation options, session formats and available specialists.",
     path: "/consultation",
     keywords: ["Astrology Consultation", "Astrologer Booking", "Vedic Astrologer", "Live Consultation"]
   }),
@@ -45,9 +45,8 @@ export default async function ConsultationPage() {
 
   return <><EditorialServiceBanner eyebrow="HOME / EXPERT GUIDANCE"
     headline="Astrologer Consultations"
-    caption="Browse the approved profiles and read session details before choosing a consultation. External meeting rooms depend on assigned providers."
+    caption="Explore ways to connect with an astrologer and find guidance for your questions."
     image="https://upload.wikimedia.org/wikipedia/commons/0/04/Astrologer.jpg" imageAlt="Representative astrology consultation exhibition photograph, by Ravikiran, CC BY-SA 4.0"
-    imageCredit={{label:"Ravikiran · CC BY-SA 4.0",source:"https://commons.wikimedia.org/wiki/File:Astrologer.jpg"}}
     link="/ask-astrologer" linkLabel="Ask a written question" />
     <ConsultationGallery />
     <AstrologersPageContent profiles={profiles} /></>;

@@ -330,7 +330,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
     eyebrow: "Delivery Policy",
     title: "Digital reports, premium access, and consultation delivery",
     intro:
-      "Naksharix delivers active paid digital services electronically. The spiritual Shop lists informational products for enquiry; physical product checkout and shipping are not offered.",
+      "Naksharix delivers digital services electronically and accepts eligible physical-product orders through secure checkout. Shipping and fulfilment details are confirmed with each order.",
     badge: "Delivery",
     icon: PackageCheck,
     highlights: [
@@ -362,7 +362,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "Physical Shipping",
         body:
-          "The Naksharix spiritual Shop is informational and enquiry-only. No public physical-product checkout, stock guarantee or shipping commitment is currently offered.",
+          "Products with a published price may be ordered through the cart when checkout is available. Product photographs are illustrative. Delivery address, order details, availability and dispatch arrangements are confirmed as part of the order process. If an item cannot be fulfilled, contact support for resolution under our refund policy.",
       },
       {
         title: "Delivery Problems",
@@ -380,7 +380,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
     highlights: [
       "Payments are processed through Razorpay",
       "Premium reports and consultations require verified payment",
-      "Shop enquiries and readiness-gated AI availability",
+      "Product orders and availability",
     ],
     sections: [
       {

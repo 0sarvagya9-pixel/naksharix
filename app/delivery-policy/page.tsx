@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   ...seo({
     title: "Delivery Policy - Naksharix",
     description:
-      "Read how Naksharix delivers premium digital reports and consultation details, and why physical shipping remains unavailable while the shop is coming soon.",
+      "Read about digital report delivery, consultation confirmations, and shipping arrangements for physical orders.",
     path: "/delivery-policy",
     keywords: ["Naksharix Delivery Policy", "Digital Report Delivery", "Consultation Delivery", "Shipping Policy"],
   }),

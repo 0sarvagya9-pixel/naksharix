@@ -5,10 +5,10 @@ import { ArrowRight } from "lucide-react";
 /* Owner-approved visual format cards. They are service-discovery links,
    never fabricated doctors, verified profiles, appointment slots or prices. */
 const formats = [
-  { title: "Consultation Profile", subtitle: "Video, voice and chat options", src: "/approved-gallery/consult-photo.jpg", href: "/astrologers", cta: "Explore astrologers" },
-  { title: "Astrologer Profile", subtitle: "Browse available consultation formats", src: "/approved-gallery/puja-hero.jpg", href: "/astrologers", cta: "Explore astrologers" },
-  { title: "Astrology Specialist", subtitle: "Traditional Kundli and report guidance", src: "/approved-gallery/kundli-report.jpg", href: "/reports", cta: "Explore reports" },
-  { title: "Traditional Guidance", subtitle: "Puja traditions and dates", src: "/approved-gallery/puja-ritual.jpg", href: "/pujas", cta: "View puja services" },
+  { title: "Video & Voice Consultations", subtitle: "Video, voice and chat options", src: "/approved-gallery/consult-photo.jpg", href: "/astrologers", cta: "Explore astrologers" },
+  { title: "Traditional Astrology", subtitle: "Browse available consultation formats", src: "/approved-gallery/puja-hero.jpg", href: "/astrologers", cta: "Explore astrologers" },
+  { title: "Kundli & Reports", subtitle: "Traditional Kundli and report guidance", src: "/approved-gallery/kundli-report.jpg", href: "/reports", cta: "Explore reports" },
+  { title: "Puja & Traditions", subtitle: "Puja traditions and dates", src: "/approved-gallery/puja-ritual.jpg", href: "/pujas", cta: "View puja services" },
 ];
 
 export function ConsultationGallery() {
@@ -28,7 +28,7 @@ export function ConsultationGallery() {
             <article key={title} className="nx-consultation-gallery-card">
               <Image src={src} alt={title+" conceptual illustration"} width={640} height={300} unoptimized className="nx-consultation-gallery-photo" />
               <div className="nx-consultation-gallery-copy">
-                <span>Explore services</span>
+                
                 <h3>{title}</h3>
                 <p>{subtitle}</p>
                 <Link href={href}>{cta} <ArrowRight size={14} aria-hidden="true"/></Link>

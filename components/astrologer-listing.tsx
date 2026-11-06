@@ -103,9 +103,9 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
 
       {!astrologers.length ? (
         <div className="mt-6 rounded-lg border border-[#decba9] bg-[#fffcf7] p-5 text-sm text-[#414553]">
-          <p>{tr("noAstrologersMatch")}</p>
+          <p>{source.length ? tr("noAstrologersMatch") : "Consultations are currently unavailable. Contact us for assistance."}</p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <Button type="button" variant="outline" onClick={() => { setLanguage("All"); setExpertise("All"); setPrice("All"); setRating("All"); }}>Reset filters</Button>
+            {source.length ? <Button type="button" variant="outline" onClick={() => { setLanguage("All"); setExpertise("All"); setPrice("All"); setRating("All"); }}>Reset filters</Button> : null}
             <Button asChild><Link href="/contact">Contact Support</Link></Button>
           </div>
         </div>
