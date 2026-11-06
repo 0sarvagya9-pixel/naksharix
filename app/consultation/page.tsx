@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AstrologersPageContent } from "@/components/astrologers-page-content";
+import { ConsultationGallery } from "@/components/consultation-gallery";
 import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import { prisma } from "@/lib/db";
 import { seo } from "@/lib/seo";
@@ -48,5 +49,6 @@ export default async function ConsultationPage() {
     image="https://upload.wikimedia.org/wikipedia/commons/0/04/Astrologer.jpg" imageAlt="Representative astrology consultation exhibition photograph, by Ravikiran, CC BY-SA 4.0"
     imageCredit={{label:"Ravikiran · CC BY-SA 4.0",source:"https://commons.wikimedia.org/wiki/File:Astrologer.jpg"}}
     link="/ask-astrologer" linkLabel="Ask a written question" />
+    <ConsultationGallery />
     <AstrologersPageContent profiles={profiles} /></>;
 }

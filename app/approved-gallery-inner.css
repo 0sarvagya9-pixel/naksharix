@@ -557,3 +557,104 @@ body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-grid {
   margin-top:12px;
  }
 }
+
+/* Approved consultation discovery cards, without claiming real profiles. */
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery {
+ padding:28px 0 12px;
+ background:#fbf6ef;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading {
+ display:flex;
+ align-items:end;
+ justify-content:space-between;
+ gap:16px;
+ margin-bottom:19px;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading p {
+ margin:0 0 7px;
+ color:#785021;
+ font-size:11px;
+ letter-spacing:.15em;
+ text-transform:uppercase;
+ font-weight:800;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading h2 {
+ margin:0 0 7px;
+ color:#14233a;
+ font:700 clamp(23px,2.45vw,32px)/1.12 Georgia,serif;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading span {
+ color:#69717e;
+ font-size:12px;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading > a {
+ flex:none;
+ display:inline-flex;
+ align-items:center;
+ gap:7px;
+ border:1px solid #d1b28e;
+ border-radius:7px;
+ padding:10px 12px;
+ color:#794028;
+ font-size:11px;
+ font-weight:800;
+ text-decoration:none;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-cards {
+ display:grid;
+ grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:14px;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-card {
+ min-width:0;
+ overflow:hidden;
+ border:1px solid #e8dccc;
+ border-radius:12px;
+ background:white;
+ box-shadow:0 12px 28px rgba(58,37,21,.08);
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-photo {
+ display:block;
+ width:100%;
+ height:145px;
+ object-fit:cover;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy {
+ padding:12px;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy > span {
+ color:#785021;
+ font-size:10px;
+ font-weight:800;
+ text-transform:uppercase;
+ letter-spacing:.12em;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy h3 {
+ margin:6px 0;
+ font:700 19px/1.2 Georgia,serif;
+ color:#14233a;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy p {
+ min-height:33px;
+ color:#606775;
+ font-size:11px;
+ line-height:1.4;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy a {
+ display:inline-flex;
+ align-items:center;
+ gap:5px;
+ color:#7a1526;
+ font-size:11px;
+ font-weight:800;
+ margin-top:8px;
+}
+@media(max-width:850px) {
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading { display:block; }
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading > a { margin-top:12px; }
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:480px) {
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-cards { grid-template-columns:1fr; }
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-photo { height:185px; }
+}
