@@ -83,7 +83,7 @@ export default async function PanchangPage({
                 Today&apos;s Panchang
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-8 text-[#525866]">
-                Explore today's Tithi, Nakshatra, Yoga, Karana and other Panchang details for your selected place.
+                Explore today&apos;s Tithi, Nakshatra, Yoga, Karana and other Panchang details for your selected place.
                 Dates and timings may differ by local tradition.
               </p>
               <div className="mt-6 flex flex-wrap gap-3 text-sm">
