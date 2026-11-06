@@ -50,7 +50,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
           </div>
         </div>
 
-        <div className="nx-gallery-shop-grid mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="nx-gallery-shop-grid mt-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
           {products.map((product) => (
             <Card key={product.id} className="inner-card flex h-full flex-col transition hover:-translate-y-1 hover:border-[#dca956]/50">
               <CardContent className="flex h-full flex-col p-6">

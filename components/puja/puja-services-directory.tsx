@@ -66,7 +66,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           className={"rounded-full border px-4 py-2 text-sm font-semibold transition "+(category===key
             ?"border-[#ffdf9f] bg-[#f5c979] text-[#351b1e]":"border-[#d5b17d]/40 bg-white text-[#5e424b] hover:border-[#f5d59c]")}>{key}</button>)}
       </div>
-      {results.length?<div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {results.length?<div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
         {results.slice(0,visibleCount).map(topic=><article key={topic.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#d0a766]/35 bg-white transition hover:-translate-y-1 hover:border-[#f4ca7f]">
           <div className="relative aspect-[16/10] overflow-hidden bg-[#fff1de]">
             <ResilientEditorialImage src={pujaEditorialImage(topic.id,topic.graphic,topic.category)}

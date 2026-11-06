@@ -117,6 +117,26 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
     }
   });
 
+  test("approved mobile catalogues show two cards per row without horizontal scrolling", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const [route, selector] of [
+      ["/reports", "#report-catalogue"],
+      ["/shop", ".nx-gallery-shop-grid"],
+      ["/pujas", "#puja-directory > .mt-8.grid"]
+    ] as const) {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      const grid = page.locator(selector);
+      await expect(grid).toBeVisible();
+      const rendered = await grid.evaluate(node => ({
+        columns: getComputedStyle(node).gridTemplateColumns.split(" ").filter(Boolean).length,
+        documentWidth: document.documentElement.scrollWidth,
+        viewportWidth: document.documentElement.clientWidth
+      }));
+      expect(rendered.columns, route).toBe(2);
+      expect(rendered.documentWidth, route).toBeLessThanOrEqual(rendered.viewportWidth + 2);
+    }
+  });
+
   test("all approved homepage photos load or gracefully show a valid local fallback", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const imgs = page.locator(".nx-approved-home .nx-a-card-image");

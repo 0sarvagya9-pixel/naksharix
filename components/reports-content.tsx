@@ -26,7 +26,7 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
           <span>Clear report formats and the actual published prices for your account.</span>
           <a href="#report-information">How reports work</a>
         </div>
-        <div id="report-catalogue" className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div id="report-catalogue" className="mt-10 grid grid-cols-2 gap-3 xl:grid-cols-3">
           {manualReports.map((report) => {
             const checkout = getManualReportCheckout(report.slug);
             const manualPrice=!checkout?manualOfferings[report.slug]:undefined;

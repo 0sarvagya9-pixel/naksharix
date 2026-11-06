@@ -818,3 +818,97 @@ body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .mt-8.grid {
    gap:4px;
  }
 }
+
+/* Exact approved mobile grid density: two real cards per row. */
+@media(max-width:620px) {
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue > div > div {
+    padding:11px !important;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-report-art {
+    height:110px;
+    margin-bottom:10px;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue h2 {
+    font-size:15px;
+    line-height:1.25;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue p.mt-4.text-sm {
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    font-size:11px;
+    line-height:1.5;
+    margin-top:6px;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue ul.mt-4 {
+    display:none;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue a,
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue button {
+    font-size:10px;
+    min-height:36px;
+    padding-inline:6px;
+    white-space:normal;
+    text-align:center;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid > div > div {
+    padding:10px !important;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid img {
+    height:120px !important;
+    padding:6px !important;
+    object-fit:contain;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid h2 {
+    font-size:15px;
+    line-height:1.25;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid p.mt-4.text-sm {
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    margin-top:6px;
+    font-size:10px;
+    line-height:1.5;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid details {
+    display:none;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid a,
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid button {
+    font-size:10px;
+    white-space:normal;
+    min-height:35px;
+    text-align:center;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .mt-8.grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory article > div:last-child {
+    padding:10px;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory article h3 {
+    font-size:14px;
+    line-height:1.2;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory article p {
+    font-size:10px;
+    line-height:1.4;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory article a.mt-5 {
+    font-size:11px;
+    min-height:36px;
+    padding-inline:8px;
+  }
+}
