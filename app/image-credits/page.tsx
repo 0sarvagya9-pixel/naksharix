@@ -26,7 +26,7 @@ const sources: Credit[] = [
     licence: "CC BY-SA 4.0", licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0/"
   }
 ];
-const credits = [...new Map(sources.map(p => [p.source, p])).values()]
+const credits = [...new Map<string,Credit>(sources.map(p => [p.source, p] as const)).values()]
   .sort((a,b) => a.label.localeCompare(b.label));
 
 export default function ImageCreditsPage() {
