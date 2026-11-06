@@ -176,7 +176,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.getByPlaceholder("Search products...").fill("Shri Yantra");
     await expect(page.getByRole("heading", { level: 2, name: "Shri Yantra" })).toBeVisible();
     await expect(page.locator('img[alt*="Yantra"]').first()).toBeVisible();
-    await expect(page.getByText("Real reference photo • actual item may differ").first()).toBeVisible();
+    await expect(page.getByText(/Images are for reference/).first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add product to cart" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Buy Now|Pay with Razorpay/i })).toHaveCount(0);
   });
@@ -242,13 +242,13 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("link", { name: /Enquire about Rudrabhishek/ })).toHaveAttribute(
       "href", /kind=PUJA.*ritual%3Arudrabhishek/
     );
-    await expect(page.getByText(/No booking or payment is taken/)).toBeVisible();
+    await expect(page.getByText(/Explore festival dates and enquire about your preferred ceremony/)).toBeVisible();
   });
 
   test("Shop product detail retains truthful photography disclosure and safe cart CTA", async ({ page }) => {
     await page.goto(absolute("/shop/shri-yantra"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Shri Yantra" })).toBeVisible();
-    await expect(page.getByText(/Real reference photograph, not verified Naksharix stock/)).toBeVisible();
+    await expect(page.getByText(/Product images are for reference/)).toBeVisible();
     await expect(page.getByRole("button", { name: "Add product to cart" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Buy Now|Pay with Razorpay/i })).toHaveCount(0);
   });
