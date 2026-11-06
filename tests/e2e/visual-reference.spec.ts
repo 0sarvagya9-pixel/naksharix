@@ -19,6 +19,13 @@ const publicScreens = [
 test("capture sitewide public visual evidence for desktop and mobile", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === "firefox-desktop", "Capture Chrome and iPhone reference evidence");
   test.setTimeout(180_000);
+  // Owner-approved reference gallery was authored at 1440x900 desktop
+  // and 390x844 mobile. Screenshot parity requires matching viewports.
+  if (testInfo.project.name === "chromium-desktop") {
+    await page.setViewportSize({ width: 1440, height: 900 });
+  } else if (testInfo.project.name === "webkit-iphone") {
+    await page.setViewportSize({ width: 390, height: 844 });
+  }
   for (const screen of publicScreens) {
     const response = await page.goto(screen.path, { waitUntil: "domcontentloaded" });
     expect(response?.status(), screen.path).toBe(200);
