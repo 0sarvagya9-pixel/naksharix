@@ -26,8 +26,12 @@ body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-photo {
 body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-photo img {
   opacity:0;
 }
+/* Earlier reference-redesign.css uses a burgundy !important overlay.
+ * Remove it explicitly; otherwise every real inner-page hero appears maroon
+ * despite the approved navy-to-bronze background underneath. */
 body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-shade {
-  background:transparent;
+  background:transparent !important;
+  background-image:none !important;
 }
 body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-body {
   padding-block:19px;

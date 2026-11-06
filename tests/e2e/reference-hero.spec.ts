@@ -69,6 +69,29 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
     expect(layout.hasCreamBackground).toBe(true);
   });
 
+  test("public detail banners use approved navy instead of obsolete burgundy overlay", async ({ page }) => {
+    for (const route of ["/kundli", "/reports", "/shop", "/consultation"]) {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      const banner = page.locator(".nx-ed-inner-banner");
+      const shade = banner.locator(".nx-ed-inner-banner-shade");
+      await expect(banner).toBeVisible();
+      await expect(shade).toBeAttached();
+      const surface = await banner.evaluate(element => {
+        const style = getComputedStyle(element);
+        const overlay = element.querySelector(".nx-ed-inner-banner-shade");
+        const overlayStyle = overlay ? getComputedStyle(overlay) : null;
+        return {
+          backgroundImage: style.backgroundImage,
+          overlayImage: overlayStyle?.backgroundImage ?? "",
+          overlayColor: overlayStyle?.backgroundColor ?? "",
+        };
+      });
+      expect(surface.backgroundImage, route).toContain("linear-gradient");
+      expect(surface.overlayImage, route).toBe("none");
+      expect(surface.overlayColor, route).toMatch(/^rgba?\(0, 0, 0, 0\)$/);
+    }
+  });
+
   test("all approved homepage photos load or gracefully show a valid local fallback", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const imgs = page.locator(".nx-approved-home .nx-a-card-image");
