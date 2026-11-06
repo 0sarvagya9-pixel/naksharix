@@ -302,3 +302,182 @@ body.naksh-page-bg [data-layout="editorial"] header a[aria-label="Naksharix home
  .nx-a-extra-card > strong { font-size:18px; }
  .nx-a-band { font-size:13px; }
 }
+
+
+/* Precise header parity at 1440x900 and 390x844; all actions remain functional. */
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-header-row {
+  height:82px !important;
+  max-width:1500px;
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  padding-inline:clamp(18px,2.25vw,32px) !important;
+  gap:14px !important;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand {
+  flex:0 0 280px;
+  width:280px;
+  min-width:0;
+  max-width:280px;
+  overflow:visible;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand > a {
+  gap:8px;
+  min-width:0;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand > a > span:first-child {
+  height:48px;
+  width:48px;
+  flex:0 0 48px;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand a[aria-label="Naksharix home"] span span:first-child {
+  font-size:24px !important;
+  line-height:1.06;
+  font-family:Georgia,serif;
+  letter-spacing:-.052em;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav {
+  flex:1 1 auto;
+  justify-content:flex-start;
+  gap:clamp(2px,.25vw,7px) !important;
+  min-width:0;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav > a,
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav > div > a {
+  color:#272d38 !important;
+  padding:8px clamp(4px,.47vw,8px) !important;
+  white-space:nowrap;
+  font-size:clamp(11px,.88vw,13px) !important;
+  letter-spacing:-.015em;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-more {
+  display:none;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-actions {
+  border-left:0;
+  padding-left:0;
+  margin-left:auto;
+  gap:6px;
+  flex-shrink:0;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-header-desktop-actions {
+  gap:3px;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-icon-link {
+  height:35px;
+  width:35px;
+  flex:0 0 35px;
+  display:grid;
+  place-items:center;
+  color:#68323c;
+  border:1px solid #eedfce;
+  border-radius:50%;
+  background:white;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-icon-link:hover {
+  background:#f8ede0;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-header-cart {
+  width:34px;
+  height:34px;
+  color:#68323c;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-account {
+  flex:0 0 auto;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-account-button,
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-auth-trigger {
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-width:126px;
+  height:38px;
+  padding:6px 15px;
+  border:1px solid #7a1526;
+  border-radius:999px;
+  background:#7a1526 !important;
+  color:#fff !important;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.1;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-account-button:hover,
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-auth-trigger:hover {
+  background:#5e1020 !important;
+  color:white !important;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo {
+  min-height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:5px 34px;
+  text-align:left;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo > span {
+  font-size:10px;
+  letter-spacing:.07em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo > a {
+  white-space:nowrap;
+  font-size:10px;
+  letter-spacing:.04em;
+}
+@media(min-width:1280px) and (max-width:1480px) {
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand {
+    flex-basis:270px;
+    width:270px;
+    max-width:270px;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav > a,
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav > div > a {
+    padding-inline:4px !important;
+    font-size:12px !important;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-actions {
+    gap:2px;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-icon-link,
+  body.naksh-page-bg [data-layout="editorial"] header .nx-header-cart {
+    height:31px;
+    width:31px;
+    flex-basis:31px;
+  }
+}
+@media(max-width:1279px) {
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-header-row {
+    height:70px !important;
+    gap:12px !important;
+    padding-inline:16px !important;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand {
+    flex:1 1 auto;
+    width:auto;
+    max-width:none;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-actions {
+    margin-left:auto;
+    border:0;
+    padding:0;
+  }
+  body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo {
+    padding-inline:10px;
+  }
+  body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo > a {
+    display:none;
+  }
+}
+@media(max-width:420px) {
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand a[aria-label="Naksharix home"] span span:first-child {
+    font-size:20px !important;
+    letter-spacing:-.055em;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-header-row {
+    padding-inline:12px !important;
+  }
+}
