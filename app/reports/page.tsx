@@ -15,8 +15,8 @@ export const metadata: Metadata = seo({
 export const dynamic="force-dynamic";
 export default async function ReportsPage() {
   const manualOfferings=await getPublishedManualReportOffers();
-  return <><EditorialServiceBanner eyebrow="CHARTS & REPORTS"
-    headline="A deeper look at your cosmic story"
+  return <><EditorialServiceBanner eyebrow="HOME / ASTROLOGY REPORTS"
+    headline="Premium Astrology Reports"
     caption="Explore available traditional chart, matching and numerology report topics. Availability and any applicable pricing are shown in the report workflow."
     image="/naksharix/editorial-reports.svg" imageAlt="Illustrated birth-chart report"
     link="/kundli" linkLabel="Begin with a free Kundli" />

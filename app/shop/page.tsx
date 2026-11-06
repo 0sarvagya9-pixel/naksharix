@@ -25,8 +25,8 @@ export default async function ShopPage() {
     <p className="mt-4 text-base leading-7">We cannot verify current catalogue prices right now. Ordering and checkout are paused for your protection. Your saved cart is not erased.</p>
     <Link href="/shop" className="mt-6 inline-block rounded-lg bg-[#8b3343] px-5 py-3 font-bold text-white">Retry Shop</Link>
   </main>;
-  return <><EditorialServiceBanner eyebrow="SPIRITUAL DISCOVERY"
-    headline="Objects of tradition and intention"
+  return <><EditorialServiceBanner eyebrow="HOME / SPIRITUAL CATALOGUE"
+    headline="Spiritual Shop"
     caption="Shop Rudraksha, Yantras and spiritual essentials. Browse products, add to cart and checkout securely."
     image={referencePhotoForProduct("rudraksha-mala")?.url || "/shop/rudraksha-mala-illustration.svg"} imageAlt="Licensed representative Rudraksha prayer bead photograph"
     link="/cart" linkLabel="View your cart" />

@@ -15,7 +15,7 @@ export const metadata: Metadata = seo({
 export default function KundliPage() {
   return (
     <main className="inner-page-shell star-field">
-      <EditorialServiceBanner eyebrow="FREE VEDIC BIRTH CHART" headline="Your Kundli, your starting point" caption="Enter your birth details for a structured traditional chart. Times, location and ephemeris settings matter." image="/naksharix/editorial-kundli.svg" imageAlt="Original Vedic birth-chart grid illustration" link="/panchang" linkLabel="Explore the Panchang" />
+      <EditorialServiceBanner eyebrow="HOME / BIRTH CHART" headline="Free Kundli Generator" caption="Enter your birth details for a structured traditional chart. Times, location and ephemeris settings matter." image="/naksharix/editorial-kundli.svg" imageAlt="Original Vedic birth-chart grid illustration" link="/panchang" linkLabel="Explore the Panchang" />
       <Section first>
         <h1 className="font-cinzel text-4xl font-black text-white">Kundli Generator</h1>
         <p className="mt-3 max-w-2xl text-slate-300">Enter your birth date, exact time and birthplace to explore a traditional Vedic birth chart. The calculations and interpretations depend on the supplied details and method.</p>
