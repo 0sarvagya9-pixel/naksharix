@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { CheckCircle2, ClipboardList, CreditCard, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,12 +49,10 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
             return (
               <Card key={report.slug} className="flex flex-col border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
                 <CardContent className="flex flex-1 flex-col p-6">
-                  <div aria-hidden="true" className="relative mb-6 flex min-h-36 items-center justify-between overflow-hidden rounded-2xl border border-[#c79c65]/45 bg-[radial-gradient(circle_at_78%_25%,#d2a45a_0%,transparent_38%),linear-gradient(115deg,#412335,#82384b)] px-6 py-5 text-[#fff4e1]">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[.19em] text-[#f0c58d]">{report.category}</p>
-                      <p className="mt-3 max-w-44 font-cinzel text-lg font-bold leading-7">{report.name[locale]}</p>
-                    </div>
-                    <div className="text-6xl font-light text-[#f2cf94]/85">✦</div>
+                  <div aria-hidden="true" className="nx-gallery-report-art relative mb-4 overflow-hidden rounded-xl border border-[#c79c65]/45">
+                    <Image src={reportGalleryImage(report.slug)} alt="" fill unoptimized
+                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                      className="nx-gallery-report-art-img"/>
                   </div>
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -200,4 +199,11 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."
   };
+}
+
+/** Visual categories only; displayed prices and product facts remain live. */
+function reportGalleryImage(slug: string) {
+  if (/love|marriage|couple|match|compatib|relationship/i.test(slug)) return "/approved-gallery/consult-photo.jpg";
+  if (/career|wealth|business|finance|year|transit|sade|dosha/i.test(slug)) return "/approved-gallery/hero-astrolabe.jpg";
+  return "/approved-gallery/kundli-report.jpg";
 }
