@@ -24,7 +24,7 @@ type SessionUser = {
   avatarUrl?: string | null;
 };
 
-export function AuthProfileMenu() {
+export function AuthProfileMenu({ showGalleryLabel = false }: { showGalleryLabel?: boolean } = {}) {
   const { tr } = useLanguage();
   const pathname = usePathname();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -106,17 +106,19 @@ export function AuthProfileMenu() {
 
   if (loading) {
     return (
-      <Button variant="ghost" size="icon" className="inline-flex" aria-label={tr("myProfile")} disabled>
+      <Button variant="ghost" size={showGalleryLabel ? "md" : "icon"} className={showGalleryLabel ? "nx-gallery-account-button inline-flex gap-2" : "inline-flex"} aria-label={tr("myProfile")} disabled>
         <UserRound className="h-5 w-5" />
+        {showGalleryLabel ? <span>My Account</span> : null}
       </Button>
     );
   }
 
   if (!user) {
     return (
-      <Button variant="ghost" size="icon" asChild className="inline-flex">
+      <Button variant="ghost" size={showGalleryLabel ? "md" : "icon"} asChild className={showGalleryLabel ? "nx-gallery-account-button inline-flex gap-2" : "inline-flex"}>
         <Link href="/login" aria-label={tr("login")}>
           <UserRound className="h-5 w-5" />
+          {showGalleryLabel ? <span>My Account</span> : null}
         </Link>
       </Button>
     );
@@ -154,11 +156,12 @@ export function AuthProfileMenu() {
           aria-expanded={open}
           aria-label={`Account menu for ${displayName}`}
           onClick={() => setOpen((value) => !value)}
-          className="grid h-11 w-11 place-items-center rounded-full border-2 border-[#b77d55] bg-[#fff6e9] p-1 text-sm text-[#6b2639] shadow-[0_6px_20px_rgba(92,43,35,0.13)] transition hover:border-[#8a3244] hover:bg-[#fce5c9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a3244]"
+          className={showGalleryLabel ? "nx-gallery-auth-trigger flex h-10 items-center gap-2 rounded-full bg-[#7a1526] px-4 text-sm font-bold text-white" : "grid h-11 w-11 place-items-center rounded-full border-2 border-[#b77d55] bg-[#fff6e9] p-1 text-sm text-[#6b2639] shadow-[0_6px_20px_rgba(92,43,35,0.13)] transition hover:border-[#8a3244] hover:bg-[#fce5c9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a3244]"}
         >
           <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-[#b88a67] bg-[#f2d8b0] text-xs font-extrabold text-[#662439]">
             <AvatarImage src={image} initials={initials} />
           </span>
+          {showGalleryLabel ? <span className="whitespace-nowrap text-xs">My Account</span> : null}
         </button>
         {open ? (
           <div
