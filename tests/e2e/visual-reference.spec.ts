@@ -23,6 +23,17 @@ test("capture sitewide public visual evidence for desktop and mobile", async ({ 
     const response = await page.goto(screen.path, { waitUntil: "domcontentloaded" });
     expect(response?.status(), screen.path).toBe(200);
     await expect(page.locator("main").first()).toBeVisible();
+    // Dynamic App Router SSR can fire DOMContentLoaded before the scoped CSS is applied.
+    // Capture the actual designed layout, never a 0px server-shell frame.
+    if (screen.path === "/") {
+      await expect(page.locator(".nx-a-hero")).toBeVisible();
+      await expect.poll(async () => page.locator(".nx-a-hero").evaluate(el => Math.round(el.getBoundingClientRect().height)), {
+        message: "Homepage gallery CSS and hero art are ready",
+        timeout: 15000
+      }).toBeGreaterThan(350);
+    } else if (await page.locator(".nx-ed-inner-banner").count()) {
+      await expect(page.locator(".nx-ed-inner-banner")).toBeVisible();
+    }
     await page.evaluate(async () => { await document.fonts.ready; });
     const screenshotPath = testInfo.outputPath("visual-" + screen.name + ".png");
     // Full-page iPhone captures can exceed WebKit's 32,767px dimension
