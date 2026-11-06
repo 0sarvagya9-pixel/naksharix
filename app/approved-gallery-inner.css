@@ -136,7 +136,7 @@ body.naksh-page-bg [data-layout="editorial"] a[data-ui="button"][data-variant="d
   background:#5f1120;
 }
 /* Photo-led Puja and product listings remain real inventory from source data. */
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child {
   background-color:#14233a;
 }
 body.naksh-page-bg [data-page-kind="shop"] article,
@@ -440,25 +440,25 @@ body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid img {
 
 /* Puja directory above-the-fold parity with the approved page gallery.
    Keep catalogue, deity grouping, published offer status and checkout intact. */
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > div.mx-auto {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.mx-auto {
   min-height:195px !important;
   padding-top:23px;
   padding-bottom:23px;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child h1 {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child h1 {
   max-width:780px;
   font-family:Georgia,'Times New Roman',serif !important;
   font-size:clamp(30px,3vw,43px) !important;
   line-height:1.1;
   letter-spacing:-.03em;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child p {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child p {
   font-size:12px;
   line-height:1.5;
   max-width:700px;
   margin-top:12px;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child .mt-7 {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child .mt-7 {
   margin-top:15px;
 }
 body.naksh-page-bg [data-page-kind="puja"] #puja-directory {
@@ -474,11 +474,11 @@ body.naksh-page-bg [data-page-kind="puja"] #puja-directory article {
   background:#fffdf8;
 }
 @media(max-width:650px) {
- body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > div.mx-auto {
+ body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.mx-auto {
    min-height:220px !important;
    padding:22px 16px;
  }
- body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child h1 { font-size:29px !important; }
+ body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child h1 { font-size:29px !important; }
 }
 
 /* Keep genuine offers high on the first page without suppressing checkout data. */
@@ -666,32 +666,35 @@ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy
 /* Keep Puja family hero consistent with the exact approved navy reference.
  * All actual ceremony photos, prices and booking actions remain in the directory.
  * The hero's duplicate buttons are surfaced by the live directory/header links. */
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child {
+  /* globals.css assigns an extra 92px sticky-header offset to ALL first
+   * star-field sections. Full-bleed approved hero is already below the header. */
+  padding-top:0 !important;
   background:linear-gradient(108deg,#14233a 0%,#263855 74%,#564338 100%) !important;
   color:#fff;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > img {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > img {
   opacity:0 !important;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > div.absolute {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.absolute {
   background:transparent !important;
   background-image:none !important;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > div.mx-auto {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.mx-auto {
   min-height:190px !important;
   padding:20px clamp(15px,3vw,34px) !important;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child .max-w-2xl {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child .max-w-2xl {
   max-width:850px !important;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child h1 {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child h1 {
   margin-top:7px !important;
   font-family:Georgia,'Times New Roman',serif !important;
   font-size:clamp(30px,3vw,41px) !important;
   line-height:1.12 !important;
   color:#fff !important;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child p.mt-6.max-w-xl {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child p.mt-6.max-w-xl {
   display:-webkit-box;
   -webkit-box-orient:vertical;
   -webkit-line-clamp:2;
@@ -702,16 +705,16 @@ body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child
   line-height:1.55;
   color:#e8e6ea;
 }
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child .mt-7,
-body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child p.mt-6.flex {
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child .mt-7,
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child p.mt-6.flex {
   display:none;
 }
 @media(max-width:650px) {
-  body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child > div.mx-auto {
+  body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.mx-auto {
     min-height:197px !important;
     padding:17px 15px !important;
   }
-  body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child h1 {
+  body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child h1 {
     font-size:31px !important;
     line-height:1.13 !important;
   }
