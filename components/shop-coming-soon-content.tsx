@@ -50,6 +50,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
           </div>
         </div>
 
+        <p className="mt-4 text-xs leading-5 text-[#665968]">Images are for reference; please check item details before ordering.</p>
         <div className="nx-gallery-shop-grid mt-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
           {products.map((product) => (
             <Card key={product.id} className="inner-card flex h-full flex-col transition hover:-translate-y-1 hover:border-[#dca956]/50">
@@ -61,11 +62,6 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
                     width={640} height={420} showFallbackLabel
                     className="h-48 w-full object-contain p-3"
                   />
-                  {product.galleryImages?.[0]?.evidenceUrl ? <div className="px-3 pb-3 text-center text-xs leading-5 text-[#57424b]">
-                    <p>{product.galleryImages[0].imageRights === "LICENSED" ? "Real reference photo • actual item may differ" : "Seller-authorized catalogue photograph • confirm exact supplied item"}</p>
-                    <a href={product.galleryImages[0].evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{product.galleryImages[0].credit || "Photo source"}</a>
-                    {product.galleryImages[0].licenseUrl ? <>{" · "}<a href={product.galleryImages[0].licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{product.galleryImages[0].licenseName || "License"}</a></>:null}
-                  </div> : <p className="pb-2 text-center text-xs text-[#6b565b]">{product.imageRights && product.imageEvidenceUrl ? "Catalogue photo with approved usage rights; confirm exact delivered item" : "Illustrative catalogue visual, not an actual stock photograph"}</p>}
                 </div>
                 <div className="flex items-start justify-between gap-4">
                   <div>

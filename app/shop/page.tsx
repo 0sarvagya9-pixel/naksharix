@@ -30,9 +30,6 @@ export default async function ShopPage() {
     caption="Shop Rudraksha, Yantras and spiritual essentials. Browse products, add to cart and checkout securely."
     image={referencePhotoForProduct("rudraksha-mala")?.url || "/shop/rudraksha-mala-illustration.svg"} imageAlt="Licensed representative Rudraksha prayer bead photograph"
     link="/cart" linkLabel="View your cart" />
-    {referencePhotoForProduct("rudraksha-mala") ? <p className="mx-auto max-w-7xl px-5 py-2 text-xs text-[#674957]">
-      Banner shows a licensed reference photograph, not a verified Naksharix SKU. Photo: <a href={referencePhotoForProduct("rudraksha-mala")!.evidenceUrl} target="_blank" rel="noopener noreferrer" className="underline">{referencePhotoForProduct("rudraksha-mala")!.credit} · {referencePhotoForProduct("rudraksha-mala")!.licenseName}</a>.
-    </p> : null}
     <div className="mx-auto max-w-7xl px-5 py-3 text-sm text-[#634650]">
       Buying natural beads or accessories? <Link href="/blog/rudraksha-product-buying-checklist" className="font-semibold underline underline-offset-4">Read the free product-identification, evidence and delivery checklist</Link> before choosing.
     </div>
