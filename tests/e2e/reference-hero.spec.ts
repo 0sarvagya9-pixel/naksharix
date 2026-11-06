@@ -35,6 +35,14 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
   test("approved desktop layout preserves reference proportions", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    // Next.js may deliver HTML before the route's CSS chunks finish loading.
+    // Await the genuinely rendered hero rather than asserting a transient 0px box.
+    const hero = page.locator(".nx-a-hero");
+    await expect(hero).toBeVisible();
+    await expect.poll(async () => hero.evaluate(node => Math.round(node.getBoundingClientRect().height)), {
+      message: "Approved hero must have its final styled height (not just SSR HTML)",
+      timeout: 15_000,
+    }).toBeGreaterThanOrEqual(350);
     const layout = await page.evaluate(() => {
       const hero = document.querySelector(".nx-a-hero")!.getBoundingClientRect();
       const art = document.querySelector(".nx-a-hero-art")!.getBoundingClientRect();
