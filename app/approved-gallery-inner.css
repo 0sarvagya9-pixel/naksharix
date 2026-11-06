@@ -476,3 +476,84 @@ body.naksh-page-bg [data-page-kind="puja"] #puja-directory article {
  }
  body.naksh-page-bg [data-page-kind="puja"] main.star-field > section:first-child h1 { font-size:29px !important; }
 }
+
+/* Keep genuine offers high on the first page without suppressing checkout data. */
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary {
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:20px;
+ min-height:115px;
+ padding:16px 20px !important;
+ border-radius:12px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:first-child {
+ flex:1 1 auto;
+ min-width:0;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:first-child h1 {
+ margin-top:5px;
+ font-size:clamp(22px,2vw,30px);
+ line-height:1.2;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:first-child > p {
+ margin-top:5px;
+ font-size:12px;
+ line-height:1.5;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:first-child > div {
+ margin-top:8px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child {
+ flex:0 0 270px;
+ margin:0;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child > div {
+ padding:12px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child h2 {
+ margin-top:4px;
+ font-size:16px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child p {
+ margin-top:4px;
+ font-size:11px;
+ line-height:1.45;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-summary {
+ padding:15px 20px;
+ border-radius:12px;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-summary h1 {
+ margin-top:5px;
+ font-size:clamp(22px,2vw,30px);
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-summary p {
+ margin-top:4px;
+ font-size:12px;
+ line-height:1.5;
+}
+body.naksh-page-bg [data-page-kind="shop"] #catalogue {
+ margin-top:14px;
+ padding:12px;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid {
+ margin-top:15px;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-inner-title {
+ margin-bottom:5px;
+ font-size:25px;
+ line-height:1.1;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-grid {
+ margin-top:12px;
+}
+@media(max-width:850px) {
+ body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary {
+  display:block;
+  padding:14px !important;
+ }
+ body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child {
+  margin-top:12px;
+ }
+}

@@ -31,7 +31,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
   return (
     <main className="inner-page-shell star-field min-h-screen bg-[#fffaf3]">
       <Section>
-        <div className="inner-section overflow-hidden rounded-3xl border border-[#ecd7c3] p-6 md:p-8">
+        <div className="nx-gallery-shop-summary inner-section overflow-hidden rounded-3xl border border-[#ecd7c3] p-6 md:p-8">
           <div className="flex flex-wrap items-end justify-between gap-5">
             <div className="max-w-3xl">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#81551e]">{labels.eyebrow}</p>

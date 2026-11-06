@@ -23,6 +23,12 @@ test("capture sitewide public visual evidence for desktop and mobile", async ({ 
     const response = await page.goto(screen.path, { waitUntil: "domcontentloaded" });
     expect(response?.status(), screen.path).toBe(200);
     await expect(page.locator("main").first()).toBeVisible();
+    // Async server-loaded catalogues may show a decorative loader after DOMContentLoaded.
+    // Wait for route-specific REAL content before taking acceptance screenshots.
+    if (screen.path === "/pujas") await expect(page.locator("#puja-directory")).toBeVisible({ timeout: 20000 });
+    if (screen.path === "/shop") await expect(page.getByRole("heading", { level: 1, name: /Naksharix Spiritual Catalogue/i })).toBeVisible({ timeout: 20000 });
+    if (screen.path === "/consultation") await expect(page.getByRole("heading", { level: 1, name: /Naksharix Astrologers/i })).toBeVisible({ timeout: 20000 });
+    if (screen.path === "/reports") await expect(page.getByRole("heading", { level: 1, name: /Premium Astrology Reports/i })).toBeVisible({ timeout: 20000 });
     // Dynamic App Router SSR can fire DOMContentLoaded before the scoped CSS is applied.
     // Capture the actual designed layout, never a 0px server-shell frame.
     if (screen.path === "/") {

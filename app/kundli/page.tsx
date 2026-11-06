@@ -17,9 +17,9 @@ export default function KundliPage() {
     <main className="inner-page-shell star-field">
       <EditorialServiceBanner eyebrow="HOME / BIRTH CHART" headline="Free Kundli Generator" caption="Enter your birth details for a structured traditional chart. Times, location and ephemeris settings matter." image="/naksharix/editorial-kundli.svg" imageAlt="Original Vedic birth-chart grid illustration" link="/panchang" linkLabel="Explore the Panchang" />
       <Section first>
-        <h1 className="font-cinzel text-4xl font-black text-white">Kundli Generator</h1>
-        <p className="mt-3 max-w-2xl text-slate-300">Enter your birth date, exact time and birthplace to explore a traditional Vedic birth chart. The calculations and interpretations depend on the supplied details and method.</p>
-        <p className="mt-3 max-w-2xl text-sm text-slate-300">New to Lagna, Rashi, Nakshatra or Dasha? <Link href="/learn/kundli-explained" className="underline underline-offset-4">Read the free Kundli explanation</Link> before interpreting a chart.</p>
+        <h1 className="nx-gallery-kundli-inner-title font-cinzel text-3xl font-black text-[#14233a]">Kundli Generator</h1>
+        <p className="nx-gallery-kundli-help sr-only">Enter your birth date, exact time and birthplace to explore a traditional Vedic birth chart. The calculations and interpretations depend on the supplied details and method.</p>
+        <p className="nx-gallery-kundli-help sr-only">New to Lagna, Rashi, Nakshatra or Dasha? <Link href="/learn/kundli-explained" className="underline underline-offset-4">Read the free Kundli explanation</Link> before interpreting a chart.</p>
         <div className="nx-gallery-kundli-grid mt-8">
           <div className="nx-gallery-kundli-form"><KundliForm /></div>
           <aside className="nx-gallery-kundli-preview" aria-label="Traditional chart preview before calculation">

@@ -19,7 +19,7 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
     <main className="min-h-screen bg-[#fffbf5] text-[#372630]">
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_18%_10%,rgba(216,175,102,0.22),transparent_26rem),radial-gradient(circle_at_86%_18%,rgba(137,169,197,0.24),transparent_30rem),linear-gradient(135deg,#fffaf1_0%,#fbf6ea_52%,#eef5fb_100%)]" />
       <Section>
-        <div className="rounded-[2rem] border border-[#e7d8be] bg-white/78 p-6 shadow-[0_24px_80px_rgba(31,41,51,0.08)] backdrop-blur md:p-8 lg:grid lg:grid-cols-[1fr_0.72fr] lg:gap-8">
+        <div className="nx-gallery-reports-summary rounded-[2rem] border border-[#e7d8be] bg-white/78 p-6 shadow-[0_24px_80px_rgba(31,41,51,0.08)] backdrop-blur md:p-8 lg:grid lg:grid-cols-[1fr_0.72fr] lg:gap-8">
           <div>
             <p className="text-sm font-extrabold uppercase tracking-[0.24em] text-[#b8862e]">{labels.eyebrow}</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black text-[#372630] sm:text-5xl">{labels.title}</h1>
