@@ -9,7 +9,7 @@
 
 /* Dark navy story panels with subdued real gallery art at right. */
 body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner {
-  min-height:216px;
+  min-height:164px;
   color:#fff;
   background:linear-gradient(108deg,#13233a 0%,#263855 58%,#644333 100%);
 }
@@ -30,8 +30,8 @@ body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-shade {
   background:transparent;
 }
 body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-body {
-  padding-block:30px;
-  min-height:216px;
+  padding-block:19px;
+  min-height:164px;
   display:flex;
   align-items:center;
   width:100%;
@@ -44,14 +44,14 @@ body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-copy > span {
 body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner h2 {
   margin:10px 0 12px;
   font-family:Georgia, 'Times New Roman', serif;
-  font-size:clamp(30px,3.4vw,47px);
+  font-size:clamp(28px,2.9vw,39px);
   line-height:1.08;
   font-weight:700;
   color:#fff !important;
 }
 body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner p {
   color:#e4dfdc;
-  font-size:14px;
+  font-size:13px;
   line-height:1.5;
   margin-top:0;
   max-width:670px;
@@ -165,10 +165,10 @@ body.naksh-page-bg [data-page-kind="dashboard"] :is(.glass-panel,.inner-card,.gl
   box-shadow:0 14px 35px rgba(58,37,21,.09);
 }
 @media (max-width:650px) {
-  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner { min-height:214px; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner { min-height:173px; }
   body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-body {
-    min-height:214px;
-    padding:24px 0;
+    min-height:173px;
+    padding:20px 0;
   }
   body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner h2 { font-size:31px; }
   body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner p { font-size:12px; }
@@ -296,4 +296,16 @@ body.naksh-page-bg [data-page-kind="consultation"] .star-field > section > p:fir
 }
 body.naksh-page-bg [data-page-kind="consultation"] .star-field .mt-6 > p {
   color:#424956;
+}
+
+/* Keep the real form/results immediately below the compact approved gallery hero. */
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner + section,
+body.naksh-page-bg [data-layout="editorial"] main.inner-page-shell > section:first-child {
+  padding-top:clamp(22px,3.2vw,43px) !important;
+}
+body.naksh-page-bg [data-page-kind="kundli"] main.inner-page-shell > section :is(.text-slate-300,.text-slate-400) {
+  color:#515b68 !important;
+}
+body.naksh-page-bg [data-page-kind="kundli"] main.inner-page-shell > section h1.text-white {
+  color:#14233a !important;
 }
