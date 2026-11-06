@@ -20,14 +20,14 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
     [p.name,p.deity,p.category,p.description].join(" ").toLowerCase().includes(query.trim().toLowerCase())
   ),[query,category]);
 
-  return <main className="star-field min-h-screen bg-[#fffaf3] pb-20">
+  return <main className="nx-puja-directory star-field min-h-screen bg-[#fffaf3] pb-20">
     <section className="relative isolate overflow-hidden border-b border-[#e6be7e]/35 bg-[#301a2c] text-white">
       <Image src="/naksharix/ganesh-hero-light-saffron.jpg" alt="" fill priority sizes="100vw" className="absolute inset-0 -z-20 object-cover object-[76%_42%]" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#261323]/95 via-[#33172a]/88 to-[#31182b]/25" aria-hidden="true" />
       <div className="mx-auto flex min-h-[540px] max-w-7xl items-center px-5 py-14 md:min-h-[580px] md:py-20 lg:px-8">
         <div className="max-w-2xl">
           <p className="text-xs font-bold uppercase tracking-[.22em] text-[#f8d389]">Naksharix • Sacred traditions</p>
-          <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Explore Puja <span className="text-[#ffcf80]">Traditions</span></h1>
+          <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Puja &amp; <span className="text-[#ffcf80]">Vedic Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
             Browse {pujaTopics.length} traditional Puja topics across deities, ceremonies and festivals.
             Choose a Puja and your preferred date, then use secure checkout for published offers. Naksharix coordinates the final ceremony timing afterward.
@@ -50,7 +50,10 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">The topics listed below do not imply temple assignments or priest availability. Final ceremony arrangements are coordinated separately after booking.</p>
           {!Object.keys(offerings).length ? <p role="status" className="mt-3 rounded-lg border border-[#d6aa70] bg-[#fff2df] p-3 text-sm text-[#69434b]">Puja prices and online bookings are currently unavailable. Please return when published offers can be verified.</p> : null}
         </div>
-        <span role="status" className="rounded-full border border-[#e2b575]/35 px-4 py-2 text-sm text-[#84303d]">Showing {Math.min(visibleCount,results.length)} of {results.length} topics</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/puja-calendar" className="inline-flex items-center gap-2 rounded-lg border border-[#cbb18d] bg-white px-4 py-2 text-xs font-bold text-[#7a1526]"><CalendarDays size={15} aria-hidden="true"/> Festival calendar</Link>
+          <span role="status" className="rounded-full border border-[#e2b575]/35 px-4 py-2 text-sm text-[#84303d]">Showing {Math.min(visibleCount,results.length)} of {results.length} topics</span>
+        </div>
       </div>
       <label className="relative mt-7 block max-w-xl">
         <span className="sr-only">Search Puja types or deities</span>
@@ -63,7 +66,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           className={"rounded-full border px-4 py-2 text-sm font-semibold transition "+(category===key
             ?"border-[#ffdf9f] bg-[#f5c979] text-[#351b1e]":"border-[#d5b17d]/40 bg-white text-[#5e424b] hover:border-[#f5d59c]")}>{key}</button>)}
       </div>
-      {results.length?<div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {results.length?<div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
         {results.slice(0,visibleCount).map(topic=><article key={topic.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#d0a766]/35 bg-white transition hover:-translate-y-1 hover:border-[#f4ca7f]">
           <div className="relative aspect-[16/10] overflow-hidden bg-[#fff1de]">
             <ResilientEditorialImage src={pujaEditorialImage(topic.id,topic.graphic,topic.category)}

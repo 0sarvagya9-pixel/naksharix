@@ -1,0 +1,934 @@
+/*
+ * NAKSHARIX 2026-11-06 owner-approved gallery inner page language.
+ *
+ * This is a visual-only layer: preserve existing real forms, prices, content,
+ * booking flows, accessible names, authenticated portals and backend.
+ *
+ * Page families correspond to preview.js gallery categories, not mock behavior.
+ */
+
+/* Dark navy story panels with subdued real gallery art at right. */
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner {
+  min-height:164px;
+  color:#fff;
+  background:linear-gradient(108deg,#13233a 0%,#263855 58%,#644333 100%);
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-photo {
+  inset:0 0 0 65%;
+  z-index:-1;
+  opacity:.3;
+  background-image:url('/approved-gallery/hero-astrolabe.jpg');
+  background-size:cover;
+  background-position:center;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000);
+  mask-image:linear-gradient(90deg,transparent,#000);
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-photo img {
+  opacity:0;
+}
+/* Earlier reference-redesign.css uses a burgundy !important overlay.
+ * Remove it explicitly; otherwise every real inner-page hero appears maroon
+ * despite the approved navy-to-bronze background underneath. */
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-shade {
+  background:transparent !important;
+  background-image:none !important;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-body {
+  padding-block:19px;
+  min-height:164px;
+  display:flex;
+  align-items:center;
+  width:100%;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-copy > span {
+  font-size:11px;
+  color:#dbb47b;
+  letter-spacing:.14em;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner h2 {
+  margin:10px 0 12px;
+  font-family:Georgia, 'Times New Roman', serif;
+  font-size:clamp(28px,2.9vw,39px);
+  line-height:1.08;
+  font-weight:700;
+  color:#fff !important;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner p {
+  color:#e4dfdc;
+  font-size:13px;
+  line-height:1.5;
+  margin-top:0;
+  max-width:670px;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner a {
+  font-size:12px;
+  color:#f1ce90;
+  margin-top:13px;
+  border-bottom-color:#dbb47b;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner a:hover { color:#fff; }
+
+/* Use the owner-approved artwork exactly, without altering existing SKU,
+ * celebrity portrait or astrologer verification claims. */
+body.naksh-page-bg [data-page-kind="kundli"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/kundli-report.jpg');
+}
+body.naksh-page-bg [data-page-kind="matching"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/consult-photo.jpg');
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/consult-photo.jpg');
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/kundli-report.jpg');
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/shop-remedies.jpg');
+}
+body.naksh-page-bg [data-page-kind="puja"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/puja-ritual.jpg');
+}
+body.naksh-page-bg [data-page-kind="blog"] .nx-ed-inner-banner-photo {
+  background-image:url('/approved-gallery/kundli-report.jpg');
+}
+
+/* Gallery's cream, navy, gold cards and two-column forms. */
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) {
+  background:#fbf6ef;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-card,.glass,.glass-card,.glass-panel,.luxury-panel) {
+  border:1px solid #e9ded1;
+  border-radius:14px;
+  background:#fffdf9;
+  box-shadow:0 14px 35px rgba(58,37,21,.09);
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(h1,h2,h3,h4) {
+  font-family:Georgia, 'Times New Roman', serif;
+  color:#14233a;
+  letter-spacing:-.03em;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(.glass,.glass-panel,.inner-card) :is(h2,h3,h4) {
+  color:#14233a !important;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(.glass,.glass-panel,.inner-card) :is(p,small) {
+  color:#4d5360;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(input,select,textarea) {
+  border-color:#ded7cf;
+  border-radius:7px;
+  color:#172338;
+  background:#fffcfa;
+}
+body.naksh-page-bg [data-layout="editorial"] :is(.inner-page-shell,.star-field) :is(input,select,textarea):focus-visible {
+  outline:3px solid #b78031;
+  outline-offset:2px;
+}
+/* Use warm surfaces, keep actual submitted values and action handlers intact. */
+body.naksh-page-bg [data-layout="editorial"] button[data-ui="button"][data-variant="default"],
+body.naksh-page-bg [data-layout="editorial"] a[data-ui="button"][data-variant="default"] {
+  background:#7a1526;
+  color:white;
+  border:1px solid #7a1526;
+  border-radius:8px;
+}
+body.naksh-page-bg [data-layout="editorial"] button[data-ui="button"][data-variant="default"]:hover,
+body.naksh-page-bg [data-layout="editorial"] a[data-ui="button"][data-variant="default"]:hover {
+  background:#5f1120;
+}
+/* Photo-led Puja and product listings remain real inventory from source data. */
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child {
+  background-color:#14233a;
+}
+body.naksh-page-bg [data-page-kind="shop"] article,
+body.naksh-page-bg [data-page-kind="puja"] article,
+body.naksh-page-bg [data-page-kind="consultation"] article,
+body.naksh-page-bg [data-page-kind="reports"] article {
+  border-radius:14px;
+  overflow:hidden;
+}
+body.naksh-page-bg [data-page-kind="shop"] article img,
+body.naksh-page-bg [data-page-kind="puja"] article img {
+  object-fit:cover;
+}
+/* The gallery uses a compact dark-blue top and a clear light footer. */
+body.naksh-page-bg [data-layout="editorial"] footer {
+  border-top:1px solid #d9c0a1 !important;
+  background:#f3e6d5 !important;
+  color:#453e42;
+}
+
+/* Portals: the approved dashboard gallery uses navy sidebar and cream cards.
+ * Keep admin/astrologer charts, statuses, counts and role guards live. */
+body.naksh-page-bg [data-page-kind="astrologer"] .astrologer-portal,
+body.naksh-page-bg [data-page-kind="dashboard"] main {
+  background:#f7f4f0;
+}
+body.naksh-page-bg [data-page-kind="dashboard"] :is(.glass-panel,.inner-card,.glass) {
+  border-color:#e7ddd1;
+  background:#fff;
+  box-shadow:0 14px 35px rgba(58,37,21,.09);
+}
+@media (max-width:650px) {
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner { min-height:173px; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-body {
+    min-height:173px;
+    padding:20px 0;
+  }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner h2 { font-size:31px; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner p { font-size:12px; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner-photo { inset:0 0 0 45%;opacity:.16; }
+  body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner a { font-size:11px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.naksh-page-bg [data-layout="editorial"] :is(.nx-ed-inner-banner,img,button) { animation:none !important; }
+}
+
+/* Approval gallery: role-protected Admin pages use the exact dark-navy left rail. */
+.nx-admin-workspace {
+ display:flex;
+ align-items:stretch;
+ width:100%;
+ min-height:calc(100vh - 128px);
+ background:#fbf6ef;
+ color:#172338;
+}
+.nx-admin-sidebar {
+ position:sticky;
+ top:0;
+ align-self:flex-start;
+ display:flex;
+ flex-direction:column;
+ width:228px;
+ flex:0 0 228px;
+ min-height:calc(100vh - 128px);
+ padding:26px 14px 34px;
+ background:#0d192a;
+ color:#fff;
+ border-right:1px solid #384252;
+}
+.nx-admin-logo {
+ display:flex;
+ gap:8px;
+ align-items:center;
+ margin:0 5px 7px;
+ color:#f2d69f;
+ font:700 18px/1.2 Georgia,serif;
+ letter-spacing:.045em;
+ white-space:nowrap;
+}
+.nx-admin-logo span { color:#f3cc86; font-size:26px; }
+.nx-admin-sidebar-subtitle {
+ margin:0 7px 30px;
+ color:#9eafc2;
+ font-size:9px;
+ letter-spacing:.13em;
+}
+.nx-admin-sidebar-caption {
+ padding:10px 11px;
+ margin-top:9px;
+ color:#8090a6;
+ font-size:9px;
+ font-weight:700;
+ letter-spacing:.13em;
+}
+.nx-admin-sidebar nav { display:grid; gap:4px; }
+.nx-admin-link {
+ display:flex;
+ align-items:center;
+ gap:10px;
+ min-height:38px;
+ padding:10px 12px;
+ border-radius:7px;
+ color:#cfdae7;
+ text-decoration:none;
+ font-size:12px;
+ font-weight:600;
+ transition:background .16s,color .16s;
+}
+.nx-admin-link svg { flex:none; }
+.nx-admin-link:hover { color:white; background:#24364c; }
+.nx-admin-link.active,
+.nx-admin-link[aria-current="page"] {
+ background:#7a1526;
+ color:#fff;
+}
+.nx-admin-content {
+ flex:1;
+ min-width:0;
+ padding:20px 24px;
+ background:#fbf6ef;
+}
+.nx-admin-content :is(h1,h2,h3,h4) {
+ color:#14233a;
+}
+.nx-admin-content :is(.glass,.glass-panel,.inner-card,[data-ui="card"]) {
+ border:1px solid #e9ded1;
+ background:#fff;
+ box-shadow:0 12px 30px rgba(58,37,21,.08);
+ border-radius:12px;
+}
+.nx-admin-content :is(input,select,textarea) {
+ border:1px solid #ded7cf;
+ border-radius:7px;
+ background:#fffdfa;
+ color:#14233a;
+}
+@media(max-width:1023px) {
+ .nx-admin-workspace { flex-direction:column; }
+ .nx-admin-sidebar {
+  position:relative;
+  width:100%;
+  min-height:auto;
+  flex:auto;
+  padding:14px;
+  border-right:0;
+  border-bottom:1px solid #384252;
+ }
+ .nx-admin-sidebar-subtitle,.nx-admin-sidebar-caption { display:none; }
+ .nx-admin-sidebar nav { display:flex; gap:5px; overflow-x:auto; padding-bottom:3px; }
+ .nx-admin-link { flex:none; min-height:38px; white-space:nowrap; }
+ .nx-admin-content { padding:14px; }
+}
+
+/* Axe audit: photo caption and empty-state text meet 4.5:1 on actual ivory panels. */
+body.naksh-page-bg [data-page-kind="shop"] .inner-card .mb-5 .text-center p,
+body.naksh-page-bg [data-page-kind="shop"] .inner-card .mb-5 > p {
+  color:#453f47 !important;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .star-field > section > p:first-child {
+  color:#735021;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .star-field .mt-6 > p {
+  color:#424956;
+}
+
+/* Keep the real form/results immediately below the compact approved gallery hero. */
+body.naksh-page-bg [data-layout="editorial"] .nx-ed-inner-banner + section,
+body.naksh-page-bg [data-layout="editorial"] main.inner-page-shell > section:first-child {
+  padding-top:clamp(22px,3.2vw,43px) !important;
+}
+body.naksh-page-bg [data-page-kind="kundli"] main.inner-page-shell > section :is(.text-slate-300,.text-slate-400) {
+  color:#515b68 !important;
+}
+body.naksh-page-bg [data-page-kind="kundli"] main.inner-page-shell > section h1.text-white {
+  color:#14233a !important;
+}
+
+/* Native functional Kundli form + approved right-side traditional chart preview. */
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-grid {
+ display:grid;
+ grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
+ align-items:start;
+ gap:24px;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-form { min-width:0; }
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-form > div { width:100%; }
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-form > div > div:first-child { max-width:none; }
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-preview {
+ position:sticky;
+ top:130px;
+ min-width:0;
+ border:1px solid #e8dcc9;
+ border-radius:14px;
+ background:#fffdf9;
+ padding:24px;
+ box-shadow:0 14px 35px rgba(58,37,21,.08);
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-eyebrow {
+ margin:0 0 11px;
+ color:#725022 !important;
+ font-size:11px;
+ font-weight:750;
+ letter-spacing:.13em;
+ text-transform:uppercase;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-preview h2 {
+ margin:0 0 15px;
+ font-family:Georgia,serif;
+ font-size:27px;
+ line-height:1.2;
+ color:#14233a;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-chart-placeholder {
+ background:#f9f1e5;
+ border:1px solid #eee0c7;
+ border-radius:10px;
+ padding:14px;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-chart-placeholder svg {
+ display:block;
+ width:100%;
+ max-width:320px;
+ height:auto;
+ margin:auto;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-chart-placeholder p {
+ color:#615b56 !important;
+ font-size:11px;
+ text-align:center;
+ line-height:1.5;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-mini {
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:9px;
+ margin-top:14px;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-mini > div {
+ display:grid;
+ justify-items:center;
+ gap:3px;
+ border:1px solid #eadbc4;
+ background:#fffcf8;
+ border-radius:8px;
+ padding:13px 5px;
+ text-align:center;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-mini strong {
+ font-size:23px;
+ color:#8c612d;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-mini small {
+ color:#6f6570;
+ font-size:10px;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-grid:has(.nx-generated-kundli-report) {
+ grid-template-columns:minmax(0,1fr);
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-grid:has(.nx-generated-kundli-report) .nx-gallery-kundli-preview { display:none; }
+@media(max-width:950px) {
+ body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-grid { grid-template-columns:1fr; }
+ body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-preview { position:static; }
+}
+
+/* Live commerce and report cards use approved source-owned imagery and
+ * gallery density while all price/availability states remain server-sourced. */
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-report-art {
+ height:155px;
+ background:#f3e8d7;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-report-art-img {
+ object-fit:cover;
+ object-position:center 48%;
+}
+body.naksh-page-bg [data-page-kind="reports"] #report-catalogue {
+ margin-top:22px;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:14px;
+}
+body.naksh-page-bg [data-page-kind="reports"] #report-catalogue > div > div {
+ padding:17px;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid {
+ gap:14px;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid > div > div {
+ padding:15px;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid img {
+ object-fit:contain;
+}
+@media(max-width:1000px) {
+ body.naksh-page-bg [data-page-kind="reports"] #report-catalogue {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
+@media(max-width:620px) {
+ body.naksh-page-bg [data-page-kind="reports"] #report-catalogue { grid-template-columns:1fr; }
+ body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-report-art { height:175px; }
+}
+
+/* Puja directory above-the-fold parity with the approved page gallery.
+   Keep catalogue, deity grouping, published offer status and checkout intact. */
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.mx-auto {
+  min-height:195px !important;
+  padding-top:23px;
+  padding-bottom:23px;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child h1 {
+  max-width:780px;
+  font-family:Georgia,'Times New Roman',serif !important;
+  font-size:clamp(30px,3vw,43px) !important;
+  line-height:1.1;
+  letter-spacing:-.03em;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child p {
+  font-size:12px;
+  line-height:1.5;
+  max-width:700px;
+  margin-top:12px;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child .mt-7 {
+  margin-top:15px;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory {
+  padding-top:25px;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .mt-8.grid {
+  margin-top:20px;
+  gap:14px;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory article {
+  border:1px solid #e4d4bf;
+  box-shadow:0 10px 25px rgba(54,31,14,.08);
+  background:#fffdf8;
+}
+@media(max-width:650px) {
+ body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.mx-auto {
+   min-height:220px !important;
+   padding:22px 16px;
+ }
+ body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child h1 { font-size:29px !important; }
+}
+
+/* Keep genuine offers high on the first page without suppressing checkout data. */
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary {
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:20px;
+ min-height:115px;
+ padding:16px 20px !important;
+ border-radius:12px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:first-child {
+ flex:1 1 auto;
+ min-width:0;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:first-child h1 {
+ margin-top:5px;
+ font-size:clamp(22px,2vw,30px);
+ line-height:1.2;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:first-child > p {
+ margin-top:5px;
+ font-size:12px;
+ line-height:1.5;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:first-child > div {
+ margin-top:8px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child {
+ flex:0 0 270px;
+ margin:0;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child > div {
+ padding:12px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child h2 {
+ margin-top:4px;
+ font-size:16px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child p {
+ margin-top:4px;
+ font-size:11px;
+ line-height:1.45;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-summary {
+ padding:15px 20px;
+ border-radius:12px;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-summary h1 {
+ margin-top:5px;
+ font-size:clamp(22px,2vw,30px);
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-summary p {
+ margin-top:4px;
+ font-size:12px;
+ line-height:1.5;
+}
+body.naksh-page-bg [data-page-kind="shop"] #catalogue {
+ margin-top:14px;
+ padding:12px;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid {
+ margin-top:15px;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-inner-title {
+ margin-bottom:5px;
+ font-size:25px;
+ line-height:1.1;
+}
+body.naksh-page-bg [data-page-kind="kundli"] .nx-gallery-kundli-grid {
+ margin-top:12px;
+}
+@media(max-width:850px) {
+ body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary {
+  display:block;
+  padding:14px !important;
+ }
+ body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-summary > div:last-child {
+  margin-top:12px;
+ }
+}
+
+/* Approved consultation discovery cards, without claiming real profiles. */
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery {
+ padding:28px 0 12px;
+ background:#fbf6ef;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading {
+ display:flex;
+ align-items:end;
+ justify-content:space-between;
+ gap:16px;
+ margin-bottom:19px;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading p {
+ margin:0 0 7px;
+ color:#785021;
+ font-size:11px;
+ letter-spacing:.15em;
+ text-transform:uppercase;
+ font-weight:800;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading h2 {
+ margin:0 0 7px;
+ color:#14233a;
+ font:700 clamp(23px,2.45vw,32px)/1.12 Georgia,serif;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading span {
+ color:#69717e;
+ font-size:12px;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading > a {
+ flex:none;
+ display:inline-flex;
+ align-items:center;
+ gap:7px;
+ border:1px solid #d1b28e;
+ border-radius:7px;
+ padding:10px 12px;
+ color:#794028;
+ font-size:11px;
+ font-weight:800;
+ text-decoration:none;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-cards {
+ display:grid;
+ grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:14px;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-card {
+ min-width:0;
+ overflow:hidden;
+ border:1px solid #e8dccc;
+ border-radius:12px;
+ background:white;
+ box-shadow:0 12px 28px rgba(58,37,21,.08);
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-photo {
+ display:block;
+ width:100%;
+ height:145px;
+ object-fit:cover;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy {
+ padding:12px;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy > span {
+ color:#785021;
+ font-size:10px;
+ font-weight:800;
+ text-transform:uppercase;
+ letter-spacing:.12em;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy h3 {
+ margin:6px 0;
+ font:700 19px/1.2 Georgia,serif;
+ color:#14233a;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy p {
+ min-height:33px;
+ color:#606775;
+ font-size:11px;
+ line-height:1.4;
+}
+body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-copy a {
+ display:inline-flex;
+ align-items:center;
+ gap:5px;
+ color:#7a1526;
+ font-size:11px;
+ font-weight:800;
+ margin-top:8px;
+}
+@media(max-width:850px) {
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading { display:block; }
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-heading > a { margin-top:12px; }
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:480px) {
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-cards { grid-template-columns:1fr; }
+ body.naksh-page-bg [data-page-kind="consultation"] .nx-consultation-gallery-photo { height:185px; }
+}
+
+/* Keep Puja family hero consistent with the exact approved navy reference.
+ * All actual ceremony photos, prices and booking actions remain in the directory.
+ * The hero's duplicate buttons are surfaced by the live directory/header links. */
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child {
+  /* globals.css assigns an extra 92px sticky-header offset to ALL first
+   * star-field sections. Full-bleed approved hero is already below the header. */
+  padding-top:0 !important;
+  background:linear-gradient(108deg,#14233a 0%,#263855 74%,#564338 100%) !important;
+  color:#fff;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > img {
+  opacity:0 !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.absolute {
+  background:transparent !important;
+  background-image:none !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.mx-auto {
+  min-height:190px !important;
+  padding:20px clamp(15px,3vw,34px) !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child .max-w-2xl {
+  max-width:850px !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child h1 {
+  margin-top:7px !important;
+  font-family:Georgia,'Times New Roman',serif !important;
+  font-size:clamp(30px,3vw,41px) !important;
+  line-height:1.12 !important;
+  color:#fff !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child p.mt-6.max-w-xl {
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+  max-width:750px;
+  margin-top:8px !important;
+  font-size:12px;
+  line-height:1.55;
+  color:#e8e6ea;
+}
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child .mt-7,
+body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child p.mt-6.flex {
+  display:none;
+}
+@media(max-width:650px) {
+  body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child > div.mx-auto {
+    min-height:197px !important;
+    padding:17px 15px !important;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] main.nx-puja-directory > section:first-child h1 {
+    font-size:31px !important;
+    line-height:1.13 !important;
+  }
+}
+
+/* Owner-approved first viewport: real reports and SKU cards precede
+ * optional explainer panels. Their transactional workflows stay unchanged. */
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-intro,
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-intro {
+ position:relative;
+ padding:3px 0 12px;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-intro > p,
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-intro > p {
+ margin:0 0 5px;
+ color:#80551f;
+ font-size:10px;
+ letter-spacing:.13em;
+ font-weight:800;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-intro h1,
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-intro h1 {
+ margin:0;
+ color:#785321;
+ font:700 11px/1.3 Inter,Arial,sans-serif;
+ letter-spacing:.06em;
+ text-transform:uppercase;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-intro h2,
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-intro h2 {
+ margin:4px 0 3px;
+ font:700 clamp(22px,2.5vw,31px)/1.1 Georgia,serif;
+ color:#14233a;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-intro > span {
+ font-size:12px;
+ color:#606876;
+}
+body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-intro > a,
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-intro > a {
+ position:absolute;
+ top:12px;
+ right:0;
+ border:1px solid #ddbb88;
+ border-radius:7px;
+ padding:7px 10px;
+ color:#7a1526;
+ font-size:11px;
+ font-weight:750;
+ background:#fff;
+}
+body.naksh-page-bg [data-page-kind="reports"] #report-catalogue { margin-top:10px; }
+body.naksh-page-bg [data-page-kind="shop"] #catalogue { margin-top:6px; }
+body.naksh-page-bg [data-page-kind="reports"] #report-information,
+body.naksh-page-bg [data-page-kind="shop"] #shop-information {
+ margin-top:25px;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory {
+ padding-top:14px !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .flex:first-child {
+ gap:5px !important;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .flex:first-child h2 {
+ margin-top:3px;
+ font-size:26px;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .flex:first-child p.mt-3 {
+ display:-webkit-box;
+ -webkit-box-orient:vertical;
+ -webkit-line-clamp:2;
+ overflow:hidden;
+ max-width:800px;
+ margin-top:3px;
+ font-size:11px;
+ line-height:1.35;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory > label.mt-7 {
+ margin-top:9px;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory > label.mt-7 input {
+ height:38px;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory > div[role="group"].mt-5 {
+ margin-top:8px;
+ gap:6px;
+}
+body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .mt-8.grid {
+ margin-top:12px;
+}
+@media(max-width:650px) {
+ body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-reports-intro > a,
+ body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-intro > a {
+   position:static;
+   display:inline-block;
+   margin-top:5px;
+ }
+ body.naksh-page-bg [data-page-kind="reports"] #report-catalogue { margin-top:5px; }
+ body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid { margin-top:9px; }
+ body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .flex:first-child > div:last-child {
+   gap:4px;
+ }
+}
+
+/* Exact approved mobile grid density: two real cards per row. */
+@media(max-width:620px) {
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue > div > div {
+    padding:11px !important;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] .nx-gallery-report-art {
+    height:110px;
+    margin-bottom:10px;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue h2 {
+    font-size:15px;
+    line-height:1.25;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue p.mt-4.text-sm {
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    font-size:11px;
+    line-height:1.5;
+    margin-top:6px;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue ul.mt-4 {
+    display:none;
+  }
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue a,
+  body.naksh-page-bg [data-page-kind="reports"] #report-catalogue button {
+    font-size:10px;
+    min-height:36px;
+    padding-inline:6px;
+    white-space:normal;
+    text-align:center;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid > div > div {
+    padding:10px !important;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid img {
+    height:120px !important;
+    padding:6px !important;
+    object-fit:contain;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid h2 {
+    font-size:15px;
+    line-height:1.25;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid p.mt-4.text-sm {
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    margin-top:6px;
+    font-size:10px;
+    line-height:1.5;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid details {
+    display:none;
+  }
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid a,
+  body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid button {
+    font-size:10px;
+    white-space:normal;
+    min-height:35px;
+    text-align:center;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory > .mt-8.grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory article > div:last-child {
+    padding:10px;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory article h3 {
+    font-size:14px;
+    line-height:1.2;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory article p {
+    font-size:10px;
+    line-height:1.4;
+  }
+  body.naksh-page-bg [data-page-kind="puja"] #puja-directory article a.mt-5 {
+    font-size:11px;
+    min-height:36px;
+    padding-inline:8px;
+  }
+}
+
+
+/* Firefox cart-link stability fix (Playwright trace 42183226279).
+ * A product card translated on hover WHILE global html smooth scrolling was
+ * moving it into view. The click was dispatched during the move and the native
+ * link never received a reliable activation. Keep the real cart link, remove
+ * scroll/hover movement only from Shop, preserve hover border and shadows. */
+html:has(body [data-page-kind="shop"]) {
+  scroll-behavior: auto !important;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid > .inner-card,
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid > .inner-card:hover {
+  transform: none !important;
+  transition-property: border-color, box-shadow !important;
+  transition-duration: 150ms !important;
+}
+body.naksh-page-bg [data-page-kind="shop"] .nx-gallery-shop-grid a[href="/cart"] {
+  position: relative;
+  z-index: 2;
+}

@@ -31,20 +31,12 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
   return (
     <main className="inner-page-shell star-field min-h-screen bg-[#fffaf3]">
       <Section>
-        <div className="inner-section overflow-hidden rounded-3xl border border-[#ecd7c3] p-6 md:p-8">
-          <div className="flex flex-wrap items-end justify-between gap-5">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#81551e]">{labels.eyebrow}</p>
-              <h1 className="mt-2 font-cinzel text-3xl font-black text-[#8c2e3b] sm:text-4xl">{labels.title}</h1>
-              <p className="mt-3 text-base leading-7 text-[#6b565b]">{labels.subtitle}</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild className="bg-[#922f40] text-white hover:bg-[#762436]"><a href="#catalogue">{labels.explore}</a></Button>
-              <Button variant="outline" asChild><Link href="/cart">View cart</Link></Button>
-            </div>
-          </div>
+        <div className="nx-gallery-shop-intro">
+          <p>BROWSE BY INTENTION &amp; CATEGORY</p>
+          <h1>{labels.title}</h1>
+          <h2>{locale === "hi" ? "आध्यात्मिक वस्तुएँ देखें" : "Discover spiritual essentials"}</h2>
+          <a href="#shop-information">Buying guidance</a>
         </div>
-
         <div id="catalogue" className="mt-8 rounded-2xl border border-[#ecd7c3] bg-white p-4">
           <div className="grid gap-3 md:grid-cols-[1fr_240px]">
             <div className="relative">
@@ -58,7 +50,7 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
           </div>
         </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="nx-gallery-shop-grid mt-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
           {products.map((product) => (
             <Card key={product.id} className="inner-card flex h-full flex-col transition hover:-translate-y-1 hover:border-[#dca956]/50">
               <CardContent className="flex h-full flex-col p-6">
@@ -107,6 +99,20 @@ export function ShopComingSoonContent({ initialProducts }: { initialProducts: Sh
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        <div id="shop-information" className="nx-gallery-shop-summary inner-section overflow-hidden rounded-3xl border border-[#ecd7c3] p-6 md:p-8">
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#81551e]">{labels.eyebrow}</p>
+              <h2 className="mt-2 font-cinzel text-3xl font-black text-[#8c2e3b] sm:text-4xl">{labels.title}</h2>
+              <p className="mt-3 text-base leading-7 text-[#6b565b]">{labels.subtitle}</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild className="bg-[#922f40] text-white hover:bg-[#762436]"><a href="#catalogue">{labels.explore}</a></Button>
+              <Button variant="outline" asChild><Link href="/cart">View cart</Link></Button>
+            </div>
+          </div>
         </div>
 
         {!products.length ? (

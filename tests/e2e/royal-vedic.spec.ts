@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const baseline = [
-  { route: "/", heading: /cosmic journey/i },
+  { route: "/", heading: /Discover your cosmic journey/i },
   { route: "/reports", heading: /premium astrology reports/i },
   { route: "/kundli", heading: /kundli/i },
   { route: "/matchmaking", heading: /matching/i },
@@ -57,10 +57,19 @@ test("light-first theme switch actually changes the page surface", async ({ page
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.evaluate(() => localStorage.removeItem("naksharix-theme"));
   await page.reload({ waitUntil: "domcontentloaded" });
+  // On the approved mobile header the theme control lives inside the
+  // accessible drawer; on desktop it remains visible in the header.
+  const mobileMenu = page.getByRole("button", { name: "Open navigation menu" });
+  if ((page.viewportSize()?.width ?? 1440) < 1280) {
+    await expect(mobileMenu).toBeVisible();
+    await mobileMenu.click();
+    await expect(page.getByRole("dialog", { name: "Navigation menu" })).toBeVisible();
+  }
   const button = page.getByRole("button", { name: "Toggle dark and light mode" });
   await expect(button).toBeEnabled();
   const before = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await button.click();
+  await expect.poll(async () => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).not.toBe(before);
   const after = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   expect(before).not.toBe(after);
   await page.reload({ waitUntil: "domcontentloaded" });

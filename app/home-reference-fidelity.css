@@ -1,0 +1,491 @@
+/*
+ * NAKSHARIX reference-fidelity homepage correction
+ * Target: existing site-owned premium home mockup, not the temporary six-photo
+ * banner. Intentionally scoped to the homepage; existing page workflows stay.
+ */
+body.naksh-page-bg .nx-editorial .nx-ed-hero {
+  min-height: 700px;
+  isolation: isolate;
+  background: #f4e9e5;
+  color: #4a2938;
+  overflow: hidden;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-imagery {
+  z-index: -3;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-photo {
+  opacity: 1;
+  animation: none;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-photo {
+  object-fit: cover;
+  object-position: center 45%;
+  transform: none !important;
+  filter: sepia(.28) saturate(.72) contrast(.92) brightness(1.16);
+  animation: none !important;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-wash {
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at 83% 15%, rgba(255,236,200,.45), transparent 47%),
+    radial-gradient(ellipse at 28% 96%, rgba(217,179,181,.33), transparent 52%),
+    linear-gradient(90deg,
+      rgba(255,250,245,.97) 0%,
+      rgba(255,249,241,.94) 23%,
+      rgba(255,247,237,.84) 42%,
+      rgba(252,239,226,.52) 73%,
+      rgba(252,242,227,.43) 100%) !important;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-wheel {
+  position: absolute;
+  z-index: -1;
+  top: clamp(1rem, 3vw, 3rem);
+  right: -2.5%;
+  width: min(59vw, 870px);
+  height: clamp(330px, 44vw, 550px);
+  pointer-events: none;
+  opacity: .44;
+  filter: saturate(.78) drop-shadow(0 24px 30px rgba(93,57,40,.12));
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-wheel-image {
+  object-fit: contain;
+  object-position: center;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-inner {
+  min-height: 700px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+  gap: clamp(2rem, 4vw, 5rem);
+  align-items: center;
+  padding-block: 4rem 6.3rem;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-copy {
+  max-width: 620px;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+  animation: none;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-eyebrow-on-dark {
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid rgba(153,102,59,.21);
+  border-radius: 99px;
+  padding: .56rem .9rem;
+  color: #82552e !important;
+  background: rgba(255,252,244,.63);
+  font-weight: 800;
+  font-size: .68rem;
+  letter-spacing: .13em;
+  backdrop-filter: blur(8px);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero h1 {
+  max-width: 12.5ch;
+  margin: 1.3rem 0 1.35rem;
+  font-family: var(--font-cinzel), Georgia, serif;
+  font-size: clamp(2.65rem, 4.1vw, 4.35rem);
+  line-height: 1.16;
+  letter-spacing: -.045em;
+  font-weight: 800;
+  color: #4d2a3b !important;
+  text-shadow: none !important;
+  text-transform: none;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero h1 em {
+  display: block;
+  margin-top: .13em;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.02em;
+  font-style: italic !important;
+  font-weight: 500;
+  letter-spacing: -.04em;
+  background: linear-gradient(110deg,#a7783b 0%,#85542e 72%,#b78d57);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-copy > p {
+  max-width: 52ch;
+  font-size: clamp(1rem, 1.22vw, 1.12rem);
+  line-height: 1.8;
+  color: #655561 !important;
+  text-shadow: none !important;
+  margin: 0 0 1.8rem;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-actions {
+  gap: .7rem;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-button {
+  border-radius: 12px;
+  min-height: 52px;
+  padding: .9rem 1.3rem;
+  box-shadow: 0 7px 18px rgba(91,58,50,.11);
+  letter-spacing: 0;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-button-gold {
+  background: linear-gradient(125deg,#edc887,#dbab63);
+  border: 1px solid #cc9e5e;
+  color: #462b36 !important;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-button-gold:hover {
+  background: linear-gradient(125deg,#f8dca8,#e3b46f);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-button-outline {
+  background: rgba(255,250,242,.72);
+  border: 1px solid #a88c76;
+  color: #60374c !important;
+  backdrop-filter: blur(8px);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-button-outline:hover {
+  background: rgba(255,255,250,.92);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-note {
+  max-width: 550px;
+  margin-top: 1.55rem;
+  color: #756674 !important;
+  font-size: .72rem;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-hero-note svg {
+  color: #9c773e;
+}
+/* Actual working feature links, not a mock unconnected form. */
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 450px;
+  justify-self: end;
+  padding: clamp(1.15rem, 2vw, 1.65rem);
+  border: 1px solid rgba(255,255,255,.84);
+  border-radius: 24px;
+  background: rgba(255,252,247,.83);
+  box-shadow: 0 26px 70px rgba(74,38,59,.16), inset 0 1px 0 rgba(255,255,255,.83);
+  backdrop-filter: blur(19px) saturate(110%);
+  -webkit-backdrop-filter: blur(19px) saturate(110%);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-card-top {
+  display: flex;
+  gap: 1.1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-kicker {
+  display: block;
+  color: #916730;
+  font-size: .64rem;
+  font-weight: 850;
+  letter-spacing: .16em;
+  line-height: 1.6;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-card h2 {
+  margin: .6rem 0 .3rem;
+  color: #532c3d;
+  font-family: var(--font-cinzel),Georgia,serif;
+  font-size: clamp(1.18rem, 1.55vw, 1.55rem);
+  font-weight: 800;
+  line-height: 1.3;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-card-top p {
+  max-width: 35ch;
+  color: #695b63;
+  font-size: .79rem;
+  line-height: 1.65;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-mark {
+  display: grid;
+  place-items: center;
+  height: 46px;
+  width: 46px;
+  flex: 0 0 46px;
+  border-radius: 15px;
+  color: #80552b;
+  border: 1px solid #e7cda7;
+  background: #faf1df;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-divider {
+  height: 1px;
+  margin: 1.15rem 0 .7rem;
+  background: linear-gradient(90deg,#e8cfaa,#eaded2,transparent);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-options {
+  display: grid;
+  gap: .35rem;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-option {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  min-height: 61px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: .45rem .6rem;
+  color: #4b3141;
+  transition: background .2s ease,border .2s ease,transform .2s ease;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-option:hover {
+  background: #f8f0e5;
+  border-color: #e8d3b7;
+  transform: translateX(2px);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-option-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 12px;
+  color: #88582d;
+  background: #f6e9d5;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-option > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .18rem;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-option strong {
+  color: #593347;
+  font-size: .85rem;
+  font-weight: 800;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-option small {
+  color: #776773;
+  font-size: .69rem;
+  line-height: 1.45;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-option > svg:last-child {
+  flex: none;
+  color: #977347;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-main-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  width: 100%;
+  min-height: 47px;
+  margin-top: 1rem;
+  border: 1px solid #7a3446;
+  border-radius: 12px;
+  background: #713044;
+  color: #fffaf3;
+  font-weight: 800;
+  font-size: .82rem;
+  transition: background .2s ease,transform .2s ease;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-main-action:hover {
+  background: #582133;
+  transform: translateY(-1px);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-heritage-privacy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .32rem;
+  margin-top: .8rem;
+  color: #806f74;
+  font-size: .63rem;
+  line-height: 1.5;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-slider-controls {
+  justify-content: center;
+  bottom: 1.6rem;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-slider-controls > button {
+  border: 1px solid #bfa38e;
+  background: rgba(255,252,246,.75);
+  color: #6c4353;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-slider-controls > button:hover {
+  background: #fffaf4;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-slider-dots button {
+  background: #c5ad9e;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-slider-dots button.is-active {
+  background: #8f5b72;
+}
+/* Short overlapping toolkit strip, like the reference's first content row. */
+body.naksh-page-bg .nx-editorial .nx-ed-quick-section {
+  position: relative;
+  z-index: 3;
+  border: 0;
+  background: #fbf4ec;
+  padding: 0 0 2.4rem;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-quick-section > .nx-ed-container {
+  position: relative;
+  top: -1.3rem;
+  margin-bottom: -1.3rem;
+  border: 1px solid #efddc8;
+  border-radius: 22px;
+  background: rgba(255,254,250,.96);
+  padding: 1.2rem clamp(1rem,2vw,1.65rem) 1.5rem;
+  box-shadow: 0 16px 50px rgba(73,34,56,.12);
+}
+body.naksh-page-bg .nx-editorial .nx-ed-quick-link {
+  border-color: #e8d7c1;
+  background: #fffdf9;
+  border-radius: 14px;
+}
+body.naksh-page-bg .nx-editorial .nx-ed-quick-link:hover {
+  background: #fbf0e2;
+}
+@media (max-width: 1080px) {
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-inner {
+    grid-template-columns: minmax(0,1fr) minmax(0,.88fr);
+    gap: 1.45rem;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero h1 {
+    font-size: clamp(2.35rem,4.4vw,3.5rem);
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-heritage-card {padding: 1rem;}
+}
+@media (max-width: 840px) {
+  body.naksh-page-bg .nx-editorial .nx-ed-hero,
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-inner { min-height: 0; }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2.2rem;
+    padding-block: 3.2rem 6.5rem;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-copy {
+    max-width: 650px;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero h1 {
+    max-width: 14ch;
+    font-size: clamp(2.25rem,6vw,3.35rem);
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-wheel {
+    top: 22%;
+    right: -26%;
+    width: 88vw;
+    height: 350px;
+    opacity: .24;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-heritage-card {
+    max-width: 560px;
+    width: 100%;
+    margin-inline: auto;
+    align-self: center;
+  }
+}
+@media (max-width: 600px) {
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-inner {
+    padding-block: 2.4rem 5.8rem;
+    gap: 1.55rem;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero h1 {
+    font-size: clamp(2.04rem,9vw,3rem);
+    margin-block: 1rem;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-eyebrow-on-dark {
+    font-size: .57rem;
+    letter-spacing: .08em;
+    padding: .47rem .65rem;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-copy > p {
+    font-size: .94rem;
+    line-height: 1.65;
+    margin-bottom: 1.2rem;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-actions {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 100%;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-button {
+    width: 100%;
+    min-height: 48px;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-note {
+    margin-top: 1.05rem;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-heritage-card {
+    border-radius: 19px;
+    padding: 1rem;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-heritage-option {
+    min-height: 58px;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-hero-wheel {
+    top: 34%;
+    right: -75%;
+    width: 135vw;
+    opacity: .19;
+  }
+  body.naksh-page-bg .nx-editorial .nx-ed-quick-section > .nx-ed-container {
+    top: -.8rem;
+    margin-bottom: -.8rem;
+  }
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero {
+  background: #17263a;
+  color: #f8eee3;
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero-wash {
+  background: linear-gradient(90deg,
+    rgba(19,32,51,.97),
+    rgba(25,40,60,.89) 46%,
+    rgba(36,45,65,.64)) !important;
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-photo {
+  filter: saturate(.75) brightness(.67);
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero h1 {
+  color: #faf1e4 !important;
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero h1 em {
+  background: linear-gradient(105deg,#f8e0ab,#cfa369);
+  background-clip:text;
+  -webkit-background-clip:text;
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero-copy > p,
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero-note {
+  color: #e6d7d2 !important;
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-eyebrow-on-dark {
+  color: #f3d5a5 !important;
+  background: rgba(26,40,59,.65);
+  border-color: rgba(239,203,146,.4);
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-card {
+  background: rgba(27,43,62,.91);
+  border-color: rgba(228,195,146,.32);
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-card h2,
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-option strong {
+  color: #f8e8d6;
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-kicker,
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-mark {color: #f0c98c;}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-card-top p,
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-option small,
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-privacy {color: #d7c7c5;}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-option {color: #f8e8d6;}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-option:hover {background: #2d4358;border-color:#596b77;}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-heritage-option-icon {background: #344b61;color: #f1d49f;}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-hero .nx-ed-button-outline {
+  background: rgba(26,40,59,.82);
+  border-color: #bac7cd;
+  color: #f6eee5 !important;
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-quick-section {
+  background: #122338;
+}
+html.dark body.naksh-page-bg .nx-editorial .nx-ed-quick-section > .nx-ed-container {
+  background: #22364d;
+  border-color:#546176;
+}
+/* Motion stays opt-in, and reduced-motion users get a static hero. */
+@media (prefers-reduced-motion: reduce) {
+  .nx-ed-hero .nx-ed-hero-photo,
+  .nx-ed-hero .nx-ed-hero-wheel,
+  .nx-ed-hero .nx-ed-heritage-card {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}

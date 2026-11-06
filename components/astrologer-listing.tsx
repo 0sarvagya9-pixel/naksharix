@@ -80,11 +80,11 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-2 text-sm text-[#FFD700]">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[#734c1b]">
                 <Star className="h-4 w-4 fill-current" />
                 {(astrologer.rating || 0).toFixed(1)} {tr("rating")} | {astrologer.experienceYears}+ {tr("years")} | {astrologer.pricePerSession !== null && astrologer.pricePerSession !== undefined ? `INR ${astrologer.pricePerSession} / 30-minute session` : `INR ${astrologer.pricePerMinute}/min · 30-minute session total INR ${(astrologer.pricePerMinute * 30).toFixed(2)}`}
               </div>
-              <p className="flex items-center gap-2 text-sm text-emerald-200"><Circle className="h-2 w-2 fill-current" /> {astrologer.status ?? tr("onlineForDemoBookings")}</p>
+              <p className="flex items-center gap-2 text-sm text-[#176b48]"><Circle className="h-2 w-2 fill-current" /> {astrologer.status ?? tr("onlineForDemoBookings")}</p>
               <div className="flex flex-wrap gap-2 text-xs">
                 {astrologer.availableForChat ? <span className="inline-flex items-center gap-1 rounded-full border border-[#D4AF37]/20 px-2 py-1"><MessageCircle className="h-3 w-3" /> Chat</span> : null}
                 {astrologer.availableForCall ? <span className="inline-flex items-center gap-1 rounded-full border border-[#D4AF37]/20 px-2 py-1"><Phone className="h-3 w-3" /> Call</span> : null}
@@ -102,7 +102,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
       </div>
 
       {!astrologers.length ? (
-        <div className="mt-6 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/60 p-5 text-sm naksh-muted-text">
+        <div className="mt-6 rounded-lg border border-[#decba9] bg-[#fffcf7] p-5 text-sm text-[#414553]">
           <p>{tr("noAstrologersMatch")}</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button type="button" variant="outline" onClick={() => { setLanguage("All"); setExpertise("All"); setPrice("All"); setRating("All"); }}>Reset filters</Button>

@@ -16,7 +16,7 @@ const CONSULTATION_PHOTO="https://upload.wikimedia.org/wikipedia/commons/0/04/As
 const KUNDLI_PHOTO="https://upload.wikimedia.org/wikipedia/commons/2/2d/Kundali_02.png";
 const REPORT_PHOTO="https://upload.wikimedia.org/wikipedia/commons/5/57/Kundali_01.png";
 const heroSlides=[
-{eyebrow:"NAKSHARIX / VEDIC HERITAGE",heading:"Discover your",accent:"cosmic journey.",body:"Traditional Vedic wisdom, thoughtfully presented through Kundli, Panchang, personal reports and guidance.",image:STARRY_SKY,main:{label:"Generate free Kundli",href:"/kundli"},secondary:{label:"Explore astrology tools",href:"/free-calculators"}},
+{eyebrow:"NAKSHARIX / THE COSMIC JOURNEY",heading:"Decode your destiny,",accent:"design your future.",body:"Discover traditional Vedic wisdom through your birth chart, daily Panchang, personalized reports and thoughtful guidance.",image:STARRY_SKY,main:{label:"Generate free Kundli",href:"/kundli"},secondary:{label:"Explore astrology tools",href:"/free-calculators"}},
 {eyebrow:"SACRED TRADITIONS / PUJA",heading:"Celebrate",accent:"sacred traditions.",body:"Explore 94 Puja traditions and preferred dates; ceremony availability is confirmed separately.",image:pujaEditorialImage("griha-pravesh-puja",STARRY_SKY,"family"),main:{label:"Explore Puja services",href:"/pujas"},secondary:{label:"Festival calendar",href:"/puja-calendar"}},
 {eyebrow:"BIRTH CHART / REPORTS",heading:"Discover more",accent:"in your chart.",body:"Explore Kundli, compatibility, numerology and personalized report options.",image:REPORT_PHOTO,main:{label:"Explore reports",href:"/reports"},secondary:{label:"Create free Kundli",href:"/kundli"}},
 {eyebrow:"PERSONAL GUIDANCE / CONSULTATION",heading:"Real questions,",accent:"thoughtful guidance.",body:"Browse approved astrologer profiles, session formats and written guidance options.",image:CONSULTATION_PHOTO,main:{label:"View consultations",href:"/consultation"},secondary:{label:"Ask a question",href:"/ask-astrologer"}},
@@ -111,7 +111,7 @@ function SectionTitle({ eyebrow, title, copy }: { eyebrow: string; title: string
 export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Record<string,number|null>}) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [manuallyPaused, setManuallyPaused] = useState(false);
+  const [manuallyPaused, setManuallyPaused] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(true);
 
   useEffect(() => {
@@ -135,7 +135,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
 
   return (
     <div className="nx-editorial">
-      <section className="nx-ed-hero" aria-label="Naksharix featured destinations"
+      <section className="nx-ed-hero nx-ed-hero--reference" aria-label="Naksharix featured destinations"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocusCapture={() => setPaused(true)}
@@ -143,17 +143,21 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
           if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
         }}>
         <div className="nx-ed-hero-imagery" aria-hidden="true">
-          {heroSlides.map((item, index) => (
-            <div className={"nx-ed-hero-photo " + (index === active ? "is-active" : "")} key={item.eyebrow}>
-              <Image src={item.image} alt="" fill priority={index === 0}
-                sizes="100vw" quality={75} unoptimized className="nx-ed-photo" />
-            </div>
-          ))}
+          <div className="nx-ed-hero-photo is-active">
+            <Image src="/images/premium-cosmic-bg-v2.webp" alt="" fill priority sizes="100vw"
+              quality={85} className="nx-ed-photo" />
+          </div>
         </div>
         <div className="nx-ed-hero-wash" aria-hidden="true" />
+        <div className="nx-ed-hero-wheel" aria-hidden="true">
+          <Image src="/images/naksharix-hero-right-visual.png" alt="" fill
+            sizes="(max-width: 900px) 100vw, 55vw" quality={85} className="nx-ed-hero-wheel-image" />
+        </div>
         <div className="nx-ed-container nx-ed-hero-inner">
           <div className="nx-ed-hero-copy" key={slide.eyebrow}>
-            <span className="nx-ed-eyebrow nx-ed-eyebrow-on-dark"><Sparkles size={14} aria-hidden="true" /> {slide.eyebrow}</span>
+            <span className="nx-ed-eyebrow nx-ed-eyebrow-on-dark">
+              <Sparkles size={15} aria-hidden="true" /> {slide.eyebrow}
+            </span>
             <h1>{slide.heading} <em>{slide.accent}</em></h1>
             <p>{slide.body}</p>
             <div className="nx-ed-actions">
@@ -164,17 +168,51 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
                 {slide.secondary.label}
               </Link>
             </div>
-            <div className="nx-ed-hero-note"><ShieldCheck size={16} aria-hidden="true" /> Transparent tools · Private account features · No guaranteed predictions</div>
-            {active===3 ? <p className="mt-2 text-xs text-[#ffe6c3]">Representative consultation exhibition photo: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Astrologer.jpg" target="_blank" rel="noopener noreferrer">Ravikiran · CC BY-SA 4.0</a></p> : null}
-            {active===4 ? <p className="mt-2 text-xs text-[#ffe6c3]">Reference item photograph: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Rudraksha_mala.jpg" target="_blank" rel="noopener noreferrer">Janak Bhatta · CC BY-SA 4.0</a></p> : null}
-            {active===1 ? <p className="mt-2 text-xs text-[#ffe6c3]">Representative ritual photo: <a className="underline" href="https://commons.wikimedia.org/wiki/File:Griha_Pravesh_Puja_Ceremony.jpg" target="_blank" rel="noopener noreferrer">AditiChintarevula · CC0</a></p> : null}
+            <div className="nx-ed-hero-note">
+              <ShieldCheck size={17} aria-hidden="true" />
+              Free Vedic tools · Private account features · No guaranteed predictions
+            </div>
+          </div>
+          <div className="nx-ed-heritage-card">
+            <div className="nx-ed-heritage-card-top">
+              <div>
+                <span className="nx-ed-heritage-kicker">YOUR PERSONAL COSMIC GUIDE</span>
+                <h2>Begin with your birth chart.</h2>
+                <p>Enter your birth details securely on the Kundli page to discover your Vedic chart.</p>
+              </div>
+              <span className="nx-ed-heritage-mark"><MoonStar size={25} strokeWidth={1.5} aria-hidden="true"/></span>
+            </div>
+            <div className="nx-ed-heritage-divider" />
+            <div className="nx-ed-heritage-options">
+              <Link href="/kundli" className="nx-ed-heritage-option">
+                <span className="nx-ed-heritage-option-icon"><MoonStar size={21} aria-hidden="true"/></span>
+                <span><strong>Free Birth Kundli</strong><small>Planets, houses and charts</small></span>
+                <ArrowRight size={17} aria-hidden="true"/>
+              </Link>
+              <Link href="/matchmaking" className="nx-ed-heritage-option">
+                <span className="nx-ed-heritage-option-icon"><Heart size={21} aria-hidden="true"/></span>
+                <span><strong>Kundli Matching</strong><small>Traditional compatibility insights</small></span>
+                <ArrowRight size={17} aria-hidden="true"/>
+              </Link>
+              <Link href="/panchang" className="nx-ed-heritage-option">
+                <span className="nx-ed-heritage-option-icon"><Sun size={21} aria-hidden="true"/></span>
+                <span><strong>Today&apos;s Panchang</strong><small>Tithi, nakshatra and muhurat</small></span>
+                <ArrowRight size={17} aria-hidden="true"/>
+              </Link>
+            </div>
+            <Link href="/kundli" className="nx-ed-heritage-main-action">
+              Create your free Kundli <ArrowRight size={18} aria-hidden="true"/>
+            </Link>
+            <p className="nx-ed-heritage-privacy"><ShieldCheck size={14} aria-hidden="true" /> Your birth details are entered on the dedicated Kundli page.</p>
           </div>
           <div className="nx-ed-slider-controls" aria-label="Featured destinations">
             <button type="button" onClick={() => advance(-1)} aria-label="Previous featured destination"><ArrowLeft size={18}/></button>
             <div className="nx-ed-slider-dots">
               {heroSlides.map((item, index) => (
-                <button type="button" aria-label={"Show slide " + (index + 1)} aria-current={index === active ? "true" : undefined}
-                  className={index === active ? "is-active" : ""} onClick={() => setActive(index)} key={item.eyebrow}/>
+                <button type="button" aria-label={"Show slide " + (index + 1)}
+                  aria-current={index === active ? "true" : undefined}
+                  className={index === active ? "is-active" : ""}
+                  onClick={() => setActive(index)} key={item.eyebrow}/>
               ))}
             </div>
             <button type="button" onClick={() => advance(1)} aria-label="Next featured destination"><ArrowRight size={18}/></button>

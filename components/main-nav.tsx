@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Menu, X, ShoppingCart, UserRound } from "lucide-react";
+import { LayoutDashboard, Menu, X, ShoppingCart, UserRound, Search, Heart } from "lucide-react";
 import { AuthProfileMenu } from "@/components/auth-profile-menu";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -14,13 +14,13 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Home", href: "/", active: ["/"] },
-  { label: "Reports", href: "/reports", active: ["/reports"] },
-  { label: "Consultation", href: "/consultation", active: ["/consultation", "/astrologers"] },
-  { label: "Puja", href: "/pujas", active: ["/pujas", "/puja-enquiry", "/puja-calendar"] },
-  { label: "Shop", href: "/shop", active: ["/shop"] },
   { label: "Kundli", href: "/kundli", active: ["/kundli", "/free-kundli"] },
   { label: "Horoscope", href: "/daily-horoscope", active: ["/horoscope", "/daily-horoscope", "/weekly-horoscope", "/monthly-horoscope", "/yearly-horoscope"] },
-  { label: "Panchang", href: "/panchang", active: ["/panchang"] }
+  { label: "Panchang", href: "/panchang", active: ["/panchang"] },
+  { label: "Puja", href: "/pujas", active: ["/pujas", "/puja-enquiry", "/puja-calendar"] },
+  { label: "Reports", href: "/reports", active: ["/reports"] },
+  { label: "Shop", href: "/shop", active: ["/shop"] },
+  { label: "Consultation", href: "/consultation", active: ["/consultation", "/astrologers"] }
 ] as const;
 
 const exploreLinks = [
@@ -87,7 +87,7 @@ const dropdownStyle = {
 export function MainNav() {
   const pathname = usePathname();
   const { locale, tr } = useLanguage();
-  const navText = (label: string) => label === "Puja"
+  const navText = (label: string) => (label === "Kundli" && locale === "en") ? "Free Kundli" : (label === "Consultation" && locale === "en") ? "Consultations" : label === "Puja"
     ? locale === "hi" ? "पूजा" : "Puja"
     : ({
         Home: "navHome", Reports: "navReports", Consultation: "consult",
@@ -145,8 +145,8 @@ export function MainNav() {
   return (
     <div className="sticky top-0 z-50 w-full">
       <div className="nx-reference-promo">
-        <span>{locale === "hi" ? "NAKSHARIX • वैदिक ज्योतिष, पारंपरिक ज्ञान और व्यक्तिगत मार्गदर्शन" : "NAKSHARIX • Vedic astrology tools, traditional knowledge and private guidance"}</span>
-        <Link href="/pujas">{locale === "hi" ? "पूजा सेवाएँ देखें" : "Explore Puja Services"} <span aria-hidden="true">→</span></Link>
+        <span>{locale === "hi" ? "NAKSHARIX • वैदिक ज्योतिष, पारंपरिक ज्ञान और व्यक्तिगत मार्गदर्शन" : "NAKSHARIX  |  Vedic heritage, thoughtfully designed for today"}</span>
+        <Link href="/pujas">{locale === "hi" ? "पूजा सेवाएँ देखें" : "Traditional knowledge"} <span aria-hidden="true">→</span></Link>
       </div>
       <header
         className="w-full transition-all duration-300"
@@ -158,12 +158,12 @@ export function MainNav() {
           boxShadow: "0 7px 22px rgba(76,32,27,0.07)"
         }}
       >
-        <div className="mx-auto flex h-14 w-full min-w-0 items-center gap-2 px-3 sm:gap-4 sm:px-5 lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center xl:min-w-[10rem] xl:flex-none">
+        <div className="nx-main-header-row mx-auto flex h-14 w-full min-w-0 items-center gap-2 px-3 sm:gap-4 sm:px-5 lg:px-8">
+          <div className="nx-main-brand flex min-w-0 flex-1 items-center xl:min-w-[10rem] xl:flex-none">
             <BrandLogo className="max-w-full" />
           </div>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex" aria-label="Primary navigation">
+          <nav className="nx-main-primary-nav hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex" aria-label="Primary navigation">
             {navLinks.map((item) => item.label === "Horoscope" ? (
               <HoroscopeMenu key={item.href} pathname={pathname} label={navText("Horoscope")} />
             ) : (
@@ -179,16 +179,20 @@ export function MainNav() {
             <MoreMenu label={navText("More")} />
           </nav>
 
-          <div className="ml-auto flex flex-shrink-0 items-center gap-1 border-l border-[rgba(126,39,37,0.15)] pl-2 sm:gap-2 sm:pl-3">
-            <LanguageSwitcher className="w-auto min-w-12" />
-            <ThemeToggle />
-            <Link href="/cart" aria-label="View shopping cart" className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[#702536] hover:bg-[#fff1e7]"><ShoppingCart size={19}/></Link>
-            <Link href="/orders" className="hidden rounded-lg px-3 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7] sm:inline-flex">{locale === "hi" ? "मेरे ऑर्डर" : "My Orders"}</Link>
-            <Link href="/puja-bookings" className="hidden rounded-lg px-2 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7] lg:inline-flex">{locale === "hi" ? "मेरी पूजाएँ" : "My Pujas"}</Link>
-            <AuthProfileMenu />
+          <div className="nx-main-actions ml-auto flex flex-shrink-0 items-center gap-1 border-l border-[rgba(126,39,37,0.15)] pl-2 sm:gap-2 sm:pl-3">
+            <div className="nx-header-desktop-actions hidden xl:flex items-center gap-1">
+              <LanguageSwitcher className="w-auto min-w-12" />
+              <ThemeToggle />
+              <Link href="/search" aria-label="Search the website" className="nx-gallery-icon-link"><Search size={18}/></Link>
+              <Link href="/saved-reports" aria-label="Saved reports" className="nx-gallery-icon-link"><Heart size={18}/></Link>
+            </div>
+            <Link href="/cart" aria-label="View shopping cart" className="nx-header-cart hidden xl:inline-flex h-10 w-10 items-center justify-center rounded-lg text-[#702536] hover:bg-[#fff1e7]"><ShoppingCart size={19}/></Link>
+            <Link href="/orders" className="nx-header-utility hidden rounded-lg px-3 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7]">{locale === "hi" ? "मेरे ऑर्डर" : "My Orders"}</Link>
+            <Link href="/puja-bookings" className="nx-header-utility hidden rounded-lg px-2 py-2 text-xs font-bold text-[#702536] hover:bg-[#fff1e7]">{locale === "hi" ? "मेरी पूजाएँ" : "My Pujas"}</Link>
+            <div className="hidden xl:block nx-gallery-account"><AuthProfileMenu showGalleryLabel /></div>
             <Link
               href="/kundli"
-              className="hidden items-center justify-center px-4 text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 xl:inline-flex"
+              className="hidden items-center justify-center px-4 text-xs font-bold transition-all duration-200 hover:-translate-y-0.5"
               style={{
                 background: "linear-gradient(135deg, #f7d17a, #c98924)",
                 color: "#17181d",
@@ -251,6 +255,12 @@ export function MainNav() {
                   </div>
                 )}
               </div>
+              <div className="mt-3 flex flex-wrap gap-3 rounded-lg bg-[#fff5e8] p-3">
+                <ThemeToggle />
+                <Link href="/cart" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-[#792b3d]"><ShoppingCart size={17}/> Cart</Link>
+                <Link href="/orders" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-[#792b3d]">My Orders</Link>
+                <Link href="/puja-bookings" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-[#792b3d]">My Pujas</Link>
+              </div>
               <div className="mt-3 grid gap-2">
                 {[...navLinks, ...moreLinks].map((item) => (
                   <Link
@@ -293,7 +303,7 @@ function HoroscopeMenu({ pathname, label }: { pathname: string; label: string })
 
 function MoreMenu({ label }: { label: string }) {
   return (
-    <div className="group relative">
+    <div className="nx-gallery-more group relative">
       <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">{label}</button>
       <div className="invisible absolute right-0 top-[120%] z-[1000] w-[460px] translate-y-2 rounded-xl p-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100" style={dropdownStyle}>
         <div className="grid grid-cols-3 gap-4 text-left">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { CheckCircle2, ClipboardList, CreditCard, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,26 +19,14 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
     <main className="min-h-screen bg-[#fffbf5] text-[#372630]">
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_18%_10%,rgba(216,175,102,0.22),transparent_26rem),radial-gradient(circle_at_86%_18%,rgba(137,169,197,0.24),transparent_30rem),linear-gradient(135deg,#fffaf1_0%,#fbf6ea_52%,#eef5fb_100%)]" />
       <Section>
-        <div className="rounded-[2rem] border border-[#e7d8be] bg-white/78 p-6 shadow-[0_24px_80px_rgba(31,41,51,0.08)] backdrop-blur md:p-8 lg:grid lg:grid-cols-[1fr_0.72fr] lg:gap-8">
-          <div>
-            <p className="text-sm font-extrabold uppercase tracking-[0.24em] text-[#b8862e]">{labels.eyebrow}</p>
-            <h1 className="mt-3 font-cinzel text-4xl font-black text-[#372630] sm:text-5xl">{labels.title}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#566575]">{labels.subtitle}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild className="bg-[#b8862e] text-white hover:bg-[#9f721f]"><a href="#report-catalogue">{labels.exploreReports}</a></Button>
-              <Button variant="outline" asChild className="border-[#d8af66] bg-white/70 text-[#372630]"><Link href="/contact">{labels.contactSupport}</Link></Button>
-            </div>
-          </div>
-          <Card className="mt-6 border-[#e7d8be] bg-[#fff9f0]/80 shadow-[0_18px_55px_rgba(31,41,51,0.06)] lg:mt-0">
-            <CardContent className="p-6">
-              <ShieldCheck className="h-6 w-6 text-[#b8862e]" />
-              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#372630]">{labels.deliveryTitle}</h2>
-              <p className="mt-3 text-sm leading-6 text-[#566575]">{labels.deliveryCopy}</p>
-            </CardContent>
-          </Card>
+        <div className="nx-gallery-reports-intro">
+          <p>CURATED DIGITAL REPORTS</p>
+          <h1>{labels.title}</h1>
+          <h2>{locale === "hi" ? "व्यक्तिगत रिपोर्ट देखें" : "Explore personal insights"}</h2>
+          <span>Clear report formats and the actual published prices for your account.</span>
+          <a href="#report-information">How reports work</a>
         </div>
-
-        <div id="report-catalogue" className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div id="report-catalogue" className="mt-10 grid grid-cols-2 gap-3 xl:grid-cols-3">
           {manualReports.map((report) => {
             const checkout = getManualReportCheckout(report.slug);
             const manualPrice=!checkout?manualOfferings[report.slug]:undefined;
@@ -48,12 +37,10 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
             return (
               <Card key={report.slug} className="flex flex-col border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">
                 <CardContent className="flex flex-1 flex-col p-6">
-                  <div aria-hidden="true" className="relative mb-6 flex min-h-36 items-center justify-between overflow-hidden rounded-2xl border border-[#c79c65]/45 bg-[radial-gradient(circle_at_78%_25%,#d2a45a_0%,transparent_38%),linear-gradient(115deg,#412335,#82384b)] px-6 py-5 text-[#fff4e1]">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[.19em] text-[#f0c58d]">{report.category}</p>
-                      <p className="mt-3 max-w-44 font-cinzel text-lg font-bold leading-7">{report.name[locale]}</p>
-                    </div>
-                    <div className="text-6xl font-light text-[#f2cf94]/85">✦</div>
+                  <div aria-hidden="true" className="nx-gallery-report-art relative mb-4 overflow-hidden rounded-xl border border-[#c79c65]/45">
+                    <Image src={reportGalleryImage(report.slug)} alt="" fill unoptimized
+                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                      className="nx-gallery-report-art-img"/>
                   </div>
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -93,6 +80,25 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
               </Card>
             );
           })}
+        </div>
+
+        <div id="report-information" className="nx-gallery-reports-summary rounded-[2rem] border border-[#e7d8be] bg-white/78 p-6 shadow-[0_24px_80px_rgba(31,41,51,0.08)] backdrop-blur md:p-8 lg:grid lg:grid-cols-[1fr_0.72fr] lg:gap-8">
+          <div>
+            <p className="text-sm font-extrabold uppercase tracking-[0.24em] text-[#b8862e]">{labels.eyebrow}</p>
+            <h2 className="mt-3 font-cinzel text-4xl font-black text-[#372630] sm:text-5xl">{labels.title}</h2>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#566575]">{labels.subtitle}</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button asChild className="bg-[#b8862e] text-white hover:bg-[#9f721f]"><a href="#report-catalogue">{labels.exploreReports}</a></Button>
+              <Button variant="outline" asChild className="border-[#d8af66] bg-white/70 text-[#372630]"><Link href="/contact">{labels.contactSupport}</Link></Button>
+            </div>
+          </div>
+          <Card className="mt-6 border-[#e7d8be] bg-[#fff9f0]/80 shadow-[0_18px_55px_rgba(31,41,51,0.06)] lg:mt-0">
+            <CardContent className="p-6">
+              <ShieldCheck className="h-6 w-6 text-[#b8862e]" />
+              <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#372630]">{labels.deliveryTitle}</h2>
+              <p className="mt-3 text-sm leading-6 text-[#566575]">{labels.deliveryCopy}</p>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="mt-10 grid gap-5 md:grid-cols-3">
@@ -200,4 +206,11 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."
   };
+}
+
+/** Visual categories only; displayed prices and product facts remain live. */
+function reportGalleryImage(slug: string) {
+  if (/love|marriage|couple|match|compatib|relationship/i.test(slug)) return "/approved-gallery/consult-photo.jpg";
+  if (/career|wealth|business|finance|year|transit|sade|dosha/i.test(slug)) return "/approved-gallery/hero-astrolabe.jpg";
+  return "/approved-gallery/kundli-report.jpg";
 }

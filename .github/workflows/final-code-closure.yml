@@ -141,6 +141,10 @@ jobs:
     name: Gate 5 - Browser and runtime smoke
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    # Same tested, pinned browser-runtime distribution used by cross-browser CI.
+    # Avoid installing Chromium OS dependencies on the ephemeral host runner.
+    container:
+      image: mcr.microsoft.com/playwright:v1.54.1-noble
     services:
       postgres:
         image: postgres:16-alpine
@@ -156,7 +160,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/naksharix_browser?schema=public
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/naksharix_browser?schema=public
       JWT_SECRET: browser-final-browser-final-browser-final-secret
       NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
       ASTROLOGY_PROVIDER: own_engine
@@ -177,7 +181,12 @@ jobs:
       - run: node scripts/qa-align-disposable-feature-schema.mjs
       - run: npm run build
       - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
-      - run: npx playwright install --with-deps chromium
+      - name: Verify preinstalled Chromium browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d /ms-playwright
+          npx playwright --version
       - name: Run local production server and browser suite
         shell: bash
         run: |

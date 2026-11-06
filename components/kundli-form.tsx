@@ -288,7 +288,7 @@ export function KundliForm() {
       </Card>
       </div>
       {result ? (
-        <div ref={reportRef}>
+        <div ref={reportRef} className="nx-generated-kundli-report">
           <KundliReport result={result} selectedLanguage={(form.watch("locale") ?? apiLocale) as Locale} onRegenerate={generateAgain} />
         </div>
       ) : null}

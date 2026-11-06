@@ -1,0 +1,483 @@
+/*
+ * Owner-approved NAKSHARIX gallery fidelity layer (06 Nov 2026).
+ * All new selectors are scoped. This does not alter checkout, pricing,
+ * report data or authenticated portal access.
+ * Source reference: NAKSHARIX_DESIGN_APPROVAL_20261106/desktop/home.jpg
+ */
+:root {
+  --approved-navy: #14233a;
+  --approved-navy-dark: #0d192a;
+  --approved-maroon: #7a1526;
+  --approved-gold: #b78031;
+  --approved-cream: #fbf6ef;
+  --approved-muted: #69717e;
+  --approved-line: #e9dfd3;
+}
+body.naksh-page-bg [data-layout="editorial"] {
+  background: var(--approved-cream);
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo {
+  min-height: 31px;
+  padding: 6px max(25px, 2.5vw);
+  background: var(--approved-navy-dark);
+  color: #e9dccb;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .045em;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo a {
+  color: #e9dccb;
+}
+body.naksh-page-bg [data-layout="editorial"] header {
+  border-bottom: 1px solid #ece1d4 !important;
+  background: rgba(255,252,248,.98) !important;
+  box-shadow: 0 2px 5px rgba(24,13,16,.035) !important;
+}
+body.naksh-page-bg [data-layout="editorial"] header > div {
+  height: 82px;
+  max-width: 1600px;
+  gap: clamp(6px, 1vw, 18px);
+  padding-inline: clamp(15px, 2.45vw, 38px);
+}
+body.naksh-page-bg [data-layout="editorial"] header nav[aria-label="Primary navigation"] {
+  gap: clamp(3px, .55vw, 11px);
+}
+body.naksh-page-bg [data-layout="editorial"] header nav[aria-label="Primary navigation"] a {
+  color: #292c35 !important;
+  font-size: clamp(11px, .92vw, 14px) !important;
+  font-weight: 650;
+}
+body.naksh-page-bg [data-layout="editorial"] header nav[aria-label="Primary navigation"] a[aria-current="page"] {
+  color: var(--approved-maroon) !important;
+  text-decoration-color: var(--approved-maroon);
+}
+body.naksh-page-bg [data-layout="editorial"] header a[aria-label="Naksharix home"] span span:first-child {
+  font-family: Georgia,serif;
+  font-size: clamp(21px, 2.1vw, 29px);
+  font-weight: 800;
+  letter-spacing: -.052em;
+}
+body.naksh-page-bg [data-layout="editorial"] header a[aria-label="Naksharix home"] .naksh-brand-subtitle {
+  font-size: 8px;
+  letter-spacing: .14em;
+  color: #a45d2d;
+}
+
+/* Exact structure and layout proportions of approved screenshot. */
+.nx-approved-home {
+  font-family: Inter, Arial, sans-serif;
+  color: #172338;
+  background: var(--approved-cream);
+  width: 100%;
+  overflow: clip;
+}
+.nx-approved-home h1,.nx-approved-home h2,.nx-approved-home h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: -.03em;
+}
+.nx-a-container {
+  margin-inline: auto;
+  max-width: 1360px;
+  padding-inline: 34px;
+}
+.nx-a-hero {
+  min-height: 360px;
+  display: grid;
+  grid-template-columns: 52% 48%;
+  overflow: hidden;
+  border-bottom: 1px solid #e6c7a6;
+  background: linear-gradient(90deg,#fffaf3 0%,#fff8ef 46%,#dbc59f 100%);
+}
+.nx-a-hero-copy {
+  position: relative;
+  z-index: 2;
+  padding: 43px 16px 36px clamp(40px,5.14vw,74px);
+}
+.nx-a-hero-copy:before {
+  content:'❁'; position:absolute; left:-14px; top:16px;
+  font:300px/1 Georgia,serif; color:rgba(177,116,48,.055);
+  pointer-events:none; z-index:-1;
+}
+.nx-a-eyebrow {
+  display:block;
+  color:#b78031;
+  font-size:12px;
+  font-weight:750;
+  letter-spacing:.19em;
+  text-transform:uppercase;
+}
+.nx-a-hero h1 {
+  max-width:680px;
+  margin:13px 0 14px;
+  color:#14233a;
+  font-size:clamp(40px,3.8vw,54px);
+  font-weight:750;
+  line-height:1.06;
+}
+.nx-a-hero h1 span {
+  display:block;
+  color:#7a1526;
+}
+.nx-a-hero-copy p {
+  max-width:525px;
+  margin:0 0 24px;
+  font-size:16px;
+  line-height:1.5;
+  color:#414553;
+}
+.nx-a-hero-art {
+  min-height:360px;
+  background-image:
+    linear-gradient(90deg,rgba(250,245,235,.94) 0%,rgba(247,234,217,.08) 24%,rgba(16,21,33,.04)),
+    url('/approved-gallery/hero-astrolabe.jpg');
+  background-position:center;
+  background-size:cover;
+}
+.nx-a-actions { display:flex; gap:12px; flex-wrap:wrap; }
+.nx-a-button {
+  min-height:45px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:11px 20px;
+  border:1px solid #bd8742;
+  border-radius:8px;
+  color:#8a4519;
+  background:#fffaf3;
+  font-size:13px;
+  font-weight:800;
+  white-space:nowrap;
+  text-decoration:none;
+  transition:transform .2s,background .2s,box-shadow .2s;
+}
+.nx-a-button:hover { transform:translateY(-2px); background:white; box-shadow:0 9px 26px rgba(83,46,24,.12); }
+.nx-a-button.nx-a-primary { background:#7a1526; border-color:#7a1526; color:white; }
+.nx-a-button.nx-a-primary:hover { background:#5f1120; }
+.nx-a-tools {
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  margin-top:18px;
+  overflow:hidden;
+  border:1px solid #e2bf86;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 14px 35px rgba(58,37,21,.09);
+}
+.nx-a-tool {
+  min-width:0;
+  padding:18px 10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  color:#172338;
+  border-right:1px solid #ebdfce;
+  text-decoration:none;
+  transition:background .2s;
+}
+.nx-a-tool:last-child { border-right:0; }
+.nx-a-tool:hover { background:#fff6e9; }
+.nx-a-tool svg { color:#7a1526; margin-bottom:5px; }
+.nx-a-tool strong { font:700 17px/1.25 Georgia,serif; }
+.nx-a-tool small { margin-top:3px; font-size:11px; color:#71717d; }
+.nx-a-section { padding:35px 0 36px; }
+.nx-a-section-heading { text-align:center; margin-bottom:24px; }
+.nx-a-section-heading span { color:#785021; font-size:12px; font-weight:750; letter-spacing:.19em; text-transform:uppercase; }
+.nx-a-section-heading h2 { margin:9px 0 8px; font-size:35px; line-height:1.1; color:#14233a; font-weight:750; }
+.nx-a-section-heading p { color:#69717e; font-size:14px; }
+.nx-a-services {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+}
+.nx-a-card {
+  min-width:0;
+  background:white;
+  border:1px solid #e9ded1;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 14px 35px rgba(58,37,21,.09);
+  transition:transform .2s,box-shadow .2s;
+}
+.nx-a-card:hover { transform:translateY(-3px); box-shadow:0 18px 40px rgba(58,37,21,.14); }
+.nx-a-image-link { display:block; overflow:hidden; background:#eee2d3; }
+.nx-a-card-image { display:block; width:100%; height:141px; object-fit:cover; transition:transform .3s; }
+.nx-a-card:hover img { transform:scale(1.035); }
+.nx-a-card-copy { padding:17px; }
+.nx-a-card-copy h3 { font-size:20px; line-height:1.2; color:#14233a; }
+.nx-a-card-copy p { min-height:34px; margin:6px 0 12px; color:#69717e; font-size:12px; line-height:1.4; }
+.nx-a-card-copy a { display:inline-flex; align-items:center; gap:6px; color:#7a1526; font-size:12px; font-weight:800; }
+.nx-a-bridge { height:1px; background:#e9dfd3; }
+
+/* Keep existing live catalogues, zodiac views, online checkout and information
+ * below the approved first-screen sections. Suppress ONLY duplicated headings. */
+.nx-approved-home + .nx-approved-retained .nx-ed-hero,
+.nx-approved-home + .nx-approved-retained .nx-ed-quick-section,
+.nx-approved-home + .nx-approved-retained .nx-ed-services {
+  display:none !important;
+}
+.nx-approved-home + .nx-approved-retained .nx-editorial {
+  overflow:visible;
+}
+.nx-approved-home + .nx-approved-retained .nx-ed-section {
+  padding-block:clamp(35px,4vw,62px);
+}
+.nx-approved-home :is(a,button):focus-visible {
+  outline:3px solid #b78031;
+  outline-offset:4px;
+}
+/* Reference gallery's 1440/390px/320px breakpoints. */
+@media (max-width:1100px) {
+  .nx-a-container { padding-inline:24px; }
+  .nx-a-hero-copy { padding-left:40px; }
+  .nx-a-hero h1 { font-size:clamp(37px,4.3vw,51px); }
+}
+@media (max-width:850px) {
+  body.naksh-page-bg [data-layout="editorial"] header > div { height:68px; padding-inline:17px; }
+  .nx-a-hero { display:flex; flex-direction:column-reverse; }
+  .nx-a-hero-art { min-height:230px; height:230px; width:100%; }
+  .nx-a-hero-copy { padding:27px 22px 34px; }
+  .nx-a-hero h1 { font-size:39px; max-width:620px; }
+  .nx-a-hero-copy p { font-size:13px; margin-bottom:20px; }
+  .nx-a-button { font-size:11px; min-height:42px; padding:10px 12px; }
+  .nx-a-container { padding-inline:18px; }
+  .nx-a-tools { margin-top:12px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .nx-a-tool { padding:12px 7px; }
+  .nx-a-tool svg { width:24px; height:24px; }
+  .nx-a-tool strong { font-size:14px; }
+  .nx-a-tool small { font-size:9px; }
+  .nx-a-section { padding-block:25px; }
+  .nx-a-section-heading h2 { font-size:29px; }
+  .nx-a-services { grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+  .nx-a-card-image { height:110px; }
+  .nx-a-card-copy { padding:11px; }
+  .nx-a-card-copy h3 { font-size:16px; }
+  .nx-a-card-copy p { font-size:10px; }
+}
+@media (max-width:420px) {
+  .nx-a-eyebrow { font-size:10px; }
+  .nx-a-hero h1 { font-size:clamp(32px,9vw,39px); }
+  .nx-a-actions { gap:8px; }
+  .nx-a-button { white-space:normal; text-align:center; }
+  .nx-a-card-copy h3 { font-size:15px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .nx-approved-home :is(a,img) { transition:none !important; }
+}
+
+/* The second gallery section and final pale band are exact reusable motifs. */
+.nx-a-extra { padding-top: 4px; }
+.nx-a-extra-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.nx-a-extra-card {
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  border:1px solid #e7ddd1;
+  border-radius:13px;
+  background:white;
+  box-shadow:0 14px 35px rgba(58,37,21,.09);
+  text-decoration:none;
+}
+.nx-a-extra-card > span { font-size:33px; color:#7a1526; }
+.nx-a-extra-card > strong { margin:7px 0; font:700 21px Georgia,serif; color:#172338; }
+.nx-a-extra-card > p { color:#69717e; font-size:12px; line-height:1.6; }
+.nx-a-extra-card > b { display:inline-flex; align-items:center; gap:6px; margin-top:14px; color:#7a1526; font-size:12px; }
+.nx-a-extra-card:hover { border-color:#c89e5c; background:#fffcf7; }
+.nx-a-band {
+  padding:22px 12px;
+  background:#f3e6d5;
+  border-top:1px solid #d9c0a1;
+  text-align:center;
+  color:#674c32;
+  font:16px Georgia,serif;
+}
+@media (max-width:850px) {
+ .nx-a-extra-grid { grid-template-columns:1fr; gap:11px; }
+ .nx-a-extra-card { padding:15px; }
+ .nx-a-extra-card > strong { font-size:18px; }
+ .nx-a-band { font-size:13px; }
+}
+
+
+/* Precise header parity at 1440x900 and 390x844; all actions remain functional. */
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-header-row {
+  height:82px !important;
+  max-width:1500px;
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  padding-inline:clamp(18px,2.25vw,32px) !important;
+  gap:14px !important;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand {
+  flex:0 0 280px;
+  width:280px;
+  min-width:0;
+  max-width:280px;
+  overflow:visible;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand > a {
+  gap:8px;
+  min-width:0;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand > a > span:first-child {
+  height:48px;
+  width:48px;
+  flex:0 0 48px;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand a[aria-label="Naksharix home"] span span:first-child {
+  font-size:24px !important;
+  line-height:1.06;
+  font-family:Georgia,serif;
+  letter-spacing:-.052em;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav {
+  flex:1 1 auto;
+  justify-content:flex-start;
+  gap:clamp(2px,.25vw,7px) !important;
+  min-width:0;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav > a,
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav > div > a {
+  color:#272d38 !important;
+  padding:8px clamp(4px,.47vw,8px) !important;
+  white-space:nowrap;
+  font-size:clamp(11px,.88vw,13px) !important;
+  letter-spacing:-.015em;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-more {
+  display:none;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-main-actions {
+  border-left:0;
+  padding-left:0;
+  margin-left:auto;
+  gap:6px;
+  flex-shrink:0;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-header-desktop-actions {
+  gap:3px;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-icon-link {
+  height:35px;
+  width:35px;
+  flex:0 0 35px;
+  display:grid;
+  place-items:center;
+  color:#68323c;
+  border:1px solid #eedfce;
+  border-radius:50%;
+  background:white;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-icon-link:hover {
+  background:#f8ede0;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-header-cart {
+  width:34px;
+  height:34px;
+  color:#68323c;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-account {
+  flex:0 0 auto;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-account-button,
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-auth-trigger {
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-width:126px;
+  height:38px;
+  padding:6px 15px;
+  border:1px solid #7a1526;
+  border-radius:999px;
+  background:#7a1526 !important;
+  color:#fff !important;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.1;
+}
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-account-button:hover,
+body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-auth-trigger:hover {
+  background:#5e1020 !important;
+  color:white !important;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo {
+  min-height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:5px 34px;
+  text-align:left;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo > span {
+  font-size:10px;
+  letter-spacing:.07em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo > a {
+  white-space:nowrap;
+  font-size:10px;
+  letter-spacing:.04em;
+}
+@media(min-width:1280px) and (max-width:1480px) {
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand {
+    flex-basis:270px;
+    width:270px;
+    max-width:270px;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav > a,
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-primary-nav > div > a {
+    padding-inline:4px !important;
+    font-size:12px !important;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-actions {
+    gap:2px;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-icon-link,
+  body.naksh-page-bg [data-layout="editorial"] header .nx-header-cart {
+    height:31px;
+    width:31px;
+    flex-basis:31px;
+  }
+}
+@media(max-width:1279px) {
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-header-row {
+    height:70px !important;
+    gap:12px !important;
+    padding-inline:16px !important;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand {
+    flex:1 1 auto;
+    width:auto;
+    max-width:none;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-actions {
+    margin-left:auto;
+    border:0;
+    padding:0;
+  }
+  body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo {
+    padding-inline:10px;
+  }
+  body.naksh-page-bg [data-layout="editorial"] .nx-reference-promo > a {
+    display:none;
+  }
+}
+@media(max-width:420px) {
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-brand a[aria-label="Naksharix home"] span span:first-child {
+    font-size:20px !important;
+    letter-spacing:-.055em;
+  }
+  body.naksh-page-bg [data-layout="editorial"] header .nx-main-header-row {
+    padding-inline:12px !important;
+  }
+}

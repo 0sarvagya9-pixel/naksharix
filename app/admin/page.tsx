@@ -240,7 +240,7 @@ export default function AdminPage() {
           </table>
         </CardContent>
       </Card>
-      <Card className="mt-6 overflow-hidden">
+      <Card id="report-requests" className="mt-6 overflow-hidden scroll-mt-24">
         <CardHeader><CardTitle>Report Requests</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-left text-sm">
