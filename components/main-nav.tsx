@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Menu, X, ShoppingCart, UserRound, Search, Heart } from "lucide-react";
 import { AuthProfileMenu } from "@/components/auth-profile-menu";
@@ -217,8 +218,8 @@ export function MainNav() {
           </div>
         </div>
 
-        {open ? (
-          <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm xl:hidden" role="dialog" aria-modal="true" aria-label="Navigation menu">
+        {open ? createPortal(
+          <div className="fixed inset-0 z-[200] h-dvh w-screen bg-black/40 backdrop-blur-sm xl:hidden" role="dialog" aria-modal="true" aria-label="Navigation menu">
             <aside id="naksharix-mobile-sidebar" className="ml-auto h-full w-[min(88vw,380px)] overflow-y-auto overscroll-contain border-l border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.98)] p-5 shadow-2xl">
               <div className="flex items-center justify-between">
                 <BrandLogo className="max-w-[12rem]" />
@@ -272,7 +273,7 @@ export function MainNav() {
                 ))}
               </div>
             </aside>
-          </div>
+          </div>, document.body
         ) : null}
       </header>
     </div>
@@ -284,7 +285,7 @@ function HoroscopeMenu({ pathname, label }: { pathname: string; label: string })
   return (
     <div className="group relative" data-nav-parent="horoscope">
       <Link href="/daily-horoscope" className={navLinkClass(active)}>{label}</Link>
-      <div className="nx-nav-dropdown invisible pointer-events-none absolute left-1/2 top-full z-[1000] w-[480px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:opacity-100" role="region" aria-label="Horoscope options" style={dropdownStyle}>
+      <div className="nx-nav-dropdown invisible pointer-events-auto absolute left-1/2 top-full z-[1000] w-[480px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100" role="region" aria-label="Horoscope options" style={dropdownStyle}>
         <div className="grid grid-cols-[160px_1fr] gap-4 text-left">
           <MenuColumn title="Horoscopes" links={horoscopeOptions} />
           <div>
@@ -303,7 +304,7 @@ function MoreMenu({ label }: { label: string }) {
   return (
     <div className="nx-gallery-more group relative" data-nav-parent="more">
       <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">{label}</button>
-      <div className="nx-nav-dropdown invisible pointer-events-none absolute right-0 top-full z-[1000] w-[460px] max-w-[calc(100vw-24px)] rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:opacity-100" style={dropdownStyle} role="region" aria-label="More site sections">
+      <div className="nx-nav-dropdown invisible pointer-events-auto absolute right-0 top-full z-[1000] w-[460px] max-w-[calc(100vw-24px)] rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100" style={dropdownStyle} role="region" aria-label="More site sections">
         <div className="grid grid-cols-3 gap-4 text-left">
           <MenuColumn title="Explore" links={exploreLinks} />
           <MenuColumn title="Tools" links={toolsLinks} />
