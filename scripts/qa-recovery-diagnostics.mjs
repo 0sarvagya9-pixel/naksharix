@@ -22,7 +22,11 @@ assert.ok(runner.includes("encrypted:true")&&runner.includes("privateStore:true"
 const cronRoute=source("app/api/cron/daily-recovery/route.ts");
 const config=JSON.parse(source("vercel.json"));
 const job=config.crons.find(entry=>entry.path==="/api/cron/daily-recovery");
-assert.ok(job && /^\\d{1,2} \\d{1,2} \\* \\* \\*$/.test(job.schedule),
+const fields=typeof job?.schedule==="string" ? job.schedule.split(" ") : [];
+const minute=Number(fields[0]), hour=Number(fields[1]);
+assert.ok(fields.length===5 && Number.isInteger(minute) && minute>=0 && minute<=59 &&
+  Number.isInteger(hour) && hour>=0 && hour<=23 &&
+  fields.slice(2).every(field=>field==="*"),
   "Production recovery must have an actual once-daily Vercel Cron schedule");
 assert.ok(cronRoute.includes("authorizedRecoveryRequest(request)") &&
   cronRoute.indexOf("authorizedRecoveryRequest(request)")<cronRoute.indexOf("await runDailyRecovery()") &&
