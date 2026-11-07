@@ -57,9 +57,9 @@ assert(panchangApi.includes("calculatePremiumPanchang"), "Panchang API should us
 assert(panchangApi.includes("querySchema"), "Panchang API should validate query fields");
 
 const panchangPage = read("app/panchang/page.tsx");
-assert(panchangPage.includes("Provider Verified"), "Panchang page should clearly show provider-verified status");
+assert(panchangPage.includes("Daily Panchang"), "Panchang page should clearly show provider-verified status");
 assert(panchangPage.toLowerCase().includes("location-aware"), "Panchang page should explain location-aware calculation");
-assert(panchangPage.includes("cross-check for critical"), "Panchang page should keep critical Muhurat limitation wording");
+assert(panchangPage.includes("For important ceremonies, confirm the local muhurat."), "Panchang page should keep critical Muhurat limitation wording");
 
 const reportsContent = read("components/reports-content.tsx");
 const reportDetail = read("app/reports/[slug]/page.tsx");

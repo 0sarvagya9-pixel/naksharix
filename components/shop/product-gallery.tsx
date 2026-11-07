@@ -20,14 +20,6 @@ export function ProductGallery({initialSrc,initialAlt,photos,mainImageRights}:Ga
        <ResilientShopPhoto src={entry.src} alt={entry.alt} width={200} height={160} className="aspect-[4/3] w-full rounded-lg object-cover"/>
      </button>)}
    </div>:null}
-   <div className="mt-3 space-y-1 px-1 text-xs leading-5 text-[#584550]">
-     <p>{chosen.imageRights === "LICENSED"
-       ? "Real reference photograph, not verified Naksharix stock; confirm the exact delivered item, material, and combo contents before purchase."
-       : chosen.imageRights
-         ? "Catalogue photograph with administrator-approved usage rights; confirm exact item specifications before fulfilment."
-         : "Illustrative catalogue artwork; not a verified product photograph."}</p>
-     {chosen.source ? <p>Photo: <a className="font-semibold underline" href={chosen.source} target="_blank" rel="noopener noreferrer">{chosen.credit || "Photographer / source"}</a>
-        {chosen.licenseUrl ? <>{" · "}<a className="underline" href={chosen.licenseUrl} target="_blank" rel="noopener noreferrer">{chosen.licenseName || "License"}</a></> : null}</p> : null}
-   </div>
+   <p className="mt-3 px-1 text-xs leading-5 text-[#584550]">Product images are for reference. Please review specifications before purchase.</p>
  </div>
 }

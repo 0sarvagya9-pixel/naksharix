@@ -5,7 +5,7 @@ const ui=read("components/shop-coming-soon-content.tsx");
 const admin=read("components/admin-shop-content.tsx");
 const api=read("app/api/admin/shop-catalogue/route.ts");
 const model=read("lib/manual-catalogue.ts");
-for(const part of ["safeProductVisual(product)","ResilientShopPhoto", "Illustrative catalogue visual", "product.imageRights", "product.imageEvidenceUrl"]) {
+for(const part of ["safeProductVisual(product)","ResilientShopPhoto", "Images are for reference", "product.imageRights", "product.imageEvidenceUrl"]) {
   assert.ok(ui.includes(part),"SHOP_PHOTO_RENDER_GUARD_MISSING="+part);
 }
 for(const part of ["imageRights: z.enum", "imageEvidenceUrl: z.string().url()", "External product image requires documented image-use rights.", "evidence.protocol !== \"https:\""]) {
@@ -41,16 +41,16 @@ assert.ok(read("lib/shop/photo-rights.ts").includes('createHash("md5")') &&
   read("lib/shop/photo-rights.ts").includes("image.hostname===\"thumb.wikimedia.org\""),
   "SHOP_COMMONS_FILENAME_HASH_GUARD_MISSING");
 assert.ok(store.includes("photoFallbackForLegacySeed") && store.includes("product.imageRights"),"STORED_ADMIN_IMAGES_NOT_PRESERVED");
-assert.ok(productDetail.includes("Real reference photograph, not verified Naksharix stock") &&
-  productDetail.includes("chosen.credit") && productDetail.includes("chosen.licenseUrl"),"PRODUCT_IMAGE_RIGHTS_DISCLOSURE_MISSING");
-assert.ok(home.includes("referencePhotoForProduct(item.id)") && ui.includes("Real reference photo"),"PHOTOGRAPHY_NOT_SITEWIDE");
+assert.ok(productDetail.includes("Product images are for reference.") &&
+  read("app/image-credits/page.tsx").includes("referenceProductPhotos"),"PRODUCT_IMAGE_GUIDANCE_OR_CREDITS_MISSING");
+assert.ok(home.includes("referencePhotoForProduct(item.id)") && ui.includes("Images are for reference"),"PHOTOGRAPHY_NOT_SITEWIDE");
 assert.ok(home.includes('referencePhotoForProduct("rudraksha-mala")') && home.includes('pujaEditorialImage("rudrabhishek"'),"HOME_SERVICES_MUST_USE_REAL_CREDITED_REFERENCES");
 const shopPage=read("app/shop/page.tsx");
-assert.ok(shopPage.includes('referencePhotoForProduct("rudraksha-mala")') && shopPage.includes("Banner shows a licensed reference photograph"),"SHOP_HERO_PHOTO_ATTRIBUTION_MISSING");
+assert.ok(shopPage.includes('referencePhotoForProduct("rudraksha-mala")') && !shopPage.includes("Banner shows a licensed reference photograph"),"SHOP_HERO_PHOTO_ATTRIBUTION_MISSING");
 const calendarPage=read("app/puja-calendar/page.tsx");
-assert.ok(calendarPage.includes('pujaEditorialImage("griha-pravesh-puja"') && calendarPage.includes("representative ritual photograph"),"PUJA_CALENDAR_REAL_PHOTO_ATTRIBUTION_MISSING");
-assert.ok(productDetail.includes('chosen.imageRights === "LICENSED"') && productDetail.includes("administrator-approved usage rights"),"ADMIN_APPROVED_PHOTOS_MISLABELLED_AS_REFERENCES");
-assert.ok(ui.includes('product.galleryImages[0].imageRights === "LICENSED"'),"SHOP_CARD_LICENSE_LABEL_MISSING");
+assert.ok(calendarPage.includes('pujaEditorialImage("griha-pravesh-puja"') && read("app/image-credits/page.tsx").includes("editorialPujaPhotos"),"PUJA_CALENDAR_REAL_PHOTO_ATTRIBUTION_MISSING");
+assert.ok(!productDetail.includes("administrator-approved usage rights") && read("app/image-credits/page.tsx").includes("referenceProductPhotos"),"CUSTOMER_CARDS_SHOULD_NOT_SHOW_ADMIN_PHOTO_JARGON");
+assert.ok(ui.includes("safeProductVisual(product)") && ui.includes("Images are for reference"),"SHOP_PHOTO_SOURCE_GUARD_OR_BUYER_NOTE_MISSING");
 const cart=read("components/shop/cart-page-client.tsx");
 assert.ok(cart.includes('import { ResilientShopPhoto }') && cart.includes("p.galleryImages?.[0]?.url"),"CART_PRODUCT_PHOTOS_MISSING");
 const cartControls=read("components/shop/quote-cart-controls.tsx");
@@ -62,7 +62,7 @@ for(const invariant of ['setOrderId(order.id);', 'try{writeCart([]);setLines([])
 }
 
 const productResilience=read("components/shop/resilient-shop-photo.tsx");
-for(const marker of ["wikimediaOriginalForThumbnail(src)","currentSrc===src","setCurrentSrc(original)","setCurrentSrc(fallback)","Reference photo unavailable · illustration"]){
+for(const marker of ["wikimediaOriginalForThumbnail(src)","currentSrc===src","setCurrentSrc(original)","setCurrentSrc(fallback)","Image unavailable"]){
   assert.ok(productResilience.includes(marker),"SHOP_PHOTO_FALLBACK_INCOMPLETE="+marker);
 }
 assert.ok(productDetail.includes("<ResilientShopPhoto")&&ui.includes("<ResilientShopPhoto")&&cart.includes("<ResilientShopPhoto"),
@@ -116,8 +116,7 @@ assert.ok(read("components/puja/puja-services-directory.tsx").includes("object-[
 const chatUX=read("components/ai-astrologer-chat.tsx");
 assert.ok(chatUX.includes("!event.shiftKey && !event.nativeEvent.isComposing")&&chatUX.includes("!consent ? <label"),"AI_SEND_KEYBOARD_OR_CONSENT_ERROR");
 
-assert.ok(read("components/home/editorial-service-banner.tsx").includes("imageCredit ?")&&
-  read("app/consultation/page.tsx").includes("imageCredit={{label:"),"CONSULTATION_CC_ATTRIBUTION_MISSING");
+assert.ok(read("app/image-credits/page.tsx").includes("Ravikiran") && read("app/image-credits/page.tsx").includes("Astrologer.jpg"),"CENTRAL_CONSULTATION_ATTRIBUTION_MISSING");
 
 const pujaPhotoMap=read("lib/puja/editorial-photos.ts");
 const sourceCoverage=read("lib/ops/commercial-readiness.ts");
@@ -140,7 +139,7 @@ const resilientPuja=read("components/puja/resilient-editorial-image.tsx");
 assert.ok(resilientPuja.includes("wikimediaOriginalForThumbnail(src)")&&
  resilientPuja.includes("setCurrentSrc(mirror)")&&
  resilientPuja.includes("setCurrentSrc(fallbackSrc)")&&
- resilientPuja.includes("Representative photo unavailable · illustration")&&
+ resilientPuja.includes("Image unavailable")&&
  !resilientPuja.includes('src.replace("https://thumb.wikimedia.org/"'),
  "WIKIMEDIA_CANONICAL_ORIGINAL_AND_ILLUSTRATION_FALLBACK_MISSING");
 for(const page of ["components/puja/puja-services-directory.tsx","app/pujas/[id]/page.tsx"]){

@@ -5,7 +5,7 @@ import { seo } from "@/lib/seo";
 export const metadata: Metadata = {
   ...seo({
     title: "AI Astrologer - Upgrading",
-    description: "Naksharix AI Astrologer is temporarily unavailable while reliability and safety improvements are completed.",
+    description: "AI Astrologer is currently unavailable. Explore Naksharix Kundli, Panchang and consultation services.",
     path: "/ai-astrologer",
     keywords: ["AI Astrologer Coming Soon", "Kundli Tools", "Astrology Tools"]
   }),

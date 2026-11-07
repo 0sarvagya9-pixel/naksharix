@@ -79,7 +79,6 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           <div className="flex flex-1 flex-col p-5">
             <h3 className="font-cinzel text-lg font-bold text-[#412831]"><Link href={"/pujas/"+topic.id} className="hover:text-[#f4c87d]">{topic.name}</Link></h3>
             <p className="mt-2 text-xs font-semibold text-[#983844]">{topic.deity}</p>
-            {pujaEditorialPhoto(topic.id,topic.category) ? <p className="mt-2 text-xs leading-5 text-[#5d4b50]">Representative image (not delivered ceremony): <a href={pujaEditorialPhoto(topic.id,topic.category)!.source} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category)!.author}</a>{" · "}<a href={pujaEditorialPhoto(topic.id,topic.category)!.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{pujaEditorialPhoto(topic.id,topic.category)!.license}</a></p>:null}
             <p className="mt-3 flex-1 text-sm leading-6 text-[#6c5459]">{topic.description}.</p>
             {offerings[topic.id] ? <p className="mt-3 text-lg font-extrabold text-[#842c3e]">
               {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(offerings[topic.id].pricePaise/100)}

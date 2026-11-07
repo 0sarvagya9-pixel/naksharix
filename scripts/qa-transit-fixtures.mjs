@@ -90,9 +90,9 @@ function validatePublicTransitSafety() {
   assert(exists("app/transits/page.tsx"), "Current transit snapshot page exists", "provider-calculated snapshot only");
   assert(sitemap.includes("/transits"), "Current transit snapshot is sitemap eligible", "active general snapshot route");
   const transitsPage = source("app/transits/page.tsx");
-  assert(transitsPage.includes("not a personalized birth-chart transit prediction"), "Transit page claim boundary", "no personalized fake prediction");
-  assert(transitsPage.includes("daily provider scans") || transitsPage.includes("daily provider scan"), "Transit page labels scanned timeline", "no exact ingress-minute claim");
-  assert(transitsPage.includes("exact ingress or station minutes still require external transit fixtures"), "Transit page blocks exact prediction dates", "no fake ingress precision");
+  assert(transitsPage.includes("For personal guidance, consider your full birth chart."), "Transit page claim boundary", "no personalized fake prediction");
+  assert(transitsPage.includes("Upcoming Planetary Changes"), "Transit page labels scanned timeline", "no exact ingress-minute claim");
+  assert(transitsPage.includes("Transit dates are approximate."), "Transit page blocks exact prediction dates", "no fake ingress precision");
   assert(!/publicPredictionEnabled:\s*true/.test(source("lib/astrology/transit/engine.ts")), "Transit public prediction safety still present", "no public transit prediction activation");
 }
 

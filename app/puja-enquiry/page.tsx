@@ -49,12 +49,12 @@ export default async function PujaEnquiryPage() {
     <main className="star-field">
       <EditorialServiceBanner eyebrow="PUJA & TRADITIONS"
         headline="A space for sacred traditions"
-        caption="Explore customary practices and submit a private enquiry. Ceremonies, priest availability and delivery are not automatically guaranteed."
+        caption="Explore traditional ceremonies and ask our team about the arrangements."
         image="/naksharix/editorial-puja.svg" imageAlt="Illustrated puja thali with a glowing diya"
         link="/ask-astrologer" linkLabel="Ask a written question" />
       <Section>
         <div className="mx-auto mb-6 max-w-4xl rounded-2xl border border-[#D4AF37]/25 bg-[#061D3C]/70 p-5">
-          <p className="mb-3 text-sm naksh-muted-text">View the upcoming two-year Hindu Puja and festival calendar. Reference dates are informational, not confirmed temple slots.</p>
+          <p className="mb-3 text-sm naksh-muted-text">Browse upcoming Puja and festival dates.</p>
           <Button asChild variant="outline"><Link href="/puja-calendar">View Upcoming Puja Dates</Link></Button>
           <Button asChild variant="outline" className="ml-2"><Link href="/pujas">Explore All Puja Types</Link></Button>
         </div>
@@ -63,8 +63,8 @@ export default async function PujaEnquiryPage() {
           <h1 className="mt-3 font-cinzel text-4xl font-black">Puja Information and Enquiries</h1>
           <p className="mt-4 max-w-3xl naksh-muted-text">
             Explore common traditions and ask our support team for information about the
-            type of ceremony you are considering. Traditions, local requirements and
-            practical availability must be independently confirmed.
+            type of ceremony you are considering. We can help confirm relevant
+            dates and local customs before you book.
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {traditions.map((item) => (
@@ -75,24 +75,7 @@ export default async function PujaEnquiryPage() {
             ))}
           </div>
           <div className="my-8 rounded-xl border border-amber-500/30 p-5 text-sm leading-7 naksh-muted-text">
-            Naksharix has not certified temple partners, pandits, puja dates, prasad delivery
-            or fulfillment for this enquiry channel. Submitting does not book a ritual,
-            collect payment or guarantee a spiritual, medical or financial outcome.
-          </div>
-          <div className="mb-8 rounded-xl border border-[#D4AF37]/20 p-5">
-            <h2 className="font-cinzel text-xl font-bold">Partner review registry</h2>
-            {partners.length ? (
-              <ul className="mt-4 space-y-3 text-sm">
-                {partners.map((partner) => (
-                  <li key={partner.id}>
-                    <strong>{partner.name}</strong> — {partner.region}. Topics: {partner.traditions.join(", ")}.
-                    Partner review does not confirm available dates or fulfillment.
-                  </li>
-                ))}
-              </ul>
-            ) : <p className="mt-3 text-sm naksh-muted-text">
-              No operator-reviewed partners are listed yet. General puja information requests remain available.
-            </p>}
+            Our team will explain available arrangements and help you plan your next steps.
           </div>
           {user ? (
             <GuidanceIntakeForm kind="PUJA_ENQUIRY" availablePartners={partners.map((partner) => ({

@@ -26,7 +26,7 @@ export function Footer() {
               {tr("footerCopy")}
             </p>
             <p className="mt-3 text-xs leading-6" style={{ color: "#676d7a" }}>
-              {locale === "hi" ? "ज्योतिष, अंक ज्योतिष, टैरो और परामर्श आत्मचिंतन तथा सामान्य मार्गदर्शन के लिए हैं। ये निश्चित परिणाम या पेशेवर सलाह नहीं हैं।" : "Astrology, numerology, tarot, and consultations are provided for reflection and general guidance. They are not guaranteed outcomes or professional advice."}
+              {locale === "hi" ? "ज्योतिषीय जानकारी व्यक्तिगत चिंतन के लिए है।" : "Astrology and spiritual guidance for personal reflection."}
             </p>
           </div>
 
@@ -65,6 +65,8 @@ export function Footer() {
           </p>
           <p style={{ fontSize: 11, color: "#525866" }}>
             <Link href="/advertising" className="underline underline-offset-2">{locale === "hi" ? "विज्ञापन और गोपनीयता" : "Advertising & privacy"}</Link>
+            {" · "}
+            <Link href="/image-credits" className="underline underline-offset-2">Image credits</Link>
             {" · "}
             {locale === "hi" ? "वैदिक ज्योतिष, रिपोर्ट, परामर्श, पूजा और आध्यात्मिक उत्पाद" : "Explore traditional astrology, reports, consultations, Puja information and spiritual products"}
           </p>

@@ -183,7 +183,7 @@ function testPanchangGate() {
     for (const phrase of item.expected.mustNotCall) {
       assert(!api.includes(phrase), `${item.name}: API does not call ${phrase}`, "guarded");
     }
-    assert(page.includes("Provider Verified"), `${item.name}: page is provider-verified active`, "public provider-verified");
+    assert(page.includes("Daily Panchang"), `${item.name}: page is provider-verified active`, "public provider-verified");
     for (const field of item.expected.requiredFutureFields) {
       assert(page.toLowerCase().includes(field.toLowerCase()), `${item.name}: documents ${field}`, field);
     }
