@@ -14,6 +14,10 @@ for(const category of [
   "PG_OPTIONS", "PG_DUMP", "ARCHIVE_FILE", "ARCHIVE_SIZE"
 ]) assert.ok(worker.includes("'"+category+"'"),"Diagnostic enum missing "+category);
 assert.ok(worker.includes("BACKUP_EXPORT_CODE="),"Worker does not provide sanitized diagnostic status");
+assert.ok(worker.includes("PGGSSENCMODE:'disable'"),"Postgres must use TLS instead of unsupported GSSAPI negotiation");
+assert.ok(runner.includes("updateNetworkPolicy({allowDomains:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]})") &&
+  runner.indexOf("updateNetworkPolicy(") < runner.indexOf("BACKUP_DATABASE_URL:"),
+  "Sandbox egress must be restricted to expected Neon hostname before source credentials enter");
 assert.ok(!worker.includes("console.error(result.stderr)"),"Never log raw pg_dump errors");
 assert.ok(runner.includes("await dump.stderr()") && runner.includes("new Set(["),"Controller must strictly whitelist diagnostic values");
 assert.ok(runner.includes("BACKUP_FAILED_") && runner.includes("readonly_export"),"Stage must still be reported fail-closed");
