@@ -61,10 +61,10 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
       return;
     }
 
+    if (sessionPrice === null) { setStatus("This consultation is not priced or approved."); return; }
     setStatus(tr("creatingBookingRequest"));
     setLoading(true);
 
-    if (sessionPrice === null) { setStatus("This consultation is not priced or approved."); return; }
     const response = await secureFetch("/api/consultation-bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -80,15 +80,25 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
         birthPlace: formData.get("birthPlace"),
         question: formData.get("question")
       })
-    });
+    }).catch(() => null);
+    if (!response) {
+      setLoading(false);
+      setStatus("Could not reach the booking service. Please check your connection and try again.");
+      return;
+    }
 
-    const json = await response.json();
+    const json = await response.json().catch(() => ({}));
     if (!response.ok) {
       setLoading(false);
       setStatus(json.error ?? tr("errorGeneric"));
       return;
     }
 
+    if (!json.data?.booking?.id || !json.data?.redirectTo) {
+      setLoading(false);
+      setStatus("The booking response was incomplete. Please check your bookings before trying again.");
+      return;
+    }
     const { booking, redirectTo } = json.data;
     if (booking.paymentStatus === "ADMIN_BYPASS" || Number(booking.amount) === 0) {
       setLoading(false);
@@ -108,8 +118,13 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ purpose: "CONSULTATION", bookingId: booking.id })
-    });
-    const orderJson = await orderResponse.json();
+    }).catch(() => null);
+    if (!orderResponse) {
+      setLoading(false);
+      setStatus("Payment could not start. Please check your bookings before retrying.");
+      return;
+    }
+    const orderJson = await orderResponse.json().catch(() => ({}));
     if (!orderResponse.ok) {
       setLoading(false);
       setStatus(orderJson.error ?? "Failed to initiate payment. Please try again.");
@@ -131,14 +146,14 @@ export function ConsultationRequestForm({ astrologerId, astrologerName, userEmai
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(paymentResponse)
-        });
+        }).catch(() => null);
         setLoading(false);
-        if (verifyResponse.ok) {
+        if (verifyResponse?.ok) {
           setStatus("Payment verified successfully!");
           router.push(redirectTo);
         } else {
-          const verifyJson = await verifyResponse.json();
-          setStatus(verifyJson.error ?? "Payment confirmation is pending; check payment history and do not pay again.");
+          const verifyJson = await verifyResponse?.json().catch(() => ({}));
+          setStatus(verifyJson?.error ?? "Payment confirmation is pending; check payment history and do not pay again.");
         }
       },
       modal: {

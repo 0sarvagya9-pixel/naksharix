@@ -49,6 +49,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
 
   return (
     <>
+      {source.length > 0 ? (
       <div className="mt-8 grid gap-3 rounded-lg border border-[#dca956]/25 bg-[#061d3c]/75 p-4 md:grid-cols-4" aria-label="Astrologer filters">
         <select aria-label="Filter astrologers by language" value={language} onChange={(event) => setLanguage(event.target.value)} className={filterClassName}>
           <option value="All">{tr("all")}</option><option value="English">{tr("english")}</option><option value="Hindi">{tr("hindi")}</option><option value="Hinglish">Hinglish</option>
@@ -63,6 +64,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
           <option value="All">{tr("all")}</option><option value="4">4+ {tr("rating")}</option><option value="4.5">4.5+ {tr("rating")}</option><option value="4.8">4.8+ {tr("rating")}</option>
         </select>
       </div>
+      ) : null}
 
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         {astrologers.map((astrologer) => (
@@ -84,7 +86,7 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
                 <Star className="h-4 w-4 fill-current" />
                 {(astrologer.rating || 0).toFixed(1)} {tr("rating")} | {astrologer.experienceYears}+ {tr("years")} | {astrologer.pricePerSession !== null && astrologer.pricePerSession !== undefined ? `INR ${astrologer.pricePerSession} / 30-minute session` : `INR ${astrologer.pricePerMinute}/min · 30-minute session total INR ${(astrologer.pricePerMinute * 30).toFixed(2)}`}
               </div>
-              <p className="flex items-center gap-2 text-sm text-[#176b48]"><Circle className="h-2 w-2 fill-current" /> {astrologer.status ?? tr("onlineForDemoBookings")}</p>
+              <p className="flex items-center gap-2 text-sm text-[#176b48]"><Circle className="h-2 w-2 fill-current" /> {astrologer.status ?? "Availability not published"}</p>
               <div className="flex flex-wrap gap-2 text-xs">
                 {astrologer.availableForChat ? <span className="inline-flex items-center gap-1 rounded-full border border-[#D4AF37]/20 px-2 py-1"><MessageCircle className="h-3 w-3" /> Chat</span> : null}
                 {astrologer.availableForCall ? <span className="inline-flex items-center gap-1 rounded-full border border-[#D4AF37]/20 px-2 py-1"><Phone className="h-3 w-3" /> Call</span> : null}
@@ -103,10 +105,12 @@ export function AstrologerListing({ profiles = [] }: { profiles?: MarketplaceAst
 
       {!astrologers.length ? (
         <div className="mt-6 rounded-lg border border-[#decba9] bg-[#fffcf7] p-5 text-sm text-[#414553]">
-          <p>{source.length ? tr("noAstrologersMatch") : "Consultations are currently unavailable. Contact us for assistance."}</p>
+          <p className="font-semibold">{source.length ? tr("noAstrologersMatch") : "No astrologers are approved for live booking at the moment."}</p>
+          {!source.length ? <p className="mt-2">You can send a private written enquiry to our support team. This is not a confirmed appointment and does not guarantee an expert reply.</p> : null}
           <div className="mt-4 flex flex-wrap gap-3">
             {source.length ? <Button type="button" variant="outline" onClick={() => { setLanguage("All"); setExpertise("All"); setPrice("All"); setRating("All"); }}>Reset filters</Button> : null}
-            <Button asChild><Link href="/contact">Contact Support</Link></Button>
+            {!source.length ? <Button asChild><Link href="/ask-astrologer">Send written enquiry</Link></Button> : null}
+            <Button variant="outline" asChild><Link href="/contact">Contact support</Link></Button>
           </div>
         </div>
       ) : null}
