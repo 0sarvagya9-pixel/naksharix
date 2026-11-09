@@ -18,12 +18,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { slug } = await params;
   if (!nakshatras.includes(slug)) return {};
   const name = titleFromSlug(slug);
-  return seo({
+  return { ...seo({
     title: `${name} Nakshatra Meaning - Naksharix`,
     description: `Learn ${name} Nakshatra meaning, personality themes, remedies, and how to connect it with Naksharix Kundli and horoscope tools.`,
     path: `/nakshatra/${slug}`,
     keywords: [`${name} Nakshatra`, "Nakshatra Meaning"]
-  });
+  }), robots: { index: false, follow: true } };
 }
 
 export default async function NakshatraPage({ params }: { params: Params }) {

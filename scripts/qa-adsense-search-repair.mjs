@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const read=(x)=>readFileSync(x,"utf8");
+const s=read("app/sitemap.ts"),a=read("app/astrology/[slug]/page.tsx");
+const n=read("app/nakshatra/[slug]/page.tsx"),p=read("app/pujas/[id]/page.tsx");
+const r=read("app/robots.ts"),hi=read("app/hi/page.tsx");
+const years=read("app/yearly-horoscope-2026/page.tsx");
+const guides=read("lib/puja/curated-guides.ts");
+assert.ok(!hi.includes("/hi/daily-horoscope")&&hi.includes("/hi/aaj-ka-rashifal"),"Hindi homepage must link to the real Hindi horoscope route");
+assert.ok(years.includes('permanentRedirect("/yearly-horoscope")')&&s.includes('page.path !== "/yearly-horoscope-2026"'),"Duplicate yearly URLs must consolidate with a permanent redirect and disappear from the sitemap");
+assert.ok(a.includes("permanentRedirect(page.path)")&&!s.includes('seoLandingPages.map('),"Thin SEO doorway routes must redirect to their functional canonical pages");
+assert.ok(n.includes("robots: { index: false, follow: true }")&&!s.includes("nakshatras.map("),"Unreviewed generic Nakshatra detail stubs must not be claimed as original indexable articles");
+assert.ok(p.includes("isCuratedPujaGuide(id)")&&p.includes("curatedGuide.sections.map(")&&s.includes("pujaTopics.filter(p=>isCuratedPujaGuide(p.id))"),"Only individually authored Puja guides should be in sitemap");
+for(const id of ["rudrabhishek","maha-lakshmi-puja","saraswati-puja","satyanarayan-katha","hanuman-puja","ganesh-puja","navagraha-shanti-puja","griha-pravesh-puja","diwali-lakshmi-puja","durga-saptashati-path"])assert.ok(guides.includes('"'+id+'"'),"Missing independently authored guide "+id);
+assert.ok(r.includes('"/astrologer/"')&&r.includes('"/astrologer$"'),"Private astrologer robots rule must not accidentally mask public /astrologers");
+console.log("NAKSHARIX_ADSENSE_CONTENT_AND_CANONICAL_QA=PASS;BROKEN_HINDI_LINK=FIXED;DUPLICATE_ALIASES=308;ORIGINAL_GUIDES=10;PUBLIC_TOOLS_PRESERVED=YES");

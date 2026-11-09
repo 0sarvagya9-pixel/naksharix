@@ -15,7 +15,7 @@ export const metadata: Metadata = seo({
 });
 
 const features = [
-  { title: "दैनिक राशिफल", description: "रोज़ का ज्योतिषीय मार्गदर्शन", href: "/hi/daily-horoscope", icon: Sparkles },
+  { title: "दैनिक राशिफल", description: "रोज़ का ज्योतिषीय मार्गदर्शन", href: "/hi/aaj-ka-rashifal", icon: Sparkles },
   { title: "जन्म कुंडली", description: "ग्रह, लग्न और भाव की जानकारी", href: "/hi/free-kundli", icon: MoonStar },
   { title: "कुंडली मिलान", description: "पारंपरिक गुण मिलान", href: "/matchmaking", icon: HeartHandshake },
   { title: "अंक ज्योतिष", description: "नाम और जन्मतिथि का विश्लेषण", href: "/numerology", icon: Sparkles },

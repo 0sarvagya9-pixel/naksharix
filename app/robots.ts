@@ -61,7 +61,8 @@ export default function robots(): MetadataRoute.Robots {
         "/my-readings",
         "/payment",
         "/report-request",
-        "/astrologer",
+        "/astrologer/",
+        "/astrologer$",
         ...(aiReady ? [] : ["/ai-astrologer"]),
         "/talk-to-kundli",
         "/chatbot"
