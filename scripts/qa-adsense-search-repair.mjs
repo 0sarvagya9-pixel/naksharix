@@ -27,4 +27,8 @@ assert.ok(n.includes("robots: { index: false, follow: true }")&&!s.includes("nak
 assert.ok(p.includes("isCuratedPujaGuide(id)")&&p.includes("curatedGuide.sections.map(")&&s.includes("pujaTopics.filter(p=>isCuratedPujaGuide(p.id))"),"Only individually authored Puja guides should be in sitemap");
 for(const id of ["rudrabhishek","maha-lakshmi-puja","saraswati-puja","satyanarayan-katha","hanuman-puja","ganesh-puja","navagraha-shanti-puja","griha-pravesh-puja","diwali-lakshmi-puja","durga-saptashati-path"])assert.ok(guides.includes('"'+id+'"'),"Missing independently authored guide "+id);
 assert.ok(r.includes('"/astrologer/"')&&r.includes('"/astrologer$"'),"Private astrologer robots rule must not accidentally mask public /astrologers");
+const canonicalAstrologyIndex=read("app/astrology/page.tsx");
+assert.ok(canonicalAstrologyIndex.includes("href={path}") && canonicalAstrologyIndex.includes("page.path") &&
+  !canonicalAstrologyIndex.includes("href={`/astrology/${slug}`}"),
+  "Astrology hub navigation and JSON-LD must link to actual canonical pages, not retired redirect aliases");
 console.log("NAKSHARIX_ADSENSE_CONTENT_AND_CANONICAL_QA=PASS;BROKEN_HINDI_LINK=FIXED;DUPLICATE_ALIASES=308;ORIGINAL_GUIDES=10;PUBLIC_TOOLS_PRESERVED=YES");

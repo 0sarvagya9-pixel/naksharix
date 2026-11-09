@@ -25,7 +25,7 @@ export default function AstrologySeoIndexPage() {
       "@type": "ListItem",
       position: index + 1,
       name: page.keyword,
-      url: `${canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)}/astrology/${page.slug}`
+      url: `${canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)}${page.path}`
     }))
   };
 
@@ -41,8 +41,8 @@ export default function AstrologySeoIndexPage() {
           Explore traditional astrology topics and available Kundli, Horoscope, Numerology, Tarot, Panchang and compatibility tools. Paid features and availability are described on their own pages.
         </p>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {seoLandingPages.map(({ slug, keyword, description, icon: Icon }) => (
-            <Link key={slug} href={`/astrology/${slug}`}>
+          {seoLandingPages.map(({ slug, path, keyword, description, icon: Icon }) => (
+            <Link key={slug} href={path}>
               <Card className="h-full border-[#D4AF37]/20 bg-[#061D3C]/80 transition hover:-translate-y-1 hover:border-[#D4AF37]/55">
                 <CardContent className="p-6">
                   <Icon className="h-6 w-6 text-[#FFD700]" />
