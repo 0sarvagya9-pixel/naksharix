@@ -7,6 +7,8 @@ const r=read("app/robots.ts"),hi=read("app/hi/page.tsx");
 const years=read("app/yearly-horoscope-2026/page.tsx");
 const guides=read("lib/puja/curated-guides.ts");
 assert.ok(!hi.includes("/hi/daily-horoscope")&&hi.includes("/hi/aaj-ka-rashifal"),"Hindi homepage must link to the real Hindi horoscope route");
+assert.ok(read("app/hi/daily-horoscope/page.tsx").includes('permanentRedirect("/hi/aaj-ka-rashifal")'),"Retired Hindi URL must redirect, not return 404");
+assert.ok(read("scripts/ops/check-sitemap-canonicals.mjs").includes("SITEMAP_NOINDEX")&&read("scripts/ops/check-sitemap-canonicals.mjs").includes("CANONICAL_MISMATCH"),"Sitemap scanner must detect indexability regressions");
 assert.ok(years.includes('permanentRedirect("/yearly-horoscope")')&&s.includes('page.path !== "/yearly-horoscope-2026"'),"Duplicate yearly URLs must consolidate with a permanent redirect and disappear from the sitemap");
 assert.ok(a.includes("permanentRedirect(page.path)")&&!s.includes('seoLandingPages.map('),"Thin SEO doorway routes must redirect to their functional canonical pages");
 assert.ok(n.includes("robots: { index: false, follow: true }")&&!s.includes("nakshatras.map("),"Unreviewed generic Nakshatra detail stubs must not be claimed as original indexable articles");

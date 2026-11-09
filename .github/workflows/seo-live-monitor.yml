@@ -8,11 +8,13 @@ on:
     paths:
       - '.github/workflows/seo-live-monitor.yml'
       - 'scripts/ops/check-seo-indexability.mjs'
+      - 'scripts/ops/check-sitemap-canonicals.mjs'
   push:
     branches: [main, complete-production-polish]
     paths:
       - '.github/workflows/seo-live-monitor.yml'
       - 'scripts/ops/check-seo-indexability.mjs'
+      - 'scripts/ops/check-sitemap-canonicals.mjs'
 
 permissions:
   contents: read
@@ -42,6 +44,7 @@ jobs:
         run: |
           node --check scripts/ops/check-seo-indexability.mjs
           node scripts/ops/check-seo-indexability.mjs
+          node scripts/ops/check-sitemap-canonicals.mjs
       - name: Open or resolve a single SEO monitoring incident
         if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
         env:
