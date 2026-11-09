@@ -11,7 +11,7 @@ const formats = [
   { title: "Puja & Traditions", subtitle: "Puja traditions and dates", src: "/approved-gallery/puja-ritual.jpg", href: "/pujas", cta: "View puja services" },
 ];
 
-export function ConsultationGallery() {
+export function ConsultationGallery({ hasAvailableExperts }: { hasAvailableExperts: boolean }) {
   return (
     <section className="nx-consultation-gallery" aria-labelledby="nx-consultation-gallery-heading">
       <div className="nx-a-container">
@@ -21,7 +21,7 @@ export function ConsultationGallery() {
             <h2 id="nx-consultation-gallery-heading">Find the right consultation format</h2>
             <span>Explore consultation options, spiritual guidance and traditional astrology services.</span>
           </div>
-          <Link href="/astrologers">View available profiles <ArrowRight size={15} aria-hidden="true"/></Link>
+          <Link href={hasAvailableExperts ? "/astrologers" : "/ask-astrologer"}>{hasAvailableExperts ? "View available profiles" : "Send a written enquiry"} <ArrowRight size={15} aria-hidden="true"/></Link>
         </div>
         <div className="nx-consultation-gallery-cards">
           {formats.map(({title,subtitle,src,href,cta}) => (
@@ -31,7 +31,9 @@ export function ConsultationGallery() {
                 
                 <h3>{title}</h3>
                 <p>{subtitle}</p>
-                <Link href={href}>{cta} <ArrowRight size={14} aria-hidden="true"/></Link>
+                <Link href={!hasAvailableExperts && href === "/astrologers" ? "/ask-astrologer" : href}>
+                  {!hasAvailableExperts && href === "/astrologers" ? "Written enquiry" : cta} <ArrowRight size={14} aria-hidden="true"/>
+                </Link>
               </div>
             </article>
           ))}

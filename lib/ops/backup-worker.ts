@@ -17,7 +17,7 @@ try {
     timeout:90000, maxBuffer:1024*1024, encoding:'utf8', env:{...process.env,
       PGHOST:url.hostname, PGPORT:url.port||'5432', PGUSER:decodeURIComponent(url.username),
       PGPASSWORD:decodeURIComponent(url.password), PGDATABASE:decodeURIComponent(url.pathname.slice(1)),
-      PGSSLMODE:'require', PGCONNECT_TIMEOUT:'15',
+      PGSSLMODE:'require', PGGSSENCMODE:'disable', PGCONNECT_TIMEOUT:'15',
       PGOPTIONS:'-c default_transaction_read_only=on -c statement_timeout=90000 -c lock_timeout=15000'
     }
   });

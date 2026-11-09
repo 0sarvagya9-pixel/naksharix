@@ -81,6 +81,12 @@ export async function runDailyRecovery() {
     stage='postgres_tools';
     const install=await sandbox.runCommand({cmd:'bash',args:['-lc','dnf install -y postgresql17-server postgresql17 >/tmp/package-install.log 2>&1'],sudo:true,timeoutMs:90000});
     if(install.exitCode!==0)throw new Error('INSTALL_FAILED');
+    // Postgres negotiates TLS after TCP. Vercel Sandbox firewall supports it
+    // when the database hostname is explicitly allowed. Restrict egress
+    // BEFORE passing source credentials to the worker.
+    stage='postgres_network_policy';
+    await sandbox.updateNetworkPolicy({allow:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]});
+    stage='postgres_tools_ready';
     await sandbox.writeFiles([{path:'/tmp/naksh-export.mjs',content:EXPORT_WORKER,mode:0o600},
       {path:'/tmp/naksh-restore.sh',content:RESTORE_WORKER,mode:0o700}]);
     stage='readonly_export';

@@ -48,6 +48,6 @@ export default async function ConsultationPage() {
     caption="Explore ways to connect with an astrologer and find guidance for your questions."
     image="https://upload.wikimedia.org/wikipedia/commons/0/04/Astrologer.jpg" imageAlt="Representative astrology consultation exhibition photograph, by Ravikiran, CC BY-SA 4.0"
     link="/ask-astrologer" linkLabel="Ask a written question" />
-    <ConsultationGallery />
+    <ConsultationGallery hasAvailableExperts={profiles.length > 0} />
     <AstrologersPageContent profiles={profiles} /></>;
 }
