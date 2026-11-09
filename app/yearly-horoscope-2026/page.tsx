@@ -1,8 +1,3 @@
-import type { Metadata } from "next";
-import { HoroscopePageShell } from "@/components/horoscope/horoscope-page-shell";
-import { horoscopePageConfig } from "@/lib/horoscope/constants";
-import { seo } from "@/lib/seo";
-
-const page = horoscopePageConfig["yearly-2026"];
-export const metadata: Metadata = seo({ title: page.metadata.title, description: page.metadata.description, path: page.path, keywords: page.metadata.keywords });
-export default function YearlyHoroscopePage() { return <HoroscopePageShell kind="yearly-2026" />; }
+import { permanentRedirect } from "next/navigation";
+/** A former duplicate of the evergreen yearly horoscope selector. */
+export default function Yearly2026LegacyRedirect() { permanentRedirect("/yearly-horoscope"); }

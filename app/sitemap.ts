@@ -2,10 +2,10 @@ import { MetadataRoute } from "next";
 import { isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { env } from "@/lib/env";
 import { blogCategories, blogPosts } from "@/lib/blog-content";
-import { growthPages, nakshatras } from "@/lib/growth-pages";
+import { growthPages } from "@/lib/growth-pages";
 import { manualReports, shopProducts } from "@/lib/manual-catalogue";
 import { pujaTopics } from "@/lib/puja/service-catalogue";
-import { seoLandingPages } from "@/lib/seo-pages";
+import { isCuratedPujaGuide } from "@/lib/puja/curated-guides";
 import { zodiacSigns } from "@/lib/zodiac";
 import { publishedSeoAlternates } from "@/lib/seo-localization";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
@@ -92,12 +92,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     ...featuredAstrologerRoutes().map((route): SitemapEntry => ({ route, priority: 0.74, frequency: "weekly" })),
     ...zodiacSigns.map((sign): SitemapEntry => ({ route: `/horoscope/${sign.slug}`, priority: 0.82, frequency: "daily" })),
-    ...Object.values(growthPages).map((page): SitemapEntry => ({ route: page.path, priority: 0.88, frequency: "weekly" })),
-    ...nakshatras.map((slug): SitemapEntry => ({ route: `/nakshatra/${slug}`, priority: 0.76, frequency: "monthly" })),
+    // Old year-selector URL now permanently redirects to the canonical yearly page.
+    ...Object.values(growthPages).filter(page => page.path !== "/yearly-horoscope-2026").map((page): SitemapEntry => ({ route: page.path, priority: 0.88, frequency: "weekly" })),
+    // Repetitive Nakshatra stubs remain useful directory destinations but are
+    // excluded from search pending independently authored, specific guides.
     ...manualReports.map((report): SitemapEntry => ({ route: `/reports/${report.slug}`, priority: 0.78, frequency: "weekly" })),
     ...shopProducts.map((p): SitemapEntry => ({ route: `/shop/${p.slug}`, priority: 0.7, frequency: "monthly" })),
-    ...pujaTopics.map((p): SitemapEntry => ({ route: `/pujas/${p.id}`, priority: 0.68, frequency: "monthly" })),
-    ...seoLandingPages.map((page): SitemapEntry => ({ route: `/astrology/${page.slug}`, priority: 0.86, frequency: "weekly" })),
+    ...pujaTopics.filter(p=>isCuratedPujaGuide(p.id)).map((p): SitemapEntry => ({ route: `/pujas/${p.id}`, priority: 0.68, frequency: "monthly" })),
+    // Former thin SEO landing aliases redirect permanently to actual tools and
+    // must not be advertised as separate canonical documents.
     ...blogCategories.map((category): SitemapEntry => ({ route: `/blog/category/${category.slug}`, priority: 0.76, frequency: "weekly" })),
     ...blogPosts.map((post): SitemapEntry => ({ route: `/blog/${post.slug}`, priority: 0.72, frequency: "monthly" }))
   ];

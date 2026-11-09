@@ -8,6 +8,7 @@ import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-pho
 import { ResilientEditorialImage } from "@/components/puja/resilient-editorial-image";
 import { seo } from "@/lib/seo";
 import { getPublishedPujaOffers,displayPujaPrice } from "@/lib/puja/offerings";
+import { getCuratedPujaGuide, isCuratedPujaGuide } from "@/lib/puja/curated-guides";
 
 type Props={params:Promise<{id:string}>};
 export function generateStaticParams() {return pujaTopics.map(p=>({id:p.id}));}
@@ -16,12 +17,14 @@ export const dynamic="force-dynamic";
 export async function generateMetadata({params}:Props):Promise<Metadata>{
   const {id}=await params;const topic=findPujaTopic(id);
   if(!topic)return {title:"Puja topic unavailable",robots:{index:false,follow:false}};
-  return seo({title:topic.name+" | Naksharix Puja Traditions",description:topic.description+". Confirm regional custom and available arrangements separately.",path:"/pujas/"+id,keywords:[topic.name,topic.deity,"Hindu Puja"]});
+  const metadata=seo({title:topic.name+" | Naksharix Puja Traditions",description:topic.description+". Confirm regional custom and available arrangements separately.",path:"/pujas/"+id,keywords:[topic.name,topic.deity,"Hindu Puja"]});
+  return isCuratedPujaGuide(id) ? metadata : {...metadata,robots:{index:false,follow:true}};
 }
 export default async function PujaTopicPage({params}:Props) {
   const {id}=await params;const item=findPujaTopic(id);if(!item)notFound();
   const related=pujaTopics.filter(p=>p.category===item.category&&p.id!==item.id).slice(0,5);
   const offering=(await getPublishedPujaOffers())[item.id];
+  const curatedGuide=getCuratedPujaGuide(item.id);
   return <main className="star-field min-h-screen bg-[#fffaf3] pb-20">
     <div className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
       <Link href="/pujas" className="inline-flex items-center gap-2 text-sm font-bold text-[#8e3442]"><ArrowLeft size={16}/> Puja directory</Link>
@@ -59,6 +62,18 @@ export default async function PujaTopicPage({params}:Props) {
         <p className="text-sm leading-7">Explore festival dates and enquire about your preferred ceremony.</p>
         <Link href="/puja-calendar" className="inline-flex items-center gap-2 font-bold text-[#8e3442]"><CalendarDays size={18}/> Two-year festival calendar</Link>
       </div>
+      {curatedGuide ? <section className="mt-12 space-y-6 rounded-3xl border border-[#dec6a4] bg-white p-6 text-[#402a2d] md:p-9" aria-label="Independent Puja preparation guide">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#8e3442]">Puja preparation and traditions</p>
+        <h2 className="font-cinzel text-3xl font-black">Understanding {item.name}</h2>
+        <p className="text-base leading-8 text-[#5f5054]">{curatedGuide.intro}</p>
+        <div className="grid gap-7 md:grid-cols-2">
+          {curatedGuide.sections.map(section=><article key={section.heading} className="rounded-2xl border border-[#eadbc4] bg-[#fffaf3] p-6">
+            <h3 className="text-xl font-bold text-[#773344]">{section.heading}</h3>
+            <p className="mt-3 leading-8 text-[#5d5057]">{section.text}</p>
+          </article>)}
+        </div>
+        <p className="text-sm leading-7 text-[#6a5960]">Editorial guidance is informative only. Traditions, available providers and materials vary; a preferred date is not a confirmed appointment.</p>
+      </section> : null}
       <section className="mt-12">
         <h2 className="font-cinzel text-2xl font-bold text-[#402a2d]">Related Puja traditions</h2>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

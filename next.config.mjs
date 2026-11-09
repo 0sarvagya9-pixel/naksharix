@@ -19,6 +19,15 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Search Console: use actual HTTP 308, not streamed Next.js HTML meta refresh.
+      { source: "/hi/daily-horoscope", destination: "/hi/aaj-ka-rashifal", permanent: true },
+      { source: "/yearly-horoscope-2026", destination: "/yearly-horoscope", permanent: true },
+      { source: "/astrology/astrology", destination: "/astrology", permanent: true },
+      { source: "/astrology/horoscope", destination: "/horoscope", permanent: true },
+      { source: "/astrology/kundli", destination: "/kundli", permanent: true },
+      { source: "/astrology/numerology", destination: "/numerology", permanent: true },
+      { source: "/astrology/tarot-reading", destination: "/tarot", permanent: true },
+      { source: "/astrology/panchang", destination: "/panchang", permanent: true },
       { source: "/auth/login", destination: "/login", permanent: true },
       { source: "/auth/signup", destination: "/signup", permanent: true },
       { source: "/terms", destination: "/terms-and-conditions", permanent: true },
