@@ -85,7 +85,7 @@ export async function runDailyRecovery() {
     // when the database hostname is explicitly allowed. Restrict egress
     // BEFORE passing source credentials to the worker.
     stage='postgres_network_policy';
-    await sandbox.updateNetworkPolicy({allowDomains:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]});
+    await sandbox.updateNetworkPolicy({allow:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]});
     stage='postgres_tools_ready';
     await sandbox.writeFiles([{path:'/tmp/naksh-export.mjs',content:EXPORT_WORKER,mode:0o600},
       {path:'/tmp/naksh-restore.sh',content:RESTORE_WORKER,mode:0o700}]);

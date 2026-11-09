@@ -15,7 +15,7 @@ for(const category of [
 ]) assert.ok(worker.includes("'"+category+"'"),"Diagnostic enum missing "+category);
 assert.ok(worker.includes("BACKUP_EXPORT_CODE="),"Worker does not provide sanitized diagnostic status");
 assert.ok(worker.includes("PGGSSENCMODE:'disable'"),"Postgres must use TLS instead of unsupported GSSAPI negotiation");
-assert.ok(runner.includes("updateNetworkPolicy({allowDomains:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]})") &&
+assert.ok(runner.includes("updateNetworkPolicy({allow:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]})") &&
   runner.indexOf("updateNetworkPolicy(") < runner.indexOf("BACKUP_DATABASE_URL:"),
   "Sandbox egress must be restricted to expected Neon hostname before source credentials enter");
 assert.ok(!worker.includes("console.error(result.stderr)"),"Never log raw pg_dump errors");
