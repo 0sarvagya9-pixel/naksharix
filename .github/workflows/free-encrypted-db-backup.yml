@@ -2,9 +2,11 @@ name: NAKSHARIX Free Encrypted PostgreSQL Backup
 
 # No plaintext DB backup is ever uploaded. Protected credential and separate
 # public encryption recipient must be configured before first successful run.
+# The independent GitHub export is operator-triggered until GitHub's protected
+# BACKUP_DATABASE_URL and BACKUP_AGE_RECIPIENT are configured. This avoids
+# claiming an encryption backup was attempted when secrets are missing.
+# Actual scheduled encrypted recovery is owned by the production Vercel Cron.
 on:
-  schedule:
-    - cron: '43 2 * * *'
   workflow_dispatch:
 
 permissions:
