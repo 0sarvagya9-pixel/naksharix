@@ -1,176 +1,53 @@
-# Naksharix Mobile App
+# Naksharix Android — Native V2 (Expo SDK 54)
 
-Production Android Play Store setup for the Naksharix mobile app using React Native, Expo, and EAS Build.
+**Status:** Native client source and Android Hermes bundle are being verified. No signed AAB/APK or on-device acceptance is claimed until EAS credentials and device tests pass.
 
-## App Details
+## Native experiences
 
-- App name: Naksharix
-- Android package name: `com.naksharix.app`
-- Expo slug: `naksharix`
-- Version: `1.0.0`
-- Android versionCode: `5`
-- Expo SDK: `54`
-- React Native: `0.81.5`
-- React: `19.1.0`
-- Privacy policy placeholder: `https://naksharix.com/privacy`
-- Production API URL: `https://naksharix.com`
-- Expo config schema: SDK 54 compatible, no deprecated `privacy` field
+- Five-tab Android navigation: Home, Rashifal, Panchang, Explore, Account; system Back support and accessible touch targets.
+- Horoscope: 12 zodiac signs with daily, weekly, monthly and 2026 yearly content from validated read-only `/api/mobile/horoscope`.
+- Panchang: six Indian city presets, change date and get real server-calculated tithi, nakshatra, sunrise/sunset and timings via `/api/panchang`. No location permission requested.
+- Explore: authoritative published Shop/Puja/Report catalogue via `/api/mobile/catalogue` and festival dates from `/api/puja/calendar`; no invented product availability or confirmed ceremonies.
+- Numerology: birth number and life-path calculation fully offline. Input is never transmitted or stored.
+- Secure login, customer dashboard, reports and checkout open HTTPS `www.naksharix.com` in the platform browser. Never store login tokens or payment credentials locally.
 
-## Files
+## Supported build / smoke checks
 
-- `app.json`: Expo app identity, Android package, icons, splash screen, permissions, and Play Store metadata.
-- `eas.json`: EAS build profiles. Android profiles use the Expo SDK 54 build image, and the `production` profile uses `android.buildType: "app-bundle"` for Play Store AAB output.
-- `.env.example`: Optional public runtime values for API, Razorpay placeholder key, and AdSense placeholder ID.
-- `assets/`: Play Store ready icon, adaptive icon, favicon, and splash placeholders.
-
-## Install
-
-```bash
+```
 cd mobile-app
-npm install
-npm run expo:fix
+npm ci
+npm run qa:native
+npx expo export --platform android --output-dir ../.tmp-android-export
+# Production Play Store bundle (requires authorized Expo EAS account):
+npx eas-cli build -p android --profile production --non-interactive
 ```
 
-## Local Preview
+Server-side contracts run from the repository root:
 
-```bash
-npm run start
-npm run android
+```
+node scripts/qa-mobile-public-apis.mjs
+node scripts/qa-mobile-native-v2.mjs
+node scripts/qa-mobile-native.mjs
 ```
 
-## Production AAB Build
+## Identity, privacy and release gates
 
-Log in and initialize EAS once per Expo account/project:
+- Expo project: `0cadd797-361c-44a4-8b19-8cd15c9f3f44`; package: `com.naksharix.app`.
+- Application version `1.1.0`, Android versionCode `7`. Production profile creates an Android App Bundle (AAB); preview profile creates an internal APK.
+- No unnecessary photo, camera, background location, media or push-notification permissions.
+- Public data endpoints use GET, input validation, rate limits and no-store. On outage screens fail closed with a retry control.
+- APK/AAB signing, Google Play upload, device login, purchases and notification/permission checks need real-device/connected EAS acceptance. Mobile code cannot make Google AdSense approval or database backup verification succeed.
+- Digital purchases, if later sold inside a Play Store Android app, need a separate Google Play Billing policy review. Current app does not collect native payments.
 
-```bash
-cd mobile-app
-npm install
-npm run expo:fix
-npx eas-cli login
-npx eas-cli init
-```
+Google Play Payments gate: Digital report listings are informational only. There is no direct external checkout CTA on report cards or their category footer. A future purchase feature needs an approved Play Billing or other legally permitted alternative flow. Physical goods and outside-app services use their distinct policy treatment.
 
-Then generate the Play Store AAB with the exact production command:
+## GitHub Actions internal APK
 
-```bash
-eas build -p android --profile production
-```
+`NAKSHARIX Android Native Build` compiles Expo JS/Hermes and attempts a Gradle `assembleRelease` internal test APK (prebuild template DEBUG key). Download the resulting internal QA APK from that workflow's **Artifacts** section. This is an installable internal test artifact, **not** the Google Play production-signed bundle. Store release builds still require the authorized EAS/Play signing credentials and owner device QA.
 
-The `production` profile is configured with:
+## Website + Android shared user account (V2.1)
+Use Connect my website account from the Android Account tab; the phone opens the existing Google/password login on the secure www.naksharix.com website. Approve the one-time pairing on that signed-in browser page. The Android client gets a separate seven-day, mobile-scoped, revocable session token stored in Expo SecureStore; passwords and browser/Google cookies never enter the app.
 
-```json
-"android": {
-  "buildType": "app-bundle"
-}
-```
+The native Account tab reads the same user ID's profile, saved Kundli, report requests, purchases, orders, Puja bookings, consultations, appointments and payments from the website's existing database. Older records are paginated. Name/language edits update the same website user record. No email-only guest record claim, native payments or customer data replication.
 
-## Environment Variables
-
-Copy `.env.example` to `.env` for local mobile development:
-
-```bash
-cp .env.example .env
-```
-
-Required for production API routing:
-
-```bash
-EXPO_PUBLIC_API_URL=https://naksharix.com
-EXPO_PUBLIC_PRIVACY_POLICY_URL=https://naksharix.com/privacy
-```
-
-Optional future activation variables are intentionally not included as empty values in `eas.json`, because EAS rejects empty env values in build profiles. Keep them in local `.env` only when testing, or create EAS secrets later when you have real/test IDs:
-
-```bash
-EXPO_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
-EXPO_PUBLIC_GOOGLE_ADSENSE_ID=ca-pub-xxxxxxxxxxxxxxxx
-```
-
-If these variables are missing, the app falls back safely: payment buttons remain visible but disabled with `Payments are coming soon`, ads are hidden, and the production AAB build still works.
-
-## Razorpay Activation Later
-
-1. Create or open your Razorpay account.
-2. Use test keys first.
-3. Add the public key to mobile env or EAS secrets:
-
-```bash
-EXPO_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
-```
-
-4. Add server-side Razorpay secrets only in the Naksharix web/API deployment, not inside the mobile app:
-
-```bash
-RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
-RAZORPAY_KEY_SECRET=your_server_secret
-RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
-```
-
-5. Add server keys in Vercel under Project Settings > Environment Variables.
-6. Rebuild the mobile app with:
-
-```bash
-eas build -p android --profile production
-```
-
-Until `EXPO_PUBLIC_RAZORPAY_KEY_ID` is set, payment buttons stay visible but disabled with: `Payments are coming soon`.
-
-## Google AdSense Placeholder Activation Later
-
-The app includes a reusable placeholder component that renders nothing unless an ID exists. For native mobile monetization, Google AdMob is usually the production choice; this placeholder is kept for future webview/PWA/approved ad integration alignment.
-
-To enable the placeholder later:
-
-```bash
-EXPO_PUBLIC_GOOGLE_ADSENSE_ID=ca-pub-xxxxxxxxxxxxxxxx
-```
-
-Add the value in EAS project environment variables or your local `.env`. Do not add it as an empty string in `eas.json`. If it is missing, ads are hidden and builds continue normally.
-
-## EAS Environment Variables
-
-You can add mobile env values in the Expo/EAS dashboard or with CLI secrets after you have real/test values. Do not create empty EAS secrets and do not put empty optional monetization keys in `eas.json`:
-
-```bash
-eas secret:create --scope project --name EXPO_PUBLIC_API_URL --value https://naksharix.com
-eas secret:create --scope project --name EXPO_PUBLIC_RAZORPAY_KEY_ID --value rzp_test_xxxxxxxxxxxxx
-eas secret:create --scope project --name EXPO_PUBLIC_GOOGLE_ADSENSE_ID --value ca-pub-xxxxxxxxxxxxxxxx
-```
-
-Do not put private API keys, Gemini keys, Razorpay secret keys, or database URLs in the mobile app. Keep those on the Naksharix backend/Vercel environment only.
-
-## Dependency Alignment Notes
-
-This project is aligned to Expo SDK 54, React Native 0.81.5, React 19.1.0, and Expo-managed native modules. It intentionally does not pin `expo-modules-core` directly. Expo installs the compatible `expo-modules-core`, Android Gradle plugin, and autolinking packages for the selected SDK.
-
-If EAS reports Gradle errors from `expo-modules-core`, run:
-
-```bash
-npm install
-npm run expo:fix
-npx expo-doctor
-npx tsc --noEmit
-eas build -p android --profile production
-```
-
-Do not add a manual `expo-modules-core` version unless Expo support specifically asks for it.
-
-## EAS Cloud Gradle Compatibility
-
-The Android production profile pins the EAS build image to `sdk-54`. Keep this in place for Expo SDK 54 so EAS cloud uses the matching Android Gradle plugin, Gradle, React Native, and Expo Modules toolchain.
-
-On Windows, `eas build:inspect -s pre-build` can stop with `Android builds are supported only on Linux and macOS` because that command uses the local build plugin. That is a local inspection limitation, not the cloud Gradle failure. Use the cloud build command for the real Play Store AAB build:
-
-```bash
-eas build -p android --profile production
-```
-## Play Store Checklist
-
-- Replace placeholder privacy policy page with a complete production privacy policy.
-- Upload real brand icon and splash assets if the generated placeholders are not final.
-- Run `npm run expo:fix`, `npx expo-doctor`, and `npx tsc --noEmit` before release.
-- Run `eas build -p android --profile production`.
-- Download the generated `.aab` from Expo.
-- Upload the `.aab` to Play Console internal testing first.
-- Confirm package name remains `com.naksharix.app`; it cannot be changed after Play Store release.
-
+Production release acceptance must cover a real Google/password pairing, relaunch, cross-device profile/history sync, logout/revoke and Android real-device testing. Source-only tests do not prove those steps. Android app version 1.2.0, versionCode 8.

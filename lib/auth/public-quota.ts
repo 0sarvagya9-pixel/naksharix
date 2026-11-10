@@ -8,7 +8,8 @@ import { env } from "@/lib/env";
 export type AuthQuotaScope =
   | "signup-ip" | "login-ip"
   | "otp-request-ip" | "otp-request-destination"
-  | "otp-verify-ip" | "otp-verify-destination";
+  | "otp-verify-ip" | "otp-verify-destination"
+  | "mobile-link-start-ip" | "mobile-link-poll-ip" | "mobile-profile-update-ip";
 
 export function trustedPublicClientIp(request: Request): string {
   // Prefer Vercel's trusted forwarded copy in production. The normal proxy
