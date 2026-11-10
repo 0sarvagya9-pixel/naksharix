@@ -26,7 +26,8 @@ assert.ok(panchang.includes('getPublicData<{panchang:Panchang}>')&&
   panchang.includes("No device location permission"),
   "Native Panchang must use validated existing API and location-specific data");
 assert.ok(explore.includes('getPublicData<MobileCatalogue>')&&
-  explore.includes('getPublicData<CalendarItem[]>')&&
+  explore.includes('getPublicData<CalendarFeed>')&&
+  explore.includes("items.events.filter(")&&explore.includes("items.bookingAvailable!==false")&&
   explore.includes("priceLabel")&&explore.includes("bookingConfirmed"),
   "Catalogues and festival dates must load authoritative public feeds without claiming fulfilment");
 assert.ok(number.includes("Nothing you enter is transmitted or saved.")&&

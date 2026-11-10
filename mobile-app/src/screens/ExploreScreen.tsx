@@ -9,6 +9,7 @@ type CatalogItem={id:string;title:string;category:string;subtitle:string;pricePa
 type MobileCatalogue={shop:CatalogItem[];pujas:CatalogItem[];reports:CatalogItem[];
   meta:{disclaimer:string;checkout:string;shopStorageReady:boolean}};
 type CalendarItem={id:string;date:string;name:string;bookingStatus:"information_only"};
+type CalendarFeed={events:CalendarItem[];bookingAvailable:false;countryReference:string;note:string};
 const tabs:ReadonlyArray<{id:Mode,label:string,icon:string}>=[
   {id:"shop",label:"Shop",icon:"◈"},
   {id:"pujas",label:"Puja",icon:"✦"},
@@ -53,11 +54,11 @@ export function ExploreScreen(){
     if(mode!=="calendar")return;
     const controller=new AbortController();
     setCalendarLoading(true);setCalendarError("");
-    getPublicData<CalendarItem[]>("/api/puja/calendar",controller.signal)
+    getPublicData<CalendarFeed>("/api/puja/calendar",controller.signal)
       .then(items=>{
         if(controller.signal.aborted)return;
-        if(!Array.isArray(items))throw Error("Calendar response is invalid");
-        setCalendar(items.filter(item=>typeof item.date==="string"&&item.date>=todayIST())
+        if(!items||!Array.isArray(items.events)||items.bookingAvailable!==false)throw Error("Calendar response is invalid");
+        setCalendar(items.events.filter(item=>typeof item.date==="string"&&item.date>=todayIST())
           .sort((a,b)=>a.date.localeCompare(b.date)).slice(0,32));
         setCalendarLoading(false);
       })
