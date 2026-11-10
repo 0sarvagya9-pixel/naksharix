@@ -19,7 +19,11 @@ const csrfExemptApiPrefixes = [
   "/api/auth/csrf",
   "/api/auth/providers",
   "/api/auth/error",
-  "/api/auth/verify-request"
+  "/api/auth/verify-request",
+  "/api/mobile/auth/start",
+  "/api/mobile/auth/poll",
+  "/api/mobile/auth/logout",
+  "/api/mobile/account"
 ];
 
 function getLegacyAuthCookieName() {
