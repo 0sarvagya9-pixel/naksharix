@@ -1,0 +1,41 @@
+import { StyleSheet } from "react-native";
+
+export const colors = {
+  background: "#FAF6EF",
+  ink: "#34232E",
+  muted: "#6C5D65",
+  burgundy: "#71344B",
+  burgundyDeep: "#4A2239",
+  gold: "#C49A54",
+  softGold: "#F6E8CA",
+  surface: "#FFFDF9",
+  border: "#EADCC9",
+  soft: "#F4EEE5",
+  success: "#526D53",
+  error: "#9E3E49",
+  white: "#FFFFFF",
+} as const;
+
+export const sharedStyles = StyleSheet.create({
+  scroll: { flexGrow: 1, paddingHorizontal: 19, paddingTop: 18, paddingBottom: 34, gap: 16 },
+  eyebrow: { color: colors.burgundy, fontSize: 11, letterSpacing: 2, fontWeight: "800" },
+  title: { color: colors.ink, fontSize: 30, lineHeight: 37, fontWeight: "900" },
+  subtitle: { color: colors.muted, fontSize: 14, lineHeight: 22 },
+  sectionTitle: { color: colors.ink, fontSize: 20, fontWeight: "800" },
+  card: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 20, padding: 18, gap: 10 },
+  cardTitle: { fontWeight: "800", color: colors.ink, fontSize: 16, lineHeight: 23 },
+  cardText: { color: colors.muted, fontSize: 13, lineHeight: 21 },
+  pill: { borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
+    paddingHorizontal: 13, paddingVertical: 10, minHeight: 44, justifyContent: "center" },
+  pillSelected: { backgroundColor: colors.burgundy, borderColor: colors.burgundy },
+  pillText: { color: colors.ink, fontSize: 13, fontWeight: "700" },
+  pillTextSelected: { color: colors.white },
+  button: { minHeight: 48, borderRadius: 13, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: colors.burgundy,
+    justifyContent: "center", alignItems: "center" },
+  buttonText: { color: colors.white, fontSize: 14, fontWeight: "800" },
+  mutedButton: { minHeight: 44, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11,
+    borderWidth: 1, borderColor: colors.border, justifyContent: "center", alignItems: "center", backgroundColor: colors.surface },
+  mutedButtonText: { color: colors.burgundy, fontSize: 13, fontWeight: "700" },
+  disclaimer: { borderRadius: 14, padding: 14, borderColor: colors.border, borderWidth: 1,
+    backgroundColor: colors.soft, color: colors.muted, fontSize: 12, lineHeight: 19 },
+});
