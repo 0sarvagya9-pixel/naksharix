@@ -38,3 +38,5 @@ node scripts/qa-mobile-native.mjs
 - Public data endpoints use GET, input validation, rate limits and no-store. On outage screens fail closed with a retry control.
 - APK/AAB signing, Google Play upload, device login, purchases and notification/permission checks need real-device/connected EAS acceptance. Mobile code cannot make Google AdSense approval or database backup verification succeed.
 - Digital purchases, if later sold inside a Play Store Android app, need a separate Google Play Billing policy review. Current app does not collect native payments.
+
+Google Play Payments gate: Digital report listings are informational only. There is no direct external checkout CTA on report cards or their category footer. A future purchase feature needs an approved Play Billing or other legally permitted alternative flow. Physical goods and outside-app services use their distinct policy treatment.

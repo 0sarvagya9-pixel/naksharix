@@ -72,7 +72,7 @@ export function ExploreScreen(){
     keyboardShouldPersistTaps="handled">
     <Text style={S.eyebrow}>HANDPICKED EXPERIENCES</Text>
     <Text style={S.title}>Explore Naksharix</Text>
-    <Text style={S.subtitle}>Browse published information in the app. Bookings, purchase and private reports use the protected website.</Text>
+    <Text style={S.subtitle}>Browse published spiritual offerings. Digital report purchases are not available inside this Android app.</Text>
     <View style={styles.navRow}>
       {tabs.map(tab=><Pressable key={tab.id} accessibilityRole="button"
         accessibilityState={{selected:mode===tab.id}} style={[styles.navItem,mode===tab.id&&styles.active]}
@@ -117,17 +117,19 @@ export function ExploreScreen(){
         <Text style={S.cardText}>{item.subtitle}</Text>
         <View style={styles.itemFoot}>
           <Text style={styles.price}>{priceLabel(item.pricePaise)}</Text>
-          <Pressable accessibilityRole="link" accessibilityLabel={"View "+item.title}
+          {mode!=="reports"?<Pressable accessibilityRole="link" accessibilityLabel={"View "+item.title}
             style={styles.detailButton} onPress={()=>openWebsite(item.path)}>
             <Text style={styles.detailText}>View details  ↗</Text>
-          </Pressable>
+          </Pressable>:<Text style={styles.reportPolicy}>Information only</Text>}
         </View>
         {mode==="pujas"?<Text style={styles.note}>Priest and date availability are not confirmed.</Text>:null}
       </View>):<View style={S.card}><Text style={S.cardText}>No matching published items. Try another search.</Text></View>}
-      <Pressable style={S.mutedButton} accessibilityRole="link"
-        onPress={()=>openWebsite(mode==="shop"?"/shop":mode==="pujas"?"/pujas":"/reports")}>
+      {mode!=="reports"?<Pressable style={S.mutedButton} accessibilityRole="link"
+        onPress={()=>openWebsite(mode==="shop"?"/shop":"/pujas")}>
         <Text style={S.mutedButtonText}>Open full {mode} catalogue  ↗</Text>
-      </Pressable>
+      </Pressable>:<Text style={S.disclaimer}>
+        Digital report checkout is not offered in this Google Play application. This list is informational.
+      </Text>}
     </View>}
     <Text style={S.disclaimer}>Prices are listings, not proof of physical stock, expert availability or fulfilled services. No in-app payment or background purchase is performed.</Text>
   </ScrollView>;
@@ -153,6 +155,7 @@ const styles=StyleSheet.create({
   detailButton:{backgroundColor:colors.burgundy,paddingHorizontal:12,paddingVertical:11,borderRadius:10,
     minHeight:44,justifyContent:"center"},
   detailText:{color:colors.white,fontSize:12,fontWeight:"800"},
+  reportPolicy:{color:colors.muted,fontSize:11,fontWeight:"800",maxWidth:100,textAlign:"right"},
   note:{color:colors.muted,fontSize:11,fontStyle:"italic"},
   event:{flexDirection:"row",alignItems:"center",gap:14,borderWidth:1,borderColor:colors.border,
     backgroundColor:colors.surface,borderRadius:17,padding:14},

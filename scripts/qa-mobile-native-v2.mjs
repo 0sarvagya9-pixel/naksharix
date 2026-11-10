@@ -30,6 +30,10 @@ assert.ok(explore.includes('getPublicData<MobileCatalogue>')&&
   explore.includes("items.events.filter(")&&explore.includes("items.bookingAvailable!==false")&&
   explore.includes("priceLabel")&&explore.includes("bookingConfirmed"),
   "Catalogues and festival dates must load authoritative public feeds without claiming fulfilment");
+assert.ok(explore.includes('mode!=="reports"?<Pressable') &&
+  explore.includes('Digital report checkout is not offered') &&
+  explore.includes('mode!=="reports"?<Pressable style={S.mutedButton}'),
+  "Android must not steer digital report users to external checkout instead of Play Billing");
 assert.ok(number.includes("Nothing you enter is transmitted or saved.")&&
   !/fetch\(|secureFetch\(|axios|AsyncStorage/.test(number),
   "Offline numerology must never transmit birth data");

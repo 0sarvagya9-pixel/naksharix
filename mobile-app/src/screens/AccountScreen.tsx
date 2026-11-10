@@ -19,7 +19,7 @@ export function AccountScreen(){
   return <ScrollView contentContainerStyle={S.scroll}>
     <Text style={S.eyebrow}>ACCOUNT & SAFETY</Text>
     <Text style={S.title}>Your Naksharix</Text>
-    <Text style={S.subtitle}>Login, paid services and private reports stay within the official secure account system.</Text>
+    <Text style={S.subtitle}>Your profile and previously saved reports are accessible through the official secure account system. There are no in-app digital purchases.</Text>
     <View style={styles.hero}>
       <Text style={styles.heroTitle}>Secure account access</Text>
       <Text style={styles.heroText}>Sign-in happens in your browser. Passwords and authentication tokens are never collected or stored by this native app.</Text>
