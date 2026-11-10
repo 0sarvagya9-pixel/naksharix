@@ -38,8 +38,16 @@ const workflow = read(".github/workflows/free-public-uptime.yml");
 const backup = read(".github/workflows/free-encrypted-db-backup.yml");
 for(const required of ["schedule:","workflow_dispatch:","issues: write","gh issue create","gh issue close","check-public-endpoints.mjs"])
   assert.ok(workflow.includes(required), "Monitor missing: "+required);
-for(const required of ["schedule:","workflow_dispatch:","secrets.BACKUP_DATABASE_URL","vars.BACKUP_AGE_RECIPIENT","postgres:17-alpine","age -r","retention-days: 7","if-no-files-found: error","set -euo pipefail"])
-  assert.ok(backup.includes(required),"Encrypted-backup guard missing: "+required);
+// The independent GitHub age export must fail closed without its protected
+// inputs, and must not run on a schedule until those inputs exist.
+for(const required of ["workflow_dispatch:","secrets.BACKUP_DATABASE_URL","vars.BACKUP_AGE_RECIPIENT","postgres:17-alpine","age -r","retention-days: 7","if-no-files-found: error","set -euo pipefail"])
+  assert.ok(backup.includes(required),"Manual encrypted-backup guard missing: "+required);
+assert.ok(!backup.includes("  schedule:"),"Unconfigured independent encrypted export must not run on a schedule");
+// GitHub's default-branch job now checks an actual encrypted, private
+// clean-room recovery receipt and reuses the existing backup incident.
+const recoveryWatch=read(".github/workflows/encrypted-recovery-watch.yml");
+for(const required of ["schedule:","cron: '17 6 * * *'","workflow_dispatch:","issues: write","check-encrypted-recovery.mjs","gh issue create","gh issue close"])
+  assert.ok(recoveryWatch.includes(required),"Encrypted-recovery watcher missing: "+required);
 assert.ok(backup.includes("encrypted-backup/*.dump.age") && !backup.includes("encrypted-backup/*.dump\n"),
   "Only ciphertext may be uploaded");
 assert.ok(!backup.includes("actions/cache"),"No production database caching");
