@@ -11,9 +11,19 @@ assert.ok(worker.includes("process.umask(0o077)") &&
 for(const category of [
   "CONNECTION_URL", "HOST_MISMATCH", "CLIENT_MISSING",
   "AUTH", "PERMISSION", "DNS", "NETWORK", "VERSION",
-  "PG_OPTIONS", "PG_DUMP", "ARCHIVE_FILE", "ARCHIVE_SIZE"
+  "PG_OPTIONS", "PG_DUMP", "ARCHIVE_FILE", "ARCHIVE_SIZE", "TLS", "LOCK_TIMEOUT", "QUERY_TIMEOUT", "CLIENT_TIMEOUT", "CONNECT_PROBE", "READONLY_GUARD"
 ]) assert.ok(worker.includes("'"+category+"'"),"Diagnostic enum missing "+category);
 assert.ok(worker.includes("BACKUP_EXPORT_CODE="),"Worker does not provide sanitized diagnostic status");
+assert.ok(worker.includes("SELECT current_setting('transaction_read_only')") &&
+  worker.includes("String(probe.stdout || '').trim()!=='on'") &&
+  worker.includes("PGGSSENCMODE:'disable'"),
+  "Neon export must prove a read-only TLS connection before pg_dump");
+assert.ok(worker.includes("for (let attempt=0; attempt<2; attempt++)") &&
+  worker.includes("'NETWORK','DNS','CLIENT_TIMEOUT'") &&
+  worker.includes("timeout:110000"),
+  "Transient source-connect retries are bounded and archive export has an explicit deadline");
+assert.ok(runner.includes("timeoutMs:155000") && runner.includes("timeout:285000"),
+  "Sandbox and worker deadlines must permit bounded cold-start retry");
 assert.ok(worker.includes("PGGSSENCMODE:'disable'"),"Postgres must use TLS instead of unsupported GSSAPI negotiation");
 assert.ok(runner.includes("updateNetworkPolicy({allow:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]})") &&
   runner.indexOf("updateNetworkPolicy(") < runner.indexOf("BACKUP_DATABASE_URL:"),
