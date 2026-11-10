@@ -1,0 +1,105 @@
+name: NAKSHARIX Android Native Build
+
+on:
+  pull_request:
+    paths:
+      - "mobile-app/**"
+      - "app/api/mobile/**"
+      - "scripts/qa-mobile-*.mjs"
+      - ".github/workflows/android-native-build.yml"
+  push:
+    branches: [complete-production-polish]
+    paths:
+      - "mobile-app/**"
+      - "app/api/mobile/**"
+      - "scripts/qa-mobile-*.mjs"
+      - ".github/workflows/android-native-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: naksharix-android-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-source-and-hermes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install repository QA dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Validate private data boundaries and mobile contracts
+        run: |
+          node scripts/qa-mobile-public-apis.mjs
+          node scripts/qa-mobile-native.mjs
+          node scripts/qa-mobile-native-v2.mjs
+      - name: Install native app dependencies
+        working-directory: mobile-app
+        run: npm ci --no-audit --no-fund
+      - name: Strict native TypeScript check
+        working-directory: mobile-app
+        run: npm run qa:native
+      - name: Export standalone Android Hermes JS bundle
+        working-directory: mobile-app
+        env:
+          EXPO_PUBLIC_API_URL: https://www.naksharix.com
+        run: |
+          npx expo export --platform android --output-dir android-bundle
+          test -s android-bundle/metadata.json
+          find android-bundle/_expo/static/js/android -name '*.hbc' -size +300k | grep -q .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naksharix-android-v2-hermes-bundle
+          path: mobile-app/android-bundle/
+          retention-days: 7
+          if-no-files-found: error
+
+  android-internal-apk:
+    needs: native-source-and-hermes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CI: "1"
+      EXPO_PUBLIC_API_URL: https://www.naksharix.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mobile-app/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Install required Android SDK
+        run: sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
+      - name: Install native dependencies
+        working-directory: mobile-app
+        run: npm ci --no-audit --no-fund
+      - name: Generate Expo Android native project
+        working-directory: mobile-app
+        run: npx expo prebuild --platform android --clean --no-install
+      - name: Build release-mode APK for INTERNAL TESTING ONLY
+        working-directory: mobile-app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleRelease -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=1g"
+          test -s app/build/outputs/apk/release/app-release.apk
+          sha256sum app/build/outputs/apk/release/app-release.apk
+      # The Expo prebuild template signs this internal testing APK with its DEBUG key.
+      # Never distribute as a Play Store signed production artifact.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naksharix-android-v2-INTERNAL-TESTING-APK
+          path: mobile-app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 7
+          if-no-files-found: error

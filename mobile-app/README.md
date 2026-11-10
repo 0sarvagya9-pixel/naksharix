@@ -40,3 +40,7 @@ node scripts/qa-mobile-native.mjs
 - Digital purchases, if later sold inside a Play Store Android app, need a separate Google Play Billing policy review. Current app does not collect native payments.
 
 Google Play Payments gate: Digital report listings are informational only. There is no direct external checkout CTA on report cards or their category footer. A future purchase feature needs an approved Play Billing or other legally permitted alternative flow. Physical goods and outside-app services use their distinct policy treatment.
+
+## GitHub Actions internal APK
+
+`NAKSHARIX Android Native Build` compiles Expo JS/Hermes and attempts a Gradle `assembleRelease` internal test APK (prebuild template DEBUG key). Download the resulting internal QA APK from that workflow's **Artifacts** section. This is an installable internal test artifact, **not** the Google Play production-signed bundle. Store release builds still require the authorized EAS/Play signing credentials and owner device QA.

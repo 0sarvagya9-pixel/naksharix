@@ -43,4 +43,16 @@ assert.ok(account.includes('open("/login")')&&
 assert.ok(api.includes("AbortController")&&api.includes('method:"GET"')&&
   api.includes('cache:"no-store"')&&env.includes('url.startsWith("https://")'),
   "Native API client must stay GET-only and HTTPS");
+const workflow=read(".github/workflows/android-native-build.yml");
+const config=JSON.parse(read("mobile-app/app.json"));
+assert.equal(config.expo.android.versionCode,7);
+assert.equal(config.expo.version,"1.1.0");
+assert.ok(!config.expo.android.permissions.includes("POST_NOTIFICATIONS"),"No unused notification permission");
+assert.ok(workflow.includes("assembleRelease") &&
+  workflow.includes("npx expo prebuild --platform android --clean --no-install") &&
+  workflow.includes("upload-artifact@v4") &&
+  workflow.includes("app-release.apk") &&
+  workflow.includes("npx expo export --platform android") &&
+  workflow.includes("npm run qa:native"),
+  "CI must build a standalone internal APK and independently validate the Hermes native bundle");
 console.log("NAKSHARIX_NATIVE_ANDROID_V2_CONTRACT=PASS;FIVE_TABS=YES;SERVER_READONLY=YES;OFFLINE_NUMEROLOGY=PASS;INAPP_PAYMENTS=NO");
