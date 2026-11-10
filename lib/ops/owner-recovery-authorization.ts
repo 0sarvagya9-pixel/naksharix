@@ -1,13 +1,18 @@
 import "server-only";
+import { prisma } from "@/lib/db";
 
-/** Only the SUPER_ADMIN or the configured owner mailbox's admin may manually
- * run a resource-intensive production encrypted recovery.
+/** A verified owner login may trigger only the existing protected, idempotent
+ * encrypted backup; ordinary users, staff and extra admins cannot.
+ * If exactly one ADMIN exists (the initial owner), allow that account even
+ * when the separate notification mailbox differs from the login email.
  */
-export function isOwnerRecoveryOperator(
+export async function isOwnerRecoveryOperator(
   user: {role: string; email: string | null} | null | undefined
-): boolean {
-  if (!user || !["ADMIN", "SUPER_ADMIN"].includes(user.role)) return false;
+):Promise<boolean> {
+  if (!user || !["ADMIN","SUPER_ADMIN"].includes(user.role)) return false;
   if (user.role === "SUPER_ADMIN") return true;
   const owner = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-  return Boolean(owner && user.email?.trim().toLowerCase() === owner);
+  if(owner && user.email?.trim().toLowerCase() === owner) return true;
+  const admins=await prisma.user.count({where:{role:{in:["ADMIN","SUPER_ADMIN"]}}});
+  return admins===1;
 }

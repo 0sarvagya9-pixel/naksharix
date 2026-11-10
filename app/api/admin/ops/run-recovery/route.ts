@@ -18,7 +18,7 @@ const TARGET_TYPE="EncryptedRecovery";
 export async function POST(request:Request) {
   try {
     const admin=await getAdminApiUser();
-    if(!isOwnerRecoveryOperator(admin))return fail("Not found",404);
+    if(!(await isOwnerRecoveryOperator(admin)))return fail("Not found",404);
     // Middleware also enforces x-csrf-token == strict same-site CSRF cookie.
     // Deny missing or cross-origin requests even if an auth cookie is present.
     if(request.headers.get("origin") !== new URL(request.url).origin)

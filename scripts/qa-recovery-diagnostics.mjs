@@ -68,8 +68,8 @@ const ownerPage=source("app/admin/operations/page.tsx");
 const control=source("components/admin/manual-encrypted-recovery-control.tsx");
 const ownerGate=source("lib/ops/owner-recovery-authorization.ts");
 assert.ok(ownerRoute.includes("getAdminApiUser()")&&
-  ownerRoute.includes("isOwnerRecoveryOperator(admin)")&&
-  ownerRoute.indexOf("isOwnerRecoveryOperator(admin)")<ownerRoute.indexOf("await runDailyRecovery()"),
+  ownerRoute.includes("await isOwnerRecoveryOperator(admin)")&&
+  ownerRoute.indexOf("await isOwnerRecoveryOperator(admin)")<ownerRoute.indexOf("await runDailyRecovery()"),
   "Manual recovery requires current owner identity BEFORE source access");
 assert.ok(ownerRoute.includes('z.literal("RUN_VERIFIED_RECOVERY")') &&
   ownerRoute.includes('request.headers.get("origin") !== new URL(request.url).origin') &&
@@ -85,12 +85,13 @@ assert.ok(ownerRoute.includes("await recoveryHealth()")&&
   ownerRoute.includes("proof.encrypted!==true"),
   "Manual recovery cannot claim success without fresh independent restore");
 assert.ok(ownerGate.includes('user.role === "SUPER_ADMIN"')&&
-  ownerGate.includes("process.env.ADMIN_EMAIL"),
+  ownerGate.includes("process.env.ADMIN_EMAIL") &&
+  ownerGate.includes("admins===1") && ownerGate.includes("prisma.user.count"),
   "Run privilege restricted to SUPER_ADMIN or the configured owner mailbox");
 assert.ok(control.includes('secureFetch("/api/admin/ops/run-recovery"')&&
   control.includes('"/api/ops/backup-status"')&&
   control.includes("RUN_VERIFIED_RECOVERY")&&
-  ownerPage.includes("isOwnerRecoveryOperator(admin)"),
+  ownerPage.includes("ownerAccess ? <ManualEncryptedRecoveryControl"),
   "Owner-only control must use protected CSRF request and independently check verification state");
 
 console.log("BACKUP_CRON_REGISTERED=PASS;BACKUP_DIAGNOSTIC_QA=PASS;NO_RAW_SECRET_LOGGING=PASS;READONLY_PRODUCTION=PASS;RESTORE_GUARD_PRESERVED=PASS");
