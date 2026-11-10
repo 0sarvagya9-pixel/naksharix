@@ -77,7 +77,10 @@ export async function runDailyRecovery() {
     access:'private',addRandomSuffix:false,allowOverwrite:false,contentType:'application/json'});
   let sandbox:Sandbox|null=null;let stage='sandbox_start';
   try {
-    sandbox=await Sandbox.create({runtime:'node22',timeout:285000,resources:{vcpus:1},persistent:false,region:'bom1'});
+    // Same-region egress: the Neon production database lives in AWS us-east-1.
+    // US-East iad1 Sandbox with explicit Neon-only egress was tested to reach
+    // PostgreSQL TLS/auth handshake; never allow arbitrary outbound hosts.
+    sandbox=await Sandbox.create({runtime:'node22',timeout:285000,resources:{vcpus:1},persistent:false,region:'iad1'});
     stage='postgres_tools';
     const install=await sandbox.runCommand({cmd:'bash',args:['-lc','dnf install -y postgresql17-server postgresql17 >/tmp/package-install.log 2>&1'],sudo:true,timeoutMs:60000});
     if(install.exitCode!==0)throw new Error('INSTALL_FAILED');

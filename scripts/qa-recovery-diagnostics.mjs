@@ -27,6 +27,8 @@ assert.ok(runner.includes("timeoutMs:150000") && runner.includes("timeout:285000
   runner.includes("sudo:true,timeoutMs:60000") && runner.includes("timeoutMs:55000"),
   "Sandbox and worker deadlines must permit bounded cold-start retry");
 assert.ok(worker.includes("PGGSSENCMODE:'disable'"),"Postgres must use TLS instead of unsupported GSSAPI negotiation");
+assert.ok(runner.includes("region:'iad1'") && !runner.includes("region:'bom1'"),
+  "Encrypted recovery sandbox must run in same US East region as Neon source");
 assert.ok(runner.includes("updateNetworkPolicy({allow:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]})") &&
   runner.indexOf("updateNetworkPolicy(") < runner.indexOf("BACKUP_DATABASE_URL:"),
   "Sandbox egress must be restricted to expected Neon hostname before source credentials enter");
