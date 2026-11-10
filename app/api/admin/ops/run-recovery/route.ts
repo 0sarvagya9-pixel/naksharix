@@ -27,7 +27,9 @@ export async function POST(request:Request) {
     if(process.env.VERCEL_ENV !== "production") return fail("Production-only operation.",403);
     if(!dailyRecoveryConfigured()) return fail("Protected recovery configuration is missing.",503);
     const current=await recoveryHealth();
-    if(current.operational && current.encrypted && current.restoreVerified)
+    if(current.operational && "encrypted" in current && current.encrypted===true &&
+      "restoreVerified" in current && current.restoreVerified===true &&
+      "lastSuccessfulAt" in current)
       return ok({state:"verified",encrypted:true,privateStore:true,restoreVerified:true,
         lastSuccessfulAt:current.lastSuccessfulAt,alreadyVerified:true});
     // Serialize and cap owner-triggered attempts across all Vercel instances.
@@ -53,7 +55,9 @@ export async function POST(request:Request) {
       // An HTTP success is not accepted without a separately readable,
       // recent, encrypted private Blob receipt proving isolated restore.
       const proof=await recoveryHealth();
-      if(!proof.operational||proof.encrypted!==true||proof.restoreVerified!==true)
+      if(!proof.operational || !("encrypted" in proof) || proof.encrypted!==true ||
+        !("restoreVerified" in proof) || proof.restoreVerified!==true ||
+        !("lastSuccessfulAt" in proof))
         throw new Error("BACKUP_RECEIPT_NOT_VERIFIED");
       await prisma.adminActionLog.create({data:{
         adminId:admin!.id,action:OUTCOME_ACTION,targetType:TARGET_TYPE,targetId:day,
