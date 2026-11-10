@@ -46,6 +46,9 @@ jobs:
       - name: Strict native TypeScript check
         working-directory: mobile-app
         run: npm run qa:native
+      - name: Expo SDK project health
+        working-directory: mobile-app
+        run: CI=1 npx --yes expo-doctor
       - name: Export standalone Android Hermes JS bundle
         working-directory: mobile-app
         env:
@@ -87,10 +90,12 @@ jobs:
           set -euo pipefail
           export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
-          command -v sdkmanager
-          sdkmanager --version
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort | tail -n 1)"
+          test -n "$SDKMANAGER" && test -x "$SDKMANAGER"
+          echo "SDKMANAGER_READY=YES"
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --version
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null || true
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --install "platforms;android-36" "build-tools;36.0.0" "platform-tools"
       - name: Install native dependencies
         working-directory: mobile-app
         run: npm ci --no-audit --no-fund
