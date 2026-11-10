@@ -79,7 +79,7 @@ export async function runDailyRecovery() {
   try {
     sandbox=await Sandbox.create({runtime:'node22',timeout:285000,resources:{vcpus:1},persistent:false,region:'bom1'});
     stage='postgres_tools';
-    const install=await sandbox.runCommand({cmd:'bash',args:['-lc','dnf install -y postgresql17-server postgresql17 >/tmp/package-install.log 2>&1'],sudo:true,timeoutMs:90000});
+    const install=await sandbox.runCommand({cmd:'bash',args:['-lc','dnf install -y postgresql17-server postgresql17 >/tmp/package-install.log 2>&1'],sudo:true,timeoutMs:60000});
     if(install.exitCode!==0)throw new Error('INSTALL_FAILED');
     // Postgres negotiates TLS after TCP. Vercel Sandbox firewall supports it
     // when the database hostname is explicitly allowed. Restrict egress
@@ -90,7 +90,7 @@ export async function runDailyRecovery() {
     await sandbox.writeFiles([{path:'/tmp/naksh-export.mjs',content:EXPORT_WORKER,mode:0o600},
       {path:'/tmp/naksh-restore.sh',content:RESTORE_WORKER,mode:0o700}]);
     stage='readonly_export';
-    const dump=await sandbox.runCommand({cmd:'node',args:['/tmp/naksh-export.mjs'],timeoutMs:155000,env:{
+    const dump=await sandbox.runCommand({cmd:'node',args:['/tmp/naksh-export.mjs'],timeoutMs:150000,env:{
       BACKUP_DATABASE_URL:process.env.DIRECT_URL||process.env.DATABASE_URL!,
       BACKUP_EXPECTED_SOURCE_HOST:process.env.BACKUP_EXPECTED_SOURCE_HOST!
     }});
@@ -123,7 +123,7 @@ export async function runDailyRecovery() {
     if(!prior&&backupChecksum(restoredDump)!==checksum)throw new Error('CHECKSUM_MISMATCH');
     await sandbox.writeFiles([{path:'/tmp/naksh-roundtrip.dump',content:restoredDump,mode:0o600}]);
     stage='isolated_restore';
-    const restore=await sandbox.runCommand({cmd:'bash',args:['/tmp/naksh-restore.sh'],timeoutMs:90000});
+    const restore=await sandbox.runCommand({cmd:'bash',args:['/tmp/naksh-restore.sh'],timeoutMs:55000});
     if(restore.exitCode!==0)throw new Error('RESTORE_FAILED');
     const report=await sandbox.readFileToBuffer({path:'/tmp/naksh-restore-receipt.json'});
     const counts=JSON.parse(report?.toString()||'{}') as {tables:number;indexes:number;foreignKeys:number};

@@ -23,7 +23,8 @@ assert.ok(worker.includes("for (let attempt=0; attempt<2; attempt++)") &&
   worker.includes("'NETWORK','DNS','CLIENT_TIMEOUT'") &&
   worker.includes("timeout:110000"),
   "Transient source-connect retries are bounded and archive export has an explicit deadline");
-assert.ok(runner.includes("timeoutMs:155000") && runner.includes("timeout:285000"),
+assert.ok(runner.includes("timeoutMs:150000") && runner.includes("timeout:285000") &&
+  runner.includes("sudo:true,timeoutMs:60000") && runner.includes("timeoutMs:55000"),
   "Sandbox and worker deadlines must permit bounded cold-start retry");
 assert.ok(worker.includes("PGGSSENCMODE:'disable'"),"Postgres must use TLS instead of unsupported GSSAPI negotiation");
 assert.ok(runner.includes("updateNetworkPolicy({allow:[process.env.BACKUP_EXPECTED_SOURCE_HOST!]})") &&
