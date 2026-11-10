@@ -44,3 +44,10 @@ Google Play Payments gate: Digital report listings are informational only. There
 ## GitHub Actions internal APK
 
 `NAKSHARIX Android Native Build` compiles Expo JS/Hermes and attempts a Gradle `assembleRelease` internal test APK (prebuild template DEBUG key). Download the resulting internal QA APK from that workflow's **Artifacts** section. This is an installable internal test artifact, **not** the Google Play production-signed bundle. Store release builds still require the authorized EAS/Play signing credentials and owner device QA.
+
+## Website + Android shared user account (V2.1)
+Use Connect my website account from the Android Account tab; the phone opens the existing Google/password login on the secure www.naksharix.com website. Approve the one-time pairing on that signed-in browser page. The Android client gets a separate seven-day, mobile-scoped, revocable session token stored in Expo SecureStore; passwords and browser/Google cookies never enter the app.
+
+The native Account tab reads the same user ID's profile, saved Kundli, report requests, purchases, orders, Puja bookings, consultations, appointments and payments from the website's existing database. Older records are paginated. Name/language edits update the same website user record. No email-only guest record claim, native payments or customer data replication.
+
+Production release acceptance must cover a real Google/password pairing, relaunch, cross-device profile/history sync, logout/revoke and Android real-device testing. Source-only tests do not prove those steps. Android app version 1.2.0, versionCode 8.

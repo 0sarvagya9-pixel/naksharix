@@ -37,16 +37,16 @@ assert.ok(explore.includes('mode!=="reports"?<Pressable') &&
 assert.ok(number.includes("Nothing you enter is transmitted or saved.")&&
   !/fetch\(|secureFetch\(|axios|AsyncStorage/.test(number),
   "Offline numerology must never transmit birth data");
-assert.ok(account.includes('open("/login")')&&
-  account.includes("tokens are never collected or stored"),
-  "Login remains on secure official website without embedding tokens in app");
+assert.ok(account.includes("saveAccessToken(")&&account.includes("mobileRequest<Account>")&&
+  account.includes("deleteAccessToken(")&&account.includes("Connect my website account"),
+  "Native account must securely pair to same website user and show saved history");
 assert.ok(api.includes("AbortController")&&api.includes('method:"GET"')&&
-  api.includes('cache:"no-store"')&&env.includes('url.startsWith("https://")'),
+  api.includes('cache:"no-store"')&&env.includes('url==="https://www.naksharix.com"'),
   "Native API client must stay GET-only and HTTPS");
 const workflow=read(".github/workflows/android-native-build.yml");
 const config=JSON.parse(read("mobile-app/app.json"));
-assert.equal(config.expo.android.versionCode,7);
-assert.equal(config.expo.version,"1.1.0");
+assert.equal(config.expo.android.versionCode,8);
+assert.equal(config.expo.version,"1.2.0");
 assert.ok(!config.expo.android.permissions.includes("POST_NOTIFICATIONS"),"No unused notification permission");
 assert.ok(workflow.includes("assembleRelease") &&
   workflow.includes("npx expo prebuild --platform android --clean --no-install") &&
