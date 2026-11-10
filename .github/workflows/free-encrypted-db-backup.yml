@@ -2,15 +2,12 @@ name: NAKSHARIX Free Encrypted PostgreSQL Backup
 
 # No plaintext DB backup is ever uploaded. Protected credential and separate
 # public encryption recipient must be configured before first successful run.
+# The independent GitHub export is operator-triggered until GitHub's protected
+# BACKUP_DATABASE_URL and BACKUP_AGE_RECIPIENT are configured. This avoids
+# claiming an encryption backup was attempted when secrets are missing.
+# Actual scheduled encrypted recovery is owned by the production Vercel Cron.
 on:
-  schedule:
-    - cron: '43 2 * * *'
   workflow_dispatch:
-  # Exercise the fail-closed backup and alert path when this workflow changes on main.
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/free-encrypted-db-backup.yml'
 
 permissions:
   contents: read
@@ -21,8 +18,6 @@ concurrency:
 
 jobs:
   encrypted-pg-dump:
-    permissions:
-      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -78,33 +73,4 @@ jobs:
           if find encrypted-backup -type f ! -name '*.dump.age' | grep -q .; then
             echo "::error::Plaintext detected in artifact directory."
             exit 1
-          fi
-
-  notify-backup-state:
-    name: Surface encrypted-backup job failures without sharing credentials
-    needs: encrypted-pg-dump
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      issues: write
-    steps:
-      - name: Open one issue on backup failure, close only after a successful encrypted upload
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          BACKUP_RESULT: ${{ needs.encrypted-pg-dump.result }}
-        run: |
-          set -euo pipefail
-          incident_title='[backup] NAKSHARIX encrypted backup job failed'
-          issue_number=$(gh issue list --state open --limit 100 --json number,title \
-            --jq '.[] | select(.title == "[backup] NAKSHARIX encrypted backup job failed") | .number' | head -n 1)
-          if [ "$BACKUP_RESULT" = "success" ]; then
-            if [ -n "$issue_number" ]; then
-              gh issue comment "$issue_number" --body 'The latest scheduled workflow uploaded an encrypted PostgreSQL artifact. Independent off-site retention and a clean-room restore are still separate acceptance gates.'
-              gh issue close "$issue_number" --reason completed
-            fi
-          elif [ -z "$issue_number" ]; then
-            gh issue create --title "$incident_title" --body 'The NAKSHARIX scheduled encrypted PostgreSQL backup did not succeed. Inspect this workflow run. Confirm that BACKUP_DATABASE_URL exists as a protected GitHub Actions secret and BACKUP_AGE_RECIPIENT exists as a public age1 repository variable, without sharing either credential or the offline decryption key in issues or logs. A Neon recovery branch is not an independent encrypted off-site backup. No successful backup is claimed.'
           fi
