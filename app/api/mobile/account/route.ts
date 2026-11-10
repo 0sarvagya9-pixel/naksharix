@@ -10,7 +10,7 @@ export async function GET(request:NextRequest){
   const user=await getMobileAccountUser(request);
   if(!user)return fail("Sign in to your Naksharix account on this phone.",401);
   const id=user.id;
-  const [profile,kundlis,kundliReports,reportRequests,purchasedReports,shopOrders,
+  const [profile,kundlis,kundliReports,numerologyReports,horoscopeHistory,tarotReadings,reportRequests,purchasedReports,shopOrders,
     pujaBookings,consultations,payments,appointments]=await Promise.all([
     prisma.user.findUnique({where:{id},select:{id:true,email:true,name:true,phone:true,
       locale:true,dob:true,birthTime:true,birthPlace:true,createdAt:true}}),
@@ -18,6 +18,12 @@ export async function GET(request:NextRequest){
       select:{id:true,name:true,birthDate:true,birthPlace:true,isFavorite:true,createdAt:true}}),
     prisma.kundliReport.findMany({where:{userId:id},orderBy:{createdAt:"desc"},take:30,
       select:{id:true,name:true,createdAt:true}}),
+    prisma.numerologyReport.findMany({where:{userId:id},orderBy:{createdAt:"desc"},take:30,
+      select:{id:true,name:true,lifePathNumber:true,createdAt:true}}),
+    prisma.horoscope.findMany({where:{userId:id},orderBy:{createdAt:"desc"},take:30,
+      select:{id:true,zodiac:true,period:true,createdAt:true}}),
+    prisma.tarotReading.findMany({where:{userId:id},orderBy:{createdAt:"desc"},take:30,
+      select:{id:true,spread:true,createdAt:true}}),
     prisma.reportRequest.findMany({where:{userId:id},orderBy:{createdAt:"desc"},take:30,
       select:{id:true,reportSlug:true,status:true,paymentStatus:true,deliveryStatus:true,createdAt:true}}),
     prisma.purchasedReport.findMany({where:{userId:id},orderBy:{createdAt:"desc"},take:30,
@@ -34,7 +40,7 @@ export async function GET(request:NextRequest){
       select:{id:true,mode:true,status:true,scheduledAt:true}})
   ]);
   if(!profile)return fail("Account is no longer available.",401);
-  return ok({profile,history:{kundlis,kundliReports,reportRequests,purchasedReports,
+  return ok({profile,history:{kundlis,kundliReports,numerologyReports,horoscopeHistory,tarotReadings,reportRequests,purchasedReports,
     shopOrders,pujaBookings,consultations,appointments,
     payments:payments.map(row=>({...row,amount:Number(row.amount)}))},
     meta:{source:"same_naksharix_website_database",userId:id,readOnlyHistory:true,

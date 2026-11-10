@@ -7,9 +7,10 @@ import {MobileAuthError,deleteAccessToken,mobileRequest,savedAccessToken,saveAcc
 type Profile={id:string;name:string;email:string;phone:string|null;locale:string;
   dob:string|null;birthPlace:string|null;createdAt:string};
 type RecordRow={id:string;name?:string;title?:string;reportSlug?:string;topicId?:string;
+  zodiac?:string;period?:string;spread?:string;lifePathNumber?:number;
   purpose?:string;status?:string;paymentStatus?:string;deliveryStatus?:string;
   createdAt?:string;preferredDate?:string;scheduledAt?:string;trackingReference?:string};
-type Section="kundlis"|"kundliReports"|"reportRequests"|"purchasedReports"|"shopOrders"|
+type Section="kundlis"|"kundliReports"|"numerologyReports"|"horoscopeHistory"|"tarotReadings"|"reportRequests"|"purchasedReports"|"shopOrders"|
   "pujaBookings"|"consultations"|"payments"|"appointments";
 type History=Record<Section,RecordRow[]>;
 type Account={profile:Profile;history:History;meta:{userId:string;source:string}};
@@ -18,6 +19,9 @@ type Poll={state:"pending"|"expired"|"linked";accessToken?:string};
 const groups:ReadonlyArray<{key:Section;title:string;url:string}>=[
   {key:"kundlis",title:"Kundli",url:"/my-readings"},
   {key:"kundliReports",title:"Saved Reports",url:"/saved-reports"},
+  {key:"numerologyReports",title:"Numerology",url:"/numerology"},
+  {key:"horoscopeHistory",title:"Horoscope",url:"/horoscope"},
+  {key:"tarotReadings",title:"Tarot",url:"/tarot"},
   {key:"reportRequests",title:"Report Requests",url:"/profile"},
   {key:"purchasedReports",title:"Purchased Reports",url:"/saved-reports"},
   {key:"shopOrders",title:"Shop Orders",url:"/profile"},
@@ -194,9 +198,9 @@ export function AccountScreen(){
           </Text></Pressable>)}</View>
         {records.length===0?<Text style={S.cardText}>No records saved under this account yet.</Text>:
           records.map(row=><View key={row.id} style={styles.historyItem}>
-            <Text style={S.cardTitle}>{row.name||row.title||row.reportSlug||row.topicId||row.purpose||"Saved record"}</Text>
+            <Text style={S.cardTitle}>{row.name||row.title||row.reportSlug||row.topicId||row.purpose||(row.zodiac?row.zodiac+" "+(row.period||"horoscope"):"")||row.spread||"Saved record"}</Text>
             <Text style={S.cardText}>{row.status||row.paymentStatus||row.deliveryStatus||"Saved"}
-              {dateLabel(row)?" · "+dateLabel(row):""}</Text>
+              {dateLabel(row)?" · "+dateLabel(row):""}{row.lifePathNumber!==undefined?" · Life path "+row.lifePathNumber:""}</Text>
             {row.trackingReference?<Text style={S.cardText}>Tracking: {row.trackingReference}</Text>:null}
           </View>)}
         {account.history[section].length===30&&nextPage[section]!==null?

@@ -32,10 +32,13 @@ for(const name of ["/api/mobile/auth/start","/api/mobile/auth/poll","/api/mobile
  assert.ok(middle.includes('"'+name+'"'),"Bearer-only route missing middleware exemption");
 assert.ok(approve.includes("getCurrentUser()")&&approve.includes("approveMobilePair("));
 assert.ok(account.includes("getMobileAccountUser(request)")&&account.includes("prisma.user.update"));
-for(const model of ["kundli","kundliReport","reportRequest","purchasedReport","shopOrder","pujaBookingRequest","consultationBooking","payment","appointment"])
+for(const model of ["kundli","kundliReport","numerologyReport","horoscope","tarotReading","reportRequest","purchasedReport","shopOrder","pujaBookingRequest","consultationBooking","payment","appointment"])
  assert.ok(account.includes("prisma."+model+".findMany({where:{userId:id}"),
    "History must filter by verified user ID: "+model);
 assert.ok(older.includes("where:{userId}")&&older.includes("records.slice(0,30)"),"Older records scoped");
+for(const section of ["numerologyReports","horoscopeHistory","tarotReadings"]){
+ assert.ok(account.includes(section)&&older.includes('case "'+section+'"')&&app.includes('key:"'+section+'"'),"Linked website history missing "+section);
+}
 assert.ok(client.includes("SecureStore.setItemAsync")&&client.includes('credentials:"omit"'));
 assert.ok(app.includes("saveAccessToken(")&&app.includes("deleteAccessToken(")&&app.includes("Load older history"));
 const ota=[],sessions=[],users=new Map([["A",{id:"A",email:"a@example.invalid",name:"Test A",role:"USER"}]]);

@@ -4,7 +4,7 @@ import {prisma} from "@/lib/db";
 import {getMobileAccountUser} from "@/lib/mobile/account-link";
 import {fail,handleApiError,ok} from "@/lib/api";
 const schema=z.object({
- section:z.enum(["kundlis","kundliReports","reportRequests","purchasedReports",
+ section:z.enum(["kundlis","kundliReports","numerologyReports","horoscopeHistory","tarotReadings","reportRequests","purchasedReports",
    "shopOrders","pujaBookings","consultations","payments","appointments"]),
  page:z.coerce.number().int().min(1).max(1000)
 }).strict();
@@ -27,6 +27,12 @@ export async function GET(request:NextRequest){
      select:{id:true,name:true,birthDate:true,birthPlace:true,isFavorite:true,createdAt:true}});break;
    case "kundliReports":records=await prisma.kundliReport.findMany({where:{userId},...opts,
      select:{id:true,name:true,createdAt:true}});break;
+   case "numerologyReports":records=await prisma.numerologyReport.findMany({where:{userId},...opts,
+     select:{id:true,name:true,lifePathNumber:true,createdAt:true}});break;
+   case "horoscopeHistory":records=await prisma.horoscope.findMany({where:{userId},...opts,
+     select:{id:true,zodiac:true,period:true,createdAt:true}});break;
+   case "tarotReadings":records=await prisma.tarotReading.findMany({where:{userId},...opts,
+     select:{id:true,spread:true,createdAt:true}});break;
    case "reportRequests":records=await prisma.reportRequest.findMany({where:{userId},...opts,
      select:{id:true,reportSlug:true,status:true,paymentStatus:true,deliveryStatus:true,createdAt:true}});break;
    case "purchasedReports":records=await prisma.purchasedReport.findMany({where:{userId},...opts,
