@@ -151,7 +151,19 @@ export async function runDailyRecovery() {
       ? error.message.slice('EXPORT_FAILED_'.length) : '';
     const suffix=diagnostic ? ' ('+diagnostic+')' : '';
     await notify(day,false,`The daily recovery task failed at stage: ${stage}${suffix}. Production database was not changed. Check the private operations dashboard; no successful restore is claimed.`);
-    throw new Error('BACKUP_FAILED_'+stage.toUpperCase()+(diagnostic?'_'+diagnostic:''));
+    // Vercel Hobby can reject Sandbox.create with HTTP 402 after its monthly
+    // quota is exhausted. Preserve a distinct, secret-free incident category
+    // rather than misreporting this as a database connectivity failure.
+    const providerError=error && typeof error==='object' ? error as {
+      response?:{status?:number};status?:number;code?:string;message?:string
+    } : null;
+    const quotaBlocked=stage==='sandbox_start' && (
+      providerError?.response?.status===402 || providerError?.status===402 ||
+      providerError?.code==='payment_required' ||
+      providerError?.message?.includes('Hobby plan usage limit exceeded')===true
+    );
+    throw new Error(quotaBlocked ? 'BACKUP_FAILED_SANDBOX_QUOTA_EXHAUSTED' :
+      'BACKUP_FAILED_'+stage.toUpperCase()+(diagnostic?'_'+diagnostic:''));
   }finally {
     await sandbox?.stop().catch(()=>{});
     await del(lock.url).catch(()=>{});
