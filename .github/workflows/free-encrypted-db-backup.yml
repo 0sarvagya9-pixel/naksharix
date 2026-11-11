@@ -1,76 +1,161 @@
-name: NAKSHARIX Free Encrypted PostgreSQL Backup
+name: NAKSHARIX Independent Encrypted PostgreSQL Recovery
 
-# No plaintext DB backup is ever uploaded. Protected credential and separate
-# public encryption recipient must be configured before first successful run.
-# The independent GitHub export is operator-triggered until GitHub's protected
-# BACKUP_DATABASE_URL and BACKUP_AGE_RECIPIENT are configured. This avoids
-# claiming an encryption backup was attempted when secrets are missing.
-# Actual scheduled encrypted recovery is owned by the production Vercel Cron.
+# Backup runs on GitHub's isolated Ubuntu runner, NOT Vercel Sandbox.
+# Only ciphertext is retained. An offline owner-controlled age recipient is
+# mandatory. A second, temporary age recipient permits an actual decrypt +
+# pg_restore drill before the artifact is accepted.
 on:
+  schedule:
+    - cron: '43 4 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: naksharix-free-db-backup
+  group: naksharix-independent-recovery
   cancel-in-progress: false
 
 jobs:
-  encrypted-pg-dump:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    env:
-      BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
-      BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+  encrypted-backup-and-restore:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     steps:
-      - name: Check protected inputs before accessing production
+      - name: Fail closed if protected source or offline recipient is missing
         shell: bash
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+          EXPECTED_SOURCE_HOST: ep-royal-glitter-aqy6jkqz.c-8.us-east-1.aws.neon.tech
         run: |
           set -euo pipefail
           if [ -z "${BACKUP_DATABASE_URL:-}" ] || [ -z "${BACKUP_AGE_RECIPIENT:-}" ]; then
-            echo "::error::Missing protected backup database URL or age public recipient; no backup attempted."
+            echo "::error::Missing repository secret BACKUP_DATABASE_URL or variable BACKUP_AGE_RECIPIENT. No backup was attempted."
             exit 1
           fi
-          if [[ "$BACKUP_AGE_RECIPIENT" != age1* ]] || [ "${#BACKUP_AGE_RECIPIENT}" -lt 55 ]; then
-            echo "::error::Invalid age recipient; refusing to export any database data."
-            exit 1
-          fi
-      - name: Install free age encryption tool
+          node <<'NODE'
+          const url = new URL(process.env.BACKUP_DATABASE_URL);
+          if (!['postgres:', 'postgresql:'].includes(url.protocol) ||
+              url.hostname !== process.env.EXPECTED_SOURCE_HOST ||
+              url.hostname.includes('-pooler.') ||
+              !['require','verify-full'].includes(url.searchParams.get('sslmode')) ||
+              !url.username || !url.password) {
+            console.error('BACKUP_SOURCE_DIRECT_TLS_HOST_GUARD=FAIL');
+            process.exit(1);
+          }
+          if (!/^age1[02-9ac-hj-np-z]{50,70}$/.test(process.env.BACKUP_AGE_RECIPIENT)) {
+            console.error('BACKUP_OFFLINE_RECIPIENT=INVALID');
+            process.exit(1);
+          }
+          console.log('BACKUP_SOURCE_DIRECT_TLS_HOST_GUARD=PASS;OWNER_RECIPIENT_CONFIGURED=YES');
+          NODE
+
+      - name: Install age encryption utility
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq age
-      - name: Stream PostgreSQL 17 custom-format dump directly into age encryption
+          sudo apt-get install -qq -y age
+          age --version
+
+      - name: Create one-run-only restoration identity
         shell: bash
         run: |
           set -euo pipefail
           umask 077
+          age-keygen -o "$RUNNER_TEMP/naksharix-restore-verifier.agekey" 2>/dev/null
+          verify_recipient="$(age-keygen -y "$RUNNER_TEMP/naksharix-restore-verifier.agekey")"
+          test -n "$verify_recipient"
+          echo "NAKSHARIX_VERIFY_RECIPIENT=$verify_recipient" >> "$GITHUB_ENV"
+          echo "INDEPENDENT_RESTORE_IDENTITY=EPHEMERAL"
+
+      - name: Stream read-only PostgreSQL 17 dump into TWO-recipient age ciphertext
+        shell: bash
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+          PGOPTIONS: -c default_transaction_read_only=on
+        run: |
+          set -euo pipefail
+          umask 077
           mkdir -p encrypted-backup
-          # The DB URL stays in a masked GitHub Actions environment variable.
-          # Never provide the URL in source, logs, arguments or artifact names.
-          docker run --rm --network host --env BACKUP_DATABASE_URL postgres:17-alpine \
-            sh -ec 'exec pg_dump --dbname="$BACKUP_DATABASE_URL" --format=custom --no-owner --no-privileges' \
-            | age -r "$BACKUP_AGE_RECIPIENT" -o encrypted-backup/naksharix.dump.age
+          # A second recipient is used only to test decryption on this runner.
+          # The OWNER recipient remains necessary for recovering the archive later.
+          docker run --rm --network host \
+            --env BACKUP_DATABASE_URL --env PGOPTIONS \
+            postgres:17-alpine sh -ec '
+              test "$(psql "$BACKUP_DATABASE_URL" -Atqc "SHOW transaction_read_only")" = on
+              exec pg_dump --dbname="$BACKUP_DATABASE_URL" --format=custom --no-owner --no-privileges
+            ' | age -r "$BACKUP_AGE_RECIPIENT" -r "$NAKSHARIX_VERIFY_RECIPIENT" \
+                -o encrypted-backup/naksharix.dump.age
           test -s encrypted-backup/naksharix.dump.age
-          grep -aq '^age-encryption.org/v1' encrypted-backup/naksharix.dump.age || {
-            echo "::error::Missing encrypted format header; no artifact will be uploaded."
+          grep -aq '^age-encryption.org/v1' encrypted-backup/naksharix.dump.age
+          echo "PRODUCTION_READ_ONLY_EXPORT=PASS;CIPHERTEXT_ONLY=YES"
+
+      - name: Restore encrypted archive into disposable isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name naksharix-recovery-proof \
+            --env POSTGRES_HOST_AUTH_METHOD=trust postgres:17-alpine >/dev/null
+          for attempt in $(seq 1 45); do
+            if docker exec naksharix-recovery-proof pg_isready -U postgres -q; then break; fi
+            sleep 1
+          done
+          docker exec naksharix-recovery-proof pg_isready -U postgres -q
+          # No dump or decrypted rows are written to a runner artifact or workspace.
+          age --decrypt --identity "$RUNNER_TEMP/naksharix-restore-verifier.agekey" \
+            encrypted-backup/naksharix.dump.age |
+            docker exec -i naksharix-recovery-proof pg_restore \
+              -U postgres -d postgres --no-owner --no-privileges --exit-on-error
+          restored="$(docker exec naksharix-recovery-proof psql -U postgres -d postgres \
+            -At -F ',' -c "SELECT
+              (SELECT count(*) FROM pg_tables WHERE schemaname='public'),
+              (SELECT count(*) FROM pg_indexes WHERE schemaname='public'),
+              (SELECT count(*) FROM pg_constraint c JOIN pg_namespace n
+                 ON n.oid=c.connamespace WHERE n.nspname='public' AND c.contype='f')")"
+          IFS=',' read -r tables indexes foreign_keys <<< "$restored"
+          if ! [[ "$tables" =~ ^[0-9]+$ ]] || \
+             [ "$tables" -lt 43 ] || [ "$indexes" -lt 100 ] || [ "$foreign_keys" -lt 40 ]; then
+            echo "::error::Isolated restore failed minimum schema completeness checks."
             exit 1
-          }
-          echo "ENCRYPTED_BACKUP=CREATED;PLAIN_TEXT_ARTIFACT=NO"
-      - name: Upload ciphertext only, retained seven days
+          fi
+          echo "RESTORE_FROM_ENCRYPTED_ARCHIVE=PASS;SCHEMA_COUNTS=$tables/$indexes/$foreign_keys"
+          echo "NAKSHARIX_VERIFIED_RESTORE=YES" >> "$GITHUB_ENV"
+
+      - name: Upload only verified ciphertext to GitHub artifact storage
+        if: env.NAKSHARIX_VERIFIED_RESTORE == 'YES'
         uses: actions/upload-artifact@v4
         with:
           name: naksharix-encrypted-postgres-${{ github.run_id }}
           path: encrypted-backup/*.dump.age
           retention-days: 7
           if-no-files-found: error
-      - name: Assert artifact directory contains no plaintext files
+
+      - name: Record evidence without revealing any customer data
+        if: env.NAKSHARIX_VERIFIED_RESTORE == 'YES'
         shell: bash
         run: |
           set -euo pipefail
-          if find encrypted-backup -type f ! -name '*.dump.age' | grep -q .; then
-            echo "::error::Plaintext detected in artifact directory."
-            exit 1
+          test "$(find encrypted-backup -type f | wc -l)" -eq 1
+          test -z "$(find encrypted-backup -type f ! -name '*.dump.age' -print -quit)"
+          digest="$(sha256sum encrypted-backup/naksharix.dump.age | cut -d' ' -f1)"
+          {
+            echo '### NAKSHARIX independent encrypted recovery'
+            echo 'Source: read-only TLS PostgreSQL export'
+            echo 'Result: ciphertext decrypted and restored to isolated PostgreSQL 17'
+            echo 'Retention: seven days; only owner-decryptable ciphertext uploaded'
+            echo "Encrypted artifact SHA256: $digest"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "INDEPENDENT_ENCRYPTED_BACKUP_AND_RESTORE=PASS"
+
+      - name: Destroy isolated restore and temporary private key
+        if: always()
+        shell: bash
+        run: |
+          docker rm -fv naksharix-recovery-proof >/dev/null 2>&1 || true
+          if [ -f "$RUNNER_TEMP/naksharix-restore-verifier.agekey" ]; then
+            shred -u "$RUNNER_TEMP/naksharix-restore-verifier.agekey" || \
+              rm -f "$RUNNER_TEMP/naksharix-restore-verifier.agekey"
           fi
+          echo "EPHEMERAL_VERIFICATION_KEY_CLEANUP=PASS"
