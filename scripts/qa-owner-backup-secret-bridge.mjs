@@ -23,6 +23,18 @@ assert.ok(script.includes("winget install -e --id GitHub.cli --accept-package-ag
   "winget output must not contaminate the GitHub CLI path.");
 assert.ok(script.includes("connection-string $branch --project-id $project --role-name $role"));
 assert.ok(script.includes("RedirectStandardInput = $true"));
+assert.ok(script.includes("GH_ACTIONS_SECRETS_PUBLIC_KEY=DENIED") &&
+  script.includes("GH_ACTIONS_SECRETS_PERMISSION=PASS") &&
+  script.includes('repos/$Repository/actions/secrets/public-key') &&
+  script.indexOf('GH_ACTIONS_SECRETS_PERMISSION=PASS') < script.indexOf('Invoke-NeonAuthInChrome -NeonCli $neon'),
+  "Secret writing permission must be checked before any Neon database credential is fetched.");
+assert.ok(script.includes("GH_ACTIONS_SECRET_WRITE=FAIL;ERROR_CLASS=") &&
+  script.includes("$stderrTask = $proc.StandardError.ReadToEndAsync()") &&
+  script.includes("GH_ACTIONS_SECRET_WRITE=PASS") &&
+  script.includes("Do not print stdout or stderr"),
+  "Protect credential output while revealing bounded write-error categories.");
+assert.ok(!script.includes("'--app','actions'"),"GitHub Actions is the default secret store.");
+
 assert.ok(script.includes("$proc.StandardInput.Write($connection)"));
 assert.ok(script.includes("BACKUP_DATABASE_URL','--repo'"));
 assert.ok(script.includes("Never paste Neon credentials"));

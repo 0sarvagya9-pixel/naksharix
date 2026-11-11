@@ -89,6 +89,22 @@ if ($LASTEXITCODE -ne 0 -or $selectedRepo -ne $Repository) {
 }
 Write-Host 'GitHub repository authorization: PASS'
 
+# Repo read permission is NOT enough to write Actions secrets.
+# Verify the GitHub account/token can read the public encryption key used
+# by the Actions Secrets API BEFORE asking Neon for the DB credential.
+$adminPermission = (& $gh api "repos/$Repository" --jq '.permissions.admin' 2>$null | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or $adminPermission -ne 'true') {
+    throw 'GH_REPO_ADMIN=NO. GitHub CLI must authenticate as a repository administrator; no Neon DB credential was fetched.'
+}
+$repoSecretKeyId = (& $gh api "repos/$Repository/actions/secrets/public-key" --jq '.key_id' 2>$null | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or !$repoSecretKeyId) {
+    $envOverride = [bool]($env:GH_TOKEN -or $env:GITHUB_TOKEN)
+    Write-Host ('GH_TOKEN_ENV_OVERRIDE_PRESENT=' + $envOverride.ToString().ToUpperInvariant())
+    throw 'GH_ACTIONS_SECRETS_PUBLIC_KEY=DENIED. GitHub CLI authorization lacks Actions secrets access. Refresh official GitHub CLI credentials with repo scope or use a repository-admin identity. No database credential was fetched.'
+}
+$repoSecretKeyId = $null
+Write-Host 'GH_ACTIONS_SECRETS_PERMISSION=PASS'
+
 # Neon CLI obtains the EXISTING dedicated SELECT-only production role.
 # Its credential must NEVER be passed as a command-line flag or echoed.
 function Get-ChromeExecutable {
@@ -193,7 +209,8 @@ try {
     # do NOT put a secret in process argv, console, temporary file or history.
     $psi = [System.Diagnostics.ProcessStartInfo]::new()
     $psi.FileName = $gh
-    foreach ($arg in @('secret','set','BACKUP_DATABASE_URL','--repo',$Repository,'--app','actions')) {
+    # GitHub's official default secret app is Actions; avoid unnecessary flags.
+    foreach ($arg in @('secret','set','BACKUP_DATABASE_URL','--repo',$Repository)) {
         [void]$psi.ArgumentList.Add($arg)
     }
     $psi.UseShellExecute = $false
@@ -205,15 +222,40 @@ try {
     $proc.StartInfo = $psi
     if (!$proc.Start()) { throw 'Unable to start encrypted GitHub secret writer' }
     try {
+        # Drain output asynchronously to prevent redirection deadlocks. The
+        # output buffers are PRIVATE and NEVER printed: GitHub may echo a URL
+        # or token in an error message.
+        $stdoutTask = $proc.StandardOutput.ReadToEndAsync()
+        $stderrTask = $proc.StandardError.ReadToEndAsync()
         $proc.StandardInput.Write($connection)
         $proc.StandardInput.Close()
         if (!$proc.WaitForExit(60000)) {
             $proc.Kill()
-            throw 'GitHub secret update timed out'
+            throw 'GH_SECRET_WRITE_TIMEOUT: no successful backup claimed'
         }
         if ($proc.ExitCode -ne 0) {
-            throw 'GitHub secret update failed. Check GitHub login and repository permissions.'
+            $errorText = [string]$stderrTask.GetAwaiter().GetResult()
+            $class = if ($errorText -match '403|resource not accessible|permission|forbidden') {
+                'FORBIDDEN'
+            } elseif ($errorText -match '401|unauthorized|authentication') {
+                'AUTH'
+            } elseif ($errorText -match '404|not found') {
+                'NOT_FOUND'
+            } elseif ($errorText -match 'encryp|public.key|sodium') {
+                'ENCRYPTION'
+            } elseif ($errorText -match 'timeout|connection|network|429|500|502|503') {
+                'TRANSIENT'
+            } else {
+                'UNCLASSIFIED'
+            }
+            Write-Host ('GH_ACTIONS_SECRET_WRITE=FAIL;ERROR_CLASS=' + $class + ';EXIT=' + $proc.ExitCode)
+            $errorText = $null
+            throw 'Protected GitHub Actions secret write failed; no backup workflow was dispatched.'
         }
+        # Do not print stdout or stderr (even on success).
+        [void]$stdoutTask.GetAwaiter().GetResult()
+        [void]$stderrTask.GetAwaiter().GetResult()
+        Write-Host 'GH_ACTIONS_SECRET_WRITE=PASS'
     } finally {
         $proc.Dispose()
     }

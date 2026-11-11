@@ -32,6 +32,32 @@ independent PostgreSQL decrypt/restore + ciphertext artifact can change
 the recovery result to PASS. GitHub and Neon login/authorization are completed
 on the owner's device; no remote agent can bypass those steps.
 
+## Diagnosing GitHub Actions secret write failure safely
+
+A verified Neon login and read-only URL do **not** prove that GitHub CLI has
+permission to write encrypted Actions secrets. The owner-local bridge now
+checks the repository admin permission and GitHub Actions Secrets public
+encryption key **before** accessing any Neon database credential.
+
+- `GH_REPO_ADMIN=NO`: the GitHub CLI identity cannot administer the
+  NAKSHARIX repository; select the correct repository owner.
+- `GH_ACTIONS_SECRETS_PUBLIC_KEY=DENIED`: the CLI token lacks the
+  required repository Actions-secrets access. A token supplied by
+  `GH_TOKEN` or `GITHUB_TOKEN` can override the stored `gh` login.
+  Refresh GitHub CLI authorization to include repository access if needed,
+  then rerun the bridge. Do not paste tokens or secret URLs.
+- `GH_ACTIONS_SECRET_WRITE=FAIL;ERROR_CLASS=...`: the script reports only
+  a sanitized category and exit code; never paste the raw GitHub CLI error
+  or database URL into chat.
+- `GH_ACTIONS_SECRET_WRITE=PASS` and
+  `GITHUB_PROTECTED_SECRET_NAME=VERIFIED`: the secret write and
+  independent name check succeeded, but a real encrypted backup and restore
+  still require a successful workflow run.
+
+Official GitHub CLI behavior: `gh secret set NAME --repo owner/repo`
+reads the value from stdin and encrypts it locally. The Actions secret
+application is the default; no `--app` argument is required.
+
 ## Incident verified 2026-11-11
 
 The Vercel Sandbox SANDBOX_START failure was independently reproduced using a safe
