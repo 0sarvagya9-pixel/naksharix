@@ -32,6 +32,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Enforce independent encrypted backup and restore contracts
+        run: node scripts/qa-independent-recovery-workflows.mjs
       - run: npm install
       - run: npx prisma generate
         env:
