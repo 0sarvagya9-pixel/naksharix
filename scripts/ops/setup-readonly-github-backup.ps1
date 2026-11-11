@@ -91,9 +91,80 @@ Write-Host 'GitHub repository authorization: PASS'
 
 # Neon CLI obtains the EXISTING dedicated SELECT-only production role.
 # Its credential must NEVER be passed as a command-line flag or echoed.
-Write-Host 'Neon account authorization may open its official browser.'
-& $neon auth
-if ($LASTEXITCODE -ne 0) { throw 'Neon authentication was not completed' }
+function Get-ChromeExecutable {
+    # Open official OAuth in Chrome explicitly, without changing Windows default browser.
+    $candidates = @()
+    if ($env:ProgramFiles) { $candidates += (Join-Path $env:ProgramFiles 'Google\Chrome\Application\chrome.exe') }
+    $programFiles86 = [Environment]::GetEnvironmentVariable('ProgramFiles(x86)')
+    if ($programFiles86) { $candidates += (Join-Path $programFiles86 'Google\Chrome\Application\chrome.exe') }
+    if ($env:LOCALAPPDATA) { $candidates += (Join-Path $env:LOCALAPPDATA 'Google\Chrome\Application\chrome.exe') }
+    foreach ($p in $candidates) {
+        if (Test-Path -LiteralPath $p -PathType Leaf) { return [string]$p }
+    }
+    $cmd = Get-Command -Name chrome.exe -ErrorAction SilentlyContinue
+    if ($cmd) { return [string]$cmd.Source }
+    throw 'Google Chrome not found. Install Chrome or set it as your default browser; the script will not silently fall back to Edge.'
+}
+function Get-SafeNeonOAuthUrl {
+    param([string]$Line)
+    if ($Line -notmatch 'Auth Url:\s*(https://\S+)') { return $null }
+    try { $url = [uri]$Matches[1] } catch { return $null }
+    # Only the official Neon OAuth endpoint with a localhost loopback callback
+    # may be opened; never launch an arbitrary URL extracted from CLI output.
+    if ($url.Scheme -ne 'https' -or $url.Host -ne 'oauth2.neon.tech' -or
+        $url.AbsolutePath -ne '/oauth2/auth' -or
+        [uri]::UnescapeDataString($url.Query) -notmatch 'redirect_uri=http://127\.0\.0\.1:\d+/callback') {
+        throw 'Unrecognized Neon OAuth destination or callback; no browser opened.'
+    }
+    return [string]$url.AbsoluteUri
+}
+function Invoke-NeonAuthInChrome {
+    param([string]$NeonCli)
+    # Neon me reports signed out without triggering browser auth.
+    & $NeonCli me --output json 1>$null 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host 'NEON_EXISTING_AUTH=PASS;NO_BROWSER_NEEDED'
+        return
+    }
+    $chrome = Get-ChromeExecutable
+    if (!(Get-Command Start-ThreadJob -ErrorAction SilentlyContinue)) {
+        throw 'PowerShell 7 Start-ThreadJob is required for Chrome OAuth capture.'
+    }
+    Write-Host 'Neon login will open in GOOGLE CHROME; approve the official request within 60 seconds.'
+    $job = Start-ThreadJob -ScriptBlock {
+        param([string]$cmd)
+        & $cmd login 2>&1 | ForEach-Object { [string]$_ }
+        if ($LASTEXITCODE -ne 0) { throw 'NEON_LOGIN_COMMAND_FAILED' }
+    } -ArgumentList $NeonCli
+    $opened = $false
+    $deadline = [DateTime]::UtcNow.AddSeconds(75)
+    try {
+        do {
+            $lines = @(Receive-Job -Job $job -ErrorAction SilentlyContinue)
+            foreach ($line in $lines) {
+                $oauthUrl = Get-SafeNeonOAuthUrl -Line ([string]$line)
+                if ($oauthUrl -and !$opened) {
+                    Start-Process -FilePath $chrome -ArgumentList @($oauthUrl)
+                    $opened = $true
+                    Write-Host 'NAKSHARIX_NEON_CHROME_LOGIN_OPENED=PASS'
+                }
+            }
+            if ($job.State -in @('Completed','Failed','Stopped')) { break }
+            Start-Sleep -Milliseconds 200
+        } while ([DateTime]::UtcNow -lt $deadline)
+        if ($job.State -eq 'Running') {
+            throw 'Neon OAuth did not finish; rerun for a fresh login URL.'
+        }
+        if ($job.State -ne 'Completed') {
+            throw 'Neon browser authorization failed or timed out. Rerun to open a fresh URL in Chrome.'
+        }
+        Write-Host 'NAKSHARIX_NEON_AUTH=PASS'
+    } finally {
+        if ($job.State -eq 'Running') { Stop-Job -Job $job -ErrorAction SilentlyContinue }
+        Remove-Job -Job $job -Force -ErrorAction SilentlyContinue
+    }
+}
+Invoke-NeonAuthInChrome -NeonCli $neon
 
 $raw = @(& $neon connection-string $branch --project-id $project --role-name $role --database-name $database 2>$null)
 $exit = $LASTEXITCODE
