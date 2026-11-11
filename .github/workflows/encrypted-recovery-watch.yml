@@ -1,8 +1,7 @@
 name: NAKSHARIX Verified Encrypted Recovery Watch
 
-# Scheduled workflows run on default main, then check the authoritative
-# production encrypted/private backup and isolated restore receipt.
-# No production data, access keys, or private backup bytes are downloaded.
+# Run on GitHub's default branch. Vercel and GitHub backups are two distinct
+# recovery providers. Never claim either verified without a fresh real restore.
 on:
   schedule:
     - cron: '17 6 * * *'
@@ -10,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   issues: write
 
 concurrency:
@@ -29,31 +29,78 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify actual encrypted private archive and isolated restore receipt
-        id: check
+      - name: Verify primary Vercel private archive and isolated restore receipt
+        id: primary
         continue-on-error: true
         run: node scripts/ops/check-encrypted-recovery.mjs
-      - name: Alert on missing receipts; close issue only after actual verified restore
-        if: always() && steps.check.outcome != 'skipped'
+
+      - name: Check independently restored GitHub ciphertext if primary is blocked
+        id: independent
+        if: steps.primary.outcome == 'failure'
+        continue-on-error: true
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RECOVERY_RESULT: ${{ steps.check.outcome }}
+        run: |
+          set -euo pipefail
+          # Trust only SUCCESSFUL default-branch runs of this exact workflow
+          # which still have the encrypted artifact uploaded by its post-
+          # pg_restore gate. No database credentials or ciphertext downloaded.
+          gh api "/repos/$GH_REPO/actions/workflows/free-encrypted-db-backup.yml/runs?branch=main&status=success&per_page=20" \
+            > "$RUNNER_TEMP/naksh-gh-backup-runs.json"
+          run_id="$(node - "$RUNNER_TEMP/naksh-gh-backup-runs.json" <<'NODE'
+          const fs=require('node:fs');
+          const runs=JSON.parse(fs.readFileSync(process.argv[2],'utf8')).workflow_runs||[];
+          const min=Date.now()-36*60*60*1000;
+          const record=runs.find(x=>x.head_branch==='main' &&
+            (x.event==='schedule'||x.event==='workflow_dispatch') &&
+            x.status==='completed' && x.conclusion==='success' &&
+            Date.parse(x.updated_at)>=min);
+          process.stdout.write(record?String(record.id):'');
+          NODE
+          )"
+          test -n "$run_id" || { echo "NO_FRESH_SUCCESSFUL_GITHUB_RESTORE=YES"; exit 1; }
+          gh api "/repos/$GH_REPO/actions/runs/$run_id/artifacts" \
+            > "$RUNNER_TEMP/naksh-gh-backup-artifacts.json"
+          node - "$RUNNER_TEMP/naksh-gh-backup-artifacts.json" "$run_id" <<'NODE'
+          const fs=require('node:fs');
+          const data=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const id=process.argv[3],name='naksharix-encrypted-postgres-'+id;
+          const match=(data.artifacts||[]).find(x=>x.name===name && !x.expired &&
+            Number(x.size_in_bytes)>1024 && x.workflow_run?.id===Number(id));
+          if(!match){console.error('RECENT_GITHUB_ARCHIVE_NOT_VERIFIED');process.exit(1);}
+          console.log('GITHUB_BACKUP_CIPHERTEXT_AND_ISOLATED_RESTORE=VERIFIED;RUN_ID='+id);
+          NODE
+
+      - name: Alert until a fresh Vercel OR GitHub restored archive is verified
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PRIMARY_RESULT: ${{ steps.primary.outcome }}
+          INDEPENDENT_RESULT: ${{ steps.independent.outcome }}
         run: |
           set -euo pipefail
           incident_title='[backup] NAKSHARIX encrypted backup job failed'
-          issue_number=$(gh issue list --state open --limit 100 --json number,title \
-            --jq '.[] | select(.title == "[backup] NAKSHARIX encrypted backup job failed") | .number' | head -n 1)
-          if [ "$RECOVERY_RESULT" = "success" ]; then
+          issue_number="$(gh issue list --state open --limit 100 --json number,title \
+            --jq '.[] | select(.title == "[backup] NAKSHARIX encrypted backup job failed") | .number' | head -n 1)"
+          if [ "$PRIMARY_RESULT" = success ] || [ "$INDEPENDENT_RESULT" = success ]; then
             if [ -n "$issue_number" ]; then
-              gh issue comment "$issue_number" --body 'Fresh private encrypted archive and independently restored database receipt were verified by the live production endpoint. No backup bytes were exposed by the watcher.'
+              if [ "$PRIMARY_RESULT" = success ]; then
+                detail='Vercel private encrypted Blob and isolated restored database receipt are fresh and verified.'
+              else
+                detail='Independent GitHub age-encrypted archive and PostgreSQL 17 restore were verified. Vercel Sandbox primary remains separately quota-blocked; no Vercel receipt is claimed.'
+              fi
+              gh issue comment "$issue_number" --body "$detail No customer or backup bytes were downloaded by the watcher."
               gh issue close "$issue_number" --reason completed
             fi
           elif [ -z "$issue_number" ]; then
             gh issue create --title "$incident_title" \
-              --body 'NAKSHARIX production encrypted database recovery is unverified or stale. Inspect the /api/ops/backup-status endpoint, production Vercel Cron, and owner backup failure alerts. A Neon branch or a successful CI fixture does not replace a fresh encrypted private archive and isolated restore receipt. Do not share passwords or customer data.'
+              --body 'Neither a fresh Vercel private encrypted/isolated-restore receipt nor a recent independently restored GitHub ciphertext artifact exists. A temporary Neon branch or a synthetic CI fixture is not a backup. Do not share keys or customer data.'
           fi
-      - name: Fail closed until a fresh encrypted restore receipt exists
-        if: always() && steps.check.outcome == 'failure'
+
+      - name: Fail closed until at least one fresh restore is verified
+        if: always() && steps.primary.outcome != 'success' && steps.independent.outcome != 'success'
         run: exit 1
