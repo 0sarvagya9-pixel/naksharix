@@ -5,6 +5,12 @@ name: NAKSHARIX Independent Encrypted PostgreSQL Recovery
 # mandatory. A second, temporary age recipient permits an actual decrypt +
 # pg_restore drill before the artifact is accepted.
 on:
+  # Run once whenever the reviewed backup workflow changes on main.
+  # This never exposes protected inputs to PR/fork branches.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/free-encrypted-db-backup.yml"
   schedule:
     - cron: '43 4 * * *'
   workflow_dispatch:
