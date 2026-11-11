@@ -22,9 +22,14 @@ foreach($bad in @(
   'Auth Url: http://oauth2.neon.tech/oauth2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A56649%2Fcallback',
   'Auth Url: https://oauth2.neon.tech/oauth2/auth?redirect_uri=https%3A%2F%2Fevil.example%2Fcallback'
 )) {
+    $result=$null
     $rejected=$false
     try { $result=Get-SafeNeonOAuthUrl -Line $bad } catch { $rejected=$true }
-    if (!$rejected) { throw 'Untrusted OAuth target was not rejected' }
+    # Safe rejection can either throw or return no URL, but must never
+    # yield an openable third-party or non-HTTPS redirect.
+    if (!$rejected -and $null -ne $result) {
+        throw 'Untrusted OAuth target was accepted'
+    }
 }
 if ((Get-SafeNeonOAuthUrl -Line 'Awaiting authentication in web browser.') -ne $null) {
   throw 'Unrelated CLI output misparsed as OAuth URL'
