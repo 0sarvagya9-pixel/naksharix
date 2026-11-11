@@ -8,7 +8,7 @@ const watch=readFileSync(".github/workflows/encrypted-recovery-watch.yml","utf8"
 assert.match(backup,/schedule:\s*\n\s+- cron: '43 4 \* \* \*'/);
 assert.match(backup,/workflow_dispatch:/);
 assert.match(backup,/BACKUP_DATABASE_URL: \$\{\{ secrets\.BACKUP_DATABASE_URL \}\}/);
-assert.match(backup,/BACKUP_AGE_RECIPIENT: \\$\\{\\{ vars\\.BACKUP_AGE_RECIPIENT \\}\\}/,
+assert.match(backup,/BACKUP_AGE_RECIPIENT: \$\{\{ vars\.BACKUP_AGE_RECIPIENT \}\}/,
   "Recipient must come from a newly rotated GitHub Actions public variable.");
 assert.ok(!/BACKUP_AGE_RECIPIENT: age1[0-9a-z]+/.test(backup),
   "Never hardcode a recipient belonging to an exposed private key.");
