@@ -49,6 +49,9 @@ jobs:
       - name: Verify Neon CLI install stdout isolation (mocked)
         shell: pwsh
         run: pwsh -NoProfile -File scripts/qa-neon-cli-path.ps1
+      - name: Validate safe Chrome Neon OAuth redirect (mocked, no credentials)
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/qa-chrome-neon-oauth.ps1
       - run: npm install
       - run: npx prisma generate
         env:
