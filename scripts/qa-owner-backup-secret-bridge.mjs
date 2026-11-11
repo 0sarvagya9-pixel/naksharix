@@ -7,7 +7,14 @@ assert.ok(script.includes("$branch = 'production'"));
 assert.ok(script.includes("$project = 'delicate-star-51216895'"));
 assert.ok(script.includes("$database = 'neondb'"));
 assert.ok(script.includes("$expectedHost = 'ep-royal-glitter-aqy6jkqz.c-8.us-east-1.aws.neon.tech'"));
-assert.ok(script.includes("gh") && script.includes("auth login") && script.includes("neon auth"));
+assert.ok(script.includes("gh") && script.includes("auth login") &&
+  script.includes("Invoke-NeonAuthInChrome -NeonCli $neon"));
+assert.ok(script.includes("Get-ChromeExecutable") && script.includes("Start-Process -FilePath $chrome") &&
+  script.includes("oauth2.neon.tech") && script.includes("Start-ThreadJob") &&
+  script.includes("Get-SafeNeonOAuthUrl"),
+  "Neon login must route the live OAuth callback explicitly to Chrome.");
+assert.ok(!script.includes("& $neon auth"),
+  "Do not invoke old default-browser-only Neon authentication step.");
 assert.ok(script.includes("Resolve-NeonCmd") && script.includes("Get-Command -Name neon.cmd"),
   "Windows must use npm-created neon.cmd, not neon.ps1.");
 assert.ok(script.includes("npm install --global neon@latest --no-audit --no-fund | Out-Null"),
