@@ -52,6 +52,8 @@ jobs:
       - name: Validate safe Chrome Neon OAuth redirect (mocked, no credentials)
         shell: pwsh
         run: pwsh -NoProfile -File scripts/qa-chrome-neon-oauth.ps1
+      - name: Verify Neon agent skills and OAuth MCP configuration
+        run: node scripts/qa-neon-agent-tooling.mjs
       - run: npm install
       - run: npx prisma generate
         env:
