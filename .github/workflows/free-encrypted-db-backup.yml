@@ -21,8 +21,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
-      # Public recipient confirmed by owner from age-keygen -y; private identity stays OFF GitHub.
-      BACKUP_AGE_RECIPIENT: age1avd5935xphjzsqec79h5fae3sqen2w8nnwzgnwdqmxga56h3mcjsd09atm
+      # Public recipient only. Owner rotates the identity locally and sets
+      # GitHub Repository Variable BACKUP_AGE_RECIPIENT; never pin a leaked key.
+      BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
     steps:
       - name: Fail closed if protected source or offline recipient is missing
         shell: bash
@@ -33,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${BACKUP_DATABASE_URL:-}" ] || [ -z "${BACKUP_AGE_RECIPIENT:-}" ]; then
-            echo "::error::Missing protected repository secret BACKUP_DATABASE_URL or public age recipient. No backup was attempted."
+            echo "::error::Missing BACKUP_DATABASE_URL repository secret or rotated BACKUP_AGE_RECIPIENT repository variable. No backup attempted."
             exit 1
           fi
           node <<'NODE'
