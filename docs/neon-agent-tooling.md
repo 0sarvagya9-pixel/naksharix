@@ -5,13 +5,14 @@ Verified against Neon official skill `https://neon.com/.well-known/agent-skills/
 ## Existing setup — preserved
 
 - Production Neon project: `delicate-star-51216895` (AWS US East 1).
-- The existing Next.js/Prisma code, authentication, deployed Vercel project, database role grants, `DATABASE_URL`/`DIRECT_URL` settings, any .env files, current GitHub workflows and backup recovery controls have **not been modified** by the agent tooling setup.
+- The existing Next.js/Prisma code, authentication, deployed Vercel project, database role grants, `DATABASE_URL`/`DIRECT_URL` settings, any .env files, current backup recovery workflows have **not been modified** by the agent tooling setup. The existing GitHub CI workflow only receives an additive static QA step for these agent config files; all prior CI checks remain intact.
 - ChatGPT's installed Neon integration already provides the `neon` and `neon-postgres` skills and a connected Neon MCP. The NAKSHARIX project was readable through that connection. No second ChatGPT connector or new Neon project was created.
 - Audit of NAKSHARIX `main` found no existing repo-level `.agents/skills`, `.codex/config.toml` or `.mcp.json`; additions below are new files, not overwrites.
 
 ## Newly installed for project-level Codex usage
 
 - The full upstream `neon` and `neon-postgres` skills, including all published relative reference files, are vendored under `.agents/skills/`. The sources are pinned to the commit above so the installation is reproducible.
+- GitHub CI now runs `node scripts/qa-neon-agent-tooling.mjs` as a read-only agent-setup gate; the existing build/test jobs are preserved.
 - `.codex/config.toml` adds the official hosted Neon MCP server via OAuth. **No API token** is stored in Git; when Codex first loads this project, its OAuth flow may ask the owner to authorize access.
 - The MCP URL is scoped to the existing NAKSHARIX project, `readonly=true`, with only `docs` and `schema` categories. No SQL modification or customer-row reading tools are exposed by this new Codex configuration. Neon's official guidance discourages connecting MCP agents directly to production data; this deliberately restricts the tool surface.
 - The existing ChatGPT Neon MCP connection is **already installed** and is unchanged; this project-level Codex file does not install or alter the ChatGPT connector.
