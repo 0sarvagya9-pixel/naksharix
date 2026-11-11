@@ -34,6 +34,18 @@ jobs:
           cache: npm
       - name: Enforce independent encrypted backup and restore contracts
         run: node scripts/qa-independent-recovery-workflows.mjs
+      - name: Validate owner-local secret bridge (no credentials used)
+        run: node scripts/qa-owner-backup-secret-bridge.mjs
+      - name: Parse owner-local PowerShell script without executing it
+        shell: pwsh
+        run: |
+          $tokens=$null; $parseErrors=$null
+          [System.Management.Automation.Language.Parser]::ParseFile("scripts/ops/setup-readonly-github-backup.ps1",[ref]$tokens,[ref]$parseErrors) | Out-Null
+          if ($parseErrors.Count -gt 0) {
+            $parseErrors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          Write-Output "POWERSHELL_SECRET_BRIDGE_SYNTAX=PASS"
       - run: npm install
       - run: npx prisma generate
         env:
