@@ -5,6 +5,8 @@ const backup=readFileSync(".github/workflows/free-encrypted-db-backup.yml","utf8
 const watch=readFileSync(".github/workflows/encrypted-recovery-watch.yml","utf8");
 
 // GitHub free runner is independent of the exhausted Vercel Hobby Sandbox.
+assert.match(backup,/push:[\s\S]*?branches: \[main\][\s\S]*?\.github\/workflows\/free-encrypted-db-backup\.yml/,
+  "Only a default-branch edit to this backup workflow may run immediate guarded acceptance.");
 assert.match(backup,/schedule:\s*\n\s+- cron: '43 4 \* \* \*'/);
 assert.match(backup,/workflow_dispatch:/);
 assert.match(backup,/BACKUP_DATABASE_URL: \$\{\{ secrets\.BACKUP_DATABASE_URL \}\}/);
