@@ -8,12 +8,17 @@ const watch=readFileSync(".github/workflows/encrypted-recovery-watch.yml","utf8"
 assert.match(backup,/schedule:\s*\n\s+- cron: '43 4 \* \* \*'/);
 assert.match(backup,/workflow_dispatch:/);
 assert.match(backup,/BACKUP_DATABASE_URL: \$\{\{ secrets\.BACKUP_DATABASE_URL \}\}/);
-assert.match(backup,/BACKUP_AGE_RECIPIENT: \$\{\{ vars\.BACKUP_AGE_RECIPIENT \}\}/,
-  "Recipient must come from a newly rotated GitHub Actions public variable.");
-assert.ok(!/BACKUP_AGE_RECIPIENT: age1[0-9a-z]+/.test(backup),
-  "Never hardcode a recipient belonging to an exposed private key.");
-assert.ok(backup.includes("Missing BACKUP_DATABASE_URL repository secret or rotated BACKUP_AGE_RECIPIENT repository variable"),
-  "Missing protected inputs must fail closed before querying production.");
+const ownerChosenRecipient="age1avd5935xphjzsqec79h5fae3sqen2w8nnwzgnwdqmxga56h3mcjsd09atm";
+assert.equal((backup.match(/BACKUP_AGE_RECIPIENT: age1[0-9a-z]+/g)||[]).length,1,
+  "Exactly one owner-selected public recipient must be pinned in this workflow.");
+assert.ok(backup.includes("BACKUP_AGE_RECIPIENT: "+ownerChosenRecipient),
+  "Must preserve owner's explicitly selected existing age public recipient.");
+assert.ok(!backup.includes("vars.BACKUP_AGE_RECIPIENT"),
+  "No separate repository variable should be needed for the owner-selected recipient.");
+assert.ok(backup.includes("Missing BACKUP_DATABASE_URL repository secret or owner public recipient"),
+  "Missing protected database secret must fail closed before export.");
+assert.ok(!backup.includes("AGE-SECRET-KEY-"),
+  "Private age identities must never appear in workflow source.");
 assert.match(backup,/EXPECTED_SOURCE_HOST: ep-royal-glitter-aqy6jkqz\.c-8\.us-east-1\.aws\.neon\.tech/);
 assert.match(backup,/BACKUP_SOURCE_DIRECT_TLS_HOST_GUARD=PASS/);
 assert.match(backup,/PGOPTIONS: -c default_transaction_read_only=on/);
