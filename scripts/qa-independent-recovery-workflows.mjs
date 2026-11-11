@@ -8,7 +8,13 @@ const watch=readFileSync(".github/workflows/encrypted-recovery-watch.yml","utf8"
 assert.match(backup,/schedule:\s*\n\s+- cron: '43 4 \* \* \*'/);
 assert.match(backup,/workflow_dispatch:/);
 assert.match(backup,/BACKUP_DATABASE_URL: \$\{\{ secrets\.BACKUP_DATABASE_URL \}\}/);
-assert.match(backup,/BACKUP_AGE_RECIPIENT: \$\{\{ vars\.BACKUP_AGE_RECIPIENT \}\}/);
+const ownerPublicRecipient="age1avd5935xphjzsqec79h5fae3sqen2w8nnwzgnwdqmxga56h3mcjsd09atm";
+assert.ok(backup.includes("BACKUP_AGE_RECIPIENT: "+ownerPublicRecipient),
+  "Public recipient must match owner's verified age-keygen output.");
+assert.ok(!backup.includes("vars.BACKUP_AGE_RECIPIENT"),
+  "The public recipient is pinned; a missing repo variable must not block backup.");
+assert.equal((backup.match(/BACKUP_AGE_RECIPIENT: age1/g)||[]).length,1,
+  "Declare owner public recipient once at job scope.");
 assert.match(backup,/EXPECTED_SOURCE_HOST: ep-royal-glitter-aqy6jkqz\.c-8\.us-east-1\.aws\.neon\.tech/);
 assert.match(backup,/BACKUP_SOURCE_DIRECT_TLS_HOST_GUARD=PASS/);
 assert.match(backup,/PGOPTIONS: -c default_transaction_read_only=on/);

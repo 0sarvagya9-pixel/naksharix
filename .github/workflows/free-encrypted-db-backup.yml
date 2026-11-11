@@ -20,17 +20,20 @@ jobs:
   encrypted-backup-and-restore:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
+    env:
+      # Public recipient confirmed by owner from age-keygen -y; private identity stays OFF GitHub.
+      BACKUP_AGE_RECIPIENT: age1avd5935xphjzsqec79h5fae3sqen2w8nnwzgnwdqmxga56h3mcjsd09atm
     steps:
       - name: Fail closed if protected source or offline recipient is missing
         shell: bash
         env:
           BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
-          BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+
           EXPECTED_SOURCE_HOST: ep-royal-glitter-aqy6jkqz.c-8.us-east-1.aws.neon.tech
         run: |
           set -euo pipefail
           if [ -z "${BACKUP_DATABASE_URL:-}" ] || [ -z "${BACKUP_AGE_RECIPIENT:-}" ]; then
-            echo "::error::Missing repository secret BACKUP_DATABASE_URL or variable BACKUP_AGE_RECIPIENT. No backup was attempted."
+            echo "::error::Missing protected repository secret BACKUP_DATABASE_URL or public age recipient. No backup was attempted."
             exit 1
           fi
           node <<'NODE'
@@ -73,7 +76,7 @@ jobs:
         shell: bash
         env:
           BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
-          BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+
           PGOPTIONS: -c default_transaction_read_only=on
         run: |
           set -euo pipefail
