@@ -15,37 +15,50 @@ transactions.
 
 ## Owner-only protected configuration (do NOT put secrets in chat)
 
-**1. Create the owner encryption identity locally and save it offline.**
+**1. Preserve and protect the existing owner-generated age identity.**
 
-On the owner's Windows computer, open PowerShell and run:
+The owner has already run age-keygen on Windows. DO NOT overwrite or
+regenerate the existing key; an old encrypted backup can be decrypted only
+with the matching private identity. The confirmed owner public recipient is:
 
-    winget install -e --id FiloSottile.age --accept-package-agreements --accept-source-agreements
+    age1avd5935xphjzsqec79h5fae3sqen2w8nnwzgnwdqmxga56h3mcjsd09atm
 
-Open a new PowerShell terminal if the commands are not immediately found, then:
+The key is stored locally in:
 
-    $backupKeyDir = Join-Path $env:USERPROFILE "Documents\NAKSHARIX-Private-Recovery-Key"
-    New-Item -Path $backupKeyDir -ItemType Directory -Force | Out-Null
-    age-keygen -o (Join-Path $backupKeyDir "private-recovery-age-key.txt")
-    age-keygen -y (Join-Path $backupKeyDir "private-recovery-age-key.txt")
+    $key = Join-Path $env:USERPROFILE "NAKSHARIX-Private-Recovery-Key\private-key.txt"
 
-Keep **private-recovery-age-key.txt** safe and make an offline backup (e.g., encrypted
-USB drive). Never paste, upload or commit the private key. The final command prints
-a public age1... recipient, which is safe to share with GitHub as a variable.
+The initial age-keygen run warned that the file was world-readable. Tighten
+the Windows NTFS file ACL before any real encrypted backup:
 
-**2. Configure two GitHub repository settings.**
+    $owner = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+    if (!(Test-Path -LiteralPath $key -PathType Leaf)) { throw "Private key missing" }
+    & icacls.exe $key /grant:r ("{0}:(F)" -f $owner)
+    if ($LASTEXITCODE -ne 0) { throw "Cannot grant private-key owner access" }
+    & icacls.exe $key /inheritance:r
+    if ($LASTEXITCODE -ne 0) { throw "Cannot remove inherited permissions" }
+    & icacls.exe $key
+
+Check the ACL output for any remaining Everyone, Users or Authenticated Users
+permissions and remove those if present; never paste the PRIVATE key content
+in a chat, screenshot, GitHub repository, GitHub Actions secret, or build log.
+Make a secure offline backup of the private key.
+
+The public recipient above has been pinned as a NON-SECRET in the approved
+GitHub Actions YAML, so no GitHub Repository Variable is needed.
+
+**2. Configure ONE protected GitHub repository secret.**
 
 Open
 https://github.com/0sarvagya9-pixel/naksharix/settings/secrets/actions
-while signed into the correct repository owner account.
+while signed into the correct GitHub owner account. Add:
 
 - **Repository secret BACKUP_DATABASE_URL**: a direct/unpooled production Neon
-  PostgreSQL connection string; use a dedicated read-only export role when
-  available. It must use TLS (sslmode=require or verify-full) and the expected
-  verified Neon source hostname. Obtain it from the official Neon Connect dialog
-  or a verified credential manager. Do not paste the URL into ChatGPT, source,
-  pull requests, or screenshots.
-- **Repository variable BACKUP_AGE_RECIPIENT**: the age1... public recipient
-  printed locally above; never the private key.
+  PostgreSQL connection URL; use a dedicated read-only export role when
+  available. The workflow verifies that the TLS-enabled URL uses the exact
+  authorized source host and that the PostgreSQL session is read-only before
+  any export. Obtain the secret from the official Neon Connect dialog or
+  a secure credential manager. NEVER paste the database URL in ChatGPT, source
+  files, pull requests, screenshots, or GitHub Variables (plaintext).
 
 **3. Verify one real backup before trusting it.**
 
