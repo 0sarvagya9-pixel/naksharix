@@ -35,6 +35,10 @@ assert.ok(runner.includes("updateNetworkPolicy({allow:[process.env.BACKUP_EXPECT
 assert.ok(!worker.includes("console.error(result.stderr)"),"Never log raw pg_dump errors");
 assert.ok(runner.includes("await dump.stderr()") && runner.includes("new Set(["),"Controller must strictly whitelist diagnostic values");
 assert.ok(runner.includes("BACKUP_FAILED_") && runner.includes("readonly_export"),"Stage must still be reported fail-closed");
+assert.ok(runner.includes("BACKUP_FAILED_SANDBOX_QUOTA_EXHAUSTED") &&
+  runner.includes("providerError?.response?.status===402") &&
+  runner.includes("providerError?.code==='payment_required'"),
+  "Monthly Hobby Sandbox usage exhaustion must be distinguished from database failure without logging provider secrets");
 assert.ok(runner.includes("encrypted:true")&&runner.includes("privateStore:true")&&runner.includes("restored:true"),
   "Recovery receipt must represent real ciphertext storage and independent restore");
 const cronRoute=source("app/api/cron/daily-recovery/route.ts");
