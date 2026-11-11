@@ -23,6 +23,18 @@ assert.ok(script.includes("winget install -e --id GitHub.cli --accept-package-ag
   "winget output must not contaminate the GitHub CLI path.");
 assert.ok(script.includes("connection-string $branch --project-id $project --role-name $role"));
 assert.ok(script.includes("RedirectStandardInput = $true"));
+assert.ok(script.includes("Ensure-BackupGithubOwner -Github $gh -TargetRepository $Repository") &&
+  script.includes("auth switch --hostname github.com --user $requiredOwner") &&
+  script.includes("auth login --hostname github.com --git-protocol https --scopes repo --web") &&
+  script.includes("GH_REPO_ADMIN=PASS;OWNER_SELECTED=YES"),
+  "Wrong Windows GitHub account must auto-switch to NAKSHARIX owner, with Chrome OAuth fallback.");
+assert.ok(script.includes("GH_ENV_TOKEN_OVERRIDE=TEMPORARILY_SUPPRESSED") &&
+  script.includes("if ($hadGhToken) { $env:GH_TOKEN = $priorGhToken }") &&
+  script.includes("if ($hadGitHubToken) { $env:GITHUB_TOKEN = $priorGitHubToken }"),
+  "Override tokens must never silently mask stored admin credentials or be changed permanently.");
+assert.ok(script.indexOf("Ensure-BackupGithubOwner -Github $gh -TargetRepository $Repository") <
+  script.indexOf("Invoke-NeonAuthInChrome -NeonCli $neon"),
+  "Select admin account and verify GitHub permissions BEFORE reading any Neon database credentials.");
 assert.ok(script.includes("GH_ACTIONS_SECRETS_PUBLIC_KEY=DENIED") &&
   script.includes("GH_ACTIONS_SECRETS_PERMISSION=PASS") &&
   script.includes('repos/$Repository/actions/secrets/public-key') &&

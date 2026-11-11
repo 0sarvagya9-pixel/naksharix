@@ -76,37 +76,20 @@ function Require-Neon {
 $gh = Require-Gh
 $neon = Require-Neon
 
-# Each provider handles its OWN interactive browser authorization.
-& $gh auth status 1>$null 2>$null
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Authorize the correct GitHub owner account in the official browser.'
-    & $gh auth login --hostname github.com --git-protocol https --web
-    if ($LASTEXITCODE -ne 0) { throw 'GitHub authentication was not completed' }
-}
-$selectedRepo = (& $gh api "repos/$Repository" --jq '.full_name' 2>$null | Out-String).Trim()
-if ($LASTEXITCODE -ne 0 -or $selectedRepo -ne $Repository) {
-    throw 'The signed-in GitHub identity cannot access the authorized NAKSHARIX repository'
-}
-Write-Host 'GitHub repository authorization: PASS'
+# Environment tokens take precedence over stored GitHub owner credentials.
+# Ignore them ONLY within this script, and restore them in finally to avoid
+# altering the owner's GitHub authentication configuration.
+$hadGhToken = Test-Path Env:GH_TOKEN
+$hadGitHubToken = Test-Path Env:GITHUB_TOKEN
+$priorGhToken = $env:GH_TOKEN
+$priorGitHubToken = $env:GITHUB_TOKEN
+try {
+    Remove-Item Env:GH_TOKEN,Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
+    if ($hadGhToken -or $hadGitHubToken) {
+        Write-Host 'GH_ENV_TOKEN_OVERRIDE=TEMPORARILY_SUPPRESSED'
+    }
 
-# Repo read permission is NOT enough to write Actions secrets.
-# Verify the GitHub account/token can read the public encryption key used
-# by the Actions Secrets API BEFORE asking Neon for the DB credential.
-$adminPermission = (& $gh api "repos/$Repository" --jq '.permissions.admin' 2>$null | Out-String).Trim()
-if ($LASTEXITCODE -ne 0 -or $adminPermission -ne 'true') {
-    throw 'GH_REPO_ADMIN=NO. GitHub CLI must authenticate as a repository administrator; no Neon DB credential was fetched.'
-}
-$repoSecretKeyId = (& $gh api "repos/$Repository/actions/secrets/public-key" --jq '.key_id' 2>$null | Out-String).Trim()
-if ($LASTEXITCODE -ne 0 -or !$repoSecretKeyId) {
-    $envOverride = [bool]($env:GH_TOKEN -or $env:GITHUB_TOKEN)
-    Write-Host ('GH_TOKEN_ENV_OVERRIDE_PRESENT=' + $envOverride.ToString().ToUpperInvariant())
-    throw 'GH_ACTIONS_SECRETS_PUBLIC_KEY=DENIED. GitHub CLI authorization lacks Actions secrets access. Refresh official GitHub CLI credentials with repo scope or use a repository-admin identity. No database credential was fetched.'
-}
-$repoSecretKeyId = $null
-Write-Host 'GH_ACTIONS_SECRETS_PERMISSION=PASS'
 
-# Neon CLI obtains the EXISTING dedicated SELECT-only production role.
-# Its credential must NEVER be passed as a command-line flag or echoed.
 function Get-ChromeExecutable {
     # Open official OAuth in Chrome explicitly, without changing Windows default browser.
     $candidates = @()
@@ -121,6 +104,84 @@ function Get-ChromeExecutable {
     if ($cmd) { return [string]$cmd.Source }
     throw 'Google Chrome not found. Install Chrome or set it as your default browser; the script will not silently fall back to Edge.'
 }
+
+# Each provider handles its OWN interactive browser authorization.
+& $gh auth status 1>$null 2>$null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Authorize the correct GitHub owner account in the official browser.'
+    & $gh auth login --hostname github.com --git-protocol https --web
+    if ($LASTEXITCODE -ne 0) { throw 'GitHub authentication was not completed' }
+}
+$selectedRepo = (& $gh api "repos/$Repository" --jq '.full_name' 2>$null | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or $selectedRepo -ne $Repository) {
+    throw 'The signed-in GitHub identity cannot access the authorized NAKSHARIX repository'
+}
+Write-Host 'GitHub repository authorization: PASS'
+
+# The repo is owned by 0sarvagya9-pixel. The separate ravanmusic001
+# account has only read permission. Select the owner rather than repeatedly
+# fetching Neon credentials with the wrong GitHub CLI session.
+function Ensure-BackupGithubOwner {
+    param([string]$Github, [string]$TargetRepository)
+    $requiredOwner = '0sarvagya9-pixel'
+    $active = (& $Github api user --jq '.login' 2>$null | Out-String).Trim()
+
+    if ($active -ne $requiredOwner) {
+        Write-Host 'GH_CLI_ACCOUNT_MISMATCH=DETECTED;AUTO_SELECTING_OWNER'
+        & $Github auth switch --hostname github.com --user $requiredOwner 1>$null 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            # An already-connected ChatGPT GitHub account cannot transfer its
+            # OAuth credentials to local gh. One official browser authorization
+            # is unavoidable when the owner account has never logged in here.
+            $chrome = Get-ChromeExecutable
+            & $Github config set browser $chrome --host github.com 1>$null
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Could not set GitHub CLI browser to Chrome'
+            }
+            Write-Host 'GH_OWNER_BROWSER_SIGNIN_REQUIRED=YES;CHROME_ACCOUNT=0sarvagya9-pixel'
+            & $Github auth login --hostname github.com --git-protocol https --scopes repo --web
+            if ($LASTEXITCODE -ne 0) {
+                throw 'GitHub owner OAuth authorization did not complete'
+            }
+            & $Github auth switch --hostname github.com --user $requiredOwner 1>$null 2>$null
+            if ($LASTEXITCODE -ne 0) {
+                throw 'GitHub owner account could not be selected after browser sign-in'
+            }
+        }
+    }
+    $effectiveUser = (& $Github api user --jq '.login' 2>$null | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or $effectiveUser -ne $requiredOwner) {
+        throw 'GH_OWNER_ACCOUNT_MISMATCH: select 0sarvagya9-pixel in official GitHub sign-in'
+    }
+    Write-Host 'GH_OWNER_IDENTITY=PASS;ACCOUNT=0sarvagya9-pixel'
+
+    $permission = (& $Github api "repos/$TargetRepository" --jq '.permissions.admin' 2>$null | Out-String).Trim().ToLowerInvariant()
+    if ($LASTEXITCODE -ne 0 -or $permission -ne 'true') {
+        Write-Host 'GH_OWNER_REAUTHORIZE_REPO_SCOPE=REQUIRED'
+        & $Github auth refresh --hostname github.com --scopes repo
+        if ($LASTEXITCODE -ne 0) {
+            throw 'GitHub owner repository authorization was not granted'
+        }
+        $permission = (& $Github api "repos/$TargetRepository" --jq '.permissions.admin' 2>$null | Out-String).Trim().ToLowerInvariant()
+    }
+    if ($LASTEXITCODE -ne 0 -or $permission -ne 'true') {
+        throw 'GH_REPO_ADMIN=NO: still not authorized as the NAKSHARIX owner'
+    }
+    Write-Host 'GH_REPO_ADMIN=PASS;OWNER_SELECTED=YES'
+}
+Ensure-BackupGithubOwner -Github $gh -TargetRepository $Repository
+
+# Verify the GitHub Actions Secrets public key can be read BEFORE requesting
+# the source database credential. Do not print the encryption key ID.
+$repoSecretKeyId = (& $gh api "repos/$Repository/actions/secrets/public-key" --jq '.key_id' 2>$null | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or !$repoSecretKeyId) {
+    throw 'GH_ACTIONS_SECRETS_PUBLIC_KEY=DENIED; GitHub owner authorization needs repository Actions secrets permissions'
+}
+$repoSecretKeyId = $null
+Write-Host 'GH_ACTIONS_SECRETS_PERMISSION=PASS'
+
+# Neon CLI obtains the EXISTING dedicated SELECT-only production role.
+# Its credential must NEVER be passed as a command-line flag or echoed.
 function Get-SafeNeonOAuthUrl {
     param([string]$Line)
     if ($Line -notmatch 'Auth Url:\s*(https://\S+)') { return $null }
@@ -279,3 +340,10 @@ if (!$SkipBackupRun) {
     Write-Host 'BACKUP_WORKFLOW_DISPATCH=SKIPPED'
 }
 Write-Host 'Never paste Neon credentials, private age identity, or GitHub tokens into chat.'
+
+} finally {
+    if ($hadGhToken) { $env:GH_TOKEN = $priorGhToken }
+    else { Remove-Item Env:GH_TOKEN -ErrorAction SilentlyContinue }
+    if ($hadGitHubToken) { $env:GITHUB_TOKEN = $priorGitHubToken }
+    else { Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue }
+}

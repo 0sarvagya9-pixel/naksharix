@@ -54,6 +54,9 @@ jobs:
         run: pwsh -NoProfile -File scripts/qa-chrome-neon-oauth.ps1
       - name: Verify Neon agent skills and OAuth MCP configuration
         run: node scripts/qa-neon-agent-tooling.mjs
+      - name: Mock wrong-account GitHub CLI and auto-select repository owner
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/qa-gh-owner-autoselect.ps1
       - run: npm install
       - run: npx prisma generate
         env:
