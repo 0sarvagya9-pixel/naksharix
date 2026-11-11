@@ -1,5 +1,37 @@
 # NAKSHARIX — Free encrypted backup recovery (GitHub Actions)
 
+## One-step protected secret setup from the owner's Windows PC
+
+The ChatGPT GitHub integration can publish repository code and read workflow logs,
+but **cannot write GitHub Actions repository secrets**. Even with full project
+permission, this is a connector capability boundary, not a missing DB grant.
+Do not paste production database passwords, URLs, or private encryption keys
+in chat to work around it.
+
+The owner needs to run the reviewed helper once on their **own** trusted
+Windows PC (PowerShell 7); it handles the rest securely. Run it from a checked
+out copy of the reviewed NAKSHARIX repository, or download the script from the
+specific reviewed commit instead of an unpinned URL:
+
+    & .\scripts\ops\setup-readonly-github-backup.ps1
+
+The helper:
+1. Installs GitHub CLI through winget and Neon CLI through npm if missing.
+2. Opens official GitHub and Neon browser authorization if required.
+3. Reads the existing, verified production naksharix_github_backup_ro role
+   connection in memory, checking the exact project, production branch,
+   neondb database, unpooled source hostname, username and SSL.
+4. Pipes the URI (without a newline) into the GitHub CLI local encryption
+   process to create BACKUP_DATABASE_URL under Actions Repository Secrets.
+   It does not print, write, commit, or send the credential through chat.
+5. Confirms the secret's name, not its value, is present and dispatches
+   free-encrypted-db-backup.yml on main.
+
+**A dispatched job is not a verified backup.** Only actual successful
+independent PostgreSQL decrypt/restore + ciphertext artifact can change
+the recovery result to PASS. GitHub and Neon login/authorization are completed
+on the owner's device; no remote agent can bypass those steps.
+
 ## Incident verified 2026-11-11
 
 The Vercel Sandbox SANDBOX_START failure was independently reproduced using a safe
