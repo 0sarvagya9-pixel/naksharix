@@ -15,39 +15,33 @@ transactions.
 
 ## Owner-only protected configuration (do NOT put secrets in chat)
 
-**1. Rotate the old private encryption key (required).**
+**1. Owner's currently selected age recipient**
 
-The original private recovery identity was uploaded to a chat. Its file ACL may
-be restricted, but its secrecy can no longer be guaranteed. DO NOT encrypt new
-backups for the previously pinned public recipient. Existing age ciphertext
-encrypted with the older identity should be treated as potentially decryptable
-by anyone who gained the leaked private key.
+The owner explicitly chose to continue using the existing age identity generated on
+their Windows machine. Only the **public recipient** is pinned in the workflow.
+No GitHub Repository Variable is needed for BACKUP_AGE_RECIPIENT.
 
-On the owner's trusted Windows device, install GitHub CLI if needed:
+**Security risk:** The corresponding private-key file was uploaded to a chat.
+Its access control list on Windows has been tightened, but that does not undo the
+past upload. Copies of encrypted customer-data backups could potentially be
+decrypted by anyone who obtained the private key. This setup is NOT
+confidentiality-verified. Generate a new offline identity before handling
+sensitive production backups if maximum protection is required. The optional
+local rotation script is in scripts/ops/rotate-owner-age-key.ps1 and will require
+updating GitHub Actions to read a new public recipient from a repository
+variable. Never upload a private age key or paste it into logs.
 
-    winget install -e --id GitHub.cli
+**2. Set protected database access in GitHub**
 
-Use the reviewed LOCAL PowerShell helper in this repository:
+In GitHub repository Settings > Secrets and variables > Actions, add a
+Repository Secret named BACKUP_DATABASE_URL with a direct/unpooled, TLS-enabled
+Neon production PostgreSQL connection URL, preferably from a dedicated
+read-only export role. The workflow restricts the host and requires a
+read-only PostgreSQL session before running pg_dump.
 
-    & .\scripts\ops\rotate-owner-age-key.ps1
-
-It first verifies official GitHub CLI login. Then it creates a NEW private age
-identity in a restricted NTFS directory, preserves the previous file for
-archived-backup recovery, and saves ONLY the NEW PUBLIC recipient to GitHub
-Actions Repository Variable BACKUP_AGE_RECIPIENT. The new private key is NEVER
-transmitted to GitHub or the chat; make a secure OFFLINE copy.
-
-The workflow fails closed when the new recipient is missing. NEVER re-enable
-the previously pinned public recipient for new exports.
-
-**2. Configure protected database access in GitHub (required).**
-
-In GitHub repository Settings > Secrets and variables > Actions, set Repository
-Secret BACKUP_DATABASE_URL to the production Neon direct/unpooled SSL-enabled
-connection URL, preferably for a dedicated read-only export role. The source
-hostname and transaction read-only setting are validated before any pg_dump.
-Enter the private connection URL ONLY into GitHub's secret field, never here
-in chat, GitHub Variables, public repository code, or screenshots.
+Do not put the database URL in chat, a public GitHub repository or GitHub
+Repository Variables. Only the GitHub repository's protected Secret field is
+suitable for this operation.
 
 **3. Verify one real backup before trusting it.**
 
