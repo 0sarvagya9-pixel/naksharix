@@ -22,40 +22,57 @@ function Refresh-UserPath {
         [Environment]::GetEnvironmentVariable('Path','User')
 }
 function Require-Gh {
-    $command = Get-Command gh -ErrorAction SilentlyContinue
+    # A PowerShell function's success output MUST contain only the executable
+    # path. Winget progress/installer output must not become command text.
+    $command = Get-Command -Name gh.exe -ErrorAction SilentlyContinue
+    if (!$command) { $command = Get-Command -Name gh -ErrorAction SilentlyContinue }
     if (!$command) {
         Write-Host 'Installing GitHub CLI from winget official package...'
-        & winget install -e --id GitHub.cli --accept-package-agreements --accept-source-agreements
+        & winget install -e --id GitHub.cli --accept-package-agreements --accept-source-agreements | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'GitHub CLI installation failed' }
         Refresh-UserPath
-        $command = Get-Command gh -ErrorAction SilentlyContinue
+        $command = Get-Command -Name gh.exe -ErrorAction SilentlyContinue
         if (!$command) {
             $candidate = Join-Path $env:ProgramFiles 'GitHub CLI\gh.exe'
-            if (Test-Path -LiteralPath $candidate) { $command = Get-Command $candidate }
+            if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+                $command = Get-Command -Name $candidate
+            }
         }
     }
-    if (!$command) { throw 'GitHub CLI not found after installation. Open a new PowerShell window and run this script again.' }
-    return $command.Source
+    if (!$command) { throw 'GitHub CLI unavailable. Open a new PowerShell window and retry.' }
+    return [string]$command.Source
+}
+
+function Resolve-NeonCmd {
+    # Windows npm creates both neon.ps1 and neon.cmd. Prefer .cmd:
+    # it avoids execution-policy surprises and never captures install output.
+    $candidate = Join-Path $env:APPDATA 'npm\neon.cmd'
+    if (Test-Path -LiteralPath $candidate -PathType Leaf) { return [string]$candidate }
+    $command = Get-Command -Name neon.cmd -ErrorAction SilentlyContinue
+    if (!$command) { $command = Get-Command -Name neonctl.cmd -ErrorAction SilentlyContinue }
+    if ($command) { return [string]$command.Source }
+    return $null
 }
 function Require-Neon {
-    $command = Get-Command neon -ErrorAction SilentlyContinue
-    if (!$command) { $command = Get-Command neonctl -ErrorAction SilentlyContinue }
-    if (!$command) {
-        if (!(Get-Command npm -ErrorAction SilentlyContinue)) { throw 'Node.js/npm is required for official Neon CLI. Install Node.js LTS from nodejs.org.' }
+    $cliPath = Resolve-NeonCmd
+    if (!$cliPath) {
+        if (!(Get-Command npm -ErrorAction SilentlyContinue)) {
+            throw 'Node.js/npm is required for official Neon CLI. Install Node.js LTS from nodejs.org.'
+        }
         Write-Host 'Installing official Neon CLI...'
-        & npm install --global neon@latest --no-audit --no-fund
+        # npm prints e.g. "added 159 packages in 20s" on stdout.
+        # Suppress success output so the function returns ONLY the CLI path.
+        & npm install --global neon@latest --no-audit --no-fund | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'Neon CLI installation failed' }
         Refresh-UserPath
-        $command = Get-Command neon -ErrorAction SilentlyContinue
-        if (!$command) { $command = Get-Command neonctl -ErrorAction SilentlyContinue }
-        if (!$command) {
-            $candidate = Join-Path $env:APPDATA 'npm\neon.cmd'
-            if (Test-Path -LiteralPath $candidate) { $command = Get-Command $candidate }
-        }
+        $cliPath = Resolve-NeonCmd
     }
-    if (!$command) { throw 'Neon CLI not found. Open a new PowerShell window and run this script again.' }
-    return $command.Source
+    if (!$cliPath) {
+        throw 'Neon CLI not found after install. Open a new PowerShell window and run this script again.'
+    }
+    return [string]$cliPath
 }
+
 $gh = Require-Gh
 $neon = Require-Neon
 
