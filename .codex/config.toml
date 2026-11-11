@@ -1,0 +1,6 @@
+# NAKSHARIX project-only OAuth Neon MCP integration for Codex.
+# Never add a Neon API key or DATABASE_URL to this tracked file.
+# The existing ChatGPT Neon connector remains separate and unchanged.
+# Restrict tools to documentation and schema metadata, not customer rows.
+[mcp_servers.neon]
+url = "https://mcp.neon.tech/mcp?projectId=delicate-star-51216895&readonly=true&category=docs&category=schema"
