@@ -5,12 +5,8 @@ name: NAKSHARIX Independent Encrypted PostgreSQL Recovery
 # mandatory. A second, temporary age recipient permits an actual decrypt +
 # pg_restore drill before the artifact is accepted.
 on:
-  # Run once whenever the reviewed backup workflow changes on main.
-  # This never exposes protected inputs to PR/fork branches.
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/free-encrypted-db-backup.yml"
+  # Never export production data simply because this workflow was edited.
+  # Preserve the existing daily schedule; manual runs require owner action.
   schedule:
     - cron: '43 4 * * *'
   workflow_dispatch:
@@ -109,17 +105,29 @@ jobs:
           set -euo pipefail
           docker run -d --name naksharix-recovery-proof \
             --env POSTGRES_HOST_AUTH_METHOD=trust postgres:17-alpine >/dev/null
+          # The official PostgreSQL image briefly opens a temporary UNIX-socket
+          # server during initialization, then stops it before starting the
+          # final TCP postmaster. A socket-only pg_isready can pass too early.
+          # Wait for a real SQL round-trip over the FINAL TCP listener.
+          ready=0
           for attempt in $(seq 1 45); do
-            if docker exec naksharix-recovery-proof pg_isready -U postgres -q; then break; fi
+            if docker exec naksharix-recovery-proof pg_isready -h 127.0.0.1 -U postgres -q && \
+               [ "$(docker exec naksharix-recovery-proof psql -h 127.0.0.1 -U postgres -d postgres -Atqc 'SELECT 1' 2>/dev/null || true)" = 1 ]; then
+              ready=1
+              break
+            fi
             sleep 1
           done
-          docker exec naksharix-recovery-proof pg_isready -U postgres -q
+          if [ "$ready" -ne 1 ]; then
+            echo "::error::ISOLATED_POSTGRES_TCP_NOT_READY"
+            exit 1
+          fi
           # No dump or decrypted rows are written to a runner artifact or workspace.
           age --decrypt --identity "$RUNNER_TEMP/naksharix-restore-verifier.agekey" \
             encrypted-backup/naksharix.dump.age |
             docker exec -i naksharix-recovery-proof pg_restore \
-              -U postgres -d postgres --no-owner --no-privileges --exit-on-error
-          restored="$(docker exec naksharix-recovery-proof psql -U postgres -d postgres \
+              -h 127.0.0.1 -U postgres -d postgres --no-owner --no-privileges --exit-on-error
+          restored="$(docker exec naksharix-recovery-proof psql -h 127.0.0.1 -U postgres -d postgres \
             -At -F ',' -c "SELECT
               (SELECT count(*) FROM pg_tables WHERE schemaname='public'),
               (SELECT count(*) FROM pg_indexes WHERE schemaname='public'),
