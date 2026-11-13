@@ -7,9 +7,14 @@ export function isTransientDatabaseError(error: unknown): boolean {
   const value = error as { code?: unknown; errorCode?: unknown; name?: unknown; message?: unknown };
   if (typeof value.code === "string" && transientCodes.has(value.code)) return true;
   if (typeof value.errorCode === "string" && transientCodes.has(value.errorCode)) return true;
-  return value.name === "PrismaClientInitializationError"
+  // Prisma can report a closed Neon/PostgreSQL socket as an unknown request
+  // error with "kind: Closed" instead of the P1017 connection error code.
+  // Restrict message matching to Prisma client errors; never retry arbitrary
+  // application exceptions or any mutation/payment operation.
+  return (value.name === "PrismaClientInitializationError" ||
+      value.name === "PrismaClientUnknownRequestError")
     && typeof value.message === "string"
-    && /can't reach database server|server has closed|connection refused|connection timed out|connect timed out|ECONNREFUSED|ENOTFOUND|EAI_AGAIN/i.test(value.message);
+    && /can't reach database server|server has closed|server closed the connection|connection refused|connection timed out|connect timed out|connection terminated unexpectedly|kind:\s*Closed\b|ECONNREFUSED|ENOTFOUND|EAI_AGAIN/i.test(value.message);
 }
 
 // Respect explicit operator values. Only tune cold-start timeouts for Neon.
@@ -34,6 +39,9 @@ export async function retryTransientDatabaseRead<T>(read: () => Promise<T>): Pro
     return await read();
   } catch (error) {
     if (!isTransientDatabaseError(error)) throw error;
+    // Give a restarting database pool a moment to re-establish its socket.
+    // Exactly one retry, SELECT-only; write and payment paths never call this.
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
     return read();
   }
 }
