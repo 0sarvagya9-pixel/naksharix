@@ -15,6 +15,23 @@ for (const code of ["P2021", "P2002", "P2025"]) {
   assert.equal(isTransientDatabaseError({ code }), false, "NONTRANSIENT_" + code);
 }
 assert.equal(isTransientDatabaseError(new Error("Unrelated application bug")), false, "APP_BUG_NOT_SUPPRESSED");
+
+assert.equal(isTransientDatabaseError({
+  name: "PrismaClientUnknownRequestError",
+  message: "Error querying the database: Error { kind: Closed, cause: None }"
+}), true, "NEON_CLOSED_SOCKET_RETRY");
+assert.equal(isTransientDatabaseError({
+  name: "PrismaClientUnknownRequestError",
+  message: "Unique constraint failed"
+}), false, "UNRELATED_PRISMA_ERROR_NOT_RETRIED");
+assert.equal(isTransientDatabaseError(new Error("kind: Closed")), false, "NON_PRISMA_EXCEPTION_NOT_RETRIED");
+assert.ok(read("lib/reports/manual-offerings.ts").includes("retryTransientDatabaseRead") &&
+  read("lib/reports/manual-offerings.ts").includes("if(isTransientDatabaseError(e))return {}"),
+  "MANUAL_REPORT_PUBLIC_PRICE_FAILS_CLOSED");
+assert.ok(read("auth.ts").includes("retryTransientDatabaseRead(() => prisma.user.findUnique"),
+  "AUTH_ROLE_LOOKUP_RETRIES_READ_ONLY");
+assert.ok(read("app/api/health/route.ts").includes("retryTransientDatabaseRead(() => prisma.$queryRaw"),
+  "HEALTH_CHECK_RETRIES_READ_ONLY");
 let attempts = 0;
 assert.equal(await retryTransientDatabaseRead(async () => {
   attempts += 1;
