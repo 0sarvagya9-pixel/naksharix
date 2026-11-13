@@ -28,6 +28,10 @@ assert.equal(isTransientDatabaseError(new Error("kind: Closed")), false, "NON_PR
 assert.ok(read("lib/reports/manual-offerings.ts").includes("retryTransientDatabaseRead") &&
   read("lib/reports/manual-offerings.ts").includes("if(isTransientDatabaseError(e))return {}"),
   "MANUAL_REPORT_PUBLIC_PRICE_FAILS_CLOSED");
+assert.ok(read("auth.ts").includes("retryTransientDatabaseRead(() => prisma.user.findUnique"),
+  "AUTH_ROLE_LOOKUP_RETRIES_READ_ONLY");
+assert.ok(read("app/api/health/route.ts").includes("retryTransientDatabaseRead(() => prisma.$queryRaw"),
+  "HEALTH_CHECK_RETRIES_READ_ONLY");
 let attempts = 0;
 assert.equal(await retryTransientDatabaseRead(async () => {
   attempts += 1;
