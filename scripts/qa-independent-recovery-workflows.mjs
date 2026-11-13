@@ -4,9 +4,9 @@ import {readFileSync} from "node:fs";
 const backup=readFileSync(".github/workflows/free-encrypted-db-backup.yml","utf8");
 const watch=readFileSync(".github/workflows/encrypted-recovery-watch.yml","utf8");
 
-// GitHub free runner is independent of the exhausted Vercel Hobby Sandbox.
-assert.match(backup,/push:[\s\S]*?branches: \[main\][\s\S]*?\.github\/workflows\/free-encrypted-db-backup\.yml/,
-  "Only a default-branch edit to this backup workflow may run immediate guarded acceptance.");
+// Never automatically export customer data simply because a workflow changed.
+// The scheduled independent recovery and owner-initiated dispatch remain intact.
+assert.doesNotMatch(backup,/^  push:/m,"Workflow edits must not trigger immediate database exports.");
 assert.match(backup,/schedule:\s*\n\s+- cron: '43 4 \* \* \*'/);
 assert.match(backup,/workflow_dispatch:/);
 assert.match(backup,/BACKUP_DATABASE_URL: \$\{\{ secrets\.BACKUP_DATABASE_URL \}\}/);
@@ -29,6 +29,10 @@ assert.match(backup,/--format=custom --no-owner --no-privileges/);
 assert.match(backup,/age -r "\$BACKUP_AGE_RECIPIENT" -r "\$NAKSHARIX_VERIFY_RECIPIENT"/);
 assert.match(backup,/age --decrypt --identity/);
 assert.match(backup,/pg_restore[\s\S]{0,200}--exit-on-error/);
+assert.match(backup,/pg_isready -h 127\.0\.0\.1 -U postgres -q/);
+assert.match(backup,/psql -h 127\.0\.0\.1 -U postgres -d postgres -Atqc 'SELECT 1'/);
+assert.match(backup,/ISOLATED_POSTGRES_TCP_NOT_READY/);
+assert.match(backup,/pg_restore[\s\S]{0,80}-h 127\.0\.0\.1/);
 assert.match(backup,/SCHEMA_COUNTS=/);
 assert.match(backup,/retention-days: 7/);
 assert.match(backup,/if: env\.NAKSHARIX_VERIFIED_RESTORE == 'YES'/);
