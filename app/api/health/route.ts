@@ -1,5 +1,6 @@
 ﻿import { ok } from "@/lib/api";
 import { prisma } from "@/lib/db";
+import { retryTransientDatabaseRead } from "@/lib/db-transient";
 import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,7 @@ export async function GET() {
   };
 
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await retryTransientDatabaseRead(() => prisma.$queryRaw`SELECT 1`);
     checks.database = "ok";
   } catch {
     checks.database = "error";
