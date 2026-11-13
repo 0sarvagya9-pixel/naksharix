@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Role } from "@prisma/client";
 import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/db";
+import { retryTransientDatabaseRead } from "@/lib/db-transient";
 import { env } from "@/lib/env";
 
 const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
@@ -80,7 +81,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.canBypassPayment = Boolean(user.isAdminLogin);
       }
       if (token.email) {
-        const dbUser = await prisma.user.findUnique({ where: { email: token.email }, select: { id: true, role: true } });
+        // Role lookup is read-only; never retry credential or account mutations.
+        const dbUser = await retryTransientDatabaseRead(() => prisma.user.findUnique({ where: { email: token.email }, select: { id: true, role: true } }));
         if (dbUser) {
           token.id = dbUser.id;
           token.role = dbUser.role;
