@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Section } from "@/components/section";
 import { CommerceEnquiryForm, type EnquiryOption } from "@/components/commerce-enquiry-form";
 import { getCurrentUser } from "@/lib/auth/jwt";
@@ -19,6 +20,7 @@ export default async function CommerceEnquiryPage({
   searchParams
 }: { searchParams: Promise<{ kind?: string; item?: string }> }) {
   const params = await searchParams;
+  if (params.kind === "PUJA") redirect("/pujas");
   const kind = params.kind === "PUJA" ? "PUJA" : "SHOP";
   const user = await getCurrentUser();
   const options: EnquiryOption[] = kind === "SHOP" ?

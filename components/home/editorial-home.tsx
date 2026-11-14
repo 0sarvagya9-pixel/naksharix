@@ -17,7 +17,7 @@ const KUNDLI_PHOTO="https://upload.wikimedia.org/wikipedia/commons/2/2d/Kundali_
 const REPORT_PHOTO="https://upload.wikimedia.org/wikipedia/commons/5/57/Kundali_01.png";
 const heroSlides=[
 {eyebrow:"NAKSHARIX / THE COSMIC JOURNEY",heading:"Decode your destiny,",accent:"design your future.",body:"Discover traditional Vedic wisdom through your birth chart, daily Panchang, personalized reports and thoughtful guidance.",image:STARRY_SKY,main:{label:"Generate free Kundli",href:"/kundli"},secondary:{label:"Explore astrology tools",href:"/free-calculators"}},
-{eyebrow:"SACRED TRADITIONS / PUJA",heading:"Celebrate",accent:"sacred traditions.",body:"Explore 94 Puja traditions and preferred dates; ceremony availability is confirmed separately.",image:pujaEditorialImage("griha-pravesh-puja",STARRY_SKY,"family"),main:{label:"Explore Puja services",href:"/pujas"},secondary:{label:"Festival calendar",href:"/puja-calendar"}},
+{eyebrow:"SACRED TRADITIONS / PUJA",heading:"Celebrate",accent:"sacred traditions.",body:"Puja services coming soon. New bookings and payments are temporarily paused.",image:pujaEditorialImage("griha-pravesh-puja",STARRY_SKY,"family"),main:{label:"Coming Soon",href:"/pujas"},secondary:{label:"Festival calendar",href:"/puja-calendar"}},
 {eyebrow:"BIRTH CHART / REPORTS",heading:"Discover more",accent:"in your chart.",body:"Explore Kundli, compatibility, numerology and personalized report options.",image:REPORT_PHOTO,main:{label:"Explore reports",href:"/reports"},secondary:{label:"Create free Kundli",href:"/kundli"}},
 {eyebrow:"PERSONAL GUIDANCE / CONSULTATION",heading:"Real questions,",accent:"thoughtful guidance.",body:"Browse approved astrologer profiles, session formats and written guidance options.",image:CONSULTATION_PHOTO,main:{label:"View consultations",href:"/consultation"},secondary:{label:"Ask a question",href:"/ask-astrologer"}},
 {eyebrow:"SPIRITUAL SHOP / DISCOVER",heading:"Curated finds",accent:"for your practice.",body:"Discover Rudraksha malas, yantras and spiritual accessories with clear product details.",image:referencePhotoForProduct("rudraksha-mala")?.url||STARRY_SKY,main:{label:"Explore the Shop",href:"/shop"},secondary:{label:"My Orders",href:"/shop/orders"}},
@@ -47,8 +47,8 @@ const services = [
     href:"/reports",cta:"View astrology reports",image:REPORT_PHOTO,alt:"Traditional Kundli chart reference, CC0"
   },
   {
-    number:"04",label:"Traditional Puja",copy:"Explore 94 Puja traditions and book your preferred date.",
-    href:"/pujas",cta:"Explore Puja directory",image:pujaEditorialImage("rudrabhishek","/naksharix/editorial-puja.svg","shiva"),alt:"Licensed representative photograph of Shiva Puja ritual context"
+    number:"04",label:"Traditional Puja",copy:"Puja services are coming soon. New bookings are paused.",
+    href:"/pujas",cta:"Coming Soon",image:pujaEditorialImage("rudrabhishek","/naksharix/editorial-puja.svg","shiva"),alt:"Licensed representative photograph of Shiva Puja ritual context"
   },
   {
     number:"05",label:"Kundli Matching",copy:"Compare traditional chart inputs and learn about Guna Milan.",
@@ -77,7 +77,7 @@ const zodiac = [
 const journeys = [
   {
     label: "Puja & traditions", eyebrow: "TRADITIONS",
-    desc: "Explore Puja traditions, book your preferred date and pay securely. Naksharix coordinates the ceremony.",
+    desc: "Puja services are coming soon; new bookings and payments are temporarily closed.",
     href: "/pujas", cta: "Explore Puja directory",
     image: "/naksharix/ganesh-hero-light-saffron.jpg",
     alt: "Traditional Ganesh devotional art"
@@ -346,7 +346,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
       <section className="nx-ed-section" aria-label="Featured Puja topics">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="PUJA TRADITIONS" title="Ceremonies for every occasion."
-            copy="Explore traditional Puja topics and upcoming festival dates. Availability and local muhurat require confirmation." />
+            copy="Our Puja services are coming soon. New bookings and online payments are temporarily unavailable." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { id:"rudrabhishek", name:"Rudrabhishek", category:"shiva" },
@@ -355,16 +355,16 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
               { id:"griha-pravesh-puja", name:"Griha Pravesh Puja", category:"family" }
             ].map(item=>(
               <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1c1427] text-white">
-                <Link href={"/pujas/"+item.id}
-                  aria-label={"Book Now — "+item.name}>
+                <Link href="/pujas"
+                  aria-label={"Puja services coming soon — "+item.name}>
                   <Image src={pujaEditorialImage(item.id,"/pujas/"+item.category+"-illustration.svg",item.category)} alt={item.name+" representative ritual photo"}
                     width={540} height={335} unoptimized className="aspect-[16/10] w-full object-cover transition duration-300 hover:scale-105" />
                 </Link>
                 <div className="p-5">
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
-                  <Link href={"/pujas/"+item.id}
+                  <Link href="/pujas"
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
-                    Book Now <ArrowRight size={16}/>
+                    Coming Soon <ArrowRight size={16}/>
                   </Link>
                 </div>
               </article>
@@ -375,7 +375,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
               Upcoming festivals <CalendarDays size={17}/>
             </Link>
             <Link href="/pujas" className="inline-flex items-center gap-2 font-bold text-[#724012]">
-              Explore Puja directory <ArrowRight size={17}/>
+              Puja Coming Soon <ArrowRight size={17}/>
             </Link>
           </div>
         </div>

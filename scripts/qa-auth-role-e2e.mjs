@@ -495,69 +495,58 @@ try {
     assert.doesNotMatch(JSON.stringify(result), /push\.example\.test/);
   });
 
-  await check("written questions and puja enquiries are real private non-payment tickets", async () => {
-    for (const path of ["/ask-astrologer", "/puja-enquiry", "/learn"]) {
-      const page = await req(path);
-      assert.equal(page.status, 200, "public explanatory page missing: " + path);
-    }
+  await check("written guidance remains available; Puja enquiries are paused", async () => {
+    const publicGuidance = await req("/ask-astrologer");
+    assert.equal(publicGuidance.status, 200);
+    const comingSoon = await req("/puja-enquiry");
+    assert.ok([200,307,308].includes(comingSoon.status),"Puja enquiry should redirect to Coming Soon");
     const anon = await post("/api/guidance-enquiries", {
-      kind: "WRITTEN_GUIDANCE", topic: "CAREER",
-      message: "Please review this career question using available guidance."
+      kind:"WRITTEN_GUIDANCE",topic:"CAREER",
+      message:"Please review this career question using available guidance."
     });
-    assert.equal(anon.status, 401);
-    const rejected = await post("/api/guidance-enquiries", {
-      kind: "PUJA_ENQUIRY", topic: "GENERAL",
-      message: "Need a ceremony.", paymentStatus: "PAID"
-    }, userCookie);
-    assert.equal(rejected.status, 422, "client may not inject payment fields");
+    assert.equal(anon.status,401);
+    const malformed = await post("/api/guidance-enquiries",{
+      kind:"PUJA_ENQUIRY",topic:"GENERAL",
+      message:"Need a ceremony.",paymentStatus:"PAID"
+    },userCookie);
+    assert.equal(malformed.status,422,"Forged payment fields must be refused");
     const written = await post("/api/guidance-enquiries", {
-      kind: "WRITTEN_GUIDANCE", topic: "CAREER",
-      message: "I am exploring a career change and want to know what traditional chart concepts mean."
-    }, userCookie);
-    const writtenBody = await written.json();
-    assert.equal(written.status, 201, JSON.stringify(writtenBody));
-    assert.equal(writtenBody.data.paymentRequired, false);
-    assert.equal(writtenBody.data.expertAssigned, false);
-    assert.equal(writtenBody.data.bookingCreated, false);
-    const writtenId = writtenBody.data.ticket.id;
-    const puja = await post("/api/guidance-enquiries", {
-      kind: "PUJA_ENQUIRY", topic: "SPIRITUAL_PRACTICE",
-      message: "I would like more information about Rudrabhishek traditions before making any arrangements."
-    }, userCookie);
-    const pujaBody = await puja.json();
-    assert.equal(puja.status, 201, JSON.stringify(pujaBody));
-    const pujaId = pujaBody.data.ticket.id;
-    const actual = await prisma.supportTicket.findMany({
-      where: { id: { in: [writtenId, pujaId] } },
-      select: { id: true, userId: true, subject: true, messages: true }
+      kind:"WRITTEN_GUIDANCE",topic:"CAREER",
+      message:"I am exploring a career change and want to know what traditional chart concepts mean."
+    },userCookie);
+    const writtenBody=await written.json();
+    assert.equal(written.status,201,JSON.stringify(writtenBody));
+    assert.equal(writtenBody.data.paymentRequired,false);
+    assert.equal(writtenBody.data.expertAssigned,false);
+    assert.equal(writtenBody.data.bookingCreated,false);
+    const writtenId=writtenBody.data.ticket.id;
+    const paused=await post("/api/guidance-enquiries",{
+      kind:"PUJA_ENQUIRY",topic:"SPIRITUAL_PRACTICE",
+      message:"I would like more information about Rudrabhishek traditions before making any arrangements."
+    },userCookie);
+    assert.equal(paused.status,503,"New Puja enquiries must not create tickets");
+    const actual=await prisma.supportTicket.findUniqueOrThrow({
+      where:{id:writtenId},select:{userId:true,subject:true,messages:true}
     });
-    assert.equal(actual.length, 2);
-    for (const ticket of actual) {
-      assert.equal(ticket.userId, userId);
-      assert.equal(ticket.messages.length, 1);
-      assert.equal(ticket.messages[0].author, "USER");
-    }
-    assert.ok(actual.some((item) => item.subject.startsWith("[WRITTEN GUIDANCE]")));
-    assert.ok(actual.some((item) => item.subject.startsWith("[PUJA ENQUIRY]")));
-
-    const owned = await req("/api/support/tickets", { headers: { cookie: userCookie } });
-    const ownedData = await owned.json();
-    assert.ok(ownedData.data.tickets.some((ticket) => ticket.id === pujaId));
-    const staff = await req("/api/admin/support", { headers: { cookie: adminCookie } });
-    const staffData = await staff.json();
-    assert.ok(staffData.data.tickets.some((ticket) => ticket.id === writtenId));
-    const staffReply = await post("/api/admin/support/reply", {
-      ticketId: writtenId,
-      message: "Your question was received. Guidance availability will be reviewed before any assignment.",
-      clientMutationId: randomUUID()
-    }, adminCookie);
-    assert.equal(staffReply.status, 200, await staffReply.text());
-    const conversation = await prisma.supportTicket.findUniqueOrThrow({
-      where: { id: writtenId },
-      select: { messages: true }
+    assert.equal(actual.userId,userId);
+    assert.ok(actual.subject.startsWith("[WRITTEN GUIDANCE]"));
+    assert.equal(actual.messages.length,1);
+    const owned=await req("/api/support/tickets",{headers:{cookie:userCookie}});
+    const ownedData=await owned.json();
+    assert.ok(ownedData.data.tickets.some(t=>t.id===writtenId));
+    const staff=await req("/api/admin/support",{headers:{cookie:adminCookie}});
+    const staffData=await staff.json();
+    assert.ok(staffData.data.tickets.some(t=>t.id===writtenId));
+    const replied=await post("/api/admin/support/reply",{
+      ticketId:writtenId,message:"Your question was received. Guidance availability will be reviewed before any assignment.",
+      clientMutationId:randomUUID()
+    },adminCookie);
+    assert.equal(replied.status,200,await replied.text());
+    const conversation=await prisma.supportTicket.findUniqueOrThrow({
+      where:{id:writtenId},select:{messages:true}
     });
-    assert.equal(conversation.messages.length, 2);
-    assert.equal(conversation.messages[1].author, "ADMIN");
+    assert.equal(conversation.messages.length,2);
+    assert.equal(conversation.messages[1].author,"ADMIN");
   });
 
   await check("free lessons persist real owner-scoped progress and forbid forged credits", async () => {
@@ -625,7 +614,7 @@ try {
         kind: "PUJA_ENQUIRY", topic: "SPIRITUAL_PRACTICE", partnerId,
         message: "Please share basic details about this regional ritual enquiry before booking."
       }, userCookie);
-      assert.equal(privateRequest.status, 422, "unreviewed partner was accepted as an option");
+      assert.equal(privateRequest.status, 503, "Puja enquiries must stay paused even for unreviewed partners");
       const blockedReview = await post(endpoint, {
         partnerId, decision: "VERIFIED", note: "Users cannot verify providers."
       }, userCookie, "PATCH");
@@ -644,7 +633,7 @@ try {
         kind: "PUJA_ENQUIRY", topic: "SPIRITUAL_PRACTICE", partnerId,
         message: "I am looking for the traditional meaning of a Ganesh Puja ceremony."
       }, userCookie);
-      assert.equal(enquiry.status, 201, await enquiry.text());
+      assert.equal(enquiry.status, 503, "New Puja enquiries remain paused even for verified partners");
       const suspended = await post(endpoint, {
         partnerId, decision: "SUSPENDED",
         note: "Disable the test partner from the public catalogue."
@@ -658,81 +647,43 @@ try {
     }
   });
 
-  await check("authenticated Shop and Puja enquiries persist in real support queue without payments", async () => {
-    const created = [];
+  await check("Shop enquiries remain live while Puja enquiries fail closed", async () => {
+    const saved=[];
     try {
-      const unauth = await post("/api/commerce/enquiries", {
-        kind: "SHOP", itemId: "shri-yantra", quantity: 1,
-        message: "Can you confirm authenticity and delivery options?"
+      const unauth=await post("/api/commerce/enquiries",{
+        kind:"SHOP",itemId:"shri-yantra",quantity:1,
+        message:"Can you confirm authenticity and delivery options?"
       });
-      assert.equal(unauth.status, 401);
-      const rejected = await post("/api/commerce/enquiries", {
-        kind: "SHOP", itemId: "shri-yantra", quantity: 0,
-        message: "Please provide your best price and supplier details."
-      }, userCookie);
-      assert.equal(rejected.status, 422);
-      const priceInjection = await post("/api/commerce/enquiries", {
-        kind: "SHOP", itemId: "shri-yantra", quantity: 1, amount: 1,
-        paymentStatus: "PAID", message: "Please reserve and deliver two yantras."
-      }, userCookie);
-      assert.equal(priceInjection.status, 422);
-      const shop = await post("/api/commerce/enquiries", {
-        kind: "SHOP", itemId: "shri-yantra", quantity: 2,
-        message: "Please verify the actual physical item, stock and price."
-      }, userCookie);
-      const shopBody = await shop.json();
-      assert.equal(shop.status, 201, JSON.stringify(shopBody));
-      assert.equal(shopBody.data.paymentRequired, false);
-      assert.equal(shopBody.data.orderCreated, false);
-      assert.equal(shopBody.data.bookingCreated, false);
-      assert.equal(shopBody.data.trackingPath, "/support");
-      created.push(shopBody.data.ticket.id);
-      const ticket = await prisma.supportTicket.findUniqueOrThrow({ where: { id: shopBody.data.ticket.id } });
-      assert.equal(ticket.userId, userId);
-      assert.match(ticket.subject, /^\[SHOP ENQUIRY\]/);
-      assert.ok(JSON.stringify(ticket.messages).includes("Quantity requested: 2"));
-      const feed = await req("/api/puja/calendar");
-      assert.equal(feed.status, 200);
-      const first = (await feed.json()).data.events[0];
+      assert.equal(unauth.status,401);
+      const forged=await post("/api/commerce/enquiries",{
+        kind:"SHOP",itemId:"shri-yantra",quantity:1,amount:1,paymentStatus:"PAID",
+        message:"Please reserve and deliver two yantras."
+      },userCookie);
+      assert.equal(forged.status,422);
+      const shop=await post("/api/commerce/enquiries",{
+        kind:"SHOP",itemId:"shri-yantra",quantity:2,
+        message:"Please verify the actual physical item, stock and price."
+      },userCookie);
+      const data=await shop.json();
+      assert.equal(shop.status,201,JSON.stringify(data));
+      assert.equal(data.data.paymentRequired,false);
+      assert.equal(data.data.orderCreated,false);
+      saved.push(data.data.ticket.id);
+      const ticket=await prisma.supportTicket.findUniqueOrThrow({where:{id:data.data.ticket.id}});
+      assert.match(ticket.subject,/^\[SHOP ENQUIRY\]/);
+      const calendar=await req("/api/puja/calendar");
+      assert.equal(calendar.status,200);
+      const first=(await calendar.json()).data.events[0];
       assert.ok(first?.id);
-      const puja = await post("/api/commerce/enquiries", {
-        kind: "PUJA", itemId: first.id, city: "Bhopal",
-        message: "Please advise about local Panchang and pandit availability."
-      }, userCookie);
-      const pujaBody = await puja.json();
-      assert.equal(puja.status, 201, JSON.stringify(pujaBody));
-      assert.equal(pujaBody.data.fulfillmentConfirmed, false);
-      created.push(pujaBody.data.ticket.id);
-      const pujaTicket = await prisma.supportTicket.findUniqueOrThrow({ where: { id: pujaBody.data.ticket.id } });
-      assert.equal(pujaTicket.userId, userId);
-      assert.match(pujaTicket.subject, /^\[PUJA DATE ENQUIRY\]/);
-      assert.ok(JSON.stringify(pujaTicket.messages).includes("Local tithi/muhurat: NOT VERIFIED"));
-      const ritual = await post("/api/commerce/enquiries", {
-        kind: "PUJA", itemId: "ritual:rudrabhishek", city: "Bhopal",
-        message: "Please explain possible traditional arrangement requirements."
-      }, userCookie);
-      const ritualBody = await ritual.json();
-      assert.equal(ritual.status, 201, JSON.stringify(ritualBody));
-      assert.equal(ritualBody.data.bookingCreated, false);
-      assert.equal(ritualBody.data.paymentRequired, false);
-      created.push(ritualBody.data.ticket.id);
-      const ritualTicket = await prisma.supportTicket.findUniqueOrThrow({
-        where: { id: ritualBody.data.ticket.id }
-      });
-      assert.match(ritualTicket.subject, /^\[PUJA TOPIC ENQUIRY\]/);
-      assert.ok(JSON.stringify(ritualTicket.messages).includes("Traditional Puja: Rudrabhishek"));
-      const forgedRitual = await post("/api/commerce/enquiries", {
-        kind: "PUJA", itemId: "ritual:invented-paid-ritual", city: "Bhopal",
-        message: "Please do not allow me to book invented ceremonies."
-      }, userCookie);
-      assert.equal(forgedRitual.status, 422);
-      const invalidCalendar = await post("/api/commerce/enquiries", {
-        kind: "PUJA", itemId: "2029-invented-ceremony", city: "Bhopal",
-        message: "This event should not be available for booking."
-      }, userCookie);
-      assert.equal(invalidCalendar.status, 422);
+      for(const itemId of [first.id,"ritual:rudrabhishek","ritual:invented-paid-ritual"]) {
+        const puja=await post("/api/commerce/enquiries",{
+          kind:"PUJA",itemId,city:"Bhopal",
+          message:"Please confirm availability when Puja services reopen."
+        },userCookie);
+        assert.equal(puja.status,503,"Puja Coming Soon must refuse new support enquiries");
+      }
     } finally {
-      await prisma.supportTicket.deleteMany({ where: { id: { in: created } } });
+      await prisma.supportTicket.deleteMany({where:{id:{in:saved}}});
     }
   });
 
@@ -754,15 +705,17 @@ try {
       const data=await updated.json();assert.equal(updated.status,200);
       assert.equal(data.data.offerings.find(o=>o.topicId==="rudrabhishek").pricePaise,199900);
       const detail=await req("/pujas/rudrabhishek");
-      assert.equal(detail.status,200);
-      assert.match(await detail.text(),/₹1,999/);
+      assert.ok([200,307,308].includes(detail.status));
+      assert.doesNotMatch(await detail.text(),/₹1,999/);
       const directory=await req("/pujas");
       assert.equal(directory.status,200);
-      assert.match(await directory.text(),/₹1,999/);
+      const pausedHtml=await directory.text();
+      assert.match(pausedHtml,/Coming Soon|जल्द आ रही हैं/);
+      assert.doesNotMatch(pausedHtml,/₹1,999/);
       const stop=await post(url,{...input,available:false},adminCookie,"PUT");
       assert.equal(stop.status,200,await stop.text());
       const unpublished=await req("/pujas/rudrabhishek");
-      assert.equal(unpublished.status,200);
+      assert.ok([200,307,308].includes(unpublished.status));
       assert.doesNotMatch(await unpublished.text(),/₹1,999/);
     } finally {
       // CI localhost database only, never production. Clean the synthetic offer record.
@@ -867,56 +820,30 @@ try {
     }
   });
 
-  await check("real Puja booking supports owner-managed ceremony and private tracking", async () => {
-    const topicId="rudrabhishek",offerUrl="/api/admin/puja-offerings";
-    const offerInput={topicId,pricePaise:199900,durationMinutes:90,available:true,note:"Disposable CI-only service offering"};
-    const request={topicId,preferredDate:new Date(Date.now()+5*86400000).toISOString().slice(0,10),
+  await check("Puja Coming Soon rejects new booking writes and preserves private history", async () => {
+    const request={
+      topicId:"rudrabhishek",
+      preferredDate:new Date(Date.now()+5*86400000).toISOString().slice(0,10),
       city:"Indore",devoteeName:"QA Devotee",gotra:null,
-      sankalpNote:"This is a synthetic Puja test. No ceremony to be performed.",customerPhone:"+91 9876543210"};
-    let bookingId,partnerId;
-    const extraBookingIds=[];
-    try {
-      const anon=await post("/api/puja/bookings",request);assert.equal(anon.status,401);
-      const unopened=await post("/api/puja/bookings",request,userCookie);assert.equal(unopened.status,422);
-      const approved=await post(offerUrl,offerInput,adminCookie,"PUT");assert.equal(approved.status,200,await approved.text());
-      const injected=await post("/api/puja/bookings",{...request,paymentStatus:"PAID"},userCookie);
-      assert.equal(injected.status,422);
-      const created=await post("/api/puja/bookings",request,userCookie);
-      const body=await created.json();assert.equal(created.status,201,JSON.stringify(body));
-      bookingId=body.data.booking.id;
-      assert.equal(body.data.confirmed,false);assert.equal(body.data.panditAssigned,false);
-      assert.equal(body.data.booking.quotedPricePaise,199900);
-      for(let n=0;n<3;n++){
-        const extra=await post("/api/puja/bookings",request,userCookie);
-        assert.equal(extra.status,201,"Puja request "+(n+2)+" should fit quota");
-        extraBookingIds.push((await extra.json()).data.booking.id);
-      }
-      const overLimit=await post("/api/puja/bookings",request,userCookie);
-      assert.equal(overLimit.status,429,"Fifth Puja request must be denied without a write");
-      const ownerList=await req("/api/puja/bookings",{headers:{cookie:userCookie}});
-      assert.ok((await ownerList.json()).data.bookings.some(p=>p.id===bookingId));
-      const adminList=await req("/api/admin/puja-bookings",{headers:{cookie:adminCookie}});
-      const row=(await adminList.json()).data.bookings.find(p=>p.id===bookingId);
-      assert.ok(row && row.status==="REQUESTED");
-      const patch={id:bookingId,expectedVersion:row.version,status:"CONFIRMED",partnerId:null,
-        scheduledAt:null,adminNote:"CI synthetic verification only",evidenceUrl:null};
-      const unauthorized=await post("/api/admin/puja-bookings",patch,userCookie,"PATCH");assert.equal(unauthorized.status,403);
-      const ownerManaged=await post("/api/admin/puja-bookings",patch,adminCookie,"PATCH");
-      const confirmed=await ownerManaged.json();assert.equal(ownerManaged.status,200,JSON.stringify(confirmed));
-      assert.equal(confirmed.data.booking.status,"CONFIRMED");
-      assert.equal(confirmed.data.booking.partnerId,null);
-      const stale=await post("/api/admin/puja-bookings",patch,adminCookie,"PATCH");
-      assert.equal(stale.status,409);
-      const scheduled=await post("/api/admin/puja-bookings",
-        {...patch,expectedVersion:2,status:"SCHEDULED",
-          scheduledAt:new Date(Date.now()+5*86400000).toISOString()},adminCookie,"PATCH");
-      assert.equal(scheduled.status,200,await scheduled.text());
-      const latest=await prisma.pujaBookingRequest.findUniqueOrThrow({where:{id:bookingId}});
-      assert.equal(latest.status,"SCHEDULED");assert.ok(latest.scheduledAt);
-    } finally {
-      if(bookingId||extraBookingIds.length)await prisma.pujaBookingRequest.deleteMany({where:{id:{in:[...(bookingId?[bookingId]:[]),...extraBookingIds]}}});
-      if(partnerId)await prisma.pujaPartner.deleteMany({where:{id:partnerId}});
-      await prisma.pujaOffering.deleteMany({where:{topicId}});
+      sankalpNote:"A synthetic CI-only request which must not create any booking.",
+      customerPhone:"+91 9876543210"
+    };
+    const before=await prisma.pujaBookingRequest.count();
+    for(const cookie of [undefined,userCookie,adminCookie]){
+      const result=await post("/api/puja/bookings",request,cookie);
+      assert.equal(result.status,503,"Puja booking POST must never create new rows");
+    }
+    const injected=await post("/api/puja/bookings",{...request,paymentStatus:"PAID"},userCookie);
+    assert.equal(injected.status,503);
+    const after=await prisma.pujaBookingRequest.count();
+    assert.equal(after,before,"Puja Coming Soon wrote new bookings");
+    const history=await req("/api/puja/bookings",{headers:{cookie:userCookie}});
+    assert.equal(history.status,200,await history.text());
+    const admin=await req("/api/admin/puja-bookings",{headers:{cookie:adminCookie}});
+    assert.equal(admin.status,200,await admin.text());
+    for(const path of ["/pujas","/puja-booking?item=rudrabhishek","/pujas/rudrabhishek"]){
+      const page=await req(path);
+      assert.ok([200,307,308].includes(page.status),"Puja public route unavailable: "+path);
     }
   });
 

@@ -5,7 +5,8 @@ const keys=["kundli","consultation","reports","learning","panchang","puja","taro
 for(const k of keys)assert.ok(existsSync("public/naksharix/editorial-"+k+".svg"),"MISSING_RELEVANT_ART="+k);
 for(const p of ["app/horoscope/page.tsx","app/tarot/page.tsx","app/matchmaking/page.tsx","app/puja-calendar/page.tsx","app/free-calculators/page.tsx","app/consultation/page.tsx","app/reports/page.tsx","app/learn/page.tsx","app/shop/page.tsx","app/puja-enquiry/page.tsx","app/kundli/page.tsx","app/numerology/page.tsx","app/blog/page.tsx","app/astrologers/page.tsx"]){
   const s=read(p);
-  assert.ok(s.includes("editorial-")||s.includes("rudraksha-mala-illustration.svg")||
+  assert.ok((p === "app/puja-enquiry/page.tsx" && s.includes('redirect("/pujas")')) ||
+    s.includes("editorial-")||s.includes("rudraksha-mala-illustration.svg")||
     s.includes("commons.wikimedia.org/wiki/Special:FilePath")||s.includes("upload.wikimedia.org"),
     "HERO_NOT_CONTEXTUAL="+p);
   assert.ok(!/star-filled night sky above mountains|Golden sunrise over mountains|Milky Way sky above snowy mountains/i.test(s),"IRRELEVANT_PHOTO="+p);

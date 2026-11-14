@@ -20,6 +20,7 @@ const orders=read("app/api/commerce/orders/route.ts");
 const adminOrders=read("app/api/admin/shop-orders/route.ts");
 const puja=read("app/api/puja/bookings/route.ts");
 const adminPuja=read("app/api/admin/puja-bookings/route.ts");
+const pujaPaused=puja.includes("New bookings are temporarily closed.");
 assert.ok(orders.includes("getCurrentUser()")&&orders.includes("getShopCatalogue()")&&
  orders.includes('paymentStatus:"UNPAID"')&&orders.includes("Number.isSafeInteger(subtotal)"),"Order price/payment invariant absent");
 assert.ok(orders.includes("new Set(productIds).size")&&orders.includes("pg_advisory_xact_lock")&&
@@ -36,11 +37,14 @@ assert.ok(adminOrders.includes("getAdminApiUser()")&&adminOrders.includes("updat
  "Shop admin role/concurrency/audit missing");
 assert.ok(adminOrders.includes("paymentCollected:false")&&adminOrders.includes("onlinePaymentVerified:false"),
  "Never claim an unverified gateway charge");
-assert.ok(puja.includes("getCurrentUser()")&&puja.includes("getPuja")===false&&
- puja.includes("pujaOffering.findUnique")&&puja.includes("pg_advisory_xact_lock")&&puja.includes("tx.pujaBookingRequest.count")&&
- puja.includes("tx.pujaBookingRequest.create")&&puja.includes("if(recent>=4)return null")&&
- puja.includes("preferredDate"),
- "Puja booking must read real published offer and validate preferred date");
+assert.ok(pujaPaused ?
+   (puja.includes("export async function GET()") && puja.includes("prisma.pujaBookingRequest.findMany") &&
+    !puja.includes("pujaBookingRequest.create")) :
+   (puja.includes("getCurrentUser()")&&puja.includes("getPuja")===false&&
+    puja.includes("pujaOffering.findUnique")&&puja.includes("pg_advisory_xact_lock")&&
+    puja.includes("tx.pujaBookingRequest.count")&&puja.includes("tx.pujaBookingRequest.create")&&
+    puja.includes("if(recent>=4)return null")&&puja.includes("preferredDate")),
+ "Puja booking must fail closed while Coming Soon or validate current offers before writes");
 assert.ok(adminPuja.includes("getAdminApiUser()")&&adminPuja.includes('reviewStatus!=="VERIFIED"')&&
  adminPuja.includes("updateMany")&&adminPuja.includes("adminActionLog.create"),
  "Puja admin needs verified partner and optimistic concurrency");
@@ -48,17 +52,19 @@ assert.ok(
  !orders.includes('from "@/lib/rate-limit"') &&
  !puja.includes('from "@/lib/rate-limit"') &&
  orders.includes("prisma.$transaction") &&
- puja.includes("prisma.$transaction") &&
  orders.includes("Daily order request limit reached.") &&
- puja.includes("Daily Puja request limit reached."),
+ (pujaPaused ? !puja.includes("pujaBookingRequest.create") :
+  (puja.includes("prisma.$transaction") && puja.includes("Daily Puja request limit reached."))),
  "COMMERCIAL_REQUEST_QUOTA_MUST_BE_DB_SERIALIZED_ACROSS_INSTANCES"
 );
 assert.ok(read("components/shop/cart-page-client.tsx").includes('secureFetch("/api/commerce/orders"')&&
  read("app/orders/page.tsx").includes("userId:user.id"),"Customer shop order flow missing");
-assert.ok(read("components/puja/booking-request-client.tsx").includes('secureFetch("/api/puja/bookings"')&&
- read("app/puja-bookings/page.tsx").includes("userId:user.id"),"Customer Puja booking flow missing");
+assert.ok((pujaPaused || read("components/puja/booking-request-client.tsx").includes('secureFetch("/api/puja/bookings"'))&&
+ read("app/puja-bookings/page.tsx").includes("userId:user.id"),"Existing Puja history and closure gate missing");
 assert.ok(read("scripts/qa-auth-role-e2e.mjs").includes("real Shop order request")&&
- read("scripts/qa-auth-role-e2e.mjs").includes("real Puja booking supports owner-managed ceremony"),"Disposable HTTP acceptance missing");
+ read("scripts/qa-auth-role-e2e.mjs").includes(pujaPaused ?
+   "Puja Coming Soon rejects new booking writes" :
+   "real Puja booking supports owner-managed ceremony"),"Disposable HTTP acceptance missing");
 const reportAdmin=read("app/api/admin/manual-report-offerings/route.ts");
 const reportUI=read("components/reports-content.tsx");
 assert.ok(reportAdmin.includes("getAdminApiUser()")&&reportAdmin.includes("getManualReportCheckout(input.reportSlug)")&&

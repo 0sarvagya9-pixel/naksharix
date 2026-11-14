@@ -1,9 +1,6 @@
 import type {Metadata} from "next";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
-import { env } from "@/lib/env";
-import { getRazorpayReadiness } from "@/lib/payments/readiness";
-import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { findPujaTopic } from "@/lib/puja/service-catalogue";
@@ -16,21 +13,18 @@ export default async function MyPujas(){
    <Link className="mt-3 inline-block text-[#8c3044] underline" href="/login">Sign in</Link></main>;
  let rows:Awaited<ReturnType<typeof prisma.pujaBookingRequest.findMany>>=[];
  let payments:Awaited<ReturnType<typeof prisma.payment.findMany>>=[];
- let publishedOfferIds=new Set<string>();
  let missing=false;
  try{
    rows=await prisma.pujaBookingRequest.findMany({where:{userId:user.id},orderBy:{createdAt:"desc"},take:50});
    payments=await prisma.payment.findMany({where:{userId:user.id,purpose:"PUJA_BOOKING"},
      orderBy:{createdAt:"desc"},take:100});
-   const offers=await prisma.pujaOffering.findMany({where:{topicId:{in:rows.map(row=>row.topicId)},available:true,pricePaise:110000},select:{topicId:true}});
-   publishedOfferIds=new Set(offers.map(offer=>offer.topicId));
  }
  catch(e){if(e instanceof Prisma.PrismaClientKnownRequestError&&e.code==="P2021")missing=true;else throw e}
  return <main className="min-h-screen bg-[#fffbf5] px-5 py-12 text-[#432b34]">
   <div className="mx-auto max-w-4xl"><h1 className="font-cinzel text-4xl font-bold">My Puja Requests</h1>
-   <p className="mt-4 text-sm text-[#6b555c]">View your Puja bookings, payments and preferred dates. Our team coordinates the final ceremony schedule.</p>
+   <p className="mt-4 text-sm text-[#6b555c]">View your existing Puja bookings, payments and preferred dates. New Puja bookings and payments are currently paused.</p>
    {missing?<p className="mt-7 rounded-xl border p-5">Puja booking service will become available after the reviewed database migration.</p>:null}
-   {!missing&&!rows.length?<div className="mt-8 rounded-xl border bg-white p-7">No Puja requests yet. <Link href="/pujas" className="font-bold text-[#792a3c] underline">Browse Pujas</Link></div>:null}
+   {!missing&&!rows.length?<div className="mt-8 rounded-xl border bg-white p-7">No Puja requests yet. <Link href="/pujas" className="font-bold text-[#792a3c] underline">Puja services coming soon</Link></div>:null}
    <div className="mt-8 grid gap-5">{rows.map(row=><article key={row.id} className="rounded-2xl border border-[#e8cbaa] bg-white p-6">
     <p className="text-xs font-bold tracking-wide text-[#8f3947]">#{row.id}</p>
     <h2 className="mt-2 font-cinzel text-xl font-bold">{findPujaTopic(row.topicId)?.name||row.topicId}</h2>
@@ -46,15 +40,9 @@ export default async function MyPujas(){
       });
       const payment=bookingPayments[0];
       const paymentSettled=bookingPayments.some(pay=>["PAID","REFUNDED","ADMIN_BYPASS","FREE"].includes(pay.status));
-      const eligible=["REQUESTED","CONFIRMED","SCHEDULED"].includes(row.status)&&
-        publishedOfferIds.has(row.topicId)&&row.quotedPricePaise===110000;
-      const retryable=!paymentSettled&&(!payment||["PENDING","FAILED"].includes(payment.status));
-      const checkoutEnabled=env.PUJA_PAYMENTS_ENABLED==="true"&&getRazorpayReadiness().enabled;
       return <div className="mt-4 rounded-xl border border-[#e8cbaa] bg-[#fff8ed] p-4">
         <p className="text-sm font-semibold">Razorpay payment: {payment?.status||"NOT CHARGED"}</p>
-        {eligible&&retryable&&checkoutEnabled?
-          <div className="mt-3"><RazorpayCheckoutButton payload={{purpose:"PUJA_BOOKING",bookingId:row.id}} label={payment?.status==="FAILED"?"Retry ₹1,100 Razorpay payment":payment?.status==="PENDING"?"Resume ₹1,100 Razorpay checkout":"Pay ₹1,100 securely with Razorpay"} successHref="/puja-bookings"/></div>:null}
-        {eligible&&retryable&&!checkoutEnabled?<p className="mt-2 text-xs">Your booking is saved. Online payment will be available when checkout is active.</p>:null}
+        {!paymentSettled?<p className="mt-2 text-xs">New Puja payments are paused while Puja services are coming soon. Please contact support regarding an existing payment or request.</p>:null}
         <p className="mt-2 text-xs">The preferred date is a request; the final time and ceremony logistics will be coordinated separately.</p>
         {paymentSettled?<p className="mt-2 text-xs">Payment history is recorded; another checkout will not be opened for this booking.</p>:null}
       </div>;

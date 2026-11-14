@@ -8,6 +8,8 @@ const index=read("app/pujas/page.tsx");
 const detail=read("app/pujas/[id]/page.tsx");
 const listings=read("components/puja/puja-services-directory.tsx");
 const db=read("lib/puja/offerings.ts");
+const pujaPaused=index.includes("Coming Soon") && detail.includes('redirect("/pujas")') &&
+  read("app/api/puja/bookings/route.ts").includes("New bookings are temporarily closed.");
 assert.ok(db.includes("no payment is collected before confirmation")&&db.includes("note:/(verified Pandit availability"),"LEGACY_PUJA_NOTE_MUST_NOT_MISLEAD_PUBLIC");
 const sql=read("docs/sql/20261027_puja_offering.sql");
 assert.match(prisma,/model PujaOffering \{/);
@@ -17,18 +19,18 @@ assert.ok(admin.includes('if(!findPujaTopic(input.topicId))')&&admin.includes('i
 assert.ok(admin.includes('pricePaise:z.number().int().min(100).max(100000000).nullable()'),"Unsafe amount range");
 assert.ok(!/\b(?:razorpay|payment\.create|checkoutSession|prisma\.payment\.create)\b/.test(admin),"Admin rate update must not collect a payment");
 assert.ok(ui.includes('secureFetch("/api/admin/puja-offerings"')&&ui.includes("Publish price"),"Missing editable Admin Puja prices");
-assert.ok(index.includes("getPublishedPujaOffers()")&&listings.includes("offerings[topic.id]")&&detail.includes('const offering=(await getPublishedPujaOffers())[item.id]'),"Missing public price integration");
+assert.ok(pujaPaused || (index.includes("getPublishedPujaOffers()")&&listings.includes("offerings[topic.id]")&&detail.includes('const offering=(await getPublishedPujaOffers())[item.id]')),"Public price integration must be active or deliberately paused");
 assert.ok(db.includes('error.code==="P2021"')&&db.includes("return {}"),"Missing-table fallback must not fake prices");
-assert.ok(listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "')&&listings.includes("listed service fee · secure checkout"),"Published Puja offers must show Book Now and current checkout");
+assert.ok(pujaPaused || (listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "')&&listings.includes("listed service fee · secure checkout")),"Puja public booking must be priced or coming soon");
 const bookingClient=read("components/puja/booking-request-client.tsx");
 const bookingApi=read("app/api/puja/bookings/route.ts");
-assert.ok(bookingClient.includes("expectedPricePaise:pricePaise") &&
+assert.ok(pujaPaused || (bookingClient.includes("expectedPricePaise:pricePaise") &&
   bookingApi.includes("expectedPricePaise:z.number().int().min(100).max(100000000).optional()") &&
   bookingApi.includes("offer.pricePaise!==input.expectedPricePaise") &&
-  bookingApi.includes('Refresh and review the new price before submitting.'), "PUJA_PRICE_STALE_SUBMISSION_MUST_FAIL_CLOSED");
+  bookingApi.includes('Refresh and review the new price before submitting.')), "PUJA_PRICE_STALE_SUBMISSION_MUST_FAIL_CLOSED");
 assert.ok(bookingClient.includes("confirmedQuotePaise")&&bookingClient.includes("quotedPricePaise")&&
   !bookingClient.includes("Listed fee ₹1,100."),"BOOKING_COPY_MUST_FOLLOW_SERVER_QUOTE");
-assert.ok(!detail.includes("₹1,100 is the listed service fee.")&&detail.includes("Book Now saves your preferred date"),
+assert.ok(pujaPaused || (!detail.includes("₹1,100 is the listed service fee.")&&detail.includes("Book Now saves your preferred date")),
   "PUJA_DETAIL_MUST_NOT_CONTRADICT_ADMIN_PRICE");
 assert.ok(ui.includes('ResilientEditorialImage')&&ui.includes('fallbackSrc={topic.graphic}')&&
   !ui.includes('import Image from "next/image"'), "ADMIN_PHOTO_MUST_FALLBACK_IF_COMMONS_UNAVAILABLE");
@@ -49,14 +51,16 @@ assert.ok(gatewayWebhook.includes('event.event === "refund.processed"')&&
   gatewayWebhook.includes("verifyRazorpayWebhookSignature")&&
   sharedRefund.includes('original.purpose === "PUJA_BOOKING"')&&
   sharedRefund.includes('status: "REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
-assert.ok(bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"'),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");
-assert.ok(bookingPage.includes('pricePaise:110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
-  bookingPage.includes('getRazorpayReadiness().enabled')&&bookingPage.includes('["REQUESTED","CONFIRMED","SCHEDULED"].includes(row.status)'),
+assert.ok(pujaPaused ? !bookingPage.includes("RazorpayCheckoutButton") : (bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"')),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");
+assert.ok(pujaPaused ? bookingPage.includes("prisma.payment.findMany") && bookingPage.includes("prisma.pujaBookingRequest.findMany") && !bookingPage.includes("RazorpayCheckoutButton") :
+  (bookingPage.includes('pricePaise:110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
+  bookingPage.includes('getRazorpayReadiness().enabled')&&bookingPage.includes('["REQUESTED","CONFIRMED","SCHEDULED"].includes(row.status)')),
   "PUJA_CHECKOUT_UI_PRICE_OR_CREDENTIAL_GUARD_MISSING");
-assert.ok(bookingPage.includes('["PENDING","FAILED"].includes(payment.status)')&&
+assert.ok(pujaPaused ? bookingPage.includes("paymentSettled=bookingPayments.some") && !bookingPage.includes("retryable&&checkoutEnabled") :
+  (bookingPage.includes('["PENDING","FAILED"].includes(payment.status)')&&
   bookingPage.includes('paymentSettled=bookingPayments.some')&&
   bookingPage.includes('"REFUNDED"')&&
-  bookingPage.includes('retryable&&checkoutEnabled'),"PUJA_CHECKOUT_FAILED_PENDING_RESUME_OR_DUPLICATE_GUARD_MISSING");
+  bookingPage.includes('retryable&&checkoutEnabled')),"PUJA_CHECKOUT_FAILED_PENDING_RESUME_OR_DUPLICATE_GUARD_MISSING");
 const checkoutClient=read("components/razorpay-checkout-button.tsx");
 assert.ok(checkoutClient.includes("Unable to reach the payment server")&&
   checkoutClient.includes("Payment confirmation is pending")&&

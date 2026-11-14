@@ -56,7 +56,9 @@ assert.ok(card.includes("Images are for reference") &&
   "HONEST_IMAGE_REFERENCE_OR_CART_LINK_MISSING");
 assert.ok(read("components/reports-content.tsx").includes("RazorpayCheckoutButton") &&
   read("components/puja/puja-services-directory.tsx").includes("offerings[topic.id]") &&
-  read("app/pujas/[id]/page.tsx").includes("displayPujaPrice"),
+  (read("app/pujas/[id]/page.tsx").includes("displayPujaPrice") ||
+   (read("app/pujas/[id]/page.tsx").includes('redirect("/pujas")') &&
+    read("app/pujas/page.tsx").includes("Coming Soon"))),
   "PRICE_AND_SECURE_CHECKOUT_INTEGRITY_MISSING");
 assert.ok(read("app/panchang/page.tsx").includes("Daily Panchang") &&
   !read("app/panchang/page.tsx").includes("provider-verified regression"),

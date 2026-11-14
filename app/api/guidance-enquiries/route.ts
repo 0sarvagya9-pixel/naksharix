@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     // Validate before counting attempts. Never accept recipient IDs, prices,
     // astrologer assignments, payment flags, or an externally supplied subject.
     const input = await validateJson(request, schema);
+    if (String(input.kind) === "PUJA_ENQUIRY") return fail("Puja services coming soon. New enquiries are paused.", 503);
     if (input.partnerId && input.kind !== "PUJA_ENQUIRY") {
       return fail("Partner references are only valid for puja enquiries", 422);
     }

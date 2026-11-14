@@ -126,8 +126,10 @@ for(const id of ["kali-puja","saraswati-puja","satyanarayan-katha","karwa-chauth
 assert.ok(sourceCoverage.includes("puja-photo-coverage") &&
   sourceCoverage.includes("Category fallbacks are not photos of the exact ceremony."),"PUJA_IMAGE_COMPLETENESS_MUST_BE_TRUTHFUL");
 assert.ok(home.includes('href={"/shop/"+item.id}') &&
-  home.includes('View item / Add to Cart')&&home.includes('href={"/pujas/"+item.id}')&&
-  home.includes('Book Now <ArrowRight'),"HOMEPAGE_FEATURED_COMMERCE_LINKS_STALE");
+  home.includes('View item / Add to Cart') &&
+  ((home.includes('href={"/pujas/"+item.id}') && home.includes('Book Now <ArrowRight')) ||
+    (home.includes('href="/pujas"') && home.includes('Coming Soon <ArrowRight'))),
+  "HOMEPAGE_FEATURED_COMMERCE_LINKS_STALE");
 
 const adminPujaPhotos=read("components/admin-puja-offerings.tsx");
 for(const marker of ["needsExactPhoto","Show Pujas that still need a topic-specific photograph",
@@ -143,7 +145,10 @@ assert.ok(resilientPuja.includes("wikimediaOriginalForThumbnail(src)")&&
  !resilientPuja.includes('src.replace("https://thumb.wikimedia.org/"'),
  "WIKIMEDIA_CANONICAL_ORIGINAL_AND_ILLUSTRATION_FALLBACK_MISSING");
 for(const page of ["components/puja/puja-services-directory.tsx","app/pujas/[id]/page.tsx"]){
- assert.ok(read(page).includes("<ResilientEditorialImage"),"PUJA_IMAGE_FALLBACK_NOT_CONNECTED="+page);
+ const source = read(page);
+ assert.ok(source.includes("<ResilientEditorialImage") ||
+   (page === "app/pujas/[id]/page.tsx" && source.includes('redirect("/pujas")')),
+   "PUJA_IMAGE_FALLBACK_NOT_CONNECTED="+page);
 }
 
 const shopAdminReadiness=read("components/admin-shop-content.tsx");
