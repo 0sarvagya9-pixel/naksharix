@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
     if (body.purpose === "SUBSCRIPTION" && env.SUBSCRIPTIONS_ENABLED !== "true") return fail("Not found", 404);
     if (body.purpose === "SHOP_ORDER" && env.SHOP_PAYMENTS_ENABLED !== "true")
       return fail("Shop online payments are temporarily unavailable. Your order remains saved.", 503);
-    if (body.purpose === "PUJA_BOOKING" && env.PUJA_PAYMENTS_ENABLED !== "true")
-      return fail("Puja online checkout is temporarily unavailable. Your booking can still be saved.", 503);
+    if (body.purpose === "PUJA_BOOKING")
+      return fail("Puja services coming soon. New Puja payments are temporarily closed.", 503);
     if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
     const readiness = getRazorpayReadiness();
     if (!readiness.enabled || !razorpay) return fail(readiness.reason, 503);
