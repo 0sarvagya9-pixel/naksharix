@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const src=readFileSync("app/api/ops/one-time-puja-care-email/route.ts","utf8");
+assert.ok(src.includes("timingSafeEqual")&&src.includes("Date.now() > EXPIRES"));
+assert.ok(src.includes("getEmailReadiness")&&src.includes("care_sender_unavailable"));
+assert.ok(src.includes("care@naksharix\\.com")&&src.includes('sender:"care@naksharix.com"'));
+assert.ok(src.includes('action !== "care.puja.owner_approved"')&&src.includes('targetType !== "PujaBookingRequest"'));
+assert.ok(src.includes('userId:booking.userId')&&src.includes('status:"PAID"'));
+assert.ok(src.includes("quotedPricePaise")&&src.includes("providerPaymentId"));
+assert.ok(src.includes("CLAIM_ID")&&src.includes('e.code==="P2002"'));
+assert.ok(src.includes("idempotencyKey:")&&src.includes("export function HEAD()"));
+assert.ok(!src.includes("kushalstationary")&&!src.includes("ravanmusic001"));
+assert.ok(!src.includes("pay_Tysx")&&!src.includes("cmwc5n"));
+assert.ok(!src.includes("qBZCX0YJ-GdmQL5FHJZJ1P_fW8U5tMyHqauOiJbAel45MfEfmRwloQ"));
+assert.ok(!src.includes("SMTP_PASS"));
+console.log("NAKSHARIX_ONE_TIME_CARE_GATE=PASS;NO_CUSTOMER_DATA_IN_PUBLIC_SOURCE=YES");
