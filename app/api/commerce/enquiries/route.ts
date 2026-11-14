@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     if (!user) return fail("Sign in to submit and track an enquiry.", 401);
     const input = await validateJson(request, schema);
-    if (input.kind === "PUJA") return fail("Puja services coming soon. New enquiries are paused.", 503);
+    if (String(input.kind) === "PUJA") return fail("Puja services coming soon. New enquiries are paused.", 503);
     let subject: string;
     let description: string;
     if (input.kind === "SHOP") {
