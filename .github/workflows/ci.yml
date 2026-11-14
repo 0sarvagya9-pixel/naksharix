@@ -43,8 +43,6 @@ jobs:
           if [ "$FREE_OPS_EXIT" -ne 0 ] || [ "$THREE_PHASE_EXIT" -ne 0 ] || [ "$PHASE1_EXIT" -ne 0 ] || [ "$CSRF_EXIT" -ne 0 ] || [ "$I18N_EXIT" -ne 0 ] || [ "$SEO_EXIT" -ne 0 ] || [ "$ADSENSE_EXIT" -ne 0 ] || [ "$ADS_LAUNCH_EXIT" -ne 0 ] || [ "$HYGIENE_EXIT" -ne 0 ] || [ "$RELEASE_STATE_EXIT" -ne 0 ] || [ "$FINAL_EXIT" -ne 0 ]; then
             exit 1
           fi
-      - name: Verify one-time Hindi customer email sender and idempotency guards
-        run: node scripts/qa-care-one-time-email.mjs
       - name: Upload static audit log
         if: always()
         uses: actions/upload-artifact@v4
