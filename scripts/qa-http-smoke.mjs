@@ -167,9 +167,12 @@ for (const kind of ["SHOP", "PUJA"]) {
   const response = await expectStatus("/commerce-enquiry?kind=" + kind, 200, undefined, "commerce enquiry page " + kind);
   if (response) {
     const html = await response.text();
-    const marker = kind === "SHOP" ? "Product availability enquiry" : "Puja date and availability enquiry";
-    if (!html.includes(marker) || !html.includes("Sign in")) fail("commerce enquiry page " + kind, "missing login fence");
-    else pass("commerce enquiry page " + kind, "source-owned options and login fence");
+    const isLiveShop = kind === "SHOP";
+    const valid = isLiveShop
+      ? html.includes("Product availability enquiry") && html.includes("Sign in")
+      : (html.includes("Coming Soon") || html.includes("जल्द आ रही हैं")) && !html.includes("Book Now");
+    if (!valid) fail("commerce enquiry page " + kind, "incorrect active/pause status");
+    else pass("commerce enquiry page " + kind, isLiveShop ? "source-owned shop login fence" : "Puja Coming Soon, no enquiry form");
   }
 }
 await expectStatus("/api/commerce/enquiries", 403, {
@@ -180,9 +183,9 @@ await expectStatus("/api/commerce/enquiries", 403, {
 const pujaDirectory = await expectStatus("/pujas", 200, undefined, "traditional Puja directory");
 if (pujaDirectory) {
   const html = await pujaDirectory.text();
-  if (!html.includes("Puja Directory") || !html.includes("Explore Puja"))
-    fail("Puja directory", "Missing searchable directory header");
-  else pass("Puja directory", "traditional categories available");
+  if (!(html.includes("Coming Soon") || html.includes("जल्द आ रही हैं")) || html.includes("Book Now"))
+    fail("Puja directory", "Coming Soon missing or checkout CTA still visible");
+  else pass("Puja directory", "single Coming Soon page without booking buttons");
 }
 for (const [url,label] of [
   ["/pujas/rudrabhishek","Puja detail"],
@@ -307,10 +310,15 @@ await Promise.all(Array.from({ length: 6 }, async () => {
         continue;
       }
       const body = await response.text();
-      if (!body.includes(item.marker) || (item.kind === "puja" && !body.includes("Enquire about"))) {
-        fail("catalogue integrity " + item.path, "Missing expected " + item.kind + " content");
+      const correct = item.kind === "puja"
+        ? (body.includes("Coming Soon") || body.includes("जल्द आ रही हैं")) && !body.includes("Book Now")
+        : body.includes(item.marker);
+      if (!correct) {
+        fail("catalogue integrity " + item.path, "Expected archived Puja redirect or live " + item.kind + " content");
       } else {
-        pass("catalogue integrity " + item.path, "HTTP 200; expected " + item.kind + " content");
+        pass("catalogue integrity " + item.path, item.kind === "puja"
+          ? "legacy Puja detail redirects to Coming Soon"
+          : "HTTP 200; expected " + item.kind + " content");
       }
     } catch (error) {
       fail("catalogue integrity " + item.path, error instanceof Error ? error.message : String(error));
