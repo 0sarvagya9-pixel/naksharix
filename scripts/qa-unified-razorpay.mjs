@@ -28,8 +28,12 @@ gate(readiness.includes("merchantKeyPairMatches") && readiness.includes("env.RAZ
 gate(read("lib/payments/razorpay.ts").includes("new Razorpay({ key_id: env.RAZORPAY_KEY_ID, key_secret: env.RAZORPAY_KEY_SECRET })"),
   "one existing Razorpay client");
 gate(env.includes('SHOP_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false")') &&
+  env.includes('PUJA_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false")') &&
   order.includes('env.SHOP_PAYMENTS_ENABLED !== "true"') &&
-  order.includes('env.PUJA_PAYMENTS_ENABLED !== "true"'), "new payment categories disabled by default");
+  (order.includes('env.PUJA_PAYMENTS_ENABLED !== "true"') ||
+    (order.includes('if (body.purpose === "PUJA_BOOKING")') &&
+      order.includes('New Puja payments are temporarily closed.'))),
+  "new payment categories disabled by default, with Puja permanently paused while Coming Soon");
 gate(schema.includes("SHOP_ORDER") && schema.includes("REFUNDED") &&
   schema.includes("fulfillmentEvidenceUrl String?") &&
   migration.includes("ADD VALUE IF NOT EXISTS 'SHOP_ORDER'") &&
