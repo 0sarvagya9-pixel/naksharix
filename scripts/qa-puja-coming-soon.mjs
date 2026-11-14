@@ -23,5 +23,5 @@ const history=s("app/puja-bookings/page.tsx");
 assert.ok(history.includes("prisma.payment.findMany")&&history.includes("prisma.pujaBookingRequest.findMany"));
 assert.ok(!history.includes("RazorpayCheckoutButton"),"No payment retry UI even for existing unpaid requests");
 assert.ok(s("app/api/commerce/enquiries/route.ts").includes('if (String(input.kind) === "PUJA") return fail'));
-assert.ok(s("app/api/guidance-enquiries/route.ts").includes('if (input.kind === "PUJA_ENQUIRY") return fail'));
+assert.ok(s("app/api/guidance-enquiries/route.ts").includes('if (String(input.kind) === "PUJA_ENQUIRY") return fail'));
 console.log("NAKSHARIX_PUJA_COMING_SOON=PASS;NO_NEW_BOOKINGS=YES;NO_NEW_PAYMENTS=YES;EXISTING_RECORDS_PRESERVED=YES");
