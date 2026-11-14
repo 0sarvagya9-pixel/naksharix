@@ -5,6 +5,8 @@ const page=s("app/pujas/page.tsx");
 assert.ok(page.includes("Coming Soon")&&page.includes("पूजा सेवाएँ")&&page.includes("नई पूजा बुकिंग"));
 assert.ok(!page.includes("PujaServicesDirectory")&&!page.includes("getPublishedPujaOffers"));
 assert.ok(!page.includes("Book Now")&&!page.includes("RazorpayCheckoutButton"));
+const home=s("components/home/editorial-home.tsx");
+assert.ok(home.includes("Coming Soon <ArrowRight")&&!home.includes("Book Now <ArrowRight"),"Homepage Puja CTA must not offer bookings");
 for(const p of ["app/pujas/[id]/page.tsx","app/puja-booking/page.tsx","app/puja-enquiry/page.tsx"]) {
  assert.ok(s(p).includes('redirect("/pujas")'),"Legacy Puja URL must route to Coming Soon: "+p);
 }
