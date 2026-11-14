@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 const src=readFileSync("app/api/ops/one-time-puja-care-email/route.ts","utf8");
 assert.ok(src.includes("timingSafeEqual")&&src.includes("Date.now() > EXPIRES"));
 assert.ok(src.includes("getEmailReadiness")&&src.includes("care_sender_unavailable"));
-assert.ok(src.includes("care@naksharix\\.com")&&src.includes("from:\"care@naksharix.com\""));
+assert.ok(src.includes("care@naksharix\\.com")&&src.includes('sender:"care@naksharix.com"'));
 assert.ok(src.includes('action !== "care.puja.owner_approved"')&&src.includes('targetType !== "PujaBookingRequest"'));
 assert.ok(src.includes('userId:booking.userId')&&src.includes('status:"PAID"'));
 assert.ok(src.includes("quotedPricePaise")&&src.includes("providerPaymentId"));
