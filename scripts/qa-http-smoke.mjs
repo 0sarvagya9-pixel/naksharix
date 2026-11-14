@@ -168,9 +168,14 @@ for (const kind of ["SHOP", "PUJA"]) {
   if (response) {
     const html = await response.text();
     const isLiveShop = kind === "SHOP";
+    // Next.js streamed server redirects can return HTTP 200 with a
+    // NEXT_REDIRECT RSC instruction instead of the final HTML document.
+    const pujaRedirected = html.includes("NEXT_REDIRECT;replace;/pujas;307;") ||
+      html.includes("NEXT_REDIRECT;push;/pujas;307;");
     const valid = isLiveShop
       ? html.includes("Product availability enquiry") && html.includes("Sign in")
-      : (html.includes("Coming Soon") || html.includes("जल्द आ रही हैं")) && !html.includes("Book Now");
+      : ((html.includes("Coming Soon") || html.includes("जल्द आ रही हैं")) ||
+          pujaRedirected) && !html.includes("Book Now");
     if (!valid) fail("commerce enquiry page " + kind, "incorrect active/pause status");
     else pass("commerce enquiry page " + kind, isLiveShop ? "source-owned shop login fence" : "Puja Coming Soon, no enquiry form");
   }
