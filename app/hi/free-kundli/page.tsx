@@ -50,6 +50,30 @@ export default function FreeKundliHindiPage() {
           <Button asChild><Link href="/kundli">कुंडली बनाएं</Link></Button>
           <Button variant="outline" asChild><Link href="/hi/learn/kundli-explained">कुंडली समझने की मार्गदर्शिका</Link></Button>
         </div>
+        <section aria-labelledby="kundli-kaise-banaye" className="mt-12 max-w-4xl">
+          <h2 id="kundli-kaise-banaye" className="font-cinzel text-2xl font-bold">ऑनलाइन फ्री कुंडली कैसे बनाएं?</h2>
+          <ol className="mt-5 list-decimal space-y-3 pl-6 leading-7 naksh-muted-text">
+            <li>ऊपर दिए गए “कुंडली बनाएं” बटन से फ्री कुंडली जनरेटर खोलें।</li>
+            <li>अपनी सही जन्म-तारीख, दर्ज जन्म-समय और जन्मस्थान भरें। जानकारी की जाँच करके ही आगे बढ़ें।</li>
+            <li>तैयार कुंडली में लग्न, राशि, ग्रहों की स्थिति और भाव देखें। शब्दों का अर्थ समझने के लिए <Link href="/hi/learn/kundli-explained" className="font-semibold underline underline-offset-4">हिंदी कुंडली मार्गदर्शिका</Link> पढ़ें।</li>
+          </ol>
+          <p className="mt-4 leading-7 naksh-muted-text">अगर जन्म का सही समय उपलब्ध नहीं है, तो लग्न और भावों पर निर्भर निष्कर्ष अनिश्चित हो सकते हैं। पारंपरिक ज्योतिषीय व्याख्या भविष्य की निश्चित जानकारी नहीं है।</p>
+        </section>
+        <section aria-labelledby="kundli-sawal" className="mt-12 max-w-4xl">
+          <h2 id="kundli-sawal" className="font-cinzel text-2xl font-bold">जन्म कुंडली से जुड़े सामान्य सवाल</h2>
+          <div className="mt-5 grid gap-4">
+            {[
+              { question: "क्या जन्म समय के बिना कुंडली बनाई जा सकती है?", answer: "जन्म-तारीख से कुछ सामान्य जानकारी देखी जा सकती है, लेकिन सही जन्म-समय के बिना लग्न और भावों की सटीक गणना पर भरोसा नहीं करना चाहिए।" },
+              { question: "जन्मस्थान कुंडली के लिए जरूरी क्यों है?", answer: "जन्मस्थान और स्थानीय समय के आधार पर ग्रहों के संदर्भ तथा लग्न की गणना की जाती है। गलत स्थान या समय-क्षेत्र से चार्ट के कुछ हिस्से बदल सकते हैं।" },
+              { question: "दो वेबसाइटों पर मेरी कुंडली अलग क्यों है?", answer: "अयनांश, समय-क्षेत्र, भाव-पद्धति या गणना की दूसरी सेटिंग अलग होने से परिणाम बदल सकते हैं। पहले दोनों जगह दर्ज जन्म-विवरण और पद्धति की तुलना करें।" }
+            ].map((item) => (
+              <div key={item.question} className="rounded-lg border border-[#D4AF37]/20 p-5">
+                <h3 className="font-semibold">{item.question}</h3>
+                <p className="mt-2 leading-7 naksh-muted-text">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
         <SeoInternalLinks title="कुंडली और ज्योतिष के अन्य उपयोगी पेज" />
       </Section>
     </main>
