@@ -26,12 +26,15 @@ export const growthPages: Record<string, GrowthPage> = {
     sections: [
       { heading: "Which birth details matter?", body: "Enter the recorded date, time and birthplace as precisely as you know them. The location helps determine the local time zone; even a small birth-time error may affect a rising sign or the house boundaries near a transition. If the exact time is unknown, avoid treating fine-grained timing as certain." },
       { heading: "Lagna, rashi and nakshatra are different", body: "Lagna is the ascendant, or the zodiac sign rising at the eastern horizon for a particular moment and place. Rashi often refers to the Moon sign in Indian astrology. Nakshatra divides the ecliptic into lunar mansion segments. These describe different chart dimensions and should not be used interchangeably." },
-      { heading: "How should I read a free chart?", body: "Start with the chart date, local time, birthplace and calculation conventions. Then review the ascendant, twelve houses and placements together rather than relying on one planet or an isolated dosha. Astrology is a cultural interpretive practice, not an established scientific method for predicting personal events." }
+      { heading: "How do I make and read a free Kundli online?", body: "Open the free Kundli generator, enter your recorded date of birth, time and birthplace, then review the calculated chart. Check the ascendant, Moon sign, houses and planet positions together, and compare the selected calculation conventions if another website shows a different result. You can read the free Kundli learning guide before interpreting any dasha or dosha. Astrology is a cultural interpretive practice, not an established scientific method for predicting personal events." }
     ],
     faqs: [
       { question: "Is the free Kundli enough to start?", answer: "Yes. It gives a readable summary first, then offers a premium report for deeper detail." },
       { question: "What birth details are required?", answer: "Provide your birth date, recorded time and birthplace. The app resolves location coordinates internally where available; you do not need to calculate latitude and longitude yourself." },
-      { question: "Is a Kundli scientifically proven to predict the future?", answer: "No. Astrology is a traditional interpretive practice. Use a chart for reflection and cultural interest, not as evidence or a substitute for professional decisions." }
+      { question: "Is a Kundli scientifically proven to predict the future?", answer: "No. Astrology is a traditional interpretive practice. Use a chart for reflection and cultural interest, not as evidence or a substitute for professional decisions." },
+      { question: "How can I make a free Janam Kundli online?", answer: "Use the Naksharix Kundli generator with the birth date, recorded birth time and birthplace. Check the details before submitting, then read the chart and explanatory guide without buying a report." },
+      { question: "What if I do not know my exact birth time?", answer: "Use the best recorded time available and mark any uncertainty. A guessed time can change the ascendant and houses, so do not treat time-sensitive interpretations as reliable." },
+      { question: "Why do two Kundli websites show different results?", answer: "They may use different ayanamsha, time-zone rules, house systems or Rahu/Ketu conventions. Verify the entered birth data and calculation settings first." }
     ]
   },
   "kundli-matching": {
@@ -52,7 +55,9 @@ export const growthPages: Record<string, GrowthPage> = {
     faqs: [
       { question: "What is Ashtakoota matching?", answer: "It is a traditional eight-factor comparison commonly scored out of 36 Guna points. The breakdown offers context beyond a single total." },
       { question: "Is Manglik part of the 36-point score?", answer: "No. Manglik is a separate traditional chart assessment. Treat its interpretation cautiously, not as a definitive label." },
-      { question: "Can a score decide whether a couple should marry?", answer: "No. Relationship choices require mutual consent, compatibility, respect and informed judgment; astrology cannot guarantee an outcome." }
+      { question: "Can a score decide whether a couple should marry?", answer: "No. Relationship choices require mutual consent, compatibility, respect and informed judgment; astrology cannot guarantee an outcome." },
+      { question: "How many Gunas are compared in traditional Kundli Milan?", answer: "Ashtakoota compares eight traditional categories with weighted scores totaling up to 36 points. Look at the factor breakdown instead of a total alone." },
+      { question: "Does a Manglik result mean a marriage will fail?", answer: "No. Manglik is a traditional, separate chart interpretation, not a scientific test of relationship outcomes. Focus on consent, communication and real-life compatibility." }
     ]
   },
   "daily-horoscope": {
