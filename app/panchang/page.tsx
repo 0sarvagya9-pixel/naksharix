@@ -10,8 +10,8 @@ import { timezoneOffsetForDate, todayInTimezone } from "@/lib/astrology/timezone
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Today Panchang | Naksharix",
-  description: "Explore traditional Panchang calculations for chosen dates and places, including tithi, nakshatra, yoga, karana and Rahu Kaal. Results depend on location and calculation conventions.",
+  title: "Aaj Ka Panchang - Today's Tithi & Nakshatra",
+  description: "Check Panchang for your chosen date and city: Tithi, Nakshatra, Yoga, Karana, sunrise, Rahu Kaal and Muhurat timings. Locations and conventions matter.",
   path: "/panchang",
   keywords: ["Panchang", "Today Panchang", "Tithi", "Rahu Kaal", "Abhijit Muhurat"]
 });
@@ -171,6 +171,60 @@ export default async function PanchangPage({
             </div>
           </CardContent>
         </Card>
+
+        {/* Server-rendered context explains the calculator without changing its calculations. */}
+        <section aria-labelledby="panchang-explained" className="mt-8 rounded-3xl border border-[rgba(216,154,43,0.22)] bg-white/60 p-6 md:p-8">
+          <h2 id="panchang-explained" className="font-cinzel text-2xl font-bold text-[#17181d]">
+            Aaj Ka Panchang: how to read today&apos;s Tithi and Nakshatra
+          </h2>
+          <p className="mt-4 text-base leading-8 text-[#525866]">
+            The Panchang shown above is calculated for <strong>{city.label}</strong> on{" "}
+            <strong>{selectedDate}</strong>, using the selected location and its timezone
+            offset ({resolvedOffset}). Choosing another city or date recalculates the results;
+            today&apos;s Tithi or Rahu Kaal for Delhi may not match another location.
+          </p>
+          <div className="mt-6 grid gap-5 md:grid-cols-2">
+            <div>
+              <h3 className="font-semibold text-[#17181d]">The five elements of Panchang</h3>
+              <p className="mt-2 text-sm leading-7 text-[#525866]">
+                <strong>Tithi</strong> is the lunar day and <strong>Vaar</strong> is the weekday.
+                <strong> Nakshatra</strong> describes the Moon&apos;s traditional lunar mansion;
+                <strong> Yoga</strong> and <strong>Karana</strong> are additional calendar factors.
+                Their names appear in the day and lunar-details cards above.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[#17181d]">How the time windows work</h3>
+              <p className="mt-2 text-sm leading-7 text-[#525866]">
+                Rahu Kaal, Yamaganda, Gulika Kaal and Abhijit Muhurat are customary
+                time windows calculated from the local day. Their interpretation varies
+                between traditions. Cross-check a locally trusted Panchang before
+                planning an important ceremony.
+              </p>
+            </div>
+          </div>
+          <h3 className="mt-7 font-semibold text-[#17181d]">Panchang questions</h3>
+          <dl className="mt-3 space-y-4 text-sm leading-7 text-[#525866]">
+            <div>
+              <dt className="font-semibold text-[#17181d]">Why does today&apos;s Panchang change by city?</dt>
+              <dd>Local sunrise, the selected calendar date and timezone can affect the displayed day and auspicious time windows. Use the city selector for the place you want to check.</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-[#17181d]">Can I check a different date?</dt>
+              <dd>Yes. Select a calendar date and location, then choose Calculate Panchang. The values above update for that selection rather than showing a generic national result.</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-[#17181d]">Is this the same as a birth Nakshatra?</dt>
+              <dd>No. This Panchang shows details for a chosen day. A birth Nakshatra uses a person&apos;s exact birth time and place.</dd>
+            </div>
+          </dl>
+          <nav aria-label="Related Vedic tools" className="mt-6 flex flex-wrap gap-3 text-sm font-semibold">
+            <Link href="/free-calculators/nakshatra-calculator" className="rounded-lg border border-[#dca956]/30 px-4 py-2 text-[#8c571a] hover:underline">Birth Nakshatra calculator</Link>
+            <Link href="/free-kundli" className="rounded-lg border border-[#dca956]/30 px-4 py-2 text-[#8c571a] hover:underline">Free Kundli</Link>
+            <Link href="/hi/free-kundli" className="rounded-lg border border-[#dca956]/30 px-4 py-2 text-[#8c571a] hover:underline">हिंदी जन्म कुंडली</Link>
+          </nav>
+        </section>
+
       </Section>
     </main>
   );
