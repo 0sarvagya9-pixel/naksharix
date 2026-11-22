@@ -1,0 +1,22 @@
+/* Shared non-blocking, centered 5-second feedback for every page family. */
+@keyframes nx-center-notice-enter {
+  from { opacity: 0; transform: translateY(12px) scale(.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes nx-center-notice-expire {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.nx-center-notice {
+  animation: nx-center-notice-enter 220ms ease-out both;
+  font-family: var(--font-poppins), var(--font-inter), sans-serif;
+  max-height: min(75dvh, 420px);
+  overflow-y: auto;
+}
+.nx-center-notice-progress {
+  animation: nx-center-notice-expire 5000ms linear forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nx-center-notice { animation: none; }
+  .nx-center-notice-progress { animation: none; opacity: .4; }
+}
