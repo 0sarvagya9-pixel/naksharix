@@ -59,7 +59,8 @@ export function SiteNotificationCenter() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [active, dismiss]);
 
-  if (!mounted || !active) return null;
+  if (!mounted) return null;
+  if (!active) return <span hidden data-site-notifications-ready="true" />;
   const look = appearance[active.kind];
   const Icon = look.Icon;
 
