@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
+import { siteNotice } from "@/lib/ui/site-notification";
 
 export const SHOP_CART_STORAGE_KEY="naksharix-product-cart-v1";
 export type CartLine = {productId:string;quantity:number};
@@ -23,16 +24,18 @@ export function AddToCartButton({productId}:{productId:string}){
   function add(goToCart=false){
     const list=readCart();
     const index=list.findIndex(line=>line.productId===productId);
-    if(index>=0&&list[index].quantity>=10){setResult("limit");return}
-    if(index<0&&list.length>=20){setResult("full");return}
+    if(index>=0&&list[index].quantity>=10){setResult("limit");siteNotice.warning("Maximum 10 units of this product can be added.","Quantity limit reached");return}
+    if(index<0&&list.length>=20){setResult("full");siteNotice.warning("Your cart already contains 20 different products.","Cart is full");return}
     if(index>=0)list[index]={...list[index],quantity:list[index].quantity+1};
     else list.push({productId,quantity:1});
     try{
       writeCart(list);
       setResult("added");
+      siteNotice.success("Item added to your cart. Review delivery details and payment in checkout.", "Added to cart");
       if(goToCart)router.push("/cart");
     }catch{
       setResult("unavailable");
+      siteNotice.error("Cart could not be saved in your browser. Enable storage and try again.", "Cart not saved");
     }
   }
   const message=result==="limit"?"Maximum 10 of this product per cart.":
