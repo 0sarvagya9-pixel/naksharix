@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { featuredAstrologers } from "@/lib/astrologers";
 import type { MarketplaceAstrologer } from "@/components/astrologer-listing";
 import { secureFetch } from "@/lib/security/csrf";
+import { siteNotice } from "@/lib/ui/site-notification";
 import { useLanguage } from "@/components/language-provider";
 import { errorClass, isBlank, scrollToFirstError, type FieldErrors } from "@/lib/form-validation";
 
@@ -36,6 +37,7 @@ export function ConsultationBooking({ selectedAstrologerId, profiles = [] }: { s
     }, {});
     setFieldErrors(validationErrors);
     if (Object.keys(validationErrors).length) {
+      siteNotice.warning("Complete the required consultation details before submitting.", "Missing information");
       scrollToFirstError(validationErrors);
       return;
     }
