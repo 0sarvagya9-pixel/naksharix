@@ -41,6 +41,24 @@ export async function secureFetch(input: RequestInfo | URL, init: RequestInit = 
       credentials: init.credentials ?? "same-origin",
       headers
     });
+    // Only acknowledge server-persisted business changes. An HTTP 200
+    // from a payment *order/verification* endpoint must NOT be shown here
+    // as paid, settled, delivered, or a confirmed ceremony.
+    if (isMutation && response.ok) {
+      const successText: Record<string, string> = {
+        "POST /api/commerce/orders": "Order request saved. Confirm the final amount and payment status in My Orders.",
+        "POST /api/puja/bookings": "Puja request received. A Pandit and ceremony time must be confirmed; no payment is due yet.",
+        "POST /api/consultation-bookings": "Consultation request received. Check your account for acceptance and payment status.",
+        "PUT /api/admin/puja-offerings": "Puja offering settings saved. Service launch and Pandit availability are verified separately.",
+        "POST /api/admin/puja-partners": "Pandit profile saved for review. This does not confirm availability.",
+        "PATCH /api/admin/puja-partners": "Pandit review decision saved. Individual ceremony dates still need confirmation.",
+        "PATCH /api/admin/puja-bookings": "Puja status saved. Customer inbox delivery is not guaranteed.",
+        "PATCH /api/admin/shop-orders": "Shop order status saved. Payment and actual delivery remain separate checks.",
+        "POST /api/admin/fulfilment-notification": "Notification retry recorded. Provider acceptance does not prove inbox delivery."
+      };
+      const message = successText[method + " " + pathname];
+      if (message) siteNotice.success(message, "Saved successfully");
+    }
     if (isMutation && !response.ok) {
       const payment = pathname.includes("/payments/") || pathname.includes("/razorpay/");
       const msg = payment
