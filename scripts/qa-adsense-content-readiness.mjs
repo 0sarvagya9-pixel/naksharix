@@ -21,7 +21,7 @@ assert.ok(!calendar.includes('href="/puja-enquiry"'),
 assert.ok(nav.includes('Link href="/learn">{locale === "hi"'),
   "The homepage learning promo must point to a genuinely available resource");
 
-const h1Count = source => [...source.matchAll(/<h1\\b/g)].length;
+const h1Count = source => [...source.matchAll(/<h1\b/g)].length;
 assert.equal(h1Count(home), 1, "Primary homepage section needs exactly one H1");
 assert.equal(h1Count(secondaryHome), 0, "Secondary editorial homepage section must not add another H1");
 assert.ok(heroStyles.includes(".nx-ed-hero h2") && !heroStyles.includes(".nx-ed-hero h1"),
@@ -37,7 +37,7 @@ for (const [slug, concepts] of guides) {
   const page = read("app/free-calculators/" + slug + "/page.tsx");
   for (const concept of concepts) assert.ok(page.includes(concept),
     "Missing practical, specific, usable content in " + slug + ": " + concept);
-  assert.ok((page.match(/<h[234]\\b/g) || []).length >= 3,
+  assert.ok((page.match(/<h[234]\b/g) || []).length >= 3,
     "Calculator must explain its method and limitations: " + slug);
   assert.ok(page.includes("FocusedCalculatorContent"),
     "Calculator functionality must be preserved: " + slug);
