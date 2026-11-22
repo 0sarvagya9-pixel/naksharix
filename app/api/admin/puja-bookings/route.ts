@@ -104,7 +104,7 @@ export async function PATCH(request:Request){
    kind:"puja",userId:result.userId,reference:result.id,
    oldStatus:result.status===existing.status && result.scheduledAt?.getTime() !== existing.scheduledAt?.getTime() ? "__SCHEDULE_CHANGED__" : existing.status,status:result.status
   });
-  return ok({booking:result,notification,paymentVerified:false,partnerAssigned:Boolean(result.partnerId)});
+  return ok({booking:result,notification,paymentVerified:Boolean(existingPaid),partnerAssigned:Boolean(result.partnerId)});
  }catch(error){
   if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2021")return fail("Booking schema not provisioned.",503);
   return handleApiError(error);
