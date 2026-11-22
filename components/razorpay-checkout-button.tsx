@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
@@ -54,8 +54,10 @@ export function RazorpayCheckoutButton({
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const verifiedRef = useRef(false);
 
   async function startCheckout() {
+    verifiedRef.current = false;
     setLoading(true);
     setStatus(tr("creatingSecureOrder"));
 
@@ -138,9 +140,10 @@ export function RazorpayCheckoutButton({
           });
           if (!verifyResponse.ok) {
             setStatus("Payment confirmation is pending. Check your payment history before trying again; do not pay twice.");
-            siteNotice.warning("Payment verification is pending. Review payment history before another attempt.", "Do not pay twice");
+            // secureFetch already shows one centered payment error; preserve the detailed inline warning.
             return;
           }
+          verifiedRef.current = true;
           setStatus(tr("paymentVerified"));
           siteNotice.success("Your payment has been verified. Check the booking/order history for fulfilment status.", "Payment verified");
           const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
@@ -155,6 +158,7 @@ export function RazorpayCheckoutButton({
       },
       modal: {
         ondismiss: () => {
+          if (verifiedRef.current) return;
           setLoading(false);
           setStatus(tr("checkoutClosed"));
           siteNotice.info("Checkout closed. If money was deducted, verify payment history before retrying.", "Checkout closed");
