@@ -4,13 +4,13 @@ import { env } from "@/lib/env";
 import { blogCategories, blogPosts } from "@/lib/blog-content";
 import { growthPages } from "@/lib/growth-pages";
 import { manualReports, shopProducts } from "@/lib/manual-catalogue";
-import { pujaTopics } from "@/lib/puja/service-catalogue";
-import { isCuratedPujaGuide } from "@/lib/puja/curated-guides";
 import { zodiacSigns } from "@/lib/zodiac";
 import { publishedSeoAlternates } from "@/lib/seo-localization";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { indexableKundliGuideLanguages, kundliGuidePath } from "@/lib/kundli-education";
 
+// Paused Puja booking/detail pages intentionally return noindex or redirect to the
+// Coming Soon notice. They must not be offered as indexable sitemap entries.
 const staticRoutes = [
   "",
   "/hi",
@@ -65,7 +65,6 @@ const staticRoutes = [
   "/kundli",
   "/astrologers",
   "/consultation",
-  "/pujas",
   "/puja-calendar",
   "/learn",
   "/reports",
@@ -98,7 +97,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // excluded from search pending independently authored, specific guides.
     ...manualReports.map((report): SitemapEntry => ({ route: `/reports/${report.slug}`, priority: 0.78, frequency: "weekly" })),
     ...shopProducts.map((p): SitemapEntry => ({ route: `/shop/${p.slug}`, priority: 0.7, frequency: "monthly" })),
-    ...pujaTopics.filter(p=>isCuratedPujaGuide(p.id)).map((p): SitemapEntry => ({ route: `/pujas/${p.id}`, priority: 0.68, frequency: "monthly" })),
     // Former thin SEO landing aliases redirect permanently to actual tools and
     // must not be advertised as separate canonical documents.
     ...blogCategories.map((category): SitemapEntry => ({ route: `/blog/category/${category.slug}`, priority: 0.76, frequency: "weekly" })),
