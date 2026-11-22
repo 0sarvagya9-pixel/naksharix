@@ -44,6 +44,10 @@ assert.ok(guides.includes('"/shop/5-mukhi-rudraksha"') &&
   guides.includes('"/shop/rudraksha-mala"') &&
   guides.includes('"/shop/shri-yantra"'),
   "BUYER_EDUCATION_MUST_LINK_TO_REAL_CATALOGUE_ROUTES");
+const indexnow = read("scripts/seo/submit-indexnow.mjs");
+for (const route of ["/shop", "/shop/5-mukhi-rudraksha", "/shop/dhan-yog-bracelet", "/shop/shri-yantra", "/shop/rudraksha-mala"]) {
+  assert.ok(indexnow.includes('"' + route + '"'), "BUYER_ROUTE_MISSING_FROM_FREE_INDEXNOW_DISCOVERY=" + route);
+}
 assert.ok(jsonld.includes('replace(/</g, "\\\\u003c")'),
   "INLINE_PRODUCT_JSONLD_REQUIRES_HTML_ESCAPE");
 console.log("NAKSHARIX_ORGANIC_SALES_QA=PASS;SHARE_LINKS=YES;LIVE_SHOP_PRICES=YES;UNVERIFIED_IMAGES_EXCLUDED=YES;GOOGLE_MERCHANT_ACCOUNT_CONNECTION_STILL_REQUIRED=YES");
