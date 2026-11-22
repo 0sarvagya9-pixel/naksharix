@@ -2,8 +2,8 @@
 import { useState,type FormEvent } from "react";
 import Link from "next/link";
 import { secureFetch } from "@/lib/security/csrf";
-import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
-export function PujaRequestClient({topicId,name,pricePaise,signedIn,checkoutAvailable}:{topicId:string;name:string;pricePaise:number;signedIn:boolean;checkoutAvailable:boolean}){
+import { PUJA_STATUS_NOTICES } from "@/lib/puja/customer-notices";
+export function PujaRequestClient({topicId,name,pricePaise,signedIn}:{topicId:string;name:string;pricePaise:number;signedIn:boolean}){
  const [city,setCity]=useState(""),[preferredDate,setPreferredDate]=useState("");
  const [devoteeName,setDevoteeName]=useState(""),[gotra,setGotra]=useState("");
  const [customerPhone,setCustomerPhone]=useState(""),[sankalpNote,setSankalpNote]=useState("");
@@ -31,13 +31,13 @@ export function PujaRequestClient({topicId,name,pricePaise,signedIn,checkoutAvai
   <p className="text-xs font-bold uppercase tracking-[.2em] text-[#913648]">Naksharix Puja booking</p>
   <h1 className="mt-3 font-cinzel text-3xl font-bold">{name}</h1>
   <p className="mt-4 text-2xl font-bold text-[#7b293d]">{new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(pricePaise/100)}</p>
-  <p className="mt-3 text-sm leading-7 text-[#655159]">Enter your details and preferred date to book your Puja. The ceremony time and arrangements will be coordinated after booking.</p>
+  <p className="mt-3 text-sm leading-7 text-[#655159]">Send your preferred date as a request. This is not a reserved Puja slot. A verified Pandit must accept and a final date/time must be coordinated before payment is offered.</p>
   {bookingId?<div role="status" className="mt-6 rounded-xl border border-[#b9d5a9] bg-[#f4fff0] p-5">
     <p className="font-bold">Puja booking saved: #{bookingId}</p>
-    <p className="mt-2 text-sm">{confirmedQuotePaise!==null?"Server-recorded requested fee: "+new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(confirmedQuotePaise/100)+". ":""}Your preferred date has been noted. Our team will coordinate the exact ceremony schedule. </p>
-    {checkoutAvailable?<div className="mt-4 max-w-sm"><RazorpayCheckoutButton
-      payload={{purpose:"PUJA_BOOKING",bookingId}} label="Pay ₹1,100 with Razorpay" successHref="/puja-bookings"/></div>:
-      <p className="mt-3 text-sm">Your booking is saved. Payment details will be available in My Pujas.</p>}
+    <p className="mt-2 text-sm">{confirmedQuotePaise!==null?"Server-recorded requested fee: "+new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(confirmedQuotePaise/100)+". ":""}Your preferred date was received, but your Pandit and ceremony time are not yet confirmed. </p>
+    <p className="mt-3 text-sm font-semibold text-[#395a42]">{PUJA_STATUS_NOTICES.REQUESTED.hi}</p>
+    <p className="mt-2 text-sm">{PUJA_STATUS_NOTICES.REQUESTED.en}</p>
+    <p className="mt-3 text-sm">Payment will appear in My Puja Requests only AFTER the approved Pandit and exact ceremony schedule are confirmed.</p>
     <Link className="mt-4 inline-block font-bold text-[#762a3b] underline" href="/puja-bookings">View My Pujas</Link>
   </div>:!signedIn?<div className="mt-6 rounded-2xl border border-[#e2c4a1] bg-white p-6">
     <h2 className="text-lg font-bold">Sign in to book your Puja</h2>
@@ -46,7 +46,7 @@ export function PujaRequestClient({topicId,name,pricePaise,signedIn,checkoutAvai
   </div>:<form onSubmit={submit} className="mt-7 space-y-5 rounded-2xl border border-[#e2c4a1] bg-white p-6 shadow-sm">
    <label className={labelClass}>Devotee&apos;s full name<input required minLength={2} maxLength={120} value={devoteeName} onChange={e=>setDevoteeName(e.target.value)} className={inputClass}/></label>
    <label className={labelClass}>Phone<input required minLength={8} maxLength={20} value={customerPhone} onChange={e=>setCustomerPhone(e.target.value)} className={inputClass}/></label>
-   <label className={labelClass}>Preferred date (not a reserved time)<input required type="date" value={preferredDate} onChange={e=>setPreferredDate(e.target.value)} className={inputClass}/></label>
+   <label className={labelClass}>Preferred date (not a reserved time)<input required type="date" min={new Date(Date.now()+86400_000).toISOString().slice(0,10)} value={preferredDate} onChange={e=>setPreferredDate(e.target.value)} className={inputClass}/></label>
    <label className={labelClass}>City / location<input required minLength={2} maxLength={100} value={city} onChange={e=>setCity(e.target.value)} className={inputClass}/></label>
    <label className={labelClass}>Gotra (optional)<input maxLength={100} value={gotra} onChange={e=>setGotra(e.target.value)} className={inputClass}/></label>
    <label className={labelClass}>Private Sankalp requirements<textarea required minLength={10} maxLength={1500} rows={4} value={sankalpNote} onChange={e=>setSankalpNote(e.target.value)} className={inputClass} placeholder="Names, intention, preferred language, family details to share privately."/></label>
