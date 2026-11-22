@@ -33,6 +33,7 @@ export async function getPujaLaunchState(): Promise<PujaLaunchState> {
   if (env.PUJA_PAYMENTS_ENABLED !== "true") reasons.push("Puja payment feature is disabled.");
   if (!getRazorpayReadiness().enabled) reasons.push("Razorpay acceptance is not configured.");
   if (!getEmailReadiness().emailEnabled) reasons.push("Customer and admin transactional email is not configured.");
+  if (!env.ADMIN_EMAIL) reasons.push("Admin request-notification mailbox is not configured.");
   if (reasons.length) return { enabled: false, reasons, offers: {}, approvedPartnerCount: 0 };
   try {
     const [published, partners] = await Promise.all([
