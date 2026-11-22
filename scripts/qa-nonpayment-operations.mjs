@@ -55,8 +55,12 @@ assert.ok(shop.includes("updateMany({") && shop.includes("version:input.expected
 assert.ok(adminShop.includes("nextStatuses") && adminPuja.includes("nextStatuses") &&
   adminShop.includes("result.data.notification?.outcome") && adminPuja.includes("result.data.notification?.outcome"),
   "Owner UI restricts invalid status choices and explains email acceptance honestly");
-assert.ok(myShop.includes('order.status==="DELIVERED"') && myPuja.includes("Naksharix owner team"),
-  "Customer tracking shows current fulfilment and owner coordination");
+assert.ok(myShop.includes('order.status==="DELIVERED"') &&
+  myPuja.includes("Pandit confirmation pending") &&
+  myPuja.includes("pujaStatusNotice(row.status)") &&
+  myPuja.includes('timeZone:"Asia/Kolkata"') &&
+  myPuja.includes("const canCheckout = release.enabled"),
+  "Customer tracking must disclose unassigned Pandit, bilingual status, IST and conditional paid checkout");
 assert.ok(reportDeliver.includes('deliveryStatus === "email_sent"') &&
   reportDeliver.includes("Already recorded as sent; no duplicate email attempted") &&
   reportDeliver.includes("Email delivery was not accepted by the provider"),

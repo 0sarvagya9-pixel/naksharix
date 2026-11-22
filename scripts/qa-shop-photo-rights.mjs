@@ -127,8 +127,10 @@ assert.ok(sourceCoverage.includes("puja-photo-coverage") &&
   sourceCoverage.includes("Category fallbacks are not photos of the exact ceremony."),"PUJA_IMAGE_COMPLETENESS_MUST_BE_TRUTHFUL");
 assert.ok(home.includes('href={"/shop/"+item.id}') &&
   home.includes('View item / Add to Cart') &&
-  ((home.includes('href={"/pujas/"+item.id}') && home.includes('Book Now <ArrowRight')) ||
-    (home.includes('href="/pujas"') && home.includes('Coming Soon <ArrowRight'))),
+  home.includes('href="/pujas"') &&
+  home.includes('pujaEnabled ? "Request date" : "Coming Soon"') &&
+  home.includes("availablePujaIds.includes(item.id)") &&
+  !home.includes("Book Now <ArrowRight"),
   "HOMEPAGE_FEATURED_COMMERCE_LINKS_STALE");
 
 const adminPujaPhotos=read("components/admin-puja-offerings.tsx");

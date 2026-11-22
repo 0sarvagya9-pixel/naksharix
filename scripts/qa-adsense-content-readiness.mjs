@@ -12,8 +12,10 @@ const nav = read("components/main-nav.tsx");
 
 assert.ok(puja.includes("robots: { index: false, follow: true }"),
   "Puja must remain noindex while bookings are paused");
-assert.ok(!sitemap.includes('"/pujas"') && !sitemap.includes("pujaTopics"),
-  "Paused Puja pages must not appear in the indexable sitemap");
+assert.ok(!sitemap.split("type SitemapFrequency")[0].includes('"/pujas"') &&
+  sitemap.includes('puja.enabled ? ["/pujas"') &&
+  sitemap.includes("Object.keys(puja.offers)"),
+  "Paused Puja stays off sitemap; launched topics require exact verified providers");
 assert.ok(calendar.includes("New Naksharix Puja bookings and online Puja payments are currently paused"),
   "The date-planning calendar must not promise unavailable booking services");
 assert.ok(!calendar.includes('href="/puja-enquiry"'),

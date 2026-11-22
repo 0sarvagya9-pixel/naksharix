@@ -31,8 +31,8 @@ const services = [
     id: "pujas",
     title: "Puja Booking Requests",
     price: "Published fee on each Puja",
-    description: "Choose your Puja, enter private Sankalp details, and pay securely at the published fee. Naksharix coordinates ceremony arrangements.",
-    features: ["94 traditional Puja topics", "Book Now with preferred date", "My Pujas tracking", "Secure Razorpay checkout"],
+    description: "Choose a reviewed Puja, request a date, await verified Pandit acceptance and a confirmed schedule, then pay only from your account.",
+    features: ["Only supported Puja topics", "No payment on initial request", "Confirmed Pandit and date before checkout", "Private status tracking"],
     href: "/pujas",
     cta: "Explore Pujas",
     icon: CalendarDays
@@ -59,14 +59,14 @@ const services = [
   }
 ];
 
-export function PricingContent({ pujaPriceLabel }: { pujaPriceLabel: string }) {
+export function PricingContent({ pujaPriceLabel, pujaEnabled }: { pujaPriceLabel: string; pujaEnabled: boolean }) {
   return (
     <Section>
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#00f5a0]">Active Services</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">Services and Pricing</h1>
         <p className="mt-4 naksh-muted-text">
-          Naksharix does not currently sell public monthly AI subscriptions. Published prices appear on the relevant report, approved consultation and Puja pages. Shop prices require owner approval.
+          Naksharix does not currently sell public monthly AI subscriptions. Published prices appear on active report and consultation pages. Puja is available only when verified partners and booking operations are ready.
         </p>
       </div>
 
@@ -77,11 +77,11 @@ export function PricingContent({ pujaPriceLabel }: { pujaPriceLabel: string }) {
               <Icon className="h-7 w-7 text-[#00f5a0]" />
               <CardTitle className="mt-4 font-cinzel">{title}</CardTitle>
               <p className="cosmic-gold-text text-xl font-black">{id === "pujas" ? pujaPriceLabel : price}</p>
-              <p className="text-sm leading-6 naksh-muted-text">{description}</p>
+              <p className="text-sm leading-6 naksh-muted-text">{id==="pujas" && !pujaEnabled ? "Puja bookings and online payments are paused until verified Pandits are available. No advance payment is due." : description}</p>
             </CardHeader>
             <CardContent className="flex h-full flex-col">
               <ul className="space-y-3 text-sm naksh-muted-text">
-                {features.map((feature) => (
+                {(id==="pujas" && !pujaEnabled ? ["Coming Soon", "No advance payment", "Existing bookings remain accessible", "Verified Pandit required before launch"] : features).map((feature) => (
                   <li key={feature} className="flex gap-2">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#01A361]" />
                     {feature}
@@ -89,7 +89,7 @@ export function PricingContent({ pujaPriceLabel }: { pujaPriceLabel: string }) {
                 ))}
               </ul>
               <Button asChild className="mt-6 w-full">
-                <Link href={href}><Sparkles className="h-4 w-4" />{cta}</Link>
+                <Link href={href}><Sparkles className="h-4 w-4" />{id==="pujas"&&!pujaEnabled?"Puja Coming Soon":cta}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -97,7 +97,7 @@ export function PricingContent({ pujaPriceLabel }: { pujaPriceLabel: string }) {
       </div>
 
       <p className="mx-auto mt-8 max-w-3xl text-center text-sm leading-6 naksh-muted-text">
-        AI Astrologer is available as a separate guided experience with consent when the provider is configured. Shop supports priced orders and Razorpay checkout. Puja booking accepts your preferred date, with ceremony timing coordinated afterward. Public subscriptions are not active.
+        AI Astrologer is available as a separate guided experience with consent when the provider is configured. Shop supports priced orders and Razorpay checkout. Puja is reopened only after operator approval, real Pandit acceptance and ceremony confirmation; payment is not collected on an initial request. Public subscriptions are not active.
       </p>
     </Section>
   );

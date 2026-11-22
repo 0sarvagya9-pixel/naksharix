@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { secureFetch } from "@/lib/security/csrf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { pujaTopics } from "@/lib/puja/service-catalogue";
 
 type Partner = {
   id: string; name: string; region: string; traditions: string[];
@@ -84,9 +85,20 @@ export function AdminPujaPartners() {
         <label className="grid gap-1 text-sm">Service region
           <Input required minLength={3} maxLength={100} value={region} onChange={(e) => setRegion(e.target.value)} />
         </label>
-        <label className="grid gap-1 text-sm">Traditions (comma-separated)
+        <label className="grid gap-1 text-sm">Supported Puja topic IDs (comma-separated; exact capability required)
           <Input required value={traditions} onChange={(e) => setTraditions(e.target.value)} />
         </label>
+        <label className="grid gap-1 text-sm">Add an exact Puja to partner&apos;s capabilities
+          <select defaultValue="" onChange={e=>{
+            if (!e.target.value) return;
+            setTraditions(current => [...new Set([...current.split(",").map(x=>x.trim()).filter(Boolean),e.target.value])].join(", "));
+            e.target.value="";
+          }} className="rounded-lg border border-[#cba879] bg-white p-3">
+            <option value="">Select specific Puja…</option>
+            {pujaTopics.map(topic=><option key={topic.id} value={topic.id}>{topic.name}</option>)}
+          </select>
+        </label>
+        <p className="text-xs leading-6 naksh-muted-text">Generic claims like &quot;Hindu Puja&quot; do not activate bookings. Confirm the Pandit&apos;s ability to perform every selected rite, region, date and fees independently.</p>
         <label className="grid gap-1 text-sm">Public HTTPS verification evidence
           <Input type="url" maxLength={500} value={evidenceUrl} onChange={(e) => setEvidenceUrl(e.target.value)} />
         </label>

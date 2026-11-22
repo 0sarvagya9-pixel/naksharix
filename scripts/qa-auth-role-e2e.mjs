@@ -594,12 +594,12 @@ try {
     assert.equal(unauth.status, 404);
     const forbidden = await post(endpoint, {
       name: "Fixture Regional Temple", region: "India",
-      traditions: ["Ganesh Puja"], evidenceUrl: "https://example.org/registry/temple"
+      traditions: ["ganesh-chaturthi-puja"], evidenceUrl: "https://example.org/registry/temple"
     }, userCookie);
     assert.equal(forbidden.status, 404);
     const created = await post(endpoint, {
       name: "Fixture Regional Temple", region: "Test India",
-      traditions: ["Ganesh Puja"], evidenceUrl: "https://example.org/registry/temple"
+      traditions: ["ganesh-chaturthi-puja"], evidenceUrl: "https://example.org/registry/temple"
     }, adminCookie);
     const info = await created.json();
     assert.equal(created.status, 201, JSON.stringify(info));

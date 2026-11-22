@@ -25,7 +25,9 @@ const essential = [
   "docs/PREDEPLOY_SINGLE_CUTOVER_HANDOFF_20261026.md"
 ];
 for (const file of essential) assert.ok(fs.existsSync(path.join(root, file)), "Missing release bundle file: " + file);
-has("app/page.tsx", "<EditorialHome featuredShopPrices={featuredShopPrices} />");
+has("app/page.tsx", "<EditorialHome featuredShopPrices={featuredShopPrices} pujaEnabled={puja.enabled}");
+has("app/page.tsx", "getPujaLaunchState()");
+has("app/page.tsx", "availablePujaIds={Object.keys(puja.offers)}");
 has("app/page.tsx", "getShopCatalogue()");
 has("lib/ops/schema-readiness.ts", 'to_regclass(\'public."LearningProgress"\')');
 has("lib/ops/schema-readiness.ts", 'to_regclass(\'public."PujaPartner"\')');
