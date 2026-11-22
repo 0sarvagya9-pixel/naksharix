@@ -240,6 +240,11 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("heading", { name: "Shri Yantra" })).toBeVisible();
     await expect(page.getByText(/Product images are for reference/)).toBeVisible();
     await expect(page.getByRole("button", { name: "Add product to cart" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Share Shri Yantra on WhatsApp" })).toHaveAttribute("href", /^https:\/\/wa\.me\/\?text=/);
+    await expect(page.getByRole("button", { name: "Copy product link" })).toBeVisible();
+    await expect(page.locator("#shop-breadcrumb-shri-yantra")).toHaveCount(1);
+    // The test seed has a Wikimedia reference, not a seller-supplied SKU image.
+    await expect(page.locator("#shop-product-shri-yantra")).toHaveCount(0);
     await expect(page.getByRole("button", { name: /Buy Now|Pay with Razorpay/i })).toHaveCount(0);
   });
 
