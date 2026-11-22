@@ -16,6 +16,7 @@ export type PujaLaunchState = {
   reasons: string[];
   offers: Record<string, PublicPujaOffer>;
   approvedPartnerCount: number;
+  readyServiceCount: number;
 };
 export function pujaReleaseFlagEnabled(): boolean {
   return env.PUJA_BOOKINGS_ENABLED === "true" && env.PUJA_PAYMENTS_ENABLED === "true";
@@ -27,14 +28,14 @@ export function partnerSupportsTopic(partner: {
   return partner.reviewStatus === "VERIFIED" && !!partner.reviewedAt &&
     !!partner.evidenceUrl && partner.traditions.includes(topicId);
 }
-export async function getPujaLaunchState(): Promise<PujaLaunchState> {
+export async function getPujaLaunchState(inspectWhenPaused = false): Promise<PujaLaunchState> {
   const reasons: string[] = [];
   if (env.PUJA_BOOKINGS_ENABLED !== "true") reasons.push("Owner has not activated new Puja intake.");
   if (env.PUJA_PAYMENTS_ENABLED !== "true") reasons.push("Puja payment feature is disabled.");
   if (!getRazorpayReadiness().enabled) reasons.push("Razorpay acceptance is not configured.");
   if (!getEmailReadiness().emailEnabled) reasons.push("Customer and admin transactional email is not configured.");
   if (!env.ADMIN_EMAIL) reasons.push("Admin request-notification mailbox is not configured.");
-  if (reasons.length) return { enabled: false, reasons, offers: {}, approvedPartnerCount: 0 };
+  if (reasons.length && !inspectWhenPaused) return { enabled: false, reasons, offers: {}, approvedPartnerCount: 0, readyServiceCount: 0 };
   try {
     const [published, partners] = await Promise.all([
       getPublishedPujaOffers(),
@@ -54,10 +55,10 @@ export async function getPujaLaunchState(): Promise<PujaLaunchState> {
     if (!partners.length) reasons.push("No admin-reviewed Pandit with evidence is registered.");
     if (!Object.keys(offers).length) reasons.push("No ₹1,100 published Puja has a verified topic-specific Pandit.");
     return { enabled: reasons.length === 0, reasons, offers: reasons.length ? {} : offers,
-      approvedPartnerCount: partners.length };
+      approvedPartnerCount: partners.length, readyServiceCount: Object.keys(offers).length };
   } catch {
     // No stale partner/offer cache. Database failure must disable new sales.
     return { enabled: false, reasons: ["Authoritative Puja availability could not be verified."],
-      offers: {}, approvedPartnerCount: 0 };
+      offers: {}, approvedPartnerCount: 0, readyServiceCount: 0 };
   }
 }
