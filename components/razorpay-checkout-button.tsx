@@ -151,7 +151,7 @@ export function RazorpayCheckoutButton({
           else router.refresh();
         } catch {
           setStatus("Payment confirmation could not be checked. Check payment history before trying again; do not pay twice.");
-          siteNotice.warning("Verification could not be checked. Review payment history before attempting another payment.", "Payment status pending");
+          // secureFetch already provided one centered pending-payment notice.
         } finally {
           setLoading(false);
         }
