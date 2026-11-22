@@ -1,14 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Flower2, Clock3, ArrowLeft } from "lucide-react";
+import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { PujaServicesDirectory } from "@/components/puja/puja-services-directory";
 
-export const metadata: Metadata = {
+const pausedMetadata: Metadata = {
   title: "पूजा सेवाएँ जल्द आ रही हैं | NAKSHARIX",
   description: "NAKSHARIX पर पूजा सेवाएँ अभी उपलब्ध नहीं हैं। उपयुक्त पंडित उपलब्ध होने पर नई बुकिंग फिर शुरू की जाएगी।",
   robots: { index: false, follow: true }
 };
 
-export default function PujasPage() {
+export const dynamic = "force-dynamic";
+export async function generateMetadata(): Promise<Metadata> {
+  const release = await getPujaLaunchState();
+  return release.enabled ? {
+    title: "Available Puja Services & Verified Pandits | NAKSHARIX",
+    description: "Explore approved Puja offerings. Send a preferred-date request; Pandit and schedule must be confirmed before any payment.",
+    robots: { index: true, follow: true }
+  } : pausedMetadata;
+}
+export default async function PujasPage() {
+  const release = await getPujaLaunchState();
+  if (release.enabled) return <PujaServicesDirectory offerings={release.offers} />;
   return (
     <main className="relative isolate flex min-h-[75vh] items-center overflow-hidden bg-[#fffaf4] px-4 py-16 text-[#492d33] sm:px-6 sm:py-24">
       <div aria-hidden="true" className="pointer-events-none absolute -left-20 top-0 h-80 w-80 rounded-full bg-[#f5d5a6]/35 blur-3xl" />
