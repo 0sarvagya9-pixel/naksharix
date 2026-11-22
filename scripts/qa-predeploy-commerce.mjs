@@ -37,34 +37,39 @@ assert.ok(adminOrders.includes("getAdminApiUser()")&&adminOrders.includes("updat
  "Shop admin role/concurrency/audit missing");
 assert.ok(adminOrders.includes("paymentCollected:false")&&adminOrders.includes("onlinePaymentVerified:false"),
  "Never claim an unverified gateway charge");
-assert.ok(pujaPaused ?
-   (puja.includes("export async function GET()") && puja.includes("prisma.pujaBookingRequest.findMany") &&
-    !puja.includes("pujaBookingRequest.create")) :
-   (puja.includes("getCurrentUser()")&&puja.includes("getPuja")===false&&
-    puja.includes("pujaOffering.findUnique")&&puja.includes("pg_advisory_xact_lock")&&
-    puja.includes("tx.pujaBookingRequest.count")&&puja.includes("tx.pujaBookingRequest.create")&&
-    puja.includes("if(recent>=4)return null")&&puja.includes("preferredDate")),
- "Puja booking must fail closed while Coming Soon or validate current offers before writes");
-assert.ok(adminPuja.includes("getAdminApiUser()")&&adminPuja.includes('reviewStatus!=="VERIFIED"')&&
- adminPuja.includes("updateMany")&&adminPuja.includes("adminActionLog.create"),
- "Puja admin needs verified partner and optimistic concurrency");
+assert.ok(pujaPaused &&
+   puja.includes('if (!release.enabled)') &&
+   puja.includes("getPujaLaunchState()") &&
+   puja.includes("getCurrentUser()") &&
+   puja.includes("pg_advisory_xact_lock") &&
+   puja.includes("tx.pujaBookingRequest.count") &&
+   puja.includes("tx.pujaBookingRequest.create") &&
+   puja.includes('if (recent >= 3)') &&
+   puja.includes("expectedPricePaise") &&
+   puja.indexOf("if (!release.enabled)") < puja.indexOf("tx.pujaBookingRequest.create"),
+ "Puja booking must refuse writes by default and allow request-only intake only after launch readiness");
+assert.ok(adminPuja.includes("getAdminApiUser()") &&
+ adminPuja.includes("partnerSupportsTopic(partner, existing.topicId)") &&
+ adminPuja.includes("partnerAcceptanceConfirmed") &&
+ adminPuja.includes("updateMany") && adminPuja.includes("adminActionLog.create"),
+ "Puja admin needs topic-matched approved Pandit acceptance and optimistic concurrency");
 assert.ok(
  !orders.includes('from "@/lib/rate-limit"') &&
  !puja.includes('from "@/lib/rate-limit"') &&
  orders.includes("prisma.$transaction") &&
  orders.includes("Daily order request limit reached.") &&
- (pujaPaused ? !puja.includes("pujaBookingRequest.create") :
-  (puja.includes("prisma.$transaction") && puja.includes("Daily Puja request limit reached."))),
+ (pujaPaused && puja.includes("prisma.$transaction") &&
+  puja.includes("Daily Puja request limit reached.") && puja.includes("if (!release.enabled)")),
  "COMMERCIAL_REQUEST_QUOTA_MUST_BE_DB_SERIALIZED_ACROSS_INSTANCES"
 );
 assert.ok(read("components/shop/cart-page-client.tsx").includes('secureFetch("/api/commerce/orders"')&&
  read("app/orders/page.tsx").includes("userId:user.id"),"Customer shop order flow missing");
 assert.ok((pujaPaused || read("components/puja/booking-request-client.tsx").includes('secureFetch("/api/puja/bookings"'))&&
  read("app/puja-bookings/page.tsx").includes("userId:user.id"),"Existing Puja history and closure gate missing");
-assert.ok(read("scripts/qa-auth-role-e2e.mjs").includes("real Shop order request")&&
- read("scripts/qa-auth-role-e2e.mjs").includes(pujaPaused ?
-   "Puja Coming Soon rejects new booking writes" :
-   "real Puja booking supports owner-managed ceremony"),"Disposable HTTP acceptance missing");
+assert.ok(read("scripts/qa-auth-role-e2e.mjs").includes("real Shop order request") &&
+ read("scripts/qa-auth-role-e2e.mjs").includes("Puja Coming Soon rejects new booking writes") &&
+ puja.includes("Puja services coming soon. New bookings are temporarily closed."),
+ "Disposable HTTP acceptance must prove Puja stays closed when launch flag is off");
 const reportAdmin=read("app/api/admin/manual-report-offerings/route.ts");
 const reportUI=read("components/reports-content.tsx");
 assert.ok(reportAdmin.includes("getAdminApiUser()")&&reportAdmin.includes("getManualReportCheckout(input.reportSlug)")&&
