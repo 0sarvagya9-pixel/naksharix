@@ -13,6 +13,9 @@ on:
       - 'lib/blog-content.ts'
       - 'app/blog/**'
       - 'app/learn/page.tsx'
+      - 'app/shop/**'
+      - 'lib/shop/organic-discovery.ts'
+      - 'components/shop/product-share-actions.tsx'
   workflow_dispatch:
 
 permissions:
