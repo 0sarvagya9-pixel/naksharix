@@ -52,13 +52,13 @@
 }
 .nx-ed-hero-inner { position: relative; display: grid; grid-template-columns: minmax(0,1fr); align-items: center; gap: 1.5rem; padding-block: 7.3rem 6.5rem; }
 .nx-ed-hero-copy { max-width: 870px; z-index: 1; }
-.nx-ed-hero h1 {
+.nx-ed-hero h2 {
   font-family: var(--font-cinzel), Georgia, serif; margin: 1.35rem 0 1.5rem;
   max-width: 770px; font-size: clamp(2.7rem, 5.3vw, 5.8rem); font-weight: 700;
   letter-spacing: -.043em; line-height: 1.14; text-wrap: balance;
   text-shadow: 0 12px 40px rgba(0,0,0,.22);
 }
-.nx-ed-hero h1 em {
+.nx-ed-hero h2 em {
   display: block; font-style: normal; font-weight: 700;
   background: linear-gradient(120deg, #f8e1b1 5%, #deb16f 55%, #ffeed2);
   color: transparent; background-clip: text; -webkit-background-clip: text;
@@ -213,7 +213,7 @@
   .nx-ed-container { width: calc(100% - 1.6rem); }
   .nx-ed-hero { min-height: 670px; }
   .nx-ed-hero-inner { padding-block: 5.3rem 5.7rem; }
-  .nx-ed-hero h1 { font-size: clamp(2.5rem, 10vw, 3.5rem); }
+  .nx-ed-hero h2 { font-size: clamp(2.5rem, 10vw, 3.5rem); }
   .nx-ed-hero-copy > p { font-size: .96rem; }
   .nx-ed-actions { align-items: stretch; }
   .nx-ed-hero .nx-ed-actions { flex-direction: column; max-width: 330px; }
