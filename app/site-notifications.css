@@ -1,7 +1,7 @@
 /* Shared non-blocking, centered 5-second feedback for every page family. */
 @keyframes nx-center-notice-enter {
   from { opacity: 0; transform: scale(.975); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 1; transform: scale(1); }
 }
 @keyframes nx-center-notice-expire {
   from { transform: scaleX(1); }
