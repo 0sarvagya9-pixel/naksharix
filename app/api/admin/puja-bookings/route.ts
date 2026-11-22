@@ -95,7 +95,7 @@ export async function PATCH(request:Request){
    const booking=await tx.pujaBookingRequest.findUniqueOrThrow({where:{id:input.id}});
    await tx.adminActionLog.create({data:{adminId:admin.id,action:"puja.booking.update",
     targetType:"PujaBookingRequest",targetId:input.id,metadata:{from:existing.status,to:booking.status,
-     partnerId:booking.partnerId,version:booking.version,completionEvidencePresent:Boolean(booking.evidenceUrl)}}});
+     partnerId:booking.partnerId,version:booking.version,partnerAcceptanceConfirmed:input.partnerAcceptanceConfirmed,completionEvidencePresent:Boolean(booking.evidenceUrl)}}});
    return booking;
   },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});
   if(!result)return fail("Concurrent Puja request update.",409);
