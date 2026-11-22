@@ -47,7 +47,7 @@ export default async function MyPujas(){
     </div>:null}
     <p className="mt-2 text-sm">Preferred date: {row.preferredDate.toLocaleDateString("en-IN")} · City: {row.city}</p>
     <p className="mt-2 text-sm">Published fee at request: ₹{(row.quotedPricePaise/100).toFixed(2)}</p>
-    <p className="mt-2 text-sm">Confirmed ceremony: {row.scheduledAt?row.scheduledAt.toLocaleString("en-IN"):"Not yet scheduled"}</p>
+    <p className="mt-2 text-sm">Confirmed ceremony: {row.scheduledAt?row.scheduledAt.toLocaleString("en-IN",{timeZone:"Asia/Kolkata",timeZoneName:"short"}):"Not yet scheduled"}</p>
     <p className="mt-2 text-sm">Pandit assignment: {row.partnerId?"Assigned — check status for confirmation":"Pandit confirmation pending"}</p>
     {(()=>{
       const bookingPayments=payments.filter(pay=>{
