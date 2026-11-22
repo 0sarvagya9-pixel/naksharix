@@ -18,7 +18,13 @@ assert.ok(!/razorpay|providerOrderId|checkout|payment\.create|booking\.create|ca
 assert.ok(shop.includes("AddToCartButton"), "SHOP_CART_CTA_MISSING");
 assert.ok(read("components/shop/cart-page-client.tsx").includes('secureFetch("/api/commerce/orders"') &&
  read("components/shop/cart-page-client.tsx").includes("Sign in to checkout"), "SHOP_DIRECT_ORDER_FROM_CART_MISSING");
-assert.ok(puja.includes("/commerce-enquiry?kind=PUJA&item="), "PUJA_CTA_MISSING");
+assert.ok(
+ !puja.includes("/commerce-enquiry?kind=PUJA&item=") &&
+ puja.includes("Puja bookings currently paused") &&
+ puja.includes("New Naksharix Puja bookings and online Puja payments are currently paused") &&
+ read("app/pujas/page.tsx").includes("robots: { index: false, follow: true }"),
+ "PAUSED_PUJA_CTA_OR_NOINDEX_REGRESSION"
+);
 const cartQuote=read("app/api/commerce/cart-quote/route.ts");
 const cartUi=read("components/shop/cart-page-client.tsx");
 for(const term of ["getCurrentUser()","validateJson(request,schema)","getShopCatalogue()","p.status===\"active\"","rateLimit(","prisma.supportTicket.create","paymentRequired:false","orderCreated:false","fulfillmentConfirmed:false"]){
