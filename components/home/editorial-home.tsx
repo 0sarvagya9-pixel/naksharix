@@ -108,7 +108,9 @@ function SectionTitle({ eyebrow, title, copy }: { eyebrow: string; title: string
   );
 }
 
-export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Record<string,number|null>}) {
+export function EditorialHome({featuredShopPrices={},pujaEnabled=false,availablePujaIds=[]}: {
+ featuredShopPrices?: Record<string,number|null>;pujaEnabled?:boolean;availablePujaIds?:string[];
+}) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [manuallyPaused, setManuallyPaused] = useState(true);
@@ -128,7 +130,24 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
     return () => window.clearInterval(timer);
   }, [paused, manuallyPaused, reducedMotion]);
 
-  const slide = heroSlides[active];
+  const slide = active===1 && pujaEnabled ? {
+    ...heroSlides[active],
+    body: "Explore available Pujas with an approved Pandit. Request your preferred date without paying; the individual ceremony and schedule must be confirmed first.",
+    main: { label: "Explore available Pujas", href: "/pujas" }
+  } : heroSlides[active];
+  const displayServices = services.map(item => item.number==="04" && pujaEnabled
+    ? {...item,copy:"Explore services with a verified Pandit; request a date before payment.",cta:"Explore available Pujas"}
+    : item);
+  const displayJourneys = journeys.map(item => item.label==="Puja & traditions" && pujaEnabled
+    ? {...item,desc:"Explore verified Puja offerings; request a date and await Pandit confirmation before payment.",cta:"Browse available Pujas"}
+    : item);
+  const featuredPujaItems = [
+    { id:"rudrabhishek", name:"Rudrabhishek", category:"shiva" },
+    { id:"maha-lakshmi-puja", name:"Maha Lakshmi Puja", category:"devi" },
+    { id:"navagraha-shanti-puja", name:"Navagraha Shanti", category:"graha" },
+    { id:"griha-pravesh-puja", name:"Griha Pravesh Puja", category:"family" }
+  ].filter(item=>!pujaEnabled||availablePujaIds.includes(item.id));
+
   function advance(direction: number) {
     setActive((index) => (index + direction + heroSlides.length) % heroSlides.length);
   }
@@ -244,7 +263,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
         <div className="nx-ed-container">
           <SectionTitle eyebrow="EXPLORE NAKSHARIX" title="Astrology, made personal." copy="Explore astrology tools and personal guidance at your own pace." />
           <div className="nx-ed-service-grid">
-            {services.map((item) => (
+            {displayServices.map((item) => (
               <article className="nx-ed-service-card" key={item.href}>
                 <Link href={item.href} className="nx-ed-card-image" aria-label={item.cta}>
                   <Image src={item.image} alt={item.alt} fill sizes="(max-width: 700px) 100vw, (max-width: 1080px) 50vw, 33vw"
@@ -288,7 +307,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
         <div className="nx-ed-container">
           <SectionTitle eyebrow="MORE TO DISCOVER" title="An entire world to explore." copy="Go beyond the calculator with traditional learning, thoughtful conversations and clearly described services." />
           <div className="nx-ed-journey-grid">
-            {journeys.map((item) => (
+            {displayJourneys.map((item) => (
               <Link href={item.href} className="nx-ed-journey-card" key={item.href}>
                 <Image src={item.image} alt={item.alt} fill sizes="(max-width: 720px) 100vw, 33vw" quality={72}/>
                 <span className="nx-ed-journey-shade" aria-hidden="true"/>
@@ -346,17 +365,14 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
       <section className="nx-ed-section" aria-label="Featured Puja topics">
         <div className="nx-ed-container">
           <SectionTitle eyebrow="PUJA TRADITIONS" title="Ceremonies for every occasion."
-            copy="Our Puja services are coming soon. New bookings and online payments are temporarily unavailable." />
+            copy={pujaEnabled
+              ? "Explore available Puja services. Individual Pandit acceptance and schedule confirmation are required before payment."
+              : "Our Puja services are coming soon. New bookings and online payments are temporarily unavailable."} />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { id:"rudrabhishek", name:"Rudrabhishek", category:"shiva" },
-              { id:"maha-lakshmi-puja", name:"Maha Lakshmi Puja", category:"devi" },
-              { id:"navagraha-shanti-puja", name:"Navagraha Shanti", category:"graha" },
-              { id:"griha-pravesh-puja", name:"Griha Pravesh Puja", category:"family" }
-            ].map(item=>(
+            {featuredPujaItems.map(item=>(
               <article key={item.id} className="overflow-hidden rounded-2xl border border-[#d2aa6a]/35 bg-[#1c1427] text-white">
                 <Link href="/pujas"
-                  aria-label={"Puja services coming soon — "+item.name}>
+                  aria-label={(pujaEnabled?"Explore available Puja — ":"Puja services coming soon — ")+item.name}>
                   <Image src={pujaEditorialImage(item.id,"/pujas/"+item.category+"-illustration.svg",item.category)} alt={item.name+" representative ritual photo"}
                     width={540} height={335} unoptimized className="aspect-[16/10] w-full object-cover transition duration-300 hover:scale-105" />
                 </Link>
@@ -364,7 +380,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
                   <h3 className="font-cinzel text-lg font-bold">{item.name}</h3>
                   <Link href="/pujas"
                     className="mt-4 inline-flex items-center gap-2 font-bold text-[#f5cc82]">
-                    Coming Soon <ArrowRight size={16}/>
+                    {pujaEnabled ? "Request date" : "Coming Soon"} <ArrowRight size={16}/>
                   </Link>
                 </div>
               </article>
@@ -375,7 +391,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
               Upcoming festivals <CalendarDays size={17}/>
             </Link>
             <Link href="/pujas" className="inline-flex items-center gap-2 font-bold text-[#724012]">
-              Puja Coming Soon <ArrowRight size={17}/>
+              {pujaEnabled ? "Explore available Pujas" : "Puja Coming Soon"} <ArrowRight size={17}/>
             </Link>
           </div>
         </div>
