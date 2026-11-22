@@ -66,7 +66,7 @@ export function SiteNotificationCenter() {
 
   return createPortal(
     <div
-      className="pointer-events-none fixed inset-0 z-[12000] flex items-center justify-center px-4 py-6"
+      className="pointer-events-none fixed left-[50vw] top-[50vh] z-[12000] w-[calc(100vw-2rem)] max-w-[430px] -translate-x-1/2 -translate-y-1/2"
       data-notification-region="center"
     >
       <section
