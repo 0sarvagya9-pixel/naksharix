@@ -77,9 +77,13 @@ assert.ok(checkoutClient.includes("Unable to reach the payment server")&&
 
 const pricingPage=read("app/pricing/page.tsx");
 const pricingContent=read("components/pricing-content.tsx");
-assert.ok(pricingPage.includes("getPublishedPujaOffers()") &&
+assert.ok(pricingPage.includes("getPujaLaunchState()") &&
   pricingPage.includes('displayPujaPrice(prices[0])') &&
-  pricingContent.includes("pujaPriceLabel"),"PUBLIC_PRICING_MUST_FOLLOW_APPROVED_DB_FEES");
+  pricingPage.includes('"Coming Soon"') &&
+  pricingContent.includes("pujaPriceLabel") &&
+  pricingContent.includes("pujaEnabled") &&
+  pricingContent.includes("No advance payment"),
+  "PUBLIC_PRICING_MUST_FOLLOW_VERIFIED_LAUNCH_GATE_OR_SHOW_COMING_SOON");
 assert.ok(pricingContent.includes('href: "/pujas"')&&
   pricingContent.includes('href: "/shop"')&&
   pricingContent.includes('href: "/shop"'),"PRICING_MUST_DESCRIBE_REAL_COMMERCE_STATE");
