@@ -4,6 +4,11 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { AddToCartButton } from "@/components/shop/quote-cart-controls";
 import { ProductGallery } from "@/components/shop/product-gallery";
+import { ProductShareActions } from "@/components/shop/product-share-actions";
+import { productDiscoverySchema } from "@/lib/shop/organic-discovery";
+import { JsonLd } from "@/components/seo/json-ld";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
+import { env } from "@/lib/env";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import type { ShopProduct } from "@/lib/manual-catalogue";
 import { seo } from "@/lib/seo";
@@ -40,11 +45,24 @@ export default async function ProductDetails({params}:Props) {
   if (!product) notFound();
   const image=imageFor(product);
   const illustrated=!(product.galleryImages?.length) && (image.endsWith("-illustration.svg")||image.endsWith("-placeholder.svg"));
+  const canonicalOrigin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
+  const productUrl = new URL("/shop/" + encodeURIComponent(product.slug), canonicalOrigin).toString();
+  const discoverySchema = productDiscoverySchema(product, canonicalOrigin);
+  const breadcrumbSchema = {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: canonicalOrigin },
+      { "@type": "ListItem", position: 2, name: "Shop", item: canonicalOrigin + "/shop" },
+      { "@type": "ListItem", position: 3, name: product.name.en, item: productUrl }
+    ]
+  };
   return <main className="star-field min-h-screen bg-[#fffaf3] pb-20">
+    <JsonLd id={`shop-breadcrumb-${slug}`} data={breadcrumbSchema} />
+    {discoverySchema ? <JsonLd id={`shop-product-${slug}`} data={discoverySchema} /> : null}
     <div className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
       <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-bold text-[#8e3442]"><ArrowLeft size={16}/> Back to shop</Link>
       <div className="mt-7 grid gap-8 lg:grid-cols-2">
-        <ProductGallery initialSrc={image} initialAlt={product.imageAlt.en||product.name.en} photos={product.galleryImages||[]} mainImageRights={product.imageRights} />
+        <ProductGallery initialSrc={image} initialAlt={product.imageAlt.en||product.name.en} photos={product.galleryImages||[]} mainImageRights={product.imageRights} itemPhotoVerified={Boolean(discoverySchema)} />
         <div className="rounded-3xl border border-[#d8b372]/35 bg-white p-6 text-[#402a2d] md:p-10">
           <p className="text-sm font-bold uppercase tracking-widest text-[#8e3442]">{product.category} • {product.purpose}</p>
           <h1 className="mt-4 font-cinzel text-3xl font-black md:text-5xl">{product.name.en}</h1>
@@ -61,6 +79,7 @@ export default async function ProductDetails({params}:Props) {
             : "Price awaiting verification"}</p>
           <p className="mt-2 text-sm leading-6 text-[#67545a]">Listed selling price includes delivery. Review your total in the cart, place your order and pay securely with Razorpay.</p>
           <div className="mt-5 max-w-xs"><AddToCartButton productId={product.id} /></div>
+          <ProductShareActions name={product.name.en} productUrl={productUrl} />
           {illustrated?<p className="mt-5 text-xs leading-6 text-[#756267]">
             Image shown is for reference. Confirm product details before ordering.
           </p>:null}

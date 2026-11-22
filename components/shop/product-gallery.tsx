@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { ResilientShopPhoto } from "@/components/shop/resilient-shop-photo";
 import type { ProductGalleryImage } from "@/lib/manual-catalogue";
-type GalleryProps={initialSrc:string;initialAlt:string;photos:ProductGalleryImage[];mainImageRights?:"OWNED"|"LICENSED"|"SUPPLIER_AUTHORIZED"};
-export function ProductGallery({initialSrc,initialAlt,photos,mainImageRights}:GalleryProps){
+type GalleryProps={initialSrc:string;initialAlt:string;photos:ProductGalleryImage[];mainImageRights?:"OWNED"|"LICENSED"|"SUPPLIER_AUTHORIZED";itemPhotoVerified?:boolean};
+export function ProductGallery({initialSrc,initialAlt,photos,mainImageRights,itemPhotoVerified=false}:GalleryProps){
  const entries=photos.length ? photos.slice(0,8).map(photo=>({src:photo.url,alt:photo.alt,credit:photo.credit||"",licenseName:photo.licenseName||"",licenseUrl:photo.licenseUrl||"",source:photo.evidenceUrl,imageRights:photo.imageRights})) :
  [{src:initialSrc,alt:initialAlt,credit:"",licenseName:"",licenseUrl:"",source:"",imageRights:mainImageRights}];
  const [active,setActive]=useState(0);
@@ -20,6 +20,6 @@ export function ProductGallery({initialSrc,initialAlt,photos,mainImageRights}:Ga
        <ResilientShopPhoto src={entry.src} alt={entry.alt} width={200} height={160} className="aspect-[4/3] w-full rounded-lg object-cover"/>
      </button>)}
    </div>:null}
-   <p className="mt-3 px-1 text-xs leading-5 text-[#584550]">Product images are for reference. Please review specifications before purchase.</p>
+   <p className="mt-3 px-1 text-xs leading-5 text-[#584550]">{itemPhotoVerified ? "Seller-provided product photos for this listing. Check specifications before ordering." : "Product images are for reference. Please review specifications before purchase."}</p>
  </div>
 }

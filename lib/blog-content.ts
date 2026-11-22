@@ -519,6 +519,18 @@ export const blogPosts = [
     ],
     "related": [
       {
+        "href": "/shop/5-mukhi-rudraksha",
+        "label": "See the 5 Mukhi Rudraksha price and item details"
+      },
+      {
+        "href": "/shop/rudraksha-mala",
+        "label": "View the Rudraksha Mala listing"
+      },
+      {
+        "href": "/shop/shri-yantra",
+        "label": "See the Shri Yantra listing"
+      },
+      {
         "href": "/shop",
         "label": "Browse the spiritual catalogue"
       },
