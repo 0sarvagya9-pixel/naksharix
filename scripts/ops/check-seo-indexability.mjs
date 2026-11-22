@@ -63,7 +63,7 @@ export async function verifyLiveSeo(fetcher = fetch, origin = CANONICAL_ORIGIN) 
       } catch { return true; }
     });
     const pausedPujaRoutes = urls.filter(url => {
-      try { return /^\\/pujas(?:\\/|$)/.test(new URL(url).pathname); }
+      try { return /^\/pujas(?:\/|$)/.test(new URL(url).pathname); }
       catch { return false; }
     });
     collect("/sitemap.xml", !response.ok ? "HTTP non-success" :
