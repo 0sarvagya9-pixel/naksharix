@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/email/email-service";
 import { logger } from "@/lib/monitoring/logger";
 import { env } from "@/lib/env";
+import { pujaStatusNotice } from "@/lib/puja/customer-notices";
 
 type FulfilmentKind = "shop" | "puja";
 export type FulfilmentNotice = {
@@ -45,7 +46,8 @@ export async function notifyCustomerOfFulfilmentChange(input: {
   status: string;
 }): Promise<FulfilmentNotice> {
   if (input.status === input.oldStatus) return { outcome: "not_needed" };
-  const description = statusMessages[input.kind][input.status];
+  const detail = input.kind === "puja" ? pujaStatusNotice(input.status) : null;
+  const description = detail ? detail.en : statusMessages[input.kind][input.status];
   if (!description) return { outcome: "not_needed" };
   let email: string | undefined;
   try {
@@ -56,6 +58,18 @@ export async function notifyCustomerOfFulfilmentChange(input: {
     return { outcome: "failed" };
   }
   if (!email) return { outcome: "recipient_missing" };
+  let scheduleText = "";
+  if (input.kind === "puja") {
+    const booking = await prisma.pujaBookingRequest.findFirst({
+      where: {id:input.reference,userId:input.userId},
+      select: {scheduledAt:true,topicId:true}
+    }).catch(() => null);
+    if (booking?.scheduledAt) {
+      scheduleText = "Recorded ceremony date/time: " +
+        booking.scheduledAt.toLocaleString("en-IN",{timeZone:"Asia/Kolkata",timeZoneName:"short"}) +
+        " (confirm the venue or online link with the coordinator).";
+    }
+  }
   const trackingPath = input.kind === "shop" ? "/orders" : "/puja-bookings";
   try {
     const result = await sendEmail({
@@ -65,11 +79,14 @@ export async function notifyCustomerOfFulfilmentChange(input: {
         "Namaste,",
         "",
         description,
+        ...(detail ? [detail.hi] : []),
+        ...(scheduleText ? [scheduleText] : []),
         `Reference: ${input.reference}`,
         `Status: ${input.status}`,
         `Track your request after signing in: ${env.NEXT_PUBLIC_APP_URL}${trackingPath}`,
         "",
         "This is a status notification, not a payment receipt or independent proof of delivery or ceremony completion.",
+        ...(input.kind==="puja" ? ["Only a verified Razorpay payment record proves a captured fee; no payment is due on an initial request."] : []),
         "If something is incorrect, contact Naksharix support at care@naksharix.com.",
         "Do not reply with passwords, OTPs, complete birth details or payment credentials."
       ].join("\n")
