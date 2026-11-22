@@ -8,8 +8,11 @@ const center = read("components/ui/site-notification-center.tsx");
 const emitter = read("lib/ui/site-notification.ts");
 const secure = read("lib/security/csrf.ts");
 const pay = read("components/razorpay-checkout-button.tsx");
+const browserConfig = read("tests/e2e/playwright.config.ts");
 const add = read("components/shop/quote-cart-controls.tsx");
 
+assert.ok(browserConfig.includes('"site-notification-center.spec.ts"'),
+  "Browser release must exercise the popup in Chromium, Firefox and WebKit");
 assert.ok(layout.includes("<SiteNotificationCenter />") &&
   layout.includes('import "@/app/site-notifications.css"'),
   "Global notification UI must be installed in the root layout, not a single route");
