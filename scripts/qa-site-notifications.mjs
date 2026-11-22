@@ -50,8 +50,10 @@ const verified = pay.indexOf('if (!verifyResponse.ok)');
 const success = pay.indexOf('siteNotice.success("Your payment has been verified.');
 assert.ok(verified !== -1 && success > verified &&
   pay.includes('secureFetch("/api/payments/razorpay/verify"') &&
-  pay.includes('siteNotice.warning("Verification could not be checked.') &&
-  pay.includes('setStatus("Payment confirmation is pending.'),
+  secure.includes('siteNotice.warning(') &&
+  secure.includes('"Payment status pending"') &&
+  pay.includes('setStatus("Payment confirmation is pending.') &&
+  pay.includes('setStatus("Payment confirmation could not be checked.'),
   "Only gateway-verified capture gets a success notification; pending must remain visible");
 assert.ok(add.includes('siteNotice.success("Item added to your cart.') &&
   add.includes('siteNotice.error("Cart could not be saved') &&
