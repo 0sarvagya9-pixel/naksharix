@@ -4,6 +4,7 @@ import { ResilientEditorialImage } from "@/components/puja/resilient-editorial-i
 import { editorialPujaPhotos, pujaEditorialPhoto } from "@/lib/puja/editorial-photos";
 import { pujaTopics } from "@/lib/puja/service-catalogue";
 import { secureFetch } from "@/lib/security/csrf";
+import { siteNotice } from "@/lib/ui/site-notification";
 type Offer={topicId:string;pricePaise:number|null;durationMinutes:number|null;available:boolean;note:string};
 function blank(topicId:string):Offer{return {topicId,pricePaise:110000,durationMinutes:null,available:false,note:""}}
 export function AdminPujaOfferEditor(){
@@ -23,7 +24,7 @@ export function AdminPujaOfferEditor(){
  ),[query,needsExactPhoto]);
  async function save(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(!draft||busy)return;
-  if(draft.available&&draft.pricePaise===null){setError("Set an approved INR price before publishing.");return}
+  if(draft.available&&draft.pricePaise===null){setError("Set an approved INR price before publishing.");siteNotice.warning("Add an approved INR price before marking a Puja as available.","Price required");return}
   setBusy(true);setError("");setNotice("");
   try{
    const r=await secureFetch("/api/admin/puja-offerings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(draft)});

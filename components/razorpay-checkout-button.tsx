@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { secureFetch } from "@/lib/security/csrf";
+import { siteNotice } from "@/lib/ui/site-notification";
 import { useLanguage } from "@/components/language-provider";
 import { canBypassPayment } from "@/lib/auth/permissions";
 
@@ -53,8 +54,10 @@ export function RazorpayCheckoutButton({
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const verifiedRef = useRef(false);
 
   async function startCheckout() {
+    verifiedRef.current = false;
     setLoading(true);
     setStatus(tr("creatingSecureOrder"));
 
@@ -63,6 +66,7 @@ export function RazorpayCheckoutButton({
     if (userResponse?.status === 401) {
       setLoading(false);
       setStatus(tr("signInToPay"));
+      siteNotice.warning("Sign in to your account before starting payment.", "Sign in required");
       // Resume the same public report or product after sign-in; never place a
       // charge before authentication, and never trust an external redirect.
       const resume = window.location.pathname + window.location.search;
@@ -72,6 +76,7 @@ export function RazorpayCheckoutButton({
     if (canBypassPayment(userJson?.data?.user)) {
       setLoading(false);
       setStatus(tr("adminTestingModePaymentBypassed"));
+      siteNotice.info("Admin mode skipped a charge. No payment has been collected.", "Admin testing mode");
       router.push(adminBypassHref ?? getAdminBypassTarget(payload));
       return;
     }
@@ -80,6 +85,7 @@ export function RazorpayCheckoutButton({
     if (!scriptLoaded || !window.Razorpay) {
       setLoading(false);
       setStatus(tr("paymentsComingSoon"));
+      siteNotice.warning("Secure payment checkout is unavailable. Please try later.", "Payment unavailable");
       return;
     }
 
@@ -134,22 +140,28 @@ export function RazorpayCheckoutButton({
           });
           if (!verifyResponse.ok) {
             setStatus("Payment confirmation is pending. Check your payment history before trying again; do not pay twice.");
+            // secureFetch already shows one centered payment error; preserve the detailed inline warning.
             return;
           }
+          verifiedRef.current = true;
           setStatus(tr("paymentVerified"));
+          siteNotice.success("Your payment has been verified. Check the booking/order history for fulfilment status.", "Payment verified");
           const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
           if (target) router.push(target);
           else router.refresh();
         } catch {
           setStatus("Payment confirmation could not be checked. Check payment history before trying again; do not pay twice.");
+          // secureFetch already provided one centered pending-payment notice.
         } finally {
           setLoading(false);
         }
       },
       modal: {
         ondismiss: () => {
+          if (verifiedRef.current) return;
           setLoading(false);
           setStatus(tr("checkoutClosed"));
+          siteNotice.info("Checkout closed. If money was deducted, verify payment history before retrying.", "Checkout closed");
         }
       }
     });
@@ -158,6 +170,7 @@ export function RazorpayCheckoutButton({
     } catch {
       setLoading(false);
       setStatus("Unable to open Razorpay checkout. No payment was initiated in this window.");
+      siteNotice.error("Could not open checkout. Review payment history before trying again.", "Checkout unavailable");
     }
   }
 
