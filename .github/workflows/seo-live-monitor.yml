@@ -36,17 +36,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify checker syntax and public SEO signals
+      - name: Verify checker syntax before deployment
+        run: |
+          node --check scripts/ops/check-seo-indexability.mjs
+          node --check scripts/ops/check-sitemap-canonicals.mjs
+      # A pull request cannot make a currently deployed live sitemap change.
+      # Check public production after deployment on the daily/manual monitor,
+      # not as a pre-merge gate that is guaranteed to report the old site.
+      - name: Monitor live public SEO signals
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         id: check
         env:
           NAKSHARIX_SEO_DIAG: "1"
         continue-on-error: true
         run: |
-          node --check scripts/ops/check-seo-indexability.mjs
           node scripts/ops/check-seo-indexability.mjs
           node scripts/ops/check-sitemap-canonicals.mjs
       - name: Open or resolve a single SEO monitoring incident
-        if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+        if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -69,5 +76,5 @@ jobs:
             gh issue comment "$incident" --body 'Technical SEO remains degraded. Review the latest scheduled run.'
           fi
       - name: Fail when live SEO is degraded
-        if: always() && steps.check.outcome != 'success'
+        if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.check.outcome != 'success'
         run: exit 1
