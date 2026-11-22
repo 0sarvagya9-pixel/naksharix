@@ -145,7 +145,7 @@ export function MainNav() {
     <div className="sticky top-0 z-50 w-full">
       <div className="nx-reference-promo">
         <span>{locale === "hi" ? "NAKSHARIX • वैदिक ज्योतिष, पारंपरिक ज्ञान और व्यक्तिगत मार्गदर्शन" : "NAKSHARIX  |  Vedic heritage, thoughtfully designed for today"}</span>
-        <Link href="/pujas">{locale === "hi" ? "पूजा सेवाएँ देखें" : "Traditional knowledge"} <span aria-hidden="true">→</span></Link>
+        <Link href="/learn">{locale === "hi" ? "वैदिक ज्योतिष सीखें" : "Explore free learning"} <span aria-hidden="true">→</span></Link>
       </div>
       <header
         className="w-full transition-all duration-300"
