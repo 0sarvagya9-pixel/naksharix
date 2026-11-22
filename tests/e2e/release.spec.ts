@@ -196,15 +196,16 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page).toHaveURL(/\/login\?redirectTo=%2Fcart/);
   });
 
-  test("Puja enquiry from reviewed calendar requires account and does not claim booking", async ({ page }) => {
+  test("Puja calendar clearly pauses enquiry and sends visitors to service status", async ({ page }) => {
     await page.goto(absolute("/puja-calendar"), { waitUntil: "domcontentloaded" });
-    await page.getByRole("link", { name: "Enquire about this Puja" }).first().click();
-    await expect(page).toHaveURL(/\/commerce-enquiry\?kind=PUJA&item=/);
-    await expect(page.getByRole("heading", { name: "Puja date and availability enquiry" })).toBeVisible();
-    await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Checkout|Pay/i })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Upcoming Puja Calendar" })).toBeVisible();
+    await expect(page.getByText(/New Naksharix Puja bookings and online Puja payments are currently paused/)).toBeVisible();
+    const status = page.getByRole("link", { name: "Puja bookings currently paused" }).first();
+    await expect(status).toHaveAttribute("href", "/pujas");
+    await status.click();
+    await expect(page).toHaveURL(/\\/pujas$/);
+    await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
   });
-
   test("premium homepage shows credited real catalogue reference photography and ritual cards", async ({ page }) => {
     await page.goto(absolute("/"), { waitUntil: "domcontentloaded" });
     await expect(page.getByText("5 Mukhi Rudraksha", { exact: true })).toBeVisible();
@@ -213,38 +214,27 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("link", { name: "Explore Puja directory" }).first()).toBeVisible();
   });
 
-  test("Puja directory initially limits mobile cards and reveals more on demand", async ({ page }) => {
+  test("Puja booking pause has no purchase or enquiry controls on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(12);
-    await page.getByRole("button", { name: /Load more Puja topics/ }).click();
-    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(24);
+    await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
+    await expect(page.getByText("Coming Soon", { exact: true })).toBeVisible();
+    await expect(page.locator("#puja-directory")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Checkout|Book Now|Pay/i })).toHaveCount(0);
   });
-
-  test("Puja service directory filters traditions and preserves selected topic", async ({ page }) => {
-    await page.goto(absolute("/pujas"), { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "Puja Directory" })).toBeVisible();
-    const search = page.getByRole("searchbox", { name: "Search Puja types or deities" });
-    await expect(search).toBeEnabled();
-    await search.fill("Rudrabhishek");
-    await expect(page.getByRole("heading", { name: "Rudrabhishek", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Enquire", exact: true })).toHaveCount(1);
-    await page.getByRole("link", { name: "Enquire", exact: true }).click();
-    await expect(page).toHaveURL(/kind=PUJA&item=ritual%3Arudrabhishek/);
-    await expect(page.getByRole("heading", { name: "Puja date and availability enquiry" })).toBeVisible();
-    await expect(page.getByText("Sign in to submit and track a private enquiry.")).toBeVisible();
+  test("Puja legacy enquiry links safely redirect to paused service notice", async ({ page }) => {
+    await page.goto(absolute("/puja-enquiry"), { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\\/pujas$/);
+    await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /पुरानी बुकिंग देखें/i })).toHaveAttribute("href", "/puja-bookings");
   });
-
-  test("individual Puja detail page keeps safe enquiry context", async ({ page }) => {
+  test("individual Puja details cannot bypass the Coming Soon pause", async ({ page }) => {
     await page.goto(absolute("/pujas/rudrabhishek"), { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "Rudrabhishek", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Enquire about Rudrabhishek/ })).toHaveAttribute(
-      "href", /kind=PUJA.*ritual%3Arudrabhishek/
-    );
-    await expect(page.getByText(/Explore festival dates and enquire about your preferred ceremony/)).toBeVisible();
+    await expect(page).toHaveURL(/\\/pujas$/);
+    await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Checkout|Book Now|Pay/i })).toHaveCount(0);
   });
-
   test("Shop product detail retains truthful photography disclosure and safe cart CTA", async ({ page }) => {
     await page.goto(absolute("/shop/shri-yantra"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Shri Yantra" })).toBeVisible();
