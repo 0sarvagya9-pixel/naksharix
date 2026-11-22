@@ -3,6 +3,7 @@ import { Prisma, type Payment } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog } from "@/lib/reports/report-audit";
+import { notifyCapturedPujaPayment, notifyProcessedPujaRefund } from "@/lib/puja/payment-notifications";
 
 /** One-gateway post-capture state reconciliation. Idempotent; never reopens canceled work. */
 export async function reconcileCapturedPurpose(payment: Payment) {
@@ -29,13 +30,12 @@ export async function reconcileCapturedPurpose(payment: Payment) {
     });
   }
   if (payment.purpose === "PUJA_BOOKING" && typeof meta.pujaBookingId === "string") {
-    await prisma.pujaBookingRequest.updateMany({
-      where: { id: meta.pujaBookingId, userId: payment.userId, status: "REQUESTED" },
-      data: { status: "CONFIRMED" }
-    });
+    // Payment is accepted only after a verified Pandit/date were scheduled.
+    // Never overwrite the ceremony status to CONFIRMED from a gateway callback.
+    await notifyCapturedPujaPayment(payment).catch(() =>
+      logger.warn("puja_capture_notification_temporarily_unavailable"));
   }
-  // Confirmation is a paid booking, not a claim that an exact ceremony
-  // time or individual Pandit has already been assigned.
+  // Verified payment updates the Payment ledger, NOT proof of a ceremony.
 }
 
 /** Only signed Razorpay refund.processed with the exact FULL original amount
@@ -123,4 +123,8 @@ export async function reconcileProcessedRefund(refund: {
     targetId: original.id,
     metadata: { refundId: refund.id, purpose: original.purpose, verifiedWebhook: true }
   });
+  if (original.purpose === "PUJA_BOOKING") {
+    await notifyProcessedPujaRefund(original, refund.id).catch(() =>
+      logger.warn("puja_refund_notification_temporarily_unavailable"));
+  }
 }

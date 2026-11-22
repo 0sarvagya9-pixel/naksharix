@@ -9,6 +9,7 @@ import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
 import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
 import { getThreePhaseAcceptance } from "@/lib/ops/three-phase-acceptance";
+import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export async function GET() {
   const monitoring = getMonitoringReadiness();
   const commercial = await getCommercialReadiness();
   const unified = await getThreePhaseAcceptance(commercial);
+  const pujaLaunch = await getPujaLaunchState(true);
 
   return ok({
     app: {
@@ -69,6 +71,7 @@ export async function GET() {
       }
     },
     commercial,
+    pujaLaunch,
     unified,
     checkedAt: new Date().toISOString()
   }, { status: database === "ok" ? 200 : 503 });

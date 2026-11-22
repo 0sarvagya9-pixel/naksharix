@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { EditorialHome } from "@/components/home/editorial-home";
 import { ApprovedGalleryHome } from "@/components/home/approved-gallery-home";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
+import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
@@ -29,11 +30,12 @@ export default async function HomePage() {
   } catch {
     // Home page remains operational without falsely advertising unavailable prices.
   }
+  const puja = await getPujaLaunchState();
   return (
     <main className="overflow-hidden bg-[var(--nx-bg)] text-[var(--nx-text)]">
       <ApprovedGalleryHome />
       <div className="nx-approved-retained">
-        <EditorialHome featuredShopPrices={featuredShopPrices} />
+        <EditorialHome featuredShopPrices={featuredShopPrices} pujaEnabled={puja.enabled} availablePujaIds={Object.keys(puja.offers)} />
       </div>
     </main>
   );

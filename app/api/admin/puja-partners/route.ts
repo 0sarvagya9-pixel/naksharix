@@ -4,6 +4,7 @@ import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
+import { findPujaTopic } from "@/lib/puja/service-catalogue";
 
 const createSchema = z.object({
   name: z.string().trim().min(3).max(100),
@@ -65,9 +66,13 @@ export async function PATCH(request: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       const existing = await tx.pujaPartner.findUnique({
         where: { id: input.partnerId },
-        select: { id: true, evidenceUrl: true, reviewStatus: true }
+        select: { id: true, evidenceUrl: true, reviewStatus: true, traditions: true }
       });
       if (!existing) return "not_found" as const;
+      if (input.decision === "VERIFIED" &&
+          !existing.traditions.some(topicId => Boolean(findPujaTopic(topicId)))) {
+        return "missing_topic_approval" as const;
+      }
       if (input.decision === "VERIFIED" && !existing.evidenceUrl) {
         return "missing_evidence" as const;
       }
@@ -94,6 +99,7 @@ export async function PATCH(request: NextRequest) {
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
     if (result === "not_found") return fail("Partner not found", 404);
     if (result === "missing_evidence") return fail("Evidence required before review.", 422);
+    if (result === "missing_topic_approval") return fail("Assign at least one exact supported Puja topic before verification.", 422);
     return ok({ recorded: true, reviewStatus: input.decision });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {

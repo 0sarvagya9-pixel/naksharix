@@ -9,6 +9,7 @@ import { env } from "@/lib/env";
 import { getPaidReport } from "@/lib/paid-reports";
 import { razorpay } from "@/lib/payments/razorpay";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
+import { getPujaLaunchState, partnerSupportsTopic } from "@/lib/puja/launch-readiness";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { getReportPricing } from "@/lib/reports/pricing";
 import { getSubscriptionPlan } from "@/lib/revenue";
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (body.purpose === "SUBSCRIPTION" && env.SUBSCRIPTIONS_ENABLED !== "true") return fail("Not found", 404);
     if (body.purpose === "SHOP_ORDER" && env.SHOP_PAYMENTS_ENABLED !== "true")
       return fail("Shop online payments are temporarily unavailable. Your order remains saved.", 503);
-    if (body.purpose === "PUJA_BOOKING")
+    if (body.purpose === "PUJA_BOOKING" && !(await getPujaLaunchState()).enabled)
       return fail("Puja services coming soon. New Puja payments are temporarily closed.", 503);
     if (canBypassPayment(user)) return fail("Admin access does not require payment", 403);
     const readiness = getRazorpayReadiness();
@@ -200,11 +201,16 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
   }
   if (body.purpose === "PUJA_BOOKING") {
     const booking = await prisma.pujaBookingRequest.findUnique({ where: { id: body.bookingId } });
-    // Booking and ceremony logistics are fulfilled by the owner. Customers
-    // pay the published fee; a preferred date is not represented as a final muhurat.
-    if (!booking || booking.userId !== userId || !["REQUESTED","CONFIRMED","SCHEDULED"].includes(booking.status)) return null;
-    const offer = await prisma.pujaOffering.findUnique({ where: { topicId: booking.topicId } });
-    if (!offer?.available || offer.pricePaise !== booking.quotedPricePaise ||
+    // No buyer is charged for an unaccepted date, missing Pandit, stale fee,
+    // old canceled request or a service whose partner is no longer verified.
+    if (!booking || booking.userId !== userId || booking.status !== "SCHEDULED" ||
+        !booking.partnerId || !booking.scheduledAt || booking.scheduledAt.getTime() <= Date.now()) return null;
+    const [offer, partner] = await Promise.all([
+      prisma.pujaOffering.findUnique({ where: { topicId: booking.topicId } }),
+      prisma.pujaPartner.findUnique({ where: { id: booking.partnerId } })
+    ]);
+    if (!partner || !partnerSupportsTopic(partner, booking.topicId) ||
+        !offer?.available || offer.pricePaise !== booking.quotedPricePaise ||
         booking.quotedPricePaise !== 110000 || booking.quotedPricePaise < 100) return null;
     return { name: "Naksharix Puja Booking", amount: booking.quotedPricePaise / 100,
       metadata: { pujaBookingId: booking.id, pujaTopicId: booking.topicId } };

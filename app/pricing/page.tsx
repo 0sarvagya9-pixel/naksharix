@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
 import { PricingContent } from "@/components/pricing-content";
-import { getPublishedPujaOffers, displayPujaPrice } from "@/lib/puja/offerings";
-import { pujaTopics } from "@/lib/puja/service-catalogue";
+import { displayPujaPrice } from "@/lib/puja/offerings";
+import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
 
 export const metadata: Metadata = seo({
   title: "Naksharix Services and Pricing",
@@ -14,14 +14,11 @@ export const metadata: Metadata = seo({
 export const dynamic = "force-dynamic";
 
 export default async function PricingPage() {
-  // Only advertise the published owner-managed price. A missing or mixed
-  // catalogue cannot be substituted with a guessed amount.
-  const published = await getPublishedPujaOffers();
-  const prices = pujaTopics.map(topic => published[topic.id]?.pricePaise);
-  const consistent = prices.length === pujaTopics.length &&
+  const launch = await getPujaLaunchState();
+  const prices = Object.values(launch.offers).map(offer => offer.pricePaise);
+  const consistent = launch.enabled && prices.length > 0 &&
     prices.every(price => Number.isSafeInteger(price) && price === prices[0]);
-  const pujaPriceLabel = consistent && typeof prices[0] === "number"
-    ? displayPujaPrice(prices[0]) + " listed fee"
-    : "See prices per Puja";
-  return <PricingContent pujaPriceLabel={pujaPriceLabel} />;
+  const pujaPriceLabel = !launch.enabled ? "Coming Soon" :
+    consistent ? displayPujaPrice(prices[0]) + " per available Puja" : "Price shown per available Puja";
+  return <PricingContent pujaPriceLabel={pujaPriceLabel} pujaEnabled={launch.enabled} />;
 }
