@@ -1,0 +1,39 @@
+name: AdSense safe dependency refresh (one-time)
+on:
+  push:
+    branches:
+      - fix/adsense-content-readiness-20261122
+    paths:
+      - .github/workflows/adsense-dependency-refresh.yml
+permissions:
+  contents: write
+jobs:
+  refresh-dependencies:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/adsense-content-readiness-20261122
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Resolve patched versions without major upgrades
+        run: |
+          set -euo pipefail
+          npm install --package-lock-only --ignore-scripts --save-exact next@15.5.29
+          npm audit fix --package-lock-only --ignore-scripts
+          npm ci --ignore-scripts
+          npm audit --omit=dev --audit-level=high
+      - name: Commit only verified dependency metadata
+        run: |
+          set -euo pipefail
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add package.json package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "fix(deps): patch Next.js and vulnerable transitive dependencies"
+            git push origin HEAD:fix/adsense-content-readiness-20261122
+          fi
