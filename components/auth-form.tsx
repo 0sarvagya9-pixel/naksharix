@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, signupSchema } from "@/lib/validations/auth";
 import { secureFetch } from "@/lib/security/csrf";
+import { siteNotice } from "@/lib/ui/site-notification";
 import { useLanguage } from "@/components/language-provider";
 import { errorClass, scrollToFirstError } from "@/lib/form-validation";
 import { safeInternalAuthPath } from "@/lib/auth/safe-redirect";
@@ -119,6 +120,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
 
   function onInvalid(errors: FieldErrors<Record<string, string>>) {
     const nextErrors = Object.fromEntries(Object.keys(errors).map((key) => [key, requiredMessage]));
+    siteNotice.warning("Please review the required sign-in or registration fields.", "Complete the form");
     scrollToFirstError(nextErrors);
   }
 
