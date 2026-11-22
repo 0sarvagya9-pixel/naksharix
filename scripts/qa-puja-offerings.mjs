@@ -10,6 +10,13 @@ const listings=read("components/puja/puja-services-directory.tsx");
 const db=read("lib/puja/offerings.ts");
 const pujaPaused=index.includes("Coming Soon") && detail.includes('redirect("/pujas")') &&
   read("app/api/puja/bookings/route.ts").includes("New bookings are temporarily closed.");
+const launch=read("lib/puja/launch-readiness.ts");
+const env=read("lib/env.ts");
+assert.ok(env.includes('PUJA_BOOKINGS_ENABLED: z.enum(["true", "false"]).default("false")') &&
+  launch.includes('env.PUJA_BOOKINGS_ENABLED !== "true"') &&
+  launch.includes("partnerSupportsTopic(partner, topicId)") &&
+  launch.includes("getEmailReadiness().emailEnabled"),
+  "Puja must be paused by default and launch must require an exact-topic verified Pandit and email");
 assert.ok(db.includes("no payment is collected before confirmation")&&db.includes("note:/(verified Pandit availability"),"LEGACY_PUJA_NOTE_MUST_NOT_MISLEAD_PUBLIC");
 const sql=read("docs/sql/20261027_puja_offering.sql");
 assert.match(prisma,/model PujaOffering \{/);
@@ -42,8 +49,9 @@ const gatewayOrder=read("app/api/payments/razorpay/order/route.ts");
 const gatewayWebhook=read("app/api/payments/razorpay/webhook/route.ts");
 const bookingPage=read("app/puja-bookings/page.tsx");
 assert.ok(prisma.includes("PUJA_BOOKING")&&read("lib/env.ts").includes('PUJA_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false")'),"PUJA_GATEWAY_MUST_DEFAULT_DISABLED");
-for(const s of ['booking.userId !== userId','["REQUESTED","CONFIRMED","SCHEDULED"].includes(booking.status)',
- 'offer.pricePaise !== booking.quotedPricePaise','booking.quotedPricePaise !== 110000','pujaBookingId: booking.id'])
+for(const s of ['booking.userId !== userId','booking.status !== "SCHEDULED"',
+ 'offer.pricePaise !== booking.quotedPricePaise','booking.quotedPricePaise !== 110000','pujaBookingId: booking.id',
+ 'partnerSupportsTopic(partner, booking.topicId)','booking.scheduledAt.getTime() <= Date.now()'])
   assert.ok(gatewayOrder.includes(s),"PUJA_PAYMENT_PRICE_OR_OWNERSHIP_GUARD_MISSING="+s);
 const sharedRefund=read("lib/payments/purpose-reconciliation.ts");
 assert.ok(gatewayWebhook.includes('event.event === "refund.processed"')&&
@@ -51,16 +59,16 @@ assert.ok(gatewayWebhook.includes('event.event === "refund.processed"')&&
   gatewayWebhook.includes("verifyRazorpayWebhookSignature")&&
   sharedRefund.includes('original.purpose === "PUJA_BOOKING"')&&
   sharedRefund.includes('status: "REFUNDED"'),"PUJA_REFUND_WEBHOOK_GUARD_MISSING");
-assert.ok(pujaPaused ? !bookingPage.includes("RazorpayCheckoutButton") : (bookingPage.includes("RazorpayCheckoutButton")&&bookingPage.includes('env.PUJA_PAYMENTS_ENABLED==="true"')),"CONFIRMED_PUJA_CHECKOUT_NOT_GATED");
-assert.ok(pujaPaused ? bookingPage.includes("prisma.payment.findMany") && bookingPage.includes("prisma.pujaBookingRequest.findMany") && !bookingPage.includes("RazorpayCheckoutButton") :
-  (bookingPage.includes('pricePaise:110000')&&bookingPage.includes('publishedOfferIds.has(row.topicId)')&&
-  bookingPage.includes('getRazorpayReadiness().enabled')&&bookingPage.includes('["REQUESTED","CONFIRMED","SCHEDULED"].includes(row.status)')),
-  "PUJA_CHECKOUT_UI_PRICE_OR_CREDENTIAL_GUARD_MISSING");
-assert.ok(pujaPaused ? bookingPage.includes("paymentSettled=bookingPayments.some") && !bookingPage.includes("retryable&&checkoutEnabled") :
-  (bookingPage.includes('["PENDING","FAILED"].includes(payment.status)')&&
-  bookingPage.includes('paymentSettled=bookingPayments.some')&&
-  bookingPage.includes('"REFUNDED"')&&
-  bookingPage.includes('retryable&&checkoutEnabled')),"PUJA_CHECKOUT_FAILED_PENDING_RESUME_OR_DUPLICATE_GUARD_MISSING");
+assert.ok(bookingPage.includes("const canCheckout = release.enabled") &&
+  bookingPage.includes('row.status === "SCHEDULED"') &&
+  bookingPage.includes("const validatedPartner = partner ? partnerSupportsTopic(partner,row.topicId)") &&
+  bookingPage.includes("currentOffer?.pricePaise===row.quotedPricePaise") &&
+  bookingPage.includes('row.quotedPricePaise === 110000') &&
+  bookingPage.includes("RazorpayCheckoutButton") &&
+  bookingPage.includes("paymentSettled=bookingPayments.some") &&
+  bookingPage.includes('"REFUNDED"') &&
+  bookingPage.includes("!paymentSettled && !pendingOld"),
+  "PUJA_CHECKOUT_UI_MUST_REQUIRE_LAUNCH_PANDIT_SCHEDULE_CURRENCY_AND_NO_DUPLICATE");
 const checkoutClient=read("components/razorpay-checkout-button.tsx");
 assert.ok(checkoutClient.includes("Unable to reach the payment server")&&
   checkoutClient.includes("Payment confirmation is pending")&&
