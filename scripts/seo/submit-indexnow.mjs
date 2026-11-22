@@ -1,6 +1,6 @@
 /**
  * Public search-discovery notification. Zero credentials, zero visitor/PII data.
- * Only verified, live, indexable NAKSHARIX guide URLs are submitted.
+ * Only verified, live, indexable public NAKSHARIX guide/shop URLs are submitted.
  * A 200/202 confirms receipt, not crawling, ranking, indexing or organic traffic.
  */
 import assert from "node:assert/strict";
@@ -20,13 +20,18 @@ export const DISCOVERY_ROUTES = Object.freeze([
   "/blog/rudraksha-product-buying-checklist",
   "/blog/personalized-astrology-report-delivery-guide",
   "/blog",
-  "/learn"
+  "/learn",
+  "/shop",
+  "/shop/5-mukhi-rudraksha",
+  "/shop/dhan-yog-bracelet",
+  "/shop/shri-yantra",
+  "/shop/rudraksha-mala"
 ]);
 
 export function assertDiscoveryConfiguration() {
   assert.match(INDEXNOW_KEY, /^[a-f0-9]{32}$/, "Invalid public IndexNow proof key");
   assert.equal(new Set(DISCOVERY_ROUTES).size, DISCOVERY_ROUTES.length, "Duplicate discovery routes");
-  assert.ok(DISCOVERY_ROUTES.every(route => /^\/(?:blog(?:\/[a-z-]+)?|learn)$/.test(route)),
+  assert.ok(DISCOVERY_ROUTES.every(route => /^\/(?:blog(?:\/[a-z-]+)?|learn|shop(?:\/[a-z0-9-]+)?)$/.test(route)),
     "Unexpected or sensitive submission path");
   return DISCOVERY_ROUTES.map(route => ORIGIN + route);
 }
