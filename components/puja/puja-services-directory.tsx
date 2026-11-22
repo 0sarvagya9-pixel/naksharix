@@ -16,9 +16,9 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
   const [category,setCategory]=useState<(typeof pujaCategories)[number]>("All");
   const [visibleCount,setVisibleCount]=useState(12);
   const results=useMemo(()=>pujaTopics.filter(p=>
-    (category==="All"||p.category===category) &&
+    Boolean(offerings[p.id]) && (category==="All"||p.category===category) &&
     [p.name,p.deity,p.category,p.description].join(" ").toLowerCase().includes(query.trim().toLowerCase())
-  ),[query,category]);
+  ),[query,category,offerings]);
 
   return <main className="nx-puja-directory star-field min-h-screen bg-[#fffaf3] pb-20">
     <section className="relative isolate overflow-hidden border-b border-[#e6be7e]/35 bg-[#301a2c] text-white">
@@ -29,8 +29,8 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           <p className="text-xs font-bold uppercase tracking-[.22em] text-[#f8d389]">Naksharix • Sacred traditions</p>
           <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Puja &amp; <span className="text-[#ffcf80]">Vedic Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
-            Browse {pujaTopics.length} traditional Puja topics across deities, ceremonies and festivals.
-            Choose a Puja and your preferred date, then use secure checkout for published offers. Naksharix coordinates the final ceremony timing afterward.
+            Browse {Object.keys(offerings).length} offerings with a registered, topic-approved Pandit.
+            Submit a preferred date first. The Pandit must accept your ceremony and the schedule must be confirmed before payment.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <a href="#puja-directory" className="rounded-xl bg-[#f6c776] px-6 py-3 font-bold text-[#351b20]">Explore Puja Topics</a>
@@ -38,7 +38,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
               <CalendarDays size={17}/> Festival calendar
             </Link>
           </div>
-          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> ₹1,100 published fee • Secure checkout • Ceremony time coordinated afterward</p>
+          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> ₹1,100 currently supported fee • No upfront payment • Pandit/date confirmation first</p>
         </div>
       </div>
     </section>
@@ -47,7 +47,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-[#8e3641]">Traditional practices</p>
           <h2 id="puja-catalogue-heading" className="mt-2 font-cinzel text-3xl font-bold text-[#412831]">Puja Directory</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">The topics listed below do not imply temple assignments or priest availability. Final ceremony arrangements are coordinated separately after booking.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">These are topic-specific offerings supported by admin-reviewed Pandits. Individual dates, service mode, materials and logistics still require direct confirmation before payment.</p>
           {!Object.keys(offerings).length ? <p role="status" className="mt-3 rounded-lg border border-[#d6aa70] bg-[#fff2df] p-3 text-sm text-[#69434b]">Puja prices and online bookings are currently unavailable. Please return when published offers can be verified.</p> : null}
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -82,11 +82,11 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
             <p className="mt-3 flex-1 text-sm leading-6 text-[#6c5459]">{topic.description}.</p>
             {offerings[topic.id] ? <p className="mt-3 text-lg font-extrabold text-[#842c3e]">
               {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(offerings[topic.id].pricePaise/100)}
-              <span className="ml-2 text-xs font-normal text-[#67515a]">listed service fee · secure checkout</span>
+              <span className="ml-2 text-xs font-normal text-[#67515a]">listed fee · request date without paying</span>
             </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
-            <Link href={offerings[topic.id] ? "/puja-booking?item="+encodeURIComponent(topic.id) : "/commerce-enquiry?kind=PUJA&item="+encodeURIComponent("ritual:"+topic.id)}
+            <Link href={"/puja-booking?item="+encodeURIComponent(topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
-              {offerings[topic.id] ? "Book Now" : "Enquire"} <ArrowRight size={16}/>
+              Request preferred date <ArrowRight size={16}/>
             </Link>
           </div>
         </article>)}
@@ -103,9 +103,9 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
       )}
       <div className="mt-12 grid gap-5 rounded-2xl border border-[#d0a36c]/30 bg-[#fff4e6] p-7 md:grid-cols-3">
         {[
-          ["01","Explore","Choose a traditional Puja, festival date, or ceremony topic."],
-          ["02","Book Now","Enter Sankalp details and your preferred date securely."],
-          ["03","Pay securely","Naksharix coordinates the ceremony date and time after booking."]
+          ["01","Select","Choose a Puja with an approved Pandit and published price."],
+          ["02","Request","Send preferred date and private Sankalp details. No payment yet."],
+          ["03","Confirm & pay","After the Pandit accepts and date/time are confirmed, pay securely in My Puja Requests."]
         ].map(([step,title,copy])=><div key={step} className="flex gap-4">
           <b className="font-cinzel text-2xl text-[#8e3641]">{step}</b>
           <div><h3 className="font-bold text-[#412831]">{title}</h3><p className="mt-2 text-sm leading-6 text-[#665056]">{copy}</p></div>
