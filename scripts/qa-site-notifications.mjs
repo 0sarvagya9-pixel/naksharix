@@ -25,7 +25,9 @@ assert.ok(center.includes("SITE_NOTIFICATION_DURATION_MS") &&
   center.includes("window.clearTimeout(timeout)") &&
   center.includes('key={active.id}') &&
   center.includes("createPortal(") &&
-  center.includes('className="pointer-events-none fixed inset-0') &&
+  center.includes('className="pointer-events-none fixed left-[50vw] top-[50vh]') &&
+  center.includes("w-[calc(100vw-2rem)]") &&
+  center.includes("-translate-x-1/2 -translate-y-1/2") &&
   center.includes('aria-label="Dismiss notification"') &&
   center.includes('data-site-notifications-ready="true"') &&
   center.includes('role={active.kind === "error" ? "alert" : "status"}') &&
