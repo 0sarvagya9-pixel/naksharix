@@ -22,7 +22,7 @@ assert.equal(ads, "google.com, pub-7848529669366564, DIRECT, f08c47fec0942fa0", 
 const sitemap = await get("/sitemap.xml");
 assert.ok(!/<loc>https:\/\/www\.naksharix\.com\/pujas(?:\/|<)/.test(sitemap), "Paused Puja unexpectedly included in sitemap");
 const homepage = await get("/");
-assert.equal((homepage.match(/<h1\\b/gi) || []).length, 1, "Homepage should render exactly one main H1");
+assert.equal((homepage.match(/<h1\b/gi) || []).length, 1, "Homepage should render exactly one main H1");
 assert.ok(homepage.includes("Discover your"), "Primary original hero missing");
 const pujas = await get("/pujas");
 assert.ok(/<meta[^>]+name="robots"[^>]+content="[^"]*noindex/i.test(pujas), "Puja coming-soon page must be noindex");
@@ -35,11 +35,11 @@ for (const [path, term] of [
 ]) {
   const body = await get(path);
   assert.ok(body.includes(term), "Missing original educational explanation on " + path);
-  assert.ok((body.match(/<h[23]\\b/gi) || []).length >= 3, "Insufficient instructional structure on " + path);
+  assert.ok((body.match(/<h[23]\b/gi) || []).length >= 3, "Insufficient instructional structure on " + path);
 }
 for (const path of ["/about", "/contact", "/faq", "/privacy-policy", "/terms-and-conditions", "/refund-policy", "/delivery-policy", "/advertising", "/shop", "/reports", "/learn"]) {
   const body = await get(path);
-  assert.ok(/<h1\\b/i.test(body), "Page has no main heading: " + path);
+  assert.ok(/<h1\b/i.test(body), "Page has no main heading: " + path);
 }
 const apex = await fetch("https://naksharix.com/", {
   redirect: "follow", headers: { "Cache-Control": "no-cache" }, signal: AbortSignal.timeout(30000)
