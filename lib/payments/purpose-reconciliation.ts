@@ -3,7 +3,7 @@ import { Prisma, type Payment } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog } from "@/lib/reports/report-audit";
-import { notifyCapturedPujaPayment } from "@/lib/puja/payment-notifications";
+import { notifyCapturedPujaPayment, notifyProcessedPujaRefund } from "@/lib/puja/payment-notifications";
 
 /** One-gateway post-capture state reconciliation. Idempotent; never reopens canceled work. */
 export async function reconcileCapturedPurpose(payment: Payment) {
@@ -123,4 +123,8 @@ export async function reconcileProcessedRefund(refund: {
     targetId: original.id,
     metadata: { refundId: refund.id, purpose: original.purpose, verifiedWebhook: true }
   });
+  if (original.purpose === "PUJA_BOOKING") {
+    await notifyProcessedPujaRefund(original, refund.id).catch(() =>
+      logger.warn("puja_refund_notification_temporarily_unavailable"));
+  }
 }
