@@ -11,6 +11,7 @@ import "@/app/royal-vedic-heritage.css";
 import "@/app/home-reference-fidelity.css";
 import "@/app/approved-gallery-theme.css";
 import "@/app/approved-gallery-inner.css";
+import "@/app/site-notifications.css";
 import { env, validateProductionEnv } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
@@ -18,6 +19,7 @@ import { AnalyticsPreferences } from "@/components/analytics-preferences";
 import { PwaRegister } from "@/components/pwa-register";
 import { SchemaMarkup } from "@/components/schema-markup";
 import { LanguageProvider } from "@/components/language-provider";
+import { SiteNotificationCenter } from "@/components/ui/site-notification-center";
 import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
@@ -84,6 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Footer />
             <AnalyticsPreferences />
           </PremiumGlassShell>
+          <SiteNotificationCenter />
         </LanguageProvider>
         <PwaRegister />
         <SchemaMarkup />
