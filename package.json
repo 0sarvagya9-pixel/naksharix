@@ -114,7 +114,7 @@
     "ioredis": "^5.6.1",
     "jose": "^6.0.10",
     "lucide-react": "^0.503.0",
-    "next": "15.5.28",
+    "next": "15.5.29",
     "next-auth": "5.0.0-beta.32",
     "pdf-lib": "1.17.1",
     "razorpay": "^2.9.6",
@@ -157,6 +157,13 @@
       "deepmerge-ts": "^8.0.2"
     },
     "follow-redirects": "1.16.2",
-    "qs": "6.16.1"
+    "qs": "6.16.1",
+    "effect": "^3.22.1",
+    "minimatch@^3.0.0": {
+      "brace-expansion": "^1.1.21"
+    },
+    "minimatch@^10.0.0": {
+      "brace-expansion": "^5.0.11"
+    }
   }
 }

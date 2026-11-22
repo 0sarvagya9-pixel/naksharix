@@ -38,7 +38,7 @@ export default function PujaCalendarPage() {
         headline="Follow the seasons of worship"
         caption="Explore a rolling two-year reference list of major Puja and festival dates. Confirm regional customs and local tithi independently."
         image={pujaEditorialImage("griha-pravesh-puja","/naksharix/editorial-puja.svg","family")} imageAlt="Representative licensed photograph of a traditional Puja ceremony"
-        link="/pujas" linkLabel="Explore all Puja types" />
+        link="/pujas" linkLabel="Puja service availability" />
       <Section>
         <div className="rounded-[1.7rem] border border-[#D6AB67]/55 bg-[linear-gradient(115deg,#421b2b_0%,#702a39_60%,#8b4239_100%)] p-6 text-[#fffaf2] shadow-[0_25px_70px_rgba(65,23,36,.17)] md:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FFD700]">Hindu calendar • India reference</p>
@@ -53,7 +53,7 @@ export default function PujaCalendarPage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild><Link href="/panchang">Verify local Panchang</Link></Button>
-            <Button variant="outline" asChild><Link href="/puja-enquiry">Ask about Puja arrangements</Link></Button>
+            <Button variant="outline" asChild><Link href="/pujas">Check current Puja service status</Link></Button>
           </div>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -64,7 +64,7 @@ export default function PujaCalendarPage() {
           </div>
           <div className="rounded-2xl border border-[#e6c49a] bg-[#fff8ee] p-5 text-sm leading-7 text-[#503942]">
             <ShieldCheck className="mb-2 h-5 w-5 text-[#8b3041]" />
-            These dates help you plan your celebrations. Contact our team for available Puja arrangements.
+            These dates are for planning and education only. New Naksharix Puja bookings and online Puja payments are currently paused.
           </div>
         </div>
         <div className="mt-9 space-y-9">
@@ -83,7 +83,7 @@ export default function PujaCalendarPage() {
                       <p className="mt-2 text-sm font-semibold text-[#863345]">{displayDate(event.date)}</p>
                       
                       <div className="mt-auto flex flex-wrap gap-4 pt-5 text-sm">
-                        <Link href={"/commerce-enquiry?kind=PUJA&item=" + encodeURIComponent(event.id)} className="font-semibold text-[#83303f] underline-offset-4 hover:underline">Enquire about this Puja</Link>
+                        <Link href="/pujas" className="font-semibold text-[#83303f] underline-offset-4 hover:underline">Puja bookings currently paused</Link>
                         <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[#68565a] underline-offset-4 hover:underline">Source date</a>
                       </div>
                     </CardContent>

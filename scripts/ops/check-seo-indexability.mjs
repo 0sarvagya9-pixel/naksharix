@@ -3,14 +3,13 @@ import assert from "node:assert/strict";
 export const CANONICAL_ORIGIN = "https://www.naksharix.com";
 export const CORE_ROUTES = [
   "/", "/free-kundli", "/kundli-matching", "/reports",
-  "/shop", "/pujas", "/learn", "/hi"
+  "/shop", "/learn", "/hi"
 ];
 const MUST_APPEAR = [
   "https://www.naksharix.com/",
   "https://www.naksharix.com/free-kundli",
   "https://www.naksharix.com/reports",
   "https://www.naksharix.com/shop",
-  "https://www.naksharix.com/pujas",
   "https://www.naksharix.com/hi"
 ];
 const PRIVATE_PREFIXES = [
@@ -63,10 +62,15 @@ export async function verifyLiveSeo(fetcher = fetch, origin = CANONICAL_ORIGIN) 
           target.pathname === p || target.pathname.startsWith(p + "/"));
       } catch { return true; }
     });
+    const pausedPujaRoutes = urls.filter(url => {
+      try { return /^\/pujas(?:\/|$)/.test(new URL(url).pathname); }
+      catch { return false; }
+    });
     collect("/sitemap.xml", !response.ok ? "HTTP non-success" :
       urls.length < 40 ? "unexpectedly few public routes" :
       unique.size !== urls.length ? "duplicate loc URLs" :
       bad.length ? "noncanonical or private loc found" :
+      pausedPujaRoutes.length ? "paused Puja route exposed in sitemap" :
       MUST_APPEAR.some(p => !unique.has(p.endsWith("/") ? p.slice(0, -1) : p) &&
         !unique.has(p)) ? "required public loc missing" : null);
   } catch {

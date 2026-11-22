@@ -8,12 +8,12 @@ import { expect, test } from "@playwright/test";
 const publicScreens = [
   { path: "/", name: "homepage" },
   { path: "/shop", name: "shop" },
-  { path: "/pujas", name: "puja-directory" },
+  { path: "/pujas", name: "puja-coming-soon" },
   { path: "/consultation", name: "consultation" },
   { path: "/reports", name: "reports" },
   { path: "/kundli", name: "kundli" },
   { path: "/shop/shri-yantra", name: "shop-detail" },
-  { path: "/pujas/rudrabhishek", name: "puja-detail" }
+  { path: "/pujas/rudrabhishek", name: "paused-puja-detail" }
 ] as const;
 
 test("capture sitewide public visual evidence for desktop and mobile", async ({ page }, testInfo) => {
@@ -32,7 +32,7 @@ test("capture sitewide public visual evidence for desktop and mobile", async ({ 
     await expect(page.locator("main").first()).toBeVisible();
     // Async server-loaded catalogues may show a decorative loader after DOMContentLoaded.
     // Wait for route-specific REAL content before taking acceptance screenshots.
-    if (screen.path === "/pujas") await expect(page.locator("#puja-directory")).toBeVisible({ timeout: 20000 });
+    if (screen.path === "/pujas" || screen.path === "/pujas/rudrabhishek") await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible({ timeout: 20000 });
     if (screen.path === "/shop") await expect(page.getByRole("heading", { level: 1, name: /Naksharix Spiritual Catalogue/i })).toBeVisible({ timeout: 20000 });
     if (screen.path === "/consultation") await expect(page.getByRole("heading", { level: 1, name: /Naksharix Astrologers/i })).toBeVisible({ timeout: 20000 });
     if (screen.path === "/reports") await expect(page.getByRole("heading", { level: 1, name: /Premium Astrology Reports/i })).toBeVisible({ timeout: 20000 });

@@ -5,6 +5,9 @@ const page=s("app/pujas/page.tsx");
 assert.ok(page.includes("Coming Soon")&&page.includes("पूजा सेवाएँ")&&page.includes("नई पूजा बुकिंग"));
 assert.ok(!page.includes("PujaServicesDirectory")&&!page.includes("getPublishedPujaOffers"));
 assert.ok(!page.includes("Book Now")&&!page.includes("RazorpayCheckoutButton"));
+assert.ok(page.includes("robots: { index: false, follow: true }"), "Paused Puja page must be noindex");
+const sitemap=s("app/sitemap.ts");
+assert.ok(!sitemap.includes('"/pujas"')&&!sitemap.includes('route: `/pujas/'), "Paused Puja routes must not appear in sitemap");
 const home=s("components/home/editorial-home.tsx");
 assert.ok(home.includes("Coming Soon <ArrowRight")&&!home.includes("Book Now <ArrowRight"),"Homepage Puja CTA must not offer bookings");
 for(const p of ["app/pujas/[id]/page.tsx","app/puja-booking/page.tsx","app/puja-enquiry/page.tsx"]) {

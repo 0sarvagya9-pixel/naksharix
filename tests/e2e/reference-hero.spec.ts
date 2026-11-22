@@ -92,37 +92,38 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
     }
   });
 
-  test("Puja directory has an approved compact navy banner with the real festival action", async ({ page }) => {
+  test("paused Puja service shows its honest, accessible Coming Soon notice", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/pujas", { waitUntil: "domcontentloaded" });
-    const header = page.locator('main.star-field > section').first();
-    await expect(page.getByRole("heading", { level: 1, name: /Puja.*Vedic Traditions/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Festival calendar/i }).last()).toHaveAttribute("href", "/puja-calendar");
-    await expect.poll(async () => header.evaluate(node => node.getBoundingClientRect().height)).toBeLessThan(290);
-    await expect(page.locator("#puja-directory")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
+    await expect(page.getByText("Coming Soon", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: /पुरानी बुकिंग देखें/i })).toHaveAttribute("href", "/puja-bookings");
+    await expect(page.locator("#puja-directory")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Book Now|Pay|Checkout/i })).toHaveCount(0);
   });
-
-  test("mobile first-screen layout exposes real report, shop and Puja cards", async ({ page }) => {
+  test("mobile first-screen shows product cards and paused Puja notice", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     for (const [route, selector] of [
       ["/reports", "#report-catalogue > div"],
-      ["/shop", ".nx-gallery-shop-grid > div"],
-      ["/pujas", "#puja-directory article"]
+      ["/shop", ".nx-gallery-shop-grid > div"]
     ] as const) {
       await page.goto(route, { waitUntil: "domcontentloaded" });
       const first = page.locator(selector).first();
       await expect(first).toBeVisible();
       const top = await first.evaluate(node => Math.round(node.getBoundingClientRect().top));
-      expect(top, route + " must show first REAL catalogue card within the approved mobile screen").toBeLessThan(844);
+      expect(top, route + " must show a catalogue card on the first mobile screen").toBeLessThan(844);
     }
+    await page.goto("/pujas", { waitUntil: "domcontentloaded" });
+    const title = page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ });
+    await expect(title).toBeVisible();
+    const top = await title.evaluate(node => Math.round(node.getBoundingClientRect().top));
+    expect(top, "Puja pause notice must be visible without scrolling").toBeLessThan(844);
   });
-
-  test("approved mobile catalogues show two cards per row without horizontal scrolling", async ({ page }) => {
+  test("approved mobile report and shop catalogues fit without horizontal scrolling", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     for (const [route, selector] of [
       ["/reports", "#report-catalogue"],
-      ["/shop", ".nx-gallery-shop-grid"],
-      ["/pujas", "#puja-directory > .mt-8.grid"]
+      ["/shop", ".nx-gallery-shop-grid"]
     ] as const) {
       await page.goto(route, { waitUntil: "domcontentloaded" });
       const grid = page.locator(selector);
@@ -135,8 +136,13 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
       expect(rendered.columns, route).toBe(2);
       expect(rendered.documentWidth, route).toBeLessThanOrEqual(rendered.viewportWidth + 2);
     }
+    await page.goto("/pujas", { waitUntil: "domcontentloaded" });
+    const dimensions = await page.evaluate(() => ({
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: document.documentElement.clientWidth
+    }));
+    expect(dimensions.documentWidth, "paused Puja mobile view").toBeLessThanOrEqual(dimensions.viewportWidth + 2);
   });
-
   test("all approved homepage photos load or gracefully show a valid local fallback", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const imgs = page.locator(".nx-approved-home .nx-a-card-image");

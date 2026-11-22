@@ -158,7 +158,7 @@ export function EditorialHome({featuredShopPrices={}}: {featuredShopPrices?: Rec
             <span className="nx-ed-eyebrow nx-ed-eyebrow-on-dark">
               <Sparkles size={15} aria-hidden="true" /> {slide.eyebrow}
             </span>
-            <h1>{slide.heading} <em>{slide.accent}</em></h1>
+            <h2>{slide.heading} <em>{slide.accent}</em></h2>
             <p>{slide.body}</p>
             <div className="nx-ed-actions">
               <Link className="nx-ed-button nx-ed-button-gold" href={slide.main.href}>
