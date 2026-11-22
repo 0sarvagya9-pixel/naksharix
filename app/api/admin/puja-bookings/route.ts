@@ -51,7 +51,8 @@ export async function PATCH(request:Request){
   // administrator assertion after contacting the Pandit directly.
   const partnerId = input.partnerId || existing.partnerId;
   const partner = partnerId ? await prisma.pujaPartner.findUnique({ where: {id: partnerId} }) : null;
-  if (partnerId && (!partner || !partnerSupportsTopic(partner, existing.topicId)))
+  if (partnerId && !["CANCELED","REJECTED"].includes(input.status) &&
+      (!partner || !partnerSupportsTopic(partner, existing.topicId)))
     return fail("Assign an admin-verified Pandit approved for this exact Puja.", 422);
   if (["CONFIRMED", "SCHEDULED", "IN_PROGRESS", "COMPLETED"].includes(input.status)) {
     if (!partnerId || !partner || !partnerSupportsTopic(partner, existing.topicId))
