@@ -32,8 +32,10 @@ assert.ok(!sitemap.split("type SitemapFrequency")[0].includes('"/pujas"') &&
   sitemap.includes('puja.enabled ? ["/pujas"') &&
   sitemap.includes("Object.keys(puja.offers)"),
   "Puja sitemap entries must be conditional on verified live readiness");
-assert.ok(home.includes("Coming Soon <ArrowRight") &&
-  !home.includes("Book Now <ArrowRight"),"Homepage must not promote unavailable Puja bookings");
+assert.ok(home.includes('pujaEnabled ? "Request date" : "Coming Soon"') &&
+  home.includes('pujaEnabled ? "Explore available Pujas" : "Puja Coming Soon"') &&
+  !home.includes("Book Now <ArrowRight"),
+  "Homepage must expose current Puja launch status without booking while paused");
 assert.ok(detail.includes('if (!release.enabled || !topic || !offer) redirect("/pujas")') &&
   bookingPage.includes('if (!item || !release.enabled || !release.offers[item]) redirect("/pujas")') &&
   s("app/puja-enquiry/page.tsx").includes('redirect("/pujas")'),
