@@ -30,7 +30,7 @@ assert.ok(heroStyles.includes(".nx-ed-hero h2") && !heroStyles.includes(".nx-ed-
 const guides = [
   ["dasha-calculator", ["120", "Mahadasha", "Antardasha", "birth time"]],
   ["name-number-calculator", ["RAM", "9 + 1 + 4", "birth date", "letter"]],
-  ["guna-milan-calculator", ["36", "Varna", "Nadi", "consent"]],
+  ["guna-milan-calculator", ["36", "Varna", "Nadi", "Consent"]],
   ["nakshatra-calculator", ["27", "3°20", "Moon", "time zone"]]
 ];
 for (const [slug, concepts] of guides) {
