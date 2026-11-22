@@ -52,3 +52,47 @@ export async function notifyCapturedPujaPayment(payment: Payment): Promise<void>
     } catch { logger.warn("puja_payment_notification_failed"); }
   }
 }
+
+/** Notify only after a signed full-amount refund has been PROCESSED.
+ * A refund request/pending state is never advertised as returned money. */
+export async function notifyProcessedPujaRefund(
+  payment: Payment, providerRefundId: string
+): Promise<void> {
+  if (payment.purpose !== "PUJA_BOOKING" || !providerRefundId) return;
+  const meta = (payment.metadata as Record<string, unknown> | null) ?? {};
+  const bookingId = typeof meta.pujaBookingId === "string" ? meta.pujaBookingId : null;
+  if (!bookingId) return;
+  const user = await prisma.user.findUnique({
+    where: {id: payment.userId}, select: {email: true}
+  });
+  if (!user?.email) return;
+  const amount = new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR"
+  }).format(Number(payment.amount));
+  const message = [
+    "Namaste,", "",
+    "A full refund for your NAKSHARIX Puja booking has been marked PROCESSED by the verified payment provider.",
+    "आपकी पूजा बुकिंग की पूरी राशि का रिफंड पेमेंट प्रदाता द्वारा प्रोसेस किया गया है।",
+    "Puja booking: " + bookingId,
+    "Refund amount: " + amount,
+    "Provider refund reference: " + providerRefundId,
+    "Bank/UPI credit timing depends on the payment provider and bank.",
+    "See private records: " + new URL("/puja-bookings", env.NEXT_PUBLIC_APP_URL),
+    "Support: care@naksharix.com",
+    "This email does not request an OTP, UPI PIN, card number or password."
+  ].join("\n");
+  const targets = [
+    {to:user.email, key: "puja-refund-customer-" + providerRefundId, subject:"NAKSHARIX — Puja refund processed"},
+    ...(env.ADMIN_EMAIL ? [{to:env.ADMIN_EMAIL,key:"puja-refund-admin-" + providerRefundId,
+      subject:"NAKSHARIX — Puja refund processed; reconcile booking"}] : [])
+  ];
+  for(const target of targets){
+    try{
+      const result = await sendEmail({
+        to: target.to, subject: target.subject,
+        idempotencyKey: target.key, text: message
+      });
+      if(!result.sent)logger.warn("puja_refund_email_unavailable");
+    }catch{logger.warn("puja_refund_email_failed");}
+  }
+}
