@@ -83,7 +83,7 @@ export default function PujaCalendarPage() {
                       <p className="mt-2 text-sm font-semibold text-[#863345]">{displayDate(event.date)}</p>
                       
                       <div className="mt-auto flex flex-wrap gap-4 pt-5 text-sm">
-                        <Link href={"/commerce-enquiry?kind=PUJA&item=" + encodeURIComponent(event.id)} className="font-semibold text-[#83303f] underline-offset-4 hover:underline">Enquire about this Puja</Link>
+                        <Link href="/pujas" className="font-semibold text-[#83303f] underline-offset-4 hover:underline">Puja bookings currently paused</Link>
                         <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[#68565a] underline-offset-4 hover:underline">Source date</a>
                       </div>
                     </CardContent>
