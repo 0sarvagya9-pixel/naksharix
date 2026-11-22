@@ -93,9 +93,17 @@ export async function secureFetch(input: RequestInfo | URL, init: RequestInit = 
     }
     return response;
   } catch (error) {
-    if (isMutation) siteNotice.error(
-      "The secure request could not connect. Check your connection and the on-page status before trying again.",
-      "Connection problem");
+    if (isMutation && !(error instanceof Error && error.name === "AbortError")) {
+      if (pathname.includes("/payments/") || pathname.includes("/razorpay/")) {
+        siteNotice.warning(
+          "Payment confirmation could not be checked. Review payment history before retrying; do not pay twice.",
+          "Payment status pending");
+      } else {
+        siteNotice.error(
+          "The secure request could not connect. Check your connection and the on-page status before trying again.",
+          "Connection problem");
+      }
+    }
     throw error;
   }
 }
