@@ -76,20 +76,27 @@ export async function secureFetch(input: RequestInfo | URL, init: RequestInit = 
     }
     if (isMutation && !response.ok) {
       const payment = pathname.includes("/payments/") || pathname.includes("/razorpay/");
-      const msg = payment
-        ? "We could not complete this payment action. Check payment history before attempting another payment."
-        : response.status === 401 || response.status === 403
-          ? "Please sign in with the correct account and try again."
-          : response.status === 409
-            ? "This item changed or a previous request exists. Review the current details before retrying."
-            : response.status === 422
-              ? "Please review the information in the form and correct any errors."
-              : response.status === 429
-                ? "Too many attempts. Please try again later."
-                : response.status === 503
-                  ? "This service is temporarily unavailable. Your request has not been confirmed."
-                  : "This action could not be completed. Review the page message and try again.";
-      siteNotice.error(msg, payment ? "Payment needs attention" : "Action not completed");
+      const verification = pathname.endsWith("/payments/razorpay/verify");
+      const auth = pathname.endsWith("/auth/login") || pathname.endsWith("/auth/signup");
+      const msg = verification
+        ? "Payment status could not be verified here. Check payment history before trying again; do not pay twice."
+        : payment
+          ? "The payment action needs review. Check your payment history before another attempt."
+          : auth
+            ? "Sign-in or registration needs attention. Follow any verification instructions on the page."
+            : response.status === 401 || response.status === 403
+              ? "Please sign in with an authorized account and try again."
+              : response.status === 409
+                ? "This item changed or a previous request exists. Review the current details before retrying."
+                : response.status === 422
+                  ? "Please review the information in the form and correct any errors."
+                  : response.status === 429
+                    ? "Too many attempts. Please try again later."
+                    : response.status === 503
+                      ? "This service is temporarily unavailable. Your request has not been confirmed."
+                      : "This action could not be completed. Review the page message and try again.";
+      if (verification) siteNotice.warning(msg, "Payment status pending");
+      else siteNotice.error(msg, payment ? "Payment needs attention" : "Action not completed");
     }
     return response;
   } catch (error) {
