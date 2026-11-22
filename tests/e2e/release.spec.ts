@@ -203,7 +203,7 @@ test.describe("Naksharix release browser QA", () => {
     const status = page.getByRole("link", { name: "Puja bookings currently paused" }).first();
     await expect(status).toHaveAttribute("href", "/pujas");
     await status.click();
-    await expect(page).toHaveURL(/\\/pujas$/);
+    await expect(page).toHaveURL(/\/pujas$/);
     await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
   });
   test("premium homepage shows credited real catalogue reference photography and ritual cards", async ({ page }) => {
@@ -225,13 +225,13 @@ test.describe("Naksharix release browser QA", () => {
   });
   test("Puja legacy enquiry links safely redirect to paused service notice", async ({ page }) => {
     await page.goto(absolute("/puja-enquiry"), { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\\/pujas$/);
+    await expect(page).toHaveURL(/\/pujas$/);
     await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /पुरानी बुकिंग देखें/i })).toHaveAttribute("href", "/puja-bookings");
   });
   test("individual Puja details cannot bypass the Coming Soon pause", async ({ page }) => {
     await page.goto(absolute("/pujas/rudrabhishek"), { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\\/pujas$/);
+    await expect(page).toHaveURL(/\/pujas$/);
     await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Checkout|Book Now|Pay/i })).toHaveCount(0);
   });
