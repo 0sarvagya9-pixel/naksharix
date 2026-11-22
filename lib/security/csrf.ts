@@ -54,9 +54,24 @@ export async function secureFetch(input: RequestInfo | URL, init: RequestInit = 
         "PATCH /api/admin/puja-partners": "Pandit review decision saved. Individual ceremony dates still need confirmation.",
         "PATCH /api/admin/puja-bookings": "Puja status saved. Customer inbox delivery is not guaranteed.",
         "PATCH /api/admin/shop-orders": "Shop order status saved. Payment and actual delivery remain separate checks.",
-        "POST /api/admin/fulfilment-notification": "Notification retry recorded. Provider acceptance does not prove inbox delivery."
+        "POST /api/admin/fulfilment-notification": "Notification retry recorded. Provider acceptance does not prove inbox delivery.",
+        "POST /api/auth/login": "Sign-in accepted. Opening your account.",
+        "POST /api/auth/signup": "Registration accepted. Complete any required email verification.",
+        "POST /api/report-requests": "Report request recorded. Payment and document delivery are tracked separately.",
+        "POST /api/support/tickets": "Support request recorded. You can follow progress in your account.",
+        "POST /api/support/tickets/reply": "Support reply saved in the conversation.",
+        "POST /api/admin/support/reply": "Support reply saved. Email delivery status is shown on the page.",
+        "PATCH /api/admin/support": "Support status saved.",
+        "PATCH /api/admin/report-requests": "Report workflow update recorded in the audit history.",
+        "POST /api/astrologer/profile": "Astrologer profile saved for review, not yet approved."
       };
-      const message = successText[method + " " + pathname];
+      const reportAction = /^\/api\/admin\/report-requests\/[^/]+\/(generate-pdf|deliver)$/.test(pathname);
+      const message = successText[method + " " + pathname] ||
+        (method === "POST" && reportAction
+          ? pathname.endsWith("/generate-pdf")
+            ? "Report PDF generation finished. Check saved report details before delivery."
+            : "Report delivery action processed. The page confirms provider acceptance separately."
+          : undefined);
       if (message) siteNotice.success(message, "Saved successfully");
     }
     if (isMutation && !response.ok) {
