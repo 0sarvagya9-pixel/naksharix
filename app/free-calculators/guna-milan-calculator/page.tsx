@@ -62,7 +62,7 @@ export default function GunaMilanCalculatorPage() {
           <li>A high traditional score cannot guarantee a safe, respectful or happy marriage; a low score cannot rule one out.</li>
           <li>Consent, shared goals, communication, respect, safety and family circumstances require conversations between real people.</li>
           <li>Manglik or other chart considerations are not interchangeable with the eight-factor point total.</li>
-          <li>Keep another person's private birth details confidential, and only use them with permission.</li>
+          <li>Keep another person&apos;s private birth details confidential, and only use them with permission.</li>
         </ul>
         <nav aria-label="Related matching resources" className="mt-8 flex flex-wrap gap-3 text-sm font-semibold">
           <Link href="/blog/kundli-matching-score" className="rounded-lg border border-[#dca956]/35 px-4 py-2 text-[#8c571a] underline">Read the Guna Milan explanation</Link>
