@@ -1,0 +1,26 @@
+name: One-time AdSense Post-Deployment Live Verification
+on:
+  push:
+    branches:
+      - fix/adsense-content-readiness-20261122
+    paths:
+      - .github/workflows/adsense-live-postdeploy.yml
+permissions:
+  contents: read
+jobs:
+  live-site-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check live audit script syntax
+        run: node --check scripts/ops/adsense-live-postdeploy.mjs
+      - name: Verify public production SEO, ownership, original content, policies and redirects
+        env:
+          NAKSHARIX_SEO_DIAG: '1'
+        run: node scripts/ops/adsense-live-postdeploy.mjs
