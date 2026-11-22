@@ -46,7 +46,7 @@ test.describe("Naksharix editorial photo homepage", () => {
   });
 
   test("public service pages have photographic banners without changing their core content", async ({ page }) => {
-    for (const path of ["/consultation", "/reports", "/shop", "/learn", "/puja-enquiry"]) {
+    for (const path of ["/consultation", "/reports", "/shop", "/learn", "/puja-calendar"]) {
       await page.goto(path, { waitUntil: "domcontentloaded" });
       await expect(page.locator(".nx-ed-inner-banner img")).toHaveCount(1);
       await expect(page.locator(".nx-ed-inner-banner h2")).toBeVisible();
@@ -57,6 +57,13 @@ test.describe("Naksharix editorial photo homepage", () => {
       }));
       expect(dimensions.width, path).toBeLessThanOrEqual(dimensions.client + 2);
     }
+  });
+
+  test("paused Puja enquiry redirects to a truthful coming-soon notice", async ({ page }) => {
+    await page.goto("/puja-enquiry", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\\/pujas$/);
+    await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Book Now|Pay|Checkout/i })).toHaveCount(0);
   });
 
   test("approved gallery stays stable without an automatic hero switch", async ({ page }) => {
