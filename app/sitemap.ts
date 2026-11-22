@@ -8,6 +8,7 @@ import { zodiacSigns } from "@/lib/zodiac";
 import { publishedSeoAlternates } from "@/lib/seo-localization";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { indexableKundliGuideLanguages, kundliGuidePath } from "@/lib/kundli-education";
+import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
 
 // Paused Puja booking/detail pages intentionally return noindex or redirect to the
 // Coming Soon notice. They must not be offered as indexable sitemap entries.
@@ -80,7 +81,8 @@ const staticRoutes = [
 type SitemapFrequency = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 type SitemapEntry = { route: string; priority: number; frequency: SitemapFrequency };
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const puja = await getPujaLaunchState();
   const publicRoutes = isAiAstrologerReady() ? [...staticRoutes, "/ai-astrologer"] : staticRoutes;
   const routes: SitemapEntry[] = [
     ...indexableKundliGuideLanguages.map((language): SitemapEntry => ({ route: kundliGuidePath(language), priority: 0.81, frequency: "monthly" })),
@@ -90,6 +92,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       frequency: route === "" ? "daily" : legalRoute(route) ? "yearly" : "weekly"
     })),
     ...featuredAstrologerRoutes().map((route): SitemapEntry => ({ route, priority: 0.74, frequency: "weekly" })),
+    // Dynamically index only verified, currently launched Puja services.
+    // Paused or unsupported services are deliberately excluded.
+    ...(puja.enabled ? ["/pujas", ...Object.keys(puja.offers).map(id=>"/pujas/"+id)] : [])
+      .map((route): SitemapEntry => ({ route, priority: 0.69, frequency: "weekly" })),
     ...zodiacSigns.map((sign): SitemapEntry => ({ route: `/horoscope/${sign.slug}`, priority: 0.82, frequency: "daily" })),
     // Old year-selector URL now permanently redirects to the canonical yearly page.
     ...Object.values(growthPages).filter(page => page.path !== "/yearly-horoscope-2026").map((page): SitemapEntry => ({ route: page.path, priority: 0.88, frequency: "weekly" })),
