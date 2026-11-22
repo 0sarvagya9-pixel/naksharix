@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           # Patch only known affected major lines, avoiding a v5 brace-expansion
           # override inside a v3 minimatch consumer or a v1 override in v10.
-          node -e 'const fs=require("fs");const f="package.json";const p=JSON.parse(fs.readFileSync(f));p.overrides={...p.overrides,effect:"^3.22.1","minimatch@^3.0.0":{"brace-expansion":"^1.1.21"},"minimatch@^10.0.0":{"brace-expansion":"^5.0.11"}};fs.writeFileSync(f,JSON.stringify(p,null,2)+"\\n");'
+          node -e 'const fs=require("fs");const f="package.json";const p=JSON.parse(fs.readFileSync(f));p.overrides={...p.overrides,effect:"^3.22.1","minimatch@^3.0.0":{"brace-expansion":"^1.1.21"},"minimatch@^10.0.0":{"brace-expansion":"^5.0.11"}};fs.writeFileSync(f,JSON.stringify(p,null,2));'
           npm install --package-lock-only --ignore-scripts --save-exact next@15.5.29
           npm audit fix --package-lock-only --ignore-scripts
           npm ci --ignore-scripts
