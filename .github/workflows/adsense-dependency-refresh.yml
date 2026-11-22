@@ -38,5 +38,7 @@ jobs:
           git add package.json package-lock.json
           if ! git diff --cached --quiet; then
             git commit -m "fix(deps): patch Next.js and vulnerable transitive dependencies"
+            git fetch origin fix/adsense-content-readiness-20261122
+            git rebase origin/fix/adsense-content-readiness-20261122
             git push origin HEAD:fix/adsense-content-readiness-20261122
           fi
