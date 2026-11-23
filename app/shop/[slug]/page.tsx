@@ -47,6 +47,8 @@ export default async function ProductDetails({params}:Props) {
   const illustrated=!(product.galleryImages?.length) && (image.endsWith("-illustration.svg")||image.endsWith("-placeholder.svg"));
   const canonicalOrigin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
   const productUrl = new URL("/shop/" + encodeURIComponent(product.slug), canonicalOrigin).toString();
+  const relatedProducts = catalogue.products.filter(item => item.id !== product.id && item.status === "active" && Number.isSafeInteger(item.unitPricePaise) && (item.unitPricePaise ?? 0) > 0)
+    .sort((a,b) => Number(b.category === product.category) - Number(a.category === product.category)).slice(0,3);
   const discoverySchema = productDiscoverySchema(product, canonicalOrigin);
   const breadcrumbSchema = {
     "@context": "https://schema.org", "@type": "BreadcrumbList",
@@ -95,6 +97,22 @@ export default async function ProductDetails({params}:Props) {
           <p className="mt-3 text-sm leading-7 text-[#67545a]">{body}</p>
         </section>)}
       </div>
+      {relatedProducts.length ? <section className="mt-9" aria-labelledby="related-shop-heading">
+        <h2 id="related-shop-heading" className="font-cinzel text-2xl font-bold text-[#702d3d]">Compare other spiritual products</h2>
+        <p className="mt-2 text-sm leading-6 text-[#634e52]">Explore other currently listed items and their prices. Each item is optional, not a required remedy.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {relatedProducts.map(item => <article key={item.id} className="rounded-xl border border-[#ddc19b] bg-white p-5 text-[#402a2d]">
+            <h3 className="font-semibold text-lg"><Link href={"/shop/"+encodeURIComponent(item.slug)} className="underline underline-offset-4">{item.name.en}</Link></h3>
+            <p className="mt-2 text-sm leading-6">{item.shortDescription.en}</p>
+            <p className="mt-3 font-bold text-[#762536]">{new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format((item.unitPricePaise ?? 0)/100)}</p>
+          </article>)}
+        </div>
+      </section> : null}
+      <nav className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-[#793746]" aria-label="Shop buying guidance">
+        <Link href="/delivery-policy" className="underline underline-offset-4">Delivery policy</Link>
+        <Link href="/refund-policy" className="underline underline-offset-4">Refund policy</Link>
+        <Link href="/contact" className="underline underline-offset-4">Product support</Link>
+      </nav>
       <p className="mt-9 flex items-center gap-3 text-sm text-[#634e52]"><ShieldCheck size={18}/>
         Final item specifications and delivery terms are confirmed before fulfilment.
       </p>

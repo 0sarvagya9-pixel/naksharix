@@ -175,3 +175,33 @@ assert.ok(!indexNow.includes("process.env.DATABASE_URL") &&
 console.log("INDEXNOW_STATIC_DISCOVERY=PASS;HOST_KEY_PUBLIC=YES;PRODUCTION_ONLY=YES;PRIVATE_URLS=NO");
 
 console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
+
+
+// Conversion from public tools remains voluntary, and public report sharing
+// never contains a private report id, birth data, order id or checkout state.
+const relevant = read("components/relevant-report-discovery.tsx");
+for (const [route,topic] of [["tarot","tarot"],["numerology","numerology"],["weekly-love-horoscope","love"],["numerology-monthly-horoscope","numerology"]]) {
+  assert.ok(read("app/"+route+"/page.tsx").includes('<RelevantReportDiscovery topic="'+topic+'" />'), "Missing relevant report discovery: "+route);
+  assert.ok(indexNow.includes('"/'+route+'"'), "Public tool not included in safe search discovery: "+route);
+}
+assert.ok(relevant.includes('tarot: ["love-report", "career-report"]') &&
+  relevant.includes('numerology: ["numerology-lo-shu-report"]') &&
+  relevant.includes("different method from tarot") && relevant.includes("<OptionalReportNextStep"),
+  "Do not misrepresent a paid astrology report as a tarot reading");
+const reportDetails=read("app/reports/[slug]/page.tsx");
+assert.ok(reportDetails.includes('productUrl={publicReportUrl} kind="report"') &&
+  reportDetails.includes('canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)') &&
+  reportDetails.includes('href="/refund-policy"') &&
+  reportDetails.includes('href="/blog/personalized-astrology-report-delivery-guide"'),
+  "Missing public-only report referral or buyer guidance");
+const relatedShop=read("app/shop/[slug]/page.tsx");
+assert.ok(relatedShop.includes('item.status === "active"') && relatedShop.includes("Number.isSafeInteger(item.unitPricePaise)") &&
+  relatedShop.includes("Compare other spiritual products") && relatedShop.includes("Each item is optional"),
+  "Related products must use the current active priced catalogue");
+assert.ok(read("components/analytics-preferences.tsx").includes("reportLink ? 'report_cta_clicked' : 'cta_link'") &&
+  read("components/analytics-preferences.tsx").includes("choice!=='granted'"),
+  "Public sales CTA counts must retain optional analytics consent");
+for (const route of ["/free-kundli","/hi/free-kundli","/kundli-matching","/hi/kundli-milan","/tarot","/numerology","/weekly-love-horoscope","/numerology-monthly-horoscope","/reports","/reports/premium-kundli","/reports/couple-kundli","/reports/love-report","/reports/career-report","/reports/numerology-lo-shu-report"]) {
+  assert.ok(indexNow.includes('"'+route+'"'), "Missing public discovery route: "+route);
+}
+console.log("ORGANIC_SALES_CONVERSION=PASS;RELEVANT_REPORTS=4;REPORT_SHARE=PUBLIC_ONLY;SHOP_PRICES=LIVE_CATALOGUE;CONSENT=PRESERVED");

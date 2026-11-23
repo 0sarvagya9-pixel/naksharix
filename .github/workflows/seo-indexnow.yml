@@ -16,6 +16,17 @@ on:
       - 'app/shop/**'
       - 'lib/shop/organic-discovery.ts'
       - 'components/shop/product-share-actions.tsx'
+      - 'components/optional-report-next-step.tsx'
+      - 'components/relevant-report-discovery.tsx'
+      - 'app/reports/**'
+      - 'app/tarot/page.tsx'
+      - 'app/numerology/page.tsx'
+      - 'app/weekly-love-horoscope/page.tsx'
+      - 'app/numerology-monthly-horoscope/page.tsx'
+      - 'app/free-kundli/page.tsx'
+      - 'app/kundli-matching/page.tsx'
+      - 'app/hi/free-kundli/page.tsx'
+      - 'app/hi/kundli-milan/page.tsx'
   workflow_dispatch:
 
 permissions:

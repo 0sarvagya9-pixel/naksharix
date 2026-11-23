@@ -11,7 +11,11 @@ export function AnalyticsPreferences() {
     if(choice!=='granted')return;
     const click=(event:MouseEvent)=>{const link=(event.target as Element|null)?.closest?.('a[href]');
       if(!link)return;try{const url=new URL(link.getAttribute('href')||'',location.origin);
-        if(url.origin===location.origin&&publicAnalyticsRoute(url.pathname))trackNaksharixEvent('cta_link');}catch{}};
+        if(url.origin===location.origin&&publicAnalyticsRoute(url.pathname)) {
+          // Attribute only the type of voluntary public CTA, never destination query or personal data.
+          const reportLink = /^\/reports(?:\/[a-z0-9-]+)?$/.test(url.pathname) && !url.search && !url.hash;
+          trackNaksharixEvent(reportLink ? 'report_cta_clicked' : 'cta_link');
+        }}catch{}};
     document.addEventListener('click',click);return()=>document.removeEventListener('click',click);
   },[choice]);
   function choose(value:'granted'|'denied'){try{localStorage.setItem(analyticsConsentKey,value);}catch{}setChoice(value);setExpanded(false);}

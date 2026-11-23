@@ -290,6 +290,30 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByText(/INR 499\/mo|INR 1499\/mo|Subscribe to Premium|Subscribe to VIP/i)).toHaveCount(0);
   });
 
+
+  test("public report discovery is optional, priced and linked to matching detail pages", async ({ page }) => {
+    await page.goto(absolute("/tarot"), { waitUntil: "domcontentloaded" });
+    const discovery=page.locator('section[aria-labelledby="relevant-report-discovery-heading"]');
+    await expect(discovery).toBeVisible();
+    await expect(discovery.getByText("INR 499",{exact:true})).toBeVisible();
+    await expect(discovery.getByText("INR 599",{exact:true})).toBeVisible();
+    await expect(discovery.locator('a[href="/reports/love-report"]')).toBeVisible();
+    await expect(discovery.locator('a[href="/reports/career-report"]')).toBeVisible();
+    await expect(discovery.getByRole("button")).toHaveCount(0);
+    await page.goto(absolute("/numerology"), {waitUntil:"domcontentloaded"});
+    const num=page.locator('section[aria-labelledby="relevant-report-discovery-heading"]');
+    await expect(num.getByText("INR 399",{exact:true})).toBeVisible();
+    await expect(num.locator('a[href="/reports/numerology-lo-shu-report"]')).toBeVisible();
+    await page.goto(absolute("/reports/love-report"), {waitUntil:"domcontentloaded"});
+    const share=page.getByRole("region",{name:"Share this report"});
+    await expect(share.getByRole("link",{name:/Share .* on WhatsApp/})).toBeVisible();
+    const shareUrl=new URL((await share.getByRole("link",{name:/Share .* on WhatsApp/}).getAttribute("href"))!);
+    expect(shareUrl.hostname).toBe("wa.me");
+    const sharedText=shareUrl.searchParams.get("text") ?? "";
+    expect(sharedText).toContain("/reports/love-report");
+    expect(sharedText).not.toMatch(/orderId=|paymentId=|birthDate=|email=/i);
+  });
+
   test("security headers are present on public pages", async ({ request }) => {
     const response = await request.get(absolute("/"));
     const headers = response.headers();
