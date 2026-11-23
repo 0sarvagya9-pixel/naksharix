@@ -2,10 +2,10 @@ import Link from "next/link";
 import { getManualReport } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 
-type ReportSlug = "premium-kundli" | "couple-kundli";
+type ReportSlug = "premium-kundli" | "couple-kundli" | "love-report" | "career-report" | "numerology-lo-shu-report";
 
 /** An optional, catalogue-backed next step. No checkout, personal data or ad integration. */
-export function OptionalReportNextStep({ reportSlug, locale }: { reportSlug: ReportSlug; locale: "en" | "hi" }) {
+export function OptionalReportNextStep({ reportSlug, locale }: { reportSlug: ReportSlug; locale: "en" | "hi" | "hinglish" }) {
   const report = getManualReport(reportSlug);
   const checkout = getManualReportCheckout(reportSlug);
   if (!report || !checkout || !Number.isFinite(checkout.amount) || checkout.amount <= 0) return null;

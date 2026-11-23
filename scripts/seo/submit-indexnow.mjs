@@ -25,13 +25,27 @@ export const DISCOVERY_ROUTES = Object.freeze([
   "/shop/5-mukhi-rudraksha",
   "/shop/dhan-yog-bracelet",
   "/shop/shri-yantra",
-  "/shop/rudraksha-mala"
+  "/shop/rudraksha-mala",
+  "/free-kundli",
+  "/hi/free-kundli",
+  "/kundli-matching",
+  "/hi/kundli-milan",
+  "/tarot",
+  "/numerology",
+  "/weekly-love-horoscope",
+  "/numerology-monthly-horoscope",
+  "/reports",
+  "/reports/premium-kundli",
+  "/reports/couple-kundli",
+  "/reports/love-report",
+  "/reports/career-report",
+  "/reports/numerology-lo-shu-report"
 ]);
 
 export function assertDiscoveryConfiguration() {
   assert.match(INDEXNOW_KEY, /^[a-f0-9]{32}$/, "Invalid public IndexNow proof key");
   assert.equal(new Set(DISCOVERY_ROUTES).size, DISCOVERY_ROUTES.length, "Duplicate discovery routes");
-  assert.ok(DISCOVERY_ROUTES.every(route => /^\/(?:blog(?:\/[a-z-]+)?|learn|shop(?:\/[a-z0-9-]+)?)$/.test(route)),
+  assert.ok(DISCOVERY_ROUTES.every(route => /^\/(?:blog(?:\/[a-z-]+)?|learn|shop(?:\/[a-z0-9-]+)?|reports(?:\/(?:premium-kundli|couple-kundli|love-report|career-report|numerology-lo-shu-report))?|free-kundli|hi\/(?:free-kundli|kundli-milan)|kundli-matching|tarot|numerology|weekly-love-horoscope|numerology-monthly-horoscope)$/.test(route)),
     "Unexpected or sensitive submission path");
   return DISCOVERY_ROUTES.map(route => ORIGIN + route);
 }
@@ -89,7 +103,9 @@ async function main() {
 
   for (const url of urlList) {
     const html = await readPublic(url);
-    const head = html.split("</head>")[0] ?? "";
+    // Next.js metadata may be streamed after </head>. Check real markup, not
+    // serialized script payloads or comments that can contain unrelated text.
+    const head = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<!--[\s\S]*?-->/g, "");
     if (/<meta[^>]*name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(head) ||
         /<meta[^>]*content=["'][^"']*noindex[^"']*["'][^>]*name=["']robots["']/i.test(head))
       throw new Error("NON_INDEXABLE_URL=" + new URL(url).pathname);

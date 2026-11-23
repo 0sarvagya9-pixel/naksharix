@@ -13,6 +13,9 @@ import { normalizeLocale } from "@/lib/i18n";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import { getPublishedManualReportOffers } from "@/lib/reports/manual-offerings";
 import { seo } from "@/lib/seo";
+import { ProductShareActions } from "@/components/shop/product-share-actions";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
+import { env } from "@/lib/env";
 
 type Params = Promise<{ slug: string }>;
 export const dynamic = "force-dynamic";
@@ -41,6 +44,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
   const labels = detailLabels(locale);
   const checkout = getManualReportCheckout(report.slug);
+  const publicReportUrl = new URL(`/reports/${report.slug}`, canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)).toString();
   const ownerApprovedManualFee=!checkout?(await getPublishedManualReportOffers())[report.slug]:undefined;
   const manualFee=ownerApprovedManualFee?new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(ownerApprovedManualFee.pricePaise/100):null;
   const requestHref = `/report-request/new?plan=PREMIUM&reportSlug=${encodeURIComponent(report.slug)}`;
@@ -134,6 +138,16 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             </div>
           </CardContent>
         </Card>
+        <aside className="mt-10 rounded-2xl border border-[#ddc19b] bg-[#fffaf1] p-5 text-[#402a2d]" aria-label="Report buying guidance">
+          <h2 className="font-cinzel text-xl font-bold">Before you buy</h2>
+          <p className="mt-2 text-sm leading-7">Review what is included, how to receive your report and the applicable refund policy before paying. Your personal results are private.</p>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+            <Link href="/blog/personalized-astrology-report-delivery-guide" className="underline underline-offset-4">Report delivery guide</Link>
+            <Link href="/refund-policy" className="underline underline-offset-4">Refund policy</Link>
+            <Link href="/reports" className="underline underline-offset-4">Compare all reports</Link>
+          </div>
+          <ProductShareActions name={report.name[locale]} productUrl={publicReportUrl} kind="report" />
+        </aside>
       </Section>
     </main>
   );

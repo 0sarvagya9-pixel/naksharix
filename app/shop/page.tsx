@@ -8,8 +8,8 @@ import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...seo({
-    title: "Spiritual Catalogue | Rudraksha, Yantra, Mala and Symbolic Remedy Items",
-    description: "Explore Naksharix catalogue information for rudraksha, bracelets, yantras, malas, and symbolic remedy items. Browse prices, add products to your cart and place orders with secure Razorpay checkout.",
+    title: "Spiritual Shop Online | Rudraksha, Yantra, Mala & Bracelets",
+    description: "Browse Rudraksha beads, malas, yantras and spiritual bracelets at Naksharix. Compare listed prices, product details and delivery terms before secure online checkout.",
     path: "/shop",
     keywords: ["Spiritual Catalogue", "Rudraksha", "Yantra", "Mala", "Astrology Remedy Items"]
   }),
