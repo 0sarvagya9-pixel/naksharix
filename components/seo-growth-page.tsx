@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { GrowthPage } from "@/lib/growth-pages";
 import { EducationalAd } from "@/components/adsense/educational-ad";
+import { OptionalReportNextStep } from "@/components/optional-report-next-step";
 
 export function SeoGrowthPage({ page }: { page: GrowthPage }) {
+  const optionalReport = page.slug === "free-kundli" ? "premium-kundli" : page.slug === "kundli-matching" ? "couple-kundli" : null;
   return (
     <main className="star-field">
       <JsonLd
@@ -24,7 +26,7 @@ export function SeoGrowthPage({ page }: { page: GrowthPage }) {
       />
       <Section>
         <div className="max-w-4xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix SEO Guide</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Naksharix Astrology Guide</p>
           <h1 className="mt-3 font-cinzel text-4xl font-black sm:text-5xl">{page.h1}</h1>
           <p className="mt-5 text-lg leading-8 naksh-muted-text">{page.intro}</p>
           <div className="mt-7 flex flex-wrap gap-3">
@@ -63,6 +65,7 @@ export function SeoGrowthPage({ page }: { page: GrowthPage }) {
             ))}
           </div>
         </div>
+        {optionalReport ? <OptionalReportNextStep reportSlug={optionalReport} locale="en" /> : null}
         {page.sections?.length ? (
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {page.sections.map((section) => (

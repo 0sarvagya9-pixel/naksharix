@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SeoInternalLinks } from "@/components/seo/internal-links";
+import { OptionalReportNextStep } from "@/components/optional-report-next-step";
 import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
@@ -74,6 +75,7 @@ export default function KundliMilanHindiPage() {
             गुणों के पारंपरिक हिसाब को विस्तार से समझने के लिए <Link href="/blog/kundli-matching-score" className="font-semibold underline underline-offset-4">36 गुणों की मार्गदर्शिका</Link> देखें।
           </p>
         </section>
+        <OptionalReportNextStep reportSlug="couple-kundli" locale="hi" />
         <SeoInternalLinks title="कुंडली और विवाह से जुड़े पेज" />
       </Section>
     </main>
