@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SeoInternalLinks } from "@/components/seo/internal-links";
+import { OptionalReportNextStep } from "@/components/optional-report-next-step";
 import { env } from "@/lib/env";
 import { seo } from "@/lib/seo";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
@@ -74,6 +75,7 @@ export default function FreeKundliHindiPage() {
             ))}
           </div>
         </section>
+        <OptionalReportNextStep reportSlug="premium-kundli" locale="hi" />
         <SeoInternalLinks title="कुंडली और ज्योतिष के अन्य उपयोगी पेज" />
       </Section>
     </main>

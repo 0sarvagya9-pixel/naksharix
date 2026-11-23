@@ -74,13 +74,16 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
             </section>
           ))}
         </div>
-        <aside className="mt-10 rounded-2xl border border-[#D4AF37]/25 p-6" aria-label="Related free tools">
-          <h2 className="font-cinzel text-xl font-bold">Try the related free tools</h2>
-          <p className="mt-2 text-sm naksh-muted-text">Continue learning with practical examples. No paid purchase is required.</p>
+        <aside className="mt-10 rounded-2xl border border-[#D4AF37]/25 p-6" aria-label="Related resources">
+          <h2 className="font-cinzel text-xl font-bold">Explore related resources</h2>
+          <p className="mt-2 text-sm naksh-muted-text">Continue learning with practical examples. Reading this guide does not require a purchase.</p>
           <ul className="mt-4 list-disc space-y-2 pl-5">
             {post.related.map((item) => (
               <li key={item.href}>
                 <Link href={item.href} className="font-semibold underline underline-offset-4">{item.label}</Link>
+                {item.href.startsWith("/shop") ? <span className="ml-2 text-sm naksh-muted-text">— Shop catalogue (optional purchase)</span> :
+                  item.href.startsWith("/reports") ? <span className="ml-2 text-sm naksh-muted-text">— Paid reports (optional purchase)</span> :
+                  item.href === "/pujas" ? <span className="ml-2 text-sm naksh-muted-text">— Current service availability</span> : null}
               </li>
             ))}
           </ul>

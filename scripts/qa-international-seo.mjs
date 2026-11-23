@@ -113,6 +113,29 @@ assert.ok(editorial.includes("not a guarantee") && editorial.includes("not valid
   "Editorial content lacks explicit uncertainty or responsible use safeguards");
 console.log("EDITORIAL_GROWTH_QA=PASS;ORIGINAL_GUIDES=10;SECTIONS=43;BASIC_INTERNAL_LINKS=PASS");
 
+// Direct paid discovery must be voluntary, priced from the same authoritative
+// catalogue as checkout, and clearly distinguished from free education.
+const optionalReport = read("components/optional-report-next-step.tsx");
+for (const marker of ["getManualReport(reportSlug)", "getManualReportCheckout(reportSlug)",
+  "checkout.price", 'href={`/reports/${report.slug}`}', "Optional personalized paid report",
+  "You can use the free tool without buying anything.", "फ्री टूल का उपयोग करने के लिए रिपोर्ट खरीदना जरूरी नहीं है।"])
+  assert.ok(optionalReport.includes(marker), "Optional report discovery missing: " + marker);
+assert.ok(!optionalReport.includes("RazorpayCheckoutButton") && !optionalReport.includes("fetch(") &&
+  !optionalReport.includes("useEffect") && !optionalReport.includes("location."),
+  "Optional discovery must never initiate payment, read user data or force navigation");
+assert.ok(growthView.includes('page.slug === "free-kundli" ? "premium-kundli"') &&
+  growthView.includes('page.slug === "kundli-matching" ? "couple-kundli"') &&
+  growthView.includes('<OptionalReportNextStep reportSlug={optionalReport} locale="en" />') &&
+  !growthView.includes("Naksharix SEO Guide"), "English report discovery or public copy regression");
+assert.ok(read("app/hi/free-kundli/page.tsx").includes('<OptionalReportNextStep reportSlug="premium-kundli" locale="hi" />') &&
+  read("app/hi/kundli-milan/page.tsx").includes('<OptionalReportNextStep reportSlug="couple-kundli" locale="hi" />'),
+  "Hindi report discovery missing");
+assert.ok(article.includes("Shop catalogue (optional purchase)") && article.includes("Paid reports (optional purchase)") &&
+  article.includes("Current service availability") && !article.includes("Try the related free tools"),
+  "Do not label paid or paused services as free tools");
+console.log("OPTIONAL_REPORT_DISCOVERY=PASS;EN_HI=4;AUTHORITATIVE_PRICE=YES;NO_FORCED_PURCHASE=YES");
+
+
 
 // Search discovery must submit only public educational URLs after production release identity.
 const indexNow = read("scripts/seo/submit-indexnow.mjs");
