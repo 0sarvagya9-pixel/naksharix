@@ -3,6 +3,34 @@ import assert from "node:assert/strict";
 export const BASE_URL = "https://www.naksharix.com";
 const ADS_SELLER = "google.com, pub-7848529669366564, DIRECT, f08c47fec0942fa0";
 
+
+// Check actual server-rendered HTML, not strings embedded in Next.js hydration scripts.
+// Coming Soon is healthy while bookings are intentionally closed; the old Book Now
+// directory is not a valid active state under the request-before-payment contract.
+export function classifyPujaPage(html) {
+  const rendered = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<!--[\s\S]*?-->/g, "");
+  const robots = (rendered.match(/<meta\b[^>]*>/gi) ?? [])
+    .filter(tag => /\bname=["']robots["']/i.test(tag));
+  const noindex = robots.some(tag => /\bcontent=["'][^"']*\bnoindex\b/i.test(tag));
+  const paused = rendered.match(/<section\b[^>]*\baria-labelledby=["']puja-coming-soon-heading["'][^>]*>[\s\S]*?<\/section>/i)?.[0] ?? "";
+  const active = /\bid=["']puja-catalogue-heading["']/i.test(rendered);
+  if (paused && !active && noindex &&
+      paused.includes("Coming Soon") &&
+      paused.includes("नई पूजा बुकिंग और ऑनलाइन भुगतान उपलब्ध नहीं हैं।") &&
+      !/(?:Book Now|Request preferred date|href=["']\/puja-booking(?:[?"'/]|$))/i.test(paused)) {
+    return "paused";
+  }
+  if (!paused && active && !noindex &&
+      rendered.includes("Puja Directory") &&
+      rendered.includes("No upfront payment") &&
+      rendered.includes("Request preferred date") &&
+      /href=["']\/puja-booking\?item=[^"']+/i.test(rendered)) {
+    return "active";
+  }
+  return "invalid";
+}
+
 export async function checkPublicEndpoints(fetcher = fetch, base = BASE_URL) {
   const endpoints = [
     "/api/health", "/api/release", "/api/ops/readiness", "/ads.txt",
@@ -10,6 +38,7 @@ export async function checkPublicEndpoints(fetcher = fetch, base = BASE_URL) {
     "/reports", "/consultation", "/advertising", "/robots.txt", "/sitemap.xml"
   ];
   const results = [];
+  let pujaState = "invalid";
   for (const path of endpoints) {
     let passed = false;
     let status = "unreachable";
@@ -19,7 +48,9 @@ export async function checkPublicEndpoints(fetcher = fetch, base = BASE_URL) {
       });
       status = String(response.status);
       if (response.ok) {
-        const body = (await response.text()).slice(0, 200000);
+        const text = await response.text();
+        // Streamed metadata and sitemap entries may occur after the initial HTML.
+        const body = path === "/pujas" || path === "/sitemap.xml" ? text : text.slice(0, 200000);
         if (path === "/api/health") {
           const data = JSON.parse(body).data;
           passed = data?.status === "ok" &&
@@ -44,11 +75,16 @@ export async function checkPublicEndpoints(fetcher = fetch, base = BASE_URL) {
           passed = body.includes("https://www.naksharix.com/reports") &&
             body.includes("https://www.naksharix.com/shop") &&
             !body.includes("<loc>https://www.naksharix.com/admin");
+          const pujaRoot = /<loc>\s*https:\/\/www\.naksharix\.com\/pujas\/?\s*<\/loc>/i.test(body);
+          const pujaEntry = /<loc>\s*https:\/\/www\.naksharix\.com\/pujas(?:\/[^<]*)?\s*<\/loc>/i.test(body);
+          passed = passed && (pujaState === "paused" ? !pujaEntry :
+            pujaState === "active" ? pujaRoot : false);
         } else if (path === "/reports") {
           passed = body.includes("Premium Astrology Reports") &&
             body.includes("15 clearly priced personalized reports");
         } else if (path === "/pujas") {
-          passed = body.includes("Puja Directory") && body.includes("Book Now");
+          pujaState = classifyPujaPage(body);
+          passed = pujaState !== "invalid";
         } else if (path === "/shop") {
           passed = body.includes("Spiritual Catalogue") && body.includes("Add to cart");
         } else {
@@ -60,7 +96,7 @@ export async function checkPublicEndpoints(fetcher = fetch, base = BASE_URL) {
     }
     results.push({path, passed, status});
   }
-  return {passed: results.every(item => item.passed), results};
+  return {passed: results.every(item => item.passed), results, pujaState};
 }
 
 if (process.argv[1]?.endsWith("check-public-endpoints.mjs")) {
@@ -73,6 +109,7 @@ if (process.argv[1]?.endsWith("check-public-endpoints.mjs")) {
   assert.ok(result);
   console.log("NAKSHARIX_PUBLIC_MONITOR=" + (result.passed ? "PASS" : "FAIL"));
   console.log("PUBLIC_ENDPOINT_COUNT=" + result.results.length);
+  console.log("PUJA_PUBLIC_STATE=" + result.pujaState);
   if (!result.passed) {
     console.error("FAILED_PATHS=" + result.results.filter(x => !x.passed)
       .map(x => x.path + " HTTP_" + x.status).join(", "));
