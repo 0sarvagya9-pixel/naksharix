@@ -4,6 +4,10 @@ import { checkPublicEndpoints } from "./ops/check-public-endpoints.mjs";
 
 const read = path => readFileSync(path, "utf8");
 const healthy = body => new Response(body, {status:200});
+const pausedPuja = '<html><head><meta name="robots" content="noindex, follow"></head><body><section aria-labelledby="puja-coming-soon-heading"><h1 id="puja-coming-soon-heading">पूजा सेवाएँ जल्द आ रही हैं</h1><p>Coming Soon</p><p>नई पूजा बुकिंग और ऑनलाइन भुगतान उपलब्ध नहीं हैं।</p></section></body></html>';
+const activePuja = '<html><head><meta name="robots" content="index, follow"></head><body><p>No upfront payment</p><h2 id="puja-catalogue-heading">Puja Directory</h2><a href="/puja-booking?item=ganesh">Request preferred date</a></body></html>';
+const sitemap = "<urlset><url><loc>https://www.naksharix.com/shop</loc></url><url><loc>https://www.naksharix.com/reports</loc></url></urlset>";
+const activeSitemap = sitemap.replace("</urlset>", "<url><loc>https://www.naksharix.com/pujas</loc></url><url><loc>https://www.naksharix.com/pujas/ganesh</loc></url></urlset>");
 const fakeFetch = async url => {
   const path = new URL(url).pathname;
   if (path === "/api/health") return healthy(JSON.stringify({data:{status:"ok",checks:{app:"ok",database:"ok"}}}));
@@ -13,13 +17,40 @@ const fakeFetch = async url => {
   }}));
   if (path === "/ads.txt") return healthy("google.com, pub-7848529669366564, DIRECT, f08c47fec0942fa0");
   if (path === "/robots.txt") return healthy("User-agent: *\\nDisallow: /admin\\nDisallow: /api\\nSitemap: https://www.naksharix.com/sitemap.xml");
-  if (path === "/sitemap.xml") return healthy("<urlset><url><loc>https://www.naksharix.com/shop</loc></url><url><loc>https://www.naksharix.com/reports</loc></url></urlset>");
+  if (path === "/sitemap.xml") return healthy(sitemap);
   if (path === "/shop") return healthy("<html><body>Spiritual Catalogue Add to cart</body></html>");
-  if (path === "/pujas") return healthy("<html><body>Puja Directory Book Now</body></html>");
+  if (path === "/pujas") return healthy(pausedPuja);
   if (path === "/reports") return healthy("<html><body>Premium Astrology Reports 15 clearly priced personalized reports</body></html>");
   return healthy("<html><body>"+("Naksharix authentic educational content ".repeat(35))+"</body></html>");
 };
-assert.equal((await checkPublicEndpoints(fakeFetch)).passed, true, "Valid site rejected");
+const paused = await checkPublicEndpoints(fakeFetch);
+assert.equal(paused.passed, true, "Healthy paused site rejected");
+assert.equal(paused.pujaState, "paused");
+assert.equal(paused.results.length, 14);
+const withPuja = (html, xml=sitemap, status=200) => async url => {
+  const path = new URL(url).pathname;
+  if (path === "/pujas") return new Response(html,{status});
+  if (path === "/sitemap.xml") return healthy(xml);
+  return fakeFetch(url);
+};
+const active = await checkPublicEndpoints(withPuja(activePuja,activeSitemap));
+assert.equal(active.passed,true,"Verified request-first directory rejected");
+assert.equal(active.pujaState,"active");
+for (const [label,html,xml,status] of [
+  ["legacy direct booking","<html><body>Puja Directory Book Now</body></html>",sitemap,200],
+  ["script-only placeholder",'<script>'+pausedPuja+'</script>',sitemap,200],
+  ["missing noindex",pausedPuja.replace("noindex, follow","index, follow"),sitemap,200],
+  ["paused payment/request CTA",pausedPuja.replace("</section>",'<a href="/puja-booking?item=ganesh">Request preferred date</a></section>'),sitemap,200],
+  ["paused root indexed",pausedPuja,activeSitemap,200],
+  ["paused detail indexed",pausedPuja,sitemap.replace("</urlset>",'<url><loc>https://www.naksharix.com/pujas/ganesh</loc></url></urlset>'),200],
+  ["active missing sitemap root",activePuja,sitemap,200],
+  ["active with noindex",activePuja.replace("index, follow","noindex, follow"),activeSitemap,200],
+  ["active missing request-first copy",activePuja.replace("No upfront payment","Pay upfront"),activeSitemap,200],
+  ["public HTTP outage",pausedPuja,sitemap,503]
+]) {
+  const result=await checkPublicEndpoints(withPuja(html,xml,status));
+  assert.equal(result.passed,false,"Wrongly accepted "+label);
+}
 const wrongSeller = await checkPublicEndpoints(async url =>
   new URL(url).pathname === "/ads.txt" ? healthy("google.com, pub-INVALID, DIRECT, f08c47fec0942fa0") : fakeFetch(url));
 assert.equal(wrongSeller.passed,false,"Wrong advertising seller wrongly accepted");
