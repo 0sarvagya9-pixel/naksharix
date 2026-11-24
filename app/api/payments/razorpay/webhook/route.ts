@@ -6,6 +6,7 @@ import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { finalizePaidPayment, verifyRazorpayWebhookSignature } from "@/lib/revenue";
 import { reconcileCapturedPurpose, reconcileProcessedRefund } from "@/lib/payments/purpose-reconciliation";
+import {processMembershipEvent} from "@/lib/ai/membership-ledger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,11 @@ export async function POST(request: NextRequest) {
       payment?: { entity?: { id?: string; order_id?: string; status?: string; amount?: number; currency?: string } };
       refund?: { entity?: { id?: string; payment_id?: string; amount?: number; status?: string } }
     } };
+    if(typeof event.event==="string"&&event.event.startsWith("subscription.")){
+      const payload=event.payload as {subscription?:{entity?:unknown};payment?:{entity?:unknown}}|undefined;
+      await processMembershipEvent(event.event,payload?.subscription?.entity,payload?.payment?.entity);
+      return ok({received:true});
+    }
     const payment = event.payload?.payment?.entity;
     if (event.event === "payment.captured" && payment?.order_id && payment.id) {
       const existingPayment = await prisma.payment.findUnique({ where: { providerOrderId: payment.order_id } });

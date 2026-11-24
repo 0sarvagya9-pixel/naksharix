@@ -62,7 +62,7 @@ export async function reconcileProcessedRefund(refund: {
       const packageId=(original.metadata as Record<string,unknown>|null)?.digitalPackageId;
       if(typeof packageId==="string")await prisma.$transaction(async tx=>{await lockPackage(tx,packageId);await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id,status:"PAID"},data:{status:"REVIEW"}});});
     }
-    if(original.purpose==="AI_CREDITS"&&refund.amount!<fullAmountPaise){
+    if(["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose)&&refund.amount!<fullAmountPaise){
       // A signed partial refund requires human reconciliation; prevent any further spending of this grant.
       await prisma.$transaction(async tx=>{await lockCreditAccount(tx,original.userId);await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null,suspendedAt:null,payment:{status:"PAID"}},data:{suspendedAt:new Date()}});});
     }
@@ -75,7 +75,7 @@ export async function reconcileProcessedRefund(refund: {
   // must re-run the WHOLE transaction, not leave a refunded payment with a
   // still-paid digital entitlement or an uncanceled shop order.
   const transitioned = await prisma.$transaction(async (tx) => {
-    if(original.purpose==="AI_CREDITS")await lockCreditAccount(tx,original.userId);
+    if(["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose))await lockCreditAccount(tx,original.userId);
     const packageId=original.purpose==="DIGITAL_PACKAGE"&&typeof meta.digitalPackageId==="string"?meta.digitalPackageId:null;
     if(packageId)await lockPackage(tx,packageId);
     const expertId=original.purpose==="EXPERT_SERVICE"&&typeof meta.expertServiceId==="string"?meta.expertServiceId:null;
@@ -90,7 +90,7 @@ export async function reconcileProcessedRefund(refund: {
     if (updated.count !== 1) return false;
     if(expertId){await tx.expertServiceRequest.updateMany({where:{id:expertId,userId:original.userId,paymentId:original.id},data:{status:"REFUNDED",settlementStatus:"REVIEW"}});}
     if(packageId)await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id},data:{status:"REFUNDED"}});
-    if(original.purpose==="AI_CREDITS")await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null},data:{revokedAt:new Date()}});
+    if(["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose))await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null},data:{revokedAt:new Date()}});
 
     if (original.purpose === "SHOP_ORDER" && typeof meta.shopOrderId === "string") {
       await tx.shopOrder.updateMany({

@@ -81,6 +81,7 @@ enum PaymentPurpose {
   AI_CREDITS
   DIGITAL_PACKAGE
   EXPERT_SERVICE
+  AI_MEMBERSHIP
 }
 
 enum ReportPlanType {
@@ -203,6 +204,7 @@ model User {
   digitalPackageOrders         DigitalPackageOrder[]
   businessTenants              BusinessTenant[]
   expertServiceRequests         ExpertServiceRequest[]
+  aiMemberships                 AiMembership[]
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -410,6 +412,7 @@ model Payment {
   aiCreditGrant    AiCreditGrant?
   digitalPackageOrder DigitalPackageOrder?
   expertServiceRequest ExpertServiceRequest?
+  aiMembershipCycle AiMembershipCycle?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -1032,6 +1035,8 @@ model AiCreditGrant {
   units       Int
   remaining   Int
   offerVersion String
+  validFrom   DateTime?
+  validUntil  DateTime?
   suspendedAt DateTime?
   revokedAt   DateTime?
   createdAt   DateTime @default(now())
@@ -1206,4 +1211,45 @@ model ExpertServiceRequest {
   @@index([userId,status])
   @@index([astrologerProfileId,status])
   @@index([status,createdAt])
+}
+
+model AiMembership {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ clientIntent String
+ version String
+ planId String
+ pricePaise Int
+ unitsPerCycle Int
+ totalCycles Int
+ approvedModel String
+ termsVersion String
+ liveMode Boolean
+ providerSubscriptionId String? @unique
+ hostedUrl String?
+ state String @default("CREATING")
+ providerState String?
+ lastProviderCheckedAt DateTime?
+ cancellationRequestedAt DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ cycles AiMembershipCycle[]
+ @@unique([userId,clientIntent])
+ @@index([userId,state])
+}
+model AiMembershipCycle {
+ id String @id @default(cuid())
+ membershipId String
+ membership AiMembership @relation(fields:[membershipId],references:[id],onDelete:Cascade)
+ cycleNumber Int
+ periodStart DateTime
+ periodEnd DateTime
+ providerInvoiceId String @unique
+ paymentId String @unique
+ payment Payment @relation(fields:[paymentId],references:[id],onDelete:Cascade)
+ createdAt DateTime @default(now())
+ @@unique([membershipId,cycleNumber])
+ @@unique([membershipId,periodStart])
+ @@index([membershipId,periodEnd])
 }

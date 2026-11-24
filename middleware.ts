@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPrefixes = ["/expert-services","/learn/paid-course","/digital-packages","/business-workspace","/dashboard", "/admin", "/astrologer", "/profile", "/my-readings", "/saved-reports"];
+const protectedPrefixes = ["/ai-membership","/expert-services","/learn/paid-course","/digital-packages","/business-workspace","/dashboard", "/admin", "/astrologer", "/profile", "/my-readings", "/saved-reports"];
 const authJsCookieNames = [
   "authjs.session-token",
   "__Secure-authjs.session-token",
@@ -98,6 +98,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/api/:path*",
+    "/ai-membership/:path*",
     "/expert-services/:path*",
     "/learn/paid-course/:path*",
     "/digital-packages/:path*",

@@ -59,6 +59,7 @@ export default function robots(): MetadataRoute.Robots {
         "/dashboard",
         "/digital-packages",
         "/expert-services",
+        "/ai-membership",
         "/learn/paid-course",
         "/business-workspace",
         "/api",
