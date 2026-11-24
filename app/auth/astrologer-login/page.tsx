@@ -24,7 +24,7 @@ export default function AstrologerLoginPage() {
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} loginMode="ASTROLOGER" showRoleCards={false} />
           <p className="mt-4 text-sm naksh-muted-text">
-            New guide on Naksharix? <Link href="/astrologer/onboarding" className="text-[#01A361]">Start onboarding</Link>
+            New guide on Naksharix? <Link href="/join-astrologer" className="text-[#01A361]">Start onboarding</Link>
           </p>
           <p className="mt-2 text-sm naksh-muted-text">
             Looking for your personal dashboard? <Link href="/auth/login" className="text-[#01A361]">User login</Link>

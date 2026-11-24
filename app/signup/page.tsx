@@ -30,7 +30,7 @@ export default function SignupPage() {
             Already registered? <Link href="/login" className="text-[#01A361]">Sign in</Link>
           </p>
           <p className="mt-2 text-sm naksh-muted-text">
-            Want to consult on Naksharix? <Link href="/astrologer/onboarding" className="text-[#01A361]">Apply as an astrologer or consultant</Link>
+            Want to consult on Naksharix? <Link href="/join-astrologer" className="text-[#01A361]">Apply as an astrologer or consultant</Link>
           </p>
         </CardContent>
       </Card>

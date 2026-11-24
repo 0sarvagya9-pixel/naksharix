@@ -66,6 +66,7 @@ const staticRoutes = [
   "/shubh-muhurat",
   "/kundli",
   "/astrologers",
+  "/join-astrologer",
   "/consultation",
   "/puja-calendar",
   "/learn",
