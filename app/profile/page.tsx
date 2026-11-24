@@ -25,6 +25,7 @@ export default async function ProfilePage() {
       </Card>
 
       <PushPreferences/>
+      {env.EXPERT_SERVICE_INTAKE_ENABLED==="true"?<Link className="mt-5 inline-block font-semibold underline" href="/expert-services">Expert service requests and human reviews</Link>:null}
       {env.B2B_INTEGRATION_ENABLED==="true"?<Link className="mt-5 inline-block font-semibold underline" href="/business-workspace">Business integration workspace</Link>:null}
       {env.DIGITAL_PACKAGE_SALES_ENABLED==="true"||env.DIGITAL_PACKAGE_GENERATION_ENABLED==="true"?<Link className="mt-5 ml-4 inline-block font-semibold underline" href="/digital-packages">Digital package orders</Link>:null}
       <Card className="glass mt-6">

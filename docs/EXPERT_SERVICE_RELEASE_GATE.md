@@ -1,0 +1,7 @@
+# Expert services release gate
+Both feature flags default false; no customer intake, practitioner contract, payout or payment has been created. Source-only additive migration. This is not automatic expert approval.
+- Request owner consents to the assigned practitioner receiving their question and, for review, the exact original paid-report PDF. Approved profile, verified email, genuine quote, explicit acceptance, exact amount and original report entitlement are required. Do not infer third-party consent.
+- Exact same Razorpay merchant. Pending or unknown payments cannot be replaced. Capture after a lost provider or expired deadline is recorded for review rather than delivering a fictitious service.
+- A practitioner must independently read and attest to their actual response; download/checksum record proves authorized access only, not reading quality. No AI impersonation or fabricated human review.
+- Partial/full refund suspends/revokes access and flags any payout for reconciliation. Existing base report refund also flags dependent expert reviews. Manual payout reference means an owner verified a separately completed transfer; no automatic transfer or tax/settlement claim.
+- Before activation: isolated migration, authorization, approved-profile changes, expired quote, capture/replay, ownership, refund races, source regeneration/checksum, accessibility, mobile, email and actual practitioner agreement acceptance. Full paid/live acceptance only after owner authorization.

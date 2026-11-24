@@ -33,6 +33,7 @@ const groups = [
     label: "WORKSPACE",
     links: [
       { label: "Availability", href: "/astrologer/availability", icon: Clock3 },
+      { label: "Written services and reviews", href: "/astrologer/expert-services", icon: FileText },
       { label: "Report drafts", href: "/astrologer/report-generator", icon: FileText },
       { label: "Reviews", href: "/astrologer/reviews", icon: Star },
       { label: "My profile", href: "/astrologer/profile", icon: UserRound }

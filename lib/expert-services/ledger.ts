@@ -46,8 +46,8 @@ export async function createExpertRequest(userId:string,input:z.infer<typeof req
  });
 }
 export async function listExpertCustomer(userId:string){
- const [rows,reports]=await Promise.all([prisma.expertServiceRequest.findMany({where:{userId},select:{...publicSelect,response:true,payment:true,userId:true,paymentId:true,astrologerProfileId:true,consentVersion:true},orderBy:{createdAt:"desc"},take:30}),prisma.reportRequest.findMany({where:{userId,paymentStatus:"PAID",adminBypass:false,generatedPdfSize:{not:null}},select:{id:true,reportSlug:true,createdAt:true},orderBy:{createdAt:"desc"},take:20})]);
- return {requests:rows.map(({payment,userId:uid,paymentId,astrologerProfileId,consentVersion,response,expertFeePaise,settlementStatus,...row})=>({...row,response:row.status==="DELIVERED"&&expertEntitled({...row,userId:uid,paymentId,astrologerProfileId,consentVersion},payment)?response:null})),reports};
+ const [rows,reports]=await Promise.all([prisma.expertServiceRequest.findMany({where:{userId},select:{...publicSelect,response:true,payment:true,userId:true,paymentId:true,astrologerProfileId:true,consentVersion:true,sourceChecksum:true},orderBy:{createdAt:"desc"},take:30}),prisma.reportRequest.findMany({where:{userId,paymentStatus:"PAID",adminBypass:false,generatedPdfSize:{not:null}},select:{id:true,reportSlug:true,createdAt:true},orderBy:{createdAt:"desc"},take:20})]);
+ return {requests:await Promise.all(rows.map(async ({payment,userId:uid,paymentId,astrologerProfileId,consentVersion,response,expertFeePaise,settlementStatus,sourceChecksum,...row})=>({...row,response:row.status==="DELIVERED"&&expertEntitled({...row,userId:uid,paymentId,astrologerProfileId,consentVersion},payment)&&await sourceStillValid(prisma,{...row,userId:uid,sourceChecksum})?response:null}))),reports};
 }
 export async function cancelExpertCustomer(userId:string,id:string){
  return prisma.$transaction(async tx=>{await lockExpertService(tx,id);const changed=await tx.expertServiceRequest.updateMany({where:{id,userId,paymentId:null,status:{in:["REQUESTED","ASSIGNED","QUOTED"]}},data:{status:"CANCELED"}});if(changed.count)await audit(tx,userId,id,"canceled");return changed.count===1;});
@@ -70,7 +70,7 @@ export async function actExpertAdmin(adminId:string,input:z.infer<typeof adminSc
   await tx.expertServiceRequest.update({where:{id:row.id},data:{status:"CANCELED"}});
  }else{
   // Record an independently executed manual payout only. This endpoint never transfers money.
-  if(row.status!=="DELIVERED"||row.settlementStatus!=="PAYABLE"||!row.expertFeePaise||!expertEntitled(row,row.payment)||await tx.expertServiceRequest.findUnique({where:{settlementReference:input.reference},select:{id:true}}))return false;
+  if(row.status!=="DELIVERED"||row.settlementStatus!=="PAYABLE"||!row.expertFeePaise||!expertEntitled(row,row.payment)||!await sourceStillValid(tx,row)||await tx.expertServiceRequest.findUnique({where:{settlementReference:input.reference},select:{id:true}}))return false;
   await tx.expertServiceRequest.update({where:{id:row.id},data:{settlementStatus:"SETTLED",settlementReference:input.reference,settledAt:new Date()}});
  }
  await audit(tx,adminId,row.id,input.action.toLowerCase());return true;
