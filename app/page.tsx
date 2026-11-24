@@ -4,6 +4,7 @@ import { ApprovedGalleryHome } from "@/components/home/approved-gallery-home";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
 import { seo } from "@/lib/seo";
+import { KumbhHomePromotion } from "@/components/puja/kumbh-event-promotion";
 
 export const metadata: Metadata = seo({
   title: "Free Kundli, Horoscope & Vedic Astrology Tools",
@@ -34,6 +35,7 @@ export default async function HomePage() {
   return (
     <main className="overflow-hidden bg-[var(--nx-bg)] text-[var(--nx-text)]">
       <ApprovedGalleryHome />
+      {puja.enabled && <KumbhHomePromotion availableIds={Object.keys(puja.offers)} initialNow={Date.now()}/>}
       <div className="nx-approved-retained">
         <EditorialHome featuredShopPrices={featuredShopPrices} pujaEnabled={puja.enabled} availablePujaIds={Object.keys(puja.offers)} />
       </div>

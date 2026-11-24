@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { secureFetch } from "@/lib/security/csrf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { pujaTopics } from "@/lib/puja/service-catalogue";
+import { allPujaTopics, findKumbhEvent, kumbhEventVisible } from "@/lib/puja/service-catalogue";
 
 type Partner = {
   id: string; name: string; region: string; traditions: string[];
@@ -95,7 +95,7 @@ export function AdminPujaPartners() {
             e.target.value="";
           }} className="rounded-lg border border-[#cba879] bg-white p-3">
             <option value="">Select specific Puja…</option>
-            {pujaTopics.map(topic=><option key={topic.id} value={topic.id}>{topic.name}</option>)}
+            {allPujaTopics.filter(topic=>!findKumbhEvent(topic.id)||kumbhEventVisible(findKumbhEvent(topic.id)!)).map(topic=><option key={topic.id} value={topic.id}>{topic.name}</option>)}
           </select>
         </label>
         <p className="text-xs leading-6 naksh-muted-text">Generic claims like &quot;Hindu Puja&quot; do not activate bookings. Confirm the Pandit&apos;s ability to perform every selected rite, region, date and fees independently.</p>

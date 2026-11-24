@@ -2,7 +2,7 @@
 import { useEffect,useMemo,useState,type FormEvent } from "react";
 import { ResilientEditorialImage } from "@/components/puja/resilient-editorial-image";
 import { editorialPujaPhotos, pujaEditorialPhoto } from "@/lib/puja/editorial-photos";
-import { pujaTopics } from "@/lib/puja/service-catalogue";
+import { pujaTopics, allPujaTopics, findKumbhEvent, kumbhEventVisible } from "@/lib/puja/service-catalogue";
 import { secureFetch } from "@/lib/security/csrf";
 import { siteNotice } from "@/lib/ui/site-notification";
 type Offer={topicId:string;pricePaise:number|null;durationMinutes:number|null;available:boolean;note:string};
@@ -18,7 +18,8 @@ export function AdminPujaOfferEditor(){
  }).then(rows=>{if(active)setSaved(Object.fromEntries(rows.map(o=>[o.topicId,o])))})
  .catch(e=>{if(active)setError(e instanceof Error?e.message:"Unable to load prices.")});
  return()=>{active=false}},[]);
- const results=useMemo(()=>pujaTopics.filter(topic=>
+ const results=useMemo(()=>allPujaTopics.filter(topic=>
+   (!findKumbhEvent(topic.id)||kumbhEventVisible(findKumbhEvent(topic.id)!)) &&
    (topic.name+" "+topic.category+" "+topic.deity).toLowerCase().includes(query.toLowerCase()) &&
    (!needsExactPhoto || !editorialPujaPhotos[topic.id])
  ),[query,needsExactPhoto]);
@@ -48,7 +49,7 @@ export function AdminPujaOfferEditor(){
   {error?<p role="alert" className="mt-4 rounded-xl bg-[#fff0f0] p-4 text-sm text-[#8e2342]">{error}</p>:null}
   {notice?<p role="status" className="mt-4 rounded-xl bg-[#eff9f0] p-4 text-sm text-[#31592d]">{notice}</p>:null}
   {draft?<form onSubmit={save} className="mt-6 max-w-2xl space-y-4 rounded-2xl border border-[#d8b58d] bg-white p-6">
-   <h2 className="font-cinzel text-xl font-bold text-[#402832]">{pujaTopics.find(p=>p.id===draft.topicId)?.name}</h2>
+   <h2 className="font-cinzel text-xl font-bold text-[#402832]">{allPujaTopics.find(p=>p.id===draft.topicId)?.name}</h2>
    <p className="text-xs leading-6 text-[#6b535e]">New drafts start at ₹1,100 and remain unpublished. Existing saved rates are preserved. Current Razorpay Puja checkout supports exactly ₹1,100 and requires verified operator, scheduled ceremony and payment readiness; another saved fee cannot be charged through this checkout.</p>
    <label className="block text-sm font-bold">Approved fee (INR)
      <input inputMode="decimal" type="number" step=".01" min="1" max="1000000" value={draft.pricePaise===null?"":(draft.pricePaise/100).toFixed(2)}

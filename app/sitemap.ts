@@ -9,6 +9,7 @@ import { publishedSeoAlternates } from "@/lib/seo-localization";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { indexableKundliGuideLanguages, kundliGuidePath } from "@/lib/kundli-education";
 import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { findKumbhEvent } from "@/lib/puja/service-catalogue";
 
 // Paused Puja booking/detail pages intentionally return noindex or redirect to the
 // Coming Soon notice. They must not be offered as indexable sitemap entries.
@@ -94,7 +95,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...featuredAstrologerRoutes().map((route): SitemapEntry => ({ route, priority: 0.74, frequency: "weekly" })),
     // Dynamically index only verified, currently launched Puja services.
     // Paused or unsupported services are deliberately excluded.
-    ...(puja.enabled ? ["/pujas", ...Object.keys(puja.offers).map(id=>"/pujas/"+id)] : [])
+    ...(puja.enabled ? ["/pujas", ...Object.keys(puja.offers).filter(id=>!findKumbhEvent(id)).map(id=>"/pujas/"+id)] : [])
       .map((route): SitemapEntry => ({ route, priority: 0.69, frequency: "weekly" })),
     ...zodiacSigns.map((sign): SitemapEntry => ({ route: `/horoscope/${sign.slug}`, priority: 0.82, frequency: "daily" })),
     // Old year-selector URL now permanently redirects to the canonical yearly page.

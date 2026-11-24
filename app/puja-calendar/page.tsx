@@ -9,6 +9,7 @@ import { seo } from "@/lib/seo";
 import { nextTwoYearsPujaCalendar } from "@/lib/puja/observances";
 import { pujaEditorialImage } from "@/lib/puja/editorial-photos";
 import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
+import { KumbhEventCards } from "@/components/puja/kumbh-event-promotion";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,7 @@ export default async function PujaCalendarPage() {
         caption="Explore a rolling two-year reference list of major Puja and festival dates. Confirm regional customs and local tithi independently."
         image={pujaEditorialImage("griha-pravesh-puja","/naksharix/editorial-puja.svg","family")} imageAlt="Representative licensed photograph of a traditional Puja ceremony"
         link="/pujas" linkLabel={launch.enabled ? "Explore available Pujas" : "Puja service availability"} />
+      {launch.enabled && <KumbhEventCards offerings={launch.offers} initialNow={Date.now()}/>}
       <Section>
         <div className="rounded-[1.7rem] border border-[#D6AB67]/55 bg-[linear-gradient(115deg,#421b2b_0%,#702a39_60%,#8b4239_100%)] p-6 text-[#fffaf2] shadow-[0_25px_70px_rgba(65,23,36,.17)] md:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FFD700]">Hindu calendar • India reference</p>
