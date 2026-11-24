@@ -43,7 +43,7 @@ export default async function MyOrdersPage(){
       order.shippingPaise!==null && order.taxPaise!==null &&
       order.totalPaise===order.subtotalPaise+order.shippingPaise+order.taxPaise && shippingPayable(order) ? (
        env.SHOP_PAYMENTS_ENABLED==="true" && getRazorpayReadiness().enabled ?
-         <div className="mt-4 max-w-md"><ShopOrderPayButton orderId={order.id} totalPaise={order.totalPaise} country={order.deliveryCountry} quote={readShippingSnapshot(order.shippingQuote)}/></div> :
+         <div className="mt-4 max-w-md"><ShopOrderPayButton orderId={order.id} totalPaise={order.totalPaise} country={order.deliveryCountry} quote={readShippingSnapshot(order.shippingQuote)} orderVersion={order.version}/></div> :
          <p className="mt-3 text-sm">Your order is saved. Online payment will be available shortly.</p>
      ) : null}
      {order.paymentStatus==="PAID"?<p className="mt-2 text-sm font-semibold">{

@@ -20,7 +20,7 @@ type CheckoutPayload =
       reportRequestId?: string;
     }
   | { purpose: "PUJA_BOOKING"; bookingId: string }
-  | { purpose: "SHOP_ORDER"; shopOrderId: string; expectedTotalPaise?: number; shippingTermsVersion?: string };
+  | { purpose: "SHOP_ORDER"; shopOrderId: string; expectedTotalPaise?: number; expectedOrderVersion?: number; shippingTermsVersion?: string };
 
 type RazorpayResponse = {
   razorpay_order_id: string;

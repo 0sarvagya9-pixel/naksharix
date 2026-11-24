@@ -16,6 +16,7 @@ import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-au
 import { getReportPricing } from "@/lib/reports/pricing";
 import { getSubscriptionPlan } from "@/lib/revenue";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
+import { shippingPayable,SHIPPING_TERMS_VERSION,readShippingSnapshot } from "@/lib/shop/shipping-rules";
 
 const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
@@ -24,7 +25,7 @@ const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
   z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) }),
   z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1), feeTermsVersion: z.literal(PUJA_FEE_TERMS_VERSION) }),
-  z.object({ purpose: z.literal("SHOP_ORDER"), shopOrderId: z.string().min(1) })
+  z.object({ purpose: z.literal("SHOP_ORDER"), shopOrderId: z.string().min(1), expectedTotalPaise:z.number().int().positive().max(1000000000).optional(),expectedOrderVersion:z.number().int().positive().optional(),shippingTermsVersion:z.literal(SHIPPING_TERMS_VERSION).optional() }).strict()
 ]);
 
 type CheckoutBody = z.infer<typeof schema>;
@@ -95,17 +96,27 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const payment = await prisma.payment.create({
-      data: {
+    const paymentData={
         userId: user.id,
-        provider: "RAZORPAY",
+        provider: "RAZORPAY" as const,
         purpose: body.purpose as PaymentPurpose,
-        status: "PENDING",
+        status: "PENDING" as const,
         amount: item.amount,
         currency: "INR",
         metadata: { ...item.metadata, reportRequestId, savedReportId }
-      }
-    });
+    };
+    // Reserve the Shop payment under the same lock as admin quote updates.
+    // Do not open a second gateway order during an in-flight reservation.
+    const payment=body.purpose==="SHOP_ORDER"?await prisma.$transaction(async tx=>{
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${body.shopOrderId}),hashtext('naksharix-shop-payment-v1'))::text`;
+      const fresh=await tx.shopOrder.findUnique({where:{id:body.shopOrderId}});
+      if(!fresh||fresh.userId!==user.id||fresh.status!=="CONFIRMED"||!["UNPAID","FAILED"].includes(fresh.paymentStatus)||
+         fresh.version!==item.metadata.shopOrderVersion||fresh.totalPaise!==Math.round(item.amount*100)||!shippingPayable(fresh))return null;
+      const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:"SHOP_ORDER",status:{in:["PENDING","PAID"]},metadata:{path:["shopOrderId"],equals:body.shopOrderId}},select:{id:true}});
+      if(outstanding)return null;
+      return tx.payment.create({data:paymentData});
+    }):await prisma.payment.create({data:paymentData});
+    if(!payment)return fail("The shipping quote changed or a payment attempt is already pending. Review My Orders before trying again.",409);
 
     let order;
     try {
@@ -227,9 +238,12 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
         !["SELLER_FULFILLED", "MANUAL_CONFIRMATION"].includes(order.fulfillmentMode) ||
         order.shippingPaise === null || order.taxPaise === null ||
         !Number.isSafeInteger(order.totalPaise) || !order.totalPaise || order.totalPaise < 100 ||
-        order.totalPaise !== order.subtotalPaise + order.shippingPaise + order.taxPaise) return null;
+        order.totalPaise !== order.subtotalPaise + order.shippingPaise + order.taxPaise || !shippingPayable(order)) return null;
+    if(body.expectedTotalPaise!==undefined&&body.expectedTotalPaise!==order.totalPaise)return null;
+    if(order.deliveryCountry!=="IN"&&(body.expectedTotalPaise!==order.totalPaise||body.expectedOrderVersion!==order.version||body.shippingTermsVersion!==SHIPPING_TERMS_VERSION))return null;
+    const shippingQuote=readShippingSnapshot(order.shippingQuote);
     return { name: "Naksharix Shop Order", amount: order.totalPaise / 100,
-      metadata: { shopOrderId: order.id, shopTaxPaise: order.taxPaise } };
+      metadata: { shopOrderId: order.id,shopOrderVersion:order.version,shopCountry:order.deliveryCountry,shopShippingPaise:order.shippingPaise,shopTaxPaise:order.taxPaise,shopDutiesMode:shippingQuote?.dutiesMode??"INCLUDED",...(order.deliveryCountry!=="IN"?{shippingTermsVersion:body.shippingTermsVersion,shippingTermsAcceptedAt:new Date().toISOString()}: {}) } };
   }
   if (body.purpose === "CONSULTATION") {
     const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });

@@ -23,6 +23,7 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
  const [orderShipping,setOrderShipping]=useState<number|null>(null);
  const [orderTax,setOrderTax]=useState<number|null>(null);
  const [orderCountry,setOrderCountry]=useState("IN");
+ const [orderVersion,setOrderVersion]=useState(1);
  const [orderQuote,setOrderQuote]=useState<ShippingSnapshot|null>(null);
  const [orderStatus,setOrderStatus]=useState("");
  const [buyerName,setBuyerName]=useState("");
@@ -104,7 +105,7 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
      const order=payload?.data?.order;
      if(typeof order?.id!=="string")throw new Error("Order was not acknowledged by the server.");
      setOrderId(order.id);setOrderPayable(order.totalPaise===null?null:Number(order.totalPaise));
-     setOrderShipping(order.shippingPaise);setOrderTax(order.taxPaise);setOrderCountry(order.deliveryCountry??country);setOrderQuote(order.shippingQuote??null);
+     setOrderShipping(order.shippingPaise);setOrderTax(order.taxPaise);setOrderCountry(order.deliveryCountry??country);setOrderQuote(order.shippingQuote??null);setOrderVersion(order.version??1);
      setOrderStatus(order.status);
      try{writeCart([]);setLines([]);}catch{setIssue("Order placed. Cart could not be cleared; do not submit a duplicate order.");}
      router.refresh();
@@ -128,7 +129,7 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
       <p className="mt-2 text-sm">Shipping: {orderShipping===null?"Quote pending":money(orderShipping)} · Additional checkout tax: {orderTax===null?"Pending":money(orderTax)}</p>
       <p className="mt-2 text-lg font-bold">Total: {orderPayable===null?"Awaiting confirmed shipping and tax":money(orderPayable)}</p>
       {checkoutAvailable&&orderStatus==="CONFIRMED"&&orderPayable!==null?
-        <div className="mt-5 max-w-sm"><ShopOrderPayButton orderId={orderId} totalPaise={orderPayable} country={orderCountry} quote={orderQuote}/></div>:
+        <div className="mt-5 max-w-sm"><ShopOrderPayButton orderId={orderId} totalPaise={orderPayable} country={orderCountry} quote={orderQuote} orderVersion={orderVersion}/></div>:
         <p className="mt-3 text-sm">{orderPayable===null?"No payment collected. Our team will confirm product eligibility, actual courier charges and applicable tax before payment. Review the final quote in My Orders.":"Your order has been saved. You can follow its status and payment instructions under My Orders."}</p>}
       <Link href="/orders" className="mt-5 inline-block rounded-xl border border-[#b5cbb7] bg-white px-4 py-3 font-bold text-[#762e3d]">View My Orders</Link>
    </section>:!valid.length?<div className="mt-8 rounded-2xl border border-[#e6cbb0] bg-white p-8">
