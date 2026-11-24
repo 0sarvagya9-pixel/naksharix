@@ -36,8 +36,12 @@ export async function POST(request: NextRequest) {
       if (existingPayment.providerPaymentId !== body.razorpay_payment_id) {
         return fail("Payment ID does not match the completed order", 409);
       }
-      await sendVerifiedGooglePurchase(request,body.analyticsSession,existingPayment);
-      return ok({ payment: existingPayment });
+      const captured=await verifyRazorpayCapturedPayment(body.razorpay_order_id,body.razorpay_payment_id,Number(existingPayment.amount),existingPayment.currency);
+      if(!captured.ok)return fail("Payment requires reconciliation before acknowledgement",409);
+      const current=await finalizePaidPayment(body.razorpay_order_id,body.razorpay_payment_id,{verifiedBy:"client",gatewayStatus:"captured"});
+      if(!current)return fail("Payment no longer eligible for capture",409);
+      await sendVerifiedGooglePurchase(request,body.analyticsSession,current);
+      return ok({ payment: current });
     }
     if (existingPayment.status === "REFUNDED" || existingPayment.status === "ADMIN_BYPASS" ||
         existingPayment.status === "FREE") {
