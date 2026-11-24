@@ -19,7 +19,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 11 | Professional signup | SOURCE | Explicit professional role query preselection. |
 | 12 | Unverified accounts | PARTIAL | Localized OTP, accurate non-enumerating delivery messaging and private aggregate onboarding counts staged. Actual mailbox receipt and customer conversion remain unverified. |
 | 13 | Authentication heading semantics | SOURCE | Primary H1 semantics; verify keyboard and screen-reader behavior. |
-| 14 | Auth translations | PARTIAL | OTP form complete EN/HI/Hinglish key-based messages and accessible status/error announcements; reset and full server/role/email localization still require review. |
+| 14 | Auth translations | PARTIAL | OTP form complete EN/HI/Hinglish key-based messages and accessible status/error announcements; reset form EN/HI/Hinglish localized with status-based safe error messages; remaining full server/role/email localization requires review. |
 | 15 | Stale report orders | SOURCE | Exact merchant-order recovery and serialized reservation; unknown/partial/refunded states fail closed; independent gateway tests pending. |
 | 16 | Validate before payment | SOURCE | Direct fixed-price report server preflight, signed eligibility claim, same-page paid detail submission; verify all entry points and legacy compatibility. |
 | 17 | Differentiated report benefits | SOURCE | Integrated PR153, catalogue and detail copy backed by actual report renderer. |
@@ -117,3 +117,5 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 
 ### Hold-only compile correction — 24 November 2026
 - Run 45444313354 at d7fdcc55: Prisma install/validation and deterministic contracts passed; TypeScript failed at the B2B matching boundary (optional provider factor name passed to a required validator). Corrected via explicit runtime qualification of all eight canonical factors, exact maxima, available flags, finite scores and total consistency before passing to the existing validator. Added negative fixtures (missing name, NaN, duplicate key, invalid maximum, mismatched total). Exact new-head CI not yet confirmed. No deployment or live provider call.
+
+- Password recovery form now uses three complete locale dictionaries, safe localized status mapping rather than raw server text, exact UTF-8 byte validation, explicit API acknowledgement before success, busy guards and accessible error associations. Isolated contract fixtures authored; no real email or browser acceptance yet. Shared legacy auth sanitization of password strings remains a compatibility/security review item (do not silently change existing password semantics).

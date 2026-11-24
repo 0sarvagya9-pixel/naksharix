@@ -14,3 +14,20 @@ assert.equal(resetSessionIsStale(101,101),true);
 assert.equal(resetSessionIsStale(102,101),false);
 assert.equal(resetSessionIsStale(NaN,101),true);
 console.log("WORLDCLASS_PASSWORD_RESET_CONTRACT=PASS;100_UNIQUE_TOKENS;ROLE_AND_SESSION_GUARDS");
+
+import {passwordRecoveryCopy,recoveryErrorKey,recoveryPasswordLengthValid} from "../lib/auth/password-recovery-copy.ts";
+const recoveryKeys=Object.keys(passwordRecoveryCopy.en).sort();
+for(const locale of ["hi","hinglish"]){
+ assert.deepEqual(Object.keys(passwordRecoveryCopy[locale]).sort(),recoveryKeys);
+ assert.ok(Object.values(passwordRecoveryCopy[locale]).every(x=>typeof x==="string"&&x.trim().length>0));
+}
+assert.equal(recoveryErrorKey(400,"confirm"),"invalid");
+assert.equal(recoveryErrorKey(422,"request"),"input");
+assert.equal(recoveryErrorKey(429,"request"),"rate");
+assert.equal(recoveryErrorKey(503,"confirm"),"unavailable");
+assert.equal(recoveryPasswordLengthValid("a".repeat(72)),true);
+assert.equal(recoveryPasswordLengthValid("a".repeat(73)),false);
+assert.equal(recoveryPasswordLengthValid("क".repeat(25)),false);
+assert.equal(recoveryPasswordLengthValid("क".repeat(24)),true);
+assert.equal(recoveryPasswordLengthValid("short"),false);
+console.log("PASSWORD_RECOVERY_LOCALIZATION_CONTRACT_PASS");
