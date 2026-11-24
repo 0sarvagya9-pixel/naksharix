@@ -11,7 +11,7 @@ export function creditUsageEnabled(){
 }
 export async function creditSchemaReady(){
  try{
- const [r]=await prisma.$queryRaw<{ready:boolean}[]>`SELECT to_regclass('public."AiCreditGrant"') IS NOT NULL AND to_regclass('public."AiCreditUse"') IS NOT NULL AND EXISTS(SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname='PaymentPurpose' AND e.enumlabel='AI_CREDITS') AND (SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='AiCreditGrant' AND column_name IN ('validFrom','validUntil'))=2 AS ready`;
+ const [r]=await prisma.$queryRaw<{ready:boolean}[]>`SELECT to_regclass('public."AiCreditGrant"') IS NOT NULL AND to_regclass('public."AiCreditUse"') IS NOT NULL AND EXISTS(SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname='PaymentPurpose' AND e.enumlabel='AI_CREDITS') AND EXISTS(SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname='PaymentPurpose' AND e.enumlabel='AI_MEMBERSHIP') AND (SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='AiCreditGrant' AND column_name IN ('validFrom','validUntil'))=2 AS ready`;
  return r?.ready===true;
  }catch{return false;}
 }
@@ -23,7 +23,7 @@ export async function availableCreditOffer():Promise<CreditOffer|null>{
 export async function lockCreditAccount(tx:Prisma.TransactionClient,userId:string){
  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}),hashtext('naksharix-ai-credit-v1'))::text`;
 }
-const availableWhere=(userId:string,now=new Date()):Prisma.AiCreditGrantWhereInput=>({suspendedAt:null,revokedAt:null,AND:[{OR:[{validFrom:null},{validFrom:{lte:now}}]},{OR:[{validUntil:null},{validUntil:{gt:now}}]}],payment:{userId,provider:"RAZORPAY",purpose:{in:["AI_CREDITS","AI_MEMBERSHIP"]},status:"PAID"}});
+const availableWhere=(userId:string,now=new Date()):Prisma.AiCreditGrantWhereInput=>({suspendedAt:null,revokedAt:null,OR:[{validFrom:null,validUntil:null,payment:{purpose:"AI_CREDITS"}},{validFrom:{lte:now},validUntil:{gt:now},payment:{purpose:"AI_MEMBERSHIP"}}],payment:{userId,provider:"RAZORPAY",purpose:{in:["AI_CREDITS","AI_MEMBERSHIP"]},status:"PAID",...(process.env.VERCEL_ENV==="production"?{metadata:{path:["analyticsLiveOrder"],equals:true}}:{})}});
 async function releaseUse(tx:Prisma.TransactionClient,id:string,grantPaymentId:string,now:Date){
  const changed=await tx.aiCreditUse.updateMany({where:{id,status:"RESERVED"},data:{status:"RELEASED",finishedAt:now}});
  if(changed.count===1)await tx.aiCreditGrant.update({where:{paymentId:grantPaymentId},data:{remaining:{increment:1}}});

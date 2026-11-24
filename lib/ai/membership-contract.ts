@@ -41,5 +41,8 @@ export function readChargeEvidence(subscription:unknown,payment:unknown,offer:Me
 }
 export function freshChargeMatches(value:unknown,evidence:CycleEvidence,pricePaise:number){
  if(!value||typeof value!=="object")return false;const p=value as Record<string,unknown>;
- return p.id===evidence.paymentId&&p.order_id===evidence.orderId&&p.invoice_id===evidence.invoiceId&&p.status==="captured"&&p.amount===pricePaise&&p.currency==="INR"&&safeInt(p.amount_refunded,0,pricePaise);
+ return p.id===evidence.paymentId&&p.order_id===evidence.orderId&&p.invoice_id===evidence.invoiceId&&(p.status==="captured"||(p.status==="refunded"&&p.amount_refunded===pricePaise))&&p.amount===pricePaise&&p.currency==="INR"&&safeInt(p.amount_refunded,0,pricePaise);
 }
+
+/** Terminal mandates are never reopened by stale provider observations. */
+export function preserveTerminalMembershipState(current:string,next:string){return (terminalMembershipStates as readonly string[]).includes(current)?current:next;}

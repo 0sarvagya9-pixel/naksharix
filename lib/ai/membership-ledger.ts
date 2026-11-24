@@ -3,9 +3,10 @@ import {prisma} from "@/lib/db";
 import {env} from "@/lib/env";
 import {creditUsageEnabled,lockCreditAccount} from "@/lib/ai/credit-ledger";
 import {getRazorpayReadiness} from "@/lib/payments/readiness";
-import {MEMBERSHIP_TERMS_VERSION,membershipOffer,sameMembershipOffer,mappedMembershipState,safeSubscriptionLink,terminalMembershipStates,readChargeEvidence,freshChargeMatches,type MembershipOffer} from "@/lib/ai/membership-contract";
+import {MEMBERSHIP_TERMS_VERSION,membershipOffer,sameMembershipOffer,mappedMembershipState,preserveTerminalMembershipState,safeSubscriptionLink,terminalMembershipStates,readChargeEvidence,freshChargeMatches,type MembershipOffer} from "@/lib/ai/membership-contract";
 import {checkApprovedPlan,createProviderMembership,fetchProviderMembership,cancelProviderMembership,fetchMembershipPayment} from "@/lib/ai/membership-provider";
-import type {AiMembership} from "@prisma/client";
+import type {AiMembership,Prisma} from "@prisma/client";
+import {lockProviderPayment,cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 export async function membershipSchemaReady(){
  try{const [r]=await prisma.$queryRaw<{ready:boolean}[]>`SELECT to_regclass('public."AiMembership"') IS NOT NULL AND to_regclass('public."AiMembershipCycle"') IS NOT NULL AND to_regclass('public."AiCreditGrant"') IS NOT NULL AND EXISTS(SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname='PaymentPurpose' AND e.enumlabel='AI_MEMBERSHIP') AND (SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='AiCreditGrant' AND column_name IN ('validFrom','validUntil'))=2 AS ready`;return r?.ready===true;}catch{return false;}
 }
@@ -16,9 +17,9 @@ export async function availableMembershipOffer(){
 }
 function ownProvider(row:AiMembership,value:Record<string,unknown>){
  const notes=value.notes as Record<string,unknown>|undefined;
- return typeof value.id==="string"&&/^sub_[A-Za-z0-9]{5,80}$/.test(value.id)&&(!row.providerSubscriptionId||row.providerSubscriptionId===value.id)&&value.plan_id===row.planId&&value.quantity===1&&value.total_count===row.totalCycles&&notes?.naksharix_membership_id===row.id&&notes.naksharix_membership_version===row.version&&row.liveMode===isLive();
+ return typeof value.id==="string"&&/^sub_[A-Za-z0-9]{5,80}$/.test(value.id)&&(!row.providerSubscriptionId||row.providerSubscriptionId===value.id)&&value.plan_id===row.planId&&value.quantity===1&&value.total_count===row.totalCycles&&notes?.naksharix_membership_id===row.id&&notes.naksharix_membership_version===row.version&&row.liveMode===isLive()&&(process.env.VERCEL_ENV!=="production"||row.liveMode);
 }
-function publicMembership(row:AiMembership){return {id:row.id,version:row.version,pricePaise:row.pricePaise,unitsPerCycle:row.unitsPerCycle,totalCycles:row.totalCycles,state:row.state,providerState:row.providerState,lastProviderCheckedAt:row.lastProviderCheckedAt,canCancel:Boolean(row.providerSubscriptionId)&&!(terminalMembershipStates as readonly string[]).includes(row.state),authorizationUrl:row.state==="AWAITING_AUTHORIZATION"&&!row.cancellationRequestedAt?safeSubscriptionLink(row.hostedUrl):null};}
+function publicMembership(row:AiMembership){return {id:row.id,version:row.version,pricePaise:row.pricePaise,unitsPerCycle:row.unitsPerCycle,totalCycles:row.totalCycles,state:row.state,providerState:row.providerState,lastProviderCheckedAt:row.lastProviderCheckedAt,canCancel:Boolean(row.providerSubscriptionId)&&!(terminalMembershipStates as readonly string[]).includes(row.state),authorizationUrl:row.state==="AWAITING_AUTHORIZATION"&&row.providerState==="created"&&!row.cancellationRequestedAt?safeSubscriptionLink(row.hostedUrl):null};}
 async function saveProviderState(row:AiMembership,value:Record<string,unknown>){
  if(!ownProvider(row,value))throw Error("MEMBERSHIP_PROVIDER_IDENTITY_MISMATCH");
  return prisma.$transaction(async tx=>{
@@ -26,8 +27,9 @@ async function saveProviderState(row:AiMembership,value:Record<string,unknown>){
   const current=await tx.aiMembership.findUnique({where:{id:row.id}});
   if(!current||!ownProvider(current,value))throw Error("MEMBERSHIP_PROVIDER_IDENTITY_CHANGED");
   const state=mappedMembershipState(value.status,Boolean(current.cancellationRequestedAt));
-  const next=(terminalMembershipStates as readonly string[]).includes(current.state)&&!(terminalMembershipStates as readonly string[]).includes(state)?current.state:state;
-  return tx.aiMembership.update({where:{id:current.id},data:{providerSubscriptionId:value.id as string,state:next,providerState:String(value.status).slice(0,40),lastProviderCheckedAt:new Date(),hostedUrl:next==="AWAITING_AUTHORIZATION"?safeSubscriptionLink(value.short_url):null}});
+  const next=preserveTerminalMembershipState(current.state,state);
+  if((terminalMembershipStates as readonly string[]).includes(current.state))return current;
+  return tx.aiMembership.update({where:{id:current.id},data:{providerSubscriptionId:value.id as string,state:next,providerState:String(value.status).slice(0,40),lastProviderCheckedAt:new Date(),hostedUrl:next==="AWAITING_AUTHORIZATION"&&value.status==="created"?safeSubscriptionLink(value.short_url):null}});
  });
 }
 export async function listMemberships(userId:string){
@@ -89,14 +91,25 @@ export async function processMembershipEvent(eventName:string,subscription:unkno
   if(!evidence)throw Error("MEMBERSHIP_CHARGE_EVIDENCE_INVALID");
   const fresh=await fetchMembershipPayment(evidence.paymentId);
   if(!freshChargeMatches(fresh,evidence,row.pricePaise))throw Error("MEMBERSHIP_CHARGE_PROVIDER_MISMATCH");
-  const refunded=Number(fresh.amount_refunded);
   await prisma.$transaction(async tx=>{
+   // Serialize cycle creation against signed refund receipt insertion, even before Payment exists.
+   await lockProviderPayment(tx,evidence.paymentId);
    await lockCreditAccount(tx,row.userId);
+   const refunded=Math.max(Number(fresh.amount_refunded),await cumulativeSignedRefund(tx,evidence.paymentId));
+   if(refunded>row.pricePaise)throw Error("MEMBERSHIP_REFUND_TOTAL_INVALID");
    const current=await tx.aiMembership.findUnique({where:{id:row.id}});
    if(!current||!ownProvider(current,s)||current.termsVersion!==MEMBERSHIP_TERMS_VERSION)throw Error("MEMBERSHIP_CHARGE_IDENTITY_CHANGED");
    const existing=await tx.aiMembershipCycle.findFirst({where:{OR:[{membershipId:row.id,cycleNumber:evidence.cycleNumber},{providerInvoiceId:evidence.invoiceId},{membershipId:row.id,periodStart:evidence.periodStart}]},include:{payment:true}});
    if(existing){
     if(existing.membershipId!==row.id||existing.cycleNumber!==evidence.cycleNumber||existing.providerInvoiceId!==evidence.invoiceId||existing.payment.providerPaymentId!==evidence.paymentId||existing.payment.providerOrderId!==evidence.orderId||existing.periodStart.getTime()!==evidence.periodStart.getTime()||existing.periodEnd.getTime()!==evidence.periodEnd.getTime())throw Error("MEMBERSHIP_DUPLICATE_CYCLE_CONFLICT");
+    if(refunded>0){
+     const metadata=(existing.payment.metadata as Record<string,unknown>|null)??{};
+     const prior=typeof metadata.amountRefundedPaise==="number"?metadata.amountRefundedPaise:0;
+     const known=Math.max(prior,refunded);
+     await tx.payment.updateMany({where:{id:existing.payment.id,status:"PAID"},data:{...(known>=row.pricePaise?{status:"REFUNDED" as const}:{}),metadata:{...metadata,amountRefundedPaise:known,refundVerifiedBy:"provider_read_or_signed_receipt"} as Prisma.InputJsonObject}});
+     if(known>=row.pricePaise)await tx.aiCreditGrant.updateMany({where:{paymentId:existing.payment.id,revokedAt:null},data:{revokedAt:new Date()}});
+     else await tx.aiCreditGrant.updateMany({where:{paymentId:existing.payment.id,revokedAt:null,suspendedAt:null},data:{suspendedAt:new Date()}});
+    }
     return;
    }
    // Overlapping paid periods are not valid extra entitlement, even with different invoice IDs.

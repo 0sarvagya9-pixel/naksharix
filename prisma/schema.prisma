@@ -1216,7 +1216,7 @@ model ExpertServiceRequest {
 model AiMembership {
  id String @id @default(cuid())
  userId String
- user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ user User @relation(fields:[userId],references:[id],onDelete:Restrict)
  clientIntent String
  version String
  planId String

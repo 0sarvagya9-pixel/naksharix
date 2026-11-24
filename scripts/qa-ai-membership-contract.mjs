@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";import {readFileSync} from "node:fs";
-import {membershipOffer,exactMonthlyPlan,safeSubscriptionLink,readChargeEvidence,freshChargeMatches,mappedMembershipState,sameMembershipOffer} from "../lib/ai/membership-contract.ts";
+import {membershipOffer,exactMonthlyPlan,safeSubscriptionLink,readChargeEvidence,freshChargeMatches,mappedMembershipState,sameMembershipOffer,preserveTerminalMembershipState} from "../lib/ai/membership-contract.ts";
 const cfg={enabled:true,planId:"plan_fixture123",version:"fixture-v1",price:"19900",units:"25",cycles:"12",approvedModel:"fixture",activeModel:"fixture"},offer=membershipOffer(cfg);
 assert.ok(offer);for(const patch of [{enabled:false},{price:"0"},{units:"501"},{cycles:"13"},{approvedModel:"other"},{planId:"bad"}])assert.equal(membershipOffer({...cfg,...patch}),null);
 assert.ok(sameMembershipOffer(offer,{...offer}));assert.equal(sameMembershipOffer(offer,{...offer,pricePaise:1}),false);
@@ -13,6 +13,8 @@ const ev=readChargeEvidence(s,p,offer,s.id,start);assert.ok(ev);assert.equal(ev.
 for(const patch of [{paid_count:0},{plan_id:"other"},{quantity:2},{current_start:null},{current_end:start+86400},{status:"authenticated"},{offer_id:"discount"}])assert.equal(readChargeEvidence({...s,...patch},p,offer,s.id,start),null);
 for(const patch of [{status:"authorized"},{amount:1},{currency:"USD"},{invoice_id:null},{amount_refunded:100}])assert.equal(readChargeEvidence(s,{...p,...patch},offer,s.id,start),null);
 assert.equal(freshChargeMatches(p,ev,19900),true);assert.equal(freshChargeMatches({...p,order_id:"order_wrong"},ev,19900),false);
+assert.equal(freshChargeMatches({...p,status:"refunded",amount_refunded:19900},ev,19900),true);assert.equal(freshChargeMatches({...p,status:"refunded",amount_refunded:100},ev,19900),false);
+assert.equal(preserveTerminalMembershipState("CANCELED","ACTIVE"),"CANCELED");assert.equal(preserveTerminalMembershipState("COMPLETED","CANCELED"),"COMPLETED");
 assert.equal(mappedMembershipState("active",true),"CANCEL_PENDING");assert.equal(mappedMembershipState("cancelled",true),"CANCELED");
 const read=p=>readFileSync(p,"utf8"),ledger=read("lib/ai/membership-ledger.ts"),credit=read("lib/ai/credit-ledger.ts"),hook=read("app/api/payments/razorpay/webhook/route.ts");
 assert.ok(ledger.includes("MEMBERSHIP_DUPLICATE_CYCLE_CONFLICT")&&ledger.includes("MEMBERSHIP_PERIOD_OVERLAP")&&ledger.includes("validUntil:evidence.periodEnd")&&ledger.includes("fetchMembershipPayment"));
@@ -20,4 +22,6 @@ assert.ok(credit.includes('purpose:{in:["AI_CREDITS","AI_MEMBERSHIP"]}')&&credit
 assert.ok(hook.indexOf("verifyRazorpayWebhookSignature(payload, signature)")<hook.indexOf("await processMembershipEvent"));
 assert.ok(read("lib/payments/purpose-reconciliation.ts").includes('["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose)'));
 assert.ok(read("lib/ai/membership-provider.ts").includes("cancel_at_cycle_end:false"));
+assert.ok(ledger.includes("await lockProviderPayment(tx,evidence.paymentId)")&&ledger.includes("cumulativeSignedRefund(tx,evidence.paymentId)"));
+assert.ok(read("lib/payments/refund-evidence.ts").includes("tx.auditLog.upsert")&&read("lib/payments/purpose-reconciliation.ts").includes("await recordSignedRefundReceipt(refund)"));
 console.log("AI_MEMBERSHIP_CONTRACT_PASS;REAL_MERCHANT_RENEWAL_CANCEL_AND_DB_ACCEPTANCE_PENDING");

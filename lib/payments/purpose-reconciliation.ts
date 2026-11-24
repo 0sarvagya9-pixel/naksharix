@@ -5,6 +5,7 @@ import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog } from "@/lib/reports/report-audit";
 import { notifyCapturedPujaPayment, notifyProcessedPujaRefund } from "@/lib/puja/payment-notifications";
 import {lockCreditAccount} from "@/lib/ai/credit-ledger";
+import {recordSignedRefundReceipt} from "@/lib/payments/refund-evidence";
 import {lockPackage} from "@/lib/digital-packages/ledger";
 import {lockExpertService,expertSchemaReady} from "@/lib/expert-services/ledger";
 
@@ -50,10 +51,14 @@ export async function reconcileProcessedRefund(refund: {
 }) {
   if (refund.status !== "processed" || !refund.payment_id || !refund.id ||
       !Number.isSafeInteger(refund.amount) || Number(refund.amount) <= 0) return;
+  // Signed receipts survive out-of-order events before a membership Payment exists.
+  const signedTotal=await recordSignedRefundReceipt(refund);
   const original = await prisma.payment.findUnique({ where: { providerPaymentId: refund.payment_id } });
   if (!original) return;
   const fullAmountPaise = Math.round(Number(original.amount) * 100);
-  if (refund.amount !== fullAmountPaise) {
+  const effectiveRefund=original.purpose==="AI_MEMBERSHIP"&&signedTotal!==null?signedTotal:Number(refund.amount);
+  if(effectiveRefund>fullAmountPaise&&original.purpose==="AI_MEMBERSHIP")throw Error("MEMBERSHIP_REFUND_TOTAL_INVALID");
+  if (effectiveRefund !== fullAmountPaise) {
     if(original.purpose==="EXPERT_SERVICE"&&Number(refund.amount)<fullAmountPaise){
       const expertId=(original.metadata as Record<string,unknown>|null)?.expertServiceId;
       if(typeof expertId==="string")await prisma.$transaction(async tx=>{await lockExpertService(tx,expertId);await tx.expertServiceRequest.updateMany({where:{id:expertId,userId:original.userId,paymentId:original.id,status:{in:["PAID","DELIVERED"]}},data:{status:"REVIEW",settlementStatus:"REVIEW"}});});
@@ -62,7 +67,7 @@ export async function reconcileProcessedRefund(refund: {
       const packageId=(original.metadata as Record<string,unknown>|null)?.digitalPackageId;
       if(typeof packageId==="string")await prisma.$transaction(async tx=>{await lockPackage(tx,packageId);await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id,status:"PAID"},data:{status:"REVIEW"}});});
     }
-    if(["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose)&&refund.amount!<fullAmountPaise){
+    if(["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose)&&effectiveRefund<fullAmountPaise){
       // A signed partial refund requires human reconciliation; prevent any further spending of this grant.
       await prisma.$transaction(async tx=>{await lockCreditAccount(tx,original.userId);await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null,suspendedAt:null,payment:{status:"PAID"}},data:{suspendedAt:new Date()}});});
     }
