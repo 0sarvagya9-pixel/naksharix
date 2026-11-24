@@ -11,14 +11,21 @@ import { safeServerTranslation } from "@/lib/i18n-server";
 import { getManualReport } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import { cookies } from "next/headers";
+import { env } from "@/lib/env";
+import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
 
 type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string; reportSlug?: string }>;
 
 export default async function NewReportRequestPage({ searchParams }: { searchParams: SearchParams }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
   const params = await searchParams;
+  const user = await getCurrentUser();
+  if (!user) {
+    const query = new URLSearchParams();
+    if(params.orderId)query.set("orderId",params.orderId);
+    if(params.reportSlug)query.set("reportSlug",params.reportSlug);
+    if(params.plan)query.set("plan",params.plan);
+    redirect("/login?redirectTo="+encodeURIComponent("/report-request/new?"+query.toString()));
+  }
   const locale = await readLocale();
   const adminMode = params.mode === "admin";
   const isAdmin = canBypassPayment(user);
@@ -58,6 +65,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     redirect(`/reports/${report.slug}`);
   }
 
+  const automaticDelivery=paymentVerified&&env.AUTO_REPORT_DELIVERY_ENABLED==="true";
   return (
     <Section className="max-w-4xl">
       <Card className="glass overflow-visible border-[#D4AF37]/25">
@@ -65,7 +73,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
           <CardTitle className="font-cinzel text-3xl">{safeServerTranslation(locale, "reportRequestDetails")}</CardTitle>
           <p className="text-sm naksh-muted-text">
             {paymentVerified
-              ? "Payment is verified. Submit accurate birth details to create the paid report request."
+              ? automaticDelivery ? autoReportDeliveryMessage(locale) : "Payment is verified. Submit accurate birth details to create the paid report request."
               : "Submit accurate birth details for manual review. No payment is collected for this review-only request."}
           </p>
         </CardHeader>
@@ -77,6 +85,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
             reportSlug={report.slug}
             reportName={report.name[locale]}
             paymentVerified={paymentVerified}
+            automaticDelivery={automaticDelivery}
             adminBypass={adminMode && isAdmin}
           />
         </CardContent>
