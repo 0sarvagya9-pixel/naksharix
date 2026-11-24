@@ -55,7 +55,7 @@ jobs:
         run: |
           set +e
           failed=0
-          for check in qa:worldclass-timezone qa:worldclass-auth qa:report-order-recovery qa:report-preflight qa:annual-rules qa:calendar-export qa:recovery-receipt qa:ai-credit-contract qa:durable-ops qa:web-push-contract qa:independent-ephemeris qa:digital-package-contract qa:business-integrations-contract qa:paid-course-contract; do
+          for check in qa:worldclass-timezone qa:worldclass-auth qa:report-order-recovery qa:report-preflight qa:annual-rules qa:calendar-export qa:recovery-receipt qa:ai-credit-contract qa:durable-ops qa:web-push-contract qa:independent-ephemeris qa:digital-package-contract qa:business-integrations-contract qa:paid-course-contract qa:expert-services-contract; do
             echo "::group::$check"
             npm run "$check" || failed=1
             echo "::endgroup::"

@@ -6,6 +6,7 @@ import { writeAuditLog } from "@/lib/reports/report-audit";
 import { notifyCapturedPujaPayment, notifyProcessedPujaRefund } from "@/lib/puja/payment-notifications";
 import {lockCreditAccount} from "@/lib/ai/credit-ledger";
 import {lockPackage} from "@/lib/digital-packages/ledger";
+import {lockExpertService,expertSchemaReady} from "@/lib/expert-services/ledger";
 
 /** One-gateway post-capture state reconciliation. Idempotent; never reopens canceled work. */
 export async function reconcileCapturedPurpose(payment: Payment) {
@@ -53,6 +54,10 @@ export async function reconcileProcessedRefund(refund: {
   if (!original) return;
   const fullAmountPaise = Math.round(Number(original.amount) * 100);
   if (refund.amount !== fullAmountPaise) {
+    if(original.purpose==="EXPERT_SERVICE"&&Number(refund.amount)<fullAmountPaise){
+      const expertId=(original.metadata as Record<string,unknown>|null)?.expertServiceId;
+      if(typeof expertId==="string")await prisma.$transaction(async tx=>{await lockExpertService(tx,expertId);await tx.expertServiceRequest.updateMany({where:{id:expertId,userId:original.userId,paymentId:original.id,status:{in:["PAID","DELIVERED"]}},data:{status:"REVIEW",settlementStatus:"REVIEW"}});});
+    }
     if(original.purpose==="DIGITAL_PACKAGE"&&refund.amount!<fullAmountPaise){
       const packageId=(original.metadata as Record<string,unknown>|null)?.digitalPackageId;
       if(typeof packageId==="string")await prisma.$transaction(async tx=>{await lockPackage(tx,packageId);await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id,status:"PAID"},data:{status:"REVIEW"}});});
@@ -73,6 +78,8 @@ export async function reconcileProcessedRefund(refund: {
     if(original.purpose==="AI_CREDITS")await lockCreditAccount(tx,original.userId);
     const packageId=original.purpose==="DIGITAL_PACKAGE"&&typeof meta.digitalPackageId==="string"?meta.digitalPackageId:null;
     if(packageId)await lockPackage(tx,packageId);
+    const expertId=original.purpose==="EXPERT_SERVICE"&&typeof meta.expertServiceId==="string"?meta.expertServiceId:null;
+    if(expertId)await lockExpertService(tx,expertId);
     const updated = await tx.payment.updateMany({
       where: { id: original.id, status: "PAID", providerPaymentId: refund.payment_id },
       data: {
@@ -81,6 +88,7 @@ export async function reconcileProcessedRefund(refund: {
       }
     });
     if (updated.count !== 1) return false;
+    if(expertId){await tx.expertServiceRequest.updateMany({where:{id:expertId,userId:original.userId,paymentId:original.id},data:{status:"REFUNDED",settlementStatus:"REVIEW"}});}
     if(packageId)await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id},data:{status:"REFUNDED"}});
     if(original.purpose==="AI_CREDITS")await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null},data:{revokedAt:new Date()}});
 
@@ -138,6 +146,11 @@ export async function reconcileProcessedRefund(refund: {
     targetId: original.id,
     metadata: { refundId: refund.id, purpose: original.purpose, verifiedWebhook: true }
   });
+  if (["KUNDLI_REPORT","YEARLY_REPORT","MATCH_REPORT"].includes(original.purpose)&&await expertSchemaReady()){
+    // A refunded base report cannot continue to authorize a paid review. Do not invent a second refund.
+    const linked=await prisma.reportRequest.findUnique({where:{paymentId:original.id},select:{id:true}});
+    if(linked){const reviews=await prisma.expertServiceRequest.findMany({where:{sourceReportId:linked.id,userId:original.userId,status:{in:["PAID","DELIVERED"]}},select:{id:true}});for(const review of reviews)await prisma.$transaction(async tx=>{await lockExpertService(tx,review.id);await tx.expertServiceRequest.updateMany({where:{id:review.id,status:{in:["PAID","DELIVERED"]}},data:{status:"REVIEW",settlementStatus:"REVIEW"}});});}
+  }
   if (original.purpose === "PUJA_BOOKING") {
     await notifyProcessedPujaRefund(original, refund.id).catch(() =>
       logger.warn("puja_refund_notification_temporarily_unavailable"));

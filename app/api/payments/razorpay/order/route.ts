@@ -24,10 +24,13 @@ import { shippingPayable,SHIPPING_TERMS_VERSION,readShippingSnapshot } from "@/l
 
 import {availableCreditOffer,lockCreditAccount} from "@/lib/ai/credit-ledger";
 import {resolvePackageCheckout,lockPackage} from "@/lib/digital-packages/ledger";
+import {resolveExpertCheckout,lockExpertService} from "@/lib/expert-services/ledger";
+import {EXPERT_TERMS_VERSION} from "@/lib/expert-services/contract";
 import {PACKAGE_TERMS_VERSION} from "@/lib/digital-packages/catalogue";
 import {AI_CREDIT_TERMS_VERSION,creditSnapshot,offerMatches,validCreditIntent} from "@/lib/ai/credit-contract";
 
 const schema = z.discriminatedUnion("purpose", [
+  z.object({purpose:z.literal("EXPERT_SERVICE"),expertServiceId:z.string().min(1).max(100),quoteVersion:z.number().int().positive(),pricePaise:z.number().int().min(100).max(10000000),termsVersion:z.literal(EXPERT_TERMS_VERSION)}).strict(),
   z.object({purpose:z.literal("DIGITAL_PACKAGE"),packageOrderId:z.string().min(1).max(100),version:z.literal("v1"),pricePaise:z.number().int().min(100).max(10000000),termsVersion:z.literal(PACKAGE_TERMS_VERSION)}).strict(),
   z.object({purpose:z.literal("AI_CREDITS"),intent:z.string().refine(validCreditIntent),version:z.string().max(64),units:z.number().int().min(1).max(500),pricePaise:z.number().int().min(100).max(1000000),termsVersion:z.literal(AI_CREDIT_TERMS_VERSION)}).strict(),
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
@@ -94,11 +97,12 @@ export async function POST(request: NextRequest) {
     const reportCheckout = "reportId" in body;
     const creditCheckout=body.purpose==="AI_CREDITS";
     const packageCheckout=body.purpose==="DIGITAL_PACKAGE";
+    const expertCheckout=body.purpose==="EXPERT_SERVICE";
     if(reusable&&body.purpose==="AI_CREDITS"){
       const prior=creditSnapshot(reusable.metadata,Math.round(Number(reusable.amount)*100),reusable.currency);
       if(!prior||!offerMatches(prior,body))return fail("Prior credit order terms need reconciliation. Do not pay again.",409);
     }
-    if (reusable && (reportCheckout||creditCheckout||packageCheckout)) {
+    if (reusable && (reportCheckout||creditCheckout||packageCheckout||expertCheckout)) {
       // A missing order ID may be an in-flight reservation or ambiguous
       // gateway-create failure. Never replace it with a second order.
       const decision=await checkExistingReportOrder(reusable);
@@ -107,14 +111,14 @@ export async function POST(request: NextRequest) {
         if(paid&&reportRequestId){
           await prisma.reportRequest.updateMany({where:{id:reportRequestId,userId:user.id,paymentId:paid.id,status:{in:[ReportRequestStatus.RECEIVED,ReportRequestStatus.PENDING_REVIEW,ReportRequestStatus.PAYMENT_PENDING]},paymentStatus:{in:[ReportPaymentStatus.PENDING,ReportPaymentStatus.FAILED]}},data:{paymentStatus:ReportPaymentStatus.PAID,status:ReportRequestStatus.PAID}});
         }
-        return fail(packageCheckout?"Payment already captured. Refresh your digital package account. Do not pay again.":creditCheckout?"Payment already captured. Refresh your AI credit balance and check Payment History. Do not pay again.":"Payment already captured. Open your dashboard Payment History to continue the report. Do not pay again.",409);
+        return fail(expertCheckout?"Payment already captured. Refresh your expert service requests. Do not pay again.":packageCheckout?"Payment already captured. Refresh your digital package account. Do not pay again.":creditCheckout?"Payment already captured. Refresh your AI credit balance and check Payment History. Do not pay again.":"Payment already captured. Open your dashboard Payment History to continue the report. Do not pay again.",409);
       }
       if(decision.kind!=="retry_same_order"||!reusable.providerOrderId)
         return fail("Previous payment requires merchant reconciliation. Do not pay again; contact support.",409);
     }
-    if (!reportCheckout && !creditCheckout && !packageCheckout && reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
+    if (!reportCheckout && !creditCheckout && !packageCheckout && !expertCheckout && reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
       return fail("An old payment attempt needs merchant reconciliation. Check payment history or contact support before paying again.", 409);
-    if (reusable && (reusable.status === "PENDING" || ((reportCheckout||creditCheckout||packageCheckout)&&reusable.status==="FAILED")) && reusable.providerOrderId) {
+    if (reusable && (reusable.status === "PENDING" || ((reportCheckout||creditCheckout||packageCheckout||expertCheckout)&&reusable.status==="FAILED")) && reusable.providerOrderId) {
       if (body.purpose === "PUJA_BOOKING") await writeAuditLog({ actor: user, action: "puja.fee_terms_accepted", targetType: "Payment", targetId: reusable.id, metadata: { feeTermsVersion: body.feeTermsVersion } });
       if ("analyticsSession" in body) await sendGoogleCheckout(request,body.analyticsSession,body.purpose,item.amount);
       return ok({
@@ -149,6 +153,15 @@ export async function POST(request: NextRequest) {
       const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:"SHOP_ORDER",status:{in:["PENDING","PAID"]},metadata:{path:["shopOrderId"],equals:body.shopOrderId}},select:{id:true}});
       if(outstanding)return null;
       return tx.payment.create({data:paymentData});
+    }):body.purpose==="EXPERT_SERVICE"?await prisma.$transaction(async tx=>{
+      await lockExpertService(tx,body.expertServiceId);
+      const fresh=await resolveExpertCheckout(user.id,body.expertServiceId,body.quoteVersion,body.pricePaise,tx);
+      if(!fresh||fresh.amount!==item.amount)return null;
+      const request=await tx.expertServiceRequest.findFirst({where:{id:body.expertServiceId,userId:user.id,status:"QUOTED",paymentId:null,quoteVersion:body.quoteVersion,pricePaise:body.pricePaise}});
+      if(!request)return null;
+      const payment=await tx.payment.create({data:paymentData});
+      await tx.expertServiceRequest.update({where:{id:request.id},data:{paymentId:payment.id,status:"PAYMENT_PENDING"}});
+      return payment;
     }):body.purpose==="DIGITAL_PACKAGE"?await prisma.$transaction(async tx=>{
       await lockPackage(tx,body.packageOrderId);
       const draft=await tx.digitalPackageOrder.findFirst({where:{id:body.packageOrderId,userId:user.id,status:"DRAFT",paymentId:null,expiresAt:{gt:new Date()},productVersion:body.version,pricePaise:body.pricePaise,consentVersion:PACKAGE_TERMS_VERSION}});
@@ -242,7 +255,7 @@ async function findReusablePayment(body: CheckoutBody, userId: string) {
       userId,
       provider: "RAZORPAY",
       purpose: body.purpose as PaymentPurpose,
-      status: { in: ("reportId" in body||body.purpose==="AI_CREDITS"||body.purpose==="DIGITAL_PACKAGE") ? ["PENDING", "PAID", "FAILED"] : ["PENDING", "PAID"] },
+      status: { in: ("reportId" in body||body.purpose==="AI_CREDITS"||body.purpose==="DIGITAL_PACKAGE"||body.purpose==="EXPERT_SERVICE") ? ["PENDING", "PAID", "FAILED"] : ["PENDING", "PAID"] },
       metadata: { path: [identity.key], equals: identity.value }
     },
     orderBy: { createdAt: "desc" },
@@ -257,6 +270,7 @@ function checkoutIdentity(body: CheckoutBody) {
   if (body.purpose === "SUBSCRIPTION") return null;
   if (body.purpose === "AI_CREDITS") return {key:"aiCreditIntent",value:body.intent};
   if (body.purpose === "DIGITAL_PACKAGE") return {key:"digitalPackageId",value:body.packageOrderId};
+  if (body.purpose === "EXPERT_SERVICE") return {key:"expertServiceId",value:body.expertServiceId};
   if (body.reportRequestId) return { key: "reportRequestId", value: body.reportRequestId };
   if (body.savedReportId) return { key: "savedReportId", value: body.savedReportId };
   // Prevent repeated accidental charges for the same fixed-price report.
@@ -266,6 +280,7 @@ function checkoutIdentity(body: CheckoutBody) {
 }
 
 async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
+  if(body.purpose==="EXPERT_SERVICE")return resolveExpertCheckout(userId,body.expertServiceId,body.quoteVersion,body.pricePaise);
   if(body.purpose==="DIGITAL_PACKAGE")return resolvePackageCheckout(userId,body.packageOrderId,body.version,body.pricePaise);
   if(body.purpose==="AI_CREDITS"){
     const offer=await availableCreditOffer();

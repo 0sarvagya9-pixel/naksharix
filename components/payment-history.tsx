@@ -60,6 +60,7 @@ export function PaymentHistory() {
               </Button>
             ) : null}
             {payment.reportRequest&&payment.status==="PAID"?<Button variant="outline" size="sm" asChild><Link href={`/report-request/success?id=${encodeURIComponent(payment.reportRequest.id)}`}>View report status</Link></Button>:null}
+            {payment.purpose==="EXPERT_SERVICE"?<Button asChild variant="outline" size="sm"><Link href="/expert-services">Review expert service</Link></Button>:null}
             {payment.purpose==="DIGITAL_PACKAGE"?<Button asChild variant="outline" size="sm"><Link href="/digital-packages">Open package orders</Link></Button>:null}
             {payment.purpose==="AI_CREDITS"&&["PENDING","FAILED","PAID"].includes(payment.status)?<Button asChild variant="outline" size="sm"><Link href="/ai-astrologer">Review AI credit balance or existing purchase</Link></Button>:null}
             {payment.invoice ? (

@@ -80,6 +80,7 @@ enum PaymentPurpose {
   WALLET_TOPUP
   AI_CREDITS
   DIGITAL_PACKAGE
+  EXPERT_SERVICE
 }
 
 enum ReportPlanType {
@@ -201,6 +202,7 @@ model User {
   webPushSubscriptions         WebPushSubscription[]
   digitalPackageOrders         DigitalPackageOrder[]
   businessTenants              BusinessTenant[]
+  expertServiceRequests         ExpertServiceRequest[]
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -407,6 +409,7 @@ model Payment {
   reportRequest     ReportRequest?
   aiCreditGrant    AiCreditGrant?
   digitalPackageOrder DigitalPackageOrder?
+  expertServiceRequest ExpertServiceRequest?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -717,6 +720,7 @@ model AstrologerProfile {
   notes              AstrologerNote[]
   payouts            Payout[]
   reviews            Review[]
+  expertServiceRequests ExpertServiceRequest[]
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
 
@@ -1166,4 +1170,40 @@ model BusinessUsageCall {
  finishedAt DateTime?
  @@id([tenantId,requestId])
  @@index([tenantId,period])
+}
+
+model ExpertServiceRequest {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  clientIntent String
+  kind String
+  question String
+  language String
+  sourceReportId String?
+  sourceChecksum String?
+  consentVersion String
+  status String @default("REQUESTED")
+  astrologerProfileId String?
+  astrologerProfile AstrologerProfile? @relation(fields:[astrologerProfileId],references:[id],onDelete:SetNull)
+  quoteVersion Int @default(0)
+  pricePaise Int?
+  expertFeePaise Int?
+  dueAt DateTime?
+  providerAcceptedAt DateTime?
+  paymentId String? @unique
+  payment Payment? @relation(fields:[paymentId],references:[id],onDelete:SetNull)
+  sourceReadAt DateTime?
+  sourceReadChecksum String?
+  response String?
+  completedAt DateTime?
+  settlementStatus String @default("NOT_EARNED")
+  settlementReference String? @unique
+  settledAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId,clientIntent])
+  @@index([userId,status])
+  @@index([astrologerProfileId,status])
+  @@index([status,createdAt])
 }

@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";import {readFileSync} from "node:fs";
+import {EXPERT_TERMS_VERSION,expertEntitled,exactExpertPayment,validExpertQuote,sourceMatches} from "../lib/expert-services/contract.ts";
+const o={id:"e",userId:"u",kind:"REPORT_REVIEW",paymentId:"p",quoteVersion:1,pricePaise:10000,astrologerProfileId:"astro",consentVersion:EXPERT_TERMS_VERSION,status:"PAID"};
+const p={id:"p",userId:"u",purpose:"EXPERT_SERVICE",provider:"RAZORPAY",currency:"INR",amount:100,status:"PAID",providerPaymentId:"fixture",metadata:{expertServiceId:"e",expertKind:"REPORT_REVIEW",expertQuoteVersion:1,expertPricePaise:10000,expertProfileId:"astro",expertTermsVersion:EXPERT_TERMS_VERSION,gatewayStatus:"captured"}};
+assert.equal(expertEntitled(o,p),true);assert.equal(expertEntitled({...o,status:"DELIVERED"},p),true);
+for(const patch of [{status:"REFUNDED"},{status:"REVIEW"},{paymentId:"other"},{astrologerProfileId:"other"},{quoteVersion:2},{userId:"other"},{pricePaise:10001}])assert.equal(expertEntitled({...o,...patch},p),false);
+for(const patch of [{status:"PENDING"},{providerPaymentId:null},{currency:"USD"},{amount:99},{metadata:{...p.metadata,gatewayStatus:"authorized"}}])assert.equal(expertEntitled(o,{...p,...patch}),false);
+assert.equal(exactExpertPayment(o,{...p,status:"PENDING"}),true);
+const now=100000000;assert.equal(validExpertQuote(10000,5000,now+7200000,now),true);assert.equal(validExpertQuote(10000,10001,now+7200000,now),false);assert.equal(validExpertQuote(10000,5000,now+1000,now),false);assert.equal(sourceMatches("REPORT_REVIEW","a".repeat(64),"a".repeat(64)),true);assert.equal(sourceMatches("REPORT_REVIEW","a".repeat(64),"b".repeat(64)),false);assert.equal(sourceMatches("REPORT_REVIEW",null,null),false);
+const read=p=>readFileSync(p,"utf8"),ledger=read("lib/expert-services/ledger.ts"),route=read("app/api/payments/razorpay/order/route.ts"),revenue=read("lib/revenue.ts"),refund=read("lib/payments/purpose-reconciliation.ts");
+assert.ok(ledger.includes("approvedExpert")&&ledger.includes("providerAcceptedAt:new Date()")&&ledger.includes('status:"DELIVERED",response:input.response'));
+assert.ok(ledger.includes("recordExpertSourceRead")&&ledger.includes("sourceMatches(row.kind,row.sourceChecksum,row.sourceReadChecksum)"));
+assert.ok(route.includes("lockExpertService(tx,body.expertServiceId)")&&revenue.includes("validateExpertCapture")&&refund.includes('status:"REFUNDED",settlementStatus:"REVIEW"'));
+console.log("EXPERT_SERVICE_CONTRACT_PASS;REAL_PRACTITIONER_GATEWAY_AND_DB_ACCEPTANCE_PENDING");

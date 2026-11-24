@@ -73,13 +73,13 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 08 | Complete Life bundle | SOURCE | Five actual calculated report components under one captured package order, private validated birth input, separate generation leases and secure downloads, refund revocation. Approval and full acceptance pending. |
 | 09 | Family package | SOURCE | Three distinct consented family inputs and three independent private Kundli PDFs, per-item entitlement, checksum and refund guard. Approval and full acceptance pending. |
 | 10 | Marriage planning | PARTIAL | Couple report plus original practical planning workbook as exact two-item package. Human consultation deliberately not sold without approved practitioner; add-on and full acceptance pending. |
-| 11 | Human reviewed add-on | OPEN | Verified reviewer, workflow and truthful review evidence. |
+| 11 | Human reviewed add-on | PARTIAL | Exact paid-report checksum and explicit permission, verified assigned practitioner acceptance, quote/capture, restricted source PDF access, actual human attestation and response, refund and manual settlement ledger staged. Workspace UI and runtime/external practitioner acceptance pending. |
 | 12 | AI credits | SOURCE | Dedicated default-off one-time response packs, approved model/price/quantity gates, immutable captured-payment grant, cross-instance serialized reservation/debit/release, duplicate prevention, partial/full refund suspension, private account controls, additive schema and QA. Actual provider cost, isolated DB/gateway and full acceptance pending; no production activation. |
 | 13 | AI membership | OPEN | Recurring billing, limits, cancellation and renewals, approved price. |
 | 14 | Astrologer chat | EXTERNAL | Existing consultation foundation; genuine availability, session metering and payout. |
 | 15 | Astrologer voice | EXTERNAL | Actual voice channel, consent, duration and settlement. |
 | 16 | Video consultation | EXTERNAL | Actual video channel and verified provider. |
-| 17 | Written consultation | OPEN | Private request, acceptance, deliverable, refund and payout. |
+| 17 | Written consultation | PARTIAL | Private intake, real approved-practitioner assignment and quote acceptance, same-merchant capture, human response, refund revocation and manual payout record staged; customer/admin/practitioner UI and acceptance pending. |
 | 18 | Follow-up packages | OPEN | Multi-session entitlement, provider agreement and expiry. |
 | 19 | Individual Puja | EXTERNAL | Existing booking request foundation; real partner/fulfilment gate. |
 | 20 | Group festival Puja | OPEN | Group capacity, verified organizer, participant fulfilment and refund. |

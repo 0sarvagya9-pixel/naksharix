@@ -8,6 +8,7 @@ import { subscriptionPlans } from "@/lib/subscription-plans";
 import {creditSnapshot} from "@/lib/ai/credit-contract";
 import {lockCreditAccount} from "@/lib/ai/credit-ledger";
 import {validatePackageCapture} from "@/lib/digital-packages/ledger";
+import {validateExpertCapture} from "@/lib/expert-services/ledger";
 
 export function getSubscriptionPlan(id: string) {
   return subscriptionPlans.find((plan) => plan.id === id);
@@ -74,6 +75,7 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
   const mergedMetadata = { ...existingMetadata, ...metadata } as Prisma.InputJsonObject;
 
   return prisma.$transaction(async (tx) => {
+    const expertOrder=payment.purpose==="EXPERT_SERVICE"?await validateExpertCapture(tx,payment,metadata.gatewayStatus):null;
     const packageOrderId=payment.purpose==="DIGITAL_PACKAGE"?await validatePackageCapture(tx,payment,metadata.gatewayStatus):null;
     const credit=payment.purpose==="AI_CREDITS"?creditSnapshot(payment.metadata,Math.round(Number(payment.amount)*100),payment.currency):null;
     if(payment.purpose==="AI_CREDITS"){
@@ -127,6 +129,7 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
       });
     }
 
+    if(expertOrder)await tx.expertServiceRequest.update({where:{id:expertOrder.id},data:{status:expertOrder.status}});
     if(packageOrderId)await tx.digitalPackageOrder.update({where:{id:packageOrderId},data:{status:"PAID"}});
     if(paid.purpose==="AI_CREDITS"&&credit){
       // Capture and unique credit grant commit together. No credits from pending, test-in-production, waived or duplicate payments.
