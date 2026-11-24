@@ -16,6 +16,8 @@ import { seo } from "@/lib/seo";
 import { ProductShareActions } from "@/components/shop/product-share-actions";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { env } from "@/lib/env";
+import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
+
 
 type Params = Promise<{ slug: string }>;
 export const dynamic = "force-dynamic";
@@ -30,7 +32,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!report) return {};
   return seo({
     title: `${report.name.en} | Naksharix Premium Astrology Report`,
-    description: report.description.en,
+    description: env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&getManualReportCheckout(report.slug)?`${report.name.en}. ${autoReportDeliveryMessage("en")}`:report.description.en,
     path: `/reports/${report.slug}`,
     keywords: [report.name.en, "Premium Astrology Report", "Manual Astrology Report", "Naksharix"]
   });
@@ -44,6 +46,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
   const labels = detailLabels(locale);
   const checkout = getManualReportCheckout(report.slug);
+  const automaticDelivery=Boolean(checkout)&&env.AUTO_REPORT_DELIVERY_ENABLED==="true";
   const publicReportUrl = new URL(`/reports/${report.slug}`, canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)).toString();
   const ownerApprovedManualFee=!checkout?(await getPublishedManualReportOffers())[report.slug]:undefined;
   const manualFee=ownerApprovedManualFee?new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(ownerApprovedManualFee.pricePaise/100):null;
@@ -58,7 +61,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{report.category}</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{report.name[locale]}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{report.description[locale]}</p>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{automaticDelivery?autoReportDeliveryMessage(locale):report.description[locale]}</p>
             <div className="mt-7 flex flex-wrap gap-3">
               {checkout ? (
                 <div className="min-w-56">
@@ -82,7 +85,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
               <FileText className="h-6 w-6 text-[#00f5a0]" />
               <p className="mt-4 text-sm text-[#a8b3c7]">{labels.price}</p>
               <p className="mt-2 font-cinzel text-3xl font-black text-[#fbc02d]">{checkout?.price ?? manualFee ?? labels.manualReview}</p>
-              <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{checkout ? labels.paidNote : ownerApprovedManualFee ? "We will confirm the service details and fee before collecting payment." : labels.manualNote}</p>
+              <p className="mt-4 text-sm leading-6 text-[#a8b3c7]">{automaticDelivery?autoReportDeliveryMessage(locale):checkout ? labels.paidNote : ownerApprovedManualFee ? "We will confirm the service details and fee before collecting payment." : labels.manualNote}</p>
             </CardContent>
           </Card>
         </div>
@@ -107,7 +110,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
               <ShieldCheck className="h-6 w-6 text-[#00f5a0]" />
               <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.deliveryProcess}</h2>
               <ol className="mt-4 grid gap-3 text-sm text-[#dbeafe]">
-                {(checkout ? labels.paidSteps : labels.manualSteps).map((step, index) => (
+                {(automaticDelivery?[...labels.paidSteps.slice(0,3),autoReportDeliveryMessage(locale),locale==="hi"?"रिपोर्ट की स्थिति अपने खाते में देखें और निजी PDF डाउनलोड करें।":"Track your report in your account and download the private PDF."]:checkout ? labels.paidSteps : labels.manualSteps).map((step, index) => (
                   <li key={step} className="rounded-lg border border-[#263957] bg-[#142647]/72 p-3"><span className="mr-2 text-[#fbc02d]">{index + 1}.</span>{step}</li>
                 ))}
               </ol>

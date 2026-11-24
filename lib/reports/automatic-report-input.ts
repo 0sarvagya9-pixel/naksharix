@@ -53,6 +53,7 @@ export function checkAutomaticInputs(slug:string,birth:unknown,extra:unknown) {
   if(!b.success||!e.success)return {ok:false as const,reason:"Confirm complete birth details, including a valid date, time, location and birth-time UTC offset."};
   if(slug==="couple-kundli"&&(!e.data.partner||e.data.partnerPermission!==true))
     return {ok:false as const,reason:"Both people's complete birth details and permission to use the other person's details are required for matching."};
+  if(slug==="numerology-lo-shu-report"&&(!e.data.romanName||!/[A-Za-z]/.test(e.data.romanName)))return {ok:false as const,reason:"Enter the full name in Roman letters for name numerology."};
   if(slug==="name-correction-report"&&(!e.data.romanName||!/[A-Za-z]/.test(e.data.romanName)||!e.data.candidateNames?.some(n=>/[A-Za-z]/.test(n)&&n.toLowerCase()!==e.data.romanName!.toLowerCase())))
     return {ok:false as const,reason:"Enter the current name in Roman letters and at least one alternative spelling for comparison."};
   if((slug==="name-correction-report"||slug==="baby-name-report")&&e.data.candidateNames?.some(n=>!/[A-Za-z]/.test(n)))

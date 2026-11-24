@@ -52,6 +52,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
       && payment.purpose === checkout.purpose
       && Number(payment.amount) === checkout.amount
       && metadata.reportId === checkout.reportId
+      && (env.AUTO_REPORT_DELIVERY_ENABLED!=="true"||(payment.provider==="RAZORPAY"&&payment.currency==="INR"))
     );
 
     if (!validPayment || !payment) redirect(`/reports/${report.slug}?checkout=invalid`);

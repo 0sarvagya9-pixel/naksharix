@@ -75,9 +75,10 @@ export function ReportRequestForm({
   const couple=automaticDelivery&&reportSlug==="couple-kundli";
   const nameCorrection=automaticDelivery&&reportSlug==="name-correction-report";
   const babyName=automaticDelivery&&reportSlug==="baby-name-report";
+  const numerologyName=automaticDelivery&&reportSlug==="numerology-lo-shu-report";
   function autoDetails(){return {confirmed,partnerPermission:couple?partnerPermission:undefined,
     partner:couple&&partnerLocation?{name:partnerName,gender:partnerGender,dateOfBirth:partnerDate,timeOfBirth:partnerTime,birthPlace:partnerLocation.displayName,latitude:partnerLocation.latitude,longitude:partnerLocation.longitude,timezone:partnerOffset.trim()===""?undefined:Number(partnerOffset)}:undefined,
-    romanName:nameCorrection?romanName:undefined,candidateNames:nameCorrection||babyName?names.split(/[\n,]/).map(s=>s.trim()).filter(Boolean):undefined};}
+    romanName:nameCorrection||numerologyName?romanName:undefined,candidateNames:nameCorrection||babyName?names.split(/[\n,]/).map(s=>s.trim()).filter(Boolean):undefined};}
   function primaryOffset(){return automaticDelivery?(offset.trim()===""?undefined:Number(offset)):location?.timezoneOffset;}
 
   function validate() {
@@ -229,6 +230,7 @@ export function ReportRequestForm({
           <Field label="Second person’s UTC offset at birth"><Input type="number" required min={-12} max={14} step="any" value={partnerOffset} onChange={e=>setPartnerOffset(e.target.value)}/></Field>
         </div><label className="flex items-start gap-3 text-sm"><input type="checkbox" required checked={partnerPermission} onChange={e=>setPartnerPermission(e.target.checked)}/> I have permission to submit the other person’s birth details for this report.</label>
       </fieldset>}
+      {numerologyName&&<Field label="Full name in Roman letters (for name numerology)"><Input required maxLength={100} value={romanName} onChange={e=>setRomanName(e.target.value)} placeholder="Example: Asha Sharma"/></Field>}
       {(nameCorrection||babyName)&&<fieldset className="space-y-4 rounded-xl border border-[#D4AF37]/30 p-4"><legend className="px-2 font-semibold">{nameCorrection?"Name spelling comparison":"Baby name preferences"}</legend>{nameCorrection&&<Field label="Current name in Roman letters"><Input required maxLength={100} value={romanName} onChange={e=>setRomanName(e.target.value)}/></Field>}<Field label={nameCorrection?"Alternative name spellings (at least one)":"Preferred names (optional)"}><textarea required={nameCorrection} value={names} maxLength={1200} onChange={e=>setNames(e.target.value)} rows={3} className="cosmic-textarea" placeholder="Enter Roman-letter names, separated by commas"/></Field></fieldset>}
       {automaticDelivery&&<label className="flex items-start gap-3 rounded-lg border border-[#D4AF37]/30 p-4 text-sm"><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)} className="mt-1"/>I confirm these birth details and birth-time UTC offsets are accurate. I request the private report to be generated and the secure PDF access link to be emailed to my registered account.</label>}
       {status ? <p className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" aria-live="polite">{status}</p> : null}

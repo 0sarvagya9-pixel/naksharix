@@ -70,7 +70,8 @@ export async function POST(request: NextRequest) {
       const validPayment = payment.status === PaymentStatus.PAID
         && String(payment.purpose) === checkout.purpose
         && Number(payment.amount) === checkout.amount
-        && metadata.reportId === checkout.reportId;
+        && metadata.reportId === checkout.reportId
+        && (env.AUTO_REPORT_DELIVERY_ENABLED!=="true"||(payment.provider==="RAZORPAY"&&payment.currency==="INR"));
 
       if (!validPayment) {
         return fail("Payment does not match this report. Please restart checkout from the report page.", 422);
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
 
       const existing = await prisma.reportRequest.findUnique({ where: { paymentId: payment.id } });
       if (existing) {
-        if(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&existing.deliveryStatus.startsWith("auto_"))after(()=>processAutomaticReport(existing.id).catch(()=>undefined));
+        if(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&existing.deliveryStatus.startsWith("auto_"))after(async()=>{await processAutomaticReport(existing.id).catch(()=>undefined)});
         return ok({ reportRequest: existing, automaticQueued: existing.deliveryStatus.startsWith("auto_") });
       }
 
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    if(automatic)after(()=>processAutomaticReport(reportRequest.id).catch(()=>undefined));
+    if(automatic)after(async()=>{await processAutomaticReport(reportRequest.id).catch(()=>undefined)});
     return ok({ reportRequest, automaticQueued: automatic });
   } catch (error) {
     return handleApiError(error);
