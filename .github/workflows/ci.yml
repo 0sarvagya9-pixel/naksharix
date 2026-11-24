@@ -176,6 +176,49 @@ jobs:
           fi
           cat http-smoke.log
           exit "$SMOKE_EXIT"
+      - name: Verify automatic-report public landing copy on isolated HTTP runtime
+        env:
+          AUTO_REPORT_DELIVERY_ENABLED: "true"
+          EMAIL_PROVIDER: disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run start -- -p 3001 > /tmp/naksharix-report-copy.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:3001/api/health > /dev/null; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$READY" -ne 1 ]; then
+            cat /tmp/naksharix-report-copy.log
+            exit 1
+          fi
+          node --input-type=module <<'JS'
+          import assert from "node:assert/strict";
+          const examples = [
+            ["premium-kundli", "en", "Explore your birth chart, planetary positions", "Planet positions, twelve houses and Navamsa", "INR 799"],
+            ["couple-kundli", "en", "Review both birth charts, 36-point Guna Milan", "Ashtakoot / 36-point Guna Milan", "INR 699"],
+            ["numerology-lo-shu-report", "en", "Explore birth number, life path and name number", "Lo Shu grid and missing or repeated digits", "INR 399"],
+            ["couple-kundli", "hi", "दोनों की जन्म कुंडली, 36 गुण मिलान", "अष्टकूट / 36 गुण मिलान", "INR 699"],
+            ["numerology-lo-shu-report", "hinglish", "Moolank, life path, name number", "Lo Shu grid aur missing/repeated digits", "INR 399"]
+          ];
+          for (const [slug, locale, summary, feature, price] of examples) {
+            const response = await fetch("http://127.0.0.1:3001/reports/" + slug, {headers:{Cookie:"naksharix-language="+locale}});
+            assert.equal(response.status, 200, slug+" "+locale);
+            const html = await response.text();
+            const body = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,"").replace(/<[^>]+>/g," ").replace(/\s+/g," ");
+            assert.ok(body.includes(summary), slug+" "+locale+" missing product summary");
+            assert.ok(body.includes(feature), slug+" "+locale+" missing product feature");
+            assert.ok(body.includes(price), slug+" "+locale+" missing current catalogue fee");
+            assert.ok(body.includes("Report format"), slug+" misleading sample label");
+            console.log("PASS",slug,locale);
+          }
+          JS
       - name: Upload HTTP smoke log
         if: always()
         uses: actions/upload-artifact@v4
