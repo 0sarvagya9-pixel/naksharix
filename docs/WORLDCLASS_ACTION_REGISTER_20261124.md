@@ -114,3 +114,6 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 
 ### Development source verification boundary
 - Package and B2B source introduced in the hold branch only. Existing customer birth-record debug logging removed from matching route. Razorpay script loading has a bounded timeout and retry-safe shared promise. Full application build, payment, device, real provider and production acceptance not yet certified.
+
+### Hold-only compile correction — 24 November 2026
+- Run 45444313354 at d7fdcc55: Prisma install/validation and deterministic contracts passed; TypeScript failed at the B2B matching boundary (optional provider factor name passed to a required validator). Corrected via explicit runtime qualification of all eight canonical factors, exact maxima, available flags, finite scores and total consistency before passing to the existing validator. Added negative fixtures (missing name, NaN, duplicate key, invalid maximum, mismatched total). Exact new-head CI not yet confirmed. No deployment or live provider call.
