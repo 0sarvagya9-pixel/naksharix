@@ -5,7 +5,8 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { env } from "@/lib/env";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
-import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
+import { ShopOrderPayButton } from "@/components/shop/shop-order-pay-button";
+import { countryName,readShippingSnapshot,shippingPayable } from "@/lib/shop/shipping-rules";
 export const dynamic="force-dynamic";
 export const metadata:Metadata={title:"Track My Orders | Naksharix",robots:{index:false,follow:false}};
 const money=(p:number)=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(p/100);
@@ -29,18 +30,20 @@ export default async function MyOrdersPage(){
       <strong className="text-[#7d293c]">Order #{order.id}</strong><span className="rounded-full bg-[#fff2e0] px-3 py-2 text-sm font-bold">{order.status}</span>
      </div>
      <p className="mt-3 text-sm text-[#6d5561]">Created {order.createdAt.toLocaleDateString("en-IN")} · Payment: {order.paymentStatus}</p>
+     <p className="mt-2 text-sm">Destination: {order.deliveryCity}, {countryName(order.deliveryCountry)}</p>
      <p className="mt-3 text-lg font-bold">Product subtotal: {money(order.subtotalPaise)}</p>
+     <p className="mt-2 text-sm">Shipping: {order.shippingPaise===null?"Awaiting quote":money(order.shippingPaise)} · Additional tax: {order.taxPaise===null?"Awaiting quote":money(order.taxPaise)}</p>
+     {order.totalPaise===null&&order.deliveryCountry!=="IN"?<p className="mt-2 text-sm font-semibold">Awaiting verified international shipping quote. No payment is due yet.</p>:null}
+     {order.deliveryCountry!=="IN"&&order.status==="CONFIRMED"&&["UNPAID","FAILED"].includes(order.paymentStatus)&&!shippingPayable(order)?<p className="mt-2 text-sm font-semibold">Shipping quote requires renewal before payment. Contact support.</p>:null}
      <p className="mt-2 text-sm">Order total: {order.totalPaise!==null?money(order.totalPaise):"Final total pending"}</p>
      <p className="mt-2 text-sm">Tracking: {order.trackingReference||"Not dispatched"}</p>
      {order.status==="CONFIRMED" && ["UNPAID","FAILED"].includes(order.paymentStatus) &&
       ["SELLER_FULFILLED","MANUAL_CONFIRMATION"].includes(order.fulfillmentMode) &&
       order.totalPaise!==null && order.totalPaise>0 &&
       order.shippingPaise!==null && order.taxPaise!==null &&
-      order.totalPaise===order.subtotalPaise+order.shippingPaise+order.taxPaise ? (
+      order.totalPaise===order.subtotalPaise+order.shippingPaise+order.taxPaise && shippingPayable(order) ? (
        env.SHOP_PAYMENTS_ENABLED==="true" && getRazorpayReadiness().enabled ?
-         <div className="mt-4 max-w-sm"><RazorpayCheckoutButton
-           payload={{purpose:"SHOP_ORDER",shopOrderId:order.id}}
-           label={`Pay ${money(order.totalPaise)} with Razorpay`} successHref="/orders"/></div> :
+         <div className="mt-4 max-w-md"><ShopOrderPayButton orderId={order.id} totalPaise={order.totalPaise} country={order.deliveryCountry} quote={readShippingSnapshot(order.shippingQuote)}/></div> :
          <p className="mt-3 text-sm">Your order is saved. Online payment will be available shortly.</p>
      ) : null}
      {order.paymentStatus==="PAID"?<p className="mt-2 text-sm font-semibold">{

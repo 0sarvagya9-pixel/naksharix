@@ -89,7 +89,7 @@ export async function POST(request:Request){
         shippingPaise:shipping.shippingPaise,taxPaise:shipping.taxPaise,totalPaise:shipping.totalPaise,
         status:checkoutReady?"CONFIRMED":"REQUESTED",
         paymentStatus:"UNPAID",fulfillmentMode:"SELLER_FULFILLED"},
-      select:{id:true,status:true,paymentStatus:true,subtotalPaise:true,shippingPaise:true,taxPaise:true,totalPaise:true,deliveryCountry:true,createdAt:true}
+      select:{id:true,status:true,paymentStatus:true,subtotalPaise:true,shippingPaise:true,taxPaise:true,totalPaise:true,deliveryCountry:true,shippingQuote:true,createdAt:true}
     });
   });
   if(!order)return fail("Daily order request limit reached.",429);

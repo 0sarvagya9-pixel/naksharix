@@ -366,7 +366,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       {
         title: "Physical Shipping",
         body:
-          "Products with a published price may be ordered through the cart when checkout is available. Product photographs are illustrative. Delivery address, order details, availability and dispatch arrangements are confirmed as part of the order process. If an item cannot be fulfilled, contact support for resolution under our refund policy.",
+          "Products with a published price may be ordered through the cart when checkout is available. India standard shipping is included in the listed prices. For international destinations, charges depend on the country, postal region, products and quantities. Only currently approved carrier rates are used; when no verified rate exists, a delivery quote is requested and no payment is collected until the final price is confirmed. Destination customs duties, import VAT and carrier collection charges may be payable separately unless expressly included in the accepted quote. Digital reports have no physical shipping charge. Product photographs are illustrative; eligibility and dispatch arrangements are confirmed as part of the order process. Contact support for fulfilment or refund concerns.",
       },
       {
         title: "Delivery Problems",
