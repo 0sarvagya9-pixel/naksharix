@@ -94,7 +94,7 @@ export async function POST(request:Request){
   });
   if(!order)return fail("Daily order request limit reached.",429);
   return ok({order,charged:false,
-    onlineCheckoutAvailable:env.SHOP_PAYMENTS_ENABLED==="true"&&getRazorpayReadiness().enabled,
+    onlineCheckoutAvailable:order.status==="CONFIRMED"&&env.SHOP_PAYMENTS_ENABLED==="true"&&getRazorpayReadiness().enabled,
     nextStep:order.totalPaise===null?"International delivery quote requested. No payment collected.":order.status==="CONFIRMED"?"Pay the displayed total securely with Razorpay.":"Order saved. Payment will be available after confirmation."},
     {status:201});
  }catch(error){

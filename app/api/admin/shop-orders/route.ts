@@ -78,7 +78,7 @@ export async function PATCH(request:Request){
   const updated=await prisma.$transaction(async tx=>{
    // Same transaction-scoped lock as SHOP_ORDER payment reservation. A quote
    // cannot be changed or canceled while a gateway order is outstanding.
-   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${input.id}),hashtext(\'naksharix-shop-payment-v1\'))::text`;
+   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${input.id}),hashtext('naksharix-shop-payment-v1'))::text`;
    if(changesPrice||input.manualQuote||input.status==="CANCELED"){
      const open=await tx.payment.findFirst({where:{userId:current.userId,purpose:"SHOP_ORDER",status:{in:["PENDING","PAID"]},metadata:{path:["shopOrderId"],equals:current.id}},select:{id:true}});
      if(open)return null;

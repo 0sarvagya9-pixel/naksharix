@@ -37,7 +37,7 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
  const [quoteIssue,setQuoteIssue]=useState("");
  const [quoteBusy,setQuoteBusy]=useState(false);
  const [quoteRevision,setQuoteRevision]=useState(0);
- const [accepted,setAccepted]=useState(false);
+ const [acceptedKey,setAcceptedKey]=useState<string|null>(null);
  const [message,setMessage]=useState("");
  useEffect(()=>{
    const load=()=>setLines(readCart());load();
@@ -52,6 +52,7 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
  const itemsJSON=JSON.stringify(valid.map(l=>({productId:l.productId,quantity:l.quantity})));
  const selectionKey=country+"|"+normalizedPostal+"|"+itemsJSON+"|"+total+"|"+quoteRevision;
  const quote=quoteResult?.key===selectionKey?quoteResult.quote:null;
+ const accepted=quote!==null&&acceptedKey===quote.quoteKey;
  const finalTotal=international?quote?.totalPaise??null:total;
  useEffect(()=>{
    if(!signedIn||!international||!postalOK||!valid.length||unpriced)return;
@@ -70,13 +71,13 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
    },450);
    return()=>{current=false;clearTimeout(timer);controller.abort()};
  },[signedIn,international,postalOK,valid.length,unpriced,itemsJSON,country,normalizedPostal,selectionKey,total]);
- function changeCountry(next:string){setCountry(next);setPostalCode("");setStateName("");setAccepted(false);setQuoteBusy(false);setQuoteIssue("");}
- function changePostal(next:string){setPostalCode(next);setAccepted(false);setQuoteIssue("");setQuoteBusy(false);}
+ function changeCountry(next:string){setCountry(next);setPostalCode("");setStateName("");setAcceptedKey(null);setQuoteBusy(false);setQuoteIssue("");}
+ function changePostal(next:string){setPostalCode(next);setAcceptedKey(null);setQuoteIssue("");setQuoteBusy(false);}
 
  function update(id:string,qty:number){
    const next=lines.filter(l=>l.productId!==id);
    if(qty>0)next.push({productId:id,quantity:Math.min(10,qty)});
-   try{writeCart(next);setLines(next);setIssue("");setAccepted(false);setQuoteIssue("");setQuoteBusy(false);}
+   try{writeCart(next);setLines(next);setIssue("");setAcceptedKey(null);setQuoteIssue("");setQuoteBusy(false);}
    catch{setIssue("Cart could not be saved in this browser. Enable browser storage and retry.");}
  }
  async function submitOrder(e:FormEvent<HTMLFormElement>){
@@ -100,6 +101,7 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
      const payload=await response.json().catch(()=>null);
      if(!response.ok){
        if(response.status===401){setIssue("Your session expired. Sign in again; your cart remains saved.");return;}
+       if(response.status===409){setAcceptedKey(null);setQuoteRevision(n=>n+1);}
        throw new Error(payload?.error||"Could not place order. Please retry.");
      }
      const order=payload?.data?.order;
@@ -183,8 +185,8 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
          </div>
          <label className="block text-sm font-semibold">{international?"Postal / ZIP code":"PIN code"}<input required={postalRequired(country)} autoComplete="postal-code" pattern={international?undefined:"[1-9][0-9]{5}"} maxLength={international?16:6} inputMode={international?"text":"numeric"} placeholder={postalHint(country)} className={inputClass} value={postalCode} onChange={e=>changePostal(e.target.value)}/></label>
          {postalCode&&!postalOK?<p className="text-xs text-[#8b3043]" role="alert">Enter a valid postal code for {countryName(country)}.</p>:null}
-         {international&&quoteIssue?<div role="alert" className="text-xs text-[#8b3043]">{quoteIssue} <button type="button" className="underline" onClick={()=>{setQuoteIssue("");setQuoteRevision(n=>n+1);setAccepted(false)}}>Retry quote</button></div>:null}
-         {international&&quote?<label className="flex items-start gap-2 text-xs leading-5"><input type="checkbox" required checked={accepted} onChange={e=>setAccepted(e.target.checked)} className="mt-1"/>I have reviewed the current shipping amount or quote-pending status, and understand the destination customs and import-charge terms.</label>:null}
+         {international&&quoteIssue?<div role="alert" className="text-xs text-[#8b3043]">{quoteIssue} <button type="button" className="underline" onClick={()=>{setQuoteIssue("");setQuoteRevision(n=>n+1);setAcceptedKey(null)}}>Retry quote</button></div>:null}
+         {international&&quote?<label className="flex items-start gap-2 text-xs leading-5"><input type="checkbox" required checked={accepted} onChange={e=>setAcceptedKey(e.target.checked?quote.quoteKey:null)} className="mt-1"/>I have reviewed the current shipping amount or quote-pending status, and understand the destination customs and import-charge terms.</label>:null}
          <label className="block text-sm font-semibold">Order note (optional)<textarea rows={2} maxLength={1000} className={inputClass} value={message} onChange={e=>setMessage(e.target.value)}/></label>
          <button type="submit" disabled={pending||unpriced||!postalOK||(international&&(!quote||!accepted||quoteBusy))} className="mt-2 w-full rounded-xl bg-[#822c40] px-4 py-4 font-bold text-white disabled:opacity-50">
            {pending?"Submitting…":international&&quote?.kind==="QUOTE_REQUIRED"?"Request international shipping quote":checkoutAvailable?"Place order & continue to payment":"Place order"}

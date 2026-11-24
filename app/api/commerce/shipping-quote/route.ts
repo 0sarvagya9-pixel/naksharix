@@ -14,6 +14,8 @@ export async function POST(request:Request){
   if(!validPostal(input.country,input.postalCode))return fail("Enter a valid postal code for your delivery country.",422);
   if(new Set(input.items.map(i=>i.productId)).size!==input.items.length)return fail("Duplicate cart item.",422);
   const lines=await resolveCanonicalCart(input.items);if(!lines)return fail("Current product prices could not be verified.",409);
+  const subtotal=lines.reduce((n,l)=>n+l.lineTotalPaise,0);
+  if(!Number.isSafeInteger(subtotal)||subtotal>1000000000)return fail("Order value exceeds limit.",422);
   const postal=normalizePostal(input.country,input.postalCode);
   const quote=await resolveShipping(input.country,postal,lines);
   return ok({kind:quote.kind,subtotalPaise:quote.subtotalPaise,shippingPaise:quote.shippingPaise,taxPaise:quote.taxPaise,totalPaise:quote.totalPaise,carrier:quote.snapshot?.carrier??null,dutiesMode:quote.snapshot?.dutiesMode??null,expiresAt:quote.snapshot?.expiresAt??null,quoteKey:quoteKey(input.country,postal,lines,quote)}, {headers:{"Cache-Control":"private, no-store"}});

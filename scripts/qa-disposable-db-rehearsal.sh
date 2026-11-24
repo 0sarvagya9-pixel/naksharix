@@ -71,6 +71,20 @@ SELECT
 test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/unified-payment-schema-count.txt")" = "3"
 echo 'unified_payment_additive_migration_disposable_only=PASS' | tee "$EVIDENCE_DIR/unified-payment-schema-gate.txt"
 
+# Rehearse the country-aware shipping migration twice in this disposable database only.
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261124-country-aware-shop-shipping.sql \
+  2>&1 | tee "$EVIDENCE_DIR/shop-shipping-migration-first.log"
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261124-country-aware-shop-shipping.sql \
+  2>&1 | tee "$EVIDENCE_DIR/shop-shipping-migration-repeat.log"
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc "
+SELECT
+ (SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='ShopOrder' AND column_name IN ('deliveryCountry','shippingQuote'))
+ +(SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name='ShopShippingRate')
+ +(SELECT count(*) FROM pg_indexes WHERE schemaname='public' AND indexname='ShopShippingRate_country_productId_postalPrefix_key');" \
+ | tee "$EVIDENCE_DIR/shop-shipping-schema-count.txt"
+test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/shop-shipping-schema-count.txt")" = "4"
+echo 'shop_shipping_additive_migration_disposable_only=PASS'
+
 
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc \
   "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('User','Session','OtpToken');" \
