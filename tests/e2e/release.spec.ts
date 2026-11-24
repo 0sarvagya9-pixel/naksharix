@@ -314,6 +314,24 @@ test.describe("Naksharix release browser QA", () => {
     expect(sharedText).not.toMatch(/orderId=|paymentId=|birthDate=|email=/i);
   });
 
+  test("partnership page links current priced reports and preserves private enquiry authentication", async ({ page, request }) => {
+    await page.goto(absolute("/partnerships"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { level: 1, name: "Explore a partnership with Naksharix" })).toBeVisible();
+    const cards = page.locator('section[aria-labelledby="partner-report-heading"] article');
+    await expect(cards).toHaveCount(3);
+    for (const slug of ["premium-kundli", "couple-kundli", "numerology-lo-shu-report"]) {
+      await expect(cards.locator('a[href="/reports/'+slug+'"]')).toBeVisible();
+    }
+    await expect(cards.getByText(/one-time report fee/)).toHaveCount(3);
+    await expect(page.getByText("No purchase is needed to enquire.",{exact:false})).toBeVisible();
+    const link = page.getByRole("link", { name: "Send a private collaboration enquiry" });
+    await expect(link).toHaveAttribute("href","/support?topic=partnership");
+    await link.click();
+    await expect(page).toHaveURL(/\/login\?redirectTo=%2Fsupport%3Ftopic%3Dpartnership$/i);
+    const privateResponse = await request.get(absolute("/api/support/tickets"), { maxRedirects: 0 });
+    expect(privateResponse.status()).toBe(401);
+  });
+
   test("security headers are present on public pages", async ({ request }) => {
     const response = await request.get(absolute("/"));
     const headers = response.headers();

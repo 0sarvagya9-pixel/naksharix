@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalPolicyPage } from "@/components/legal-policy-page";
 import { seo } from "@/lib/seo";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
@@ -19,7 +20,7 @@ export default async function ContactPage({
   const { topic } = await searchParams;
   const catalogue = await getShopCatalogue();
   const product = catalogue.products.find((item) => item.status === "active" && item.slug === topic);
-  if (!product) return <LegalPolicyPage page="contact" />;
+  if (!product) return <><LegalPolicyPage page="contact" /><ContactAlternatives /></>;
 
   const subject = "Naksharix product availability: " + product.name.en;
   const mailto = "mailto:care@naksharix.com?subject=" + encodeURIComponent(subject) +
@@ -28,6 +29,7 @@ export default async function ContactPage({
   return (
     <>
       <LegalPolicyPage page="contact" />
+      <ContactAlternatives />
       <section aria-label="Selected product availability enquiry" className="mx-auto w-full max-w-4xl px-4 pb-10 sm:px-6">
         <div className="rounded-2xl border border-amber-500/30 bg-black/15 p-5">
           <h2 className="text-xl font-semibold">Availability enquiry: {product.name.en}</h2>
@@ -39,4 +41,17 @@ export default async function ContactPage({
       </section>
     </>
   );
+}
+
+function ContactAlternatives() {
+  return <section className="mx-auto w-full max-w-4xl px-4 pb-10 sm:px-6" aria-label="Private support and partnerships">
+    <div className="rounded-2xl border border-[#ddc19b] bg-[#fffaf2] p-5 text-[#432d31]">
+      <h2 className="font-cinzel text-xl font-bold">Private enquiries without email correspondence</h2>
+      <p className="mt-2 text-sm leading-7">Sign in to submit a private request and check staff replies in the Support Centre. Business and editorial collaborators can review the public partnership information before making an enquiry.</p>
+      <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold">
+        <Link href="/support" className="underline underline-offset-4">Open Support Centre</Link>
+        <Link href="/partnerships" className="underline underline-offset-4">Editorial and referral collaborations</Link>
+      </div>
+    </div>
+  </section>;
 }
