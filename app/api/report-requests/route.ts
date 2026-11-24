@@ -5,7 +5,8 @@ import { processAutomaticReport } from "@/lib/reports/automatic-report-worker";
 
 export const runtime="nodejs";
 export const maxDuration=120;
-import { PaymentStatus, ReportPaymentStatus, ReportPlanType, ReportRequestStatus } from "@prisma/client";
+import { PaymentStatus, Prisma, ReportPaymentStatus, ReportPlanType, ReportRequestStatus } from "@prisma/client";
+import {lockProviderPayment,cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     let paymentId: string | undefined;
+    let providerPaymentId: string | null = null;
     let paymentStatus: ReportPaymentStatus = adminBypass ? ReportPaymentStatus.ADMIN_BYPASS : ReportPaymentStatus.PENDING;
     const planType = body.planType as ReportPlanType;
 
@@ -77,13 +79,8 @@ export async function POST(request: NextRequest) {
         return fail("Payment does not match this report. Please restart checkout from the report page.", 422);
       }
 
-      const existing = await prisma.reportRequest.findUnique({ where: { paymentId: payment.id } });
-      if (existing) {
-        if(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&existing.deliveryStatus.startsWith("auto_"))after(async()=>{await processAutomaticReport(existing.id).catch(()=>undefined)});
-        return ok({ reportRequest: existing, automaticQueued: existing.deliveryStatus.startsWith("auto_") });
-      }
-
       paymentId = payment.id;
+      providerPaymentId=payment.providerPaymentId;
       paymentStatus = ReportPaymentStatus.PAID;
     } else if (!adminBypass && body.orderId) {
       return fail("This manual-review report does not accept an upfront payment.", 422);
@@ -98,7 +95,24 @@ export async function POST(request: NextRequest) {
       if(question.length>2000)return fail("Please limit the main question to 2,000 characters.",422);
       concern=encodeAutomaticReportInput(question,checked.extra);
     }
-    const reportRequest = await prisma.reportRequest.create({
+    // Recheck ownership and paid eligibility inside the same transaction as
+    // request creation. Refund processing updates Payment before dependent
+    // requests; the row lock prevents a new paid request slipping past it.
+    const result=await prisma.$transaction(async tx=>{
+      if(paymentId&&checkout){
+        if(providerPaymentId){
+          await lockProviderPayment(tx,providerPaymentId);
+          if(await cumulativeSignedRefund(tx,providerPaymentId)>0)return null;
+        }
+        const locked=await tx.$queryRaw<{id:string}[]>`SELECT "id" FROM "Payment" WHERE "id"=${paymentId} FOR UPDATE`;
+        if(!locked.length)return null;
+        const current=await tx.payment.findUnique({where:{id:paymentId}});
+        const metadata=(current?.metadata as Record<string,unknown>|null)??{};
+        if(!current||current.userId!==user.id||current.status!==PaymentStatus.PAID||current.providerPaymentId!==providerPaymentId||String(current.purpose)!==checkout.purpose||Number(current.amount)!==checkout.amount||metadata.reportId!==checkout.reportId||(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&(current.provider!=="RAZORPAY"||current.currency!=="INR")))return null;
+        const existing=await tx.reportRequest.findUnique({where:{paymentId}});
+        if(existing)return {row:existing,created:false};
+      }
+      const row=await tx.reportRequest.create({
       data: {
         userId: user.id,
         paymentId,
@@ -121,7 +135,15 @@ export async function POST(request: NextRequest) {
         language: body.language,
         adminBypass
       }
-    });
+      });
+      return {row,created:true};
+    },{isolationLevel:Prisma.TransactionIsolationLevel.ReadCommitted});
+    if(!result)return fail("Payment requires reconciliation before creating a report request.",409);
+    const reportRequest=result.row;
+    if(!result.created){
+      if(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&reportRequest.deliveryStatus.startsWith("auto_"))after(async()=>{await processAutomaticReport(reportRequest.id).catch(()=>undefined)});
+      return ok({reportRequest,automaticQueued:reportRequest.deliveryStatus.startsWith("auto_")});
+    }
 
     await writeReportStatusHistory({
       reportRequestId: reportRequest.id,
