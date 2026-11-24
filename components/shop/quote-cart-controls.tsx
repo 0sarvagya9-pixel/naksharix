@@ -3,18 +3,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
 import { siteNotice } from "@/lib/ui/site-notification";
+import {normalizeCartLines,type CartLine} from "@/lib/shop/checkout-contract";
+export type {CartLine} from "@/lib/shop/checkout-contract";
 
 export const SHOP_CART_STORAGE_KEY="naksharix-product-cart-v1";
-export type CartLine = {productId:string;quantity:number};
 export function readCart():CartLine[]{
   try{
     const raw=JSON.parse(window.localStorage.getItem(SHOP_CART_STORAGE_KEY)||"[]");
-    if(!Array.isArray(raw))return[];
-    return raw.filter((line):line is CartLine=>Boolean(line)&&typeof line.productId==="string"&&/^[a-zA-Z0-9-]{1,128}$/.test(line.productId)&&Number.isSafeInteger(line.quantity)&&line.quantity>=1&&line.quantity<=10).slice(0,20);
+    return normalizeCartLines(raw);
   }catch{return[]}
 }
 export function writeCart(lines:CartLine[]){
-  window.localStorage.setItem(SHOP_CART_STORAGE_KEY,JSON.stringify(lines.slice(0,20)));
+  window.localStorage.setItem(SHOP_CART_STORAGE_KEY,JSON.stringify(normalizeCartLines(lines)));
   window.dispatchEvent(new Event("naksharix-cart-changed"));
 }
 type CartResult="idle"|"added"|"limit"|"full"|"unavailable";

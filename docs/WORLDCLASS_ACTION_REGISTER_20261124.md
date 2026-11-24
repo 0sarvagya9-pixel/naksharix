@@ -127,3 +127,6 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 
 ### Credential normalization guard — 24 November 2026
 - Identified shared JSON sanitizer silently trimming or stripping chosen password text before signup/reset validation and hashing. New signup and reset now explicitly reject altered credential fields before sanitization, with matching client checks and localized guidance. Legacy login normalization and stored hashes are unchanged; no migration or backward-incompatible hash format. Deterministic negative/positive fixtures added to the hold-only source check. Source staged; exact-head CI and browser/reset acceptance pending.
+
+### Shop checkout source repair
+- Validated quote totals, integer paise, expiry and exact returned order snapshot checks; local cart normalization, cross-tab change handling, localized acknowledgement/errors and no automatic retry after ambiguous acknowledgement. Remaining static checkout labels, durable server-side idempotency, browser and merchant/fulfilment acceptance are not closed. Existing production deployment restrictions unchanged.
