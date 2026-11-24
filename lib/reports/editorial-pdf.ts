@@ -71,6 +71,13 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   caps(M,84,kicker);y=102+fixed(M,102,title+(continuation?tr(" (continued)"," (जारी)"):""),CW,25,"title",wine,30)+8;
   if(sub)y+=fixed(M,y,sub,CW,10.1,"body",muted,14.7)+15;
  }
+ let firstSpecialist=true;
+ function specialist(kicker:string,title:string,minBody=145){
+  const headingHeight=wrap(title,CW,18,"title").length*22+43;
+  if(firstSpecialist||y+headingHeight+minBody>BOTTOM){firstSpecialist=false;interior(kicker,title);return}
+  chapter=kicker;heading=title;rule(M,y+2,W-M,y+2,gold,.65);y+=14;caps(M,y,kicker, gold,8);y+=15;
+  y+=fixed(M,y,title,CW,18,"title",wine,22)+13;
+ }
  function ensure(h:number){if(h>BOTTOM-160)throw Error("REPORT_EDITORIAL_BLOCK_TOO_TALL");if(y+h>BOTTOM)interior(chapter,heading,"",true)}
  function paragraph(v:string,size=10.5,color:RGB=ink,kind:FontKind="body",after=10){const ls=wrap(v,CW,size,kind);for(const line of ls){ensure(size*1.5);tx(M,y,line,size,kind,color);y+=size*1.5;}y+=after}
  function subhead(v:string){ensure(32);caps(M,y,v);y+=22}
@@ -159,7 +166,20 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
    paragraph(tr("H = house counted from natal Moon; R = retrograde at snapshot. Dates are sampling checkpoints, not exact event predictions.","H = जन्म चंद्र से भाव; R = उस तिथि पर वक्री। तिथियाँ गणना संदर्भ हैं, निश्चित भविष्यवाणियाँ नहीं।"),9,muted);
   }else table([tr("Date","तिथि"),"Graha / sign","Degree",tr("From Moon","चंद्र से"),tr("From Lagna","लग्न से"),tr("Phase / motion","चरण / गति")],flat.map(r=>[date(r.date),s(r.planet)+" / "+s(r.sign),deg(r.degree),shown(r.houseFromMoon),shown(r.houseFromAscendant),s(r.traditionalPhase)|| (r.retrograde===true?"Retrograde":"Direct")]),[1.05,1.15,.85,.75,.75,1.6],8.7,30);
  }
- function reflectionPlan(){interior(tr("REFLECTION PLAN","चिंतन योजना"),tr("Turn insight into action","चिंतन को कार्य में बदलें"),tr("Use this report as a structured reflection exercise, not a directive for major decisions.","इसे चिंतन के साधन की तरह उपयोग करें, बड़े निर्णयों के निर्देश की तरह नहीं।"));cardRows(insights.plan,1);const q=obj(data("your-question"));if(s(q.submittedQuestion)){subhead(tr("Your submitted question","आपका प्रश्न"));paragraph(s(q.submittedQuestion),10,muted)}cardRows([insights.question],1);note(s(data("trust")));paragraph("Questions about your report?  care@naksharix.com  |  www.naksharix.com",10,wine,"bold")}
+ function reflectionPlan(){
+  interior(tr("REFLECTION PLAN","चिंतन योजना"),tr("Turn insight into action","चिंतन को कार्य में बदलें"),tr("Use this report as a structured reflection exercise, not a directive for major decisions.","इसे चिंतन के साधन की तरह उपयोग करें, बड़े निर्णयों के निर्देश की तरह नहीं।"));
+  for(const [i,p] of insights.plan.entries()){
+   const titleLines=wrap(p.title,CW-35,16,"title"),bodyLines=wrap(p.body,CW-35,10);
+   const height=32+titleLines.length*19+bodyLines.length*14+12;
+   if(height>250){cardRows([p],1);continue}
+   ensure(height+10);rect(M,y,CW,height,white,light);rect(M,y,5,height,i===1?green:gold);
+   caps(M+17,y+9,p.label,gold,8);fixed(M+17,y+24,p.title,CW-35,16,"title",wine,19);
+   fixed(M+17,y+24+titleLines.length*19+4,p.body,CW-35,10,"body",ink,14);y+=height+10;
+  }
+  const q=obj(data("your-question"));if(s(q.submittedQuestion)){subhead(tr("Your submitted question","आपका प्रश्न"));paragraph(s(q.submittedQuestion),10,muted,"body",5)}
+  subhead(insights.question.label);paragraph(insights.question.title,14,wine,"title",5);paragraph(insights.question.body,10,ink,"body",8);
+  note(s(data("trust")));
+ }
  // Dedicated cover, same navy/gold visual system as the owner design proof.
  page=pdf.addPage([W,H]);rect(0,0,W,H,navy);rect(0,0,W,8,gold);rect(M,36,CW,H-72,navy,C("7C694F"));brand(61,true);caps(W-M-14,69,"PERSONAL EDITION",glow,8,"right");
  const cx=W/2,cy=295;
@@ -182,7 +202,8 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  // The same validated input can contain an unusually long name or place.
  // Continue those details on the private overview rather than clipping them.
  if(coverY>763)throw Error("REPORT_COVER_LAYOUT_OVERFLOW");
- caps(cx,779,"NAKSHARIX.COM",glow,8,"center");
+ caps(cx,767,"NAKSHARIX.COM",glow,8,"center");
+ tx(cx,780,"Ref: "+request.requestId,7.1,"body",light,"center");
 
  interior(tr("01 / YOUR PROFILE","01 / आपकी प्रोफ़ाइल"),tr("Your chart at a glance","आपकी कुंडली एक नज़र में"),tr("A clear reading of the calculated birth chart, before the detailed tables.","विस्तृत गणनाओं से पहले जन्म कुंडली का संक्षिप्त परिचय।"));
  tiles([{label:"Lagna",value:shown(birth.ascendant)},{label:"Moon sign",value:shown(birth.moonSign)},{label:"Nakshatra",value:shown(birth.nakshatra),sub:birth.pada?"Pada "+s(birth.pada):""},{label:"Sun sign",value:shown(birth.sunSign)}]);
@@ -205,42 +226,42 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
    const k=sec.key,v=sec.data,r=obj(v);
    if(["birth","editorial-insights","your-question","trust"].includes(k))continue;
    if(k==="partner"){
-    interior("02 / COMPATIBILITY",sec.title);paragraph(shown(r.name)+" · "+date(obj(r.birth).dateOfBirth)+" · "+shown(obj(r.birth).timeOfBirth)+" · "+shown(obj(r.birth).birthPlace),10.5,wine,"bold");charts(records(r.primaryHouses),records(r.houses),"PERSON 1 / D1","PERSON 2 / D1");planetTable(records(r.positions));
+    specialist("02 / COMPATIBILITY",sec.title,345);paragraph(shown(r.name)+" · "+date(obj(r.birth).dateOfBirth)+" · "+shown(obj(r.birth).timeOfBirth)+" · "+shown(obj(r.birth).birthPlace),10.5,wine,"bold");charts(records(r.primaryHouses),records(r.houses),"PERSON 1 / D1","PERSON 2 / D1");planetTable(records(r.positions));
    }else if(k==="guna"){
-    interior("ASHTAKOOT / MATCHING",sec.title);const max=number(r.maxScore),total=number(r.totalScore);tiles([{label:"Guna Milan",value:total+" / "+max,sub:s(r.verdict)}]);ensure(30);rect(M,y,CW,16,sand);rect(M,y,CW*Math.min(1,Math.max(0,max?total/max:0)),16,green);y+=31;const factors=records(r.ashtakoot);table(["Koot","Score","Traditional rule"],factors.map(f=>[s(f.koot??f.name),s(f.score)+" / "+s(f.maxScore),[s(f.brideValue)+" / "+s(f.groomValue),s(f.explanation??f.meaning)].filter(Boolean).join("\n")]),[1,.7,3],9.2,39);note(tr("A traditional compatibility score is not a decision about marriage, consent or personal worth.","पारंपरिक मिलान अंक विवाह, सहमति या व्यक्तिगत मूल्य का निर्णय नहीं हैं।"));
+    specialist("ASHTAKOOT / MATCHING",sec.title,210);const max=number(r.maxScore),total=number(r.totalScore);tiles([{label:"Guna Milan",value:total+" / "+max,sub:s(r.verdict)}]);ensure(30);rect(M,y,CW,16,sand);rect(M,y,CW*Math.min(1,Math.max(0,max?total/max:0)),16,green);y+=31;const factors=records(r.ashtakoot);table(["Koot","Score","Traditional rule"],factors.map(f=>[s(f.koot??f.name),s(f.score)+" / "+s(f.maxScore),[s(f.brideValue)+" / "+s(f.groomValue),s(f.explanation??f.meaning)].filter(Boolean).join("\n")]),[1,.7,3],9.2,39);note(tr("A traditional compatibility score is not a decision about marriage, consent or personal worth.","पारंपरिक मिलान अंक विवाह, सहमति या व्यक्तिगत मूल्य का निर्णय नहीं हैं।"));
    }else if(k==="numerology-profile"||k==="birth-numerology"||k==="current-name"){
-    interior("NUMEROLOGY",sec.title);if(r.current)paragraph(s(r.current),18,wine,"title");cardRows(Object.entries(r).filter(([,value])=>obj(value).value!=null).map(([key,value])=>numCard(obj(value),label(key))),2);
+    specialist("NUMEROLOGY",sec.title,k==="lo-shu"?300:170);if(r.current)paragraph(s(r.current),18,wine,"title");cardRows(Object.entries(r).filter(([,value])=>obj(value).value!=null).map(([key,value])=>numCard(obj(value),label(key))),2);
    }else if(k==="lo-shu"){
-    interior("NUMEROLOGY",sec.title);loShu(records(r.grid));const repeated=records(r.repeated),missing=records(r.missing);if(repeated.length)table(["Repeated digit","Count","Reflection"],repeated.map(t=>[s(t.value),s(t.count),s(t.guidance)]),[1,1,3]);if(missing.length)table(["Not present","Reflection themes"],missing.map(t=>[s(t.value),s(t.guidance)]),[1,3]);
+    specialist("NUMEROLOGY",sec.title,k==="lo-shu"?300:170);loShu(records(r.grid));const repeated=records(r.repeated),missing=records(r.missing);if(repeated.length)table(["Repeated digit","Count","Reflection"],repeated.map(t=>[s(t.value),s(t.count),s(t.guidance)]),[1,1,3]);if(missing.length)table(["Not present","Reflection themes"],missing.map(t=>[s(t.value),s(t.guidance)]),[1,3]);
    }else if(k==="name-options"||k==="name-comparison"){
-    interior("NAME COMPARISON",sec.title);table(["Name", "Name number",k==="name-options"?"Traditional sound":"Soul / personality","Meaning / guidance"],records(v).map(t=>[shown(t.name),shown(obj(t.nameNumber).value),k==="name-options"?(t.startsWithTraditionalSound?"Matches":"Alternative"):shown(obj(t.soulUrge).value)+" / "+shown(obj(t.personality).value),s(obj(t.nameNumber).meaning)+"\n"+s(obj(t.nameNumber).guidance)]),[1.2,.8,1.1,2.5],9,40);
+    specialist("NAME COMPARISON",sec.title,150);table(["Name", "Name number",k==="name-options"?"Traditional sound":"Soul / personality","Meaning / guidance"],records(v).map(t=>[shown(t.name),shown(obj(t.nameNumber).value),k==="name-options"?(t.startsWithTraditionalSound?"Matches":"Alternative"):shown(obj(t.soulUrge).value)+" / "+shown(obj(t.personality).value),s(obj(t.nameNumber).meaning)+"\n"+s(obj(t.nameNumber).guidance)]),[1.2,.8,1.1,2.5],9,40);
    }else if(k==="naming"){
-    interior("NAMING TRADITION",sec.title);tiles([{label:"Nakshatra",value:shown(r.nakshatra)},{label:"Pada",value:shown(r.pada)},{label:"Traditional sound",value:shown(r.traditionalSound)}]);paragraph(tr("Alternative traditional sounds: ","अन्य पारंपरिक ध्वनियाँ: ")+s(r.otherSounds));
+    specialist("NAMING TRADITION",sec.title,150);tiles([{label:"Nakshatra",value:shown(r.nakshatra)},{label:"Pada",value:shown(r.pada)},{label:"Traditional sound",value:shown(r.traditionalSound)}]);paragraph(tr("Alternative traditional sounds: ","अन्य पारंपरिक ध्वनियाँ: ")+s(r.otherSounds));
    }else if(k==="manglik"||k==="kaal-sarp"||k==="match-dosha"){
-    interior("TRADITIONAL RULES",sec.title);if(k==="match-dosha"){for(const [key,val] of Object.entries(r)){if(obj(val).present!==undefined)dosha(obj(val),label(key));else if(s(val))paragraph(label(key)+": "+s(val));}}else dosha(k==="kaal-sarp"?obj(r.assessment):r,sec.title);if(s(r.notes))note(s(r.notes));
+    specialist("TRADITIONAL RULES",sec.title,155);if(k==="match-dosha"){for(const [key,val] of Object.entries(r)){if(obj(val).present!==undefined)dosha(obj(val),label(key));else if(s(val))paragraph(label(key)+": "+s(val));}}else dosha(k==="kaal-sarp"?obj(r.assessment):r,sec.title);if(s(r.notes))note(s(r.notes));
    }else if(k.includes("dasha")||k==="relationship-timing"){
-    interior("TIMING FRAMEWORK",sec.title);periodCards(r);if(obj(r.birthNumber).value!=null||obj(r.lifePath).value!=null)cardRows([numCard(obj(r.birthNumber),"Birth number"),numCard(obj(r.lifePath),"Life path")],2);
+    specialist("TIMING FRAMEWORK",sec.title,170);periodCards(r);if(obj(r.birthNumber).value!=null||obj(r.lifePath).value!=null)cardRows([numCard(obj(r.birthNumber),"Birth number"),numCard(obj(r.lifePath),"Life path")],2);
    }else if(k==="current-transit"||k.includes("transits")||k.includes("months")){
-    interior("TRANSIT CHECKPOINTS",sec.title);snapshots(Array.isArray(v)?v:[r]);
+    specialist("TRANSIT CHECKPOINTS",sec.title,140);snapshots(Array.isArray(v)?v:[r]);
    }else if(k.includes("houses")||k.endsWith("-context")&&Array.isArray(v)){
-    interior("LIFE AREAS",sec.title);houseTable(records(v));
+    specialist("LIFE AREAS",sec.title,140);houseTable(records(v));
    }else if(Array.isArray(v)&&records(v).every(p=>p.planet&&p.sign)&&v.length){
-    interior("PLANETARY PLACEMENTS",sec.title);planetTable(records(v));
+    specialist("PLANETARY PLACEMENTS",sec.title,110);planetTable(records(v));
    }else if(k==="sade-sati-basis"){
-    interior("SATURN / NATAL MOON",sec.title);tiles([{label:"Natal Moon",value:shown(r.natalMoon)},{label:"Natal Saturn",value:shown(obj(r.natalSaturn).sign),sub:"House "+shown(obj(r.natalSaturn).house)}]);
+    specialist("SATURN / NATAL MOON",sec.title,110);tiles([{label:"Natal Moon",value:shown(r.natalMoon)},{label:"Natal Saturn",value:shown(obj(r.natalSaturn).sign),sub:"House "+shown(obj(r.natalSaturn).house)}]);
    }else if(Array.isArray(v)&&v.every(x=>typeof x==="string")){
-    interior("PRACTICAL GUIDANCE",sec.title);cardRows(v.map((x,i)=>({label:tr("Reflection ","चिंतन ")+(i+1),title:sec.title,body:s(x)})),1);
+    specialist("PRACTICAL GUIDANCE",sec.title,140);cardRows(v.map((x,i)=>({label:tr("Reflection ","चिंतन ")+(i+1),title:sec.title,body:s(x)})),1);
    }else if(k==="compatibility-guidance"){
-    interior("RELATIONSHIP REFLECTION",sec.title);for(const key of ["moon","nakshatra","practicalGuidance","limitations"]){if(s(r[key]))paragraph(label(key)+": "+s(r[key]))}
+    specialist("RELATIONSHIP REFLECTION",sec.title,140);for(const key of ["moon","nakshatra","practicalGuidance","limitations"]){if(s(r[key]))paragraph(label(key)+": "+s(r[key]))}
    }else{
     // Unknown structured content must be reviewed, not silently flattened.
     throw Error("REPORT_EDITORIAL_UNKNOWN_SECTION_"+k);
    }
    if(sec.limitations.length)note(sec.limitations.join(" "));
   }
-  if(insights.planetNotes.length){interior("PERSONAL INTERPRETATION",tr("What your placements suggest for reflection","ग्रह स्थितियों से चिंतन के विषय"));cardRows(insights.planetNotes,2)}
+  if(insights.planetNotes.length){specialist("PERSONAL INTERPRETATION",tr("What your placements suggest for reflection","ग्रह स्थितियों से चिंतन के विषय"),145);cardRows(insights.planetNotes,2)}
  }
  reflectionPlan();
  if(tocHeight){const saved=page;page=tocPage;const list=starts.slice(1);list.forEach((p,i)=>{const x=M+i%2*(CW/2+6),top=tocY+22+Math.floor(i/2)*24;const w=CW/2-12;tx(x,top,String(p.page).padStart(2,"0"),8,"bold",gold);fixed(x+25,top,p.title,w-25,8.5,"bold",ink,11);rule(x,top+21,x+w,top+21,light)});page=saved}
- const pages=pdf.getPages();pages.forEach((p,i)=>{if(i===0)return;page=p;rule(M,H-44,W-M,H-44,gold);tx(M,H-34,"NAKSHARIX / PRIVATE REPORT",7.7,"bold",muted);tx(W-M,H-34,String(i+1).padStart(2,"0")+" / "+String(pages.length).padStart(2,"0"),8.3,"bold",muted,"right")});
+ const pages=pdf.getPages();pages.forEach((p,i)=>{if(i===0)return;page=p;rule(M,H-44,W-M,H-44,gold);tx(M,H-34,"NAKSHARIX / care@naksharix.com",7.7,"bold",muted);tx(W-M,H-34,String(i+1).padStart(2,"0")+" / "+String(pages.length).padStart(2,"0"),8.3,"bold",muted,"right")});
 }
