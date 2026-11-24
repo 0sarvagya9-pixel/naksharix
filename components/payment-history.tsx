@@ -47,6 +47,9 @@ export function PaymentHistory() {
               <p className="font-medium">{payment.purchasedReport?.title ?? payment.purpose}</p>
               <p className="text-sm naksh-muted-text">{payment.currency} {payment.amount} - {payment.status}</p>
             </div>
+            {["PENDING","FAILED"].includes(payment.status)&&payment.metadata?.reportId&&getReportSlugForPaidId(payment.metadata.reportId)&&!payment.metadata?.savedReportId&&!payment.reportRequest?(
+              <Button asChild variant="outline" size="sm"><Link href={`/reports/${encodeURIComponent(getReportSlugForPaidId(payment.metadata.reportId)!)}`}>Review / resume existing payment</Link></Button>
+            ):null}
             {payment.status === "PAID" && !payment.reportRequest &&
              !payment.metadata?.savedReportId && payment.metadata?.reportId &&
              getReportSlugForPaidId(payment.metadata.reportId) ? (

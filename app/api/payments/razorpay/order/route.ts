@@ -14,7 +14,8 @@ import { getRazorpayReadiness } from "@/lib/payments/readiness";
 import { getPujaLaunchState, partnerSupportsTopic } from "@/lib/puja/launch-readiness";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { getReportPricing } from "@/lib/reports/pricing";
-import { getSubscriptionPlan } from "@/lib/revenue";
+import { getSubscriptionPlan, finalizePaidPayment } from "@/lib/revenue";
+import { checkExistingReportOrder } from "@/lib/payments/report-order-recovery";
 import { googleSessionSchema, liveRazorpayAnalyticsOrder, sendGoogleCheckout } from "@/lib/analytics/google";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 import { shippingPayable,SHIPPING_TERMS_VERSION,readShippingSnapshot } from "@/lib/shop/shipping-rules";
@@ -80,9 +81,24 @@ export async function POST(request: NextRequest) {
     if (reusable && (Number(reusable.amount) !== item.amount || reusable.currency !== "INR"))
       return fail("An earlier order has a different amount. Contact support before trying to pay again.", 409);
     if (reusable?.status === "PAID") return fail("This checkout item is already paid.", 409);
-    if (reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
+    const reportCheckout = "reportId" in body;
+    if (reusable && reportCheckout) {
+      // A missing order ID may be an in-flight reservation or ambiguous
+      // gateway-create failure. Never replace it with a second order.
+      const decision=await checkExistingReportOrder(reusable);
+      if(decision.kind==="captured"&&reusable.providerOrderId){
+        const paid=await finalizePaidPayment(reusable.providerOrderId,decision.providerPaymentId,{verifiedBy:"merchant_order_recovery",gatewayStatus:"captured"});
+        if(paid&&reportRequestId){
+          await prisma.reportRequest.updateMany({where:{id:reportRequestId,userId:user.id,paymentId:paid.id,status:{in:[ReportRequestStatus.RECEIVED,ReportRequestStatus.PENDING_REVIEW,ReportRequestStatus.PAYMENT_PENDING]},paymentStatus:{in:[ReportPaymentStatus.PENDING,ReportPaymentStatus.FAILED]}},data:{paymentStatus:ReportPaymentStatus.PAID,status:ReportRequestStatus.PAID}});
+        }
+        return fail("Payment already captured. Open your dashboard Payment History to continue the report. Do not pay again.",409);
+      }
+      if(decision.kind!=="retry_same_order"||!reusable.providerOrderId)
+        return fail("Previous payment requires merchant reconciliation. Do not pay again; contact support.",409);
+    }
+    if (!reportCheckout && reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
       return fail("An old payment attempt needs merchant reconciliation. Check payment history or contact support before paying again.", 409);
-    if (reusable?.status === "PENDING" && reusable.providerOrderId) {
+    if (reusable && (reusable.status === "PENDING" || (reportCheckout&&reusable.status==="FAILED")) && reusable.providerOrderId) {
       if (body.purpose === "PUJA_BOOKING") await writeAuditLog({ actor: user, action: "puja.fee_terms_accepted", targetType: "Payment", targetId: reusable.id, metadata: { feeTermsVersion: body.feeTermsVersion } });
       if ("analyticsSession" in body) await sendGoogleCheckout(request,body.analyticsSession,body.purpose,item.amount);
       return ok({
@@ -117,8 +133,17 @@ export async function POST(request: NextRequest) {
       const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:"SHOP_ORDER",status:{in:["PENDING","PAID"]},metadata:{path:["shopOrderId"],equals:body.shopOrderId}},select:{id:true}});
       if(outstanding)return null;
       return tx.payment.create({data:paymentData});
+    }):reportCheckout?await prisma.$transaction(async tx=>{
+      // Serialize every fixed-price report purchase for this account/SKU.
+      // Preserve any pending, paid or failed reservation for reconciliation.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${user.id}),hashtext(${body.reportId}))::text`;
+      const identity=checkoutIdentity(body);
+      if(!identity)return null;
+      const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:body.purpose,status:{in:["PENDING","PAID","FAILED"]},metadata:{path:[identity.key],equals:identity.value}},select:{id:true}});
+      if(outstanding)return null;
+      return tx.payment.create({data:paymentData});
     }):await prisma.payment.create({data:paymentData});
-    if(!payment)return fail("The shipping quote changed or a payment attempt is already pending. Review My Orders before trying again.",409);
+    if(!payment)return fail("An order or payment attempt already exists. Review Payment History or My Orders before trying again.",409);
 
     let order;
     try {
@@ -189,7 +214,7 @@ async function findReusablePayment(body: CheckoutBody, userId: string) {
       userId,
       provider: "RAZORPAY",
       purpose: body.purpose as PaymentPurpose,
-      status: { in: ["PENDING", "PAID"] },
+      status: { in: "reportId" in body ? ["PENDING", "PAID", "FAILED"] : ["PENDING", "PAID"] },
       metadata: { path: [identity.key], equals: identity.value }
     },
     orderBy: { createdAt: "desc" },

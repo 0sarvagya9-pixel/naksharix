@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import {decideReportOrderRecovery as decide} from "../lib/payments/report-order-recovery-contract.ts";
+const local={id:"fixture",providerOrderId:"order_fixture",amountPaise:79900,currency:"INR"};
+const base={id:"order_fixture",receipt:"fixture",amount:79900,currency:"INR",amount_paid:0,amount_due:79900,status:"created",attempts:0};
+const payment={id:"pay_fixture",order_id:base.id,amount:79900,currency:"INR",status:"failed",amount_refunded:0,refund_status:null};
+const col=items=>({items,count:items.length});
+assert.equal(decide(local,base,col([])).kind,"retry_same_order");
+assert.equal(decide(local,{...base,status:"attempted",attempts:1},col([payment])).kind,"retry_same_order");
+const paid={...base,status:"paid",amount_paid:79900,amount_due:0,attempts:1};
+assert.deepEqual(decide(local,paid,col([{...payment,status:"captured"}])),{kind:"captured",providerPaymentId:"pay_fixture"});
+for(const [order,collection] of [[{...base,receipt:"other"},col([])],[{...base,amount:1},col([])],[{...base,currency:"USD"},col([])],[{...base,attempts:2},col([payment])],[{...base,attempts:1},col([{...payment,status:"authorized"}])],[paid,col([{...payment,status:"captured",amount_refunded:79900}])],[paid,col([{...payment,status:"captured",refund_status:"partial"}])],[paid,col([{...payment,status:"captured",order_id:"order_other"}])],[paid,col([{...payment,status:"authorized"}])],[paid,{count:2,items:[{...payment,status:"captured"}]}],[{...paid,amount_paid:100},col([{...payment,status:"captured"}])]])assert.equal(decide(local,order,collection).kind,"review");
+console.log("REPORT_ORDER_RECOVERY_CONTRACT_PASS: 14 fixture cases; no gateway, DB or charge");

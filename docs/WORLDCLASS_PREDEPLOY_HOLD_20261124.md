@@ -28,3 +28,6 @@ All 35 business opportunities from audit are requested for development, gated by
 
 ## Fifth implementation batch
 - Reconciled PR #144's public partnership page, private authenticated enquiries, catalogue/contact links and regression checks. Retained the newer production CI isolation workflow instead of replacing it with older browser dependency hunks. No partner onboarding, referral payout, contact spam or production release. Original PR remains unmerged.
+
+## Sixth implementation batch
+- Added conservative report merchant-order recovery and serialized local reservations. Resume only the same exact fully unpaid order with no authorized/captured/refunded attempts. Recover an exact captured payment through existing finalization; otherwise fail closed. Failed/in-flight unknown orders remain in review, never automatically charged again. Dashboard offers review/resume for unlinked fixed-price reports. Tests authored; no live gateway lookup, capture, production record changes or acceptance test performed. Repeat purchase intents, price changes, historic ambiguous orders and settlement/refunds still require separate acceptance.
