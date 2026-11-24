@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {packageDefinitions,packagePriceOffers,packageEntitled,packagePriceMatches} from "../lib/digital-packages/catalogue.ts";
 import {compareBusinessNames} from "../lib/digital-packages/business-names.ts";
 import {studyChapters,marriageChapters} from "../lib/digital-packages/workbooks.ts";
-assert.equal(packageDefinitions.length,5);assert.equal(studyChapters.length,7);assert.equal(marriageChapters.length,5);
+assert.equal(packageDefinitions.length,6);assert.equal(studyChapters.length,7);assert.equal(marriageChapters.length,5);
 assert.equal(packagePriceOffers(undefined,true).length,0);
 const approved=JSON.stringify([{key:"complete-life",version:"v1",pricePaise:10000}]);
 assert.equal(packagePriceOffers(approved,false).length,0);

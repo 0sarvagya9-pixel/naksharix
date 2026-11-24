@@ -88,7 +88,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 23 | Temple Chadhava | OPEN | Authorized temple contract, accurate services, receipts. |
 | 24 | Prasad delivery | OPEN | Verified fulfilment, food safety, addresses and shipping. |
 | 25 | Premium reminders | PARTIAL | Real .ics calendar export for reviewed festival, Kumbh and eclipse dates with optional local alarm and EN/HI interface; paid entitlements, opt-in server delivery and device validation remain. No paid reminder or push claim. |
-| 26 | Courses | OPEN | Actual course materials, access rights and progress. |
+| 26 | Courses | SOURCE | Original seven-module English course, worked examples, fourteen server-graded formative questions, private exact purchased-order entitlement, persistent per-order progress and workbook PDF. Revoked/refunded orders denied. Pricing approval, DB/browser/PDF acceptance pending; no accredited or live-instructor claim. |
 | 27 | Webinars | OPEN | Host, dates, seat entitlement, delivery and cancellation. |
 | 28 | Ebooks | SOURCE | Original seven-chapter Kundli study workbook with actual worked exercises and answer explanations, paid private PDF generation/download, approved-price gate. Rendering and acceptance pending; English only. |
 | 29 | Printed Kundli | OPEN | Print partner, fulfilment and shipping terms. |

@@ -23,8 +23,8 @@ export function preparePackageItems(input:PackageDraft):{kind:string;privateInpu
   return [{kind:"business-name",privateInput:{names:input.names}}];
  }
  if(input.names.length)throw Error("Candidate business names are only used in the business-name report.");
- if(def.key==="astrology-workbook"){
-  if(input.question)throw Error("The study workbook does not require personal details.");
+ if(def.key==="astrology-workbook"||def.key==="astrology-course"){
+  if(input.question)throw Error("This learning product does not require personal details.");
   return [{kind:"study-workbook",privateInput:{language:"en"}}];
  }
  if(def.key==="marriage-planning"&&JSON.stringify(input.subjects[0].birth)===JSON.stringify(input.subjects[1].birth))throw Error("Provide distinct birth profiles for the two people.");
