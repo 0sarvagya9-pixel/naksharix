@@ -24,12 +24,12 @@ export function AnalyticsPreferences({googleEnabled=false}:{googleEnabled?:boole
   useEffect(()=>{if(!googleEnabled||google!=="granted"||!publicAnalyticsRoute(path)){lastGoogle.current="";return;}
     if(lastGoogle.current!==path){lastGoogle.current=path;trackGooglePublicEvent("page_view");}},[path,google,googleEnabled]);
   useEffect(()=>{
-    if(choice!=="granted"&&(!googleEnabled||google!=="granted"))return;
+    if(choice!=='granted'&&(!googleEnabled||google!=='granted'))return;
     const click=(event:MouseEvent)=>{const link=(event.target as Element|null)?.closest?.("a[href]");
       if(!link)return;try{const url=new URL(link.getAttribute("href")||"",location.origin);
         if(url.origin===location.origin&&publicAnalyticsRoute(url.pathname)){
           const reportLink=/^\/reports(?:\/[a-z0-9-]+)?$/.test(url.pathname)&&!url.search&&!url.hash;
-          trackNaksharixEvent(reportLink?"report_cta_clicked":"cta_link");
+          trackNaksharixEvent(reportLink ? 'report_cta_clicked' : 'cta_link');
         }}catch{}};
     document.addEventListener("click",click);return()=>document.removeEventListener("click",click);
   },[choice,google,googleEnabled]);
