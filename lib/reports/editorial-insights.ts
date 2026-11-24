@@ -39,7 +39,8 @@ export function editorialHouse(chart:BirthChartData,n:number,language:AstrologyL
  const title=pick(language,H[n-1]??H[0]),ruler=RULER[h?.sign??""],rp=chart.planetPositions.find(p=>p.planet===ruler);
  const placement=ps.length?pick(language,[ps.map(p=>p.planet).join(", ")+" in "+h?.sign+"; traditional themes include "+ps.map(p=>pick(language,P[p.planet]??P.Moon)).join(", ")+".",ps.map(p=>p.planet).join(", ")+" की "+h?.sign+" में स्थिति; पारंपरिक विषय: "+ps.map(p=>pick(language,P[p.planet]??P.Moon)).join(", ")+"।",ps.map(p=>p.planet).join(", ")+" in "+h?.sign+"; traditional themes: "+ps.map(p=>pick(language,P[p.planet]??P.Moon)).join(", ")+"."]):
  rp?pick(language,["No natal planet here; traditional ruler "+ruler+" is in house "+rp.house+".","यहाँ जन्म ग्रह नहीं है; पारंपरिक स्वामी "+ruler+" भाव "+rp.house+" में है।","Is house mein koi natal planet nahi; traditional ruler "+ruler+" house "+rp.house+" mein hai."]):pick(language,["No natal planet recorded; the house remains relevant.","यहाँ जन्म ग्रह दर्ज नहीं है; भाव का महत्व बना रहता है।","Natal planet recorded nahi; house relevant hai."]);
- return {house:n,sign:h?.sign??"",planets:ps.map(p=>p.planet),title,interpretation:placement+" "+pick(language,PRACTICE[n-1]??PRACTICE[0])};
+ const compact=ps.length?pick(language,PRACTICE[n-1]??PRACTICE[0]):rp?pick(language,["Ruler "+ruler+" in H"+rp.house+". ","स्वामी "+ruler+" भाव "+rp.house+" में। ","Ruler "+ruler+" H"+rp.house+" mein. "])+pick(language,PRACTICE[n-1]??PRACTICE[0]):pick(language,PRACTICE[n-1]??PRACTICE[0]);
+ return {house:n,sign:h?.sign??"",planets:ps.map(p=>p.planet),title,compact,interpretation:placement+" "+pick(language,PRACTICE[n-1]??PRACTICE[0])};
 }
 function planetNote(p:PlanetPosition,language:AstrologyLanguage):EditorialCard{
  const house=p.house??1;
@@ -53,7 +54,7 @@ export function buildEditorialInsights(chart:BirthChartData,slug:string,question
  const main=editorialHouse(chart,focus[0],language);
  const ruler=RULER[main.sign],rulerPos=chart.planetPositions.find(p=>p.planet===ruler);
  const rulerText=rulerPos?pick(language,["The traditional ruler of "+main.sign+", "+ruler+", is in house "+rulerPos.house+" ("+rulerPos.sign+").","राशि "+main.sign+" का पारंपरिक स्वामी "+ruler+" भाव "+rulerPos.house+" ("+rulerPos.sign+") में है।",main.sign+" ka traditional ruler "+ruler+" house "+rulerPos.house+" ("+rulerPos.sign+") mein hai."]):"";
- const overview={label:pick(language,["THE CENTRAL THEME","मुख्य विषय","CENTRAL THEME"]),title:main.title+" / "+first.title,body:main.interpretation+" "+rulerText};
+ const overview={label:pick(language,["THE CENTRAL THEME","मुख्य विषय","CENTRAL THEME"]),title:main.title===first.title?main.title:main.title+" / "+first.title,body:main.interpretation+" "+rulerText};
  const cards=[{label:pick(language,["01 / PRIMARY FOCUS","01 / मुख्य ध्यान","01 / PRIMARY FOCUS"]),title:first.title,body:first.interpretation},{label:pick(language,["02 / BALANCING THEME","02 / संतुलन","02 / BALANCING THEME"]),title:second.title,body:second.interpretation}];
  const selected=chart.planetPositions.filter(p=>focus.includes(p.house??0));
  const notes=(selected.length?selected:chart.planetPositions).map(p=>planetNote(p,language));

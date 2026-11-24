@@ -1,5 +1,5 @@
 import "server-only";
-import { PDFDocument, StandardFonts, rgb, type PDFPage,type PDFFont,type PDFImage,type RGB } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, radians, type PDFPage,type PDFFont,type PDFImage,type RGB } from "pdf-lib";
 import type { PremiumReportContentResult } from "@/lib/reports/premium-report-content-engine";
 import type { EditorialCard,EditorialInsights } from "@/lib/reports/editorial-insights";
 
@@ -113,7 +113,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   y+=height+16;
  }
  function planetTable(rows:R[]){if(!rows.length)return;table(["Graha",tr("Sign","राशि"),tr("House","भाव"),tr("Degree","अंश"),tr("Nakshatra","नक्षत्र")],rows.map(r=>[shown(r.planet),shown(r.sign),shown(r.house),deg(r.degree),shown(r.nakshatra)]),[1.05,1.2,.65,.85,1.65],9.8,33)}
- function houseTable(rows:R[]){if(!rows.length)return;table([tr("House","भाव"),tr("Sign","राशि"),tr("Planets","ग्रह"),tr("Reflection theme","चिंतन विषय")],rows.map(r=>[shown(r.house),shown(r.sign),list(r.planets).map(p=>typeof p==="string"?p:s(obj(p).planet)).join(", ")||"-",s(r.title)+"\n"+s(r.interpretation)]),[.56,.85,1.3,3.5],8.8,40)}
+ function houseTable(rows:R[]){if(!rows.length)return;table([tr("House","भाव"),tr("Sign","राशि"),tr("Planets","ग्रह"),tr("Reflection theme","चिंतन विषय")],rows.map(r=>[shown(r.house),shown(r.sign),list(r.planets).map(p=>typeof p==="string"?p:s(obj(p).planet)).join(", ")||"-",s(r.title)+"\n"+s(r.compact??r.interpretation)]),[.56,.85,1.3,3.5],8.5,36)}
  function chart(x:number,top:number,size:number,houses:R[]){
   rect(x,top,size,size,white,gold);
   const shade=(poly:number[][],col:RGB)=>{const p=poly.map(([a,b],i)=>(i?"L":"M")+" "+(a*size)+" "+(b*size)).join(" ")+" Z";page.drawSvgPath(p,{x,y:H-top,color:col});};
@@ -141,7 +141,14 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   [4,9,2,3,5,7,8,1,6].forEach((n,i)=>{const g=grid.find(r=>number(r.number)===n),ct=number(g?.count),x=M+i%3*(z+gap),t=y+Math.floor(i/3)*(z+gap);rect(x,t,z,z,ct?green:sand);caps(x+9,t+7,String(n),ct?glow:muted,8);tx(x+z/2,t+25,ct?String(n).repeat(Math.min(ct,10)):"-",ct>4?12:22,"title",ct?iv:muted,"center");tx(x+z/2,t+57,ct?"x "+ct:tr("Not present","अनुपस्थित"),8.1,"body",ct?iv:muted,"center")});
   const present=grid.filter(r=>number(r.count)>0).map(r=>s(r.number)),absent=grid.filter(r=>!number(r.count)).map(r=>s(r.number));let t=y+6;const x=M+gw+20,w=CW-gw-20;caps(x,t,tr("Present digits","उपस्थित अंक"));t+=17;t+=fixed(x,t,present.join(" · ")||"-",w,21,"title",wine,24)+12;caps(x,t,tr("Not present","अनुपस्थित"));t+=16;t+=fixed(x,t,absent.join(" · ")||"-",w,17,"title",wine,21)+12;fixed(x,t,tr("Absent digits are not deficiencies. This is a symbolic tradition, not a measure of ability.","अनुपस्थित अंक किसी कमी का प्रमाण नहीं हैं। यह प्रतीकात्मक परंपरा है, क्षमता का माप नहीं।"),w,10,"body",muted,14.5);y+=gw+20;
  }
- function dosha(r:R,title:string){if(!Object.keys(r).length)return;const summary=s(r.summary);const reference=["marsHouseFromLagna","marsHouseFromMoon","marsHouseFromVenus"].filter(k=>r[k]!=null).map(k=>label(k)+": "+s(r[k])).join(" · ");cardRows([{label:title,title:r.present===true?(s(r.severity)||tr("Rule detected","नियम पाया गया")):tr("Not clearly detected","स्पष्ट रूप से नहीं पाया गया"),body:[summary,reference,s(r.remedies)].filter(Boolean).join("\n")}],1);}
+ function doshaCard(r:R,title:string):EditorialCard{const reference=["marsHouseFromLagna","marsHouseFromMoon","marsHouseFromVenus"].filter(k=>r[k]!=null).map(k=>label(k)+": "+s(r[k])).join(" · ");return {label:title,title:r.present===true?(s(r.severity)||tr("Rule detected","नियम पाया गया")):tr("Not clearly detected","स्पष्ट रूप से नहीं पाया गया"),body:[s(r.summary),reference,s(r.remedies)].filter(Boolean).join("
+")}}
+ function dosha(r:R,title:string){if(Object.keys(r).length)cardRows([doshaCard(r,title)],1)}
+ function panchangGrid(r:R){
+  const fields=["tithi","paksha","vaar","yoga","karan","nakshatra","sunrise","sunset"];
+  for(let i=0;i<fields.length;i+=4){const batch=fields.slice(i,i+4),w=CW/4;const heights=batch.map(k=>wrap(shown(r[k]),w-18,10,"bold").length*13+30);const height=Math.max(48,...heights);ensure(height);batch.forEach((k,j)=>{const x=M+j*w;rect(x,y,w-5,height-5,white,light);caps(x+8,y+8,label(k),gold,8);fixed(x+8,y+23,shown(r[k]),w-18,10,"bold",ink,13)});y+=height}
+  const others=["rahuKaal","choghadiya","muhurat"].map(k=>label(k)+": "+shown(r[k]));paragraph(others.join(" · "),8.7,muted);
+ }
  function compactFields(r:R,keys?:string[]){const ks=keys??Object.keys(r);const rows=ks.filter(k=>r[k]!=null&&typeof r[k]!=="object").map(k=>[label(k),shown(r[k])]);if(rows.length)table([tr("Reference","संदर्भ"),tr("Calculated detail","गणना विवरण")],rows,[1,2],9.6,27)}
  function snapshots(v:unknown){
   const rows=records(v);if(!rows.length)return;
@@ -160,15 +167,19 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  for(const r of [148,141,120,88,58,16])page.drawCircle({x:cx,y:H-cy,size:r,borderColor:r===148||r===120||r===58?gold:C("59616B"),borderWidth:r===148?1:.65});
  for(let i=0;i<24;i++){const a=i*Math.PI/12,r=i%2?141:132;rule(cx+r*Math.cos(a),cy+r*Math.sin(a),cx+148*Math.cos(a),cy+148*Math.sin(a),gold,.65)}
  for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6;rule(cx+88*Math.cos(a),cy+88*Math.sin(a),cx+120*Math.cos(b),cy+120*Math.sin(b),gold,.65);rule(cx+120*Math.cos(a),cy+120*Math.sin(a),cx+88*Math.cos(b),cy+88*Math.sin(b),gold,.65)}
- for(let i=0;i<8;i++){const a=i*Math.PI/4;page.drawEllipse({x:cx+35*Math.cos(a),y:H-cy-35*Math.sin(a),xScale:23,yScale:10,rotate:{type:"radians",angle:-a} as never,borderColor:gold,borderWidth:.65})}
+ for(let i=0;i<8;i++){const a=i*Math.PI/4;page.drawEllipse({x:cx+35*Math.cos(a),y:H-cy-35*Math.sin(a),xScale:23,yScale:10,rotate:radians(-a),borderColor:gold,borderWidth:.65})}
  caps(cx,466,tr("BIRTH CHART · LIFE THEMES · PERSONAL GUIDANCE","जन्म कुंडली · जीवन विषय · व्यक्तिगत मार्गदर्शन"),glow,8,"center");
- const title=request.reportTitle??label(request.templateId),titleSize=title.length>38?31:40;
+ const shortTitles:Record<string,string>={"premium-kundli":"Premium Kundli","couple-kundli":"Couple Kundli","career-report":"Career Report","wealth-report":"Wealth Report","love-report":"Love & Relationship","baby-name-report":"Baby Name","sade-sati-report":"Sade Sati","manglik-kaal-sarp-report":"Manglik & Kaal Sarp","numerology-lo-shu-report":"Numerology & Lo Shu","name-correction-report":"Name Correction","yearly-horoscope-report":"Yearly Horoscope","transit-report":"Transit Report","rahu-ketu-report":"Rahu & Ketu","jupiter-transit-report":"Jupiter Transit","fortune-report":"Fortune Report"};
+ const rawTitle=request.reportTitle??label(request.templateId);
+ const title=lang!=="hi"&&!rawTitle.startsWith("QA DEMO")?(shortTitles[request.templateId]??rawTitle):rawTitle;
+ const name=request.customerName??shown(birth.name),place=shown(birth.birthPlace);
+ const titleSize=measure(title,40,"title")>CW-46?30:40,nameSize=name.length>55?15:21,placeSize=place.length>100?8.5:10;
  let coverY=491+fixed(M+23,491,title,CW-46,titleSize,"title",iv,titleSize+5,"center")+16;
  coverY+=fixed(M+39,coverY,tr("A personalized guide to traditional calculation, interpretation and thoughtful next steps.","पारंपरिक गणना, व्याख्या और विचारपूर्ण अगले कदमों की व्यक्तिगत मार्गदर्शिका।"),CW-78,11.4,"body",light,16,"center")+17;
  rule(M+50,coverY,W-M-50,coverY,gold);coverY+=16;caps(cx,coverY,tr("Prepared for","इनके लिए तैयार"),glow,8,"center");coverY+=18;
- coverY+=fixed(M+18,coverY,request.customerName??shown(birth.name),CW-36,21,"title",iv,25,"center")+8;
+ coverY+=fixed(M+18,coverY,name,CW-36,nameSize,"title",iv,nameSize+4,"center")+8;
  coverY+=fixed(M+22,coverY,date(birth.dateOfBirth)+" | "+shown(birth.timeOfBirth)+" (UTC "+(number(birth.utcOffsetAtBirth)>=0?"+":"")+s(birth.utcOffsetAtBirth)+")",CW-44,10,"body",iv,14,"center")+3;
- coverY+=fixed(M+22,coverY,shown(birth.birthPlace),CW-44,10,"body",light,14,"center");
+ coverY+=fixed(M+22,coverY,place,CW-44,placeSize,"body",light,placeSize*1.4,"center");
  // The same validated input can contain an unusually long name or place.
  // Continue those details on the private overview rather than clipping them.
  if(coverY>763)throw Error("REPORT_COVER_LAYOUT_OVERFLOW");
@@ -187,8 +198,8 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   interior("03 / PLANETARY PLACEMENTS",tr("The nine grahas","नौ ग्रह"),tr("Degrees rounded to four decimal places.","अंश चार दशमलव स्थान तक।"));planetTable(records(data("planets")));subhead(tr("Traditional interpretation","पारंपरिक व्याख्या"));cardRows(insights.planetNotes.slice(0,2),2);
   interior("04 / LIFE AREAS",tr("Twelve houses, twelve lenses","बारह भाव, बारह दृष्टिकोण"),tr("Empty houses remain meaningful; traditional sign rulership provides context.","रिक्त भाव भी महत्वपूर्ण हैं; पारंपरिक राशि स्वामित्व संदर्भ देता है।"));houseTable(d1);
   interior("05 / TIMING FRAMEWORK",tr("Your current Dasha cycle","आपका वर्तमान दशा चक्र"),tr("Vimshottari periods are calculated timing frameworks, not promises of events.","विंशोत्तरी दशा गणना का समय-संदर्भ है, घटनाओं की गारंटी नहीं।"));periodCards(obj(data("dasha")));note(tr("Use timing as a reflection framework. Actual decisions depend on evidence and circumstances.","समय को चिंतन के संदर्भ में लें। निर्णय वास्तविक परिस्थितियों पर निर्भर हैं।"));
-  interior("06 / TRADITIONAL INDICATORS",tr("Yogas, doshas & Panchang","योग, दोष और पंचांग"),tr("Rule-based indicators and birth Panchang; no prediction of misfortune.","नियम आधारित संकेत और जन्म पंचांग; दुर्भाग्य की भविष्यवाणी नहीं।"));const yd=obj(data("yoga-dosha")),yo=obj(yd.yoga),ds=obj(yd.dosha);const detected=records(yo.detected);if(detected.length)cardRows(detected.map(r=>({label:tr("Rule detected","नियम पाया गया"),title:shown(r.name),body:[s(r.basis),s(r.interpretation),s(r.caveat)].filter(Boolean).join("\n")})),1);else paragraph(tr("No evaluated yoga is marked detected by the current rules.","वर्तमान नियमों में कोई योग पाया नहीं गया।"));dosha(obj(ds.manglik),"Manglik");dosha(obj(ds.kaalSarp),"Kaal Sarp");subhead(tr("Birth Panchang","जन्म पंचांग"));compactFields(obj(data("panchang")),["tithi","paksha","vaar","yoga","karan","nakshatra","nakshatraPada","sunrise","sunset","rahuKaal","choghadiya","muhurat"]);note(s(yo.note)+" "+s(ds.notes));
-  interior("07 / NUMEROLOGY",tr("Your numerical profile","आपकी अंक ज्योतिष प्रोफ़ाइल"),tr("Symbolic birth-date and name numbers. These are not measured personal traits.","प्रतीकात्मक जन्म तिथि और नाम अंक। ये व्यक्तित्व की वैज्ञानिक माप नहीं हैं।"));const n=obj(data("numerology"));const ns=[obj(n.birthNumber),obj(n.lifePath),obj(n.nameNumber)];tiles(ns.map((r,i)=>({label:["Moolank","Bhagyank","Naamank"][i],value:shown(r.value),sub:s(r.meaning)})));loShu(records(n.grid));cardRows(ns.map((r,i)=>({label:["Moolank","Bhagyank","Naamank"][i],title:s(r.meaning),body:s(r.guidance)})),1);
+  interior("06 / TRADITIONAL INDICATORS",tr("Yogas, doshas & Panchang","योग, दोष और पंचांग"),tr("Rule-based indicators and birth Panchang; no prediction of misfortune.","नियम आधारित संकेत और जन्म पंचांग; दुर्भाग्य की भविष्यवाणी नहीं।"));const yd=obj(data("yoga-dosha")),yo=obj(yd.yoga),ds=obj(yd.dosha);const detected=records(yo.detected);if(detected.length)table([tr("Detected yoga","पाया गया योग"),tr("Rule basis & interpretation","नियम और व्याख्या")],detected.map(r=>[shown(r.name),[s(r.basis),s(r.interpretation),s(r.caveat)].filter(Boolean).join("\n")]),[1,3.6],8.7,39);else paragraph(tr("No evaluated yoga is marked detected by the current rules.","वर्तमान नियमों में कोई योग पाया नहीं गया।"));subhead(tr("Dosha assessment","दोष का आकलन"));cardRows([doshaCard(obj(ds.manglik),"Manglik"),doshaCard(obj(ds.kaalSarp),"Kaal Sarp")],2);subhead(tr("Birth Panchang","जन्म पंचांग"));panchangGrid(obj(data("panchang")));note(s(yo.note)+" "+s(ds.notes));
+  interior("07 / NUMEROLOGY",tr("Your numerical profile","आपकी अंक ज्योतिष प्रोफ़ाइल"),tr("Symbolic birth-date and name numbers. These are not measured personal traits.","प्रतीकात्मक जन्म तिथि और नाम अंक। ये व्यक्तित्व की वैज्ञानिक माप नहीं हैं।"));const n=obj(data("numerology"));const ns=[obj(n.birthNumber),obj(n.lifePath),obj(n.nameNumber)];tiles(ns.map((r,i)=>({label:["Moolank","Bhagyank","Naamank"][i],value:shown(r.value),sub:s(r.meaning)})));loShu(records(n.grid));subhead(tr("Put the symbols into practice","अंकों को चिंतन में उपयोग करें"));table(["Number",tr("Meaning and reflection","अर्थ और चिंतन")],ns.map((r,i)=>[["Moolank","Bhagyank","Naamank"][i]+" "+shown(r.value),s(r.meaning)+" "+s(r.guidance)]),[1,3.6],9.3,35);
  }else{
   // Each specialist uses a semantic renderer, never a raw recursive JSON dump.
   for(const sec of content.sections){
