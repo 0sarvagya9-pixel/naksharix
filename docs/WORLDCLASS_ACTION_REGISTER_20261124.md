@@ -130,3 +130,5 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 
 ### Shop checkout source repair
 - Validated quote totals, integer paise, expiry and exact returned order snapshot checks; local cart normalization, cross-tab change handling, localized acknowledgement/errors and no automatic retry after ambiguous acknowledgement. Remaining static checkout labels, durable server-side idempotency, browser and merchant/fulfilment acceptance are not closed. Existing production deployment restrictions unchanged.
+
+- Shop cart controls, address field labels, product names/categories, country names, postal hints, quote disclosures, payment consent and order messages now use a shared English/Hindi/Hinglish dictionary. Generic Razorpay dialog, report checkout, account-wide UI, emails, PDF copy and browser acceptance remain separate requirements.

@@ -24,7 +24,7 @@ const migration=readFileSync("deploy/sql/20261124-country-aware-shop-shipping.sq
 assert.match(migration,/ADD COLUMN IF NOT EXISTS "deliveryCountry"/);assert.match(migration,/CREATE TABLE IF NOT EXISTS public\."ShopShippingRate"/);assert.doesNotMatch(migration,/\b(?:DROP|TRUNCATE|DELETE|INSERT INTO)\b/i);
 console.log("COUNTRY_AWARE_SHIPPING_QA=PASS;DOMESTIC_INCLUDED;MULTI_SKU_RATE;POSTAL_VALIDATION;UNQUOTED_FAIL_CLOSED;EXPIRED_RATES;IMMUTABLE_SNAPSHOT;NO_SEEDED_TARIFFS");
 
-import {checkoutCopy} from "../lib/shop/checkout-copy.ts";
+import {checkoutCopy,checkoutCountryLabel,checkoutPostalHint} from "../lib/shop/checkout-copy.ts";
 import {normalizeCartLines,cartFingerprint,readCheckoutQuote,quoteStillCurrent,readCheckoutOrder,checkoutErrorKey} from "../lib/shop/checkout-contract.ts";
 const key="a".repeat(64),expectedSubtotal=350000;
 const pendingQuote={kind:"QUOTE_REQUIRED",subtotalPaise:expectedSubtotal,shippingPaise:null,taxPaise:null,totalPaise:null,carrier:null,dutiesMode:null,expiresAt:null,quoteKey:key};
@@ -56,3 +56,16 @@ for(const [status,errorKey] of [[401,"sessionExpired"],[403,"sessionExpired"],[4
 const copyKeys=Object.keys(checkoutCopy.en).sort();
 for(const locale of ["en","hi","hinglish"]){assert.deepEqual(Object.keys(checkoutCopy[locale]).sort(),copyKeys);assert.ok(Object.values(checkoutCopy[locale]).every(v=>typeof v==="string"&&v.trim().length>0));}
 console.log("CART_RESPONSE_CONTRACT_AND_LOCALIZATION_PASS",JSON.stringify({localizedMessages:copyKeys.length,locales:3}));
+
+assert.equal(checkoutPostalHint("IN",true,"hi"),checkoutCopy.hi.pinHint);
+assert.equal(checkoutPostalHint("US",true,"hinglish"),checkoutCopy.hinglish.zipHint);
+assert.equal(checkoutPostalHint("AE",false,"hi"),checkoutCopy.hi.postalOptional);
+assert.equal(checkoutCountryLabel("IN","India","en"),"India");
+assert.equal(checkoutCountryLabel("IN","India","hi"),"भारत");
+assert.equal(checkoutCountryLabel("not-a-code","Unknown","hi"),"Unknown");
+for(const path of ["components/shop/cart-page-client.tsx","components/shop/shop-order-pay-button.tsx","components/shop/quote-cart-controls.tsx"]){
+ const source=readFileSync(path,"utf8");
+ assert.ok(source.includes("checkoutCopy[apiLocale]"),path+" must use selected language");
+ for(const match of source.matchAll(/\bcopy\.([A-Za-z][A-Za-z0-9]*)/g))assert.ok(match[1] in checkoutCopy.en,path+" missing copy key "+match[1]);
+}
+console.log("SHOP_CHECKOUT_LOCALIZED_UI_CONTRACT_PASS");
