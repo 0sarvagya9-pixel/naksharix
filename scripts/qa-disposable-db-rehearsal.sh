@@ -55,13 +55,55 @@ test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/feature-table-count.txt")" = "2"
 test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/feature-index-count.txt")" = "3"
 echo 'feature_sql_migrations_disposable_only=PASS' | tee "$EVIDENCE_DIR/feature-migration-gate.txt"
 
-# Rehearse the consent registry add-only migration against the guarded disposable DB.
+# Rehearse the actual first-install consent migration, not only an IF NOT EXISTS
+# no-op after Prisma db push. The localhost guard above must pass and this
+# newly created CI-only table must be empty before removal.
+test "$(psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc 'SELECT count(*) FROM public."MarketingConsent";')" = "0"
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c 'DROP TABLE public."MarketingConsent";'
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261124-marketing-consent.sql \
   2>&1 | tee "$EVIDENCE_DIR/marketing-consent-first.log"
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261124-marketing-consent.sql \
   2>&1 | tee "$EVIDENCE_DIR/marketing-consent-repeat.log"
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name='MarketingConsent';" | tee "$EVIDENCE_DIR/marketing-consent-table-count.txt"
 test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/marketing-consent-table-count.txt")" = "1"
+# Synthetic rows exist only inside a rolled-back disposable CI transaction.
+# Verify the actual schema enforces ownership and supports revocation and deletion.
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 <<'SQL' | tee "$EVIDENCE_DIR/marketing-consent-lifecycle.log"
+BEGIN;
+INSERT INTO public."User" ("id","email","name","referralCode","updatedAt","emailVerifiedAt")
+VALUES ('ci-consent-user','consent-fixture@example.invalid','CI fixture','ci-consent-ref',now(),now());
+INSERT INTO public."MarketingConsent" ("userId","emailAtConsent","interest","locale","source","consentVersion","confirmedAt","updatedAt")
+VALUES ('ci-consent-user','consent-fixture@example.invalid','kundli','en','website-email-updates','email-updates-v1-20261124',now(),now());
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public."MarketingConsent" ("userId","emailAtConsent","interest","locale","source","consentVersion","confirmedAt","updatedAt")
+    VALUES ('ci-consent-user','duplicate@example.invalid','kundli','en','fixture','fixture',now(),now());
+    RAISE EXCEPTION 'duplicate user consent accepted';
+  EXCEPTION WHEN unique_violation THEN NULL;
+  END;
+  BEGIN
+    INSERT INTO public."MarketingConsent" ("userId","emailAtConsent","interest","locale","source","consentVersion","confirmedAt","updatedAt")
+    VALUES ('missing-ci-user','orphan@example.invalid','kundli','en','fixture','fixture',now(),now());
+    RAISE EXCEPTION 'orphan consent accepted';
+  EXCEPTION WHEN foreign_key_violation THEN NULL;
+  END;
+  UPDATE public."MarketingConsent" SET "revokedAt"=now() WHERE "userId"='ci-consent-user';
+  IF NOT EXISTS (SELECT 1 FROM public."MarketingConsent" WHERE "userId"='ci-consent-user' AND "revokedAt" IS NOT NULL) THEN
+    RAISE EXCEPTION 'revocation not persisted';
+  END IF;
+  UPDATE public."User" SET "email"='changed@example.invalid' WHERE "id"='ci-consent-user';
+  IF EXISTS (SELECT 1 FROM public."MarketingConsent" c JOIN public."User" u ON u.id=c."userId" WHERE u.id='ci-consent-user' AND c."emailAtConsent"=u.email AND c."revokedAt" IS NULL) THEN
+    RAISE EXCEPTION 'stale email qualified';
+  END IF;
+  DELETE FROM public."User" WHERE id='ci-consent-user';
+  IF EXISTS (SELECT 1 FROM public."MarketingConsent" WHERE "userId"='ci-consent-user') THEN
+    RAISE EXCEPTION 'deleted account retained consent';
+  END IF;
+END $$;
+ROLLBACK;
+SQL
+echo 'marketing_consent_disposable_lifecycle=PASS' | tee "$EVIDENCE_DIR/marketing-consent-gate.txt"
 
 # Only ephemeral localhost PostgreSQL: also validate the new payment extension
 # is idempotent, non-destructive and compatible with the generated Prisma schema.
