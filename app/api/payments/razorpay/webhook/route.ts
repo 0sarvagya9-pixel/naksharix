@@ -4,7 +4,7 @@ import { fail, handleApiError, ok } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
-import { finalizePaidPayment, verifyRazorpayWebhookSignature } from "@/lib/revenue";
+import { finalizePaidPayment, verifyRazorpayCapturedPayment, verifyRazorpayWebhookSignature } from "@/lib/revenue";
 import { reconcileCapturedPurpose, reconcileProcessedRefund } from "@/lib/payments/purpose-reconciliation";
 import {processMembershipEvent} from "@/lib/ai/membership-ledger";
 import {isUnrefundedCapture} from "@/lib/payments/capture-evidence";
@@ -27,6 +27,16 @@ export async function POST(request: NextRequest) {
     if (event.event === "payment.captured" && payment?.order_id && payment.id) {
       const existingPayment = await prisma.payment.findUnique({ where: { providerOrderId: payment.order_id } });
       if (existingPayment && payment.status === "captured" && isUnrefundedCapture(payment, Math.round(Number(existingPayment.amount) * 100)) && (payment.currency ?? "").toUpperCase() === existingPayment.currency.toUpperCase()) {
+        // A valid signature authenticates an event snapshot, not the current
+        // merchant state. A delayed capture can follow a completed refund.
+        const fresh = await verifyRazorpayCapturedPayment(payment.order_id,payment.id,Number(existingPayment.amount),existingPayment.currency);
+        if(!fresh.ok){
+          logger.warn("razorpay_capture_fresh_evidence_requires_review",{paymentId:existingPayment.id});
+          // Ask Razorpay to retry transient provider unavailability. A known
+          // mismatch is acknowledged without granting a paid entitlement.
+          if(fresh.reason==="Unable to verify payment with Razorpay"||fresh.reason==="Razorpay is not configured")return fail("Payment verification temporarily unavailable",503);
+          return ok({received:true});
+        }
         const paid = await finalizePaidPayment(payment.order_id, payment.id, { verifiedBy: "webhook", event: event.event, gatewayStatus: payment.status });
         if (paid) await reconcileCapturedPurpose(paid);
         const metadata = (paid?.metadata as Record<string, unknown> | null) ?? {};
