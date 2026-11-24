@@ -9,7 +9,7 @@ const middleware = read("middleware.ts");
 const provider = read("components/language-provider.tsx");
 const switcher = read("components/language-switcher.tsx");
 const pairs = [...registry.matchAll(/\{ en: "([^"]+)", hi: "([^"]+)" \}/g)];
-assert.equal(pairs.length, 4, "Exactly four independently available bilingual page pairs, including brand About");
+assert.equal(pairs.length, 7, "Exactly seven published bilingual page pairs");
 assert.ok(pairs.some(([,en,hi])=>en==="/about" && hi==="/hi/about"), "Brand About reciprocal pair missing");
 const paths = pairs.flatMap(([, en, hi]) => [en, hi]);
 assert.equal(new Set(paths).size, paths.length, "Duplicate language-alternate URL");
@@ -175,7 +175,7 @@ assert.ok(!indexNow.includes("process.env.DATABASE_URL") &&
   "Search-discovery task must not read database, payment or ads configuration");
 console.log("INDEXNOW_STATIC_DISCOVERY=PASS;HOST_KEY_PUBLIC=YES;PRODUCTION_ONLY=YES;PRIVATE_URLS=NO");
 
-console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=4;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
+console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=7;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
 
 
 // Conversion from public tools remains voluntary, and public report sharing
@@ -225,3 +225,7 @@ for(const match of directory.matchAll(/https:\/\/[^)\s]+/g)){
   assert.ok(!/^(?:\/api|\/admin|\/dashboard|\/payment|\/report-request|\/saved-reports|\/profile)(?:\/|$)/.test(url.pathname) && !url.search && !url.hash,"Private link in public directory");
 }
 console.log("BRAND_ENTITY_DISCOVERY=PASS;SSR_SCHEMA=YES;BILINGUAL_ABOUT=YES;ROOT_HREFLANG=YES;RANKING=NOT_CLAIMED");
+
+for(const route of ["/kumbh-mela-2027","/hi/kumbh-mela-2027","/festival-calendar","/hi/festival-calendar","/grahan-2027","/hi/grahan-2027"]){assert.ok(sitemap.includes('"'+route+'"') && indexNow.includes('"'+route+'"') && directory.includes("https://www.naksharix.com"+route),"Seasonal discovery missing "+route);}
+assert.ok(read("lib/seo-seasonal.ts").includes("simhasthamahakumbh.maharashtra.gov.in/snan-calendar") && read("lib/seo-seasonal.ts").includes("eclipse.gsfc.nasa.gov/OH/OH2027.html") && read("lib/seo-seasonal-copy.ts").includes("ISO 12312-2"),"Missing seasonal primary sources and safety");
+console.log("SEASONAL_DISCOVERY=PASS;SIX_PUBLIC_GUIDES");

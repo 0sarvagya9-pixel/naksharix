@@ -20,6 +20,9 @@ const features = [
   { title: "कुंडली मिलान", description: "पारंपरिक गुण मिलान", href: "/matchmaking", icon: HeartHandshake },
   { title: "अंक ज्योतिष", description: "नाम और जन्मतिथि का विश्लेषण", href: "/numerology", icon: Sparkles },
   { title: "पंचांग", description: "तिथि, नक्षत्र और मुहूर्त", href: "/panchang", icon: CalendarDays },
+  { title: "कुंभ मेला 2027", description: "स्नान तिथियाँ और तैयारी", href: "/hi/kumbh-mela-2027", icon: CalendarDays },
+  { title: "त्योहार और व्रत", description: "आगामी तिथियों का कैलेंडर", href: "/hi/festival-calendar", icon: CalendarDays },
+  { title: "ग्रहण 2027", description: "ग्रहण और सुरक्षित दर्शन", href: "/hi/grahan-2027", icon: MoonStar },
   { title: "वैदिक ज्ञान", description: "कुंडली और ज्योतिष को समझें", href: "/hi/learn/kundli-explained", icon: BookOpen }
 ] as const;
 

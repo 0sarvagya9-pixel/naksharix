@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {
   pujaObservances, nextTwoYearsPujaCalendar,
-  todayInIndia, calendarYearsAfter, PUJA_SOURCES
+  todayInIndia, calendarYearsAfter, PUJA_SOURCES, PUJA_SUPPLEMENT_SOURCES
 } from "../lib/puja/observances.ts";
 const instant = (date) => new Date(date + "T05:45:00+05:30");
 assert.equal(todayInIndia(instant("2026-10-27")), "2026-10-27");
@@ -10,7 +10,7 @@ assert.throws(() => calendarYearsAfter("2028-02-30", 1));
 assert.throws(() => calendarYearsAfter("2028-02-29", 0));
 assert.ok(pujaObservances.length >= 50);
 assert.equal(new Set(pujaObservances.map((event) => event.id)).size, pujaObservances.length);
-assert.ok(pujaObservances.every((event) => event.bookingStatus === "information_only" && event.sourceUrl === PUJA_SOURCES[Number(event.date.slice(0,4))]));
+assert.ok(pujaObservances.every((event) => event.bookingStatus === "information_only" && (event.sourceUrl === PUJA_SOURCES[Number(event.date.slice(0,4))] || (event.date.startsWith("2026-12-") && event.sourceUrl === PUJA_SUPPLEMENT_SOURCES.december2026) || (event.date.startsWith("2027-") && event.sourceUrl === PUJA_SUPPLEMENT_SOURCES.hindu2027))));
 for (let i=1;i<pujaObservances.length;i++) assert.ok(pujaObservances[i].date >= pujaObservances[i-1].date);
 const calendar = nextTwoYearsPujaCalendar(instant("2026-10-27"));
 assert.equal(calendar.from, "2026-10-27");
@@ -22,3 +22,12 @@ assert.ok(calendar.events.some((event) => event.date === "2028-10-17" && event.n
 assert.ok(calendar.events.every((event) => event.date >= calendar.from && event.date < calendar.untilExclusive));
 assert.ok(nextTwoYearsPujaCalendar(instant("2028-12-31")).futureYearsRequireReview);
 console.log("PUJA_CALENDAR_QA=PASS;EVENTS=" + pujaObservances.length + ";BOOKING_ACTIVATION=NO");
+
+const {festivalHindi,kumbhGuideDates,indiaEclipseDates}=await import("../lib/seo-seasonal.ts");
+const {kumbhEvents}=await import("../lib/puja/service-catalogue.ts");
+assert.ok(pujaObservances.every(e=>festivalHindi[e.name]),"Hindi label missing");
+assert.deepEqual(kumbhGuideDates.slice(1,-1).map(e=>e.date),kumbhEvents.map(e=>e.date),"Kumbh registry parity");
+assert.deepEqual(indiaEclipseDates.map(e=>e.date),["2027-02-21","2027-08-02"]);
+assert.ok(pujaObservances.some(e=>e.date==="2026-12-20"&&e.name.includes("Mokshada Ekadashi")));
+assert.ok(pujaObservances.some(e=>e.date==="2027-02-06"&&e.name==="Mauni Amavasya"));
+console.log("SEASONAL_DATE_QA=PASS;HINDI_LABELS;KUMBH_REGISTRY_PARITY;INDIA_ECLIPSES");

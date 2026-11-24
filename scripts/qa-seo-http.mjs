@@ -7,7 +7,10 @@ const pairs = [
   ["/", "/hi"],
   ["/free-kundli", "/hi/free-kundli"],
   ["/kundli-matching", "/hi/kundli-milan"],
-  ["/about", "/hi/about"]
+  ["/about", "/hi/about"],
+  ["/kumbh-mela-2027", "/hi/kumbh-mela-2027"],
+  ["/festival-calendar", "/hi/festival-calendar"],
+  ["/grahan-2027", "/hi/grahan-2027"]
 ];
 const nativeGuides = ["en", "hi", "mr", "bn", "es", "fr"];
 const approvedGuides = ["en", "hi"];
@@ -110,7 +113,7 @@ for (const route of ["/","/about","/hi/about"]) {
 const llms=await fetch(base+"/llms.txt");
 assert.equal(llms.status,200);
 assert.ok((await llms.text()).includes("https://www.naksharix.com/hi/about"),"Missing public brand directory");
-console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=8;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");
+console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=14;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");
 
  
 // Check the actual rendered public pages from the previous 50-page audit.
@@ -145,3 +148,24 @@ assert.equal(png.readUInt32BE(16),1200);
 assert.equal(png.readUInt32BE(20),630);
 assert.ok(homeHtml.includes("/og.png"),"Homepage metadata must reference shareable raster preview");
 console.log("ONPAGE_AUDIT_HTTP=PASS;FOCUSED_ROUTES="+focusedSeoRoutes.length+";SOCIAL_PREVIEW=1200x630_PNG");
+
+for(const [path,kind,markers] of [
+  ["/kumbh-mela-2027","kumbh",["2027-08-02","2027-09-11","2027-09-12","2028-07-24","simhasthamahakumbh.maharashtra.gov.in/snan-calendar"]],
+  ["/hi/kumbh-mela-2027","kumbh",["अमृत स्नान","2027-09-12"]],
+  ["/festival-calendar","festivals",["Local Panchang","Vivah Panchami"]],
+  ["/hi/festival-calendar","festivals",["स्थानीय पंचांग","विवाह पंचमी"]],
+  ["/grahan-2027","eclipses",["2027-02-21","2027-08-02","ISO 12312-2","science.nasa.gov/eclipses/safety/"]],
+  ["/hi/grahan-2027","eclipses",["चंद्र ग्रहण","2027-08-02","ISO 12312-2"]]
+]){
+  const response=await fetch(base+path);assert.equal(response.status,200,"Seasonal page unavailable "+path);
+  const html=await response.text(), publicHtml=stripMarkup(html);
+  assert.equal([...publicHtml.matchAll(/<h1\b[^>]*>/gi)].length,1,"Seasonal H1 "+path);
+  for(const marker of markers)assert.ok(publicHtml.includes(marker),"Missing seasonal content "+path+" "+marker);
+  const script=html.match(new RegExp('<script[^>]*id="seasonal-guide-'+kind+'"[^>]*>([\\s\\S]*?)<\\/script>','i'));
+  assert.ok(script,"Missing rendered seasonal schema "+path);
+  const schema=JSON.parse(script[1]);assert.equal(schema["@type"],"WebPage");assert.equal(schema.inLanguage,path.startsWith("/hi/")?"hi":"en");
+  assert.ok(Array.isArray(schema.citation)&&schema.citation.length>=2);
+  assert.ok(xml.includes("<loc>"+absolute(path)+"</loc>"),"Missing seasonal sitemap URL");
+  assert.ok(!/<meta[^>]*name="robots"[^>]*content="[^"]*noindex/i.test(publicHtml),"Unexpected noindex "+path);
+}
+console.log("SEASONAL_HTTP=PASS;SIX_BILINGUAL_ROUTES;DATES_AND_SAFETY");

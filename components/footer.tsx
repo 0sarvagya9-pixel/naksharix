@@ -87,6 +87,9 @@ function footerGroups(locale: Locale) {
           ["अंक ज्योतिष", "/numerology"],
           ["मुफ़्त कैलकुलेटर", "/free-calculators"],
           ["टैरो", "/tarot"],
+          ["कुंभ मेला 2027", "/hi/kumbh-mela-2027"],
+          ["पर्व कैलेंडर", "/hi/festival-calendar"],
+          ["ग्रहण 2027", "/hi/grahan-2027"],
         ],
       },
       {
@@ -139,6 +142,9 @@ function footerGroups(locale: Locale) {
           ["Numerology", "/numerology"],
           ["Free Calculators", "/free-calculators"],
           ["Tarot", "/tarot"],
+          ["Kumbh Mela 2027", "/kumbh-mela-2027"],
+          ["Festival Calendar", "/festival-calendar"],
+          ["Grahan 2027", "/grahan-2027"],
         ],
       },
       {
@@ -190,6 +196,9 @@ function footerGroups(locale: Locale) {
         ["Numerology", "/numerology"],
         ["Free Calculators", "/free-calculators"],
         ["Tarot", "/tarot"],
+          ["Kumbh Mela 2027", "/kumbh-mela-2027"],
+          ["Festival Calendar", "/festival-calendar"],
+          ["Grahan 2027", "/grahan-2027"],
       ],
     },
     {

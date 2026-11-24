@@ -221,6 +221,7 @@ export default async function PanchangPage({
           <nav aria-label="Related Vedic tools" className="mt-6 flex flex-wrap gap-3 text-sm font-semibold">
             <Link href="/free-calculators/nakshatra-calculator" className="rounded-lg border border-[#dca956]/30 px-4 py-2 text-[#8c571a] hover:underline">Birth Nakshatra calculator</Link>
             <Link href="/free-kundli" className="rounded-lg border border-[#dca956]/30 px-4 py-2 text-[#8c571a] hover:underline">Free Kundli</Link>
+            <Link href="/festival-calendar" className="rounded-lg border border-[#dca956]/30 px-4 py-2 text-[#8c571a] hover:underline">Festival and Vrat calendar</Link>
             <Link href="/hi/free-kundli" className="rounded-lg border border-[#dca956]/30 px-4 py-2 text-[#8c571a] hover:underline">हिंदी जन्म कुंडली</Link>
           </nav>
         </section>

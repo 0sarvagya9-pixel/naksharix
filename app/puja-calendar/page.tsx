@@ -57,6 +57,8 @@ export default async function PujaCalendarPage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild><Link href="/panchang">Verify local Panchang</Link></Button>
+            <Button variant="outline" asChild><Link href="/kumbh-mela-2027">Kumbh Mela 2027 dates</Link></Button>
+            <Button variant="outline" asChild><Link href="/festival-calendar">Festival and vrat guide</Link></Button>
             <Button variant="outline" asChild><Link href="/pujas">{launch.enabled ? "Explore available Puja services" : "Check current Puja service status"}</Link></Button>
           </div>
         </div>

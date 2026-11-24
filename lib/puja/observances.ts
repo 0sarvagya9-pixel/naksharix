@@ -18,7 +18,9 @@ export const PUJA_SOURCES: Record<number, string> = {
 };
 
 // Original curated index of major calendar observances, NOT a vendor's offerings.
-const OBSERVANCES: ReadonlyArray<readonly [string, string]> = [
+export const PUJA_SUPPLEMENT_SOURCES = { december2026: "https://www.drikpanchang.com/festivals/month/festivals-december.html?lang=en&year=2026", hindu2027: "https://www.drikpanchang.com/calendars/hindu/hinducalendar.html?lang=en&year=2027" } as const;
+// Additional dates reviewed against New Delhi reference calendars on 24 November 2026.
+const OBSERVANCES: ReadonlyArray<readonly [string, string, string?]> = [
   ["2026-10-29", "Karwa Chauth"], ["2026-11-06", "Dhanteras"],
   ["2026-11-08", "Lakshmi Puja / Diwali"], ["2026-11-10", "Govardhan Puja"],
   ["2026-11-11", "Bhai Dooj"], ["2026-11-15", "Chhath Puja"],
@@ -67,7 +69,39 @@ const OBSERVANCES: ReadonlyArray<readonly [string, string]> = [
   ["2028-10-17", "Lakshmi Puja / Diwali"],
   ["2028-10-18", "Govardhan Puja"],
   ["2028-10-19", "Bhai Dooj"],
-  ["2028-10-23", "Chhath Puja"]
+  ["2028-10-23", "Chhath Puja"],
+  ["2026-12-01", "Kalabhairav Jayanti", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2026-12-04", "Utpanna Ekadashi", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2026-12-06", "Ravi Pradosh Vrat", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2026-12-07", "Masik Shivaratri", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2026-12-08", "Margashirsha Amavasya", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2026-12-14", "Vivah Panchami", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2026-12-16", "Dhanu Sankranti", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2026-12-20", "Gita Jayanti / Mokshada Ekadashi", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2026-12-23", "Dattatreya Jayanti / Margashirsha Purnima", PUJA_SUPPLEMENT_SOURCES.december2026],
+  ["2027-01-03", "Saphala Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-01-18", "Pausha Putrada Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-01-22", "Pausha Purnima", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-01-25", "Sakat Chauth", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-02-02", "Shattila Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-02-06", "Mauni Amavasya", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-02-13", "Ratha Saptami", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-02-17", "Jaya Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-02-20", "Magha Purnima", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-03-04", "Vijaya Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-03-18", "Amalaki Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-06-04", "Shani Jayanti / Vat Savitri", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-06-13", "Ganga Dussehra", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-06-14", "Nirjala Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-11-10", "Devutthana Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-11-11", "Tulsi Vivah", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-11-20", "Kalabhairav Jayanti", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-11-24", "Utpanna Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-12-03", "Vivah Panchami", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-12-09", "Gita Jayanti / Mokshada Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-12-13", "Dattatreya Jayanti / Margashirsha Purnima", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-12-16", "Dhanu Sankranti", PUJA_SUPPLEMENT_SOURCES.hindu2027],
+  ["2027-12-23", "Saphala Ekadashi", PUJA_SUPPLEMENT_SOURCES.hindu2027]
 ];
 function validDate(text: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(text) &&
@@ -76,14 +110,14 @@ function validDate(text: string): boolean {
 }
 
 export const pujaObservances: readonly PujaObservance[] = Object.freeze(
-  OBSERVANCES.map(([date, name]) => {
+  OBSERVANCES.map(([date, name, sourceOverride]) => {
     if (!validDate(date) || !PUJA_SOURCES[Number(date.slice(0, 4))]) {
       throw new Error("PUJA_CALENDAR_SOURCE_OR_DATE_MISSING");
     }
     return Object.freeze({
       id: date + "-" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
       date, name,
-      sourceUrl: PUJA_SOURCES[Number(date.slice(0, 4))],
+      sourceUrl: sourceOverride ?? PUJA_SOURCES[Number(date.slice(0, 4))],
       bookingStatus: "information_only" as const
     });
   }).sort((a, b) => a.date.localeCompare(b.date) || a.name.localeCompare(b.name))
