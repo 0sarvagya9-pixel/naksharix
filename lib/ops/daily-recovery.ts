@@ -5,7 +5,7 @@ import { get, put, list, del, head } from "@vercel/blob";
 import { backupChecksum, MAX_BACKUP_BYTES, openBackup, sealBackup } from "@/lib/ops/backup-crypto";
 import { EXPORT_WORKER, RESTORE_WORKER } from "@/lib/ops/backup-worker";
 import { sendEmail } from "@/lib/email/email-service";
-import {verifyRecoveryReceipt,receiptIsFresh,type RecoveryReceipt} from "@/lib/ops/recovery-receipt";
+import {verifyRecoveryReceipt,receiptIsFresh,readRestoreCounts,sameRecoveryProof,type RecoveryReceipt} from "@/lib/ops/recovery-receipt";
 
 const PREFIX="naksharix-recovery/v1/";
 const EXPECTED_PROJECT="prj_hB0nIWZqcOeBstlRVHuNKUs27RP5";
@@ -134,8 +134,8 @@ export async function runDailyRecovery() {
     const restore=await sandbox.runCommand({cmd:'bash',args:['/tmp/naksh-restore.sh'],timeoutMs:55000});
     if(restore.exitCode!==0)throw new Error('RESTORE_FAILED');
     const report=await sandbox.readFileToBuffer({path:'/tmp/naksh-restore-receipt.json'});
-    const counts=JSON.parse(report?.toString()||'{}') as {tables:number;indexes:number;foreignKeys:number};
-    if(!Number.isInteger(counts.tables)||counts.tables<43||counts.indexes<100||counts.foreignKeys<40)throw new Error('RESTORE_SCHEMA_INCOMPLETE');
+    const counts=readRestoreCounts(JSON.parse(report?.toString()||'{}'));
+    if(!counts)throw new Error('RESTORE_SCHEMA_INCOMPLETE');
     const receipt:RecoveryReceipt={version:1,day,completedAt:new Date().toISOString(),bytes:stored.length,
       sha256:backupChecksum(restoredDump),keyFingerprint:backupChecksum(Buffer.from(key,'hex')).slice(0,16),
       encrypted:true,privateStore:true,restored:true,...counts,emailAccepted:false};
@@ -148,9 +148,22 @@ export async function runDailyRecovery() {
     }
     // Analytics retention is owned by the analytics collector; recovery never writes production rows.
     stage='receipt';
-    receipt.emailAccepted=await notify(day,true,`Encrypted private backup uploaded, downloaded, decrypted and restored in an isolated database. Restored tables: ${counts.tables}. Retention: 7 days. No production data was modified.`);
-    await put(PREFIX+'receipts/'+day+'.json',JSON.stringify(receipt),{access:'private',addRandomSuffix:false,allowOverwrite:false,contentType:'application/json'});
-    return {unchanged:false,receipt};
+    if(!verifyRecoveryReceipt(receipt,day,receipt.keyFingerprint,Date.now(),MAX_BACKUP_BYTES+64))throw Error('RECEIPT_INVALID');
+    const receiptPath=PREFIX+'receipts/'+day+'.json';
+    // Announce success only after both the private ciphertext and its matching,
+    // immutable restore receipt have been independently read back.
+    const saved=await put(receiptPath,JSON.stringify(receipt),{access:'private',addRandomSuffix:false,allowOverwrite:false,contentType:'application/json'});
+    const proof=await readReceipt(day);
+    if(!proof||!sameRecoveryProof(receipt,proof))throw Error('RECEIPT_READBACK_FAILED');
+    const accepted=await notify(day,true,`Encrypted private backup uploaded, downloaded, decrypted and restored in an isolated database. Restored tables: ${counts.tables}. Retention: 7 days. No production data was modified.`);
+    if(accepted){
+      try{
+        await put(receiptPath,JSON.stringify({...proof,emailAccepted:true}),{access:'private',addRandomSuffix:false,allowOverwrite:true,ifMatch:saved.etag,contentType:'application/json'});
+        const updated=await readReceipt(day);
+        if(updated&&sameRecoveryProof(proof,updated)&&updated.emailAccepted)return {unchanged:false,receipt:updated};
+      }catch{/* The restore proof remains valid; do not invent a persisted email acknowledgement. */}
+    }
+    return {unchanged:false,receipt:proof};
   }catch (error) {
     const diagnostic=error instanceof Error && /^EXPORT_FAILED_[A-Z_]+$/.test(error.message)
       ? error.message.slice('EXPORT_FAILED_'.length) : '';
@@ -171,6 +184,6 @@ export async function runDailyRecovery() {
       'BACKUP_FAILED_'+stage.toUpperCase()+(diagnostic?'_'+diagnostic:''));
   }finally {
     await sandbox?.stop().catch(()=>{});
-    await del(lock.url).catch(()=>{});
+    await del(lock.url,{ifMatch:lock.etag}).catch(()=>{});
   }
 }

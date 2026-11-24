@@ -2,6 +2,20 @@
 export type RecoveryReceipt={version:1;day:string;completedAt:string;bytes:number;sha256:string;keyFingerprint:string;
   encrypted:true;privateStore:true;restored:true;tables:number;indexes:number;foreignKeys:number;emailAccepted:boolean};
 const safeInteger=(value:unknown,min:number,max=Number.MAX_SAFE_INTEGER):value is number=>typeof value==="number"&&Number.isSafeInteger(value)&&value>=min&&value<=max;
+export type RestoreCounts={tables:number;indexes:number;foreignKeys:number};
+export function readRestoreCounts(value:unknown):RestoreCounts|null{
+ if(!value||typeof value!=="object"||Array.isArray(value))return null;
+ const c=value as Partial<RestoreCounts>;
+ if(!safeInteger(c.tables,43)||!safeInteger(c.indexes,100)||!safeInteger(c.foreignKeys,40))return null;
+ // Select only the three expected fields. Worker JSON cannot override proof flags,
+ // the checksum, key fingerprint or receipt date via an object spread.
+ return {tables:c.tables,indexes:c.indexes,foreignKeys:c.foreignKeys};
+}
+export function sameRecoveryProof(a:RecoveryReceipt,b:RecoveryReceipt):boolean{
+ return a.version===b.version&&a.day===b.day&&a.completedAt===b.completedAt&&a.bytes===b.bytes&&
+  a.sha256===b.sha256&&a.keyFingerprint===b.keyFingerprint&&a.encrypted===b.encrypted&&
+  a.privateStore===b.privateStore&&a.restored===b.restored&&a.tables===b.tables&&a.indexes===b.indexes&&a.foreignKeys===b.foreignKeys;
+}
 export function verifyRecoveryReceipt(value:unknown,day:string,currentKeyFingerprint:string,nowMs:number,maxEnvelopeBytes:number):RecoveryReceipt|null{
  if(!value||typeof value!=="object"||Array.isArray(value)||!Number.isFinite(nowMs))return null;
  const r=value as Partial<RecoveryReceipt>;
@@ -10,7 +24,8 @@ export function verifyRecoveryReceipt(value:unknown,day:string,currentKeyFingerp
  const completed=Date.parse(r.completedAt),start=Date.parse(day+"T00:00:00Z");
  // A late-night backup may complete just after UTC midnight; never accept a future receipt.
  if(!Number.isFinite(completed)||!Number.isFinite(start)||completed<start||completed>=start+86400000+360000||completed>nowMs)return null;
- if(!safeInteger(r.bytes,42,maxEnvelopeBytes)||!safeInteger(r.tables,43)||!safeInteger(r.indexes,100)||!safeInteger(r.foreignKeys,40)||typeof r.emailAccepted!=="boolean")return null;
+ if(new Date(start).toISOString().slice(0,10)!==day||new Date(completed).toISOString()!==r.completedAt)return null;
+ if(!safeInteger(r.bytes,42,maxEnvelopeBytes)||!readRestoreCounts(r)||typeof r.emailAccepted!=="boolean")return null;
  if(typeof r.sha256!=="string"||!/^[a-f0-9]{64}$/.test(r.sha256)||typeof r.keyFingerprint!=="string"||!/^[a-f0-9]{16}$/.test(r.keyFingerprint)||r.keyFingerprint!==currentKeyFingerprint)return null;
  return r as RecoveryReceipt;
 }
