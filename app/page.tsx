@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { EditorialHome } from "@/components/home/editorial-home";
 import { ApprovedGalleryHome } from "@/components/home/approved-gallery-home";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
-import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdminRole } from "@/lib/auth/roles";
 import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { getPujaRequestState } from "@/lib/puja/request-readiness";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 export default async function PujaLaunchReadinessPage() {
   await requireAdminRole();
   const state = await getPujaLaunchState(true);
+  const intake = await getPujaRequestState();
   return <main className="min-h-[80vh] bg-[#fffaf4] px-5 py-12 text-[#412934]">
     <div className="mx-auto max-w-5xl space-y-7">
       <header className="rounded-3xl border border-[#e2c69e] bg-white p-7">
@@ -18,7 +20,7 @@ export default async function PujaLaunchReadinessPage() {
         <h1 className="mt-3 font-cinzel text-3xl font-bold">Puja Launch Readiness</h1>
         <p role="status" className="mt-4 rounded-xl border border-[#d4b38f] bg-[#fff5e7] p-4 font-bold">
           {state.enabled ? "Release gates satisfied — individual Pandit/date acceptance still required per booking."
-            : "COMING SOON — new bookings and payments remain closed."}
+            : intake.enabled ? "Request intake open — no payment until actual Pandit and schedule confirmation." : "COMING SOON — new bookings and payments remain closed."}
         </p>
         <p className="mt-4 text-sm leading-7 text-[#6c565d]">
           The booking feature is OFF by default. Published rates and a reviewed Pandit registry do

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
 import { PricingContent } from "@/components/pricing-content";
 import { displayPujaPrice } from "@/lib/puja/offerings";
-import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
 
 export const metadata: Metadata = seo({
   title: "Naksharix Services and Pricing",
@@ -19,6 +19,6 @@ export default async function PricingPage() {
   const consistent = launch.enabled && prices.length > 0 &&
     prices.every(price => Number.isSafeInteger(price) && price === prices[0]);
   const pujaPriceLabel = !launch.enabled ? "Coming Soon" :
-    consistent ? displayPujaPrice(prices[0]) + " per available Puja" : "Price shown per available Puja";
+    consistent ? displayPujaPrice(prices[0]) + " platform coordination fee" : "Price shown per available Puja";
   return <PricingContent pujaPriceLabel={pujaPriceLabel} pujaEnabled={launch.enabled} />;
 }

@@ -3,6 +3,7 @@ import { useState,type FormEvent } from "react";
 import Link from "next/link";
 import { secureFetch } from "@/lib/security/csrf";
 import { PUJA_STATUS_NOTICES } from "@/lib/puja/customer-notices";
+import { PUJA_FEE_NOTICE_EN, PUJA_FEE_NOTICE_HI } from "@/lib/puja/fee-terms";
 export function PujaRequestClient({topicId,name,pricePaise,signedIn}:{topicId:string;name:string;pricePaise:number;signedIn:boolean}){
  const [city,setCity]=useState(""),[preferredDate,setPreferredDate]=useState("");
  const [devoteeName,setDevoteeName]=useState(""),[gotra,setGotra]=useState("");
@@ -31,6 +32,8 @@ export function PujaRequestClient({topicId,name,pricePaise,signedIn}:{topicId:st
   <p className="text-xs font-bold uppercase tracking-[.2em] text-[#913648]">Naksharix Puja date request</p>
   <h1 className="mt-3 font-cinzel text-3xl font-bold">{name}</h1>
   <p className="mt-4 text-2xl font-bold text-[#7b293d]">{new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(pricePaise/100)}</p>
+  <p className="mt-2 text-sm font-semibold">Platform coordination fee · no upfront payment</p>
+  <div className="mt-4 rounded-xl border border-[#e2c4a1] bg-[#fff8ed] p-4 text-sm leading-7"><p>{PUJA_FEE_NOTICE_EN}</p><p lang="hi" className="mt-2">{PUJA_FEE_NOTICE_HI}</p><Link href="/refund-policy" className="underline">Refund policy</Link></div>
   <p className="mt-3 text-sm leading-7 text-[#655159]">Send your preferred date as a request. This is not a reserved Puja slot. A verified Pandit must accept and a final date/time must be coordinated before payment is offered.</p>
   {bookingId?<div role="status" className="mt-6 rounded-xl border border-[#b9d5a9] bg-[#f4fff0] p-5">
     <p className="font-bold">Puja request received: #{bookingId}</p>

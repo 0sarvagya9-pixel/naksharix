@@ -31,8 +31,8 @@ const services = [
     id: "pujas",
     title: "Puja Booking Requests",
     price: "Published fee on each Puja",
-    description: "Choose a reviewed Puja, request a date, await verified Pandit acceptance and a confirmed schedule, then pay only from your account.",
-    features: ["Only supported Puja topics", "No payment on initial request", "Confirmed Pandit and date before checkout", "Private status tracking"],
+    description: "Request a Puja date; the ₹1,100 platform coordination fee is payable only after Pandit acceptance and an agreed schedule.",
+    features: ["Subject to actual Pandit availability", "No payment on initial request", "Confirmed Pandit and date before checkout", "Private status tracking"],
     href: "/pujas",
     cta: "Explore Pujas",
     icon: CalendarDays
@@ -66,7 +66,7 @@ export function PricingContent({ pujaPriceLabel, pujaEnabled }: { pujaPriceLabel
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#00f5a0]">Active Services</p>
         <h1 className="mt-3 font-cinzel text-4xl font-black text-[#FFD700]">Services and Pricing</h1>
         <p className="mt-4 naksh-muted-text">
-          Naksharix does not currently sell public monthly AI subscriptions. Published prices appear on active report and consultation pages. Puja is available only when verified partners and booking operations are ready.
+          Naksharix does not currently sell public monthly AI subscriptions. Published prices appear on active report and consultation pages. Puja date requests are subject to Pandit availability; checkout is offered only after confirmation.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export function PricingContent({ pujaPriceLabel, pujaEnabled }: { pujaPriceLabel
       </div>
 
       <p className="mx-auto mt-8 max-w-3xl text-center text-sm leading-6 naksh-muted-text">
-        AI Astrologer is available as a separate guided experience with consent when the provider is configured. Shop supports priced orders and Razorpay checkout. Puja is reopened only after operator approval, real Pandit acceptance and ceremony confirmation; payment is not collected on an initial request. Public subscriptions are not active.
+        AI Astrologer is available as a separate guided experience with consent when the provider is configured. Shop supports priced orders and Razorpay checkout. Puja coordination requests are subject to actual Pandit acceptance and an agreed ceremony schedule; payment is not collected on an initial request. Public subscriptions are not active.
       </p>
     </Section>
   );

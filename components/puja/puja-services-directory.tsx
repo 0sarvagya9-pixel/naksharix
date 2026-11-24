@@ -29,7 +29,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           <p className="text-xs font-bold uppercase tracking-[.22em] text-[#f8d389]">Naksharix • Sacred traditions</p>
           <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Puja &amp; <span className="text-[#ffcf80]">Vedic Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
-            Browse {Object.keys(offerings).length} offerings with a registered, topic-approved Pandit.
+            Browse {Object.keys(offerings).length} Puja topics open for preferred-date requests.
             Submit a preferred date first. The Pandit must accept your ceremony and the schedule must be confirmed before payment.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
@@ -38,7 +38,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
               <CalendarDays size={17}/> Festival calendar
             </Link>
           </div>
-          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> ₹1,100 currently supported fee • No upfront payment • Pandit/date confirmation first</p>
+          <p className="mt-6 flex items-center gap-2 text-sm text-[#f7dcac]"><ShieldCheck size={17}/> ₹1,100 platform coordination fee • No upfront payment • Subject to Pandit availability</p>
         </div>
       </div>
     </section>
@@ -47,7 +47,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-[#8e3641]">Traditional practices</p>
           <h2 id="puja-catalogue-heading" className="mt-2 font-cinzel text-3xl font-bold text-[#412831]">Puja Directory</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">These are topic-specific offerings supported by admin-reviewed Pandits. Individual dates, service mode, materials and logistics still require direct confirmation before payment.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#755b60]">These are Puja topics you can request. Pandit availability, individual dates, service mode, materials and any additional costs require direct confirmation before payment.</p>
           {!Object.keys(offerings).length ? <p role="status" className="mt-3 rounded-lg border border-[#d6aa70] bg-[#fff2df] p-3 text-sm text-[#69434b]">Puja prices and online bookings are currently unavailable. Please return when published offers can be verified.</p> : null}
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -82,7 +82,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
             <p className="mt-3 flex-1 text-sm leading-6 text-[#6c5459]">{topic.description}.</p>
             {offerings[topic.id] ? <p className="mt-3 text-lg font-extrabold text-[#842c3e]">
               {new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(offerings[topic.id].pricePaise/100)}
-              <span className="ml-2 text-xs font-normal text-[#67515a]">listed fee · request date without paying</span>
+              <span className="ml-2 text-xs font-normal text-[#67515a]">platform fee · request date without paying</span>
             </p> : <p className="mt-3 text-sm font-semibold text-[#75535c]">Price not published</p>}
             <Link href={"/puja-booking?item="+encodeURIComponent(topic.id)}
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c87d] px-4 py-2 font-bold text-[#331c25] hover:bg-[#ffe0ae]">
@@ -103,7 +103,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
       )}
       <div className="mt-12 grid gap-5 rounded-2xl border border-[#d0a36c]/30 bg-[#fff4e6] p-7 md:grid-cols-3">
         {[
-          ["01","Select","Choose a Puja with an approved Pandit and published price."],
+          ["01","Select","Choose a Puja and review its platform coordination fee."],
           ["02","Request","Send preferred date and private Sankalp details. No payment yet."],
           ["03","Confirm & pay","After the Pandit accepts and date/time are confirmed, pay securely in My Puja Requests."]
         ].map(([step,title,copy])=><div key={step} className="flex gap-4">
