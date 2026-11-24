@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { isUnchangedCredential } from "@/lib/security/sanitize";
 
 export const signupSchema = z.object({
   name: z.string().min(2).max(80),
   email: z.string().email(),
-  password: z.string().min(8).max(72).refine(value => new TextEncoder().encode(value).length <= 72, "Use a password of at most 72 UTF-8 bytes."),
+  password: z.string().min(8).max(72).refine(value => new TextEncoder().encode(value).length <= 72, "Use a password of at most 72 UTF-8 bytes.").refine(isUnchangedCredential, "Avoid leading/trailing whitespace or markup patterns in a new password."),
   locale: z.enum(["en", "hi", "hinglish"]).default("en"),
   role: z.enum(["USER", "ASTROLOGER", "CONSULTANT"]).default("USER")
 });

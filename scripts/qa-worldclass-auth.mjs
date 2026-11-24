@@ -69,3 +69,9 @@ for(const role of ["ASTROLOGER","CONSULTANT","ADMIN"])assert.equal(otpVerificati
 for(const value of [null,{},[],{data:null},{data:{verified:false,user}},{data:{verified:"true",user}},{data:{verified:true,user:null}},{data:{verified:true,user:{...user,id:""}}},{data:{verified:true,user:{...user,id:7}}},{data:{verified:true,user:{...user,email:"other@example.invalid"}}},{data:{verified:true,user:{...user,email:7}}},{data:{verified:true,user:{...user,effectiveRole:["USER"]}}},{data:{verified:true,user:{...user,effectiveRole:"UNKNOWN"}}}])assert.equal(otpVerificationConfirmed(value,user.email),false);
 assert.equal(otpVerificationConfirmed({data:{verified:true,user:{...user,email:""}}},""),false);
 console.log("OTP_ACK_IDENTITY_AND_AUTH_PAGE_LOCALE_CONTRACT_PASS");
+
+import {isUnchangedCredential,sanitizeString} from "../lib/security/sanitize.ts";
+for (const value of ["Secur3!Pass", "ordinary space inside", "कुंडली!2026", "A&B!<1234"]) assert.equal(isUnchangedCredential(value),true);
+for (const value of [" password123", "password123 ", "<script>password123</script>", "javascript:password123", "abc onclick='x' pass123", null, 123]) assert.equal(isUnchangedCredential(value),false);
+assert.equal(sanitizeString(" password123 "),"password123"); // preserve legacy login normalization
+console.log("NEW_PASSWORD_NO_SILENT_NORMALIZATION_CONTRACT_PASS");

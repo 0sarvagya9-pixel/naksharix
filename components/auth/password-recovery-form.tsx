@@ -5,6 +5,7 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {secureFetch} from "@/lib/security/csrf";
+import {isUnchangedCredential} from "@/lib/security/sanitize";
 import {useLanguage} from "@/components/language-provider";
 import {passwordRecoveryCopy,recoveryErrorKey,recoveryPasswordLengthValid,type RecoveryKey} from "@/lib/auth/password-recovery-copy";
 export function PasswordRecoveryForm({mode}:{mode:"request"|"confirm"}){
@@ -15,7 +16,7 @@ export function PasswordRecoveryForm({mode}:{mode:"request"|"confirm"}){
   e.preventDefault();if(busy||done)return;setMessage(null);setError(null);
   if(mode==="confirm"){
    if(!token){setError("missingToken");return;}
-   if(!recoveryPasswordLengthValid(password)){setError("length");return;}
+   if(!recoveryPasswordLengthValid(password)||!isUnchangedCredential(password)){setError("length");return;}
    if(password!==confirm){setError("mismatch");return;}
   }
   setBusy(true);

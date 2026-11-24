@@ -18,3 +18,8 @@ export function sanitizeInput<T>(value: T): T {
   }
   return value;
 }
+
+/** Existing credentials use legacy sanitization. Never silently change a newly chosen secret. */
+export function isUnchangedCredential(value: unknown): value is string {
+  return typeof value === "string" && sanitizeString(value) === value;
+}

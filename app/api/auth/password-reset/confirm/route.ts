@@ -8,7 +8,7 @@ const schema=z.object({token:z.string().refine(validResetToken,"Invalid reset li
 export async function POST(request:Request){
  try{
    if(!await claimPublicAuthQuota({scope:"password-reset-confirm-ip",key:trustedPublicClientIp(request),limit:10,windowSeconds:900}))return fail("Too many attempts. Try again later.",429);
-   const body=await validateJson(request,schema);
+   const body=await validateJson(request,schema,["password"]);
    if(!await completePasswordReset(body.token,body.password))return fail("This reset link is invalid, expired or already used.",400);
    await clearAuthCookie();
    return ok({reset:true});
