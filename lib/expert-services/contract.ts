@@ -17,3 +17,15 @@ export function sourceMatches(kind:string,expected:string|null,current:string|nu
  return kind==="WRITTEN"||(kind==="REPORT_REVIEW"&&typeof expected==="string"&&/^[a-f0-9]{64}$/.test(expected)&&expected===current);
 }
 export const expertStatusLabels:Record<string,string>={REQUESTED:"Awaiting assignment",ASSIGNED:"Awaiting practitioner acceptance",QUOTED:"Practitioner accepted — review quote",PAYMENT_PENDING:"Payment requires verification",PAID:"Paid — awaiting written response",DELIVERED:"Practitioner response available",REVIEW:"Support / merchant review required",REFUNDED:"Refunded",CANCELED:"Canceled"};
+
+/** A purchased review does not override revocation of its underlying report. */
+export function expertProviderAccess(kind:string,status:string,entitled:boolean,sourceValid:boolean){
+ const validKind=kind==="WRITTEN"||kind==="REPORT_REVIEW";
+ const active=validKind&&sourceValid;
+ return {
+  question:active&&(["ASSIGNED","QUOTED","PAYMENT_PENDING"].includes(status)||(entitled&&["PAID","DELIVERED"].includes(status))),
+  response:active&&entitled&&status==="DELIVERED",
+  report:active&&entitled&&kind==="REPORT_REVIEW"&&status==="PAID",
+  reviewed:active&&entitled&&kind==="REPORT_REVIEW"&&["PAID","DELIVERED"].includes(status)
+ };
+}

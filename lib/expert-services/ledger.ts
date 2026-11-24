@@ -3,7 +3,7 @@ import {prisma} from "@/lib/db";
 import {env} from "@/lib/env";
 import {getRazorpayReadiness} from "@/lib/payments/readiness";
 import {getManualReportCheckout} from "@/lib/reports/checkout-catalogue";
-import {EXPERT_TERMS_VERSION,expertNames,expertEntitled,exactExpertPayment,validExpertQuote,sourceMatches,type ExpertKind} from "@/lib/expert-services/contract";
+import {EXPERT_TERMS_VERSION,expertNames,expertEntitled,exactExpertPayment,validExpertQuote,sourceMatches,expertProviderAccess,type ExpertKind} from "@/lib/expert-services/contract";
 import type {Prisma,Payment,ExpertServiceRequest} from "@prisma/client";
 import type {requestSchema,adminSchema,providerSchema} from "@/lib/expert-services/input";
 import type {z} from "zod";
@@ -82,10 +82,14 @@ export async function listExpertProvider(userId:string){
  return prisma.$transaction(async tx=>{
  const ready=await approvedExpert(tx,profile.id);if(!ready)return [];
  const rows=await tx.expertServiceRequest.findMany({where:{astrologerProfileId:profile.id},select:{...publicSelect,response:true,sourceReadAt:true,sourceReadChecksum:true,sourceChecksum:true,payment:true,paymentId:true,userId:true,astrologerProfileId:true,consentVersion:true,settledAt:true},orderBy:{createdAt:"desc"},take:50});
- return rows.map(({payment,userId,paymentId,astrologerProfileId,consentVersion,sourceChecksum,sourceReadChecksum,response,...row})=>{
+ return Promise.all(rows.map(async ({payment,userId,paymentId,astrologerProfileId,consentVersion,sourceChecksum,sourceReadChecksum,response,...row})=>{
  const entitled=expertEntitled({...row,userId,paymentId,astrologerProfileId,consentVersion},payment);
- return {...row,question:["ASSIGNED","QUOTED","PAYMENT_PENDING"].includes(row.status)||entitled?row.question:null,response:entitled?response:null,canReadReport:entitled&&row.kind==="REPORT_REVIEW"&&row.status==="PAID",sourceReviewed:Boolean(sourceReadChecksum&&sourceReadChecksum===sourceChecksum)};
- });
+ // Recheck the current paid report and checksum even after the review itself
+ // was purchased. A refunded/replaced source must not expose its private notes.
+ const sourceValid=await sourceStillValid(tx,{...row,userId,sourceChecksum});
+ const access=expertProviderAccess(row.kind,row.status,entitled,sourceValid);
+ return {...row,question:access.question?row.question:null,response:access.response?response:null,canReadReport:access.report,sourceReviewed:access.reviewed&&Boolean(sourceReadChecksum&&sourceReadChecksum===sourceChecksum)};
+ }));
  });
 }
 export async function actExpertProvider(userId:string,input:z.infer<typeof providerSchema>){
