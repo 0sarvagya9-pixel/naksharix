@@ -5,7 +5,7 @@ const revenue = read("lib/revenue.ts");
 const webhook = read("app/api/payments/razorpay/webhook/route.ts");
 const verify = read("app/api/payments/razorpay/verify/route.ts");
 const invariant = [
-  ["captured callback excludes refunded/waived", revenue.includes("payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.FAILED")],
+  ["captured callback excludes refunded/waived", revenue.includes("currentPayment.status!==PaymentStatus.PENDING&&currentPayment.status!==PaymentStatus.FAILED") && revenue.includes("await cumulativeSignedRefund(tx,providerPaymentId)>0")],
   ["captured compare-and-swap only from pending/failed", revenue.includes("status: { in: [PaymentStatus.PENDING, PaymentStatus.FAILED] }")],
   ["paid callback cannot switch gateway payment id", revenue.includes("payment.providerPaymentId === providerPaymentId ? payment : null")],
   ["racing callbacks re-read paid state", revenue.includes("current?.status === PaymentStatus.PAID") && revenue.includes("current.providerPaymentId === providerPaymentId")],
