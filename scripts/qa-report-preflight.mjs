@@ -66,7 +66,17 @@ assert.ok(lockPos>=0&&receiptPos>lockPos&&claimPos>receiptPos);
 assert.ok(captureServer.includes("Prisma.TransactionIsolationLevel.ReadCommitted"));
 assert.ok(captureWebhook.indexOf("const fresh = await verifyRazorpayCapturedPayment")<captureWebhook.indexOf("const paid = await finalizePaidPayment"));
 assert.ok(captureWebhook.includes("Payment verification temporarily unavailable"));
-assert.ok(captureVerify.includes("Payment requires reconciliation before acknowledgement")&&captureVerify.includes("return ok({ payment: current })"));
+// Both first capture and already-paid retry must use the same verified path.
+const retryGuard=captureVerify.indexOf('alreadyPaid && existingPayment.providerPaymentId !== body.razorpay_payment_id');
+const freshCapture=captureVerify.indexOf("const captured = await verifyRazorpayCapturedPayment(");
+const finalize=captureVerify.indexOf("const payment = await finalizePaidPayment(");
+const rejectUnfinalized=captureVerify.indexOf('if (!payment) return fail("Payment no longer eligible for capture", 409);');
+const reconcile=captureVerify.indexOf("await reconcileCapturedPurpose(payment)");
+const acknowledge=captureVerify.indexOf("return ok({ payment });");
+assert.ok(retryGuard>=0&&freshCapture>retryGuard&&finalize>freshCapture&&rejectUnfinalized>finalize&&reconcile>rejectUnfinalized&&acknowledge>reconcile);
+assert.ok(captureVerify.includes('if (!captured.ok) return alreadyPaid')&&captureVerify.includes('fail("Payment requires reconciliation before acknowledgement", 409)'));
+assert.equal((captureVerify.match(/await finalizePaidPayment\(/g)||[]).length,1);
+assert.equal((captureVerify.match(/return ok\(/g)||[]).length,1);
 assert.ok(refundReconcile.includes("if(signedTotal===null)return;")&&refundReconcile.includes("const effectiveRefund=signedTotal;"));
 console.log("CAPTURE_REFUND_ORDERING_SOURCE_CONTRACT_PASS; real gateway and concurrent DB acceptance pending");
 
