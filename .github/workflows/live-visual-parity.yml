@@ -44,8 +44,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1
-      - run: npx playwright install --with-deps chromium
+      - name: Install isolated browser QA tools
+        shell: bash
+        run: bash scripts/install-browser-qa-tools.sh
+      - run: node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" install --with-deps chromium
       - run: npx prisma generate
       - run: npm run build
       - name: Capture live and candidate snapshots (read-only)
