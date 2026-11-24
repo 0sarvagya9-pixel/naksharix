@@ -31,3 +31,24 @@ assert.equal(recoveryPasswordLengthValid("क".repeat(25)),false);
 assert.equal(recoveryPasswordLengthValid("क".repeat(24)),true);
 assert.equal(recoveryPasswordLengthValid("short"),false);
 console.log("PASSWORD_RECOVERY_LOCALIZATION_CONTRACT_PASS");
+
+
+import {authFormCopy,authFormErrorKey,authResponseConfirmed} from "../lib/auth/auth-form-copy.ts";
+const formKeys=Object.keys(authFormCopy.en).sort();
+for(const locale of ["en","hi","hinglish"]){
+  assert.deepEqual(Object.keys(authFormCopy[locale]).sort(),formKeys);
+  assert.ok(Object.values(authFormCopy[locale]).every(v=>typeof v==="string"&&v.trim().length>0));
+}
+for(const [status,mode,professional,expected] of [
+  [401,"login",false,"credentials"],[403,"login",true,"role"],[403,"login",false,"failed"],
+  [409,"signup",false,"existing"],[400,"signup",false,"input"],[422,"login",false,"input"],
+  [429,"signup",false,"rate"],[503,"login",false,"unavailable"],[500,"login",false,"failed"],
+  [200,"login",false,"failed"]
+]) assert.equal(authFormErrorKey(status,mode,professional),expected);
+for(const effectiveRole of ["USER","ASTROLOGER","CONSULTANT","ADMIN"]) assert.equal(authResponseConfirmed("login",{data:{user:{id:"fixture",effectiveRole}}}),true);
+for(const effectiveRole of ["SUPER_ADMIN","MODERATOR",null,["USER"],undefined]) assert.equal(authResponseConfirmed("login",{data:{user:{id:"fixture",effectiveRole}}}),false);
+for(const value of [null,{},[],{data:{user:{id:"",effectiveRole:"USER"}}},{data:{user:{id:42,effectiveRole:"USER"}}}]) assert.equal(authResponseConfirmed("login",value),false);
+assert.equal(authResponseConfirmed("signup",{data:{user:{id:"fixture"},verificationRequired:true}}),true);
+assert.equal(authResponseConfirmed("signup",{data:{user:{id:"fixture"},verificationRequired:false}}),false);
+assert.equal(authResponseConfirmed("signup",{data:{user:{id:"fixture"},verificationRequired:"true"}}),false);
+console.log("AUTH_FORM_RESPONSE_AND_LOCALIZATION_CONTRACT_PASS");
