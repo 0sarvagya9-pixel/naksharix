@@ -784,6 +784,7 @@ try {
       const created=await post("/api/commerce/orders",input,userCookie);
       const body=await created.json();assert.equal(created.status,201,JSON.stringify(body));
       orderId=body.data.order.id;assert.equal(body.data.order.subtotalPaise,259800);
+      assert.equal(body.data.order.deliveryCountry,"IN");assert.equal(body.data.order.shippingPaise,0);assert.equal(body.data.order.totalPaise,259800);
       assert.equal(body.data.order.paymentStatus,"UNPAID");
       assert.equal(body.data.charged,false);
       // Verify real persisted 24-hour quota using a disposable CI database.
@@ -817,6 +818,60 @@ try {
       const state=(await stateRes.json()).data;
       const reset=await post(catalogueUrl,{expectedVersion:state.version,products:original},adminCookie,"PUT");
       assert.equal(reset.status,200,await reset.text());
+    }
+  });
+
+  await check("International shipping quote, approved rates, stale amount and outstanding payment safety", async () => {
+    const catalogueUrl="/api/admin/shop-catalogue",rateUrl="/api/admin/shop-shipping",quoteUrl="/api/commerce/shipping-quote",orderUrl="/api/commerce/orders";
+    const savedRes=await req(catalogueUrl,{headers:{cookie:adminCookie}});assert.equal(savedRes.status,200);
+    const saved=(await savedRes.json()).data,sku=saved.products.find(p=>p.id==="shri-yantra");assert.ok(sku);
+    const original=saved.products,orders=[],rates=[],payments=[];
+    const terms="shop-international-shipping-2026-11-24-v1";
+    try{
+      const price=await post(catalogueUrl,{expectedVersion:saved.version,products:original.map(p=>p.id===sku.id?{...p,unitPricePaise:129900}:p)},adminCookie,"PUT");assert.equal(price.status,200,await price.text());
+      const items=[{productId:sku.id,quantity:2}],destination={items,country:"US",postalCode:"10001"};
+      const payload={items,expectedSubtotalPaise:259800,customerName:"QA Customer",customerPhone:"+1 212 555 0100",deliveryAddress:"100 Test Avenue, synthetic address",deliveryCity:"New York",deliveryState:"NY",deliveryCountry:"US",postalCode:"10001",customerNote:"CI only, no real shipment",shippingTermsVersion:terms};
+      assert.equal((await post(quoteUrl,destination)).status,401);
+      assert.equal((await post(quoteUrl,{...destination,postalCode:"452001"},userCookie)).status,422);
+      assert.equal((await post(quoteUrl,{...destination,country:"XX"},userCookie)).status,422);
+      const initial=await post(quoteUrl,destination,userCookie);assert.equal(initial.status,200);const unquoted=(await initial.json()).data;
+      assert.equal(unquoted.kind,"QUOTE_REQUIRED");assert.equal(unquoted.totalPaise,null);
+      assert.equal((await post(orderUrl,{...payload,expectedShippingQuoteKey:unquoted.quoteKey,shippingTermsVersion:undefined},userCookie)).status,422);
+      assert.equal((await post(orderUrl,{...payload,expectedShippingQuoteKey:"0".repeat(64)},userCookie)).status,409);
+      const created=await post(orderUrl,{...payload,expectedShippingQuoteKey:unquoted.quoteKey},userCookie);assert.equal(created.status,201,await created.clone().text());const request=(await created.json()).data;
+      orders.push(request.order.id);
+      assert.equal(request.order.deliveryCountry,"US");assert.equal(request.order.status,"REQUESTED");assert.equal(request.order.totalPaise,null);assert.equal(request.order.shippingPaise,null);assert.equal(request.onlineCheckoutAvailable,false);assert.equal(request.charged,false);
+      const patch={id:request.order.id,expectedVersion:request.order.version,status:"CONFIRMED",shippingPaise:180000,taxPaise:4000,trackingReference:null,fulfillmentEvidenceUrl:null,adminNote:"CI fixture only"};
+      assert.equal((await post("/api/admin/shop-orders",patch,adminCookie,"PATCH")).status,422);
+      const manualQuote={carrier:"CI synthetic carrier",evidenceReference:"Synthetic CI reference; not an actual tariff",expiresAt:new Date(Date.now()+86400000).toISOString(),dutiesMode:"RECIPIENT_MAY_PAY",confirmed:true};
+      const confirm=await post("/api/admin/shop-orders",{...patch,manualQuote},adminCookie,"PATCH");assert.equal(confirm.status,200,await confirm.clone().text());const confirmed=(await confirm.json()).data.order;
+      assert.equal(confirmed.totalPaise,443800);assert.equal(confirmed.shippingQuote.kind,"MANUAL_QUOTE");assert.equal(confirmed.shippingQuote.country,"US");
+      // A synthetic PENDING ledger reservation in a disposable database; no merchant call.
+      const fixturePayment=await prisma.payment.create({data:{userId,provider:"RAZORPAY",purpose:"SHOP_ORDER",status:"PENDING",amount:4438,currency:"INR",metadata:{shopOrderId:confirmed.id}}});
+      payments.push(fixturePayment.id);
+      assert.equal((await post("/api/admin/shop-orders",{...patch,expectedVersion:confirmed.version,shippingPaise:190000,manualQuote},adminCookie,"PATCH")).status,409);
+      assert.equal((await post("/api/admin/shop-orders",{...patch,expectedVersion:confirmed.version,status:"CANCELED",shippingPaise:180000},adminCookie,"PATCH")).status,409);
+      const rate={expectedVersion:0,country:"US",productId:sku.id,postalPrefix:"100",shippingPaisePerUnit:90000,taxPaisePerUnit:2000,maxQuantity:3,carrier:"CI synthetic carrier",evidenceReference:"CI synthetic evidence only",dutiesMode:"RECIPIENT_MAY_PAY",expiresAt:new Date(Date.now()+86400000).toISOString(),active:true,confirmed:true};
+      assert.equal((await post(rateUrl,rate,userCookie,"PUT")).status,403);
+      assert.equal((await post(rateUrl,{...rate,confirmed:false},adminCookie,"PUT")).status,422);
+      const published=await post(rateUrl,rate,adminCookie,"PUT");assert.equal(published.status,200,await published.clone().text());const savedRate=(await published.json()).data.rate;rates.push(savedRate.id);
+      const quote=await post(quoteUrl,destination,userCookie);assert.equal(quote.status,200);const calculated=(await quote.json()).data;
+      assert.equal(calculated.kind,"PUBLISHED_RATE");assert.equal(calculated.shippingPaise,180000);assert.equal(calculated.taxPaise,4000);assert.equal(calculated.totalPaise,443800);
+      const outside=await post(quoteUrl,{...destination,postalCode:"90210"},userCookie);assert.equal((await outside.json()).data.totalPaise,null);
+      const excessive=await post(quoteUrl,{...destination,items:[{productId:sku.id,quantity:4}]},userCookie);assert.equal((await excessive.json()).data.totalPaise,null);
+      const rateChange=await post(rateUrl,{...rate,id:savedRate.id,expectedVersion:savedRate.version,shippingPaisePerUnit:100000},adminCookie,"PUT");assert.equal(rateChange.status,200,await rateChange.clone().text());
+      assert.equal((await post(orderUrl,{...payload,expectedShippingQuoteKey:calculated.quoteKey},userCookie)).status,409);
+      const currentQuote=(await (await post(quoteUrl,destination,userCookie)).json()).data;assert.equal(currentQuote.totalPaise,463800);
+      const priced=await post(orderUrl,{...payload,expectedShippingQuoteKey:currentQuote.quoteKey},userCookie);assert.equal(priced.status,201,await priced.clone().text());const pricedOrder=(await priced.json()).data.order;orders.push(pricedOrder.id);
+      assert.equal(pricedOrder.totalPaise,463800);assert.equal(pricedOrder.shippingQuote.kind,"PUBLISHED_RATE");
+      const persisted=await prisma.shopOrder.findUniqueOrThrow({where:{id:pricedOrder.id}});assert.equal(persisted.deliveryCountry,"US");assert.equal(persisted.shippingPaise,200000);assert.equal(persisted.paymentStatus,"UNPAID");
+      assert.equal(await prisma.payment.count({where:{userId,purpose:"SHOP_ORDER",metadata:{path:["shopOrderId"],equals:pricedOrder.id}}}),0);
+    }finally{
+      if(payments.length)await prisma.payment.deleteMany({where:{id:{in:payments}}});
+      if(orders.length)await prisma.shopOrder.deleteMany({where:{id:{in:orders}}});
+      if(rates.length)await prisma.shopShippingRate.deleteMany({where:{id:{in:rates}}});
+      const state=(await (await req(catalogueUrl,{headers:{cookie:adminCookie}})).json()).data;
+      const reset=await post(catalogueUrl,{expectedVersion:state.version,products:original},adminCookie,"PUT");assert.equal(reset.status,200,await reset.text());
     }
   });
 

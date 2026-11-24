@@ -45,7 +45,7 @@ gate(order.includes('purpose: z.literal("SHOP_ORDER")') &&
   order.includes('order.status !== "CONFIRMED"') &&
   order.includes('["SELLER_FULFILLED", "MANUAL_CONFIRMATION"].includes(order.fulfillmentMode)'),
   "seller-operated Shop flow with server-owned immutable total");
-gate(shopPage.includes('payload={{purpose:"SHOP_ORDER",shopOrderId:order.id}}') &&
+gate(shopPage.includes("<ShopOrderPayButton orderId={order.id}") && shopPage.includes("shippingPayable(order)") && read("components/shop/shop-order-pay-button.tsx").includes("expectedTotalPaise:totalPaise") &&
   shopPage.includes('env.SHOP_PAYMENTS_ENABLED==="true"'), "shop checkout visible only after approval");
 gate(adminShop.includes('current.paymentStatus!=="PAID"') &&
   adminShop.includes("Captured Razorpay payment") &&

@@ -6,6 +6,8 @@ import { prisma } from "@/lib/db";
 import { getShopCatalogue } from "@/lib/shop/catalogue-store";
 import { env } from "@/lib/env";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
+import { isShippingCountry,validPostal,normalizePostal,SHIPPING_TERMS_VERSION } from "@/lib/shop/shipping-rules";
+import { resolveShipping,quoteKey } from "@/lib/shop/shipping-server";
 
 
 export const dynamic="force-dynamic";
@@ -16,8 +18,11 @@ const schema=z.object({
  customerPhone:z.string().trim().regex(/^[+0-9() -]{8,20}$/),
  deliveryAddress:z.string().trim().min(12).max(350),
  deliveryCity:z.string().trim().min(2).max(90),
- deliveryState:z.string().trim().min(2).max(90),
- postalCode:z.string().trim().regex(/^[0-9]{6}$/),
+ deliveryState:z.string().trim().max(90),
+ deliveryCountry:z.string().length(2).refine(isShippingCountry).default("IN"),
+ postalCode:z.string().trim().max(16),
+ expectedShippingQuoteKey:z.string().regex(/^[a-f0-9]{64}$/).optional(),
+ shippingTermsVersion:z.literal(SHIPPING_TERMS_VERSION).optional(),
  customerNote:z.string().trim().max(1000),
 }).strict();
 
@@ -25,7 +30,7 @@ export async function GET(){
  try{
   const user=await getCurrentUser();if(!user)return fail("Sign in to view orders.",401);
   const orders=await prisma.shopOrder.findMany({where:{userId:user.id},orderBy:{createdAt:"desc"},take:50,
-   select:{id:true,items:true,status:true,paymentStatus:true,subtotalPaise:true,shippingPaise:true,taxPaise:true,
+   select:{id:true,items:true,status:true,paymentStatus:true,deliveryCountry:true,shippingQuote:true,subtotalPaise:true,shippingPaise:true,taxPaise:true,
      totalPaise:true,trackingReference:true,createdAt:true,updatedAt:true}});
   return ok({orders});
  }catch(error){
@@ -37,6 +42,9 @@ export async function POST(request:Request){
  try{
   const user=await getCurrentUser();if(!user)return fail("Sign in to checkout. Your cart will stay saved in this browser.",401);
   const input=await validateJson(request,schema);
+  if(!validPostal(input.deliveryCountry,input.postalCode)||(input.deliveryCountry==="IN"&&input.deliveryState.length<2))return fail("Enter a valid postal code and state for the delivery country.",422);
+  if(input.deliveryCountry!=="IN"&&input.shippingTermsVersion!==SHIPPING_TERMS_VERSION)return fail("Accept the international shipping and customs disclosure before submitting.",422);
+  const postal=normalizePostal(input.deliveryCountry,input.postalCode);
   const productIds=input.items.map(i=>i.productId);
   if(new Set(productIds).size!==productIds.length)return fail("Duplicate cart item.",422);
   const products=await getShopCatalogue();
@@ -57,6 +65,8 @@ export async function POST(request:Request){
   // The canonical server-owned subtotal remains the only persisted amount.
   if(input.expectedSubtotalPaise!==undefined&&input.expectedSubtotalPaise!==subtotal)
     return fail("Cart prices changed. Refresh the cart and review the current prices before ordering.",409);
+  const shipping=await resolveShipping(input.deliveryCountry,postal,lines);
+  if(input.deliveryCountry!=="IN"&&input.expectedShippingQuoteKey!==quoteKey(input.deliveryCountry,postal,lines,shipping))return fail("Shipping quote changed. Recalculate and review the current total before ordering.",409);
   // Cross-instance abuse protection with no new table or Redis provisioning:
   // a transaction-scoped advisory lock serializes count + persist per user.
   // Failure to acquire/query the DB fails closed before an order is created.
@@ -70,23 +80,22 @@ export async function POST(request:Request){
       userId:user.id,createdAt:{gte:new Date(Date.now()-86400_000)}
     }});
     if(recent>=5)return null;
-    const checkoutReady=env.SHOP_PAYMENTS_ENABLED==="true" && getRazorpayReadiness().enabled;
+    const checkoutReady=shipping.totalPaise!==null&&env.SHOP_PAYMENTS_ENABLED==="true" && getRazorpayReadiness().enabled;
     return tx.shopOrder.create({
       data:{userId:user.id,items:lines,customerName:input.customerName,customerPhone:input.customerPhone,
         deliveryAddress:input.deliveryAddress,deliveryCity:input.deliveryCity,deliveryState:input.deliveryState,
-        postalCode:input.postalCode,customerNote:input.customerNote,subtotalPaise:subtotal,
-        // Displayed selling prices are the full online payable totals for this
-        // launch. No undisclosed shipping/tax is added at checkout.
-        shippingPaise:0,taxPaise:0,totalPaise:subtotal,
+        deliveryCountry:input.deliveryCountry,postalCode:postal,customerNote:input.customerNote,subtotalPaise:subtotal,
+        shippingQuote:shipping.snapshot?shipping.snapshot as unknown as Prisma.InputJsonValue:Prisma.JsonNull,
+        shippingPaise:shipping.shippingPaise,taxPaise:shipping.taxPaise,totalPaise:shipping.totalPaise,
         status:checkoutReady?"CONFIRMED":"REQUESTED",
         paymentStatus:"UNPAID",fulfillmentMode:"SELLER_FULFILLED"},
-      select:{id:true,status:true,paymentStatus:true,subtotalPaise:true,createdAt:true}
+      select:{id:true,status:true,paymentStatus:true,subtotalPaise:true,shippingPaise:true,taxPaise:true,totalPaise:true,deliveryCountry:true,shippingQuote:true,version:true,createdAt:true}
     });
   });
   if(!order)return fail("Daily order request limit reached.",429);
   return ok({order,charged:false,
-    onlineCheckoutAvailable:env.SHOP_PAYMENTS_ENABLED==="true"&&getRazorpayReadiness().enabled,
-    nextStep:order.status==="CONFIRMED"?"Pay the displayed total securely with Razorpay.":"Order saved. Payment will be available after checkout activation."},
+    onlineCheckoutAvailable:order.status==="CONFIRMED"&&env.SHOP_PAYMENTS_ENABLED==="true"&&getRazorpayReadiness().enabled,
+    nextStep:order.totalPaise===null?"International delivery quote requested. No payment collected.":order.status==="CONFIRMED"?"Pay the displayed total securely with Razorpay.":"Order saved. Payment will be available after confirmation."},
     {status:201});
  }catch(error){
   if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2021")return fail("Order storage not yet provisioned.",503);

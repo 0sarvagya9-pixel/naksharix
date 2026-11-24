@@ -916,7 +916,9 @@ model ShopOrder {
   deliveryAddress   String
   deliveryCity      String
   deliveryState     String
+  deliveryCountry   String   @default("IN")
   postalCode        String
+  shippingQuote     Json?
   customerNote      String   @default("")
   subtotalPaise     Int
   shippingPaise     Int?
@@ -970,4 +972,25 @@ model ManualReportOffering {
  note           String   @default("")
  updatedBy      String
  updatedAt      DateTime @updatedAt
+}
+
+model ShopShippingRate {
+  id                     String   @id @default(cuid())
+  country                String
+  productId              String
+  postalPrefix           String   @default("")
+  shippingPaisePerUnit   Int
+  taxPaisePerUnit        Int
+  maxQuantity            Int
+  carrier                String
+  evidenceReference      String
+  dutiesMode             String
+  expiresAt              DateTime
+  active                 Boolean  @default(false)
+  reviewedBy             String
+  version                Int      @default(1)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @default(now()) @updatedAt
+  @@unique([country, productId, postalPrefix])
+  @@index([country, active, expiresAt])
 }

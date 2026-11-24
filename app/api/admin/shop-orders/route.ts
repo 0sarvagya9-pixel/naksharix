@@ -4,6 +4,7 @@ import { fail,handleApiError,ok,validateJson } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { notifyCustomerOfFulfilmentChange } from "@/lib/notifications/fulfilment-updates";
+import { normalizePostal,shippingPayable,readShippingSnapshot,type ShippingSnapshot } from "@/lib/shop/shipping-rules";
 export const dynamic="force-dynamic";
 const statuses=["REQUESTED","CONFIRMED","PACKING","DISPATCHED","DELIVERED","CANCELED"] as const;
 const moves:Record<string,readonly string[]>={
@@ -18,7 +19,8 @@ const patch=z.object({
  taxPaise:z.number().int().min(0).max(10000000).nullable(),
  trackingReference:z.string().trim().max(140).nullable(),
  fulfillmentEvidenceUrl:z.string().url().max(500).nullable(),
- adminNote:z.string().trim().max(1500)
+ adminNote:z.string().trim().max(1500),
+ manualQuote:z.object({carrier:z.string().trim().min(2).max(120),evidenceReference:z.string().trim().min(8).max(500),expiresAt:z.string().datetime(),dutiesMode:z.enum(["INCLUDED","RECIPIENT_MAY_PAY"]),confirmed:z.literal(true)}).strict().optional()
 }).strict();
 export async function GET(){
  try{
@@ -26,7 +28,7 @@ export async function GET(){
   const orders=await prisma.shopOrder.findMany({
    orderBy:{createdAt:"desc"},take:100,
    select:{id:true,userId:true,items:true,customerName:true,customerPhone:true,deliveryCity:true,deliveryState:true,
-    deliveryAddress:true,postalCode:true,customerNote:true,subtotalPaise:true,shippingPaise:true,taxPaise:true,totalPaise:true,
+    deliveryAddress:true,deliveryCountry:true,postalCode:true,shippingQuote:true,customerNote:true,subtotalPaise:true,shippingPaise:true,taxPaise:true,totalPaise:true,
     status:true,paymentStatus:true,trackingReference:true,fulfillmentEvidenceUrl:true,adminNote:true,version:true,createdAt:true,updatedAt:true}
   });
   return ok({orders});
@@ -61,11 +63,30 @@ export async function PATCH(request:Request){
      (shipping!==current.shippingPaise||tax!==current.taxPaise))
     return fail("Shipping and tax totals cannot be changed after a captured payment.",409);
   const total=shipping!==null&&tax!==null?current.subtotalPaise+shipping+tax:null;
+  let snapshot=readShippingSnapshot(current.shippingQuote);
+  const international=current.deliveryCountry!=="IN";
+  const changesPrice=shipping!==current.shippingPaise||tax!==current.taxPaise;
+  if(input.manualQuote){
+    if(!international||current.paymentStatus==="PAID"||current.paymentStatus==="REFUNDED"||!["REQUESTED","CONFIRMED"].includes(input.status)||shipping===null||tax===null)return fail("Manual international quote is only for an unpaid order with confirmed charges.",422);
+    const expiry=Date.parse(input.manualQuote.expiresAt);
+    if(!Number.isFinite(expiry)||expiry<=Date.now()||expiry>Date.now()+90*86400000)return fail("Use a valid future courier-quote expiry within 90 days.",422);
+    snapshot={kind:"MANUAL_QUOTE",country:current.deliveryCountry,postalCode:normalizePostal(current.deliveryCountry,current.postalCode),shippingPaise:shipping,taxPaise:tax,carrier:input.manualQuote.carrier,dutiesMode:input.manualQuote.dutiesMode,expiresAt:new Date(expiry).toISOString(),rateVersions:[]} satisfies ShippingSnapshot;
+  }
+  if(international&&current.paymentStatus!=="PAID"&&input.status==="CONFIRMED"&&!shippingPayable({...current,shippingQuote:snapshot,shippingPaise:shipping,taxPaise:tax,totalPaise:total}))return fail("A current, verified international shipping quote is required before confirmation.",422);
+  if(international&&changesPrice&&!input.manualQuote)return fail("Record the verified courier quote, expiry and customs terms when changing international charges.",422);
   if(total!==null&&(!Number.isSafeInteger(total)||total>1000000000))return fail("Order total exceeds limit.",422);
   const updated=await prisma.$transaction(async tx=>{
+   // Same transaction-scoped lock as SHOP_ORDER payment reservation. A quote
+   // cannot be changed or canceled while a gateway order is outstanding.
+   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${input.id}),hashtext('naksharix-shop-payment-v1'))::text`;
+   if(changesPrice||input.manualQuote||input.status==="CANCELED"){
+     const open=await tx.payment.findFirst({where:{userId:current.userId,purpose:"SHOP_ORDER",status:{in:["PENDING","PAID"]},metadata:{path:["shopOrderId"],equals:current.id}},select:{id:true}});
+     if(open)return null;
+   }
    const change=await tx.shopOrder.updateMany({
-    where:{id:input.id,version:input.expectedVersion,status:current.status},
+    where:{id:input.id,version:input.expectedVersion,status:current.status,paymentStatus:current.paymentStatus},
     data:{status:input.status,shippingPaise:shipping,taxPaise:tax,totalPaise:total,
+     ...(input.manualQuote?{shippingQuote:snapshot as unknown as Prisma.InputJsonValue}:{}),
      trackingReference:input.trackingReference??current.trackingReference,
      fulfillmentEvidenceUrl:evidence,adminNote:input.adminNote,version:{increment:1}}
    });
@@ -74,11 +95,11 @@ export async function PATCH(request:Request){
    await tx.adminActionLog.create({data:{
     adminId:admin.id,action:"shop.order.update",targetType:"ShopOrder",targetId:input.id,
     metadata:{from:current.status,to:record.status,version:record.version,totalPaise:record.totalPaise,
-      paymentStatus:record.paymentStatus}
+      paymentStatus:record.paymentStatus,shippingCountry:record.deliveryCountry,...(input.manualQuote?{quoteEvidenceReference:input.manualQuote.evidenceReference,quoteExpiresAt:input.manualQuote.expiresAt,quoteCarrier:input.manualQuote.carrier}: {})}
    }});
    return record;
   },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});
-  if(!updated)return fail("Concurrent order change detected.",409);
+  if(!updated)return fail("Order changed or has an outstanding payment. Reconcile the payment before changing the quote or canceling.",409);
   // Status is persisted before the notification attempt: provider outages never
   // undo a valid owner update or make the browser retry a successful transition.
   const notification=await notifyCustomerOfFulfilmentChange({

@@ -49,7 +49,7 @@ const cart=read("components/shop/cart-page-client.tsx");
 assert.ok(shop.includes("AddToCartButton") && read("app/cart/page.tsx").includes("CartPageClient"),"CART_LINK_BROKEN");
 assert.ok(adminApi.includes("unitPricePaise: z.number().int().min(100)") && adminApi.includes("imageRights"),"PRICE_OR_IMAGE_RIGHTS_UNVALIDATED");
 assert.ok(cart.includes("Sign in to checkout") && cart.includes("Total payable") &&
- cart.includes('payload={{purpose:"SHOP_ORDER",shopOrderId:orderId}}'),"SHOP_CUSTOMER_CHECKOUT_MISSING");
+ cart.includes('<ShopOrderPayButton orderId={orderId}') && read("components/shop/shop-order-pay-button.tsx").includes("expectedTotalPaise:totalPaise") && cart.includes("Delivery country"),"SHOP_CUSTOMER_CHECKOUT_MISSING");
 const photoRegistry=read("lib/puja/editorial-photos.ts");
 assert.ok(photoRegistry.includes("CC BY-SA 4.0") && photoRegistry.includes("CC0 1.0") && read("app/image-credits/page.tsx").includes("editorialPujaPhotos"),"PUJA_IMAGE_RIGHTS_CREDIT_MISSING");
 

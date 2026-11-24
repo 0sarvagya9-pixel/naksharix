@@ -10,6 +10,7 @@ on:
       - deploy/sql/20261026-learning-progress.sql
       - deploy/sql/20261026-puja-partner-registry.sql
       - deploy/sql/20261029_unified_razorpay_commerce.sql
+      - deploy/sql/20261124-country-aware-shop-shipping.sql
       - lib/payments/**
       - scripts/qa-unified-razorpay.mjs
       - lib/ops/schema-readiness.ts
