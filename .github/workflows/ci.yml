@@ -103,7 +103,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          npm run qa:all > quality-qa.log 2>&1
+          node scripts/qa-all-independent.mjs > quality-qa.log 2>&1
           QA_EXIT=$?
           npm run qa:final-closure >> quality-qa.log 2>&1
           FINAL_EXIT=$?
