@@ -231,25 +231,27 @@ function toPaymentMessage(error: string | undefined, fallback: string, signIn: s
   return error;
 }
 
-function loadRazorpayScript() {
-  return new Promise<boolean>((resolve) => {
-    if (window.Razorpay) {
-      resolve(true);
-      return;
-    }
-
-    const existing = document.querySelector<HTMLScriptElement>('script[data-naksharix-razorpay="true"]');
-    if (existing) {
-      existing.addEventListener("load", () => resolve(Boolean(window.Razorpay)), { once: true });
-      existing.addEventListener("error", () => resolve(false), { once: true });
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.dataset.naksharixRazorpay = "true";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
+let razorpayScriptLoad:Promise<boolean>|null=null;
+function loadRazorpayScript():Promise<boolean>{
+ if(window.Razorpay)return Promise.resolve(true);
+ if(razorpayScriptLoad)return razorpayScriptLoad;
+ const pending=new Promise<boolean>(resolve=>{
+  const existing=document.querySelector<HTMLScriptElement>('script[data-naksharix-razorpay="true"]');
+  const script=existing??document.createElement("script");
+  let done=false;
+  const finish=(success:boolean)=>{
+   if(done)return;done=true;window.clearTimeout(timer);
+   script.removeEventListener("load",loaded);script.removeEventListener("error",failed);
+   if(!success&&!window.Razorpay)script.remove();
+   resolve(success&&Boolean(window.Razorpay));
+  };
+  const loaded=()=>finish(Boolean(window.Razorpay)),failed=()=>finish(false);
+  const timer=window.setTimeout(()=>finish(Boolean(window.Razorpay)),12000);
+  script.addEventListener("load",loaded,{once:true});script.addEventListener("error",failed,{once:true});
+  if(!existing){script.src="https://checkout.razorpay.com/v1/checkout.js";script.dataset.naksharixRazorpay="true";document.body.appendChild(script);}
+  if(window.Razorpay)finish(true);
+ });
+ razorpayScriptLoad=pending;
+ void pending.finally(()=>{if(razorpayScriptLoad===pending)razorpayScriptLoad=null;});
+ return pending;
 }

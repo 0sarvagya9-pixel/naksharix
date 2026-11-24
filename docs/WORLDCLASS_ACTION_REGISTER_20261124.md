@@ -103,7 +103,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 
 - Preserve production commit and alias; no preview or production deployment.
 - Reconcile original PRs 144/151/153 already incorporated in this branch; do not independently merge them during hold.
-- Review TypeScript and schema contracts, migrations, source and isolated fixtures; no final production testing until owner permits.
+- Exact hold-branch-only source-check workflow added: read-only GitHub runner, synthetic configuration, Prisma validation/generate, TypeScript and deterministic contracts; no database apply, deploy or external customer/provider calls. Final broad acceptance remains deferred until owner permits.
 - Close each OPEN/PARTIAL implementation and record concrete evidence. External requirements cannot be counted as complete without real evidence. No proposed prices become live without approval.
 - Independent full CI, build, visual/mobile and security acceptance, database migration plan and rollback, authenticated business flow tests, then explicit approved release and real post-deploy verification. Never claim complete based on this register.
 
@@ -111,3 +111,6 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 ### Independent numerical reference (staged)
 - Swiss Ephemeris 2.10.03 / Moshier computed 5 synthetic charts, 50 angular positions. Checked-in prior regression values compared offline: 50/50 within 0.02 degrees; maximum discrepancy 0.005300 degrees (London Mars). This is a comparison of previously saved regression data, not a run of this development head. The Sydney Mars reference crosses a sign boundary, so angular agreement does not establish sign-label or dasha accuracy. Independent fixture runner added to qa:all; current runtime, production entry points, panchang, matching, dasha and professional acceptance remain unverified. No precision certification claims changed.
 - Push revocation now fails closed when the device registry cannot be checked.
+
+### Development source verification boundary
+- Package and B2B source introduced in the hold branch only. Existing customer birth-record debug logging removed from matching route. Razorpay script loading has a bounded timeout and retry-safe shared promise. Full application build, payment, device, real provider and production acceptance not yet certified.
