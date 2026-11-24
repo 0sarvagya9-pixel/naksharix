@@ -54,6 +54,7 @@ export async function PATCH(request: Request) {
     const body = patchSchema.parse(await request.json());
     const current = await prisma.reportRequest.findUnique({ where: { id: body.id } });
     if (!current) return fail("Report request not found", 404);
+    if(["auto_generating","auto_sending"].includes(current.deliveryStatus)&&Date.now()-current.updatedAt.getTime()<5*60_000)return fail("Automatic report processing is active. Retry after the current lease ends.",409);
     if (body.status === ReportRequestStatus.READY_FOR_GENERATION && current.status !== body.status) {
       if (body.reviewConfirmed !== true || (body.adminNotes ?? "").trim().length < 30) {
         return fail("Explicit admin review confirmation and at least 30 characters of chart/input review notes are required.", 422);

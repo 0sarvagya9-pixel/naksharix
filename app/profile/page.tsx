@@ -33,11 +33,11 @@ export default async function ProfilePage() {
                 <p className="font-semibold text-foreground">{request.planType} Report</p>
                 <p className="naksh-muted-text">{request.createdAt.toLocaleString()} | {request.paymentStatus} | {request.status}</p>
                 <p className="naksh-muted-text">Delivery: {request.deliveryEmail}</p>
-                <p className="text-xs text-[#FFD700]">Manual review workflow. Download appears only after an admin generates a real PDF.</p>
+                <p className="text-xs text-[#FFD700]">{request.deliveryStatus==="email_sent"?"Report email accepted by delivery provider.":request.deliveryStatus.startsWith("auto_")?"Automatic report processing. Open the request for status and retry.":"Report review workflow. Download appears after a real PDF is stored."}</p>
               </div>
               <div className="flex flex-wrap gap-3">
                 <Link className="text-[#FFD700] hover:underline" href={`/report-request/success?id=${request.id}`}>View</Link>
-                {request.generatedPdfSize ? <Link className="text-[#00f5a0] hover:underline" href={`/api/report-requests/${request.id}/download`}>Download PDF</Link> : null}
+                {request.generatedPdfSize && request.paymentStatus!=="REFUNDED" ? <Link className="text-[#00f5a0] hover:underline" href={`/api/report-requests/${request.id}/download`}>Download PDF</Link> : null}
               </div>
             </div>
           ))}

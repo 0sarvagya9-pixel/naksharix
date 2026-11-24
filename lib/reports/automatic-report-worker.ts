@@ -15,7 +15,7 @@ import type { ReportRequest } from "@prisma/client";
 const LEASE_MS=5*60_000;
 const EMAIL_REPLAY_MS=23*3600_000;
 const GEN_STATES=["auto_queued","auto_generation_retry","auto_generating"];
-const MAIL_STATES=["auto_email_ready","auto_email_retry","auto_sending"];
+const MAIL_STATES=["auto_email_ready","auto_email_retry","auto_email_uncertain","auto_sending"];
 const ALL_STATES=[...GEN_STATES,...MAIL_STATES];
 function stillActive(state:string){return state==="auto_generating"||state==="auto_sending";}
 function claimable(row:ReportRequest,now=Date.now()){
@@ -111,7 +111,7 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
   // Resend idempotency has a finite window. If an interrupted or uncertain
   // send is older than it, keep the private file and request operator reconciliation
   // rather than silently sending duplicate customer emails.
-  if(row.deliveryStatus!=="auto_email_ready"&&Date.now()-row.generatedAt.getTime()>=EMAIL_REPLAY_MS){
+  if(["auto_email_uncertain","auto_sending"].includes(row.deliveryStatus)&&Date.now()-row.generatedAt.getTime()>=EMAIL_REPLAY_MS){
     await prisma.reportRequest.updateMany({where:{id,updatedAt:row.updatedAt,deliveryStatus:row.deliveryStatus,paymentStatus:"PAID"},data:{status:"READY_FOR_DELIVERY",deliveryStatus:"auto_email_review",deliveryError:"Email attempt requires reconciliation. Secure download remains available."}});
     return "pending";
   }
@@ -127,11 +127,11 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
     // or a public bearer download link. Refund entitlement is still checked at download.
     const sent=await sendReportDeliveryEmail({to:current.user!.email,fullName:row.fullName,reportRequestId:id,
       reportName:title,language:languageFor(row.language),
-      downloadUrl:new URL("/api/report-requests/"+encodeURIComponent(id)+"/download",env.NEXT_PUBLIC_APP_URL).toString()});
+      downloadUrl:new URL("/report-request/success?id="+encodeURIComponent(id),env.NEXT_PUBLIC_APP_URL).toString()});
     const result=await prisma.reportRequest.updateMany({
       where:leasedWhere(id,lease,"auto_sending"),
       data:sent.sent?{status:"DELIVERED",deliveryStatus:"email_sent",emailSentAt:new Date(),deliveryError:null}:
-        {status:"READY_FOR_DELIVERY",deliveryStatus:"auto_email_retry",deliveryError:"Email provider did not confirm acceptance. Secure download is available."}
+        {status:"READY_FOR_DELIVERY",deliveryStatus:sent.reason.includes("temporarily unavailable")?"auto_email_uncertain":"auto_email_retry",deliveryError:"Email provider did not confirm acceptance. Secure download is available."}
     });
     if(result.count!==1)return "skipped";
     if(!sent.sent)return "pending";
@@ -139,7 +139,7 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
     await writeAuditLog({action:"report_delivery.automatic_email_accepted",targetType:"ReportRequest",targetId:id,metadata:{reportSlug:row.reportSlug,deliveryMode:"registered_email_secure_link"}});
     return "delivered";
   }catch{
-    await flag(id,lease,"auto_sending","auto_email_retry","Report email needs a retry; secure download remains available.").catch(()=>null);
+    await flag(id,lease,"auto_sending","auto_email_uncertain","Report email needs a retry; secure download remains available.").catch(()=>null);
     return "pending";
   }
 }
@@ -148,7 +148,7 @@ export async function runAutomaticReportRecovery(limit=12){
   const cutoff=new Date(Date.now()-LEASE_MS);
   const rows=await prisma.reportRequest.findMany({
     where:{paymentStatus:"PAID",adminBypass:false,status:{in:["PAID","IN_PROGRESS","GENERATED","READY_FOR_DELIVERY"]},
-      OR:[{deliveryStatus:{in:["auto_queued","auto_generation_retry","auto_email_ready","auto_email_retry"]}},
+      OR:[{deliveryStatus:{in:["auto_queued","auto_generation_retry","auto_email_ready","auto_email_retry","auto_email_uncertain"]}},
         {deliveryStatus:{in:["auto_generating","auto_sending"]},updatedAt:{lt:cutoff}}]},
     orderBy:{updatedAt:"asc"},take:Math.max(1,Math.min(limit,24)),select:{id:true}
   });
