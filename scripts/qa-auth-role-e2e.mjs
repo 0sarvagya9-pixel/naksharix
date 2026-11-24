@@ -110,6 +110,46 @@ try {
     assert.equal(me.status, 200);
     assert.equal((await me.json()).data.user.id, userId);
   });
+  await check("marketing consent requires verified account and explicit unspoofable permission", async () => {
+    const endpoint = "/api/marketing-consent";
+    const selected = { action: "subscribe", consent: true, interest: "kundli", locale: "hi", country: "India" };
+    assert.equal((await post(endpoint, selected)).status, 401);
+    assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 0);
+    for (const invalid of [
+      { ...selected, consent: false },
+      { ...selected, email: "someone-else@example.invalid" },
+      { ...selected, userId: "another-user" },
+      { ...selected, interest: "unknown-interest" }
+    ]) {
+      const denied = await post(endpoint, invalid, userCookie);
+      assert.equal(denied.status, 422, await denied.text());
+    }
+    assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 0);
+    const saved = await post(endpoint, selected, userCookie);
+    assert.equal(saved.status, 200, await saved.text());
+    const consentRow = await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } });
+    assert.equal(consentRow.emailAtConsent, email);
+    assert.equal(consentRow.interest, "kundli");
+    assert.equal(consentRow.locale, "hi");
+    assert.equal(consentRow.country, "India");
+    assert.equal(consentRow.source, "website-email-updates");
+    assert.equal(consentRow.consentVersion, "email-updates-v1-20261124");
+    assert.ok(consentRow.confirmedAt instanceof Date);
+    assert.equal(consentRow.revokedAt, null);
+    const repeated = await post(endpoint, selected, userCookie);
+    assert.equal(repeated.status, 200, await repeated.text());
+    assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 1);
+    const active = await req("/email-updates", { headers: { cookie: userCookie } });
+    assert.equal(active.status, 200);
+    assert.ok((await active.text()).includes("Your email updates permission is active."));
+    const revoked = await post(endpoint, { action: "unsubscribe" }, userCookie);
+    assert.equal(revoked.status, 200, await revoked.text());
+    assert.ok((await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } })).revokedAt instanceof Date);
+    const inactive = await req("/email-updates", { headers: { cookie: userCookie } });
+    assert.equal(inactive.status, 200);
+    assert.ok((await inactive.text()).includes("You are not subscribed to email updates."));
+    // Leave no opted-in fixture even in disposable CI.
+  });
   await check("OTP replay rejected", async () => {
     assert.equal((await post("/api/auth/otp/verify", { email, code: testCode })).status, 400);
   });

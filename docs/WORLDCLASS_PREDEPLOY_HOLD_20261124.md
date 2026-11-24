@@ -22,3 +22,6 @@ All 35 business opportunities from audit are requested for development, gated by
 
 ## Third implementation batch
 - Reconciled all five changed files from exact PR #153 head 091defc9 onto the isolated development branch using exact patch context. Added product-specific summaries to the catalogue too, not just individual details. Price source, automatic delivery, and Puja request-only gates preserved. No production merge. Original PR remains open; release must account for this integration rather than double-applying it.
+
+## Fourth implementation batch
+- Integrated exact PR #151 consent registry, verified-account opt-in and withdrawal, additive SQL and disposable tests. No production migration, campaign or contact import. Sending-provider suppression acceptance remains mandatory. Original draft PR remains unmerged.

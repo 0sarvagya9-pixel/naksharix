@@ -25,6 +25,7 @@ export function Footer() {
             <p className="mt-4 text-sm leading-7" style={{ color: "#525866" }}>
               {tr("footerCopy")}
             </p>
+            <Link href="/email-updates" className="mt-4 inline-block text-sm font-semibold underline underline-offset-2" style={{ color: "#725022" }}>{locale === "hi" ? "ईमेल अपडेट और ऑफ़र" : "Email updates and offers"}</Link>
             <p className="mt-3 text-xs leading-6" style={{ color: "#676d7a" }}>
               {locale === "hi" ? "ज्योतिषीय जानकारी व्यक्तिगत चिंतन के लिए है।" : "Astrology and spiritual guidance for personal reflection."}
             </p>

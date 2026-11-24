@@ -1,0 +1,10 @@
+# Permission-based individual customer acquisition
+
+This feature records explicit opt-in from a signed-in, verified ordinary customer account, not from account creation, checkout, browsing, scraped third-party lists, or inferred characteristics. It sends no marketing email and makes no Brevo contact writes.
+
+## Deployment gates
+- Review additive SQL and run it twice on disposable PostgreSQL. Rehearse subscription, explicit consent required, unverified customer rejected, user identity cannot be supplied, withdrawal, changed email invalidates permission, account deletion cascades, CSRF and anonymous access. The existing full CI, database rehearsal and browser tests must pass.
+- Do not apply the migration to production until separately reviewed and exact schema backup is verified. Apply additive SQL before deploying code. Verify production anonymously and with an authorized test account; remove or exclude test contacts from acquisition metrics. Do not seed customer leads.
+- Public email-updates page requires a verified customer account; footer links to it. After live verification, promote via consent-based content and free tools. Qualification reason is the user's selected interest + explicit adult opt-in + verified account email. This is evidence of interest, not proof of purchase.
+- Export only matching current verified email, current consent version, and unrevoked consent. Deduplicate, exclude owner/test/admin accounts, honor all suppression records. Import to marketing provider only after official sender and double-opt-in/consent policy verified and a reliable two-way withdrawal/suppression reconciliation is implemented. Brevo unsubscribe link must work and Brevo unsubscribe/bounce suppression must be honored before any campaign, including changes made between export and sending. Do not send until this gate is met. No automated export or send exists here.
+- Report acquisition count and verified paid report count separately. No purchased, scraped, inferred, or fabricated contacts.
