@@ -51,5 +51,11 @@
       "path": "/api/cron/report-delivery",
       "schedule": "7 2 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "release-schema-compatible-20261124": false,
+      "internal-naksharix-development-hold-20261124": false
+    }
+  }
 }

@@ -1,12 +1,18 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { secureFetch } from "@/lib/security/csrf";
+import { authNavigationHref, safeInternalAuthPath } from "@/lib/auth/safe-redirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {useLanguage} from "@/components/language-provider";
+import {verificationCopy,type VerificationMessage} from "@/lib/auth/verification-copy";
+import {otpRequestAccepted,otpVerificationConfirmed} from "@/lib/auth/otp-response-contract";
+import {siteNotice} from "@/lib/ui/site-notification";
 
 function landingPath(role?: string) {
   if (role === "ASTROLOGER" || role === "CONSULTANT") {
@@ -19,25 +25,32 @@ function landingPath(role?: string) {
 
 export function EmailVerificationForm() {
   const router = useRouter();
+  const {locale}=useLanguage();const copy=verificationCopy[locale];
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<VerificationMessage | null>(null);
+  const [error, setError] = useState<VerificationMessage | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const inFlight=useRef(false);
+  const [completed,setCompleted]=useState(false);
+  const [returnPath,setReturnPath]=useState<string|null>(null);
+  function showError(key:VerificationMessage){setError(key);siteNotice.error(copy[key],copy.title);}
+
 
   useEffect(() => {
     const storedEmail = window.sessionStorage.getItem("naksharix-pending-email");
     const deliverySent = window.sessionStorage.getItem("naksharix-otp-delivery-sent");
+    setReturnPath(safeInternalAuthPath(window.sessionStorage.getItem("naksharix-verification-return")));
 
     if (storedEmail) setEmail(storedEmail);
 
-    if (deliverySent === "true") {
-      setMessage("A 6-digit verification code was sent to your email.");
+    if (storedEmail && deliverySent === "true") {
+      setMessage("sent");
       setCooldown(30);
-    } else if (deliverySent === "false") {
-      setError("The first verification email could not be delivered. Please use Resend code.");
+    } else if (storedEmail && deliverySent === "false") {
+      setError("deliveryFailed");
     }
   }, []);
 
@@ -53,22 +66,25 @@ export function EmailVerificationForm() {
 
   async function verify(event: FormEvent) {
     event.preventDefault();
+    if(inFlight.current||completed)return;
     setError(null);
     setMessage(null);
 
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail) {
-      setError("Enter your email address.");
+      setError("missingEmail");
       return;
     }
 
     if (!/^\d{6}$/.test(code)) {
-      setError("Enter the 6-digit verification code.");
+      setError("invalidCode");
       return;
     }
 
+    inFlight.current=true;
     setVerifying(true);
+    let confirmed=false;
 
     try {
       const response = await secureFetch("/api/auth/otp/verify", {
@@ -79,39 +95,47 @@ export function EmailVerificationForm() {
         body: JSON.stringify({
           email: normalizedEmail,
           code
-        })
+        }),
+        silent:true
       });
 
       const result = await response.json();
 
-      if (!response.ok) {
-        setError(result.error ?? "Verification failed.");
+      if (!response.ok || !otpVerificationConfirmed(result,normalizedEmail)) {
+        showError("verificationFailed");
         return;
       }
 
       window.sessionStorage.removeItem("naksharix-pending-email");
       window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
 
-      router.push(landingPath(result.data?.user?.effectiveRole));
+      const resume=safeInternalAuthPath(window.sessionStorage.getItem("naksharix-verification-return"));
+      window.sessionStorage.removeItem("naksharix-verification-return");
+      router.push(resume??landingPath(result.data?.user?.effectiveRole));
       router.refresh();
+      confirmed=true;
+      setCompleted(true);
     } catch {
-      setError("Verification could not be completed. Please try again.");
+      showError("requestFailed");
     } finally {
+      if(!confirmed)inFlight.current=false;
       setVerifying(false);
     }
   }
 
   async function resend() {
+    if(inFlight.current||completed||cooldown>0)return;
     setError(null);
     setMessage(null);
 
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail) {
-      setError("Enter your email address first.");
+      setError("missingEmail");
       return;
     }
 
+    inFlight.current=true;
     setResending(true);
 
     try {
@@ -122,26 +146,27 @@ export function EmailVerificationForm() {
         },
         body: JSON.stringify({
           email: normalizedEmail
-        })
+        }),
+        silent:true
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        setError(result.error ?? "Could not send a verification code.");
+      const result=await response.json();
+      if (!response.ok || !otpRequestAccepted(result)) {
+        showError("requestFailed");
         return;
       }
 
       window.sessionStorage.setItem("naksharix-pending-email", normalizedEmail);
-      window.sessionStorage.setItem("naksharix-otp-delivery-sent", "true");
+      window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
 
       setMessage(
-        "If an unverified account exists for this email, a new 6-digit code has been sent."
+        "requestAccepted"
       );
       setCooldown(30);
     } catch {
-      setError("Verification email could not be sent. Please try again.");
+      showError("requestFailed");
     } finally {
+      inFlight.current=false;
       setResending(false);
     }
   }
@@ -153,28 +178,33 @@ export function EmailVerificationForm() {
           <ShieldCheck className="h-5 w-5 text-[#FFD700]" />
         </div>
         <div>
-          <h1 className="font-cinzel text-xl font-bold">Verify your email</h1>
+          <h1 className="font-cinzel text-xl font-bold">{copy.title}</h1>
           <p className="text-sm naksh-muted-text">
-            Enter the 6-digit code sent to your email address.
+            {copy.intro}
           </p>
         </div>
       </div>
 
       <form onSubmit={verify} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="verification-email">Email</Label>
+          <Label htmlFor="verification-email">{copy.email}</Label>
           <Input
             id="verification-email"
             type="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);setCode("");setMessage(null);setError(null);
+              window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
+            }}
             autoComplete="email"
+            disabled={verifying||resending||completed}
+            aria-describedby={error?"verification-error":undefined}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="verification-code">Verification code</Label>
+          <Label htmlFor="verification-code">{copy.code}</Label>
           <Input
             id="verification-code"
             type="text"
@@ -186,40 +216,46 @@ export function EmailVerificationForm() {
               setCode(event.target.value.replace(/\D/g, "").slice(0, 6))
             }
             placeholder="000000"
+            disabled={verifying||resending||completed}
+            aria-describedby={error?"verification-error":undefined}
             required
           />
         </div>
 
         {message ? (
-          <p className="rounded-md border border-[#01A361]/30 bg-[#01A361]/10 p-3 text-sm">
-            {message}
+          <p role="status" aria-live="polite" className="rounded-md border border-[#01A361]/30 bg-[#01A361]/10 p-3 text-sm">
+            {copy[message]}
           </p>
         ) : null}
 
         {error ? (
-          <p className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">
-            {error}
+          <p id="verification-error" role="alert" className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">
+            {copy[error]}
           </p>
         ) : null}
 
-        <Button className="w-full" type="submit" disabled={verifying}>
-          {verifying ? "Verifying..." : "Verify email"}
+        <Button className="w-full" type="submit" disabled={verifying||resending||completed}>
+          {verifying ? copy.verifying : copy.verify}
         </Button>
 
         <Button
           className="w-full"
           type="button"
           variant="outline"
-          disabled={resending || cooldown > 0}
+          disabled={resending||verifying||completed||cooldown>0}
           onClick={resend}
         >
           {resending
-            ? "Sending..."
+            ? copy.sending
             : cooldown > 0
-              ? `Resend code in ${cooldown}s`
-              : "Resend code"}
+              ? `${copy.retry} ${cooldown}s`
+              : copy.resend}
         </Button>
       </form>
+      <p className="text-center text-sm naksh-muted-text">
+        {locale==="hi"?"ईमेल सत्यापित हो चुका है?":locale==="hinglish"?"Email verify ho chuka hai?":"Already verified?"}{" "}
+        <Link href={authNavigationHref("/login",returnPath)} className="text-[#01A361] underline">{locale==="hi"?"लॉगिन पर लौटें":locale==="hinglish"?"Login par laut jaayein":"Return to login"}</Link>
+      </p>
     </div>
   );
 }

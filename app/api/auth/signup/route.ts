@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await validateJson(request, signupSchema);
+    const body = await validateJson(request, signupSchema, ["password"]);
     const email = normalizeAuthEmail(body.email);
 
     const existing = await prisma.user.findFirst({

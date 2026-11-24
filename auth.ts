@@ -7,6 +7,7 @@ import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { retryTransientDatabaseRead } from "@/lib/db-transient";
 import { env } from "@/lib/env";
+import { PASSWORD_RESET_PURPOSE,resetSessionIsStale } from "@/lib/auth/password-reset-contract";
 
 const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 const adminCredentialsEnabled = Boolean(env.ADMIN_EMAIL && env.ADMIN_PASSWORD);
@@ -74,6 +75,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.authenticatedAt=Date.now();
         token.id = user.id;
         token.role = user.role;
         token.effectiveRole = user.effectiveRole ?? (user.role === "ADMIN" || user.role === "SUPER_ADMIN" ? "ADMIN" : user.role === "ASTROLOGER" || user.role === "CONSULTANT" ? user.role : "USER");
@@ -85,6 +87,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Role lookup is read-only; never retry credential or account mutations.
         const dbUser = await retryTransientDatabaseRead(() => prisma.user.findUnique({ where: { email: sessionEmail }, select: { id: true, role: true } }));
         if (dbUser) {
+          const reset=await retryTransientDatabaseRead(()=>prisma.otpToken.findFirst({where:{userId:dbUser.id,email:sessionEmail.toLowerCase(),purpose:PASSWORD_RESET_PURPOSE,consumedAt:{not:null}},orderBy:{consumedAt:"desc"},select:{consumedAt:true}}));
+          const authenticatedAt=typeof token.authenticatedAt==="number"?token.authenticatedAt:(typeof token.iat==="number"?token.iat*1000:NaN);
+          if(reset?.consumedAt&&resetSessionIsStale(authenticatedAt,reset.consumedAt.getTime()))return null;
+          if(Number.isFinite(authenticatedAt))token.authenticatedAt=authenticatedAt;
           token.id = dbUser.id;
           token.role = dbUser.role;
           token.effectiveRole = token.isAdminLogin ? token.effectiveRole ?? "USER" : (dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN" ? "ADMIN" : dbUser.role === "ASTROLOGER" || dbUser.role === "CONSULTANT" ? dbUser.role : "USER");

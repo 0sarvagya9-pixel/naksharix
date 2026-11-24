@@ -1,36 +1,17 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { AuthForm } from "@/components/auth-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Section } from "@/components/section";
-import { seo } from "@/lib/seo";
-import { env } from "@/lib/env";
+import {AuthPageShell} from "@/components/auth/auth-page-shell";
+import {safeInternalAuthPath} from "@/lib/auth/safe-redirect";
+import {env} from "@/lib/env";
+import {seo} from "@/lib/seo";
 
-export const metadata: Metadata = seo({
+export const metadata: Metadata = { ...seo({
   title: "Astrologer / Consultant Login - Naksharix",
   description: "Login to your Naksharix astrologer or consultant dashboard to manage profile, availability, bookings, and earnings.",
   path: "/auth/astrologer-login"
-});
+}), robots: { index: false, follow: true } };
 
-export default function AstrologerLoginPage() {
-  const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
-
-  return (
-    <Section className="max-w-md">
-      <Card className="glass">
-        <CardHeader>
-          <CardTitle className="font-cinzel">Astrologer / Consultant Login</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AuthForm mode="login" googleEnabled={googleEnabled} loginMode="ASTROLOGER" showRoleCards={false} />
-          <p className="mt-4 text-sm naksh-muted-text">
-            New guide on Naksharix? <Link href="/join-astrologer" className="text-[#01A361]">Start onboarding</Link>
-          </p>
-          <p className="mt-2 text-sm naksh-muted-text">
-            Looking for your personal dashboard? <Link href="/auth/login" className="text-[#01A361]">User login</Link>
-          </p>
-        </CardContent>
-      </Card>
-    </Section>
-  );
+type Params=Promise<{error?:string|string[];redirectTo?:string|string[];next?:string|string[]}>;
+export default async function AuthPage({searchParams}:{searchParams:Params}){
+  const params=await searchParams;
+  return <AuthPageShell mode="professional" googleEnabled={Boolean(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET)} resume={safeInternalAuthPath(params.redirectTo??params.next)} legacy={true} oauthAccountNotLinked={params.error==="OAuthAccountNotLinked"}/>;
 }

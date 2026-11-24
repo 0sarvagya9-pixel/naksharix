@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z, ZodError } from "zod";
 import { logger } from "@/lib/monitoring/logger";
 import { isTransientDatabaseError } from "@/lib/db-transient";
-import { sanitizeInput } from "@/lib/security/sanitize";
+import { sanitizeInput, isUnchangedCredential } from "@/lib/security/sanitize";
 
 export type ApiResult<T> = { data: T } | { error: string; details?: unknown };
 
@@ -20,7 +20,7 @@ export function fail(message: string, status = 400, details?: unknown) {
   return response;
 }
 
-export async function validateJson<TSchema extends z.ZodTypeAny>(request: Request, schema: TSchema): Promise<z.infer<TSchema>> {
+export async function validateJson<TSchema extends z.ZodTypeAny>(request: Request, schema: TSchema, unchangedCredentialFields: readonly string[] = []): Promise<z.infer<TSchema>> {
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
     throw new ZodError([
@@ -31,7 +31,15 @@ export async function validateJson<TSchema extends z.ZodTypeAny>(request: Reques
       }
     ]);
   }
-  const body = sanitizeInput(await request.json());
+  const raw: unknown = await request.json();
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    for (const field of unchangedCredentialFields) {
+      if (Object.prototype.hasOwnProperty.call(raw, field) && !isUnchangedCredential((raw as Record<string, unknown>)[field])) {
+        throw new ZodError([{code:"custom",path:[field],message:"Choose a password that is not altered by legacy input normalization."}]);
+      }
+    }
+  }
+  const body = sanitizeInput(raw);
   return schema.parse(body);
 }
 
