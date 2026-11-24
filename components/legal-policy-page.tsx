@@ -311,6 +311,10 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
           "Cancellation and reschedule requests are reviewed according to booking status, astrologer availability, payment state, and whether the consultation has started or been completed. Submitting a request does not automatically guarantee a refund or a new slot.",
       },
       {
+        title: "Puja Platform Coordination Fee",
+        body: "The ₹1,100 platform coordination fee is disclosed before checkout and is generally non-refundable once the coordination service is provided. Puja depends on actual Pandit availability and agreed arrangements. A preferred-date request itself is free. Non-delivery, service failure, duplicate or erroneous payments and applicable consumer rights remain eligible for refund review; any separate ceremony costs must be disclosed and agreed before payment.",
+      },
+      {
         title: "Non-Refundable Situations",
         body:
           "A change of mind after successful digital delivery, dissatisfaction with a non-guaranteed prediction, inaccurate user-entered birth details, or a completed consultation does not automatically qualify for a refund.",

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Flower2, Clock3, ArrowLeft } from "lucide-react";
-import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
 import { PujaServicesDirectory } from "@/components/puja/puja-services-directory";
 
 const pausedMetadata: Metadata = {
@@ -14,9 +14,9 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const release = await getPujaLaunchState();
   return release.enabled ? {
-    title: "Available Puja Services & Verified Pandits | NAKSHARIX",
-    description: "Explore approved Puja offerings. Send a preferred-date request; Pandit and schedule must be confirmed before any payment.",
-    robots: { index: true, follow: true }
+    title: "Puja Services & Date Requests | NAKSHARIX",
+    description: "Explore Puja topics and request a preferred date. Pandit availability and arrangements must be confirmed before payment.",
+    robots: { index: !release.requestOnly, follow: true }
   } : pausedMetadata;
 }
 export default async function PujasPage() {

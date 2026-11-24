@@ -17,6 +17,7 @@ const envSchema = z.object({
   ALLOW_AI_DIAGNOSTICS: z.enum(["true", "false"]).default("false"),
   SUBSCRIPTIONS_ENABLED: z.enum(["true", "false"]).default("false"),
   PUJA_BOOKINGS_ENABLED: z.enum(["true", "false"]).default("false"),
+  PUJA_REQUEST_INTAKE_ENABLED: z.enum(["true", "false"]).default("false"),
   PUJA_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false"),
   SHOP_PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false"),
   REDIS_URL: z.string().optional(),

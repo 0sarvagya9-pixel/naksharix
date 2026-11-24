@@ -8,6 +8,8 @@ import { secureFetch } from "@/lib/security/csrf";
 import { siteNotice } from "@/lib/ui/site-notification";
 import { useLanguage } from "@/components/language-provider";
 import { canBypassPayment } from "@/lib/auth/permissions";
+import { PUJA_FEE_NOTICE_EN, PUJA_FEE_NOTICE_HI, PUJA_FEE_TERMS_VERSION } from "@/lib/puja/fee-terms";
+import Link from "next/link";
 
 type CheckoutPayload =
   | { purpose: "SUBSCRIPTION"; plan: "PREMIUM" | "VIP" }
@@ -55,8 +57,11 @@ export function RazorpayCheckoutButton({
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const verifiedRef = useRef(false);
+  const feeDialog = useRef<HTMLDialogElement>(null);
+  const [feeAccepted, setFeeAccepted] = useState(false);
 
-  async function startCheckout() {
+  async function startCheckout(pujaConsent = false) {
+    if (loading || (payload.purpose === "PUJA_BOOKING" && !pujaConsent)) return;
     verifiedRef.current = false;
     setLoading(true);
     setStatus(tr("creatingSecureOrder"));
@@ -94,7 +99,7 @@ export function RazorpayCheckoutButton({
       orderResponse = await secureFetch("/api/payments/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload.purpose === "PUJA_BOOKING" ? { ...payload, feeTermsVersion: PUJA_FEE_TERMS_VERSION } : payload)
       });
     } catch {
       setLoading(false);
@@ -176,10 +181,19 @@ export function RazorpayCheckoutButton({
 
   return (
     <div className="space-y-2">
-      <Button type="button" className="w-full" variant={variant} onClick={startCheckout} disabled={loading}>
+      <Button type="button" className="w-full" variant={variant} onClick={() => { if (payload.purpose === "PUJA_BOOKING") { setFeeAccepted(false); feeDialog.current?.showModal(); } else void startCheckout(); }} disabled={loading}>
         <CreditCard className="h-4 w-4" />
         {loading ? tr("processing") : label}
       </Button>
+      {payload.purpose === "PUJA_BOOKING" ? <dialog ref={feeDialog} onClose={() => setFeeAccepted(false)} aria-label="Important Puja payment information" className="m-auto max-h-[90dvh] w-[min(92vw,32rem)] overflow-y-auto rounded-2xl border border-[#d8b58c] bg-white p-6 text-[#3c2830] shadow-2xl backdrop:bg-black/60">
+        <h2 className="text-xl font-bold">Important payment information</h2>
+        <p className="mt-3 text-2xl font-bold text-[#7b293d]">₹1,100 platform coordination fee</p>
+        <p className="mt-3 text-sm leading-6">{PUJA_FEE_NOTICE_EN}</p>
+        <p lang="hi" className="mt-3 text-sm leading-6">{PUJA_FEE_NOTICE_HI}</p>
+        <Link href="/refund-policy" target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm underline">Read refund policy</Link>
+        <label className="mt-4 flex items-start gap-3 text-sm font-semibold"><input type="checkbox" checked={feeAccepted} onChange={e=>setFeeAccepted(e.target.checked)} className="mt-1 h-4 w-4 shrink-0"/>I have read and accept the platform fee and availability terms.</label>
+        <div className="mt-5 flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" onClick={()=>feeDialog.current?.close()}>Cancel</Button><Button type="button" disabled={!feeAccepted || loading} onClick={()=>{ if (!feeAccepted) return; feeDialog.current?.close(); void startCheckout(true); }}>Agree &amp; proceed to pay ₹1,100</Button></div>
+      </dialog> : null}
       {status ? <p className="text-sm naksh-muted-text" aria-live="polite">{status}</p> : null}
     </div>
   );

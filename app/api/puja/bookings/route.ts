@@ -3,7 +3,7 @@ import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
-import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
 import { findPujaTopic } from "@/lib/puja/service-catalogue";
 import { notifyPujaRequestCreated } from "@/lib/puja/request-notifications";
 import { PUJA_STATUS_NOTICES } from "@/lib/puja/customer-notices";
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     const input = await validateJson(request, requestSchema);
     const topic = findPujaTopic(input.topicId);
     const offer = release.offers[input.topicId];
-    if (!topic || !offer) return fail("No verified Pandit is available for this Puja yet.", 422);
+    if (!topic || !offer) return fail("This Puja is not currently accepting date requests.", 422);
     if (offer.pricePaise !== input.expectedPricePaise)
       return fail("Refresh and review the new price before submitting.", 409);
 
