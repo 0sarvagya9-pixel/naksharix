@@ -1,0 +1,64 @@
+name: One-off encrypted owner report QA
+on:
+  push:
+    branches: [qa/owner-report-delivery-acceptance-20261124]
+permissions:
+  contents: read
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ASTROLOGY_PROVIDER: own_engine
+      EMAIL_PROVIDER: disabled
+      AI_ASTROLOGER_ENABLED: "false"
+      AI_REPORT_GENERATOR_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          show-progress: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generate all actual branded report PDFs in isolated runner
+        run: node scripts/qa-owner-report-private-output.mjs
+      - name: Encrypt private files before any artifact upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          ROOT="$RUNNER_TEMP/owner-report-qa"
+          test "$(find "$ROOT/reports" -type f -name '*.pdf' | wc -l)" = 15
+          if command -v 7z >/dev/null 2>&1; then
+            ZIP=7z
+          elif command -v 7zz >/dev/null 2>&1; then
+            ZIP=7zz
+          else
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq p7zip-full
+            ZIP=7z
+          fi
+          PASS="$(openssl rand -hex 24)"
+          cd "$ROOT/reports"
+          "$ZIP" a -tzip -mem=AES256 -p"$PASS" "$ROOT/NAKSHARIX_15_Report_Samples_Encrypted.zip" . >/dev/null
+          "$ZIP" t -p"$PASS" "$ROOT/NAKSHARIX_15_Report_Samples_Encrypted.zip" >/dev/null
+          test -s "$ROOT/NAKSHARIX_15_Report_Samples_Encrypted.zip"
+          printf '%s' "$PASS" | openssl pkeyutl -encrypt -pubin -inkey "$GITHUB_WORKSPACE/scripts/qa-owner-report-public-key.pem" -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 | base64 -w0 > "$ROOT/encrypted-password.txt"
+          printf 'OWNER_QA_ENCRYPTED_PASSWORD='
+          cat "$ROOT/encrypted-password.txt"
+          printf '\n'
+          unset PASS
+          echo "ENCRYPTED_ARCHIVE_READY=YES; 15 PDFs; AES-256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naksharix-owner-qa-encrypted-reports
+          path: ${{ runner.temp }}/owner-report-qa/NAKSHARIX_15_Report_Samples_Encrypted.zip
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+      - name: Delete local plaintext and encrypted working files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/owner-report-qa"
