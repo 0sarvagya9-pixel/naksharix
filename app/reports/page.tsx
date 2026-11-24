@@ -5,6 +5,7 @@ import { env } from "@/lib/env";
 import { ReportsContent } from "@/components/reports-content";
 import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import { getPublishedManualReportOffers } from "@/lib/reports/manual-offerings";
+import {availablePackageOffers} from "@/lib/digital-packages/ledger";
 
 export const metadata: Metadata = seo({
   title: "Premium Astrology Reports | Kundli, Match Making, Numerology & Career Reports",
@@ -15,7 +16,7 @@ export const metadata: Metadata = seo({
 
 export const dynamic="force-dynamic";
 export default async function ReportsPage() {
-  const manualOfferings=await getPublishedManualReportOffers();
+  const [manualOfferings,packages]=await Promise.all([getPublishedManualReportOffers(),availablePackageOffers()]);
   return <><EditorialServiceBanner eyebrow="HOME / ASTROLOGY REPORTS"
     headline="Premium Astrology Reports"
     caption="Explore available traditional chart, matching and numerology report topics. Availability and any applicable pricing are shown in the report workflow."
@@ -24,6 +25,7 @@ export default async function ReportsPage() {
     <div className="mx-auto max-w-6xl px-5 py-4 text-sm text-[#573d48]">
       Before choosing a personalized report, <Link href="/blog/personalized-astrology-report-delivery-guide" className="font-semibold underline underline-offset-4">read how birth details, PDF generation and secure delivery work</Link>.
     </div>
+    {packages.length?<div className="mx-auto max-w-6xl px-5 py-4 text-sm"><Link href="/digital-packages" className="font-semibold underline">Explore report packages, business-name reports and digital workbooks</Link></div>:null}
     <ReportsContent manualOfferings={manualOfferings} automaticDelivery={env.AUTO_REPORT_DELIVERY_ENABLED==="true"}/>
     <section className="mx-auto max-w-6xl px-5 pb-8 text-sm text-[#573d48]" aria-label="Educational collaboration"><p>Publish useful wedding or astrology education? <Link href="/partnerships" className="font-semibold underline underline-offset-4">Explore an optional editorial collaboration</Link>.</p></section></>;
 }

@@ -5,6 +5,7 @@ import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog } from "@/lib/reports/report-audit";
 import { notifyCapturedPujaPayment, notifyProcessedPujaRefund } from "@/lib/puja/payment-notifications";
 import {lockCreditAccount} from "@/lib/ai/credit-ledger";
+import {lockPackage} from "@/lib/digital-packages/ledger";
 
 /** One-gateway post-capture state reconciliation. Idempotent; never reopens canceled work. */
 export async function reconcileCapturedPurpose(payment: Payment) {
@@ -52,6 +53,10 @@ export async function reconcileProcessedRefund(refund: {
   if (!original) return;
   const fullAmountPaise = Math.round(Number(original.amount) * 100);
   if (refund.amount !== fullAmountPaise) {
+    if(original.purpose==="DIGITAL_PACKAGE"&&refund.amount!<fullAmountPaise){
+      const packageId=(original.metadata as Record<string,unknown>|null)?.digitalPackageId;
+      if(typeof packageId==="string")await prisma.$transaction(async tx=>{await lockPackage(tx,packageId);await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id,status:"PAID"},data:{status:"REVIEW"}});});
+    }
     if(original.purpose==="AI_CREDITS"&&refund.amount!<fullAmountPaise){
       // A signed partial refund requires human reconciliation; prevent any further spending of this grant.
       await prisma.$transaction(async tx=>{await lockCreditAccount(tx,original.userId);await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null,suspendedAt:null,payment:{status:"PAID"}},data:{suspendedAt:new Date()}});});
@@ -66,6 +71,8 @@ export async function reconcileProcessedRefund(refund: {
   // still-paid digital entitlement or an uncanceled shop order.
   const transitioned = await prisma.$transaction(async (tx) => {
     if(original.purpose==="AI_CREDITS")await lockCreditAccount(tx,original.userId);
+    const packageId=original.purpose==="DIGITAL_PACKAGE"&&typeof meta.digitalPackageId==="string"?meta.digitalPackageId:null;
+    if(packageId)await lockPackage(tx,packageId);
     const updated = await tx.payment.updateMany({
       where: { id: original.id, status: "PAID", providerPaymentId: refund.payment_id },
       data: {
@@ -74,6 +81,7 @@ export async function reconcileProcessedRefund(refund: {
       }
     });
     if (updated.count !== 1) return false;
+    if(packageId)await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id},data:{status:"REFUNDED"}});
     if(original.purpose==="AI_CREDITS")await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null},data:{revokedAt:new Date()}});
 
     if (original.purpose === "SHOP_ORDER" && typeof meta.shopOrderId === "string") {

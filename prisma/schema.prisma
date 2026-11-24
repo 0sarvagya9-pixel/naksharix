@@ -79,6 +79,7 @@ enum PaymentPurpose {
   SHOP_ORDER
   WALLET_TOPUP
   AI_CREDITS
+  DIGITAL_PACKAGE
 }
 
 enum ReportPlanType {
@@ -198,6 +199,7 @@ model User {
   marketingConsent             MarketingConsent?
   aiCreditUses                 AiCreditUse[]
   webPushSubscriptions         WebPushSubscription[]
+  digitalPackageOrders         DigitalPackageOrder[]
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -403,6 +405,7 @@ model Payment {
   purchasedReport   PurchasedReport?
   reportRequest     ReportRequest?
   aiCreditGrant    AiCreditGrant?
+  digitalPackageOrder DigitalPackageOrder?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -1059,4 +1062,48 @@ model WebPushSubscription {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   @@index([userId, createdAt])
+}
+
+model DigitalPackageOrder {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields:[userId], references:[id], onDelete:Cascade)
+  clientIntent  String
+  productKey    String
+  productVersion String
+  pricePaise    Int
+  consentVersion String
+  inputDigest   String
+  status        String   @default("DRAFT")
+  expiresAt     DateTime
+  paymentId     String?  @unique
+  payment       Payment? @relation(fields:[paymentId], references:[id], onDelete:SetNull)
+  items         DigitalPackageItem[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@unique([userId,clientIntent])
+  @@index([userId,createdAt])
+  @@index([userId,status])
+}
+model DigitalPackageItem {
+  id           String @id @default(cuid())
+  orderId      String
+  order        DigitalPackageOrder @relation(fields:[orderId], references:[id], onDelete:Cascade)
+  position     Int
+  kind         String
+  privateInput Json?
+  status       String @default("PENDING")
+  leaseToken   String?
+  leaseUntil   DateTime?
+  attempts     Int @default(0)
+  pdfBytes     Bytes?
+  pdfStorageKey String?
+  pdfStorageDriver String?
+  pdfChecksum  String?
+  pdfSize      Int?
+  generatedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([orderId,position])
+  @@index([orderId,status])
 }

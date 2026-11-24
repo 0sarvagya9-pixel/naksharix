@@ -14,8 +14,10 @@ import Link from "next/link";
 import {getReportSlugForPaidId} from "@/lib/reports/checkout-catalogue";
 
 import {AI_CREDIT_TERMS_VERSION} from "@/lib/ai/credit-contract";
+import {PACKAGE_TERMS_VERSION} from "@/lib/digital-packages/catalogue";
 
 type CheckoutPayload =
+  | {purpose:"DIGITAL_PACKAGE";packageOrderId:string;version:"v1";pricePaise:number;termsVersion:typeof PACKAGE_TERMS_VERSION}
   | {purpose:"AI_CREDITS";intent:string;version:string;units:number;pricePaise:number;termsVersion:typeof AI_CREDIT_TERMS_VERSION}
   | { purpose: "SUBSCRIPTION"; plan: "PREMIUM" | "VIP" }
   | {
@@ -88,6 +90,7 @@ export function RazorpayCheckoutButton({
     }
     if (canBypassPayment(userJson?.data?.user)) {
       setLoading(false);
+      if(payload.purpose==="DIGITAL_PACKAGE"){setStatus("Packages require an eligible customer account and captured payment.");return;}
       if(payload.purpose==="AI_CREDITS"){setStatus("Credit packs require an eligible customer account and captured payment; no admin credits granted.");return;}
       setStatus(tr("adminTestingModePaymentBypassed"));
       siteNotice.info("Admin mode skipped a charge. No payment has been collected.", "Admin testing mode");
