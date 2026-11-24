@@ -1,4 +1,10 @@
-import { NextRequest } from "next/server";
+import { NextRequest, after } from "next/server";
+import { env } from "@/lib/env";
+import { automaticExtraSchema,checkAutomaticInputs,encodeAutomaticReportInput } from "@/lib/reports/automatic-report-input";
+import { processAutomaticReport } from "@/lib/reports/automatic-report-worker";
+
+export const runtime="nodejs";
+export const maxDuration=120;
 import { PaymentStatus, ReportPaymentStatus, ReportPlanType, ReportRequestStatus } from "@prisma/client";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
@@ -26,8 +32,9 @@ const schema = z.object({
   timezone: z.number().optional(),
   phone: z.string().optional(),
   concern: z.string().min(1),
-  questionOrConcern: z.string().optional(),
-  language: z.string().default("en")
+  questionOrConcern: z.string().max(2000).optional(),
+  language: z.enum(["en","hi","hinglish"]).default("en"),
+  automaticDetails: automaticExtraSchema.optional()
 });
 
 export async function POST(request: NextRequest) {
@@ -70,7 +77,10 @@ export async function POST(request: NextRequest) {
       }
 
       const existing = await prisma.reportRequest.findUnique({ where: { paymentId: payment.id } });
-      if (existing) return ok({ reportRequest: existing });
+      if (existing) {
+        if(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&existing.deliveryStatus.startsWith("auto_"))after(()=>processAutomaticReport(existing.id).catch(()=>undefined));
+        return ok({ reportRequest: existing, automaticQueued: existing.deliveryStatus.startsWith("auto_") });
+      }
 
       paymentId = payment.id;
       paymentStatus = ReportPaymentStatus.PAID;
@@ -78,6 +88,15 @@ export async function POST(request: NextRequest) {
       return fail("This manual-review report does not accept an upfront payment.", 422);
     }
 
+    const automatic = env.AUTO_REPORT_DELIVERY_ENABLED==="true" && paymentStatus===ReportPaymentStatus.PAID && !adminBypass && Boolean(checkout);
+    const question=(body.questionOrConcern??body.concern).trim();
+    let concern=question;
+    if(automatic){
+      const checked=checkAutomaticInputs(report.slug,{name:body.fullName,gender:body.gender,dateOfBirth:body.dateOfBirth,timeOfBirth:body.timeOfBirth,birthPlace:body.birthPlace,latitude:body.latitude,longitude:body.longitude,timezone:body.timezone},body.automaticDetails);
+      if(!checked.ok)return fail(checked.reason,422);
+      if(question.length>2000)return fail("Please limit the main question to 2,000 characters.",422);
+      concern=encodeAutomaticReportInput(question,checked.extra);
+    }
     const reportRequest = await prisma.reportRequest.create({
       data: {
         userId: user.id,
@@ -96,7 +115,8 @@ export async function POST(request: NextRequest) {
         longitude: body.longitude,
         timezone: body.timezone,
         phone: body.phone,
-        concern: body.questionOrConcern ?? body.concern,
+        concern,
+        deliveryStatus: automatic ? "auto_queued" : "not_ready",
         language: body.language,
         adminBypass
       }
@@ -127,7 +147,8 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return ok({ reportRequest });
+    if(automatic)after(()=>processAutomaticReport(reportRequest.id).catch(()=>undefined));
+    return ok({ reportRequest, automaticQueued: automatic });
   } catch (error) {
     return handleApiError(error);
   }
