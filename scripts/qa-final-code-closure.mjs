@@ -103,8 +103,12 @@ assert(pkg.scripts["qa:prod-db-readonly"] === "node scripts/qa-production-db-rea
 assert(shopSource.includes("AddToCartButton") && shopContent.includes("quote-cart-controls"), "Shop cart UI exists", "stored cart does not charge by itself");
 assert(source("components/shop/cart-page-client.tsx").includes("Sign in to checkout") &&
   source("components/shop/cart-page-client.tsx").includes("Total payable") &&
-  source("components/shop/cart-page-client.tsx").includes('payload={{purpose:"SHOP_ORDER",shopOrderId:orderId}}') &&
-  source("app/api/payments/razorpay/order/route.ts").includes('order.totalPaise !== order.subtotalPaise + order.shippingPaise + order.taxPaise'),
+  source("components/shop/cart-page-client.tsx").includes("<ShopOrderPayButton orderId={orderId}") &&
+  source("components/shop/shop-order-pay-button.tsx").includes('purpose:"SHOP_ORDER"') &&
+  source("components/shop/shop-order-pay-button.tsx").includes("expectedTotalPaise:totalPaise") &&
+  source("app/api/commerce/orders/route.ts").includes("expectedShippingQuoteKey!==quoteKey") &&
+  source("app/api/payments/razorpay/order/route.ts").includes('order.totalPaise !== order.subtotalPaise + order.shippingPaise + order.taxPaise') &&
+  source("app/api/payments/razorpay/order/route.ts").includes("!shippingPayable(order)"),
   "Cart offers server-priced Razorpay checkout after account sign-in", "no hidden amount or skipped gateway verification");
 assert(source("components/shop/quote-cart-controls.tsx").includes("localStorage") &&
   !/razorpay|stripe|paymentIntent|checkoutSession|order\.create/.test(source("components/shop/quote-cart-controls.tsx")), "Cart storage does not charge by itself", "server-authenticated checkout owns payment");
