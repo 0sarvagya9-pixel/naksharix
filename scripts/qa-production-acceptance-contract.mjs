@@ -16,7 +16,7 @@ assert.ok(readiness.includes('"razorpay_shop_checkout"')&&
  "SHOP_CHECKOUT_CAPABILITY_NOT_CONSISTENT");
 assert.ok(shop.includes("<AddToCartButton")&&workflow.includes("grep -Eqi 'Add to cart'")&&
  order.includes('paymentStatus:"UNPAID"')&&
- order.includes('shippingPaise:0,taxPaise:0,totalPaise:subtotal')&&
+ order.includes("shippingPaise:shipping.shippingPaise")&&order.includes("taxPaise:shipping.taxPaise")&&order.includes("totalPaise:shipping.totalPaise")&&order.includes("expectedShippingQuoteKey!==quoteKey")&&
  read("components/shop/cart-page-client.tsx").includes("Sign in to checkout"),
  "SHOP_ORDER_TOTAL_AND_CHECKOUT_LOGIN_NOT_VERIFIED");
 assert.ok(workflow.includes('Boolean(data?.ready) !== hasAi') &&

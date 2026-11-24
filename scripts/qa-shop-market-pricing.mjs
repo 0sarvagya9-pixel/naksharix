@@ -39,13 +39,13 @@ assert.ok(admin.includes("applyMissingMarketPrices")&&
   admin.includes("Fill Missing Market Prices"),"ADMIN_EXPLICIT_PRICE_SEED_MERGE_NOT_GATED");
 assert.ok(orders.includes("product.unitPricePaise*item.quantity")&&
  orders.includes('paymentStatus:"UNPAID"')&&orders.includes('status:checkoutReady?"CONFIRMED":"REQUESTED"')&&
- orders.includes("shippingPaise:0,taxPaise:0,totalPaise:subtotal")&&
+ orders.includes("shippingPaise:shipping.shippingPaise")&&orders.includes("taxPaise:shipping.taxPaise")&&orders.includes("totalPaise:shipping.totalPaise")&&orders.includes("expectedShippingQuoteKey!==quoteKey")&&
  orders.includes('env.SHOP_PAYMENTS_ENABLED==="true"'),
  "SERVER_PRICED_CHECKOUT_OR_DEFAULT_UNPAID_GUARD_LOST");
 assert.ok(read("components/shop-coming-soon-content.tsx").includes("Listed selling price")&&
  read("components/shop/cart-page-client.tsx").includes("Total payable")&&
  read("components/shop/cart-page-client.tsx").includes("Sign in to checkout")&&
- read("components/shop/cart-page-client.tsx").includes('payload={{purpose:"SHOP_ORDER",shopOrderId:orderId}}'),
+ read("components/shop/cart-page-client.tsx").includes('<ShopOrderPayButton orderId={orderId}')&&read("components/shop/shop-order-pay-button.tsx").includes("expectedTotalPaise:totalPaise"),
  "CUSTOMER_DIRECT_CHECKOUT_JOURNEY_MISSING");
 const cartControls=read("components/shop/quote-cart-controls.tsx");
 assert.ok(cartControls.includes('function add(goToCart=false)')&&
