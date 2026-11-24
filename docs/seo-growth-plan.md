@@ -100,3 +100,8 @@ Build a metadata inventory and route index/noindex table before adding more SEO 
 - No paid OpenSEO tracker/API calls. External authority, neutral AI answer tests, real organic rankings, native review and genuine external mentions remain ongoing outcomes; do not claim AI citations or purchases until measured.
 
 - Robots exclusions cover authenticated order and Puja booking history; public Shop and educational pages remain crawlable. Robots rules are not an access-control mechanism.
+
+## 2026-11-24 second-pass page hygiene
+- Revisited the November 18 crawl: no critical issues; the page limit is a measurement limit, not a site defect. Shortened remaining long public titles, leaving existing useful descriptions and page text intact. Normalized transit metadata through the existing canonical helper. Added scoped heading semantics to calculator, horoscope and transit cards without changing their visual styling.
+- Replaced the default SVG social card reference with a first-party 1200x630 PNG response; no private data, dynamic prices or provider calls. Retained existing page-specific imagery and the old SVG path for compatibility.
+- Runtime QA checks the actual rendered pages, homepage primary heading, heading hierarchy and raster preview. Search visibility and traffic are external outcomes; title length is editorial hygiene, not a ranking threshold.

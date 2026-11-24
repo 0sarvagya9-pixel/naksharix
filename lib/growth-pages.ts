@@ -16,7 +16,7 @@ export const growthPages: Record<string, GrowthPage> = {
   "free-kundli": {
     slug: "free-kundli",
     path: "/free-kundli",
-    title: "Free Kundli Online | Vedic Birth Chart & Lagna Guide - Naksharix",
+    title: "Free Kundli Online: Vedic Birth Chart & Lagna",
     description: "Start a free Janam Kundli with your birth date, time and place. Learn what lagna, rashi, nakshatra and dasha mean before reading a birth chart.",
     h1: "Free Kundli Online — Janam Kundli & Birth Chart",
     h2: "What a Vedic birth chart can tell you",
@@ -40,7 +40,7 @@ export const growthPages: Record<string, GrowthPage> = {
   "kundli-matching": {
     slug: "kundli-matching",
     path: "/kundli-matching",
-    title: "Kundli Matching Online | Guna Milan & Manglik Guide - Naksharix",
+    title: "Kundli Matching: Guna Milan & Manglik Guide",
     description: "Understand Kundli matching, 36-point Ashtakoota Guna Milan, nakshatra and Manglik concepts before using the optional Vedic compatibility calculator.",
     h1: "Kundli Matching Online — Guna Milan Explained",
     h2: "How the traditional Guna Milan system is read",

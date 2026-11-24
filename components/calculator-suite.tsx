@@ -94,7 +94,7 @@ export function CalculatorSuite() {
   return (
     <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
       <Card className="glass h-fit">
-        <CardHeader><CardTitle className="font-cinzel">{tr("calculatorTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2" className="font-cinzel">{tr("calculatorTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
             <Field label={tr("name")} error={errors.name}><Input data-field="name" value={form.name} className={errorClass(Boolean(errors.name))} onChange={(event) => update("name", event.target.value)} /></Field>
@@ -121,7 +121,7 @@ export function CalculatorSuite() {
       </Card>
 
       <Card className="glass">
-        <CardHeader><CardTitle className="font-cinzel">{tr("calculatorResults")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2" className="font-cinzel">{tr("calculatorResults")}</CardTitle></CardHeader>
         <CardContent>
           {result ? (
             <div className="space-y-5">

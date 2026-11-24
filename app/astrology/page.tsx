@@ -10,7 +10,7 @@ import { env } from "@/lib/env";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
 
 export const metadata: Metadata = seo({
-  title: "Astrology Services - Horoscope, Kundli, Numerology, Tarot Reading and Panchang",
+  title: "Vedic Astrology: Kundli, Horoscope & More",
   description: "Explore Vedic astrology guides, free Kundli, horoscope, Panchang, numerology, tarot and available report topics with clear limitations.",
   path: "/astrology",
   keywords: ["Astrology", "Astrology Services", "AI Astrology", "Vedic Astrology"]

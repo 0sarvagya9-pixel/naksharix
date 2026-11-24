@@ -111,3 +111,37 @@ const llms=await fetch(base+"/llms.txt");
 assert.equal(llms.status,200);
 assert.ok((await llms.text()).includes("https://www.naksharix.com/hi/about"),"Missing public brand directory");
 console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=8;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");
+
+ 
+// Check the actual rendered public pages from the previous 50-page audit.
+// Titles are editorial length targets, not a Google ranking requirement.
+const focusedSeoRoutes = ["/about", "/astrology", "/calculators", "/free-calculators",
+  "/free-calculators/dasha-calculator", "/free-calculators/lo-shu-grid-calculator",
+  "/free-calculators/marriage-suitability-calculator", "/free-calculators/moon-sign-calculator",
+  "/free-calculators/nakshatra-calculator", "/free-kundli", "/horoscope",
+  "/kundli-matching", "/learn/kundli-explained", "/panchang", "/transits"];
+const stripMarkup=(html)=>html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"").replace(/<!--[\s\S]*?-->/g,"");
+const decodeBasic=(value)=>value.replace(/&amp;/g,"&").replace(/&#x27;|&#39;/g,"'").replace(/&quot;/g,'"');
+for(const path of focusedSeoRoutes){
+  const response=await fetch(base+path);
+  assert.equal(response.status,200,"Audit page unavailable "+path);
+  const html=stripMarkup(await response.text());
+  const title=decodeBasic(html.match(/<title>([^<]+)<\/title>/i)?.[1]??"");
+  assert.ok(title.length>=15 && title.length<=65,"Missing/overlong editorial title "+path+": "+title);
+  if(["/calculators","/horoscope","/transits"].includes(path)){
+    const levels=[...html.matchAll(/<h([1-6])\b[^>]*>/gi)].map(m=>Number(m[1]));
+    const start=levels.indexOf(1);
+    assert.ok(start>=0 && levels.slice(start+1).every((level,i)=>level<=levels[start+i]+1),"Skipped heading hierarchy "+path);
+  }
+}
+const homeHtml=stripMarkup(await (await fetch(base+"/")).text());
+assert.equal([...homeHtml.matchAll(/<h1\b[^>]*>/gi)].length,1,"Homepage must have one main heading");
+const social=await fetch(base+"/og.png");
+assert.equal(social.status,200,"Social preview unavailable");
+assert.ok(social.headers.get("content-type")?.includes("image/png"),"Social preview must be PNG");
+const png=Buffer.from(await social.arrayBuffer());
+assert.equal(png.subarray(0,8).toString("hex"),"89504e470d0a1a0a","Invalid PNG signature");
+assert.equal(png.readUInt32BE(16),1200);
+assert.equal(png.readUInt32BE(20),630);
+assert.ok(homeHtml.includes("/og.png"),"Homepage metadata must reference shareable raster preview");
+console.log("ONPAGE_AUDIT_HTTP=PASS;FOCUSED_ROUTES="+focusedSeoRoutes.length+";SOCIAL_PREVIEW=1200x630_PNG");
