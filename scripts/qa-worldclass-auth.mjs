@@ -52,3 +52,20 @@ assert.equal(authResponseConfirmed("signup",{data:{user:{id:"fixture"},verificat
 assert.equal(authResponseConfirmed("signup",{data:{user:{id:"fixture"},verificationRequired:false}}),false);
 assert.equal(authResponseConfirmed("signup",{data:{user:{id:"fixture"},verificationRequired:"true"}}),false);
 console.log("AUTH_FORM_RESPONSE_AND_LOCALIZATION_CONTRACT_PASS");
+
+import {otpRequestAccepted,otpVerificationConfirmed} from "../lib/auth/otp-response-contract.ts";
+import {authPageCopy} from "../lib/auth/auth-page-copy.ts";
+for(const locale of ["en","hi","hinglish"]){
+  assert.deepEqual(Object.keys(authPageCopy[locale]).sort(),Object.keys(authPageCopy.en).sort());
+  assert.ok(Object.values(authPageCopy[locale]).every(v=>typeof v==="string"&&v.trim().length>0));
+}
+assert.equal(otpRequestAccepted({data:{accepted:true}}),true);
+for(const value of [null,{},[],{data:null},{data:{accepted:"true"}},{data:{accepted:false}},{accepted:true}])assert.equal(otpRequestAccepted(value),false);
+const user={id:"fixture",email:"fixture@example.invalid",effectiveRole:"USER"};
+const ack={data:{verified:true,user}};
+assert.equal(otpVerificationConfirmed(ack,user.email),true);
+assert.equal(otpVerificationConfirmed(ack," FIXTURE@example.invalid "),true);
+for(const role of ["ASTROLOGER","CONSULTANT","ADMIN"])assert.equal(otpVerificationConfirmed({data:{verified:true,user:{...user,effectiveRole:role}}},user.email),true);
+for(const value of [null,{},[],{data:null},{data:{verified:false,user}},{data:{verified:"true",user}},{data:{verified:true,user:null}},{data:{verified:true,user:{...user,id:""}}},{data:{verified:true,user:{...user,id:7}}},{data:{verified:true,user:{...user,email:"other@example.invalid"}}},{data:{verified:true,user:{...user,email:7}}},{data:{verified:true,user:{...user,effectiveRole:["USER"]}}},{data:{verified:true,user:{...user,effectiveRole:"UNKNOWN"}}}])assert.equal(otpVerificationConfirmed(value,user.email),false);
+assert.equal(otpVerificationConfirmed({data:{verified:true,user:{...user,email:""}}},""),false);
+console.log("OTP_ACK_IDENTITY_AND_AUTH_PAGE_LOCALE_CONTRACT_PASS");

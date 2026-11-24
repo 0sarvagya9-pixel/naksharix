@@ -28,7 +28,7 @@ function landingPath(effectiveRole?: LoginMode) {
   return "/dashboard";
 }
 
-export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", showRoleCards = true }: { mode: Mode; googleEnabled?: boolean; loginMode?: LoginMode; showRoleCards?: boolean }) {
+export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", showRoleCards = true, resumePath }: { mode: Mode; googleEnabled?: boolean; loginMode?: LoginMode; showRoleCards?: boolean; resumePath?: string | null }) {
   const router = useRouter();
   const { tr, apiLocale, requiredMessage } = useLanguage();
   const copy = authFormCopy[apiLocale];
@@ -51,7 +51,9 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       chooseRole(loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER");
       return;
     }
-    if(mode==="signup" && new URLSearchParams(window.location.search).get("role")==="professional"){chooseRole("ASTROLOGER");return;}
+    const explicitRole=new URLSearchParams(window.location.search).get("role");
+    if(explicitRole==="professional"){chooseRole("ASTROLOGER");return;}
+    if(explicitRole==="user"){chooseRole("USER");return;}
     const saved = window.localStorage.getItem("naksharix-role-intent");
     if (saved === "USER" || saved === "ASTROLOGER") chooseRole(saved);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,7 +89,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       console.info("[Naksharix login]", { selectedMode: roleIntent, loginMode: selectedLoginMode });
     }
     const params=new URLSearchParams(window.location.search);
-    const resume=safeInternalAuthPath(params.get("redirectTo")??params.get("next"));
+    const resume=resumePath===undefined?safeInternalAuthPath(params.get("redirectTo")??params.get("next")):safeInternalAuthPath(resumePath);
     const preserveVerificationDestination=()=>{if(resume)window.sessionStorage.setItem("naksharix-verification-return",resume);else window.sessionStorage.removeItem("naksharix-verification-return");};
     const response = await secureFetch(`/api/auth/${mode}`, {
       method: "POST",
@@ -104,6 +106,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         result.details?.code === "EMAIL_VERIFICATION_REQUIRED"
       ) {
         window.sessionStorage.setItem("naksharix-pending-email", values.email);
+        window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
         preserveVerificationDestination();
         siteNotice.warning(copy.verifyRequired, copy.successTitle);
         router.push("/verify-email");
@@ -121,7 +124,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       window.sessionStorage.setItem("naksharix-pending-email", values.email);
       window.sessionStorage.setItem(
         "naksharix-otp-delivery-sent",
-        result.data?.deliverySent ? "true" : "false"
+        result.data?.deliverySent === true ? "true" : "false"
       );
       preserveVerificationDestination();
       siteNotice.success(copy.signupAccepted, copy.successTitle);
@@ -130,8 +133,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     }
 
     siteNotice.success(copy.loginAccepted, copy.successTitle);
-    const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-    const redirectTo = safeInternalAuthPath(searchParams?.get("redirectTo") ?? searchParams?.get("next"));
+    const redirectTo=resume;
     if (redirectTo) {
       router.push(redirectTo);
     } else {
@@ -160,7 +162,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       console.info("[Naksharix Google login]", { selectedMode: roleIntent, loginMode: selectedLoginMode });
     }
     const params=new URLSearchParams(window.location.search);
-    const redirectTo = safeInternalAuthPath(params.get("redirectTo")??params.get("next"));
+    const redirectTo=resumePath===undefined?safeInternalAuthPath(params.get("redirectTo")??params.get("next")):safeInternalAuthPath(resumePath);
     const resume = redirectTo ? "&redirectTo=" + encodeURIComponent(redirectTo) : "";
     signIn("google", { callbackUrl: `/auth/google-complete?role=${selectedLoginMode}${resume}` });
   }

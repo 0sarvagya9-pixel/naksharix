@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { EmailVerificationForm } from "@/components/email-verification-form";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { seo } from "@/lib/seo";
 
@@ -21,16 +20,8 @@ export default function VerifyEmailPage() {
   return (
     <Section className="max-w-md">
       <Card className="glass">
-        <CardHeader />
-        <CardContent>
+        <CardContent className="p-5">
           <EmailVerificationForm />
-
-          <p className="mt-5 text-center text-sm naksh-muted-text">
-            Already verified?{" "}
-            <Link href="/login" className="text-[#01A361]">
-              Return to login
-            </Link>
-          </p>
         </CardContent>
       </Card>
     </Section>

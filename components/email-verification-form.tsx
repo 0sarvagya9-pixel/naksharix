@@ -2,9 +2,10 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { secureFetch } from "@/lib/security/csrf";
-import { safeInternalAuthPath } from "@/lib/auth/safe-redirect";
+import { authNavigationHref, safeInternalAuthPath } from "@/lib/auth/safe-redirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,19 +35,21 @@ export function EmailVerificationForm() {
   const [cooldown, setCooldown] = useState(0);
   const inFlight=useRef(false);
   const [completed,setCompleted]=useState(false);
+  const [returnPath,setReturnPath]=useState<string|null>(null);
   function showError(key:VerificationMessage){setError(key);siteNotice.error(copy[key],copy.title);}
 
 
   useEffect(() => {
     const storedEmail = window.sessionStorage.getItem("naksharix-pending-email");
     const deliverySent = window.sessionStorage.getItem("naksharix-otp-delivery-sent");
+    setReturnPath(safeInternalAuthPath(window.sessionStorage.getItem("naksharix-verification-return")));
 
     if (storedEmail) setEmail(storedEmail);
 
-    if (deliverySent === "true") {
+    if (storedEmail && deliverySent === "true") {
       setMessage("sent");
       setCooldown(30);
-    } else if (deliverySent === "false") {
+    } else if (storedEmail && deliverySent === "false") {
       setError("deliveryFailed");
     }
   }, []);
@@ -189,7 +192,10 @@ export function EmailVerificationForm() {
             id="verification-email"
             type="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);setCode("");setMessage(null);setError(null);
+              window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
+            }}
             autoComplete="email"
             disabled={verifying||resending||completed}
             aria-describedby={error?"verification-error":undefined}
@@ -246,6 +252,10 @@ export function EmailVerificationForm() {
               : copy.resend}
         </Button>
       </form>
+      <p className="text-center text-sm naksh-muted-text">
+        {locale==="hi"?"ईमेल सत्यापित हो चुका है?":locale==="hinglish"?"Email verify ho chuka hai?":"Already verified?"}{" "}
+        <Link href={authNavigationHref("/login",returnPath)} className="text-[#01A361] underline">{locale==="hi"?"लॉगिन पर लौटें":locale==="hinglish"?"Login par laut jaayein":"Return to login"}</Link>
+      </p>
     </div>
   );
 }

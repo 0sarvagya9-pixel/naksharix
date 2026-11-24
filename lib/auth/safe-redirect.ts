@@ -1,6 +1,6 @@
 /** Accept only same-origin absolute paths for post-auth navigation. */
-export function safeInternalAuthPath(value: string | null | undefined): string | null {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\") || /[\u0000-\u001f\u007f]/.test(value) || /%5c/i.test(value)) return null;
+export function safeInternalAuthPath(value: unknown): string | null {
+  if (typeof value !== "string" || !value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\") || /[\u0000-\u001f\u007f]/.test(value) || /%5c/i.test(value)) return null;
   try {
     const url = new URL(value, "https://naksharix.invalid");
     // WHATWG URL dot-segment normalization can turn "/a/..//host" into
@@ -14,4 +14,14 @@ export function safeInternalAuthPath(value: string | null | undefined): string |
   } catch {
     return null;
   }
+}
+
+export type AuthNavigationPath="/login"|"/signup"|"/auth/login"|"/auth/signup"|"/auth/astrologer-login";
+export function authNavigationHref(path:AuthNavigationPath,resume:unknown,role?:"user"|"professional"):string {
+  const safe=safeInternalAuthPath(resume);
+  const params=new URLSearchParams();
+  if(role)params.set("role",role);
+  if(safe)params.set("redirectTo",safe);
+  const query=params.toString();
+  return path+(query?"?"+query:"");
 }
