@@ -17,7 +17,13 @@ for (const term of ['kind: z.literal("SHOP")', 'kind: z.literal("PUJA")',
 assert.ok(!/razorpay|providerOrderId|checkout|payment\.create|booking\.create|card(number)?/i.test(route), "ENQUIRY_MUST_NEVER_COLLECT_PAYMENT");
 assert.ok(shop.includes("AddToCartButton"), "SHOP_CART_CTA_MISSING");
 assert.ok(read("components/shop/cart-page-client.tsx").includes('secureFetch("/api/commerce/orders"') &&
- read("components/shop/cart-page-client.tsx").includes("Sign in to checkout"), "SHOP_DIRECT_ORDER_FROM_CART_MISSING");
+ read("components/shop/cart-page-client.tsx").includes('copy=checkoutCopy[apiLocale]') &&
+ read("components/shop/cart-page-client.tsx").includes('{!signedIn?') &&
+ read("components/shop/cart-page-client.tsx").includes('{copy.signInTitle}') &&
+ read("components/shop/cart-page-client.tsx").includes('href="/login?redirectTo=%2Fcart"') &&
+ read("components/shop/cart-page-client.tsx").includes('onSubmit={submitOrder}') &&
+ read("components/shop/cart-page-client.tsx").includes('!signedIn||!valid.length') &&
+ read("lib/shop/checkout-copy.ts").includes('"signInTitle": "Sign in to checkout"'), "SHOP_DIRECT_ORDER_FROM_CART_MISSING");
 assert.ok(
  !puja.includes("/commerce-enquiry?kind=PUJA&item=") &&
  puja.includes("Puja bookings currently paused") &&
