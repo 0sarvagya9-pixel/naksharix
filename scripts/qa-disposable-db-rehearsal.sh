@@ -56,12 +56,12 @@ test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/feature-index-count.txt")" = "3"
 echo 'feature_sql_migrations_disposable_only=PASS' | tee "$EVIDENCE_DIR/feature-migration-gate.txt"
 
 # Rehearse the consent registry add-only migration against the guarded disposable DB.
-psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261124-marketing-consent.sql \\
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261124-marketing-consent.sql \
   2>&1 | tee "$EVIDENCE_DIR/marketing-consent-first.log"
-psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261124-marketing-consent.sql \\
+psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f deploy/sql/20261124-marketing-consent.sql \
   2>&1 | tee "$EVIDENCE_DIR/marketing-consent-repeat.log"
 psql "$PSQL_URL" -v ON_ERROR_STOP=1 -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name='MarketingConsent';" | tee "$EVIDENCE_DIR/marketing-consent-table-count.txt"
-test "$(tr -d '\\r\\n ' < "$EVIDENCE_DIR/marketing-consent-table-count.txt")" = "1"
+test "$(tr -d '\r\n ' < "$EVIDENCE_DIR/marketing-consent-table-count.txt")" = "1"
 
 # Only ephemeral localhost PostgreSQL: also validate the new payment extension
 # is idempotent, non-destructive and compatible with the generated Prisma schema.
