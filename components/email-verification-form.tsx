@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { secureFetch } from "@/lib/security/csrf";
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {useLanguage} from "@/components/language-provider";
 import {verificationCopy,type VerificationMessage} from "@/lib/auth/verification-copy";
+import {otpRequestAccepted,otpVerificationConfirmed} from "@/lib/auth/otp-response-contract";
+import {siteNotice} from "@/lib/ui/site-notification";
 
 function landingPath(role?: string) {
   if (role === "ASTROLOGER" || role === "CONSULTANT") {
@@ -30,6 +32,10 @@ export function EmailVerificationForm() {
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const inFlight=useRef(false);
+  const [completed,setCompleted]=useState(false);
+  function showError(key:VerificationMessage){setError(key);siteNotice.error(copy[key],copy.title);}
+
 
   useEffect(() => {
     const storedEmail = window.sessionStorage.getItem("naksharix-pending-email");
@@ -57,6 +63,7 @@ export function EmailVerificationForm() {
 
   async function verify(event: FormEvent) {
     event.preventDefault();
+    if(inFlight.current||completed)return;
     setError(null);
     setMessage(null);
 
@@ -72,7 +79,9 @@ export function EmailVerificationForm() {
       return;
     }
 
+    inFlight.current=true;
     setVerifying(true);
+    let confirmed=false;
 
     try {
       const response = await secureFetch("/api/auth/otp/verify", {
@@ -83,13 +92,14 @@ export function EmailVerificationForm() {
         body: JSON.stringify({
           email: normalizedEmail,
           code
-        })
+        }),
+        silent:true
       });
 
       const result = await response.json();
 
-      if (!response.ok) {
-        setError("verificationFailed");
+      if (!response.ok || !otpVerificationConfirmed(result,normalizedEmail)) {
+        showError("verificationFailed");
         return;
       }
 
@@ -100,14 +110,18 @@ export function EmailVerificationForm() {
       window.sessionStorage.removeItem("naksharix-verification-return");
       router.push(resume??landingPath(result.data?.user?.effectiveRole));
       router.refresh();
+      confirmed=true;
+      setCompleted(true);
     } catch {
-      setError("requestFailed");
+      showError("requestFailed");
     } finally {
+      if(!confirmed)inFlight.current=false;
       setVerifying(false);
     }
   }
 
   async function resend() {
+    if(inFlight.current||completed||cooldown>0)return;
     setError(null);
     setMessage(null);
 
@@ -118,6 +132,7 @@ export function EmailVerificationForm() {
       return;
     }
 
+    inFlight.current=true;
     setResending(true);
 
     try {
@@ -128,11 +143,13 @@ export function EmailVerificationForm() {
         },
         body: JSON.stringify({
           email: normalizedEmail
-        })
+        }),
+        silent:true
       });
 
-      if (!response.ok) {
-        setError("requestFailed");
+      const result=await response.json();
+      if (!response.ok || !otpRequestAccepted(result)) {
+        showError("requestFailed");
         return;
       }
 
@@ -144,8 +161,9 @@ export function EmailVerificationForm() {
       );
       setCooldown(30);
     } catch {
-      setError("requestFailed");
+      showError("requestFailed");
     } finally {
+      inFlight.current=false;
       setResending(false);
     }
   }
@@ -173,6 +191,8 @@ export function EmailVerificationForm() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
+            disabled={verifying||resending||completed}
+            aria-describedby={error?"verification-error":undefined}
             required
           />
         </div>
@@ -190,6 +210,8 @@ export function EmailVerificationForm() {
               setCode(event.target.value.replace(/\D/g, "").slice(0, 6))
             }
             placeholder="000000"
+            disabled={verifying||resending||completed}
+            aria-describedby={error?"verification-error":undefined}
             required
           />
         </div>
@@ -201,12 +223,12 @@ export function EmailVerificationForm() {
         ) : null}
 
         {error ? (
-          <p role="alert" className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">
+          <p id="verification-error" role="alert" className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">
             {copy[error]}
           </p>
         ) : null}
 
-        <Button className="w-full" type="submit" disabled={verifying}>
+        <Button className="w-full" type="submit" disabled={verifying||resending||completed}>
           {verifying ? copy.verifying : copy.verify}
         </Button>
 
@@ -214,7 +236,7 @@ export function EmailVerificationForm() {
           className="w-full"
           type="button"
           variant="outline"
-          disabled={resending || cooldown > 0}
+          disabled={resending||verifying||completed||cooldown>0}
           onClick={resend}
         >
           {resending
