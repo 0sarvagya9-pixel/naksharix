@@ -1,0 +1,47 @@
+name: Premium Report Visual QA
+on:
+  pull_request:
+    paths:
+      - 'lib/reports/**'
+      - 'scripts/qa-automatic-report-delivery.mjs'
+      - '.github/workflows/premium-report-visual-qa.yml'
+permissions:
+  contents: read
+jobs:
+  report-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      ASTROLOGY_PROVIDER: own_engine
+      EMAIL_PROVIDER: disabled
+      AI_ASTROLOGER_ENABLED: "false"
+      AI_REPORT_GENERATOR_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          show-progress: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: node scripts/qa-automatic-report-delivery.mjs
+        env:
+          REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
+      - name: Verify 45 genuine synthetic PDF samples
+        env:
+          REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
+        run: |
+          set -euo pipefail
+          test "$(find "$REPORT_VISUAL_QA_DIR" -type f -name '*.pdf' | wc -l)" = 45
+          du -sh "$REPORT_VISUAL_QA_DIR"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: premium-report-editorial-visual-fixtures
+          path: ${{ runner.temp }}/report-visual-qa
+          retention-days: 3
+          compression-level: 1
+          if-no-files-found: error

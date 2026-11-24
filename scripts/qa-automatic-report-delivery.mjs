@@ -69,17 +69,21 @@ if(!dbMode){
    const result=await generatePremiumReportPdf({requestId:"fixture-"+slug,templateId:slug,status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:title,customerName:birth.name,language:"en"});
    assert.equal(result.generated,true,slug+" PDF generated");
    const doc=await PDFDocument.load(result.bytes);
-   assert.ok(doc.getPageCount()>=1);
+   assert.ok(doc.getPageCount()>=4 && doc.getPageCount()<=30,"Editorial pagination "+slug+": "+doc.getPageCount());
+   assert.ok(content.sections.some(s=>s.key==="editorial-insights"));
+   if(process.env.REPORT_VISUAL_QA_DIR){fs.mkdirSync(process.env.REPORT_VISUAL_QA_DIR,{recursive:true});fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,slug+"-en.pdf"),result.bytes);}
    assert.equal(doc.getAuthor(),"NAKSHARIX");
    assert.ok(doc.getTitle().includes(title));
    console.log("PASS "+slug+" "+doc.getPageCount()+" pages / "+result.bytes.length+" bytes");
  }
  for(const language of ["hi","hinglish"]){
-   const slug="premium-kundli";
+   for(const slug of input.AUTO_REPORT_SLUGS){
    const {title,content}=await assembleAutomaticPaidReport({slug,birth,extra,question,language});
    const result=await generatePremiumReportPdf({requestId:"fixture-"+language,templateId:slug,status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:title,customerName:birth.name,language});
-   assert.equal(result.generated,true);assert.ok((await PDFDocument.load(result.bytes)).getPageCount()>0);
-   console.log("PASS "+language+" branded PDF");
+   assert.equal(result.generated,true);const localized=await PDFDocument.load(result.bytes);assert.ok(localized.getPageCount()>=4&&localized.getPageCount()<=35,slug+" "+language+" pagination");
+   if(process.env.REPORT_VISUAL_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,slug+"-"+language+".pdf"),result.bytes);
+   console.log("PASS "+slug+" "+language+" editorial PDF "+localized.getPageCount()+" pages");
+   }
  }
  const mail=require("@/lib/reports/report-delivery-service");
  const result=await mail.sendReportDeliveryEmail({to:"test@example.invalid",fullName:"Asha <Test>",reportName:"Test Kundli",reportRequestId:"test-fixture",downloadUrl:"http://localhost:3000/report-request/success?id=test-fixture"});
