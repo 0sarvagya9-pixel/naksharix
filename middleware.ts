@@ -31,7 +31,6 @@ function getLegacyAuthCookieName() {
 }
 
 function isProtectedPath(pathname: string) {
-  if (pathname === "/astrologer/onboarding" || pathname.startsWith("/astrologer/onboarding/")) return false;
   return protectedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
@@ -59,6 +58,15 @@ function hasValidCsrf(request: NextRequest) {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // A legacy public application URL must never render the private portal layout.
+  // All professional account creation uses the existing verified signup flow.
+  if (pathname === "/astrologer/onboarding" || pathname === "/astrologer/onboarding/") {
+    const applicationUrl = request.nextUrl.clone();
+    applicationUrl.pathname = "/join-astrologer";
+    applicationUrl.search = "";
+    return NextResponse.redirect(applicationUrl, 307);
+  }
 
   if (requiresCsrf(request) && !hasValidCsrf(request)) {
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403, headers: { "Cache-Control": "no-store" } });
