@@ -194,6 +194,7 @@ model User {
   adminActionLogs              AdminActionLog[]
   shopOrders                   ShopOrder[]
   pujaBookingRequests          PujaBookingRequest[]
+  marketingConsent             MarketingConsent?
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -993,4 +994,22 @@ model ShopShippingRate {
   updatedAt              DateTime @default(now()) @updatedAt
   @@unique([country, productId, postalPrefix])
   @@index([country, active, expiresAt])
+}
+
+
+// Explicit email marketing permission is independent of sign-up, purchase, and transactional mail.
+model MarketingConsent {
+  userId         String    @id
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailAtConsent String
+  interest       String
+  country        String?
+  locale         String
+  source         String
+  consentVersion String
+  confirmedAt    DateTime
+  revokedAt      DateTime?
+  updatedAt      DateTime  @updatedAt
+
+  @@index([revokedAt, confirmedAt])
 }

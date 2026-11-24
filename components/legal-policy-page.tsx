@@ -141,6 +141,10 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
           "Information is used to calculate requested astrology outputs, generate and save reports, process premium access, manage consultations, prevent abuse, provide support, maintain security, and improve reliability.",
       },
       {
+        title: "Optional Marketing Email Updates",
+        body: "Customer email updates require a separate, voluntary adult opt-in using a verified account. We record your selected interest, preferred language, optional country, verified email at consent, consent version, and consent or withdrawal time. You can withdraw permission at /email-updates. Before marketing is sent, the sending provider must also honor withdrawals and unsubscribes. These preferences are not inferred from birth data, religion, browsing activity, or purchase history, and are not required for service delivery.",
+      },
+      {
         title: "Payments",
         body:
           "Payments are processed through Razorpay. Naksharix may store payment references, amount, currency, status, and the associated report or booking identifier. Naksharix does not store full card numbers, CVV, UPI PINs, or online-banking passwords.",

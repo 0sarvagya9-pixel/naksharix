@@ -386,3 +386,17 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.locator("body")).toBeVisible();
   });
 });
+
+
+test("email updates landing is public and does not silently subscribe a visitor", async ({ page }) => {
+  const response = await page.goto(absolute("/email-updates"), { waitUntil: "domcontentloaded" });
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1, name: "Naksharix email updates" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in to subscribe" })).toHaveAttribute("href", "/login?redirectTo=%2Femail-updates");
+  await expect(page.getByRole("button", { name: "Subscribe to updates" })).toHaveCount(0);
+});
+
+test("email updates POST rejects a visitor with no CSRF token", async ({ request }) => {
+  const response = await request.post(absolute("/api/marketing-consent"), { data: { action: "subscribe", consent: true, interest: "kundli", locale: "en" } });
+  expect(response.status()).toBe(403);
+});
