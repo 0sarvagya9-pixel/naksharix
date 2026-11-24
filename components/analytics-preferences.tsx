@@ -37,7 +37,6 @@ export function AnalyticsPreferences({googleEnabled=false}:{googleEnabled?:boole
   function chooseGoogle(value:"granted"|"denied"){try{localStorage.setItem(googleConsentKey,value);
     if(value==="denied")sessionStorage.removeItem(googleSessionKey);
   }catch{return;}setGoogle(value);}
-  if(!publicAnalyticsRoute(path)&&!expanded)return null;
   return <section className="mx-auto max-w-7xl px-5 pb-5 text-sm text-[#573540]" aria-label="Privacy preferences">
     <button type="button" onClick={()=>setExpanded(v=>!v)} aria-expanded={expanded} className="min-h-11 underline underline-offset-4">Analytics privacy preferences</button>
     {expanded?<div className="max-w-2xl rounded-xl border border-[#dcc1a8] bg-[#fffaf3] p-4">

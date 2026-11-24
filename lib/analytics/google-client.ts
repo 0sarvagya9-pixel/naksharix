@@ -1,7 +1,7 @@
 "use client";
 import { getCsrfToken, csrfHeaderName } from "@/lib/security/csrf";
 import { publicAnalyticsRoute, type AggregateEventName } from "@/lib/analytics/public-routes";
-import { classifySource, googleConsentKey, googleSessionKey, type GoogleSession } from "@/lib/analytics/google-contract";
+import { classifySource, googleConsentKey, googleSessionKey, googleSources, googleMedia, type GoogleSession } from "@/lib/analytics/google-contract";
 
 export function googleAnalyticsSession(): GoogleSession | undefined {
   if (typeof window === "undefined") return;
@@ -13,7 +13,7 @@ export function googleAnalyticsSession(): GoogleSession | undefined {
     const old = JSON.parse(sessionStorage.getItem(googleSessionKey) || "null") as (GoogleSession & {last:number}) | null;
     let session: GoogleSession;
     if (old && Number.isFinite(old.last) && now >= old.last && now - old.last < 30 * 60 * 1000 &&
-        /^\d{1,10}\.\d{10}$/.test(old.client_id) && Number.isSafeInteger(old.session_id)) {
+        /^\d{1,10}\.\d{10}$/.test(old.client_id) && Number.isSafeInteger(old.session_id) && googleSources.includes(old.source) && googleMedia.includes(old.medium)) {
       session = {client_id:old.client_id,session_id:old.session_id,source:old.source,medium:old.medium};
     } else {
       const random = crypto.getRandomValues(new Uint32Array(1))[0] || 1;

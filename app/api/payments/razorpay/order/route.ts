@@ -21,9 +21,9 @@ import { shippingPayable,SHIPPING_TERMS_VERSION,readShippingSnapshot } from "@/l
 
 const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
-  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional() }),
-  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional() }),
-  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional() }),
+  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
   z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) }),
   z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1), feeTermsVersion: z.literal(PUJA_FEE_TERMS_VERSION) }),
   z.object({ purpose: z.literal("SHOP_ORDER"), shopOrderId: z.string().min(1), expectedTotalPaise:z.number().int().positive().max(1000000000).optional(),expectedOrderVersion:z.number().int().positive().optional(),shippingTermsVersion:z.literal(SHIPPING_TERMS_VERSION).optional() }).strict()
