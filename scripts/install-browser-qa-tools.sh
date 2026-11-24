@@ -5,6 +5,7 @@ set -euo pipefail
 : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
 tools="$RUNNER_TEMP/naksharix-browser-tools"
 mkdir -p "$tools"
+sha256sum package.json package-lock.json > "$tools/application-lock-before.sha256"
 printf '%s\n' '{"name":"naksharix-browser-tools","version":"1.0.0","private":true}' > "$tools/package.json"
 npm install --prefix "$tools" --no-save --package-lock=false --ignore-scripts --no-audit --no-fund @playwright/test@1.54.1 @axe-core/playwright@4.10.2
 mkdir -p node_modules/@playwright node_modules/@axe-core
@@ -17,4 +18,4 @@ for pkg in @playwright/test @axe-core/playwright playwright playwright-core; do
   fi
 done
 node "$tools/node_modules/@playwright/test/cli.js" --version
-git diff --exit-code -- package.json package-lock.json
+sha256sum --check "$tools/application-lock-before.sha256"
