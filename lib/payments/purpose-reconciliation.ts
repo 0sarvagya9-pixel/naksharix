@@ -53,11 +53,14 @@ export async function reconcileProcessedRefund(refund: {
       !Number.isSafeInteger(refund.amount) || Number(refund.amount) <= 0) return;
   // Signed receipts survive out-of-order events before a membership Payment exists.
   const signedTotal=await recordSignedRefundReceipt(refund);
+  if(signedTotal===null)return;
   const original = await prisma.payment.findUnique({ where: { providerPaymentId: refund.payment_id } });
   if (!original) return;
   const fullAmountPaise = Math.round(Number(original.amount) * 100);
-  const effectiveRefund=original.purpose==="AI_MEMBERSHIP"&&signedTotal!==null?signedTotal:Number(refund.amount);
-  if(effectiveRefund>fullAmountPaise&&original.purpose==="AI_MEMBERSHIP")throw Error("MEMBERSHIP_REFUND_TOTAL_INVALID");
+  // Receipts are deduplicated by provider refund ID. Several partial
+  // refunds can together refund an entire purchase, irrespective of purpose.
+  const effectiveRefund=signedTotal;
+  if(effectiveRefund>fullAmountPaise)throw Error("RAZORPAY_REFUND_TOTAL_INVALID");
   if (effectiveRefund !== fullAmountPaise) {
     if(original.purpose==="EXPERT_SERVICE"&&Number(refund.amount)<fullAmountPaise){
       const expertId=(original.metadata as Record<string,unknown>|null)?.expertServiceId;
