@@ -71,15 +71,39 @@ try {
 export const RESTORE_WORKER = String.raw`
 set -euo pipefail
 umask 077
-unset PGHOST PGUSER PGPASSWORD PGDATABASE PGPORT PGOPTIONS
-export PGHOST=127.0.0.1 PGPORT=55432 PGUSER=naksh_restore
-mkdir -p /tmp/naksh-restore
-initdb -D /tmp/naksh-restore -A trust -U naksh_restore >/tmp/naksh-init.log 2>&1
-pg_ctl -D /tmp/naksh-restore -l /tmp/naksh-pg.log -o '-h 127.0.0.1 -p 55432' start >/tmp/naksh-start.log 2>&1
-trap 'pg_ctl -D /tmp/naksh-restore stop -m immediate >/dev/null 2>&1 || true' EXIT
-createdb naksharix_restore
-# This newly created loopback-only database has no customer data.
-psql --dbname=naksharix_restore -v ON_ERROR_STOP=1 -c 'DROP SCHEMA public;' >/tmp/naksh-empty-schema.log 2>&1
-pg_restore --exit-on-error --no-owner --no-privileges --dbname=naksharix_restore /tmp/naksh-roundtrip.dump >/tmp/naksh-restore.log 2>&1
-psql --dbname=naksharix_restore -At -c "SELECT json_build_object('tables',(SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'),'indexes',(SELECT count(*) FROM pg_indexes WHERE schemaname='public'),'foreignKeys',(SELECT count(*) FROM information_schema.table_constraints WHERE table_schema='public' AND constraint_type='FOREIGN KEY'))" > /tmp/naksh-restore-receipt.json
+unset PGHOST PGUSER PGPASSWORD PGDATABASE PGPORT PGOPTIONS PGHOSTADDR PGSERVICE PGSERVICEFILE PGPASSFILE
+export PGHOST=127.0.0.1 PGPORT=55432 PGUSER=naksh_restore PGCONNECT_TIMEOUT=3
+stage=CLUSTER_INIT
+data=$(mktemp -d /tmp/naksh-restore.XXXXXX)
+cleanup() {
+  status=$?
+  trap - EXIT
+  pg_ctl -D "$data" stop -m immediate >/dev/null 2>&1 || true
+  if [ "$status" -ne 0 ]; then
+    printf 'BACKUP_RESTORE_CODE=%s\n' "$stage" >&2
+  fi
+  rm -rf -- "$data"
+  exit "$status"
+}
+trap cleanup EXIT
+initdb -D "$data" -A trust -U naksh_restore >"$data/init.log" 2>&1
+stage=CLUSTER_START
+# Private Unix socket directory, explicit TCP listener and bounded readiness.
+pg_ctl -D "$data" -l "$data/postgres.log" -w -t 12 -o "-h 127.0.0.1 -p 55432 -k $data" start >"$data/start.log" 2>&1
+stage=TCP_READY
+test "$(psql --no-psqlrc --no-password -d postgres -Atqc 'SELECT 1')" = 1
+stage=CREATE_DATABASE
+createdb --no-password --template=template0 naksharix_restore
+stage=ARCHIVE_TOC
+pg_restore --list /tmp/naksh-roundtrip.dump >"$data/archive.list"
+# A default public schema is already present in a new database. Only remove it
+# when the archive actually contains a CREATE SCHEMA entry for public.
+if grep -Eq '^[0-9]+;[[:space:]]+[0-9]+[[:space:]]+[0-9]+[[:space:]]+SCHEMA - public([[:space:]]|$)' "$data/archive.list"; then
+  stage=EMPTY_SCHEMA
+  psql --no-psqlrc --no-password --dbname=naksharix_restore -v ON_ERROR_STOP=1 -c 'DROP SCHEMA public;' >"$data/empty-schema.log" 2>&1
+fi
+stage=PG_RESTORE
+pg_restore --exit-on-error --no-owner --no-privileges --no-password --dbname=naksharix_restore /tmp/naksh-roundtrip.dump >"$data/restore.log" 2>&1
+stage=RESTORE_COUNTS
+psql --no-psqlrc --no-password --dbname=naksharix_restore -v ON_ERROR_STOP=1 -At -c "SELECT json_build_object('tables',(SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'),'indexes',(SELECT count(*) FROM pg_indexes WHERE schemaname='public'),'foreignKeys',(SELECT count(*) FROM information_schema.table_constraints WHERE table_schema='public' AND constraint_type='FOREIGN KEY'))" > /tmp/naksh-restore-receipt.json
 `;

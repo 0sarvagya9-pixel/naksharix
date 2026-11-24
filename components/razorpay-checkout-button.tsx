@@ -39,7 +39,7 @@ type RazorpayResponse = {
   razorpay_signature: string;
 };
 
-type RazorpayInstance = { open: () => void };
+type RazorpayInstance = { open: () => void; on: (event: "payment.failed", callback: () => void) => void };
 type RazorpayConstructor = new (options: Record<string, unknown>) => RazorpayInstance;
 
 declare global {
@@ -97,6 +97,11 @@ export function RazorpayCheckoutButton({
       router.push(`/login?redirectTo=${encodeURIComponent(resume)}`);
       return;
     }
+    if (!userResponse?.ok || !userJson?.data?.user?.id) {
+      setBusy(false);
+      setStatus("Unable to verify your account. No payment checkout was started. Please sign in or try again.");
+      return;
+    }
     if (canBypassPayment(userJson?.data?.user)) {
       setBusy(false);
       if(payload.purpose==="EXPERT_SERVICE"){setStatus("Expert services require an eligible customer account and verified payment.");return;}
@@ -131,12 +136,13 @@ export function RazorpayCheckoutButton({
     } catch {
       setBusy(false);
       lockCheckout();
-      setStatus(pendingMessage);
+      setStatus("Unable to reach the payment server. "+pendingMessage);
       return;
     }
     const orderJson = await orderResponse.json().catch(() => null);
     if (!orderResponse.ok) {
       setBusy(false);
+      if(orderResponse.status>=500||orderResponse.status===409){lockCheckout();setStatus(pendingMessage);return;}
       setStatus(toPaymentMessage(orderJson?.error, tr("paymentsComingSoon"), tr("signInToPay")));
       return;
     }
@@ -197,13 +203,21 @@ export function RazorpayCheckoutButton({
       },
       modal: {
         ondismiss: () => {
-          if (verifiedRef.current||verificationStarted||lockedRef.current) return;
+          if (verifiedRef.current||verificationStarted) return;
           setBusy(false);
+          if(lockedRef.current){setStatus(pendingMessage);return;}
           setStatus(tr("checkoutClosed"));
           siteNotice.info("Checkout closed. If money was deducted, verify payment history before retrying.", "Checkout closed");
         }
       }
     });
+      checkout.on("payment.failed",()=>{
+        if(verifiedRef.current||verificationStarted)return;
+        // Keep the current gateway session active; do not start another order.
+        // A later successful retry inside this same checkout can still verify.
+        lockCheckout();
+        setStatus("Payment was not confirmed. Check Payment History before retrying; do not pay twice.");
+      });
       checkout.open();
     } catch {
       setBusy(false);

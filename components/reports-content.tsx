@@ -53,9 +53,9 @@ export function ReportsContent({manualOfferings,automaticDelivery=false}:{automa
                     </div>
                     <FileText className="h-5 w-5 shrink-0 text-[#b8862e]" />
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-[#566575]">{automaticDelivery&&checkout?(automaticReportPublicPreview(report.slug,locale)?.summary??report.description[locale]):report.description[locale]}</p>
+                  <p className="mt-4 text-sm leading-6 text-[#566575]">{checkout?(automaticReportPublicPreview(report.slug,locale)?.summary??report.description[locale]):report.description[locale]}</p>
                   <ul className="mt-4 space-y-2 text-sm font-semibold text-[#372630]">
-                    {(automaticDelivery&&checkout?(automaticReportPublicPreview(report.slug,locale)?.features??report.includes[locale]):report.includes[locale]).slice(0,3).map((item) => (
+                    {(checkout?(automaticReportPublicPreview(report.slug,locale)?.features??report.includes[locale]):report.includes[locale]).slice(0,3).map((item) => (
                       <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#8b3244]" />{item}</li>
                     ))}
                   </ul>
@@ -139,11 +139,11 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     return {
       eyebrow: "Premium Astrology Reports",
       title: "प्रीमियम ज्योतिष रिपोर्ट",
-      subtitle: "सभी 15 रिपोर्टों की कीमत पहले से दिखाई गई है। एक ही सुरक्षित Razorpay checkout से भुगतान करें और सत्यापन के बाद जन्म विवरण जमा करें।",
+      subtitle: "सभी 15 रिपोर्टों की कीमत पहले से दिखाई गई है। जन्म विवरण की जाँच के बाद ही सुरक्षित Razorpay भुगतान करें।",
       exploreReports: "रिपोर्ट देखें",
       contactSupport: "सपोर्ट से संपर्क करें",
       deliveryTitle: "सुरक्षित और स्पष्ट workflow",
-      deliveryCopy: "Paid reports में payment server पर verify होने के बाद ही birth-details form खुलता है। Manual-review reports में कोई payment claim नहीं किया जाता।",
+      deliveryCopy: "पहले जन्म विवरण की जाँच करें। उसके बाद ही सूचीबद्ध शुल्क का भुगतान करें। मैनुअल समीक्षा के लिए पहले कोई भुगतान नहीं लिया जाता।",
       manualReview: "Fee confirmation required",
       secureCheckout: "Razorpay payment और server verification",
       manualWorkflow: "बिना भुगतान के पहले शुल्क की पुष्टि",
@@ -153,7 +153,7 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
       stepOneTitle: "1. सही report चुनें",
       stepOneCopy: "सभी प्रकाशित रिपोर्टों की एकमुश्त कीमत checkout से पहले स्पष्ट दिखाई देती है।",
       stepTwoTitle: "2. सुरक्षित details दें",
-      stepTwoCopy: "Payment verification के बाद या manual request में accurate birth place, date, time और concern submit करें।",
+      stepTwoCopy: "भुगतान शुरू करने से पहले सटीक जन्म स्थान, तिथि, समय और प्रश्न की जाँच करें।",
       stepThreeTitle: "3. वास्तविक delivery",
       stepThreeCopy: "Download link केवल actual generated PDF उपलब्ध होने पर दिखता है।",
       disclaimer: "अस्वीकरण",
@@ -165,11 +165,11 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     return {
       eyebrow: "Premium Astrology Reports",
       title: "Premium Astrology Reports",
-      subtitle: "Sabhi 15 reports ke fixed prices listed hain. Ek hi secure Razorpay checkout se pay karein, verification ke baad birth details submit karein.",
+      subtitle: "Sabhi 15 reports ke fixed prices listed hain. Pehle birth details validate karein, phir secure Razorpay checkout se pay karein.",
       exploreReports: "Explore Reports",
       contactSupport: "Contact Support",
       deliveryTitle: "Secure aur clear workflow",
-      deliveryCopy: "Paid reports me payment server par verify hone ke baad birth-details form khulta hai. Manual-review reports me koi payment claim nahi hota.",
+      deliveryCopy: "Paid reports mein pehle birth details validate karein, phir server-verified payment karein. Manual review mein upfront payment nahi hota.",
       manualReview: "Fee confirmation required",
       secureCheckout: "Razorpay payment aur server verification",
       manualWorkflow: "Personalized quote before any payment",
@@ -179,7 +179,7 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
       stepOneTitle: "1. Sahi report choose karein",
       stepOneCopy: "Sabhi published reports me exact one-time price checkout se pehle dikhta hai.",
       stepTwoTitle: "2. Secure details submit karein",
-      stepTwoCopy: "Payment verification ke baad ya manual request me accurate birth place, date, time aur concern submit karein.",
+      stepTwoCopy: "Payment se pehle accurate birth place, date, time aur concern validate karein.",
       stepThreeTitle: "3. Real delivery",
       stepThreeCopy: "Download link sirf actual generated PDF available hone par dikhta hai.",
       disclaimer: "Disclaimer",
@@ -190,7 +190,7 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
   return {
     eyebrow: "Premium Astrology Reports",
     title: "Premium Astrology Reports",
-    subtitle: "Choose from 15 clearly priced personalized reports. Pay securely through the single Razorpay checkout, then submit birth details after server verification.",
+    subtitle: "Choose from 15 clearly priced personalized reports. Validate your birth details first, then pay securely through the single Razorpay checkout.",
     exploreReports: "Explore Reports",
     contactSupport: "Contact Support",
     deliveryTitle: "A secure, transparent workflow",
@@ -204,7 +204,7 @@ function reportLabels(locale: "en" | "hi" | "hinglish") {
     stepOneTitle: "1. Choose the right report",
     stepOneCopy: "All published reports show their exact one-time payable price before secure checkout.",
     stepTwoTitle: "2. Submit secure details",
-    stepTwoCopy: "After payment verification, or for a manual request, submit accurate birth place, date, time, and concern.",
+    stepTwoCopy: "Enter and validate accurate birth place, date, time and concern before starting payment.",
     stepThreeTitle: "3. Receive a real deliverable",
     stepThreeCopy: "Download your report when it is ready.",
     disclaimer: "Disclaimer",

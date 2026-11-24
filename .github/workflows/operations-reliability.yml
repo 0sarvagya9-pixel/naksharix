@@ -62,11 +62,14 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-16
       - name: Verify encrypted archive and isolated restore
+        shell: bash
         env:
           PGPASSWORD: postgres
         run: |
+          set -euo pipefail
           export PATH=/usr/lib/postgresql/16/bin:$PATH
-          node --experimental-strip-types scripts/qa-encrypted-restore.mjs | tee encrypted-restore.log
+          node --experimental-strip-types scripts/qa-encrypted-restore.mjs 2>&1 | tee encrypted-restore.log
+          grep -q '"result":"ENCRYPTED_RESTORE_PASS"' encrypted-restore.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

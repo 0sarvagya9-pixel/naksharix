@@ -73,7 +73,10 @@ const checkoutClient=read("components/razorpay-checkout-button.tsx");
 assert.ok(checkoutClient.includes("Unable to reach the payment server")&&
   checkoutClient.includes("Payment confirmation is pending")&&
   checkoutClient.includes("do not pay twice")&&
-  checkoutClient.includes('} finally {\n          setLoading(false);'),"RAZORPAY_CLIENT_FAILURE_OR_DUPLICATE_CHARGE_GUIDANCE_MISSING");
+  checkoutClient.includes('} finally {\n          setBusy(false);')&&
+  checkoutClient.includes('checkout.on("payment.failed"')&&
+  checkoutClient.includes('lockCheckout();')&&
+  checkoutClient.includes('if (busyRef.current || lockedRef.current'),"RAZORPAY_CLIENT_FAILURE_OR_DUPLICATE_CHARGE_GUIDANCE_MISSING");
 
 const pricingPage=read("app/pricing/page.tsx");
 const pricingContent=read("components/pricing-content.tsx");

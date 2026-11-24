@@ -166,7 +166,17 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   }else table([tr("Date","तिथि"),"Graha / sign","Degree",tr("From Moon","चंद्र से"),tr("From Lagna","लग्न से"),tr("Phase / motion","चरण / गति")],flat.map(r=>[date(r.date),s(r.planet)+" / "+s(r.sign),deg(r.degree),shown(r.houseFromMoon),shown(r.houseFromAscendant),s(r.traditionalPhase)|| (r.retrograde===true?"Retrograde":"Direct")]),[1.05,1.15,.85,.75,.75,1.6],8.7,30);
  }
  function reflectionPlan(){
-  interior(tr("REFLECTION PLAN","चिंतन योजना"),tr("Turn insight into action","चिंतन को कार्य में बदलें"),tr("Use this report as a structured reflection exercise, not a directive for major decisions.","इसे चिंतन के साधन की तरह उपयोग करें, बड़े निर्णयों के निर्देश की तरह नहीं।"));
+  const kicker=tr("REFLECTION PLAN","चिंतन योजना"),title=tr("Turn insight into action","चिंतन को कार्य में बदलें"),intro=tr("Use this report as a structured reflection exercise, not a directive for major decisions.","इसे चिंतन के साधन की तरह उपयोग करें, बड़े निर्णयों के निर्देश की तरह नहीं।");
+  // Avoid leaving a nearly empty specialist continuation page immediately
+  // before the reflection plan. Preserve dedicated Kundli chapters and keep
+  // the original typography, margins and measured block pagination.
+  if(request.templateId!=="premium-kundli"&&y<325&&insights.plan.length){
+   const p=insights.plan[0],firstHeight=44+wrap(p.title,CW-35,16,"title").length*19+wrap(p.body,CW-35,10).length*14;
+   if(firstHeight<=250&&y+wrap(title,CW,18,"title").length*22+43+wrap(intro,CW,10.1).length*15.2+12+firstHeight+10<=BOTTOM){
+    specialist(kicker,title,firstHeight+wrap(intro,CW,10.1).length*15.2+22);
+    paragraph(intro,10.1,muted,"body",12);
+   }else interior(kicker,title,intro);
+  }else interior(kicker,title,intro);
   for(const [i,p] of insights.plan.entries()){
    const titleLines=wrap(p.title,CW-35,16,"title"),bodyLines=wrap(p.body,CW-35,10);
    const height=32+titleLines.length*19+bodyLines.length*14+12;

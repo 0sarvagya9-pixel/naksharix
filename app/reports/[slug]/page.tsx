@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const report = getManualReport(slug);
   if (!report) return {};
   const checkout = getManualReportCheckout(report.slug);
-  const preview = checkout && env.AUTO_REPORT_DELIVERY_ENABLED === "true" ? automaticReportPublicPreview(report.slug, "en") : null;
+  const preview = checkout ? automaticReportPublicPreview(report.slug, "en") : null;
   return seo({
     title: `${report.name.en} | ${checkout ? checkout.price : "Report enquiry"}`,
     description: preview && checkout ? `${preview.summary} One-time fee: ${checkout.price}.` : report.description.en,
@@ -52,7 +52,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   const labels = detailLabels(locale);
   const checkout = getManualReportCheckout(report.slug);
   const automaticDelivery=Boolean(checkout)&&env.AUTO_REPORT_DELIVERY_ENABLED==="true";
-  const publicPreview = automaticDelivery ? automaticReportPublicPreview(report.slug, locale) : null;
+  const publicPreview = checkout ? automaticReportPublicPreview(report.slug, locale) : null;
   const publicReportUrl = new URL(`/reports/${report.slug}`, canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)).toString();
   const ownerApprovedManualFee=!checkout?(await getPublishedManualReportOffers())[report.slug]:undefined;
   const manualFee=ownerApprovedManualFee?new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(ownerApprovedManualFee.pricePaise/100):null;
@@ -181,12 +181,12 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") {
     return {
       request: "Review request submit करें",
-      payAndContinue: "भुगतान करके आगे बढ़ें",
+      payAndContinue: "विवरण जाँचें और आगे बढ़ें",
       contactSupport: "सपोर्ट से संपर्क करें",
       emailSupport: "ईमेल सपोर्ट",
       price: "Report fee",
       manualReview: "Manual review",
-      paidNote: "Razorpay payment server पर verify होने के बाद secure birth-details form खुलेगा।",
+      paidNote: "पहले जन्म विवरण सुरक्षित फ़ॉर्म में जाँचें। पुष्टि के बाद ही सूचीबद्ध शुल्क का भुगतान करें।",
       manualNote: "इस specialist report के लिए payment claim नहीं किया जाता। Request DB में pending review के रूप में save होगी।",
       included: "क्या शामिल है",
       whoShouldRequest: "किसे request करनी चाहिए",
@@ -195,7 +195,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       languages: ["English", "Hindi", "Hinglish"],
       samplePreview: "Report format",
       deliveryProcess: "Delivery process",
-      paidSteps: ["Razorpay पर listed fee का secure payment करें", "Server payment capture और signature verify करेगा", "Accurate birth details secure form में submit करें", "Request paid status के साथ review queue में जाएगी", "Download केवल actual generated PDF पर दिखेगा"],
+      paidSteps: ["सटीक जन्म विवरण सुरक्षित फ़ॉर्म में भरें और जाँचें", "जाँच सफल होने पर सूचीबद्ध शुल्क का सुरक्षित भुगतान करें", "सर्वर भुगतान की पुष्टि और हस्ताक्षर की जाँच करेगा", "भुगतान के बाद अनुरोध समीक्षा में जाएगा", "वास्तविक PDF तैयार होने पर ही डाउनलोड उपलब्ध होगा"],
       manualSteps: ["Secure form में accurate birth details submit करें", "Request pending review status के साथ save होगी", "Admin scope और fee confirm करेगा", "कोई unsupported payment या delivery confirmation नहीं दिखाई जाएगी", "Download केवल actual generated PDF पर दिखेगा"],
       disclaimer: "अस्वीकरण",
       disclaimerCopy: "ज्योतिष रिपोर्ट चिंतनात्मक मार्गदर्शन के साधन हैं। ये परिणामों की गारंटी नहीं देतीं और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।"
@@ -205,12 +205,12 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hinglish") {
     return {
       request: "Submit Review Request",
-      payAndContinue: "Pay and Continue",
+      payAndContinue: "Validate details & continue",
       contactSupport: "Contact Support",
       emailSupport: "Email Support",
       price: "Report fee",
       manualReview: "Manual review",
-      paidNote: "Razorpay payment server par verify hone ke baad secure birth-details form khulega.",
+      paidNote: "Pehle secure form mein birth details validate karein. Validation ke baad hi listed fee ka payment karein.",
       manualNote: "Is specialist report ke liye payment claim nahi hota. Request DB me pending review ke roop me save hogi.",
       included: "What is included",
       whoShouldRequest: "Who should request this report",
@@ -219,7 +219,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       languages: ["English", "Hindi", "Hinglish"],
       samplePreview: "Report format",
       deliveryProcess: "Delivery process",
-      paidSteps: ["Razorpay par listed fee ka secure payment karein", "Server payment capture aur signature verify karega", "Accurate birth details secure form me submit karein", "Request paid status ke saath review queue me jayegi", "Download sirf actual generated PDF par dikhega"],
+      paidSteps: ["Accurate birth details secure form mein fill aur validate karein", "Validation ke baad listed fee ka secure payment karein", "Server payment capture aur signature verify karega", "Paid request review queue mein jayegi", "Download sirf actual generated PDF par dikhega"],
       manualSteps: ["Secure form me accurate birth details submit karein", "Request pending review status ke saath save hogi", "Admin scope aur fee confirm karega", "Koi unsupported payment ya delivery confirmation nahi dikhaya jayega", "Download sirf actual generated PDF par dikhega"],
       disclaimer: "Disclaimer",
       disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
@@ -228,12 +228,12 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
 
   return {
     request: "Submit Review Request",
-    payAndContinue: "Pay and Continue",
+    payAndContinue: "Validate details & continue",
     contactSupport: "Contact Support",
     emailSupport: "Email Support",
     price: "Report fee",
     manualReview: "Manual review",
-    paidNote: "After secure payment, you can submit your birth details.",
+    paidNote: "Validate your birth details first. Pay the listed fee only after validation succeeds.",
     manualNote: "Send your request and our team will confirm the next steps.",
     included: "What is included",
     whoShouldRequest: "Who should request this report",
@@ -242,7 +242,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
     languages: ["English", "Hindi", "Hinglish"],
     samplePreview: "Report format",
     deliveryProcess: "Delivery process",
-    paidSteps: ["Pay the listed fee through secure Razorpay checkout", "The server verifies the payment capture and signature", "Submit accurate birth details through the secure form", "The request enters review with paid status", "Download appears only when an actual generated PDF exists"],
+    paidSteps: ["Enter and validate accurate birth details through the secure form", "After validation, pay the listed fee through secure Razorpay checkout", "The server verifies the payment capture and signature", "The request enters review with paid status", "Download appears only when an actual generated PDF exists"],
     manualSteps: ["Submit accurate birth details through the secure form", "The request is saved with pending-review status", "An administrator confirms scope and fee", "No unsupported payment or delivery confirmation is displayed", "Download appears only when an actual generated PDF exists"],
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."

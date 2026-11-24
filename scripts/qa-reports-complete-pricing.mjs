@@ -56,7 +56,10 @@ const payButton=read("components/razorpay-checkout-button.tsx");
 const authForm=read("components/auth-form.tsx");
 assert.ok(payButton.includes("userResponse?.status === 401") &&
   payButton.includes("router.push(`/login?redirectTo=${encodeURIComponent(resume)}`)") &&
-  authForm.includes('safeInternalAuthPath(searchParams?.get("redirectTo")'),
+  authForm.includes('safeInternalAuthPath(params.get("redirectTo")??params.get("next"))')&&
+  authForm.includes('safeInternalAuthPath(resumePath)')&&
+  payButton.includes('!userResponse?.ok || !userJson?.data?.user?.id')&&
+  payButton.indexOf('!userResponse?.ok || !userJson?.data?.user?.id')<payButton.indexOf('secureFetch("/api/payments/razorpay/order"'),
   "Logged-out checkout returns to the same report through safe sign-in without initiating payment");
 const manualOfferSource=read("lib/reports/manual-offerings.ts");
 assert.ok(manualOfferSource.includes("if(!allowed.size)return {};") &&
