@@ -1,0 +1,142 @@
+{
+  "provenance": {
+    "engine": "Swiss Ephemeris 2.10.03 (Python swisseph)",
+    "method": "Moshier, sidereal Lahiri, geocentric apparent longitudes, mean lunar node; Ketu opposite Rahu; whole-sign houses; explicit UTC offset",
+    "returnedPlanetFlags": 65860,
+    "generatedFor": "synthetic regression examples; independently computed numeric reference, not external professional certification",
+    "toleranceDegrees": 0.02,
+    "scope": "ten angular positions per case; not dasha, matching, panchang or predictive accuracy"
+  },
+  "fixtures": [
+    {
+      "id": "provider-kundli-delhi-1990",
+      "input": {
+        "id": "provider-kundli-delhi-1990",
+        "date": "1990-01-01",
+        "time": "12:00:00",
+        "timezone": "+05:30",
+        "latitude": 28.6139,
+        "longitude": 77.209,
+        "place": "Delhi, India",
+        "ayanamsa": "lahiri",
+        "house_system": "Vedic Whole Sign"
+      },
+      "longitudeDegrees": {
+        "ascendant": 343.92264,
+        "Sun": 256.859918,
+        "Moon": 306.465295,
+        "Mars": 226.118117,
+        "Mercury": 272.014416,
+        "Jupiter": 71.458852,
+        "Venus": 282.529881,
+        "Saturn": 261.909715,
+        "Rahu": 294.726414,
+        "Ketu": 114.726414
+      }
+    },
+    {
+      "id": "provider-kundli-mumbai-2001",
+      "input": {
+        "id": "provider-kundli-mumbai-2001",
+        "date": "2001-03-21",
+        "time": "23:45:00",
+        "timezone": "+05:30",
+        "latitude": 19.076,
+        "longitude": 72.8777,
+        "place": "Mumbai, India",
+        "ayanamsa": "lahiri",
+        "house_system": "Vedic Whole Sign"
+      },
+      "longitudeDegrees": {
+        "ascendant": 225.758875,
+        "Sun": 337.319917,
+        "Moon": 300.560573,
+        "Mars": 232.794627,
+        "Mercury": 311.973491,
+        "Jupiter": 42.045204,
+        "Venus": 350.576488,
+        "Saturn": 32.920055,
+        "Rahu": 77.592179,
+        "Ketu": 257.592179
+      }
+    },
+    {
+      "id": "provider-kundli-new-york-1999",
+      "input": {
+        "id": "provider-kundli-new-york-1999",
+        "date": "1999-11-30",
+        "time": "18:15:00",
+        "timezone": "-05:00",
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "place": "New York, USA",
+        "ayanamsa": "lahiri",
+        "house_system": "Vedic Whole Sign"
+      },
+      "longitudeDegrees": {
+        "ascendant": 71.56823,
+        "Sun": 224.445509,
+        "Moon": 146.446311,
+        "Mars": 279.732647,
+        "Mercury": 204.396528,
+        "Jupiter": 1.82521,
+        "Venus": 180.394055,
+        "Saturn": 17.986025,
+        "Rahu": 102.858328,
+        "Ketu": 282.858328
+      }
+    },
+    {
+      "id": "provider-kundli-london-1988",
+      "input": {
+        "id": "provider-kundli-london-1988",
+        "date": "1988-09-12",
+        "time": "09:20:00",
+        "timezone": "+01:00",
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "place": "London, UK",
+        "ayanamsa": "lahiri",
+        "house_system": "Vedic Whole Sign"
+      },
+      "longitudeDegrees": {
+        "ascendant": 174.910073,
+        "Sun": 146.085545,
+        "Moon": 158.510476,
+        "Mars": 345.838317,
+        "Mercury": 172.397074,
+        "Jupiter": 42.18137,
+        "Venus": 101.487668,
+        "Saturn": 242.36472,
+        "Rahu": 319.946568,
+        "Ketu": 139.946568
+      }
+    },
+    {
+      "id": "provider-kundli-sydney-1976",
+      "input": {
+        "id": "provider-kundli-sydney-1976",
+        "date": "1976-05-05",
+        "time": "03:05:00",
+        "timezone": "+10:00",
+        "latitude": -33.8688,
+        "longitude": 151.2093,
+        "place": "Sydney, Australia",
+        "ayanamsa": "lahiri",
+        "house_system": "Vedic Whole Sign"
+      },
+      "longitudeDegrees": {
+        "ascendant": 336.611339,
+        "Sun": 20.818224,
+        "Moon": 80.2457,
+        "Mars": 89.995498,
+        "Mercury": 39.330954,
+        "Jupiter": 15.77325,
+        "Venus": 8.892888,
+        "Saturn": 93.772946,
+        "Rahu": 199.133268,
+        "Ketu": 19.133268
+      }
+    }
+  ]
+}

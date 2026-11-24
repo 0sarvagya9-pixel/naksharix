@@ -26,7 +26,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 18 | Report comparison | SOURCE | Compare up to three actual priced catalogue entries; verify accessibility and mobile. |
 | 19 | Sample PDF | SOURCE | Actual renderer-based fictional sample generation for 15 supported reports; outputs not rendered/inspected yet. |
 | 20 | Live report delivery | POST_APPROVAL | Real purchase-to-delivery, email, retry, download and permission acceptance require explicit approval. |
-| 21 | Independent astrology accuracy | OPEN | Cross-check real ephemerides and reference charts; do not claim certification. |
+| 21 | Independent astrology accuracy | PARTIAL | Cross-check real ephemerides and reference charts; do not claim certification. |
 | 22 | 2027 horoscope | SOURCE | Added 12 calculated reference snapshots, sign-relative monthly themes, EN/HI pages, year-aware web/mobile API and QA fixtures. Existing paid report remains rolling twelve months. Independent ephemeris and full acceptance remain pending. |
 | 23 | Astrologer approvals | EXTERNAL | Genuine credential review and provider availability needed. |
 | 24 | Verified Pandit | EXTERNAL | Actual partner due diligence and acceptance. |
@@ -106,3 +106,8 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 - Review TypeScript and schema contracts, migrations, source and isolated fixtures; no final production testing until owner permits.
 - Close each OPEN/PARTIAL implementation and record concrete evidence. External requirements cannot be counted as complete without real evidence. No proposed prices become live without approval.
 - Independent full CI, build, visual/mobile and security acceptance, database migration plan and rollback, authenticated business flow tests, then explicit approved release and real post-deploy verification. Never claim complete based on this register.
+
+
+### Independent numerical reference (staged)
+- Swiss Ephemeris 2.10.03 / Moshier computed 5 synthetic charts, 50 angular positions. Checked-in prior regression values compared offline: 50/50 within 0.02 degrees; maximum discrepancy 0.005300 degrees (London Mars). This is a comparison of previously saved regression data, not a run of this development head. The Sydney Mars reference crosses a sign boundary, so angular agreement does not establish sign-label or dasha accuracy. Independent fixture runner added to qa:all; current runtime, production entry points, panchang, matching, dasha and professional acceptance remain unverified. No precision certification claims changed.
+- Push revocation now fails closed when the device registry cannot be checked.

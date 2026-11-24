@@ -47,7 +47,7 @@ export async function DELETE(request:Request){
  try{
  const user=await getCurrentUser();if(!user)return fail("Unauthenticated",401);
  const body=await validateJson(request,revoke);
- if(!await pushSchemaReady())return ok({revoked:true,registeredDevices:0});
+ if(!await pushSchemaReady())return fail("Device registry unavailable. Revocation could not be confirmed.",503);
  const config=pushConfiguration();
  if("all" in body){await prisma.webPushSubscription.deleteMany({where:{userId:user.id}});}
  else{
