@@ -213,7 +213,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
+      - name: Install isolated browser QA tools
+        shell: bash
+        run: bash scripts/install-browser-qa-tools.sh
       - name: Verify preinstalled cross-browser binaries
         shell: bash
         run: |
@@ -221,7 +223,7 @@ jobs:
           for browser in chromium firefox webkit; do
             test -d "/ms-playwright" || { echo "No browser cache"; exit 1; }
           done
-          npx playwright --version
+          node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" --version
       - run: npx prisma generate
       - name: Bootstrap isolated browser-test database
         shell: bash
@@ -254,7 +256,7 @@ jobs:
             cat /tmp/naksharix-browser-server.log > browser-qa.log
             exit 1
           fi
-          npx playwright test --config=tests/e2e/playwright.config.ts --workers=1 > browser-qa.log 2>&1
+          node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" test --config=tests/e2e/playwright.config.ts --workers=1 > browser-qa.log 2>&1
           BROWSER_EXIT=$?
           cat browser-qa.log
           exit "$BROWSER_EXIT"

@@ -180,13 +180,15 @@ jobs:
       - run: npx prisma db push --skip-generate
       - run: node scripts/qa-align-disposable-feature-schema.mjs
       - run: npm run build
-      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
+      - name: Install isolated browser QA tools
+        shell: bash
+        run: bash scripts/install-browser-qa-tools.sh
       - name: Verify preinstalled Chromium browser
         shell: bash
         run: |
           set -euo pipefail
           test -d /ms-playwright
-          npx playwright --version
+          node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" --version
       - name: Run local production server and browser suite
         shell: bash
         run: |
@@ -201,7 +203,7 @@ jobs:
           done
           node scripts/qa-http-smoke.mjs
           node scripts/qa-seo-http.mjs
-          npx playwright test --config=tests/e2e/playwright.config.ts --workers=1 --project=chromium-desktop
+          node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" test --config=tests/e2e/playwright.config.ts --workers=1 --project=chromium-desktop
 
   gate-6-mobile-companion:
     name: Gate 6 - Mobile companion

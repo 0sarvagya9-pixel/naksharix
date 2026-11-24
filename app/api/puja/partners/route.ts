@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const partners = await prisma.pujaPartner.findMany({
-      where: { reviewStatus: "VERIFIED" },
+      where: { reviewStatus: "VERIFIED", reviewedAt: { not: null }, evidenceUrl: { not: null } },
       select: { id: true, name: true, region: true, traditions: true },
       orderBy: [{ createdAt: "asc" }, { name: "asc" }],
       take: 50

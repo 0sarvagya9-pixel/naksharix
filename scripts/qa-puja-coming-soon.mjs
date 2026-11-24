@@ -75,4 +75,10 @@ assert.ok(admin.includes("partnerSupportsTopic(partner, existing.topicId)") &&
   admin.includes("partnerAcceptanceConfirmed") &&
   admin.includes('["IN_PROGRESS","COMPLETED"].includes(input.status) && !existingPaid'),
   "Admin cannot confirm phantom Pandits or mark unpaid rituals completed");
-console.log("NAKSHARIX_PUJA_PAUSED_BY_DEFAULT=PASS;OWNER_ACTIVATION_REQUIRED=YES;PAYMENT_BEFORE_SCHEDULE=BLOCKED;HISTORY=KEPT");
+const intake=s("lib/puja/request-readiness.ts");
+assert.ok(env.includes('PUJA_REQUEST_INTAKE_ENABLED: z.enum(["true", "false"]).default("false")') && intake.includes('env.PUJA_REQUEST_INTAKE_ENABLED !== "true"') && intake.includes("prisma.pujaBookingRequest.findFirst") && intake.includes("requestOnly: true") && intake.includes("getEmailReadiness().emailEnabled"),"Unpaid requests are owner controlled and fail closed without request storage or email");
+assert.ok(!pay.includes("getPujaRequestState") && history.includes("getPujaLaunchState()") && pay.includes("feeTermsVersion: z.literal(PUJA_FEE_TERMS_VERSION)") && pay.includes("feeTermsAcceptedAt"),"Unpaid intake cannot authorize checkout; current consent is required at API");
+const feeButton=s("components/razorpay-checkout-button.tsx");
+assert.ok(feeButton.includes("feeDialog.current?.showModal()") && feeButton.includes("disabled={!feeAccepted || loading}") && feeButton.includes("feeTermsVersion: PUJA_FEE_TERMS_VERSION"),"Explicit pre-payment consent modal");
+assert.ok(s("lib/puja/partner-shortlist.ts").includes(".slice(0,10)") && notifications.includes("shortlistPujaPartners") && notifications.includes('reviewStatus: "VERIFIED"'),"Shortlist genuine matches; no invented acceptance");
+console.log("NAKSHARIX_PUJA_PAUSED_BY_DEFAULT=PASS;UNPAID_INTAKE_SEPARATE=YES;PAYMENT_BEFORE_SCHEDULE=BLOCKED;FEE_CONSENT_REQUIRED=YES;HISTORY=KEPT");

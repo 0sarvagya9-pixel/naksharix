@@ -1,0 +1,4 @@
+export const PUJA_PLATFORM_FEE_PAISE = 110000;
+export const PUJA_FEE_TERMS_VERSION = "puja-platform-fee-2026-11-24-v1" as const;
+export const PUJA_FEE_NOTICE_EN = "₹1,100 is the platform coordination charge, not a guarantee of a Puja or a particular Pandit. Puja depends on actual Pandit availability and agreed arrangements. The fee is generally non-refundable after the coordination service is provided, except for non-delivery, service failure, duplicate or erroneous charges, or refunds required by law. Any separate Puja costs must be disclosed and agreed before payment.";
+export const PUJA_FEE_NOTICE_HI = "₹1,100 प्लेटफ़ॉर्म समन्वय शुल्क है, पूजा या किसी विशेष पंडित की गारंटी नहीं। पूजा पंडित की उपलब्धता और सहमत व्यवस्था पर निर्भर है। समन्वय सेवा मिलने के बाद शुल्क सामान्यतः वापस नहीं होता, सिवाय सेवा न मिलने, सेवा में कमी, गलत या दोहरे भुगतान अथवा कानूनन देय रिफंड के। पूजा का कोई अतिरिक्त खर्च भुगतान से पहले स्पष्ट किया जाएगा और आपकी सहमति ली जाएगी।";

@@ -4,11 +4,12 @@ import { sendEmail } from "@/lib/email/email-service";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { PUJA_STATUS_NOTICES } from "@/lib/puja/customer-notices";
+import { shortlistPujaPartners } from "@/lib/puja/partner-shortlist";
 
 /** Two minimal transactional notices; never forward private Sankalp/gotra or
  * user phone number to email lists. In-app order history stays authoritative. */
 export async function notifyPujaRequestCreated(input: {
-  id: string; userId: string; topicName: string;
+  id: string; userId: string; topicName: string; topicId: string; city: string;
 }): Promise<{ customer: "accepted" | "unavailable"; admin: "accepted" | "unavailable" }> {
   const result: { customer: "accepted" | "unavailable"; admin: "accepted" | "unavailable" } =
     { customer: "unavailable", admin: "unavailable" };
@@ -38,6 +39,8 @@ export async function notifyPujaRequestCreated(input: {
   // An email being accepted by Resend does not mean it arrived in an inbox.
   if (env.ADMIN_EMAIL) {
     try {
+      const eligible = await prisma.pujaPartner.findMany({ where: { reviewStatus: "VERIFIED", reviewedAt: { not: null }, evidenceUrl: { not: null }, traditions: { has: input.topicId } }, select: { id: true, name: true, region: true, traditions: true }, take: 500, orderBy: { name: "asc" } }).catch(() => []);
+      const shortlist = shortlistPujaPartners(eligible,input.topicId,input.city);
       const sent = await sendEmail({
         to: env.ADMIN_EMAIL, subject: "NAKSHARIX — new Puja request needs Pandit confirmation",
         idempotencyKey: "puja-request-admin-" + input.id,
@@ -46,6 +49,7 @@ export async function notifyPujaRequestCreated(input: {
           "Puja: " + input.topicName, "Reference: " + input.id,
           "Check the authenticated admin queue: " + new URL("/admin/puja-bookings", env.NEXT_PUBLIC_APP_URL),
           "Verify Pandit capability, date/time, logistics and the price before inviting any payment.",
+          shortlist.length ? "Verified matching candidates (contact individually; acceptance required): " + shortlist.map(p=>p.name+" ("+p.region+")").join(", ") : "No verified matching candidate found. Coordination team must arrange a suitable Pandit; keep the request pending.",
           "This alert is not a confirmation that a Pandit is assigned."
         ].join("\n")
       });

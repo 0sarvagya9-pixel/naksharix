@@ -132,14 +132,14 @@ export function EditorialHome({featuredShopPrices={},pujaEnabled=false,available
 
   const slide = active===1 && pujaEnabled ? {
     ...heroSlides[active],
-    body: "Explore available Pujas with an approved Pandit. Request your preferred date without paying; the individual ceremony and schedule must be confirmed first.",
+    body: "Explore Puja topics and request your preferred date without paying; a Pandit and ceremony schedule must be confirmed first.",
     main: { label: "Explore available Pujas", href: "/pujas" }
   } : heroSlides[active];
   const displayServices = services.map(item => item.number==="04" && pujaEnabled
-    ? {...item,copy:"Explore services with a verified Pandit; request a date before payment.",cta:"Explore available Pujas"}
+    ? {...item,copy:"Request a Puja date before payment; Pandit availability must be confirmed.",cta:"Explore available Pujas"}
     : item);
   const displayJourneys = journeys.map(item => item.label==="Puja & traditions" && pujaEnabled
-    ? {...item,desc:"Explore verified Puja offerings; request a date and await Pandit confirmation before payment.",cta:"Browse available Pujas"}
+    ? {...item,desc:"Explore Puja offerings; request a date and await actual Pandit confirmation before payment.",cta:"Browse available Pujas"}
     : item);
   const featuredPujaItems = [
     { id:"rudrabhishek", name:"Rudrabhishek", category:"shiva" },

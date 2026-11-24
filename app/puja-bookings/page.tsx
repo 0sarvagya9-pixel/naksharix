@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth/jwt";
 import { findPujaTopic } from "@/lib/puja/service-catalogue";
 import { getPujaLaunchState, partnerSupportsTopic } from "@/lib/puja/launch-readiness";
 import { pujaStatusNotice } from "@/lib/puja/customer-notices";
+import { getPujaRequestState } from "@/lib/puja/request-readiness";
 import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 export const dynamic="force-dynamic";
 export const metadata:Metadata={title:"My Puja Requests | Naksharix",robots:{index:false,follow:false}};
@@ -18,6 +19,7 @@ export default async function MyPujas(){
  let payments:Awaited<ReturnType<typeof prisma.payment.findMany>>=[];
  let missing=false;
  const release=await getPujaLaunchState();
+ const intake=await getPujaRequestState();
  try{
    rows=await prisma.pujaBookingRequest.findMany({where:{userId:user.id},orderBy:{createdAt:"desc"},take:50});
    payments=await prisma.payment.findMany({where:{userId:user.id,purpose:"PUJA_BOOKING"},
@@ -32,11 +34,11 @@ export default async function MyPujas(){
  const partnersById = new Map(partnerList.map(partner=>[partner.id,partner]));
  return <main className="min-h-screen bg-[#fffbf5] px-5 py-12 text-[#432b34]">
   <div className="mx-auto max-w-4xl"><h1 className="font-cinzel text-4xl font-bold">My Puja Requests</h1>
-   <p className="mt-4 text-sm text-[#6b555c]">View your Puja requests, confirmed schedules and verified payments. {release.enabled
+   <p className="mt-4 text-sm text-[#6b555c]">View your Puja requests, confirmed schedules and verified payments. {intake.enabled
     ? "A new request does not require payment; checkout opens only after your Pandit and ceremony time are confirmed."
     : "New Puja bookings and payments are currently paused."}</p>
    {missing?<p className="mt-7 rounded-xl border p-5">Puja booking service will become available after the reviewed database migration.</p>:null}
-   {!missing&&!rows.length?<div className="mt-8 rounded-xl border bg-white p-7">No Puja requests yet. <Link href="/pujas" className="font-bold text-[#792a3c] underline">{release.enabled?"Browse currently available Puja services":"Puja services coming soon"}</Link></div>:null}
+   {!missing&&!rows.length?<div className="mt-8 rounded-xl border bg-white p-7">No Puja requests yet. <Link href="/pujas" className="font-bold text-[#792a3c] underline">{intake.enabled?"Browse Puja date requests":"Puja services coming soon"}</Link></div>:null}
    <div className="mt-8 grid gap-5">{rows.map(row=><article key={row.id} className="rounded-2xl border border-[#e8cbaa] bg-white p-6">
     <p className="text-xs font-bold tracking-wide text-[#8f3947]">#{row.id}</p>
     <h2 className="mt-2 font-cinzel text-xl font-bold">{findPujaTopic(row.topicId)?.name||row.topicId}</h2>
@@ -46,9 +48,9 @@ export default async function MyPujas(){
       <p className="mt-1 text-[#6c555f]">{pujaStatusNotice(row.status)?.en}</p>
     </div>:null}
     <p className="mt-2 text-sm">Preferred date: {row.preferredDate.toLocaleDateString("en-IN")} · City: {row.city}</p>
-    <p className="mt-2 text-sm">Published fee at request: ₹{(row.quotedPricePaise/100).toFixed(2)}</p>
+    <p className="mt-2 text-sm">Platform coordination fee at request: ₹{(row.quotedPricePaise/100).toFixed(2)}</p>
     <p className="mt-2 text-sm">Confirmed ceremony: {row.scheduledAt?row.scheduledAt.toLocaleString("en-IN",{timeZone:"Asia/Kolkata",timeZoneName:"short"}):"Not yet scheduled"}</p>
-    <p className="mt-2 text-sm">Pandit assignment: {row.partnerId?"Assigned — check status for confirmation":"Pandit confirmation pending"}</p>
+    <p className="mt-2 text-sm">Pandit assignment: {row.partnerId && row.status !== "REQUESTED"?"Assigned — check status for confirmation":"Pandit confirmation pending"}</p>
     {(()=>{
       const bookingPayments=payments.filter(pay=>{
         const meta=pay.metadata;
@@ -71,7 +73,7 @@ export default async function MyPujas(){
           ? "A previous payment attempt needs reconciliation. Please check payment history or contact support; do not pay twice."
           : release.enabled
             ? "Payment unlocks only after a verified Pandit accepts and the future ceremony time is confirmed."
-            : "New Puja payments remain paused. Please contact support for an existing payment."}</p>:null}
+            : "Online Puja payment is not currently available for this request. Please await coordination or contact support."}</p>:null}
         {canCheckout?<div className="mt-4 max-w-sm">
           <RazorpayCheckoutButton payload={{purpose:"PUJA_BOOKING",bookingId:row.id}}
             label={`Pay ₹${(row.quotedPricePaise/100).toFixed(2)} securely`} successHref="/puja-bookings"/>

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { seo } from "@/lib/seo";
 import { nextTwoYearsPujaCalendar } from "@/lib/puja/observances";
 import { pujaEditorialImage } from "@/lib/puja/editorial-photos";
-import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
 
 export const dynamic = "force-dynamic";
 

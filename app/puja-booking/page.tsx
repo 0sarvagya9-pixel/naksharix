@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
+import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
 import { findPujaTopic } from "@/lib/puja/service-catalogue";
 import { PujaRequestClient } from "@/components/puja/booking-request-client";
 import { getCurrentUser } from "@/lib/auth/jwt";

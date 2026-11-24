@@ -25,7 +25,7 @@ export async function GET(){
   const admin=await getAdminApiUser();if(!admin)return fail("Forbidden",403);
   const [bookings,partners]=await Promise.all([
    prisma.pujaBookingRequest.findMany({take:100,orderBy:{createdAt:"desc"}}),
-   prisma.pujaPartner.findMany({where:{reviewStatus:"VERIFIED"},select:{id:true,name:true,region:true},take:100})
+   prisma.pujaPartner.findMany({where:{reviewStatus:"VERIFIED",reviewedAt:{not:null},evidenceUrl:{not:null}},select:{id:true,name:true,region:true,traditions:true},orderBy:{name:"asc"},take:500})
   ]);
   return ok({bookings,partners});
  }catch(error){

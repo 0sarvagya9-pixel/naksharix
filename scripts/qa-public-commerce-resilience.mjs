@@ -87,14 +87,16 @@ assert.ok(!product.includes("No automatic online checkout is active") &&
   !product.includes("Your order is an unpaid request"),
   "STALE_PRODUCT_DETAIL_PAYMENT_COPY");
 const directory = read("components/puja/puja-services-directory.tsx");
-assert.ok(directory.includes("₹1,100 currently supported fee • No upfront payment • Pandit/date confirmation first") &&
+assert.ok(directory.includes("₹1,100 platform coordination fee • No upfront payment • Subject to Pandit availability") &&
   directory.includes("Puja prices and online bookings are currently unavailable.") &&
   directory.includes("Boolean(offerings[p.id])") &&
   directory.includes("Request preferred date"),
   "PUJA_DIRECTORY_BOOKING_AND_OUTAGE_TRUTH");
-assert.ok(directory.includes("Individual dates, service mode, materials and logistics still require direct confirmation before payment.") &&
+assert.ok(directory.includes("Pandit availability, individual dates, service mode, materials and any additional costs require direct confirmation before payment.") &&
   !directory.includes("Book Now <ArrowRight"),
   "PUJA_DIRECTORY_MUST_NOT_COLLECT_PRECONFIRMATION_PAYMENT");
 assert.ok(!read("app/pujas/page.tsx").includes("Request a private review; priest availability"),
   "PUJA_META_STALE");
+const intake = read("lib/puja/request-readiness.ts");
+assert.ok(intake.includes("prisma.pujaBookingRequest.findFirst") && intake.includes("catch { return closed; }") && intake.includes("PUJA_PLATFORM_FEE_PAISE") && !read("app/api/payments/razorpay/order/route.ts").includes("getPujaRequestState"),"UNPAID_REQUEST_FEE_DISCLOSURE_MUST_NOT_AUTHORIZE_PAYMENT_OR_HIDE_STORAGE_FAILURE");
 console.log("PUBLIC_COMMERCE_RESILIENCE_QA=PASS;TRANSIENT_RETRY=READ_ONLY;STALE_PRICE_CHARGE=DISABLED;PUBLIC_COPY=ALIGNED");

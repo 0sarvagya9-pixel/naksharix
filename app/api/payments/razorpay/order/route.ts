@@ -1,3 +1,4 @@
+import { PUJA_FEE_TERMS_VERSION } from "@/lib/puja/fee-terms";
 import { NextRequest } from "next/server";
 import { PaymentPurpose, ReportPaymentStatus, ReportRequestStatus } from "@prisma/client";
 import { z } from "zod";
@@ -21,7 +22,7 @@ const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
   z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
   z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) }),
-  z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1) }),
+  z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1), feeTermsVersion: z.literal(PUJA_FEE_TERMS_VERSION) }),
   z.object({ purpose: z.literal("SHOP_ORDER"), shopOrderId: z.string().min(1) })
 ]);
 
@@ -79,6 +80,7 @@ export async function POST(request: NextRequest) {
     if (reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
       return fail("An old payment attempt needs merchant reconciliation. Check payment history or contact support before paying again.", 409);
     if (reusable?.status === "PENDING" && reusable.providerOrderId) {
+      if (body.purpose === "PUJA_BOOKING") await writeAuditLog({ actor: user, action: "puja.fee_terms_accepted", targetType: "Payment", targetId: reusable.id, metadata: { feeTermsVersion: body.feeTermsVersion } });
       return ok({
         keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         order: {
@@ -212,8 +214,8 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
     if (!partner || !partnerSupportsTopic(partner, booking.topicId) ||
         !offer?.available || offer.pricePaise !== booking.quotedPricePaise ||
         booking.quotedPricePaise !== 110000 || booking.quotedPricePaise < 100) return null;
-    return { name: "Naksharix Puja Booking", amount: booking.quotedPricePaise / 100,
-      metadata: { pujaBookingId: booking.id, pujaTopicId: booking.topicId } };
+    return { name: "Naksharix Puja Platform Coordination", amount: booking.quotedPricePaise / 100,
+      metadata: { pujaBookingId: booking.id, pujaTopicId: booking.topicId, feeTermsVersion: body.feeTermsVersion, feeTermsAcceptedAt: new Date().toISOString() } };
   }
   if (body.purpose === "SHOP_ORDER") {
     const order = await prisma.shopOrder.findUnique({ where: { id: body.shopOrderId } });
