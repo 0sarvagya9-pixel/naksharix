@@ -6,6 +6,9 @@ function record(value:unknown):Record<string,unknown>|null{
 function identifier(value:unknown):value is string{
  return typeof value==="string"&&value.trim().length>0&&value.length<=256;
 }
+function providerId(value:unknown,prefix:"order_"|"pay_"):value is string{
+ return identifier(value)&&value.startsWith(prefix)&&value.length>prefix.length&&/^[A-Za-z0-9_]+$/.test(value);
+}
 function rupeesToPaise(value:unknown):number|null{
  if(typeof value!=="string"&&typeof value!=="number")return null;
  const raw=String(value);
@@ -16,7 +19,7 @@ function rupeesToPaise(value:unknown):number|null{
 }
 export function readCheckoutOrderAck(json:unknown,expectedPaise?:number){
  const data=record(record(json)?.data),order=record(data?.order),item=record(data?.item);
- if(!identifier(data?.keyId)||!identifier(data?.paymentId)||!identifier(order?.id)||!order.id.startsWith("order_")||
+ if(!identifier(data?.keyId)||!identifier(data?.paymentId)||!providerId(order?.id,"order_")||
     typeof order.amount!=="number"||!Number.isSafeInteger(order.amount)||order.amount<=0||order.currency!=="INR"||
     !identifier(item?.name)||rupeesToPaise(item.amount)!==order.amount||
     (expectedPaise!==undefined&&expectedPaise!==order.amount))return null;
@@ -24,6 +27,8 @@ export function readCheckoutOrderAck(json:unknown,expectedPaise?:number){
 }
 type ExpectedPayment={id:string;orderId:string;providerPaymentId:string;purpose:string;amountPaise:number};
 export function isVerifiedPaymentAck(json:unknown,expected:ExpectedPayment):boolean{
+ if(!expected||!identifier(expected.id)||!providerId(expected.orderId,"order_")||!providerId(expected.providerPaymentId,"pay_")||
+    !identifier(expected.purpose)||!Number.isSafeInteger(expected.amountPaise)||expected.amountPaise<=0)return false;
  const payment=record(record(record(json)?.data)?.payment);
  return Boolean(payment&&payment.id===expected.id&&payment.status==="PAID"&&payment.provider==="RAZORPAY"&&
   payment.currency==="INR"&&payment.purpose===expected.purpose&&payment.providerPaymentId===expected.providerPaymentId&&

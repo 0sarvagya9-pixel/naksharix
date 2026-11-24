@@ -29,3 +29,18 @@ for(const wrong of [{id:"another"},{providerOrderId:"order_another"},{providerPa
 assert.equal(isVerifiedPaymentAck({data:{}},expected),false);
 assert.equal(isVerifiedPaymentAck(null,expected),false);
 console.log("CHECKOUT_ACK_CONTRACT_PASS; synthetic fixtures only");
+
+for(const invalid of [undefined,null,"","pay_","pay_ bad","order_fixture","pay_fixture\n"]){
+ assert.equal(isVerifiedPaymentAck({data:{payment:{...payment,providerPaymentId:invalid}}},{...expected,providerPaymentId:invalid}),false);
+}
+for(const invalid of [undefined,null,"","order_","order_ bad","pay_fixture"]){
+ assert.equal(isVerifiedPaymentAck({data:{payment:{...payment,providerOrderId:invalid}}},{...expected,orderId:invalid}),false);
+}
+for(const invalid of [undefined,null,""," "]){
+ assert.equal(isVerifiedPaymentAck({data:{payment:{...payment,id:invalid}}},{...expected,id:invalid}),false);
+ assert.equal(isVerifiedPaymentAck({data:{payment:{...payment,purpose:invalid}}},{...expected,purpose:invalid}),false);
+}
+for(const invalid of [0,-1,79900.5,NaN,Infinity])assert.equal(isVerifiedPaymentAck({data:{payment}},{...expected,amountPaise:invalid}),false);
+assert.equal(isVerifiedPaymentAck({data:{payment}},null),false);
+for(const id of ["order_","order_ bad","pay_fixture","order_fixture\n"])assert.equal(readCheckoutOrderAck({data:{...orderAck.data,order:{...orderAck.data.order,id}}},79900),null);
+console.log("CHECKOUT_ACK_MALFORMED_IDENTITY_GUARDS_PASS; synthetic fixtures only");
