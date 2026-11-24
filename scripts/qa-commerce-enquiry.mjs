@@ -30,8 +30,10 @@ const cartUi=read("components/shop/cart-page-client.tsx");
 for(const term of ["getCurrentUser()","validateJson(request,schema)","getShopCatalogue()","p.status===\"active\"","rateLimit(","prisma.supportTicket.create","paymentRequired:false","orderCreated:false","fulfillmentConfirmed:false"]){
  assert.ok(cartQuote.includes(term),"CART_QUOTE_SAFETY_GUARD_MISSING="+term);
 }
-assert.ok(cartUi.includes('payload={{purpose:"SHOP_ORDER",shopOrderId:orderId}}') &&
- cartUi.includes('expectedSubtotalPaise:total'), "CART_RAZORPAY_CHECKOUT_AND_STALE_PRICE_GUARD_MISSING");
+assert.ok(cartUi.includes('<ShopOrderPayButton orderId={orderId}') &&
+ cartUi.includes('expectedSubtotalPaise:total') &&
+ read("components/shop/shop-order-pay-button.tsx").includes("expectedTotalPaise:totalPaise") &&
+ read("app/api/commerce/orders/route.ts").includes("expectedShippingQuoteKey!==quoteKey"), "CART_RAZORPAY_CHECKOUT_AND_STALE_PRICE_GUARD_MISSING");
 assert.ok(!/razorpay|checkoutSession|payment\.create|providerOrderId/i.test(cartQuote),"CART_QUOTE_MUST_NOT_CHARGE");
 assert.ok(page.includes("getCurrentUser()") && page.includes("getShopCatalogue()"),"PAGE_SOURCE_OWNED_OPTIONS_MISSING");
 assert.ok(component.includes("secureFetch(") && component.includes("/api/commerce/enquiries"),"CSRF_PROTECTED_BROWSER_REQUEST_MISSING");
