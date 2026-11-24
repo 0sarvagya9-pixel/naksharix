@@ -93,7 +93,9 @@ if (requiredFiles.every(exists)) {
   const seoSource = read("lib/seo.ts");
   assert(canonicalSource.includes('url.hostname = "www.naksharix.com"') &&
     sitemapSource.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)") &&
-    sitemapSource.includes('url: `${seoOrigin}${route}`') &&
+    sitemapSource.includes('const route = rawRoute || "/"') &&
+    sitemapSource.includes('url: new URL(route, seoOrigin).toString()') &&
+    sitemapSource.includes('publishedSeoAlternates(route, seoOrigin)') &&
     robotsSource.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)") &&
     robotsSource.includes("sitemap: `${seoOrigin}/sitemap.xml`") &&
     seoSource.includes("canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)") &&
