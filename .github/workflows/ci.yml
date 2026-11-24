@@ -126,6 +126,8 @@ jobs:
           node -e 'const u = new URL(process.env.DATABASE_URL || ""); if (process.env.CI !== "true" || u.hostname !== "localhost" || u.port !== "5432" || u.pathname !== "/naksharix") { process.exit(1); }'
           npx prisma db push --skip-generate
           node scripts/qa-align-disposable-feature-schema.mjs
+      - name: Exercise paid-report worker with disposable database and isolated email transport
+        run: node scripts/qa-automatic-report-delivery.mjs --database
       - name: Run local production HTTP smoke
         shell: bash
         run: |

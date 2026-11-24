@@ -1,3 +1,4 @@
+import { reportConcernText,decodeAutomaticReportInput } from "@/lib/reports/automatic-report-input";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
@@ -38,6 +39,7 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
           <Detail label="PDF file" value={request.generatedPdfFileName ?? "Not generated"} />
           <Detail label="PDF storage" value={request.generatedPdfStorageDriver ? `${request.generatedPdfStorageDriver}: ${request.generatedPdfStorageKey ?? "-"}` : "-"} />
           <Detail label="Delivery status" value={request.deliveryStatus} />
+          <Detail label="Processing mode" value={decodeAutomaticReportInput(request.concern)?"Automatic paid report":"Manual review"} />
           <Detail label="PDF size" value={request.generatedPdfSize ? `${request.generatedPdfSize} bytes` : "-"} />
           <Detail label="Payment ID" value={request.payment?.id ?? "Admin bypass / not applicable"} />
           <Detail label="Razorpay order ID" value={request.payment?.providerOrderId ?? "-"} />
@@ -53,7 +55,7 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
           <Detail label="Support email" value="care@naksharix.com" />
           <div className="md:col-span-2 rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
             <p className="text-[#FFD700]">Concern</p>
-            <p className="mt-2 naksh-muted-text">{request.concern ?? "-"}</p>
+            <p className="mt-2 naksh-muted-text">{reportConcernText(request.concern)||"-"}</p>
           </div>
           <div className="md:col-span-2">
             <ReportRequestActions

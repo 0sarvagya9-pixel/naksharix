@@ -16,6 +16,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     const { id } = await params;
     const reportRequest = await prisma.reportRequest.findUnique({ where: { id } });
     if (!reportRequest) return fail("Report request not found", 404);
+    if(["auto_generating","auto_sending"].includes(reportRequest.deliveryStatus)&&Date.now()-reportRequest.updatedAt.getTime()<5*60_000)return fail("Automatic report processing is active. Retry after the current lease ends.",409);
     // An admin retry must not resend a completed report email.
     if (reportRequest.status === ReportRequestStatus.DELIVERED && reportRequest.deliveryStatus === "email_sent") {
       return ok({ reportRequest, delivery: { sent: false, skipped: true, reason: "Already recorded as sent; no duplicate email attempted." } });

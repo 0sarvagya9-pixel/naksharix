@@ -11,7 +11,8 @@ import { useLanguage } from "@/components/language-provider";
 import { manualReports } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 
-export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,{pricePaise:number;deliveryDays:number|null;note:string}>}) {
+import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
+export function ReportsContent({manualOfferings,automaticDelivery=false}:{automaticDelivery?:boolean;manualOfferings:Record<string,{pricePaise:number;deliveryDays:number|null;note:string}>}) {
   const { locale } = useLanguage();
   const labels = reportLabels(locale);
 
@@ -49,7 +50,7 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
                     </div>
                     <FileText className="h-5 w-5 shrink-0 text-[#b8862e]" />
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-[#566575]">{report.description[locale]}</p>
+                  <p className="mt-4 text-sm leading-6 text-[#566575]">{automaticDelivery&&checkout?autoReportDeliveryMessage(locale):report.description[locale]}</p>
                   <ul className="mt-4 space-y-2 text-sm font-semibold text-[#372630]">
                     {report.includes[locale].slice(0, 3).map((item) => (
                       <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#8b3244]" />{item}</li>
@@ -104,7 +105,7 @@ export function ReportsContent({manualOfferings}:{manualOfferings:Record<string,
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           <ProcessCard icon={CreditCard} title={labels.stepOneTitle} copy={labels.stepOneCopy} />
           <ProcessCard icon={ClipboardList} title={labels.stepTwoTitle} copy={labels.stepTwoCopy} />
-          <ProcessCard icon={FileText} title={labels.stepThreeTitle} copy={labels.stepThreeCopy} />
+          <ProcessCard icon={FileText} title={labels.stepThreeTitle} copy={automaticDelivery?autoReportDeliveryMessage(locale):labels.stepThreeCopy} />
         </div>
 
         <Card className="mt-10 border-[#e7d8be] bg-white/82 shadow-[0_18px_58px_rgba(31,41,51,0.08)] backdrop-blur">

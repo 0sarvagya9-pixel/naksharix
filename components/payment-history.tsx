@@ -6,6 +6,8 @@ import { ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { getReportSlugForPaidId } from "@/lib/reports/checkout-catalogue";
+
 type Payment = {
   id: string;
   purpose: string;
@@ -19,14 +21,7 @@ type Payment = {
   reportRequest?: { id: string; status: string } | null;
 };
 
-const manualSlugForPaidReport: Record<string, string> = {
-  "kundli-pro": "premium-kundli",
-  "marriage-report": "couple-kundli",
-  "career-report": "career-report",
-  "finance-report": "wealth-report",
-  "numerology-report": "numerology-lo-shu-report",
-  "yearly-ai": "yearly-horoscope-report"
-};
+
 
 export function PaymentHistory() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -54,13 +49,14 @@ export function PaymentHistory() {
             </div>
             {payment.status === "PAID" && !payment.reportRequest &&
              !payment.metadata?.savedReportId && payment.metadata?.reportId &&
-             manualSlugForPaidReport[payment.metadata.reportId] ? (
+             getReportSlugForPaidId(payment.metadata.reportId) ? (
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/report-request/new?plan=PREMIUM&reportSlug=${encodeURIComponent(manualSlugForPaidReport[payment.metadata.reportId])}&orderId=${encodeURIComponent(payment.id)}`}>
+                <Link href={`/report-request/new?plan=PREMIUM&reportSlug=${encodeURIComponent(getReportSlugForPaidId(payment.metadata.reportId)!)}&orderId=${encodeURIComponent(payment.id)}`}>
                   Complete purchased report details
                 </Link>
               </Button>
             ) : null}
+            {payment.reportRequest&&payment.status==="PAID"?<Button variant="outline" size="sm" asChild><Link href={`/report-request/success?id=${encodeURIComponent(payment.reportRequest.id)}`}>View report status</Link></Button>:null}
             {payment.invoice ? (
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/api/invoices/${payment.invoice.id}`} target="_blank"><ReceiptText className="h-4 w-4" /> Payment receipt</Link>

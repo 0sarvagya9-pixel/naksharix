@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { seo } from "@/lib/seo";
+import { env } from "@/lib/env";
 import { ReportsContent } from "@/components/reports-content";
 import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import { getPublishedManualReportOffers } from "@/lib/reports/manual-offerings";
@@ -21,7 +22,7 @@ export default async function ReportsPage() {
     image="/naksharix/editorial-reports.svg" imageAlt="Illustrated birth-chart report"
     link="/kundli" linkLabel="Begin with a free Kundli" />
     <div className="mx-auto max-w-6xl px-5 py-4 text-sm text-[#573d48]">
-      Before choosing a personalized report, <Link href="/blog/personalized-astrology-report-delivery-guide" className="font-semibold underline underline-offset-4">read how birth details, human review, PDF generation and secure delivery differ</Link>.
+      Before choosing a personalized report, <Link href="/blog/personalized-astrology-report-delivery-guide" className="font-semibold underline underline-offset-4">read how birth details, PDF generation and secure delivery work</Link>.
     </div>
-    <ReportsContent manualOfferings={manualOfferings}/></>;
+    <ReportsContent manualOfferings={manualOfferings} automaticDelivery={env.AUTO_REPORT_DELIVERY_ENABLED==="true"}/></>;
 }
