@@ -4,7 +4,7 @@ import {getAdminApiUser} from "@/lib/auth/roles";
 import {prisma} from "@/lib/db";
 import {getShopCatalogue} from "@/lib/shop/catalogue-store";
 import {fail,ok,handleApiError,validateJson} from "@/lib/api";
-import {isShippingCountry} from "@/lib/shop/shipping-rules";
+import {isShippingCountry,hasPublishedPostalPolicy} from "@/lib/shop/shipping-rules";
 export const dynamic="force-dynamic";
 const schema=z.object({
  id:z.string().min(1).max(140).optional(),expectedVersion:z.number().int().min(0),
@@ -33,6 +33,7 @@ export async function PUT(request:Request){
   const input=await validateJson(request,schema);
   if(input.active&&(!input.confirmed||Date.parse(input.expiresAt)<=Date.now()||Date.parse(input.expiresAt)>Date.now()+90*86400000))return fail("Verify the real carrier rate and use a future expiry within 90 days.",422);
   if(input.active){
+   if(!hasPublishedPostalPolicy(input.country))return fail("Destination address validation is not yet qualified for automatic rates. Use a verified manual courier quote.",422);
    const catalogue=await getShopCatalogue();if(!catalogue.storageReady)return fail("Catalogue unavailable.",503);
    if(!catalogue.products.some(p=>p.id===input.productId&&p.status==="active"&&Number.isSafeInteger(p.unitPricePaise)&&Number(p.unitPricePaise)>0))return fail("Choose an active priced product.",422);
   }
