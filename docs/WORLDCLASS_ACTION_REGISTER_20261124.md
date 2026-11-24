@@ -42,7 +42,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 34 | Hindi About indexing | EXTERNAL | Search engine discovery/index confirmation. |
 | 35 | Genuine backlinks | EXTERNAL | Earn independently published editorial links; no outreach launch during hold. |
 | 36 | AI citations | EXTERNAL | Independently observe actual citations; no fabricated metrics. |
-| 37 | GA4 data | OPEN | Validate consent-aware measurement and actual reporting; no fake purchase events. |
+| 37 | GA4 data | PARTIAL | Added missing seasonal/yearly public route categories and privacy-safe accepted/failed/unknown transport counters in private Operations; real GA4 reporting and consent/browser acceptance pending. No synthetic events. |
 | 38 | Durable marketing consent | SOURCE | Integrated PR151 schema, additive migration source, verified opt-in/withdrawal; migration and suppression acceptance pending. |
 | 39 | Opt-in acquisition / partnership | SOURCE | Integrated PR144 private authenticated partner enquiries and public resources; consent operations pending. |
 | 40 | Homepage conversion UI | SOURCE | Added direct reports, Puja request, and practitioner availability links while retaining approved hero and services; visual/mobile acceptance pending. |
@@ -51,8 +51,8 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 43 | Unified authentication UI | PARTIAL | Recovery, redirect and role UX improved; unified layout and complete interaction polish pending. |
 | 44 | Language consistency | OPEN | Complete EN/HI/Hinglish across forms, checkout, account and PDFs. |
 | 45 | International experience | PARTIAL | Explicit IANA/DST and offset calculation repair; global birthplace, international merchant and currency acceptance remain. |
-| 46 | Monitoring | OPEN | Central error tracking, privacy controls, alert verification and incident runbook. |
-| 47 | Scalability | PARTIAL | Paid AI usage now has separate durable per-account transactional quota, one in-flight reservation and expiry; free flow preserved. Other routes still need cross-instance load and quota qualification. |
+| 46 | Monitoring | PARTIAL | Durable low-cardinality framework-error and external transport receipt counters, private seven-day admin evidence panel. Actual provider, alert receipt and incident acceptance remain pending. |
+| 47 | Scalability | PARTIAL | Durable atomic rolling-window database counters for core quota fallback and payment/report critical routes; trusted forwarded client identity, HMAC storage, bounded retention and fail-closed critical behavior. Paid AI ledger also serialized. Remaining route coverage, concurrent database tests and load qualification pending. |
 | 48 | Admin acceptance | POST_APPROVAL | Added private live read-only aggregate reconciliation panel for paid Puja anomalies, report requests, onboarding and unpaid shop orders; actual admin workflows, refunds and mobile UI require final acceptance. |
 | 49 | Professional dashboard and payout | PARTIAL | Secure explicit professional application; full schedule, session, earnings and payout acceptance requires real approved provider. |
 | 50 | Real payment lifecycle | POST_APPROVAL | Actual authorized test charge, invoice, capture, recovery and refund evidence. |

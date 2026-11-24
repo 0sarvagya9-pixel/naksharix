@@ -34,13 +34,14 @@ async function expireReservations(tx:Prisma.TransactionClient,userId:string,now:
 }
 export async function creditAccountSummary(userId:string){
  return prisma.$transaction(async tx=>{
-  await lockCreditAccount(tx,userId);await expireReservations(tx,userId,new Date());
-  const [balance,pending]=await Promise.all([
+  await lockCreditAccount(tx,userId);const now=new Date();
+  const [balance,pending,reclaimable]=await Promise.all([
    tx.aiCreditGrant.aggregate({where:availableWhere(userId),_sum:{remaining:true}}),
-   tx.payment.findFirst({where:{userId,provider:"RAZORPAY",purpose:"AI_CREDITS",status:{in:["PENDING","FAILED"]}},select:{metadata:true,amount:true,currency:true},orderBy:{createdAt:"desc"}})
+   tx.payment.findFirst({where:{userId,provider:"RAZORPAY",purpose:"AI_CREDITS",status:{in:["PENDING","FAILED"]}},select:{metadata:true,amount:true,currency:true},orderBy:{createdAt:"desc"}}),
+   tx.aiCreditUse.count({where:{userId,status:"RESERVED",expiresAt:{lte:now},grant:availableWhere(userId)}})
   ]);
   const attempt=pending?creditSnapshot(pending.metadata,Math.round(Number(pending.amount)*100),pending.currency):null;
-  return {remaining:balance._sum.remaining??0,unresolvedPurchase:Boolean(pending),pendingIntent:attempt?.intent??null,pendingOffer:attempt?{version:attempt.version,units:attempt.units,pricePaise:attempt.pricePaise}:null};
+  return {remaining:(balance._sum.remaining??0)+reclaimable,unresolvedPurchase:Boolean(pending),pendingIntent:attempt?.intent??null,pendingOffer:attempt?{version:attempt.version,units:attempt.units,pricePaise:attempt.pricePaise}:null};
  });
 }
 export async function reserveAiCredit(userId:string,requestId:string){

@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {durableRateDecision,validDurableRateInput} from "../lib/security/durable-rate-contract.ts";
+import {googleTransportMetric,isOpsMetric} from "../lib/ops/metric-contract.ts";
+import {publicAnalyticsRoute} from "../lib/analytics/public-routes.ts";
+assert.equal(validDurableRateInput("fixture",60),true);assert.equal(validDurableRateInput("fixture",86401),false);
+assert.deepEqual(durableRateDecision(11,10000,10,1000),{allowed:false,count:11,remaining:0,retryAfterSeconds:9});
+assert.throws(()=>durableRateDecision(-1,10000,10,1000));
+assert.equal(googleTransportMetric("purchase",true),"ga4_purchase_accepted");
+assert.equal(googleTransportMetric("begin_checkout",false),"ga4_checkout_failed_or_unknown");
+assert.equal(isOpsMetric("raw-email"),false);
+for(const p of ["/kumbh-mela-2027","/hi/grahan-2027","/yearly-horoscope-2027"])assert.equal(publicAnalyticsRoute(p),p);
+for(const p of ["/admin","/report-request/new","/api/ai/credits","/profile","/reports?email=x"])assert.equal(publicAnalyticsRoute(p),null);
+const read=p=>readFileSync(p,"utf8"),counter=read("lib/security/durable-rate-counter.ts"),metrics=read("lib/ops/metrics.ts");
+assert.ok(counter.includes("createHmac")&&counter.includes("ON CONFLICT (id) DO UPDATE")&&counter.includes("WHERE \"AuditLog\".action='ops.rate.counter'"));
+assert.ok(metrics.includes('process.env.VERCEL_ENV!=="production"')&&metrics.includes("isOpsMetric(metric)")&&!metrics.includes("client_id"));
+for(const path of ["app/api/payments/razorpay/order/route.ts","app/api/payments/razorpay/verify/route.ts","app/api/report-requests/preflight/route.ts","app/api/report-requests/route.ts"])assert.ok(read(path).includes("await rateLimitResponse(")&&read(path).includes("sharedRateLimitResponse as rateLimitResponse"));
+console.log("DURABLE_OPS_CONTRACT_PASS;CONCURRENT_DATABASE_AND_LIVE_PROVIDER_ACCEPTANCE_PENDING");

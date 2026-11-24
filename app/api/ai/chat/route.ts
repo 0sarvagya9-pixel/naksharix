@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     const body = await validateJson(request, schema);
     language = readLanguageFromRequest(request, body.language);
     const aiLanguage = toAiLanguage(language);
+    if (!isGeminiConfigured()) return fail(translatedApiMessage(language, "aiChatNotConfigured"), 503);
     if(body.billing==="credit"){
       if(body.consent!==true||!body.creditRequestId)return fail("Choose paid credit use and accept AI processing consent before sending.",422);
       if(!creditUsageEnabled()||!await creditSchemaReady())return fail("Paid AI responses are temporarily unavailable; no credit used.",503);
@@ -49,8 +50,6 @@ export async function POST(request: NextRequest) {
       // all server instances before any chargeable external AI inference.
       if (!await claimAnonymousAiQuota(request)) return fail(rateLimitMessage(language), 429);
     }
-    if (!isGeminiConfigured()) return fail(translatedApiMessage(language, "aiChatNotConfigured"), 503);
-
     const parsed = parseAstrologyChat(body.messages, body.kundliContext);
     const memory = buildMemory(body.kundliContext, parsed);
 

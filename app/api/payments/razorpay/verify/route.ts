@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { finalizePaidPayment, verifyRazorpayCapturedPayment, verifyRazorpayPaymentSignature } from "@/lib/revenue";
-import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
+import { getRequestIp, sharedRateLimitResponse as rateLimitResponse } from "@/lib/security/rate-limit";
 import { reconcileCapturedPurpose } from "@/lib/payments/purpose-reconciliation";
 import { googleSessionSchema, sendVerifiedGooglePurchase } from "@/lib/analytics/google";
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthenticated", 401);
-    const limited = rateLimitResponse("razorpay-verify", user.id || getRequestIp(request), 12, 60_000);
+    const limited = await rateLimitResponse("razorpay-verify", user.id || getRequestIp(request), 12, 60_000);
     if (limited) return limited;
     const body = await validateJson(request, schema);
     const valid = verifyRazorpayPaymentSignature(body.razorpay_order_id, body.razorpay_payment_id, body.razorpay_signature);

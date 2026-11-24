@@ -7,7 +7,7 @@ import {getManualReportCheckout} from "@/lib/reports/checkout-catalogue";
 import {checkAutomaticInputs} from "@/lib/reports/automatic-report-input";
 import {getActiveAstrologyProviderName} from "@/lib/astrology/provider";
 import {issueReportPreflight} from "@/lib/reports/preflight-contract";
-import {getRequestIp,rateLimitResponse} from "@/lib/security/rate-limit";
+import {getRequestIp,sharedRateLimitResponse as rateLimitResponse} from "@/lib/security/rate-limit";
 import {fail,ok,validateJson,handleApiError} from "@/lib/api";
 const schema=z.object({reportSlug:z.string().min(1).max(100),deliveryEmail:z.string().email(),birth:z.unknown(),automaticDetails:z.unknown(),concern:z.string().trim().min(1).max(2000)});
 export async function POST(request:NextRequest){
@@ -15,7 +15,7 @@ export async function POST(request:NextRequest){
   const user=await getCurrentUser();
   if(!user)return fail("Unauthenticated",401);
   if(canBypassPayment(user))return fail("Use the administrator report review flow.",403);
-  const limited=rateLimitResponse("report-preflight",user.id||getRequestIp(request),8,60_000);
+  const limited=await rateLimitResponse("report-preflight",user.id||getRequestIp(request),8,60_000);
   if(limited)return limited;
   const body=await validateJson(request,schema);
   if(body.deliveryEmail.toLowerCase()!==user.email.toLowerCase())return fail("Delivery email must match your account.",403);

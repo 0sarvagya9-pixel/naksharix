@@ -14,7 +14,7 @@ import { prisma } from "@/lib/db";
 import { getManualReport } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
-import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
+import { getRequestIp, sharedRateLimitResponse as rateLimitResponse } from "@/lib/security/rate-limit";
 
 const schema = z.object({
   orderId: z.string().optional(),
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthenticated", 401);
 
-    const rateLimited = rateLimitResponse("report-request-create", user.id || getRequestIp(request), 5, 60_000);
+    const rateLimited = await rateLimitResponse("report-request-create", user.id || getRequestIp(request), 5, 60_000);
     if (rateLimited) return rateLimited;
 
     const body = await validateJson(request, schema);

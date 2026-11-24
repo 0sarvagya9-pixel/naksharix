@@ -19,7 +19,7 @@ import { checkExistingReportOrder } from "@/lib/payments/report-order-recovery";
 import { getReportSlugForPaidId } from "@/lib/reports/checkout-catalogue";
 import { verifyReportPreflight } from "@/lib/reports/preflight-contract";
 import { googleSessionSchema, liveRazorpayAnalyticsOrder, sendGoogleCheckout } from "@/lib/analytics/google";
-import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
+import { getRequestIp, sharedRateLimitResponse as rateLimitResponse } from "@/lib/security/rate-limit";
 import { shippingPayable,SHIPPING_TERMS_VERSION,readShippingSnapshot } from "@/lib/shop/shipping-rules";
 
 import {availableCreditOffer,lockCreditAccount} from "@/lib/ai/credit-ledger";
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthenticated", 401);
-    const limited = rateLimitResponse("razorpay-order", user.id || getRequestIp(request), 10, 60_000);
+    const limited = await rateLimitResponse("razorpay-order", user.id || getRequestIp(request), 10, 60_000);
     if (limited) return limited;
     const body = await validateJson(request, schema);
     if (body.purpose === "SUBSCRIPTION" && env.SUBSCRIPTIONS_ENABLED !== "true") return fail("Not found", 404);
