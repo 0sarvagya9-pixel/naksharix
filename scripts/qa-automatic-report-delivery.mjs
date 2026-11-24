@@ -57,6 +57,14 @@ globalThis.fetch=async(url,options)=>{
 if(!dbMode){
  assert.equal(input.AUTO_REPORT_SLUGS.length,15);
  assert.equal(new Set(input.AUTO_REPORT_SLUGS).size,15);
+ const { automaticReportPublicPreview } = require("@/lib/reports/public-preview");
+ for (const locale of ["en", "hi", "hinglish"]) {
+   const previews = input.AUTO_REPORT_SLUGS.map(slug => automaticReportPublicPreview(slug, locale));
+   assert.equal(new Set(previews.map(p=>p.summary)).size,15,"Each report must have distinct public product copy");
+   for(const p of previews){assert.ok(p.summary.length>20);assert.equal(p.features.length,3);assert.ok(p.features.every(x=>x.length>5));}
+ }
+ assert.equal(automaticReportPublicPreview("unknown-slug","en"),null);
+ assert.equal(automaticReportPublicPreview("__proto__","en"),null);
  assert.equal(input.checkAutomaticInputs("couple-kundli",birth,{confirmed:true}).ok,false);
  assert.equal(input.checkAutomaticInputs("name-correction-report",birth,{confirmed:true}).ok,false);
  assert.equal(input.checkAutomaticInputs("premium-kundli",{...birth,timezone:99},extra).ok,false);

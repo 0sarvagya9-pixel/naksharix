@@ -19,3 +19,6 @@ All 35 business opportunities from audit are requested for development, gated by
 
 ## Second implementation batch (source-only; acceptance pending)
 - Password recovery uses a separate high-entropy, expiring, hashed one-time token with per-IP/destination quota, verified nonprivileged password account eligibility, generic request responses, atomic consumption/password update/session revocation, no live email tests. OAuth JWT invalidation references the reset receipt. No production schema migration is required by this change. New signup/reset passwords cannot exceed bcrypt's 72-byte boundary; legacy sign-in remains compatible. Added private noindex recovery screens and regression contract tests. Email delivery, database race and browser E2E remain to be independently tested. Protected-route return now preserves the query string.
+
+## Third implementation batch
+- Reconciled all five changed files from exact PR #153 head 091defc9 onto the isolated development branch using exact patch context. Added product-specific summaries to the catalogue too, not just individual details. Price source, automatic delivery, and Puja request-only gates preserved. No production merge. Original PR remains open; release must account for this integration rather than double-applying it.
