@@ -51,18 +51,24 @@ assert.ok(secure.includes("if (isMutation && !response.ok)") &&
   !secure.includes('"POST /api/payments/razorpay/order":') &&
   !secure.includes('"POST /api/payments/razorpay/verify":'),
   "Global mutation notifications may show persisted requests but never infer payment success from an HTTP order");
-const verified = pay.indexOf('if (!verifyResponse.ok)');
+const verified = pay.indexOf('if (!verifyResponse.ok||!isVerifiedPaymentAck(');
 const success = pay.indexOf('siteNotice.success("Your payment has been verified.');
 assert.ok(verified !== -1 && success > verified &&
   pay.includes('secureFetch("/api/payments/razorpay/verify"') &&
+  pay.includes("const verifyJson=await verifyResponse.json()") &&
+  pay.includes("providerPaymentId:response.razorpay_payment_id") &&
   secure.includes('siteNotice.warning(') &&
   secure.includes('"Payment status pending"') &&
   pay.includes('setStatus("Payment confirmation is pending.') &&
   pay.includes('setStatus("Payment confirmation could not be checked.'),
   "Only gateway-verified capture gets a success notification; pending must remain visible");
-assert.ok(add.includes('siteNotice.success("Item added to your cart.') &&
-  add.includes('siteNotice.error("Cart could not be saved') &&
-  add.includes('siteNotice.warning("Maximum 10 units'),
+assert.ok(add.includes('siteNotice.success(copy.addedMessage,copy.added)') &&
+  add.includes('siteNotice.error(copy.cartStorage,copy.storageTitle)') &&
+  add.includes('siteNotice.warning(copy.limitMessage,copy.limitTitle)') &&
+  add.indexOf('writeCart(list)') < add.indexOf('siteNotice.success(copy.addedMessage') &&
+  read("lib/shop/checkout-copy.ts").includes('"addedMessage": "Item added to your cart.') &&
+  read("lib/shop/checkout-copy.ts").includes('"limitMessage": "Maximum 10 units') &&
+  read("lib/shop/checkout-copy.ts").includes('"cartStorage": "Cart could not be saved'),
   "Shop local storage events require accurate global confirmation");
 
 for (const path of ["components/auth-form.tsx", "components/consultation-booking.tsx", "components/admin-puja-offerings.tsx"]) {

@@ -54,13 +54,15 @@ assert.ok(ui.includes("safeProductVisual(product)") && ui.includes("Images are f
 const cart=read("components/shop/cart-page-client.tsx");
 assert.ok(cart.includes('import { ResilientShopPhoto }') && cart.includes("p.galleryImages?.[0]?.url"),"CART_PRODUCT_PHOTOS_MISSING");
 const cartControls=read("components/shop/quote-cart-controls.tsx");
-for(const invariant of ["list[index].quantity>=10","list.length>=20","writeCart(list)","setResult(\"unavailable\")","Maximum 10 of this product per cart.","Cart could not be saved in this browser."]){
+for(const invariant of ["list[index].quantity>=10","list.length>=20","writeCart(list)","setResult(\"unavailable\")","copy=checkoutCopy[apiLocale]","copy.limitMessage","copy.fullMessage","copy.cartStorage"]){
   assert.ok(cartControls.includes(invariant),"CART_CONTROL_DUPLICATE_OR_STORAGE_GUARD_MISSING="+invariant);
 }
-for(const invariant of ['setOrderId(order.id);', 'try{writeCart([]);setLines([]);}', 'do not submit a duplicate order.', 'Cart could not be saved']){
+for(const invariant of ['setOrderId(order.id);', 'readCheckoutOrder(payload,', 'if(cartFingerprint(readCart())===fingerprint){writeCart([]);setLines([]);}', 'setIssue("cartClear")', 'setIssue("cartChanged")', 'setIssue("cartStorage")', 'setUncertain(true)', 'inFlight.current||locked']){
   assert.ok(cart.includes(invariant),"CART_ACCEPTED_ORDER_OR_STORAGE_FAILURE_HANDLING_MISSING="+invariant);
 }
 
+const checkoutText=read("lib/shop/checkout-copy.ts");
+for(const marker of ['"limitMessage": "Maximum 10 units of this product per cart."', '"cartStorage": "Cart could not be saved in this browser. Enable storage and retry."', '"cartClear": "Order saved. The cart could not be cleared; do not submit a duplicate order."'])assert.ok(checkoutText.includes(marker),"LOCALIZED_CART_SAFETY_DISCLOSURE_MISSING="+marker);
 const productResilience=read("components/shop/resilient-shop-photo.tsx");
 for(const marker of ["wikimediaOriginalForThumbnail(src)","currentSrc===src","setCurrentSrc(original)","setCurrentSrc(fallback)","Image unavailable"]){
   assert.ok(productResilience.includes(marker),"SHOP_PHOTO_FALLBACK_INCOMPLETE="+marker);
