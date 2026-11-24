@@ -70,7 +70,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{publicPreview?.summary ?? report.description[locale]}</p>
             <div id="report-purchase" tabIndex={-1} className="mt-7 flex scroll-mt-28 flex-wrap gap-3">
               {checkout ? (
-                <div className="min-w-56">
+                <div className="w-full min-w-0 sm:w-auto sm:min-w-56">
                   <RazorpayCheckoutButton
                     payload={{ purpose: checkout.purpose, reportId: checkout.reportId }}
                     label={`${labels.payAndContinue} ${checkout.price}`}
@@ -131,7 +131,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{labels.disclaimerCopy}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               {checkout ? (
-                <div className="min-w-56">
+                <div className="w-full min-w-0 sm:w-auto sm:min-w-56">
                   <RazorpayCheckoutButton
                     payload={{ purpose: checkout.purpose, reportId: checkout.reportId }}
                     label={`${labels.payAndContinue} ${checkout.price}`}

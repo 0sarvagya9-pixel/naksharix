@@ -36,7 +36,8 @@ assert(reportApi.includes("getCurrentUser()"), "Report request API requires auth
 assert(reportApi.includes("ReportPaymentStatus.PENDING") && reportApi.includes("PENDING_REVIEW"), "Report request API creates pending-review records", "no-payment request stage is real DB persistence");
 assert(
   reportsContent.includes("Personalized quote before any payment")
-    && reportsContent.includes("Complete secure checkout, then enter your birth details")
+    && reportsContent.includes("Enter and validate your birth details before proceeding to secure payment")
+    && reportsContent.includes("Manual-review reports do not require upfront payment")
     && reportsContent.includes("Download your report when it is ready."),
   "Reports page explains paid and pending-review workflows",
   "no unsupported payment or delivery claim"

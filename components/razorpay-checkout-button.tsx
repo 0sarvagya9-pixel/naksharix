@@ -229,7 +229,7 @@ export function RazorpayCheckoutButton({
 
   return (
     <div className="space-y-2">
-      <Button type="button" className="w-full" variant={variant} onClick={() => { if (payload.purpose === "PUJA_BOOKING") { setFeeAccepted(false); feeDialog.current?.showModal(); } else void startCheckout(); }} disabled={loading||locked}>
+      <Button type="button" className="h-auto min-h-10 w-full min-w-0 whitespace-normal py-2 text-center" variant={variant} onClick={() => { if (payload.purpose === "PUJA_BOOKING") { setFeeAccepted(false); feeDialog.current?.showModal(); } else void startCheckout(); }} disabled={loading||locked}>
         <CreditCard className="h-4 w-4" />
         {loading ? tr("processing") : label}
       </Button>

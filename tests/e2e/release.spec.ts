@@ -177,7 +177,7 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("heading", { level: 2, name: "Shri Yantra" })).toBeVisible();
     await expect(page.locator('img[alt*="Yantra"]').first()).toBeVisible();
     await expect(page.getByText(/Images are for reference/).first()).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add product to cart" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add to cart" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Buy Now|Pay with Razorpay/i })).toHaveCount(0);
   });
 
@@ -185,7 +185,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.goto(absolute("/shop"), { waitUntil: "domcontentloaded" });
     await page.getByPlaceholder("Search products...").fill("Shri Yantra");
     await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true })).toBeVisible();
-    await page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add product to cart" }).click();
+    await page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add to cart" }).click();
     await page.getByRole("link", { name: "View cart" }).first().click();
     await expect(page).toHaveURL(/\/cart$/);
     await expect(page.getByRole("heading", { name: "Shopping cart" })).toBeVisible();
@@ -239,7 +239,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.goto(absolute("/shop/shri-yantra"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Shri Yantra" })).toBeVisible();
     await expect(page.getByText(/Product images are for reference/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Add product to cart" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add to cart" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Share Shri Yantra on WhatsApp" })).toHaveAttribute("href", /^https:\/\/wa\.me\/\?text=/);
     await expect(page.getByRole("button", { name: "Copy product link" })).toBeVisible();
     await expect(page.locator("#shop-breadcrumb-shri-yantra")).toHaveCount(1);
@@ -281,7 +281,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.route("**/api/payments/razorpay/order", async route => { orderRequests++; await route.abort(); });
     await page.getByRole("button", { name: "Validate details INR 399" }).first().click();
     await expect(page).toHaveURL(/\/login\?redirectTo=%2Freports/i);
-    await expect(page.getByRole("heading", { name: "Login to Naksharix" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Sign in to Naksharix" })).toBeVisible();
     expect(orderRequests).toBe(0);
   });
 

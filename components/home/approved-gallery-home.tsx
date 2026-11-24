@@ -67,7 +67,6 @@ export function ApprovedGalleryHome() {
               Explore Free Tools <ArrowRight size={16} aria-hidden="true"/>
             </Link>
           </div>
-          <nav aria-label="Explore personal services" className="mt-5 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold"><Link href="/reports" className="underline underline-offset-4">Compare personalized reports</Link><Link href="/pujas" className="underline underline-offset-4">Request a Puja date</Link><Link href="/consultation" className="underline underline-offset-4">Check astrologer availability</Link></nav>
         </div>
         <div className="nx-a-hero-art" role="img" aria-label="Golden Vedic zodiac artwork, symbolizing traditional astrology" />
       </section>
@@ -81,6 +80,7 @@ export function ApprovedGalleryHome() {
             </Link>
           ))}
         </nav>
+        <nav aria-label="Explore personal services" className="mt-5 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold"><Link href="/reports" className="underline underline-offset-4">Compare personalized reports</Link><Link href="/pujas" className="underline underline-offset-4">Request a Puja date</Link><Link href="/consultation" className="underline underline-offset-4">Check astrologer availability</Link></nav>
         <section className="nx-a-section" aria-labelledby="nx-a-services">
           <div className="nx-a-section-heading">
             <span>Curated experiences</span>

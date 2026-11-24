@@ -21,6 +21,13 @@ const nextConfig = {
     return [
       // Search Console: use actual HTTP 308, not streamed Next.js HTML meta refresh.
       { source: "/hi/daily-horoscope", destination: "/hi/aaj-ka-rashifal", permanent: true },
+      // Legacy catalogue aliases must resolve to the one priced report, not duplicate pages.
+      { source: "/reports/kundli-pro", destination: "/reports/premium-kundli", permanent: true },
+      { source: "/reports/marriage-report", destination: "/reports/couple-kundli", permanent: true },
+      { source: "/reports/finance-report", destination: "/reports/wealth-report", permanent: true },
+      { source: "/reports/health-report", destination: "/reports/premium-kundli", permanent: true },
+      { source: "/reports/yearly-ai", destination: "/reports/yearly-horoscope-report", permanent: true },
+      { source: "/reports/numerology-report", destination: "/reports/numerology-lo-shu-report", permanent: true },
       { source: "/yearly-horoscope-2026", destination: "/yearly-horoscope", permanent: true },
       { source: "/astrology/astrology", destination: "/astrology", permanent: true },
       { source: "/astrology/horoscope", destination: "/horoscope", permanent: true },

@@ -11,7 +11,7 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
 
     const expectedLinks = [
       ["Create Free Kundli", "/kundli"],
-      ["Explore Services", "/free-calculators"],
+      ["Explore Free Tools", "/free-calculators"],
       ["Kundli", "/kundli"],
       ["Matching", "/matchmaking"],
       ["Panchang", "/panchang"],
@@ -113,6 +113,12 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
       const top = await first.evaluate(node => Math.round(node.getBoundingClientRect().top));
       expect(top, route + " must show a catalogue card on the first mobile screen").toBeLessThan(844);
     }
+    await page.goto("/reports", { waitUntil: "domcontentloaded" });
+    const compare = page.locator("#compare-reports");
+    await expect(compare).not.toHaveAttribute("open", "");
+    await compare.locator("summary").click();
+    await expect(compare.getByRole("heading", {name:"Compare personalized reports"})).toBeVisible();
+    await expect(compare.getByRole("article")).toHaveCount(3);
     await page.goto("/pujas", { waitUntil: "domcontentloaded" });
     const title = page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ });
     await expect(title).toBeVisible();
