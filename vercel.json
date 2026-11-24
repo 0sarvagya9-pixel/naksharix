@@ -54,7 +54,8 @@
   ],
   "git": {
     "deploymentEnabled": {
-      "internal-naksharix-development-hold-20261124": false
+      "internal-naksharix-development-hold-20261124": false,
+      "release-schema-compatible-20261124": false
     }
   }
 }
