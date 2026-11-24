@@ -56,9 +56,9 @@ export function ApprovedGalleryHome() {
     <div className="nx-approved-home" data-visual-source="NAKSHARIX_DESIGN_APPROVAL_20261106">
       <section className="nx-a-hero" aria-labelledby="nx-a-heading">
         <div className="nx-a-hero-copy">
-          <span className="nx-a-eyebrow">Ancient wisdom for modern life</span>
+          <span className="nx-a-eyebrow">NAKSHARIX · Ancient wisdom for modern life</span>
           <h1 id="nx-a-heading">Discover your <span>cosmic journey.</span></h1>
-          <p>Explore traditional Kundli, Panchang, horoscope, spiritual traditions and personal guidance in one beautifully designed place.</p>
+          <p>Naksharix is an online Vedic astrology platform for free Kundli tools, Panchang, horoscopes, spiritual traditions and optional personalized reports. <Link href="/about" className="underline underline-offset-4">About Naksharix</Link></p>
           <div className="nx-a-actions">
             <Link href="/kundli" className="nx-a-button nx-a-primary">
               <MoonStar size={17} aria-hidden="true"/> Create Free Kundli <ArrowRight size={16} aria-hidden="true"/>

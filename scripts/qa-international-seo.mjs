@@ -9,7 +9,8 @@ const middleware = read("middleware.ts");
 const provider = read("components/language-provider.tsx");
 const switcher = read("components/language-switcher.tsx");
 const pairs = [...registry.matchAll(/\{ en: "([^"]+)", hi: "([^"]+)" \}/g)];
-assert.equal(pairs.length, 3, "Only three independently available bilingual page pairs");
+assert.equal(pairs.length, 4, "Exactly four independently available bilingual page pairs, including brand About");
+assert.ok(pairs.some(([,en,hi])=>en==="/about" && hi==="/hi/about"), "Brand About reciprocal pair missing");
 const paths = pairs.flatMap(([, en, hi]) => [en, hi]);
 assert.equal(new Set(paths).size, paths.length, "Duplicate language-alternate URL");
 for (const route of paths) {
@@ -174,7 +175,7 @@ assert.ok(!indexNow.includes("process.env.DATABASE_URL") &&
   "Search-discovery task must not read database, payment or ads configuration");
 console.log("INDEXNOW_STATIC_DISCOVERY=PASS;HOST_KEY_PUBLIC=YES;PRODUCTION_ONLY=YES;PRIVATE_URLS=NO");
 
-console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
+console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=4;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
 
 
 // Conversion from public tools remains voluntary, and public report sharing
@@ -205,3 +206,22 @@ for (const route of ["/free-kundli","/hi/free-kundli","/kundli-matching","/hi/ku
   assert.ok(indexNow.includes('"'+route+'"'), "Missing public discovery route: "+route);
 }
 console.log("ORGANIC_SALES_CONVERSION=PASS;RELEVANT_REPORTS=4;REPORT_SHARE=PUBLIC_ONLY;SHOP_PRICES=LIVE_CATALOGUE;CONSENT=PRESERVED");
+
+const brandSchema=read("components/schema-markup.tsx");
+const brandAnswers=read("components/seo/brand-answers.tsx");
+const brandFacts=read("lib/seo-brand.ts");
+assert.ok(brandSchema.includes("<JsonLd") && !brandSchema.includes("next/script") && !brandSchema.includes("afterInteractive"), "Brand entities must be in server-rendered HTML");
+for(const id of ["#organization","#website","#webapplication"]) assert.ok(brandSchema.includes(id), "Missing stable brand graph node "+id);
+assert.ok(brandSchema.includes('publisher: { "@id": organizationId }') && brandSchema.includes('isPartOf: { "@id": websiteId }'), "Missing linked brand entities");
+assert.ok(!/sameAs|aggregateRating|reviewCount|foundingDate|founder:/.test(brandSchema), "Unverified brand proof");
+assert.ok(brandFacts.includes("Naksharix is the name of this online platform") && brandFacts.includes("Naksharix और नक्षत्र में क्या अंतर है?") && brandAnswers.includes("brandAnswers[locale].map"), "Visible bilingual brand distinction missing");
+assert.ok(read("app/about/page.tsx").includes('path: "/about"') && read("app/hi/about/page.tsx").includes('path: "/hi/about"'), "Missing self-canonical About metadata");
+assert.ok(sitemap.includes('const route = rawRoute || "/"') && sitemap.includes("new URL(route, seoOrigin).toString()"), "Root sitemap must match canonical and use its full hreflang cluster");
+const directory=read("public/llms.txt");
+assert.ok(directory.includes("https://www.naksharix.com/about") && directory.includes("https://www.naksharix.com/hi/about") && directory.includes("optional human- and machine-readable"), "Public brand reference directory incomplete");
+for(const match of directory.matchAll(/https:\/\/[^)\s]+/g)){
+  const url=new URL(match[0]);
+  assert.equal(url.origin,"https://www.naksharix.com");
+  assert.ok(!/^(?:\/api|\/admin|\/dashboard|\/payment|\/report-request|\/saved-reports|\/profile)(?:\/|$)/.test(url.pathname) && !url.search && !url.hash,"Private link in public directory");
+}
+console.log("BRAND_ENTITY_DISCOVERY=PASS;SSR_SCHEMA=YES;BILINGUAL_ABOUT=YES;ROOT_HREFLANG=YES;RANKING=NOT_CLAIMED");

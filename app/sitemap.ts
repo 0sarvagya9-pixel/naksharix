@@ -20,6 +20,7 @@ const staticRoutes = [
   "/hi/kundli-milan",
   "/hi/free-kundli",
   "/about",
+  "/hi/about",
   "/contact",
   "/faq",
   "/privacy-policy",
@@ -118,10 +119,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (!uniqueRoutes.has(entry.route)) uniqueRoutes.set(entry.route, entry);
   }
   const seoOrigin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
-  return [...uniqueRoutes.values()].map(({ route, priority, frequency }) => {
+  return [...uniqueRoutes.values()].map(({ route: rawRoute, priority, frequency }) => {
+    // The homepage registry uses an empty string, but hreflang looks up "/".
+    const route = rawRoute || "/";
     const languages = publishedSeoAlternates(route, seoOrigin);
     return {
-      url: `${seoOrigin}${route}`,
+      url: new URL(route, seoOrigin).toString(),
       ...(languages ? { alternates: { languages } } : {}),
       changeFrequency: frequency,
       priority

@@ -1,55 +1,59 @@
-import Script from "next/script";
 import { env } from "@/lib/env";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
+import { JsonLd } from "@/components/seo/json-ld";
+import { brandName, brandDescription } from "@/lib/seo-brand";
 
-/** Grounded public structured data only: no invented stock, prices, native app,
- * searchable site endpoint, unverified AI capabilities or supplier offers.
- */
+/** Server-rendered, linked public entities. No fabricated ratings, reviews,
+ * affiliations, social profiles, native apps or inventory promises. */
 export function SchemaMarkup() {
   const siteUrl = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
+  const home = siteUrl + "/";
+  const organizationId = home + "#organization";
+  const websiteId = home + "#website";
+  const applicationId = home + "#webapplication";
   const organization = {
-    "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Naksharix",
-    url: siteUrl,
-    logo: `${siteUrl}/logo.svg`,
-    brand: { "@type": "Brand", name: "Naksharix" },
+    "@id": organizationId,
+    name: brandName,
+    url: home,
+    description: brandDescription,
+    logo: { "@type": "ImageObject", url: siteUrl + "/images/naksharix-final-logo-symbol.png" },
+    brand: { "@type": "Brand", name: brandName },
     knowsAbout: ["Vedic astrology", "Horoscope", "Kundli", "Numerology", "Tarot", "Panchang", "Kundli matching"],
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "customer support",
-      url: `${siteUrl}/contact`
-    }
+    contactPoint: { "@type": "ContactPoint", contactType: "customer support", url: siteUrl + "/contact" }
   };
   const website = {
-    "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Naksharix",
-    url: siteUrl,
-    description: "Vedic astrology tools, personalized reports, horoscope, Panchang and traditional Puja topics.",
-    inLanguage: ["en-IN", "hi-IN"]
-  };
-  const navigation = {
-    "@context": "https://schema.org",
-    "@type": "SiteNavigationElement",
-    name: ["Free Kundli", "Horoscope", "Panchang", "Consultations", "Reports", "Puja Directory", "Spiritual Catalogue"],
-    url: [
-      `${siteUrl}/kundli`, `${siteUrl}/daily-horoscope`, `${siteUrl}/panchang`,
-      `${siteUrl}/consultation`, `${siteUrl}/reports`, `${siteUrl}/pujas`, `${siteUrl}/shop`
-    ]
+    "@id": websiteId,
+    name: brandName,
+    url: home,
+    description: brandDescription,
+    publisher: { "@id": organizationId },
+    inLanguage: ["en", "hi"]
   };
   const webApp = {
-    "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Naksharix",
+    "@id": applicationId,
+    name: brandName,
     applicationCategory: "LifestyleApplication",
     operatingSystem: "Any",
-    url: siteUrl,
-    description: "Browser-based astrology and cultural-information tools with optional consultation and report workflows."
+    url: home,
+    description: brandDescription,
+    publisher: { "@id": organizationId },
+    isPartOf: { "@id": websiteId }
   };
-  return (
-    <Script id="naksharix-schema" type="application/ld+json" strategy="afterInteractive">
-      {JSON.stringify([organization, website, navigation, webApp])}
-    </Script>
-  );
+  // Keep the existing public service navigation discoverable without asserting
+  // that a directory listing is an active booking or purchasable offer.
+  const navigation = [
+    ["Free Kundli", "/kundli"], ["Horoscope", "/daily-horoscope"],
+    ["Panchang", "/panchang"], ["Consultations", "/consultation"],
+    ["Reports", "/reports"], ["Puja Directory", "/pujas"], ["Spiritual Catalogue", "/shop"]
+  ].map(([name, path]) => ({
+    "@type": "SiteNavigationElement",
+    "@id": home + "#navigation-" + path.slice(1),
+    name,
+    url: siteUrl + path,
+    isPartOf: { "@id": websiteId }
+  }));
+  return <JsonLd id="naksharix-schema" data={{ "@context": "https://schema.org", "@graph": [organization, website, webApp, ...navigation] }} />;
 }

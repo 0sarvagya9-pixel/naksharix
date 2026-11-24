@@ -2,16 +2,25 @@ import assert from "node:assert/strict";
 
 const base = (process.env.PLAYWRIGHT_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
 const canonical = (process.env.NEXT_PUBLIC_APP_URL || base).replace(/\/$/, "");
-const absolute = (path) => canonical + (path === "/" ? "" : path);
+const absolute = (path) => new URL(path, canonical + "/").toString();
 const pairs = [
   ["/", "/hi"],
   ["/free-kundli", "/hi/free-kundli"],
-  ["/kundli-matching", "/hi/kundli-milan"]
+  ["/kundli-matching", "/hi/kundli-milan"],
+  ["/about", "/hi/about"]
 ];
 const nativeGuides = ["en", "hi", "mr", "bn", "es", "fr"];
 const approvedGuides = ["en", "hi"];
 const guidePath = (language) => language === "en" ? "/learn/kundli-explained" : "/" + language + "/learn/kundli-explained";
 const langValue = (tag, code) => new RegExp('\\bhrefLang="' + code + '"', "i").test(tag);
+// Next metadata serializes a root alternate as the bare origin in some builds.
+// Normalize absolute URL syntax, not host, scheme, path or language.
+function hrefMatches(tag, path) {
+  const href=tag.match(/\bhref="([^"]+)"/i)?.[1];
+  if(!href) return false;
+  try { return new URL(href).href === absolute(path); } catch { return false; }
+}
+
 
 for (const [en, hi] of pairs) {
   for (const [path, locale] of [[en, "en"], [hi, "hi"]]) {
@@ -25,10 +34,12 @@ for (const [en, hi] of pairs) {
     assert.equal(foundHtml[1], locale, "SSR HTML language not tied to URL: " + path);
     const links = [...html.matchAll(/<link\b[^>]*\brel="alternate"[^>]*>/gi)].map((m) => m[0]);
     for (const [code, target] of [["en", en], ["hi", hi], ["x-default", en]]) {
-      assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + absolute(target) + '"')),
+      assert.ok(links.some((tag) => langValue(tag, code) && hrefMatches(tag,target)),
         "Missing reciprocal " + code + " hreflang on " + path);
     }
-    assert.ok(html.includes('href="' + absolute(path) + '"'), "Self canonical missing: " + path);
+    const canonicals=[...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/gi)].map(m=>m[0]);
+    assert.equal(canonicals.length,1,"Expected one canonical: "+path);
+    assert.ok(hrefMatches(canonicals[0],path),"Incorrect self canonical: "+path);
   }
 }
 for (const locale of nativeGuides) {
@@ -41,7 +52,7 @@ for (const locale of nativeGuides) {
   const links = [...html.matchAll(/<link\b[^>]*\brel="alternate"[^>]*>/gi)].map((x) => x[0]);
   if (approvedGuides.includes(locale)) {
     for (const code of approvedGuides) {
-      assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + absolute(guidePath(code)) + '"')),
+      assert.ok(links.some((tag) => langValue(tag, code) && hrefMatches(tag,guidePath(code))),
         "Missing reciprocal approved guide hreflang " + locale + " to " + code);
     }
   } else {
@@ -84,4 +95,19 @@ const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
 assert.equal(locs.length, new Set(locs).size, "Sitemap contains duplicate URLs");
 assert.ok(xml.includes('hreflang="hi"') && xml.includes('hreflang="x-default"'),
   "Sitemap lacks localized alternates");
-console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=6;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES");
+const rootEntry=[...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(m=>m[1]).find(x=>x.includes("<loc>"+canonical+"/</loc>"));
+assert.ok(rootEntry && rootEntry.includes('hreflang="en"') && rootEntry.includes('hreflang="hi"') && rootEntry.includes('hreflang="x-default"'),"Root sitemap canonical or language cluster missing");
+for (const route of ["/","/about","/hi/about"]) {
+  const response=await fetch(base+route);
+  assert.equal(response.status,200);
+  const html=await response.text();
+  const script=html.match(/<script[^>]*id="naksharix-schema"[^>]*>([\s\S]*?)<\/script>/i);
+  assert.ok(script,"Missing actual server-rendered JSON-LD on "+route);
+  const graph=JSON.parse(script[1])["@graph"];
+  assert.ok(Array.isArray(graph) && graph.some(node=>node["@type"]==="Organization" && node.name==="Naksharix") && graph.some(node=>node["@type"]==="WebSite" && node.name==="Naksharix" && node.url.endsWith("/")));
+  if(route!=="/")assert.ok(html.includes('id="brand-answers-heading"') && html.includes('id="naksharix-about-schema"'),"Missing visible brand answers or AboutPage graph");
+}
+const llms=await fetch(base+"/llms.txt");
+assert.equal(llms.status,200);
+assert.ok((await llms.text()).includes("https://www.naksharix.com/hi/about"),"Missing public brand directory");
+console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=8;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");
