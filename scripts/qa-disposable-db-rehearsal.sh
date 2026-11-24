@@ -92,6 +92,9 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM public."MarketingConsent" WHERE "userId"='ci-consent-user' AND "revokedAt" IS NOT NULL) THEN
     RAISE EXCEPTION 'revocation not persisted';
   END IF;
+  -- Re-consent using the original verified address, then change the address.
+  -- An unrevoked but stale-address record must no longer qualify.
+  UPDATE public."MarketingConsent" SET "revokedAt"=NULL WHERE "userId"='ci-consent-user';
   UPDATE public."User" SET "email"='changed@example.invalid' WHERE "id"='ci-consent-user';
   IF EXISTS (SELECT 1 FROM public."MarketingConsent" c JOIN public."User" u ON u.id=c."userId" WHERE u.id='ci-consent-user' AND c."emailAtConsent"=u.email AND c."revokedAt" IS NULL) THEN
     RAISE EXCEPTION 'stale email qualified';
