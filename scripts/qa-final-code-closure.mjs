@@ -105,8 +105,15 @@ assert(pkg.scripts["qa:final-closure"] === "node scripts/qa-final-code-closure.m
 assert(pkg.scripts["qa:prod-db-readonly"] === "node scripts/qa-production-db-readonly.mjs", "Production DB read-only QA registered", "manual evidence command available");
 
 assert(shopSource.includes("AddToCartButton") && shopContent.includes("quote-cart-controls"), "Shop cart UI exists", "stored cart does not charge by itself");
-assert(source("components/shop/cart-page-client.tsx").includes("Sign in to checkout") &&
-  source("components/shop/cart-page-client.tsx").includes("Total payable") &&
+assert(source("components/shop/cart-page-client.tsx").includes('copy=checkoutCopy[apiLocale]') &&
+  source("components/shop/cart-page-client.tsx").includes('{!signedIn?') &&
+  source("components/shop/cart-page-client.tsx").includes('{copy.signInTitle}') &&
+  source("components/shop/cart-page-client.tsx").includes('href="/login?redirectTo=%2Fcart"') &&
+  source("components/shop/cart-page-client.tsx").includes('!signedIn||!valid.length') &&
+  source("lib/shop/checkout-copy.ts").includes('"signInTitle": "Sign in to checkout"') &&
+  source("components/shop/cart-page-client.tsx").includes('{copy.totalINR}') &&
+  source("components/shop/cart-page-client.tsx").includes('money(finalTotal)') &&
+  source("lib/shop/checkout-copy.ts").includes('"totalINR": "Total payable (INR)"') &&
   source("components/shop/cart-page-client.tsx").includes("<ShopOrderPayButton orderId={orderId}") &&
   source("components/shop/shop-order-pay-button.tsx").includes('purpose:"SHOP_ORDER"') &&
   source("components/shop/shop-order-pay-button.tsx").includes("expectedTotalPaise:totalPaise") &&
