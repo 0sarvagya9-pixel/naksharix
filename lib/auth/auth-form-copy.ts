@@ -81,5 +81,5 @@ export function authResponseConfirmed(mode: "login"|"signup", value: unknown): b
   if (!value || typeof value !== "object") return false;
   const {data} = value as {data?: {user?: {id?: unknown; effectiveRole?: unknown}; verificationRequired?: unknown}};
   if (!data || typeof data.user?.id !== "string" || !data.user.id.trim()) return false;
-  return mode === "signup" ? data.verificationRequired === true : ["USER","ASTROLOGER","CONSULTANT","ADMIN"].includes(String(data.user.effectiveRole));
+  return mode === "signup" ? data.verificationRequired === true : typeof data.user.effectiveRole === "string" && ["USER","ASTROLOGER","CONSULTANT","ADMIN"].includes(data.user.effectiveRole);
 }
