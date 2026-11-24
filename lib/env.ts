@@ -59,6 +59,7 @@ const envSchema = z.object({
   AWS_SES_REGION: z.string().optional(),
   AWS_SES_FROM: z.string().optional(),
   REPORT_STORAGE_DRIVER: z.enum(["database", "r2", "s3"]).default("database"),
+  AUTO_REPORT_DELIVERY_ENABLED: z.enum(["true", "false"]).default("false"),
   CLOUDFLARE_R2_ACCOUNT_ID: z.string().optional(),
   CLOUDFLARE_R2_ACCESS_KEY_ID: z.string().optional(),
   CLOUDFLARE_R2_SECRET_ACCESS_KEY: z.string().optional(),

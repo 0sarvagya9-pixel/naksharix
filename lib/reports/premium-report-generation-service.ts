@@ -14,6 +14,11 @@ export type PremiumReportGenerationRequest = {
   status: PremiumReportGenerationStatus;
   content?: PremiumReportContentResult;
   reviewedByAdmin?: boolean;
+  // Only the server-owned paid report worker supplies this validation mode.
+  automatedInputValidated?: boolean;
+  reportTitle?: string;
+  customerName?: string;
+  language?: "en" | "hi" | "hinglish";
 };
 
 export type PremiumReportGenerationResult =
@@ -154,14 +159,16 @@ function drawTextRuns(page: PDFPage, value: string, x: number, y: number, size: 
 export async function generatePremiumReportPdf(request: PremiumReportGenerationRequest): Promise<PremiumReportGenerationResult> {
   const status = getPremiumEngineActivationStatus("pdf_generation");
   if (!request.content) return blocked("blocked_until_report_content", "Real chart-based report content is required.");
-  if (!request.reviewedByAdmin) return blocked("blocked_until_admin_review", "Admin review is required before creating a report PDF.");
+  const automated = request.automatedInputValidated === true && request.status === "ready_for_generation" && request.content.sections.length >= 5;
+  if (!request.reviewedByAdmin && !automated) return blocked("blocked_until_admin_review", "Admin review or validated paid-report automation is required before creating a report PDF.");
 
   const pdf = await PDFDocument.create();
-  pdf.setTitle("NAKSHARIX Premium Report " + request.requestId);
+  pdf.setTitle("NAKSHARIX | " + (request.reportTitle ?? "Premium Report") + " | " + request.requestId);
   pdf.setAuthor("NAKSHARIX");
-  pdf.setSubject("Admin-reviewed astrological working report; independent chart verification remains required");
-  pdf.setLanguage("en-IN");
+  pdf.setSubject(automated ? "Personalized calculated astrology and numerology report; independent chart verification remains required" : "Admin-reviewed astrological working report; independent chart verification remains required");
+  pdf.setLanguage(request.language === "hi" ? "hi-IN" : "en-IN");
   const fonts = await loadReportFonts(pdf);
+  const logo = await pdf.embedPng(await readFile(path.join(process.cwd(), "public", "images", "naksharix-final-logo-symbol.png"))).catch(() => null);
   let page!: PDFPage;
   let y = TOP;
   const newPage = (cover = false) => {
@@ -187,12 +194,15 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
     }
     y -= after;
   };
+  if (logo) { const scaled=logo.scaleToFit(67,67); page.drawImage(logo,{x:PAGE_WIDTH-RIGHT-scaled.width,y:PAGE_HEIGHT-101,width:scaled.width,height:scaled.height}); }
   drawTextRuns(page, "NAKSHARIX", LEFT, PAGE_HEIGHT - 66, 23, fonts, WHITE);
   drawTextRuns(page, "PREMIUM VEDIC ASTROLOGY REPORT", LEFT, PAGE_HEIGHT - 97, 13, fonts, WHITE);
-  drawTextRuns(page, "Private | Admin reviewed | Not independently chart-verified", LEFT, PAGE_HEIGHT - 126, 9.2, fonts, WHITE);
+  drawTextRuns(page, automated ? "Private | Personalized | Internally calculated" : "Private | Admin reviewed | Not independently chart-verified", LEFT, PAGE_HEIGHT - 126, 9.2, fonts, WHITE);
   y = PAGE_HEIGHT - 183;
   paragraph("Reference: " + request.requestId, 10.3, MUTED, 3);
-  paragraph("Report: " + labelize(request.templateId), 10.3, MUTED, 14);
+  paragraph(request.reportTitle ?? labelize(request.templateId), 17, WINE, 8);
+  if (request.customerName) paragraph("Prepared for: " + request.customerName, 11, MUTED, 13);
+  paragraph("www.naksharix.com  |  care@naksharix.com", 9.2, MUTED, 14);
   paragraph("REPORT CONTENT", 14, WINE, 14);
 
   for (const section of request.content.sections) {
@@ -200,7 +210,7 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
     page.drawRectangle({ x: LEFT, y: y + 2, width: CONTENT_WIDTH, height: 1.2, color: GOLD });
     y -= 19;
     paragraph(section.title, 12.2, WINE, 4);
-    line("Verification status: " + section.status.replace(/_/g, " "), 8.4, MUTED, 1.6);
+    if (!automated) line("Verification status: " + section.status.replace(/_/g, " "), 8.4, MUTED, 1.6);
     y -= 7;
     paragraph(readableText(section.data), 10, INK, 12);
     if (section.limitations?.length) {
@@ -213,7 +223,7 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
   for (let index = 0; index < pages.length; index++) {
     const current = pages[index];
     current.drawRectangle({ x: LEFT, y: 48, width: CONTENT_WIDTH, height: 0.7, color: GOLD });
-    drawTextRuns(current, "NAKSHARIX  |  Private reviewed report", LEFT, 34, 8.2, fonts, MUTED);
+    drawTextRuns(current, "NAKSHARIX  |  www.naksharix.com  |  Private report", LEFT, 34, 8.2, fonts, MUTED);
     const pageNumber = String(index + 1) + " / " + String(pages.length);
     drawTextRuns(current, pageNumber, PAGE_WIDTH - RIGHT - textWidth(pageNumber, fonts, 8.2), 34, 8.2, fonts, MUTED);
   }
@@ -228,7 +238,7 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
     bytes,
     byteLength: bytes.byteLength,
     deliveryEnabled: false,
-    reason: "A readable admin-reviewed internal PDF was created. Independent chart verification and public delivery approval remain separate."
+    reason: automated ? "A personalized internally calculated PDF was created from validated inputs. Independent chart certification is not claimed." : "A readable admin-reviewed internal PDF was created. Independent chart verification and public delivery approval remain separate."
   };
 }
 export function getPremiumReportPublicDeliveryStatus() {

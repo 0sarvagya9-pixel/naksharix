@@ -44,6 +44,10 @@ export function getManualReportCheckout(reportSlug: string): ManualReportCheckou
   };
 }
 
+export function getReportSlugForPaidId(reportId: string): string | undefined {
+  return Object.keys(manualToPaidReportId).find(slug => manualToPaidReportId[slug] === reportId);
+}
+
 export function isPaidManualReport(reportSlug: string) {
   return Boolean(getManualReportCheckout(reportSlug));
 }
