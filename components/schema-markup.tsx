@@ -42,5 +42,18 @@ export function SchemaMarkup() {
     publisher: { "@id": organizationId },
     isPartOf: { "@id": websiteId }
   };
-  return <JsonLd id="naksharix-schema" data={{ "@context": "https://schema.org", "@graph": [organization, website, webApp] }} />;
+  // Keep the existing public service navigation discoverable without asserting
+  // that a directory listing is an active booking or purchasable offer.
+  const navigation = [
+    ["Free Kundli", "/kundli"], ["Horoscope", "/daily-horoscope"],
+    ["Panchang", "/panchang"], ["Consultations", "/consultation"],
+    ["Reports", "/reports"], ["Puja Directory", "/pujas"], ["Spiritual Catalogue", "/shop"]
+  ].map(([name, path]) => ({
+    "@type": "SiteNavigationElement",
+    "@id": home + "#navigation-" + path.slice(1),
+    name,
+    url: siteUrl + path,
+    isPartOf: { "@id": websiteId }
+  }));
+  return <JsonLd id="naksharix-schema" data={{ "@context": "https://schema.org", "@graph": [organization, website, webApp, ...navigation] }} />;
 }
