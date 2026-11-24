@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CreditCard } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { secureFetch } from "@/lib/security/csrf";
+import { googleAnalyticsSession } from "@/lib/analytics/google-client";
 import { siteNotice } from "@/lib/ui/site-notification";
 import { useLanguage } from "@/components/language-provider";
 import { canBypassPayment } from "@/lib/auth/permissions";
@@ -99,7 +100,7 @@ export function RazorpayCheckoutButton({
       orderResponse = await secureFetch("/api/payments/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload.purpose === "PUJA_BOOKING" ? { ...payload, feeTermsVersion: PUJA_FEE_TERMS_VERSION } : payload)
+        body: JSON.stringify(payload.purpose === "PUJA_BOOKING" ? { ...payload, feeTermsVersion: PUJA_FEE_TERMS_VERSION } : "reportId" in payload ? {...payload,analyticsSession:googleAnalyticsSession()} : payload)
       });
     } catch {
       setLoading(false);
@@ -141,7 +142,7 @@ export function RazorpayCheckoutButton({
           const verifyResponse = await secureFetch("/api/payments/razorpay/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(response)
+            body: JSON.stringify({...response,analyticsSession:"reportId" in payload ? googleAnalyticsSession() : undefined})
           });
           if (!verifyResponse.ok) {
             setStatus("Payment confirmation is pending. Check your payment history before trying again; do not pay twice.");

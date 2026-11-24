@@ -1,9 +1,14 @@
 import { secureFetch } from "@/lib/security/csrf";
+import { trackGooglePublicEvent } from "@/lib/analytics/google-client";
 import { analyticsConsentKey, analyticsEventNames, publicAnalyticsRoute, type AggregateEventName } from "@/lib/analytics/public-routes";
 export type AnalyticsEventName = AggregateEventName;
 type AnalyticsMetadata = Record<string,string|number|boolean|undefined>;
 /** No arbitrary metadata, query strings, identities or birth data leave the browser. */
 export function trackNaksharixEvent(eventName:AnalyticsEventName,_metadata:AnalyticsMetadata={}) {
+  trackFirstPartyEvent(eventName);
+  trackGooglePublicEvent(eventName);
+}
+export function trackFirstPartyEvent(eventName:AnalyticsEventName) {
   if(typeof window==='undefined'||!analyticsEventNames.includes(eventName))return;
   const privacy=navigator as Navigator & {globalPrivacyControl?:boolean};
   if(navigator.doNotTrack==='1'||privacy.globalPrivacyControl)return;

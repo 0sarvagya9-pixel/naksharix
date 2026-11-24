@@ -130,6 +130,8 @@ jobs:
       - run: node scripts/qa-csrf-coverage.mjs
       - run: node scripts/qa-i18n-safety.mjs
       - run: npm run lint
+      - name: Check privacy-safe GA4 event and purchase contracts
+        run: node --experimental-strip-types scripts/qa-google-analytics.mjs
       - run: npm run typecheck
       - run: npm run build
       - name: Bootstrap empty disposable PostgreSQL for HTTP smoke
