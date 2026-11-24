@@ -9,6 +9,7 @@ import {creditSnapshot} from "@/lib/ai/credit-contract";
 import {lockCreditAccount} from "@/lib/ai/credit-ledger";
 import {validatePackageCapture} from "@/lib/digital-packages/ledger";
 import {validateExpertCapture} from "@/lib/expert-services/ledger";
+import {isUnrefundedCapture} from "@/lib/payments/capture-evidence";
 
 export function getSubscriptionPlan(id: string) {
   return subscriptionPlans.find((plan) => plan.id === id);
@@ -29,12 +30,13 @@ export async function verifyRazorpayCapturedPayment(orderId: string, paymentId: 
       order_id?: string;
       status?: string;
       amount?: number;
+      amount_refunded?: number;
       currency?: string;
     };
     if (payment.id !== paymentId) return { ok: false, reason: "Payment id mismatch" };
     if (payment.order_id !== orderId) return { ok: false, reason: "Order id mismatch" };
     if (payment.status !== "captured") return { ok: false, reason: "Payment is not captured" };
-    if (Number(payment.amount) !== Math.round(expectedAmount * 100)) return { ok: false, reason: "Amount mismatch" };
+    if (!isUnrefundedCapture(payment, Math.round(expectedAmount * 100))) return { ok: false, reason: "Amount or refund evidence requires reconciliation" };
     if ((payment.currency ?? "").toUpperCase() !== expectedCurrency.toUpperCase()) return { ok: false, reason: "Currency mismatch" };
     return { ok: true, reason: "verified" };
   } catch {

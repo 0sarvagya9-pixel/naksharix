@@ -7,6 +7,7 @@ import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-au
 import { finalizePaidPayment, verifyRazorpayWebhookSignature } from "@/lib/revenue";
 import { reconcileCapturedPurpose, reconcileProcessedRefund } from "@/lib/payments/purpose-reconciliation";
 import {processMembershipEvent} from "@/lib/ai/membership-ledger";
+import {isUnrefundedCapture} from "@/lib/payments/capture-evidence";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-razorpay-signature");
     if (!verifyRazorpayWebhookSignature(payload, signature)) return fail("Invalid webhook signature", 400);
     const event = JSON.parse(payload) as { event?: string; payload?: {
-      payment?: { entity?: { id?: string; order_id?: string; status?: string; amount?: number; currency?: string } };
+      payment?: { entity?: { id?: string; order_id?: string; status?: string; amount?: number; amount_refunded?: number; currency?: string } };
       refund?: { entity?: { id?: string; payment_id?: string; amount?: number; status?: string } }
     } };
     if(typeof event.event==="string"&&event.event.startsWith("subscription.")){
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     const payment = event.payload?.payment?.entity;
     if (event.event === "payment.captured" && payment?.order_id && payment.id) {
       const existingPayment = await prisma.payment.findUnique({ where: { providerOrderId: payment.order_id } });
-      if (existingPayment && payment.status === "captured" && Number(payment.amount) === Math.round(Number(existingPayment.amount) * 100) && (payment.currency ?? "").toUpperCase() === existingPayment.currency.toUpperCase()) {
+      if (existingPayment && payment.status === "captured" && isUnrefundedCapture(payment, Math.round(Number(existingPayment.amount) * 100)) && (payment.currency ?? "").toUpperCase() === existingPayment.currency.toUpperCase()) {
         const paid = await finalizePaidPayment(payment.order_id, payment.id, { verifiedBy: "webhook", event: event.event, gatewayStatus: payment.status });
         if (paid) await reconcileCapturedPurpose(paid);
         const metadata = (paid?.metadata as Record<string, unknown> | null) ?? {};
@@ -64,13 +65,16 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        await writeAuditLog({
-          actor: paid ? { id: paid.userId, role: "USER" } : null,
+        if (paid) await writeAuditLog({
+          actor: { id: paid.userId, role: "USER" },
           action: "payment.webhook_paid",
           targetType: "Payment",
           targetId: existingPayment.id,
           metadata: { provider: "razorpay", event: event.event }
         });
+        else logger.warn("razorpay_capture_not_finalized_requires_review", { paymentId: existingPayment.id });
+      } else if (existingPayment) {
+        logger.warn("razorpay_capture_evidence_requires_review", { paymentId: existingPayment.id });
       }
     }
     if ((event.event === "payment.failed" || event.event === "payment.authorized") && payment?.order_id) {

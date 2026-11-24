@@ -44,3 +44,18 @@ for(const invalid of [0,-1,79900.5,NaN,Infinity])assert.equal(isVerifiedPaymentA
 assert.equal(isVerifiedPaymentAck({data:{payment}},null),false);
 for(const id of ["order_","order_ bad","pay_fixture","order_fixture\n"])assert.equal(readCheckoutOrderAck({data:{...orderAck.data,order:{...orderAck.data.order,id}}},79900),null);
 console.log("CHECKOUT_ACK_MALFORMED_IDENTITY_GUARDS_PASS; synthetic fixtures only");
+
+import {isUnrefundedCapture} from "../lib/payments/capture-evidence.ts";
+import {readFileSync} from "node:fs";
+const capturedFixture={status:"captured",amount:79900,amount_refunded:0};
+assert.equal(isUnrefundedCapture(capturedFixture,79900),true);
+for(const refund of [undefined,null,1,79900,-1,"0",false,NaN,Infinity])assert.equal(isUnrefundedCapture({...capturedFixture,amount_refunded:refund},79900),false);
+for(const amount of [0,-1,"79900",79900.1,79899,NaN,Infinity,null,undefined])assert.equal(isUnrefundedCapture({...capturedFixture,amount},79900),false);
+for(const amount of [0,-1,NaN,Infinity,79900.5,Number.MAX_SAFE_INTEGER+1])assert.equal(isUnrefundedCapture({...capturedFixture,amount},amount),false);
+for(const status of ["authorized","refunded","failed","pending",null,undefined])assert.equal(isUnrefundedCapture({...capturedFixture,status},79900),false);
+for(const value of [null,undefined,[],true,79900,"captured"])assert.equal(isUnrefundedCapture(value,79900),false);
+const captureWebhook=readFileSync("app/api/payments/razorpay/webhook/route.ts","utf8"),captureServer=readFileSync("lib/revenue.ts","utf8");
+assert.ok(captureWebhook.includes("isUnrefundedCapture(payment, Math.round(Number(existingPayment.amount) * 100))"));
+assert.ok(captureServer.includes("isUnrefundedCapture(payment, Math.round(expectedAmount * 100))"));
+assert.ok(captureWebhook.includes('if (paid) await writeAuditLog({')&&captureWebhook.includes("razorpay_capture_not_finalized_requires_review"));
+console.log("UNREFUNDED_CAPTURE_EVIDENCE_PASS; provider and database integration acceptance pending");
