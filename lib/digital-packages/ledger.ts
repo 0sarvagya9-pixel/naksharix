@@ -83,8 +83,8 @@ export async function claimPackageItem(userId:string,orderId:string,itemId:strin
   await lockPackage(tx,orderId);const now=new Date();
   const order=await tx.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
   if(!order||!packageEntitled(order,order.payment))return {kind:"denied" as const};
-  const item=await tx.digitalPackageItem.findFirst({where:{id:itemId,orderId},select:{id:true,kind:true,status:true,leaseUntil:true,attempts:true,privateInput:true}});
-  if(!item||!getPackageDefinition(order.productKey)?.kinds.includes(item.kind as never))return {kind:"denied" as const};
+  const item=await tx.digitalPackageItem.findFirst({where:{id:itemId,orderId},select:{id:true,kind:true,position:true,status:true,leaseUntil:true,attempts:true,privateInput:true}});
+  if(!item||getPackageDefinition(order.productKey)?.kinds[item.position]!==item.kind)return {kind:"denied" as const};
   if(item.status==="READY")return {kind:"ready" as const};
   if(item.status==="GENERATING"&&item.leaseUntil&&item.leaseUntil>now)return {kind:"busy" as const};
   if(item.attempts>=5||!item.privateInput)return {kind:"review" as const};

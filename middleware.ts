@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPrefixes = ["/dashboard", "/admin", "/astrologer", "/profile", "/my-readings", "/saved-reports"];
+const protectedPrefixes = ["/digital-packages","/business-workspace","/dashboard", "/admin", "/astrologer", "/profile", "/my-readings", "/saved-reports"];
 const authJsCookieNames = [
   "authjs.session-token",
   "__Secure-authjs.session-token",
@@ -42,6 +42,8 @@ function hasAuthCookie(request: NextRequest) {
 function requiresCsrf(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/api/")) return false;
   if (["GET", "HEAD", "OPTIONS"].includes(request.method.toUpperCase())) return false;
+  // Exact server-to-server endpoint; its own bearer-key validation is mandatory.
+  if(request.nextUrl.pathname==="/api/partner/v1/calculate"&&request.method==="POST")return false;
   return !csrfExemptApiPrefixes.some((prefix) => request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(prefix));
 }
 
@@ -96,6 +98,8 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/api/:path*",
+    "/digital-packages/:path*",
+    "/business-workspace/:path*",
     "/dashboard/:path*",
     "/admin/:path*",
     "/astrologer/:path*",

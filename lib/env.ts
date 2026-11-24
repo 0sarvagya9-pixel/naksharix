@@ -20,6 +20,7 @@ const envSchema = z.object({
   AI_CREDIT_PACK_VERSION: z.string().optional(),
   AI_CREDIT_PACK_PRICE_PAISE: z.string().optional(),
   AI_CREDIT_PACK_UNITS: z.string().optional(),
+  B2B_INTEGRATION_ENABLED: z.enum(["true","false"]).default("false"),
   DIGITAL_PACKAGE_SALES_ENABLED: z.enum(["true","false"]).default("false"),
   DIGITAL_PACKAGE_APPROVED_OFFERS: z.string().optional(),
   DIGITAL_PACKAGE_GENERATION_ENABLED: z.enum(["true","false"]).default("false"),

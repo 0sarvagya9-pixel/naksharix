@@ -200,6 +200,7 @@ model User {
   aiCreditUses                 AiCreditUse[]
   webPushSubscriptions         WebPushSubscription[]
   digitalPackageOrders         DigitalPackageOrder[]
+  businessTenants              BusinessTenant[]
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -1106,4 +1107,63 @@ model DigitalPackageItem {
   updatedAt    DateTime @updatedAt
   @@unique([orderId,position])
   @@index([orderId,status])
+}
+
+model BusinessTenant {
+ id String @id @default(cuid())
+ ownerUserId String
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ displayName String
+ brandName String
+ contractReference String
+ approvedById String
+ status String @default("ACTIVE")
+ contractExpiresAt DateTime
+ monthlyUnitLimit Int
+ unitPricePaise Int
+ scopes String[]
+ keys BusinessApiKey[]
+ usage BusinessUsageMonth[]
+ calls BusinessUsageCall[]
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@index([ownerUserId,status])
+}
+model BusinessApiKey {
+ id String @id
+ tenantId String
+ tenant BusinessTenant @relation(fields:[tenantId],references:[id],onDelete:Cascade)
+ digest String @unique
+ label String
+ scopes String[]
+ expiresAt DateTime
+ revokedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([tenantId,revokedAt])
+}
+model BusinessUsageMonth {
+ tenantId String
+ tenant BusinessTenant @relation(fields:[tenantId],references:[id],onDelete:Cascade)
+ period String
+ attemptedUnits Int @default(0)
+ completedUnits Int @default(0)
+ failedUnits Int @default(0)
+ unitPricePaise Int
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@id([tenantId,period])
+}
+model BusinessUsageCall {
+ tenantId String
+ tenant BusinessTenant @relation(fields:[tenantId],references:[id],onDelete:Cascade)
+ requestId String
+ period String
+ keyId String
+ scope String
+ units Int
+ state String @default("RESERVED")
+ createdAt DateTime @default(now())
+ finishedAt DateTime?
+ @@id([tenantId,requestId])
+ @@index([tenantId,period])
 }

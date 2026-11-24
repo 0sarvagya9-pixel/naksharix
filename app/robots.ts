@@ -57,6 +57,8 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/admin",
         "/dashboard",
+        "/digital-packages",
+        "/business-workspace",
         "/api",
         "/auth",
         "/login",

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import {PushPreferences} from "@/components/push-preferences";
+import {env} from "@/lib/env";
 
 export default async function ProfilePage() {
   const user = await requireRole(["USER", "ASTROLOGER", "CONSULTANT", "ADMIN", "SUPER_ADMIN"]);
@@ -24,6 +25,8 @@ export default async function ProfilePage() {
       </Card>
 
       <PushPreferences/>
+      {env.B2B_INTEGRATION_ENABLED==="true"?<Link className="mt-5 inline-block font-semibold underline" href="/business-workspace">Business integration workspace</Link>:null}
+      {env.DIGITAL_PACKAGE_SALES_ENABLED==="true"||env.DIGITAL_PACKAGE_GENERATION_ENABLED==="true"?<Link className="mt-5 ml-4 inline-block font-semibold underline" href="/digital-packages">Digital package orders</Link>:null}
       <Card className="glass mt-6">
         <CardHeader>
           <CardTitle className="font-cinzel">My Orders / My Report Requests</CardTitle>

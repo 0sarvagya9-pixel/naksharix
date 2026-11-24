@@ -92,11 +92,11 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 27 | Webinars | OPEN | Host, dates, seat entitlement, delivery and cancellation. |
 | 28 | Ebooks | SOURCE | Original seven-chapter Kundli study workbook with actual worked exercises and answer explanations, paid private PDF generation/download, approved-price gate. Rendering and acceptance pending; English only. |
 | 29 | Printed Kundli | OPEN | Print partner, fulfilment and shipping terms. |
-| 30 | Professional SaaS | OPEN | Tenant isolation, access control, report metering and billing. |
-| 31 | White-label | OPEN | Brand licensing, tenant assets and privacy review. |
-| 32 | Astrology API | OPEN | Scoped credentials, documented real endpoints, rate limits and usage billing. |
-| 33 | Matrimonial integration | OPEN | Authorized integration contracts, partner consent and data minimization. |
-| 34 | Publisher widgets | OPEN | Embeddable accessible components, signed tenant origins and licensed use. |
+| 30 | Professional SaaS | PARTIAL | Tenant-isolated contracted workspace, scoped/revocable credentials and usage statements implemented. Tenant-specific report production and recurring billing still incomplete. |
+| 31 | White-label | PARTIAL | Contract-approved display brand in calculation responses and escaped publisher widget, mandatory attribution. Custom report branding, licensed assets and domains remain incomplete. |
+| 32 | Astrology API | SOURCE | Scoped bearer-only chart/Panchang/matching/widget calculation API, contract quota, atomic usage accounting, key expiry/revoke and estimated completed-unit statements. Actual contract, automatic billing and runtime acceptance pending. |
+| 33 | Matrimonial integration | PARTIAL | Actual scoped traditional matching API with minimal coordinate/time inputs, consent and quota. Real partner contract, privacy review and integration acceptance remain. |
+| 34 | Publisher widgets | PARTIAL | Escaped accessible server-rendered Panchang HTML via contracted API; no browser secrets. Signed-origin browser widget and actual publisher integration remain. |
 | 35 | AdSense | EXTERNAL | Maintain compliant existing foundation; actual Google approval and advertising policy. |
 
 ## Release checklist

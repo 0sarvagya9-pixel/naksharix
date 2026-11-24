@@ -27,6 +27,7 @@ export function preparePackageItems(input:PackageDraft):{kind:string;privateInpu
   if(input.question)throw Error("The study workbook does not require personal details.");
   return [{kind:"study-workbook",privateInput:{language:"en"}}];
  }
+ if(def.key==="marriage-planning"&&JSON.stringify(input.subjects[0].birth)===JSON.stringify(input.subjects[1].birth))throw Error("Provide distinct birth profiles for the two people.");
  if(def.key==="family-three"&&new Set(input.subjects.map(s=>JSON.stringify([s.birth.name.toLowerCase(),s.birth.dateOfBirth,s.birth.timeOfBirth,s.birth.latitude,s.birth.longitude]))).size!==3)throw Error("Enter three distinct family-member records.");
  return def.kinds.map((kind,i)=>{
   if(kind==="marriage-workbook")return {kind,privateInput:{language:"en" as const}};

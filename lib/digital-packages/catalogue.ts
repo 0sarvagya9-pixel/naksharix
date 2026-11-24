@@ -28,6 +28,6 @@ export function packagePriceMatches(a:{version:string;pricePaise:number},b:{vers
 export function packageEntitled(order:{id:string;userId:string;productKey:string;productVersion:string;pricePaise:number;status:string;paymentId:string|null},payment:{id:string;userId:string;status:string;purpose:string;provider:string;providerPaymentId:string|null;amount:unknown;currency:string;metadata:unknown}|null){
  if(!payment||order.status!=="PAID"||payment.id!==order.paymentId||payment.userId!==order.userId||payment.status!=="PAID"||payment.purpose!=="DIGITAL_PACKAGE"||payment.provider!=="RAZORPAY"||!payment.providerPaymentId||payment.currency!=="INR"||Math.round(Number(payment.amount)*100)!==order.pricePaise)return false;
  const meta=payment.metadata&&typeof payment.metadata==="object"?payment.metadata as Record<string,unknown>:{};
- return meta.digitalPackageId===order.id&&meta.digitalPackageKey===order.productKey&&meta.digitalPackageVersion===order.productVersion&&meta.digitalPackagePricePaise===order.pricePaise&&meta.gatewayStatus==="captured";
+ return meta.digitalPackageId===order.id&&meta.digitalPackageKey===order.productKey&&meta.digitalPackageVersion===order.productVersion&&meta.digitalPackagePricePaise===order.pricePaise&&meta.digitalPackageTermsVersion===PACKAGE_TERMS_VERSION&&meta.gatewayStatus==="captured";
 }
 export const packageStatusLabels:Record<string,string>={DRAFT:"Details saved; no payment",PAYMENT_PENDING:"Payment needs verification",PAID:"Verified purchase",REVIEW:"Merchant reconciliation required",REFUNDED:"Refunded",CANCELED:"Canceled"};

@@ -14,7 +14,7 @@ const names=compareBusinessNames(["ABC","XYZ"]);
 assert.equal(names[0].pythagoreanTotal,6);assert.equal(names[0].chaldeanTotal,6);assert.equal(names[1].pythagoreanTotal,21);assert.equal(names[1].chaldeanTotal,13);
 assert.throws(()=>compareBusinessNames(["ABC","a b c"]));assert.throws(()=>compareBusinessNames(["A123","DEF"]));
 const o={id:"o",userId:"u",productKey:"complete-life",productVersion:"v1",pricePaise:10000,status:"PAID",paymentId:"p"};
-const p={id:"p",userId:"u",status:"PAID",purpose:"DIGITAL_PACKAGE",provider:"RAZORPAY",providerPaymentId:"pay_fixture",amount:100,currency:"INR",metadata:{digitalPackageId:"o",digitalPackageKey:"complete-life",digitalPackageVersion:"v1",digitalPackagePricePaise:10000,gatewayStatus:"captured"}};
+const p={id:"p",userId:"u",status:"PAID",purpose:"DIGITAL_PACKAGE",provider:"RAZORPAY",providerPaymentId:"pay_fixture",amount:100,currency:"INR",metadata:{digitalPackageId:"o",digitalPackageKey:"complete-life",digitalPackageVersion:"v1",digitalPackagePricePaise:10000,digitalPackageTermsVersion:"digital-package-v1",gatewayStatus:"captured"}};
 assert.equal(packageEntitled(o,p),true);
 for(const patch of [{status:"REFUNDED"},{userId:"other"},{amount:1},{providerPaymentId:null},{metadata:{}},{currency:"USD"}])assert.equal(packageEntitled(o,{...p,...patch}),false);
 assert.equal(packageEntitled({...o,status:"REVIEW"},p),false);

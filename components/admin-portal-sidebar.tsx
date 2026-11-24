@@ -13,6 +13,7 @@ const adminLinks = [
   { label: "Report Requests", href: "/admin#report-requests", icon: FileText },
   { label: "Shop", href: "/admin/shop", icon: PackageSearch },
   { label: "Revenue", href: "/admin/revenue", icon: WalletCards },
+  { label: "Business integrations", href: "/admin/business-integrations", icon: ShieldCheck },
   { label: "Payouts", href: "/admin/payouts", icon: WalletCards },
   { label: "Blog", href: "/admin/blog", icon: Newspaper },
 ] as const;

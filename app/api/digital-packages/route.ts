@@ -9,7 +9,7 @@ export const dynamic="force-dynamic";
 export async function GET(){
  try{
   const user=await getCurrentUser();if(!user)return fail("Sign in to manage your packages.",401);
-  if(!await packageSchemaReady())return ok({offers:[],orders:[],available:false});
+  if(!await packageSchemaReady())return fail("Package registry is unavailable or not provisioned.",503);
   const [offers,orders]=await Promise.all([availablePackageOffers(),prisma.digitalPackageOrder.findMany({where:{userId:user.id},select:packageOrderSelect,orderBy:{createdAt:"desc"},take:30})]);
   return ok({offers,orders,available:true});
  }catch(e){return handleApiError(e);}

@@ -19,7 +19,7 @@ export function DigitalPackageWorkspace(){
  const intent=useRef<string|null>(null),submitted=useRef<unknown>(null),inflight=useRef(false);
  const offer=offers.find(o=>o.key===chosen);
  const refresh=useCallback(async()=>{
-  try{const r=await fetch("/api/digital-packages",{cache:"no-store"});if(r.status===401){setSignedOut(true);return;}const j=await r.json();if(!r.ok||!j.data)throw Error("Package status unavailable");setOffers(j.data.offers);setOrders(j.data.orders);setReady(true);}catch{setStatus("Package account could not be checked. Do not start another payment.");}
+  try{const r=await fetch("/api/digital-packages",{cache:"no-store"});if(r.status===401){setSignedOut(true);return;}const j=await r.json();if(!r.ok||!j.data)throw Error("Package status unavailable");setOffers(j.data.offers);setOrders(j.data.orders);setReady(true);}catch{setReady(false);setOffers([]);setStatus("Package account could not be checked. Do not start another payment.");}
  },[]);
  useEffect(()=>{void refresh();},[refresh]);
  function choose(key:string){if(submitted.current)return;const o=offers.find(x=>x.key===key);setChosen(key);setSubjects(Array.from({length:o?.subjects??0},blank));setNames("");setQuestion("");setLanguage("en");setAccepted(false);intent.current=null;setStatus("");}
