@@ -1,5 +1,5 @@
 import "server-only";
-import {createHmac,randomUUID} from "node:crypto";
+import {createHmac,randomUUID,createHash} from "node:crypto";
 import {Prisma as RuntimePrisma,type Prisma,type Payment,type DigitalPackageOrder} from "@prisma/client";
 import {env} from "@/lib/env";
 import {prisma} from "@/lib/db";
@@ -84,7 +84,7 @@ export async function claimPackageItem(userId:string,orderId:string,itemId:strin
   const order=await tx.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
   if(!order||!packageEntitled(order,order.payment))return {kind:"denied" as const};
   const item=await tx.digitalPackageItem.findFirst({where:{id:itemId,orderId},select:{id:true,kind:true,status:true,leaseUntil:true,attempts:true,privateInput:true}});
-  if(!item)return {kind:"denied" as const};
+  if(!item||!getPackageDefinition(order.productKey)?.kinds.includes(item.kind as never))return {kind:"denied" as const};
   if(item.status==="READY")return {kind:"ready" as const};
   if(item.status==="GENERATING"&&item.leaseUntil&&item.leaseUntil>now)return {kind:"busy" as const};
   if(item.attempts>=5||!item.privateInput)return {kind:"review" as const};
@@ -93,4 +93,30 @@ export async function claimPackageItem(userId:string,orderId:string,itemId:strin
   await tx.digitalPackageItem.update({where:{id:itemId},data:{status:"GENERATING",attempts:{increment:1},leaseToken,leaseUntil:new Date(now.getTime()+5*60000)}});
   return {kind:"claimed" as const,item,leaseToken,createdAt:order.createdAt};
  });
+}
+
+export async function completePackageItem(userId:string,orderId:string,itemId:string,leaseToken:string,bytes:Buffer){
+ if(bytes.length<100||bytes.length>8*1024*1024||bytes.subarray(0,5).toString("ascii")!=="%PDF-")throw Error("PACKAGE_PDF_INVALID");
+ const checksum=createHash("sha256").update(bytes).digest("hex");
+ return prisma.$transaction(async tx=>{
+  await lockPackage(tx,orderId);
+  const order=await tx.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
+  if(!order||!packageEntitled(order,order.payment))return false;
+  const updated=await tx.digitalPackageItem.updateMany({where:{id:itemId,orderId,status:"GENERATING",leaseToken,leaseUntil:{gt:new Date()}},data:{status:"READY",pdfBytes:new Uint8Array(bytes),pdfChecksum:checksum,pdfSize:bytes.length,pdfStorageDriver:"database",pdfStorageKey:"db://digital-package-items/"+itemId,generatedAt:new Date(),leaseToken:null,leaseUntil:null,privateInput:RuntimePrisma.DbNull}});
+  return updated.count===1;
+ });
+}
+export async function releasePackageItem(userId:string,orderId:string,itemId:string,leaseToken:string){
+ await prisma.$transaction(async tx=>{await lockPackage(tx,orderId);const order=await tx.digitalPackageOrder.findFirst({where:{id:orderId,userId},select:{id:true}});if(order)await tx.digitalPackageItem.updateMany({where:{id:itemId,orderId,status:"GENERATING",leaseToken},data:{status:"RETRY",leaseToken:null,leaseUntil:null}});});
+}
+export async function loadPackageItemForDownload(userId:string,orderId:string,itemId:string){
+ const order=await prisma.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
+ if(!order||!packageEntitled(order,order.payment))return null;
+ const item=await prisma.digitalPackageItem.findFirst({where:{id:itemId,orderId,status:"READY"},select:{pdfBytes:true,pdfChecksum:true,pdfSize:true,kind:true}});
+ if(!item?.pdfBytes||!item.pdfChecksum||item.pdfSize!==item.pdfBytes.byteLength||item.pdfBytes.byteLength>8*1024*1024)return null;
+ const bytes=Buffer.from(item.pdfBytes);
+ if(createHash("sha256").update(bytes).digest("hex")!==item.pdfChecksum||bytes.subarray(0,5).toString("ascii")!=="%PDF-")throw Error("PACKAGE_PDF_CHECKSUM_INVALID");
+ const current=await prisma.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
+ if(!current||!packageEntitled(current,current.payment))return null;
+ return {bytes,kind:item.kind};
 }

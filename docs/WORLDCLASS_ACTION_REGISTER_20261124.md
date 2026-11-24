@@ -68,11 +68,11 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 03 | Career report | EXISTING | Existing SKU; differentiated content. |
 | 04 | Numerology / Lo Shu | EXISTING | Existing SKU; independently validate calculations. |
 | 05 | Baby name | EXISTING | Existing SKU; name suggestions and limitations. |
-| 06 | Business name numerology | OPEN | Dedicated business-name report scope, engine output and merchant-approved SKU. |
+| 06 | Business name numerology | SOURCE | Dedicated two-system name comparison, per-letter arithmetic and original business naming PDF, private paid package entitlement and owner-approved offer gate. Rendering, pricing approval and runtime acceptance pending. |
 | 07 | Yearly 2027 | SOURCE | Rolling 12-month paid SKU preserved; actual calculated educational 2027 guide and year-aware APIs staged. No claimed prediction or externally certified ingress timing. |
-| 08 | Complete Life bundle | OPEN | Real component fulfilment, quantity, per-component ledger and approved price. |
-| 09 | Family package | OPEN | Per-person consent, input and distinct private report delivery. |
-| 10 | Marriage planning | OPEN | Real couple report + optional approved consultation; itemized availability and price. |
+| 08 | Complete Life bundle | SOURCE | Five actual calculated report components under one captured package order, private validated birth input, separate generation leases and secure downloads, refund revocation. Approval and full acceptance pending. |
+| 09 | Family package | SOURCE | Three distinct consented family inputs and three independent private Kundli PDFs, per-item entitlement, checksum and refund guard. Approval and full acceptance pending. |
+| 10 | Marriage planning | PARTIAL | Couple report plus original practical planning workbook as exact two-item package. Human consultation deliberately not sold without approved practitioner; add-on and full acceptance pending. |
 | 11 | Human reviewed add-on | OPEN | Verified reviewer, workflow and truthful review evidence. |
 | 12 | AI credits | SOURCE | Dedicated default-off one-time response packs, approved model/price/quantity gates, immutable captured-payment grant, cross-instance serialized reservation/debit/release, duplicate prevention, partial/full refund suspension, private account controls, additive schema and QA. Actual provider cost, isolated DB/gateway and full acceptance pending; no production activation. |
 | 13 | AI membership | OPEN | Recurring billing, limits, cancellation and renewals, approved price. |
@@ -90,7 +90,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 25 | Premium reminders | PARTIAL | Real .ics calendar export for reviewed festival, Kumbh and eclipse dates with optional local alarm and EN/HI interface; paid entitlements, opt-in server delivery and device validation remain. No paid reminder or push claim. |
 | 26 | Courses | OPEN | Actual course materials, access rights and progress. |
 | 27 | Webinars | OPEN | Host, dates, seat entitlement, delivery and cancellation. |
-| 28 | Ebooks | OPEN | Original/licensed content, secure delivery and price. |
+| 28 | Ebooks | SOURCE | Original seven-chapter Kundli study workbook with actual worked exercises and answer explanations, paid private PDF generation/download, approved-price gate. Rendering and acceptance pending; English only. |
 | 29 | Printed Kundli | OPEN | Print partner, fulfilment and shipping terms. |
 | 30 | Professional SaaS | OPEN | Tenant isolation, access control, report metering and billing. |
 | 31 | White-label | OPEN | Brand licensing, tenant assets and privacy review. |
