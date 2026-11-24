@@ -43,16 +43,23 @@ assert.ok(orders.includes("product.unitPricePaise*item.quantity")&&
  orders.includes('env.SHOP_PAYMENTS_ENABLED==="true"'),
  "SERVER_PRICED_CHECKOUT_OR_DEFAULT_UNPAID_GUARD_LOST");
 assert.ok(read("components/shop-coming-soon-content.tsx").includes("Listed selling price")&&
- read("components/shop/cart-page-client.tsx").includes("Total payable")&&
- read("components/shop/cart-page-client.tsx").includes("Sign in to checkout")&&
+ read("components/shop/cart-page-client.tsx").includes("{copy.totalINR}")&&
+ read("components/shop/cart-page-client.tsx").includes("money(finalTotal)")&&
+ read("components/shop/cart-page-client.tsx").includes("{copy.signInTitle}")&&
+ read("components/shop/cart-page-client.tsx").includes('href="/login?redirectTo=%2Fcart"')&&
+ read("components/shop/cart-page-client.tsx").includes("!signedIn||!valid.length")&&
+ read("lib/shop/checkout-copy.ts").includes('"totalINR": "Total payable (INR)"')&&
+ read("lib/shop/checkout-copy.ts").includes('"signInTitle": "Sign in to checkout"')&&
  read("components/shop/cart-page-client.tsx").includes('<ShopOrderPayButton orderId={orderId}')&&read("components/shop/shop-order-pay-button.tsx").includes("expectedTotalPaise:totalPaise"),
  "CUSTOMER_DIRECT_CHECKOUT_JOURNEY_MISSING");
 const cartControls=read("components/shop/quote-cart-controls.tsx");
 assert.ok(cartControls.includes('function add(goToCart=false)')&&
   cartControls.includes('if(goToCart)router.push("/cart")')&&
   cartControls.includes('onClick={()=>add(true)}')&&
-  cartControls.includes("Order Now")&&
-  cartControls.includes("secure checkout")&&
+  cartControls.includes("{copy.orderNow}")&&
+  cartControls.includes("{copy.orderNowInfo}")&&
+  read("lib/shop/checkout-copy.ts").includes('"orderNow": "Order Now"')&&
+  read("lib/shop/checkout-copy.ts").includes('"orderNowInfo": "Order Now opens your cart for delivery details and secure checkout."')&&
   cartControls.includes('if(index>=0&&list[index].quantity>=10)')&&
   cartControls.includes('if(index<0&&list.length>=20)'),
   "ONE_CLICK_ORDER_NOW_MUST_PRESERVE_CART_LIMITS_AND_NO_PAYMENT_DISCLOSURE");
