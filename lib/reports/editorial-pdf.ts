@@ -99,7 +99,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   const header=()=>{const h=Math.max(...headers.map((v,i)=>wrap(v.toUpperCase(),widths[i]-18,8,"bold").length*11))+17;ensure(h+minHeight);rect(M,y,CW,h,wine);let x=M;headers.forEach((v,i)=>{fixed(x+9,y+8,v.toUpperCase(),widths[i]-18,8,"bold",iv,11);x+=widths[i]});y+=h;};
   header();let i=0;
   for(const row of rows){const columns=row.map((v,j)=>wrap(v,widths[j]-18,size,j===0?"bold":"body"));
-   let consumed=0,max=Math.max(...columns.map(v=>v.length));
+   let consumed=0;const max=Math.max(...columns.map(v=>v.length));
    while(consumed<max){
     if(y+minHeight>BOTTOM){interior(chapter,heading,"",true);header();}
     const capacity=Math.max(1,Math.floor((BOTTOM-y-16)/(size*1.45)));
@@ -155,7 +155,6 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   for(let i=0;i<fields.length;i+=4){const batch=fields.slice(i,i+4),w=CW/4;const heights=batch.map(k=>wrap(shown(r[k]),w-18,10,"bold").length*13+30);const height=Math.max(48,...heights);ensure(height);batch.forEach((k,j)=>{const x=M+j*w;rect(x,y,w-5,height-5,white,light);caps(x+8,y+8,label(k),gold,8);fixed(x+8,y+23,shown(r[k]),w-18,10,"bold",ink,13)});y+=height}
   const others=["rahuKaal","choghadiya","muhurat"].map(k=>label(k)+": "+shown(r[k]));paragraph(others.join(" · "),8.7,muted);
  }
- function compactFields(r:R,keys?:string[]){const ks=keys??Object.keys(r);const rows=ks.filter(k=>r[k]!=null&&typeof r[k]!=="object").map(k=>[label(k),shown(r[k])]);if(rows.length)table([tr("Reference","संदर्भ"),tr("Calculated detail","गणना विवरण")],rows,[1,2],9.6,27)}
  function snapshots(v:unknown){
   const rows=records(v);if(!rows.length)return;
   const flat=rows.flatMap(r=>Array.isArray(r.positions)?records(r.positions).map(p=>({...p,date:r.date})): [r]);
