@@ -87,8 +87,9 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
-    });
-    const result = await response.json();
+    }).catch(()=>null);
+    const result = await response?.json().catch(()=>null);
+    if(!response||!result){setError(apiLocale==="hi"?"कनेक्शन नहीं हो सका। फिर प्रयास करें।":apiLocale==="hinglish"?"Connection nahi ho paya. Dobara try karein.":"Unable to connect. Please try again.");return;}
     if (!response.ok) {
       if (
         mode === "login" &&
@@ -189,8 +190,8 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         {mode === "signup" ? (
           <div className="space-y-2">
             <Label htmlFor="name">{tr("name")}</Label>
-            <Input id="name" data-field="name" className={errorClass(Boolean(fieldError("name")))} {...form.register("name", { onChange: () => form.clearErrors("name") })} placeholder="Anaya Sharma" aria-invalid={Boolean(fieldError("name"))} />
-            {fieldError("name") ? <p className="text-sm text-destructive">{fieldError("name")}</p> : null}
+            <Input id="name" data-field="name" className={errorClass(Boolean(fieldError("name")))} {...form.register("name", { onChange: () => form.clearErrors("name") })} placeholder="Anaya Sharma" aria-invalid={Boolean(fieldError("name"))} aria-describedby={fieldError("name")?"auth-name-error":undefined} />
+            {fieldError("name") ? <p id="auth-name-error" role="alert" className="text-sm text-destructive">{fieldError("name")}</p> : null}
           </div>
         ) : null}
         <input type="hidden" {...form.register(mode === "signup" ? "role" : "roleIntent")} />
@@ -198,14 +199,14 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         {mode === "signup" ? <input type="hidden" {...form.register("locale")} value={apiLocale} readOnly /> : null}
         <div className="space-y-2">
           <Label htmlFor="email">{tr("email")}</Label>
-          <Input id="email" data-field="email" type="email" autoComplete="email" className={errorClass(Boolean(fieldError("email")))} {...form.register("email", { onChange: () => form.clearErrors("email") })} placeholder="you@example.com" aria-invalid={Boolean(fieldError("email"))} />
-          {fieldError("email") ? <p className="text-sm text-destructive">{fieldError("email")}</p> : null}
+          <Input id="email" data-field="email" type="email" autoComplete="email" className={errorClass(Boolean(fieldError("email")))} {...form.register("email", { onChange: () => form.clearErrors("email") })} placeholder="you@example.com" aria-invalid={Boolean(fieldError("email"))} aria-describedby={fieldError("email")?"auth-email-error":undefined} />
+          {fieldError("email") ? <p id="auth-email-error" role="alert" className="text-sm text-destructive">{fieldError("email")}</p> : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">{tr("password")}</Label>
-          <Input id="password" data-field="password" type={passwordVisible?"text":"password"} autoComplete={mode==="signup"?"new-password":"current-password"} className={errorClass(Boolean(fieldError("password")))} {...form.register("password", { onChange: () => form.clearErrors("password") })} placeholder={tr("minimumPassword")} aria-invalid={Boolean(fieldError("password"))} />
+          <Input id="password" data-field="password" type={passwordVisible?"text":"password"} autoComplete={mode==="signup"?"new-password":"current-password"} className={errorClass(Boolean(fieldError("password")))} {...form.register("password", { onChange: () => form.clearErrors("password") })} placeholder={tr("minimumPassword")} aria-invalid={Boolean(fieldError("password"))} aria-describedby={fieldError("password")?"auth-password-error":undefined} />
           <button type="button" aria-controls="password" aria-pressed={passwordVisible} className="text-sm font-medium underline" onClick={()=>setPasswordVisible(v=>!v)}>{passwordVisible?(apiLocale==="hi"?"पासवर्ड छिपाएँ":apiLocale==="hinglish"?"Password hide karein":"Hide password"):(apiLocale==="hi"?"पासवर्ड दिखाएँ":apiLocale==="hinglish"?"Password dikhayein":"Show password")}</button>
-          {fieldError("password") ? <p className="text-sm text-destructive">{fieldError("password")}</p> : null}
+          {fieldError("password") ? <p id="auth-password-error" role="alert" className="text-sm text-destructive">{fieldError("password")}</p> : null}
         </div>
         {mode==="login"?<Link href="/forgot-password" className="inline-block text-sm font-semibold underline">{apiLocale==="hi"?"पासवर्ड भूल गए?":apiLocale==="hinglish"?"Password bhool gaye?":"Forgot password?"}</Link>:null}
         {error ? <p role="alert" className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">{error}</p> : null}
@@ -224,6 +225,7 @@ function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (ro
       <button
         type="button"
         onClick={() => onSelect("USER")}
+        aria-pressed={selected==="USER"}
         className={`group rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#FFD700]/60 hover:bg-[#024B30]/76 ${selected === "USER" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-[#D4AF37]/20 bg-[#061D3C]/70"}`}
       >
         <UserRound className="h-5 w-5 text-[#FFD700]" />
@@ -233,6 +235,7 @@ function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (ro
       <button
         type="button"
         onClick={() => onSelect("ASTROLOGER")}
+        aria-pressed={selected==="ASTROLOGER"}
         className={`group rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#FFD700]/60 hover:bg-[#024B30]/76 ${selected === "ASTROLOGER" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-[#D4AF37]/20 bg-[#061D3C]/70"}`}
       >
         <BriefcaseBusiness className="h-5 w-5 text-[#FFD700]" />

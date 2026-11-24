@@ -19,7 +19,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 11 | Professional signup | SOURCE | Explicit professional role query preselection. |
 | 12 | Unverified accounts | OPEN | Verify mail configuration, analyze aggregate onboarding; never verify users artificially. |
 | 13 | Authentication heading semantics | SOURCE | Primary H1 semantics; verify keyboard and screen-reader behavior. |
-| 14 | Auth translations | PARTIAL | Reset EN/HI text; all auth/OTP/role messages still need complete locale parity. |
+| 14 | Auth translations | PARTIAL | OTP form complete EN/HI/Hinglish key-based messages and accessible status/error announcements; reset and full server/role/email localization still require review. |
 | 15 | Stale report orders | SOURCE | Exact merchant-order recovery and serialized reservation; unknown/partial/refunded states fail closed; independent gateway tests pending. |
 | 16 | Validate before payment | SOURCE | Direct fixed-price report server preflight, signed eligibility claim, same-page paid detail submission; verify all entry points and legacy compatibility. |
 | 17 | Differentiated report benefits | SOURCE | Integrated PR153, catalogue and detail copy backed by actual report renderer. |
@@ -45,9 +45,9 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 37 | GA4 data | OPEN | Validate consent-aware measurement and actual reporting; no fake purchase events. |
 | 38 | Durable marketing consent | SOURCE | Integrated PR151 schema, additive migration source, verified opt-in/withdrawal; migration and suppression acceptance pending. |
 | 39 | Opt-in acquisition / partnership | SOURCE | Integrated PR144 private authenticated partner enquiries and public resources; consent operations pending. |
-| 40 | Homepage conversion UI | OPEN | Review and implement prioritized CTA improvements without deceptive claims. |
-| 41 | Mobile popup behavior | OPEN | Collision/dismissal/scroll/keyboard and device QA. |
-| 42 | Report UI | PARTIAL | Comparison, sample links, one-column mobile cards and benefits implemented; sticky CTA and actual responsive acceptance pending. |
+| 40 | Homepage conversion UI | SOURCE | Added direct reports, Puja request, and practitioner availability links while retaining approved hero and services; visual/mobile acceptance pending. |
+| 41 | Mobile popup behavior | PARTIAL | Native modal retains existing collision/session guards; restored focus and added description and overscroll containment. Physical-device and keyboard acceptance pending. |
+| 42 | Report UI | SOURCE | Comparison, samples, benefits, mobile cards and sticky mobile review CTA linked to original checkout; responsive acceptance pending. |
 | 43 | Unified authentication UI | PARTIAL | Recovery, redirect and role UX improved; unified layout and complete interaction polish pending. |
 | 44 | Language consistency | OPEN | Complete EN/HI/Hinglish across forms, checkout, account and PDFs. |
 | 45 | International experience | PARTIAL | Explicit IANA/DST and offset calculation repair; global birthplace, international merchant and currency acceptance remain. |
@@ -57,7 +57,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 49 | Professional dashboard and payout | PARTIAL | Secure explicit professional application; full schedule, session, earnings and payout acceptance requires real approved provider. |
 | 50 | Real payment lifecycle | POST_APPROVAL | Actual authorized test charge, invoice, capture, recovery and refund evidence. |
 | 51 | Real devices and slow network | POST_APPROVAL | Physical-device acceptance and network tests. |
-| 52 | Independent accessibility | PARTIAL | Heading and label improvements; full keyboard, screen reader, contrast and form-error acceptance pending. |
+| 52 | Independent accessibility | PARTIAL | Added auth error associations/announcements, selected-role ARIA state, OTP live messages and native dialog focus handling; independent keyboard/screen reader/contrast acceptance remains. |
 
 ## Revenue capability register (35)
 
@@ -87,7 +87,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 22 | Annual Puja | OPEN | Actual multi-event entitlement, capacity, cancellation. |
 | 23 | Temple Chadhava | OPEN | Authorized temple contract, accurate services, receipts. |
 | 24 | Prasad delivery | OPEN | Verified fulfilment, food safety, addresses and shipping. |
-| 25 | Premium reminders | OPEN | Opt-in notifications, calendar entitlements, delivery and cancellation. |
+| 25 | Premium reminders | PARTIAL | Real .ics calendar export for reviewed festival, Kumbh and eclipse dates with optional local alarm and EN/HI interface; paid entitlements, opt-in server delivery and device validation remain. No paid reminder or push claim. |
 | 26 | Courses | OPEN | Actual course materials, access rights and progress. |
 | 27 | Webinars | OPEN | Host, dates, seat entitlement, delivery and cancellation. |
 | 28 | Ebooks | OPEN | Original/licensed content, secure delivery and price. |

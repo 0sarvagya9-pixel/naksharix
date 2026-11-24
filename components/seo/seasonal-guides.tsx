@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {ReferenceCalendarExport} from "@/components/calendar/reference-calendar-export";
 import { Section } from "@/components/section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
@@ -19,6 +20,7 @@ export function SeasonalGuide({guide,locale}:{guide:Guide;locale:Locale}) {
   const origin=canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL), url=origin+path;
   const refs=guide==="kumbh"?[seasonalSources.kumbhCalendar,seasonalSources.kumbhSchedule,seasonalSources.kumbhSafety,seasonalSources.kumbhFaq]:guide==="eclipses"?[seasonalSources.eclipses,seasonalSources.indiaSolar,seasonalSources.indiaLunar,seasonalSources.solarSafety]:[seasonalSources.december2026,seasonalSources.hindu2027];
   const calendar=guide==="festivals"?nextTwoYearsPujaCalendar():null;
+  const exportEvents=guide==="festivals"?(calendar?.events??[]).map(e=>({id:e.id,date:e.date,name:hi?(festivalHindi[e.name]??e.name):e.name,sourceUrl:e.sourceUrl})):guide==="kumbh"?kumbhGuideDates.map((row,i)=>({id:"kumbh-"+row.date+"-"+i,date:row.date,name:hi?row.hi:row.en,sourceUrl:seasonalSources.kumbhCalendar})):indiaEclipseDates.map((row,i)=>({id:"eclipse-"+row.date+"-"+i,date:row.date,name:hi?row.hi:row.en,sourceUrl:row.source}));
   return <main lang={locale} className="min-h-screen bg-[#fff8ee] text-[#35242b]">
     <JsonLd id={"seasonal-guide-"+guide} data={{"@context":"https://schema.org","@type":"WebPage","@id":url+"#webpage",url,name:data.title,description:data.intro,inLanguage:locale,publisher:{"@id":origin+"/#organization"},isPartOf:{"@id":origin+"/#website"},citation:refs,dateModified:SEASONAL_REVIEW_DATE}}/>
     <Section first>
@@ -46,6 +48,7 @@ export function SeasonalGuide({guide,locale}:{guide:Guide;locale:Locale}) {
         {guide==="eclipses"?<section className={panel}><h2 className="text-2xl font-bold text-[#70283d]">{hi?"भारत में 2027 के दृश्य ग्रहण":"2027 eclipses visible from India"}</h2><div className="mt-4 grid gap-4 sm:grid-cols-2">{indiaEclipseDates.map(e=><article key={e.date} className="rounded-xl border border-[#e8d5bb] bg-white p-4"><h3 className="font-semibold">{hi?e.hi:e.en}</h3><time dateTime={e.date} className="mt-2 block">{dateLabel(e.date,locale)}</time><a href={e.source} target="_blank" rel="noopener noreferrer" className={linkClass}>{hi?"स्थानीय दृश्यता और समय":"Local visibility and timing"}</a></article>)}</div></section>:null}
         {data.sections.map(([heading,body,href])=><section key={heading} className={panel}><h2 className="font-cinzel text-xl font-bold text-[#70283d] sm:text-2xl">{heading}</h2><p className="mt-3 leading-8">{body}</p>{href.startsWith("https://")?<a href={href} target="_blank" rel="noopener noreferrer" className={"mt-3 inline-block "+linkClass}>{hi?"संदर्भ स्रोत":"Reference source"}</a>:href==="/pujas"&&Date.now()>=Date.parse(KUMBH_2027_PROMOTION_END)?null:<Link href={href} className={"mt-3 inline-block "+linkClass}>{href==="/pujas"?(hi?"वर्तमान पूजा अनुरोध उपलब्धता देखें":"Check current Puja request availability"):(hi?"संबंधित जानकारी":"Related information")}</Link>}</section>)}
       </div>
+      <div className="mt-7"><ReferenceCalendarExport events={exportEvents} locale={locale} kind={guide==="eclipses"?"eclipses":guide}/></div>
       <nav aria-label={hi?"संबंधित मार्गदर्शिकाएँ":"Related guides"} className="mt-8 flex flex-wrap gap-3">{(Object.keys(seasonalPaths) as Guide[]).filter(g=>g!==guide).map(g=><Link key={g} href={seasonalPaths[g][locale]} className="rounded-xl border border-[#e1c7a6] bg-white px-4 py-3 text-sm font-semibold text-[#70283d]">{seasonalCopy[g][locale].title}</Link>)}<Link href={hi?"/hi/free-kundli":"/free-kundli"} className="rounded-xl border border-[#e1c7a6] bg-white px-4 py-3 text-sm font-semibold text-[#70283d]">{hi?"निःशुल्क जन्म कुंडली":"Free Kundli"}</Link></nav>
     </Section>
   </main>

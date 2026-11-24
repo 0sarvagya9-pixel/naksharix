@@ -61,14 +61,14 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   const checkoutSuccessHref = `${requestHref}&orderId={paymentId}`;
 
   return (
-    <main className="inner-page-shell star-field">
+    <main className="inner-page-shell star-field pb-28 lg:pb-0">
       <Section>
         <div className="inner-section grid gap-8 rounded-3xl border border-[#263957] p-6 md:p-8 lg:grid-cols-[1fr_0.52fr]">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{report.category}</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{report.name[locale]}</h1>
             <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{publicPreview?.summary ?? report.description[locale]}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div id="report-purchase" tabIndex={-1} className="mt-7 flex scroll-mt-28 flex-wrap gap-3">
               {checkout ? (
                 <div className="min-w-56">
                   <RazorpayCheckoutButton
@@ -159,6 +159,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
           <ProductShareActions name={report.name[locale]} productUrl={publicReportUrl} kind="report" />
         </aside>
       </Section>
+      {checkout?<div className="sticky bottom-0 z-20 border-t border-[#e4cbaa] bg-[#fffdf8] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-[#372630] lg:hidden"><div className="mx-auto flex max-w-xl items-center justify-between gap-3"><div><p className="text-xs">{locale==="hi"?"एक बार का शुल्क":locale==="hinglish"?"One-time fee":"One-time fee"}</p><p className="font-bold">{checkout.price}</p></div><Button asChild><a href="#report-purchase">{locale==="hi"?"विवरण और खरीद":locale==="hinglish"?"Details aur purchase":"Review & continue"}</a></Button></div></div>:null}
     </main>
   );
 }

@@ -8,6 +8,8 @@ import { safeInternalAuthPath } from "@/lib/auth/safe-redirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {useLanguage} from "@/components/language-provider";
+import {verificationCopy,type VerificationMessage} from "@/lib/auth/verification-copy";
 
 function landingPath(role?: string) {
   if (role === "ASTROLOGER" || role === "CONSULTANT") {
@@ -20,10 +22,11 @@ function landingPath(role?: string) {
 
 export function EmailVerificationForm() {
   const router = useRouter();
+  const {locale}=useLanguage();const copy=verificationCopy[locale];
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<VerificationMessage | null>(null);
+  const [error, setError] = useState<VerificationMessage | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -35,10 +38,10 @@ export function EmailVerificationForm() {
     if (storedEmail) setEmail(storedEmail);
 
     if (deliverySent === "true") {
-      setMessage("A 6-digit verification code was sent to your email.");
+      setMessage("sent");
       setCooldown(30);
     } else if (deliverySent === "false") {
-      setError("The first verification email could not be delivered. Please use Resend code.");
+      setError("deliveryFailed");
     }
   }, []);
 
@@ -60,12 +63,12 @@ export function EmailVerificationForm() {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail) {
-      setError("Enter your email address.");
+      setError("missingEmail");
       return;
     }
 
     if (!/^\d{6}$/.test(code)) {
-      setError("Enter the 6-digit verification code.");
+      setError("invalidCode");
       return;
     }
 
@@ -86,7 +89,7 @@ export function EmailVerificationForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        setError(result.error ?? "Verification failed.");
+        setError("verificationFailed");
         return;
       }
 
@@ -98,7 +101,7 @@ export function EmailVerificationForm() {
       router.push(resume??landingPath(result.data?.user?.effectiveRole));
       router.refresh();
     } catch {
-      setError("Verification could not be completed. Please try again.");
+      setError("requestFailed");
     } finally {
       setVerifying(false);
     }
@@ -111,7 +114,7 @@ export function EmailVerificationForm() {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail) {
-      setError("Enter your email address first.");
+      setError("missingEmail");
       return;
     }
 
@@ -128,22 +131,20 @@ export function EmailVerificationForm() {
         })
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        setError(result.error ?? "Could not send a verification code.");
+        setError("requestFailed");
         return;
       }
 
       window.sessionStorage.setItem("naksharix-pending-email", normalizedEmail);
-      window.sessionStorage.setItem("naksharix-otp-delivery-sent", "true");
+      window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
 
       setMessage(
-        "If an unverified account exists for this email, a new 6-digit code has been sent."
+        "requestAccepted"
       );
       setCooldown(30);
     } catch {
-      setError("Verification email could not be sent. Please try again.");
+      setError("requestFailed");
     } finally {
       setResending(false);
     }
@@ -156,16 +157,16 @@ export function EmailVerificationForm() {
           <ShieldCheck className="h-5 w-5 text-[#FFD700]" />
         </div>
         <div>
-          <h1 className="font-cinzel text-xl font-bold">Verify your email</h1>
+          <h1 className="font-cinzel text-xl font-bold">{copy.title}</h1>
           <p className="text-sm naksh-muted-text">
-            Enter the 6-digit code sent to your email address.
+            {copy.intro}
           </p>
         </div>
       </div>
 
       <form onSubmit={verify} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="verification-email">Email</Label>
+          <Label htmlFor="verification-email">{copy.email}</Label>
           <Input
             id="verification-email"
             type="email"
@@ -177,7 +178,7 @@ export function EmailVerificationForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="verification-code">Verification code</Label>
+          <Label htmlFor="verification-code">{copy.code}</Label>
           <Input
             id="verification-code"
             type="text"
@@ -194,19 +195,19 @@ export function EmailVerificationForm() {
         </div>
 
         {message ? (
-          <p className="rounded-md border border-[#01A361]/30 bg-[#01A361]/10 p-3 text-sm">
-            {message}
+          <p role="status" aria-live="polite" className="rounded-md border border-[#01A361]/30 bg-[#01A361]/10 p-3 text-sm">
+            {copy[message]}
           </p>
         ) : null}
 
         {error ? (
-          <p className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">
-            {error}
+          <p role="alert" className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">
+            {copy[error]}
           </p>
         ) : null}
 
         <Button className="w-full" type="submit" disabled={verifying}>
-          {verifying ? "Verifying..." : "Verify email"}
+          {verifying ? copy.verifying : copy.verify}
         </Button>
 
         <Button
@@ -217,10 +218,10 @@ export function EmailVerificationForm() {
           onClick={resend}
         >
           {resending
-            ? "Sending..."
+            ? copy.sending
             : cooldown > 0
-              ? `Resend code in ${cooldown}s`
-              : "Resend code"}
+              ? `${copy.retry} ${cooldown}s`
+              : copy.resend}
         </Button>
       </form>
     </div>
