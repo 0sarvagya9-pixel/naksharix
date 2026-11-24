@@ -93,6 +93,14 @@ if(!dbMode){
    console.log("PASS "+slug+" "+language+" editorial PDF "+localized.getPageCount()+" pages");
    }
  }
+ const {buildFictionalReportSample}=require("@/lib/reports/fictional-sample");
+ for(const slug of input.AUTO_REPORT_SLUGS){
+   const preview=await PDFDocument.load(await buildFictionalReportSample(slug));
+   assert.ok(preview.getPageCount()>0&&preview.getPageCount()<=3);
+   assert.match(preview.getTitle(),/FICTIONAL SAMPLE/);
+   assert.equal(preview.getAuthor(),"NAKSHARIX");
+ }
+ await assert.rejects(()=>buildFictionalReportSample("unknown-slug"));
  const mail=require("@/lib/reports/report-delivery-service");
  const result=await mail.sendReportDeliveryEmail({to:"test@example.invalid",fullName:"Asha <Test>",reportName:"Test Kundli",reportRequestId:"test-fixture",downloadUrl:"http://localhost:3000/report-request/success?id=test-fixture"});
  assert.equal(result.sent,true);assert.equal(sent.length,1);

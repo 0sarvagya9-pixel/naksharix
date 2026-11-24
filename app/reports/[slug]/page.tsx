@@ -18,6 +18,8 @@ import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
 import { automaticReportPublicPreview } from "@/lib/reports/public-preview";
+import { autoReportSlugSet } from "@/lib/reports/automatic-report-input";
+import { getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 
 
 type Params = Promise<{ slug: string }>;
@@ -107,6 +109,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
               <Sparkles className="h-6 w-6 text-[#dca956]" />
               <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.samplePreview}</h2>
               <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{report.preview[locale]}</p>
+              {autoReportSlugSet.has(report.slug)&&getActiveAstrologyProviderName()==="own_engine"?<div className="mt-4 space-y-2"><Button asChild variant="outline"><Link href={`/reports/${report.slug}/sample`} target="_blank" rel="noopener noreferrer">{locale==="hi"?"काल्पनिक नमूना PDF देखें":"View fictional sample PDF"} (English)</Link></Button><p className="text-xs text-[#a8b3c7]">{locale==="hi"?"वास्तविक रिपोर्ट प्रारूप के चुनिंदा पृष्ठ। इसमें किसी ग्राहक का डेटा नहीं है।":"Selected pages from the actual report format. Fictional demonstration, not a customer report."}</p></div>:null}
             </CardContent>
           </Card>
           <Card className="inner-card">

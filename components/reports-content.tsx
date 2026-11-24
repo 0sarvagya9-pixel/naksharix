@@ -13,6 +13,7 @@ import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
 import { automaticReportPublicPreview } from "@/lib/reports/public-preview";
+import { ReportComparison } from "@/components/report-comparison";
 export function ReportsContent({manualOfferings,automaticDelivery=false}:{automaticDelivery?:boolean;manualOfferings:Record<string,{pricePaise:number;deliveryDays:number|null;note:string}>}) {
   const { locale } = useLanguage();
   const labels = reportLabels(locale);
@@ -28,7 +29,8 @@ export function ReportsContent({manualOfferings,automaticDelivery=false}:{automa
           <span>Clear report formats and the actual published prices for your account.</span>
           <a href="#report-information">How reports work</a>
         </div>
-        <div id="report-catalogue" className="mt-10 grid grid-cols-2 gap-3 xl:grid-cols-3">
+        <ReportComparison automaticDelivery={automaticDelivery}/>
+        <div id="report-catalogue" className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {manualReports.map((report) => {
             const checkout = getManualReportCheckout(report.slug);
             const manualPrice=!checkout?manualOfferings[report.slug]:undefined;
@@ -53,7 +55,7 @@ export function ReportsContent({manualOfferings,automaticDelivery=false}:{automa
                   </div>
                   <p className="mt-4 text-sm leading-6 text-[#566575]">{automaticDelivery&&checkout?(automaticReportPublicPreview(report.slug,locale)?.summary??report.description[locale]):report.description[locale]}</p>
                   <ul className="mt-4 space-y-2 text-sm font-semibold text-[#372630]">
-                    {report.includes[locale].slice(0, 3).map((item) => (
+                    {(automaticDelivery&&checkout?(automaticReportPublicPreview(report.slug,locale)?.features??report.includes[locale]):report.includes[locale]).slice(0,3).map((item) => (
                       <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#8b3244]" />{item}</li>
                     ))}
                   </ul>
