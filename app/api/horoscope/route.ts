@@ -14,7 +14,9 @@ export async function POST(request: NextRequest) {
     const sign=body.zodiac.toLowerCase();
     if(!annualSigns.some(s=>s.toLowerCase()===sign))return fail("Select a valid zodiac sign.",422);
     if(body.year!==undefined&&body.period!=="yearly")return fail("Year is supported only for yearly guidance.",422);
-    const result=body.period==="yearly"?annualApiContent(body.year??calendarYearInIndia(),sign,locale):getHoroscopeContent(body.period,sign);
+    const currentYear=calendarYearInIndia();
+    if(body.year!==undefined&&Math.abs(body.year-currentYear)>1&&body.year!==2027)return fail("Select the previous, current or next calendar year, or the 2027 reference archive.",422);
+    const result=body.period==="yearly"?annualApiContent(body.year??currentYear,sign,locale):getHoroscopeContent(body.period,sign);
     return ok({
       horoscope: {
         ...body,

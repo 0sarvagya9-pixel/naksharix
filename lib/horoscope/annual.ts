@@ -3,14 +3,19 @@ import { calculateInternalTransitSnapshot } from "@/lib/astrology/transit/engine
 import { annualSampleDates, annualInterpretation, type AnnualLocale, type AnnualSnapshot } from "@/lib/horoscope/annual-rules";
 
 /** Monthly noon positions at an explicitly fixed reference location. No ingress or station timestamps. */
+const annualCache=new Map<number,AnnualSnapshot[]>();
 export function getAnnualSnapshots(year:number):AnnualSnapshot[] {
-  return annualSampleDates(year).map(date=>{
+  const cached=annualCache.get(year);if(cached)return cached.map(row=>({...row}));
+  const samples=annualSampleDates(year).map(date=>{
     const snapshot=calculateInternalTransitSnapshot({date,timezone:"+05:30",latitude:28.6139,longitude:77.209,place:"New Delhi, India",ayanamsa:"lahiri"});
     const jupiter=snapshot.positions.find(p=>p.planet==="Jupiter")?.sign;
     const saturn=snapshot.positions.find(p=>p.planet==="Saturn")?.sign;
     if(!jupiter||!saturn)throw new Error("ANNUAL_SNAPSHOT_UNAVAILABLE");
     return {date,jupiter,saturn};
   });
+  if(annualCache.size>=4)annualCache.delete(annualCache.keys().next().value!);
+  annualCache.set(year,samples);
+  return samples.map(row=>({...row}));
 }
 export function getAnnualGuide(year:number,sign:string,locale:AnnualLocale="en"){
   return annualInterpretation(year,sign,getAnnualSnapshots(year),locale);

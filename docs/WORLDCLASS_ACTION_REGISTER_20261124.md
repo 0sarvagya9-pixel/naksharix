@@ -6,7 +6,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 
 | ID | Scope | State | Remaining acceptance / implementation |
 |---|---|---|---|
-| 01 | Production backup receipt | OPEN | Investigate failed receipt, restore isolated backup and obtain fresh genuine receipt; no production mutation during hold. |
+| 01 | Production backup receipt | PARTIAL | Staged receipt time/schema/key/size and private archive existence checks plus 36h cross-midnight lookup. Actual missing receipt/root cause and verified restore remain unresolved; no production mutation during hold. |
 | 02 | Shubh Muhurat | SOURCE | Computed Delhi Abhijit and Panchang, explicit local reference; compare authoritative fixtures. |
 | 03 | Core calculators | SOURCE | Replace seeded planetary signs with computed chart provider, timezone and location; test name invariance. |
 | 04 | Legacy matching API | SOURCE | Real chart-based Ashtakoot; verify legacy contract and eight factors. |
@@ -17,7 +17,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 09 | OTP checkout return | SOURCE | Preserve sanitized destination through verification; test end-to-end. |
 | 10 | Google redirect | SOURCE | Handle safe next destination; verify provider callback and registration. |
 | 11 | Professional signup | SOURCE | Explicit professional role query preselection. |
-| 12 | Unverified accounts | OPEN | Verify mail configuration, analyze aggregate onboarding; never verify users artificially. |
+| 12 | Unverified accounts | PARTIAL | Localized OTP, accurate non-enumerating delivery messaging and private aggregate onboarding counts staged. Actual mailbox receipt and customer conversion remain unverified. |
 | 13 | Authentication heading semantics | SOURCE | Primary H1 semantics; verify keyboard and screen-reader behavior. |
 | 14 | Auth translations | PARTIAL | OTP form complete EN/HI/Hinglish key-based messages and accessible status/error announcements; reset and full server/role/email localization still require review. |
 | 15 | Stale report orders | SOURCE | Exact merchant-order recovery and serialized reservation; unknown/partial/refunded states fail closed; independent gateway tests pending. |
@@ -53,7 +53,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 45 | International experience | PARTIAL | Explicit IANA/DST and offset calculation repair; global birthplace, international merchant and currency acceptance remain. |
 | 46 | Monitoring | OPEN | Central error tracking, privacy controls, alert verification and incident runbook. |
 | 47 | Scalability | OPEN | Shared cache or proven DB fallback, concurrency and rate-limit qualification. |
-| 48 | Admin acceptance | POST_APPROVAL | Real authenticated admin workflows, refunds, reporting and mobile UI. |
+| 48 | Admin acceptance | POST_APPROVAL | Added private live read-only aggregate reconciliation panel for paid Puja anomalies, report requests, onboarding and unpaid shop orders; actual admin workflows, refunds and mobile UI require final acceptance. |
 | 49 | Professional dashboard and payout | PARTIAL | Secure explicit professional application; full schedule, session, earnings and payout acceptance requires real approved provider. |
 | 50 | Real payment lifecycle | POST_APPROVAL | Actual authorized test charge, invoice, capture, recovery and refund evidence. |
 | 51 | Real devices and slow network | POST_APPROVAL | Physical-device acceptance and network tests. |

@@ -33,6 +33,8 @@ export async function GET(request: NextRequest) {
     }
     const {zodiac,period,locale} = parsed.data;
     if(parsed.data.year!==undefined&&period!=="yearly")return fail("Year is supported only for yearly guidance.",422);
+    const currentYear=calendarYearInIndia();
+    if(parsed.data.year!==undefined&&Math.abs(parsed.data.year-currentYear)>1&&parsed.data.year!==2027)return fail("Select the previous, current or next calendar year, or the 2027 reference archive.",422);
     const content=period==="yearly"?annualApiContent(parsed.data.year??calendarYearInIndia(),zodiac,locale):getHoroscopeContent(period,zodiac);
     return ok({
       zodiac,period,locale,

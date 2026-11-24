@@ -5,11 +5,10 @@ import { get, put, list, del, head } from "@vercel/blob";
 import { backupChecksum, MAX_BACKUP_BYTES, openBackup, sealBackup } from "@/lib/ops/backup-crypto";
 import { EXPORT_WORKER, RESTORE_WORKER } from "@/lib/ops/backup-worker";
 import { sendEmail } from "@/lib/email/email-service";
+import {verifyRecoveryReceipt,receiptIsFresh,type RecoveryReceipt} from "@/lib/ops/recovery-receipt";
 
 const PREFIX="naksharix-recovery/v1/";
 const EXPECTED_PROJECT="prj_hB0nIWZqcOeBstlRVHuNKUs27RP5";
-type RecoveryReceipt={version:1;day:string;completedAt:string;bytes:number;sha256:string;keyFingerprint:string;
-  encrypted:true;privateStore:true;restored:true;tables:number;indexes:number;foreignKeys:number;emailAccepted:boolean};
 export function dailyRecoveryConfigured() {
   return process.env.BACKUP_ENABLED === "true" && Boolean(process.env.BLOB_READ_WRITE_TOKEN) &&
     /^[a-f0-9]{64}$/i.test(process.env.BACKUP_ENCRYPTION_KEY||'') && Boolean(process.env.CRON_SECRET) &&
@@ -34,18 +33,24 @@ async function readPrivate(path: string, maxBytes: number) {
 async function readReceipt(day:string):Promise<RecoveryReceipt|null> {
   try {
     const data=await readPrivate(PREFIX+'receipts/'+day+'.json',8192);if(!data)return null;
-    const receipt=JSON.parse(data.toString()) as RecoveryReceipt;
-    return receipt.version===1 && receipt.day===day && receipt.restored===true && receipt.encrypted===true &&
-      receipt.privateStore===true && receipt.tables>=43 && /^[a-f0-9]{64}$/.test(receipt.sha256) ? receipt:null;
+    const key=process.env.BACKUP_ENCRYPTION_KEY;
+    if(!key||!/^[a-f0-9]{64}$/i.test(key))return null;
+    const receipt=verifyRecoveryReceipt(JSON.parse(data.toString()),day,backupChecksum(Buffer.from(key,"hex")).slice(0,16),Date.now(),MAX_BACKUP_BYTES+64);
+    if(!receipt)return null;
+    // Receipt alone is not proof that the corresponding private ciphertext is still stored.
+    const archive=await head(PREFIX+'archives/'+day+'.dump.aesgcm').catch(()=>null);
+    if(!archive||archive.size!==receipt.bytes||!new URL(archive.url).hostname.endsWith('.private.blob.vercel-storage.com'))return null;
+    return receipt;
   } catch { return null; }
 }
 export async function recoveryHealth() {
   if(!dailyRecoveryConfigured())return {configured:false,operational:false,reason:'protected_setup_missing'};
   const today=new Date();
-  for(const delta of [0,1]) {
+  // A 36-hour window can span three UTC calendar dates shortly after midnight.
+  for(const delta of [0,1,2]) {
     const day=new Date(today.getTime()-delta*86400000).toISOString().slice(0,10);
     const receipt=await readReceipt(day);
-    if(receipt && Date.now()-Date.parse(receipt.completedAt)<36*3600000)
+    if(receipt && receiptIsFresh(receipt,Date.now()))
       return {configured:true,operational:true,lastSuccessfulAt:receipt.completedAt,encrypted:true,restoreVerified:true,
         retentionDays:7,emailAccepted:receipt.emailAccepted};
   }
