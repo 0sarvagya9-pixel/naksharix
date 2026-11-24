@@ -9,9 +9,9 @@ import { secureFetch } from "@/lib/security/csrf";
 import {categoryLabel,type ShopProduct} from "@/lib/manual-catalogue";
 import {useLanguage} from "@/components/language-provider";
 import {checkoutCopy,checkoutCountryLabel,checkoutPostalHint,type CheckoutCopyKey} from "@/lib/shop/checkout-copy";
-import {cartFingerprint,readCheckoutQuote,readCheckoutOrder,quoteStillCurrent,checkoutErrorKey,type CheckoutQuote} from "@/lib/shop/checkout-contract";
+import {cartFingerprint,readCheckoutQuote,readCheckoutOrder,quoteStillCurrent,checkoutErrorKey,checkoutIntentAlreadyUsed,type CheckoutQuote} from "@/lib/shop/checkout-contract";
 import {siteNotice} from "@/lib/ui/site-notification";
-import { readCart, writeCart, SHOP_CART_STORAGE_KEY, type CartLine } from "@/components/shop/quote-cart-controls";
+import { readCart, writeCart, reserveCartCheckoutIntent, clearConfirmedCart, SHOP_CART_STORAGE_KEY, type CartLine } from "@/components/shop/quote-cart-controls";
 
 type Props={ products:ShopProduct[]; signedIn:boolean; checkoutAvailable:boolean };
 
@@ -112,11 +112,13 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
    inFlight.current=true;
    setPending(true);setIssue(null);
    try{
+     let checkoutIntent:string;
+     try{checkoutIntent=await reserveCartCheckoutIntent(lines);}catch{setIssue("cartStorage");notice("cartStorage");return;}
      const response=await secureFetch("/api/commerce/orders",{
        method:"POST",headers:{"Content-Type":"application/json"},silent:true,
        body:JSON.stringify({
          items:valid.map(l=>({productId:l.productId,quantity:l.quantity})),
-         expectedSubtotalPaise:total,
+         expectedSubtotalPaise:total,checkoutIntent,
          customerName:buyerName.trim(),customerPhone:buyerPhone.trim(),
          deliveryAddress:address.trim(),deliveryCity:city.trim(),
          deliveryState:stateName.trim(),deliveryCountry:country,postalCode:normalizedPostal,
@@ -126,6 +128,7 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
      });
      const payload=await response.json().catch(()=>null);
      if(!response.ok){
+       if(checkoutIntentAlreadyUsed(response.status,payload)){setUncertain(true);setIssue("uncertain");notice("uncertain");return;}
        const key=checkoutErrorKey(response.status);
        if(key==="uncertain")setUncertain(true);
        if(response.status===409){setAcceptedKey(null);setQuoteRevision(n=>n+1);router.refresh();}
@@ -139,7 +142,7 @@ export function CartPageClient({products,signedIn,checkoutAvailable}:Props){
      setOrderShipping(order.shippingPaise);setOrderTax(order.taxPaise);setOrderCountry(order.deliveryCountry);setOrderQuote(order.shippingQuote);setOrderVersion(order.version);
      setOrderStatus(order.status);
      siteNotice.success(copy[order.totalPaise===null?"quoteRequested":"orderSaved"],copy.orderUpdate);
-     try{if(cartFingerprint(readCart())===fingerprint){writeCart([]);setLines([]);}else{setIssue("cartChanged");}}catch{setIssue("cartClear");}
+     try{if(await clearConfirmedCart(fingerprint,checkoutIntent)){setLines([]);}else{setIssue("cartChanged");}}catch{setIssue("cartClear");}
      router.refresh();
    }catch{setUncertain(true);setIssue("uncertain");notice("uncertain");}
    finally{inFlight.current=false;setPending(false);}

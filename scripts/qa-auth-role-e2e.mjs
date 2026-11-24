@@ -821,19 +821,27 @@ try {
       const anon=await post("/api/commerce/orders",input);assert.equal(anon.status,401);
       const forged=await post("/api/commerce/orders",{...input,paymentStatus:"PAID",amount:1},userCookie);
       assert.equal(forged.status,422);
-      const created=await post("/api/commerce/orders",input,userCookie);
+      const checkoutIntent=randomUUID();
+      assert.equal((await post("/api/commerce/orders",{...input,checkoutIntent:"invalid"},userCookie)).status,422);
+      const attempts=await Promise.all([post("/api/commerce/orders",{...input,checkoutIntent},userCookie),post("/api/commerce/orders",{...input,checkoutIntent},userCookie)]);
+      assert.deepEqual(attempts.map(r=>r.status).sort(),[201,409],"Concurrent checkout replay must create exactly one order");
+      const created=attempts.find(r=>r.status===201),duplicate=attempts.find(r=>r.status===409);
       const body=await created.json();assert.equal(created.status,201,JSON.stringify(body));
+      const replay=await duplicate.json();assert.equal(replay.details?.code,"ORDER_INTENT_ALREADY_USED");assert.equal(replay.details?.orderId,body.data.order.id);
       orderId=body.data.order.id;assert.equal(body.data.order.subtotalPaise,259800);
       assert.equal(body.data.order.deliveryCountry,"IN");assert.equal(body.data.order.shippingPaise,0);assert.equal(body.data.order.totalPaise,259800);
       assert.equal(body.data.order.paymentStatus,"UNPAID");
       assert.equal(body.data.charged,false);
+      const changedReplay=await post("/api/commerce/orders",{...input,checkoutIntent,customerNote:"Changed test note"},userCookie);
+      assert.equal(changedReplay.status,409);assert.equal((await changedReplay.json()).details?.orderId,orderId);
+      assert.equal(await prisma.shopOrder.count({where:{userId,id:orderId}}),1);
       // Verify real persisted 24-hour quota using a disposable CI database.
       for(let n=0;n<4;n++){
-        const extra=await post("/api/commerce/orders",input,userCookie);
+        const extra=await post("/api/commerce/orders",{...input,checkoutIntent:randomUUID()},userCookie);
         assert.equal(extra.status,201,"Shop request "+(n+2)+" should fit quota");
         extraOrderIds.push((await extra.json()).data.order.id);
       }
-      const overLimit=await post("/api/commerce/orders",input,userCookie);
+      const overLimit=await post("/api/commerce/orders",{...input,checkoutIntent:randomUUID()},userCookie);
       assert.equal(overLimit.status,429,"Sixth Shop request must be denied without a write");
       const userOrders=await req("/api/commerce/orders",{headers:{cookie:userCookie}});
       assert.ok((await userOrders.json()).data.orders.some(o=>o.id===orderId));

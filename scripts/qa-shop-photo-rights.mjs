@@ -57,10 +57,11 @@ const cartControls=read("components/shop/quote-cart-controls.tsx");
 for(const invariant of ["list[index].quantity>=10","list.length>=20","writeCart(list)","setResult(\"unavailable\")","copy=checkoutCopy[apiLocale]","copy.limitMessage","copy.fullMessage","copy.cartStorage"]){
   assert.ok(cartControls.includes(invariant),"CART_CONTROL_DUPLICATE_OR_STORAGE_GUARD_MISSING="+invariant);
 }
-for(const invariant of ['setOrderId(order.id);', 'readCheckoutOrder(payload,', 'if(cartFingerprint(readCart())===fingerprint){writeCart([]);setLines([]);}', 'setIssue("cartClear")', 'setIssue("cartChanged")', 'setIssue("cartStorage")', 'setUncertain(true)', 'inFlight.current||locked']){
+for(const invariant of ['setOrderId(order.id);', 'readCheckoutOrder(payload,', 'if(await clearConfirmedCart(fingerprint,checkoutIntent)){setLines([]);}', 'setIssue("cartClear")', 'setIssue("cartChanged")', 'setIssue("cartStorage")', 'setUncertain(true)', 'inFlight.current||locked']){
   assert.ok(cart.includes(invariant),"CART_ACCEPTED_ORDER_OR_STORAGE_FAILURE_HANDLING_MISSING="+invariant);
 }
 
+assert.ok(cartControls.includes("cartFingerprint(readCart())!==fingerprint")&&cartControls.includes("storedCheckoutIntent(fingerprint)!==intent")&&cartControls.includes("window.localStorage.setItem(CHECKOUT_INTENT_KEY")&&cart.includes("checkoutIntentAlreadyUsed(response.status,payload)"),"CART_REPLAY_OR_WRONG_REVISION_GUARD_MISSING");
 const checkoutText=read("lib/shop/checkout-copy.ts");
 for(const marker of ['"limitMessage": "Maximum 10 units of this product per cart."', '"cartStorage": "Cart could not be saved in this browser. Enable storage and retry."', '"cartClear": "Order saved. The cart could not be cleared; do not submit a duplicate order."'])assert.ok(checkoutText.includes(marker),"LOCALIZED_CART_SAFETY_DISCLOSURE_MISSING="+marker);
 const productResilience=read("components/shop/resilient-shop-photo.tsx");

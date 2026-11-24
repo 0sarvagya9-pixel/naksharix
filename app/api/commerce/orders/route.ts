@@ -8,12 +8,15 @@ import { env } from "@/lib/env";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
 import { isShippingCountry,validPostal,normalizePostal,SHIPPING_TERMS_VERSION } from "@/lib/shop/shipping-rules";
 import { resolveShipping,quoteKey } from "@/lib/shop/shipping-server";
+import {validCheckoutIntent} from "@/lib/shop/checkout-contract";
+import {shopOrderIntentId} from "@/lib/shop/order-intent";
 
 
 export const dynamic="force-dynamic";
 const schema=z.object({
  items:z.array(z.object({productId:z.string().regex(/^[a-zA-Z0-9-]{1,128}$/),quantity:z.number().int().min(1).max(10)}).strict()).min(1).max(20),
  expectedSubtotalPaise:z.number().int().min(0).max(1000000000).optional(),
+ checkoutIntent:z.string().refine(validCheckoutIntent).optional(),
  customerName:z.string().trim().min(2).max(120),
  customerPhone:z.string().trim().regex(/^[+0-9() -]{8,20}$/),
  deliveryAddress:z.string().trim().min(12).max(350),
@@ -38,10 +41,15 @@ export async function GET(){
   return handleApiError(error);
  }
 }
+class OrderIntentConflict extends Error{readonly orderId:string;constructor(id:string){super("ORDER_INTENT_ALREADY_USED");this.orderId=id;}}
+function intentAlreadyUsed(id:string){return fail("This checkout attempt already has an order. Check My Orders before submitting another request.",409,{code:"ORDER_INTENT_ALREADY_USED",orderId:id});}
 export async function POST(request:Request){
  try{
   const user=await getCurrentUser();if(!user)return fail("Sign in to checkout. Your cart will stay saved in this browser.",401);
   const input=await validateJson(request,schema);
+  // Optional for existing mobile clients; the updated web checkout always sends a persisted intent.
+  const intentId=input.checkoutIntent?shopOrderIntentId(user.id,input.checkoutIntent):null;
+  if(intentId){const existing=await prisma.shopOrder.findFirst({where:{id:intentId,userId:user.id},select:{id:true}});if(existing)return intentAlreadyUsed(existing.id);}
   if(!validPostal(input.deliveryCountry,input.postalCode)||(input.deliveryCountry==="IN"&&input.deliveryState.length<2))return fail("Enter a valid postal code and state for the delivery country.",422);
   if(input.deliveryCountry!=="IN"&&input.shippingTermsVersion!==SHIPPING_TERMS_VERSION)return fail("Accept the international shipping and customs disclosure before submitting.",422);
   const postal=normalizePostal(input.deliveryCountry,input.postalCode);
@@ -76,13 +84,15 @@ export async function POST(request:Request){
         hashtext(${user.id}),hashtext('naksharix-shop-request-v1')
       )::text AS locked
     `;
+    // Repeat the ownership-scoped check under the database lock before create.
+    if(intentId){const existing=await tx.shopOrder.findFirst({where:{id:intentId,userId:user.id},select:{id:true}});if(existing)throw new OrderIntentConflict(existing.id);}
     const recent=await tx.shopOrder.count({where:{
       userId:user.id,createdAt:{gte:new Date(Date.now()-86400_000)}
     }});
     if(recent>=5)return null;
     const checkoutReady=shipping.totalPaise!==null&&env.SHOP_PAYMENTS_ENABLED==="true" && getRazorpayReadiness().enabled;
     return tx.shopOrder.create({
-      data:{userId:user.id,items:lines,customerName:input.customerName,customerPhone:input.customerPhone,
+      data:{...(intentId?{id:intentId}:{}),userId:user.id,items:lines,customerName:input.customerName,customerPhone:input.customerPhone,
         deliveryAddress:input.deliveryAddress,deliveryCity:input.deliveryCity,deliveryState:input.deliveryState,
         deliveryCountry:input.deliveryCountry,postalCode:postal,customerNote:input.customerNote,subtotalPaise:subtotal,
         shippingQuote:shipping.snapshot?shipping.snapshot as unknown as Prisma.InputJsonValue:Prisma.JsonNull,
@@ -98,6 +108,7 @@ export async function POST(request:Request){
     nextStep:order.totalPaise===null?"International delivery quote requested. No payment collected.":order.status==="CONFIRMED"?"Pay the displayed total securely with Razorpay.":"Order saved. Payment will be available after confirmation."},
     {status:201});
  }catch(error){
+  if(error instanceof OrderIntentConflict)return intentAlreadyUsed(error.orderId);
   if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2021")return fail("Order storage not yet provisioned.",503);
   return handleApiError(error);
  }
