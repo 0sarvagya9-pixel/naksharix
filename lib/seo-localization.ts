@@ -4,7 +4,8 @@ import { kundliGuideLanguages, kundliGuidePath, indexableKundliGuideLanguages } 
 export const publishedSeoPairs = [
   { en: "/", hi: "/hi" },
   { en: "/free-kundli", hi: "/hi/free-kundli" },
-  { en: "/kundli-matching", hi: "/hi/kundli-milan" }
+  { en: "/kundli-matching", hi: "/hi/kundli-milan" },
+  { en: "/about", hi: "/hi/about" }
 ] as const;
 
 /** Expansion inventory; these are NOT published or advertised language pages. */

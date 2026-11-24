@@ -4,11 +4,18 @@
  * A 200/202 confirms receipt, not crawling, ranking, indexing or organic traffic.
  */
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 export const ORIGIN = "https://www.naksharix.com";
 export const INDEXNOW_KEY = "ef1d79191967d8cf6d2404e50e8017c1";
 export const INDEXNOW_KEY_URL = `${ORIGIN}/${INDEXNOW_KEY}.txt`;
 export const DISCOVERY_ROUTES = Object.freeze([
+  "/",
+  "/about",
+  "/hi",
+  "/hi/about",
+  "/faq",
   "/blog/daily-horoscope-personalization",
   "/blog/kundli-matching-score",
   "/blog/tarot-reflection",
@@ -45,7 +52,7 @@ export const DISCOVERY_ROUTES = Object.freeze([
 export function assertDiscoveryConfiguration() {
   assert.match(INDEXNOW_KEY, /^[a-f0-9]{32}$/, "Invalid public IndexNow proof key");
   assert.equal(new Set(DISCOVERY_ROUTES).size, DISCOVERY_ROUTES.length, "Duplicate discovery routes");
-  assert.ok(DISCOVERY_ROUTES.every(route => /^\/(?:blog(?:\/[a-z-]+)?|learn|shop(?:\/[a-z0-9-]+)?|reports(?:\/(?:premium-kundli|couple-kundli|love-report|career-report|numerology-lo-shu-report))?|free-kundli|hi\/(?:free-kundli|kundli-milan)|kundli-matching|tarot|numerology|weekly-love-horoscope|numerology-monthly-horoscope)$/.test(route)),
+  assert.ok(DISCOVERY_ROUTES.every(route => route === "/" || /^\/(?:about|faq|hi(?:\/about)?|blog(?:\/[a-z-]+)?|learn|shop(?:\/[a-z0-9-]+)?|reports(?:\/(?:premium-kundli|couple-kundli|love-report|career-report|numerology-lo-shu-report))?|free-kundli|hi\/(?:free-kundli|kundli-milan)|kundli-matching|tarot|numerology|weekly-love-horoscope|numerology-monthly-horoscope)$/.test(route)),
     "Unexpected or sensitive submission path");
   return DISCOVERY_ROUTES.map(route => ORIGIN + route);
 }
@@ -80,14 +87,37 @@ async function verifyExactProduction() {
   throw new Error("RELEASE_SHA_NOT_LIVE_NO_SUBMISSION");
 }
 
+function changedDiscoveryRoutes(all) {
+  // Explicit manual workflow dispatch is an authorized discovery submission.
+  if (process.env.GITHUB_EVENT_NAME === "workflow_dispatch") return all;
+  const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf8"));
+  if (event.deleted || event.forced || !/^[0-9a-f]{40}$/.test(event.before || "") || !/^[0-9a-f]{40}$/.test(event.after || "") || event.before === "0".repeat(40)) throw new Error("INDEXNOW_CHANGE_SCOPE_UNKNOWN");
+  const changed = execFileSync("git", ["diff","--name-only",event.before,event.after], {encoding:"utf8"}).trim().split("\n");
+  const selected = new Set();
+  const add = route => { const url=ORIGIN+route; if(all.includes(url)) selected.add(url); };
+  for (const file of changed) {
+    const direct=file.match(/^app\/(.*?)\/?page\.tsx$/);
+    if(direct && !direct[1].includes("["))add(direct[1]?"/"+direct[1]:"/");
+    if(file==="components/schema-markup.tsx" || file==="lib/seo-brand.ts" || file==="components/seo/brand-answers.tsx" || file==="components/legal-policy-page.tsx" || file==="lib/seo-localization.ts" || file==="app/sitemap.ts" || file==="public/llms.txt") ["/","/hi","/about","/hi/about","/faq"].forEach(add);
+    if(file==="components/home/approved-gallery-home.tsx")add("/");
+    if(file==="lib/blog-content.ts" || file.startsWith("app/blog/")) all.filter(url=>url.startsWith(ORIGIN+"/blog")).forEach(url=>selected.add(url));
+    if(file==="lib/shop/organic-discovery.ts" || file==="components/shop/product-share-actions.tsx" || file==="app/shop/[slug]/page.tsx") all.filter(url=>url.startsWith(ORIGIN+"/shop")||url.startsWith(ORIGIN+"/reports")).forEach(url=>selected.add(url));
+    if(file==="app/reports/[slug]/page.tsx" || file==="components/optional-report-next-step.tsx" || file==="components/relevant-report-discovery.tsx") all.filter(url=>url.startsWith(ORIGIN+"/reports")||/\/(free-kundli|kundli-matching|kundli-milan|tarot|numerology|weekly-love-horoscope|numerology-monthly-horoscope)$/.test(url)).forEach(url=>selected.add(url));
+  }
+  return [...selected];
+}
+
 async function main() {
-  const urlList = assertDiscoveryConfiguration();
+  const all = assertDiscoveryConfiguration();
+  let urlList = all;
   if (process.argv.includes("--validate-only")) {
     console.log("INDEXNOW_STATIC_CHECK=PASS;ROUTES=" + urlList.length);
     return;
   }
   if (process.env.GITHUB_REF !== "refs/heads/complete-production-polish")
     throw new Error("NOT_AUTHORIZED_PRODUCTION_BRANCH");
+  urlList = changedDiscoveryRoutes(all);
+  if (!urlList.length) { console.log("INDEXNOW_SKIPPED_NO_CHANGED_PUBLIC_ROUTES"); return; }
   await verifyExactProduction();
 
   const keyFile = (await readPublic(INDEXNOW_KEY_URL)).trim();

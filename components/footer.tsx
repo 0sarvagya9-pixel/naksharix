@@ -111,7 +111,7 @@ function footerGroups(locale: Locale) {
       {
         title: "सहायता",
         links: [
-          ["हमारे बारे में", "/about"],
+          ["हमारे बारे में", "/hi/about"],
           ["संपर्क", "/contact"],
           ["सामान्य प्रश्न", "/faq"],
           ["अस्वीकरण", "/disclaimer"],

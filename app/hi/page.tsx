@@ -9,7 +9,7 @@ import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
   title: "फ्री कुंडली, राशिफल और वैदिक ज्योतिष हिंदी में",
-  description: "हिंदी में फ्री जन्म कुंडली, राशि और नक्षत्र की जानकारी, कुंडली मिलान, राशिफल, पंचांग और पारंपरिक वैदिक ज्योतिष समझें।",
+  description: "Naksharix पर हिंदी में फ्री जन्म कुंडली, राशि और नक्षत्र की जानकारी, कुंडली मिलान, राशिफल, पंचांग और पारंपरिक वैदिक ज्योतिष समझें।",
   path: "/hi",
   keywords: ["Hindi Astrology", "Hindi Horoscope", "Kundli Hindi", "Tarot Hindi"]
 });
@@ -35,7 +35,7 @@ export default function HindiHomePage() {
             <h1 className="mt-5 max-w-2xl font-cinzel text-[clamp(2rem,5vw,3.9rem)] font-extrabold leading-tight text-[#70283d]">
               आपके जीवन की ज्योतिषीय यात्रा
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-8 text-[#584b51]">{safeServerTranslation("hi", "heroCopy")}</p>
+            <p className="mt-5 max-w-xl text-base leading-8 text-[#584b51]">{safeServerTranslation("hi", "heroCopy")} <Link href="/hi/about" className="font-semibold underline underline-offset-4">Naksharix क्या है?</Link></p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild>
                 <Link href="/hi/free-kundli">

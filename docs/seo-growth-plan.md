@@ -89,3 +89,12 @@ Build a metadata inventory and route index/noindex table before adding more SEO 
 - Applied to page metadata, hreflang, sitemap entries, robots sitemap/host, root metadataBase and public Organization/WebSite/page JSON-LD.
 - Operational NEXT_PUBLIC_APP_URL is not rewritten: OAuth, session, payment callbacks, webhooks and other external service integrations remain untouched.
 - Deployment acceptance: verify generated canonical, www sitemap, www robots, alternate hreflang, and Search Console preferred canonical after the exact release reaches production.
+
+## 2026-11-24 brand discovery and AI-search foundation
+- Search Console 25 Oct–21 Nov: 20 clicks / 955 impressions; indexed selected pages but www homepage's last recorded canonical selected apex, while live Vercel domain settings redirect apex to www. Preserve preferred www host and existing operational base; measure Google recrawl rather than flip domains.
+- Add an actual server-rendered Organization / WebSite / WebApplication graph using stable IDs and brand facts; no invented social profiles, founder, ratings or affiliations.
+- Add explicit English and Hindi brand About pages, visible Q&A, internal links to public tools/report catalogue and published policies. Home copy names the brand without redesigning owner-approved structure.
+- Four English/Hindi reciprocal page pairs. Other-language educational drafts retain noindex until reviewed. Sitemap root now uses slash and its full language cluster; private pages remain excluded.
+- Optional llms.txt is a curated public directory, NOT a ranking requirement or guarantee. Existing public crawler access remains; private endpoints stay protected. Do not expand model-training permission as a marketing tactic.
+- IndexNow selects changed allowlisted public routes from Git push diff, validates exact live release and key file/sitemap/indexability before notifying. Manual dispatch is separate. No repeated unchanged URL submissions on ordinary pushes.
+- No paid OpenSEO tracker/API calls. External authority, neutral AI answer tests, real organic rankings, native review and genuine external mentions remain ongoing outcomes; do not claim AI citations or purchases until measured.

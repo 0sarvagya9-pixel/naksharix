@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import { LegalPolicyPage } from "@/components/legal-policy-page";
 import { seo } from "@/lib/seo";
+import { brandDescription } from "@/lib/seo-brand";
+import { JsonLd } from "@/components/seo/json-ld";
+import { canonicalSeoOrigin } from "@/lib/seo-origin";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = seo({
-  title: "About Naksharix - Vedic Astrology Tools and Digital Reports",
-  description:
-    "Learn how Naksharix provides Vedic astrology tools, saved Kundli reports, verified premium access, horoscope guidance, and consultation booking.",
+  title: "What is Naksharix? Vedic Astrology Tools and Digital Reports",
+  description: brandDescription,
   path: "/about",
   keywords: ["About Naksharix", "Vedic Astrology Platform", "Digital Kundli Reports", "Astrology Consultations"],
 });
 
 export default function AboutPage() {
-  return <LegalPolicyPage page="about" />;
+  const home = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL) + "/";
+  return <><JsonLd id="naksharix-about-schema" data={{ "@context": "https://schema.org", "@type": "AboutPage", "@id": home + "about#webpage", url: home + "about", name: "What is Naksharix?", description: brandDescription, inLanguage: "en", about: { "@id": home + "#organization" }, isPartOf: { "@id": home + "#website" } }} /><LegalPolicyPage page="about" /></>;
 }

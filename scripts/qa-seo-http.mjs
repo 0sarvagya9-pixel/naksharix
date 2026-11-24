@@ -6,7 +6,8 @@ const absolute = (path) => canonical + (path === "/" ? "" : path);
 const pairs = [
   ["/", "/hi"],
   ["/free-kundli", "/hi/free-kundli"],
-  ["/kundli-matching", "/hi/kundli-milan"]
+  ["/kundli-matching", "/hi/kundli-milan"],
+  ["/about", "/hi/about"]
 ];
 const nativeGuides = ["en", "hi", "mr", "bn", "es", "fr"];
 const approvedGuides = ["en", "hi"];
@@ -84,4 +85,19 @@ const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
 assert.equal(locs.length, new Set(locs).size, "Sitemap contains duplicate URLs");
 assert.ok(xml.includes('hreflang="hi"') && xml.includes('hreflang="x-default"'),
   "Sitemap lacks localized alternates");
-console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=6;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES");
+const rootEntry=[...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(m=>m[1]).find(x=>x.includes("<loc>"+canonical+"/</loc>"));
+assert.ok(rootEntry && rootEntry.includes('hreflang="en"') && rootEntry.includes('hreflang="hi"') && rootEntry.includes('hreflang="x-default"'),"Root sitemap canonical or language cluster missing");
+for (const route of ["/","/about","/hi/about"]) {
+  const response=await fetch(base+route);
+  assert.equal(response.status,200);
+  const html=await response.text();
+  const script=html.match(/<script[^>]*id="naksharix-schema"[^>]*>([\s\S]*?)<\/script>/i);
+  assert.ok(script,"Missing actual server-rendered JSON-LD on "+route);
+  const graph=JSON.parse(script[1])["@graph"];
+  assert.ok(Array.isArray(graph) && graph.some(node=>node["@type"]==="Organization" && node.name==="Naksharix") && graph.some(node=>node["@type"]==="WebSite" && node.name==="Naksharix" && node.url.endsWith("/")));
+  if(route!=="/")assert.ok(html.includes('id="brand-answers-heading"') && html.includes('id="naksharix-about-schema"'),"Missing visible brand answers or AboutPage graph");
+}
+const llms=await fetch(base+"/llms.txt");
+assert.equal(llms.status,200);
+assert.ok((await llms.text()).includes("https://www.naksharix.com/hi/about"),"Missing public brand directory");
+console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=8;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");

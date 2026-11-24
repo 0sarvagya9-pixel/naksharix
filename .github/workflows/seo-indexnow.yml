@@ -10,6 +10,19 @@ on:
       - '.github/workflows/seo-indexnow.yml'
       - 'scripts/seo/submit-indexnow.mjs'
       - 'public/ef1d79191967d8cf6d2404e50e8017c1.txt'
+      - 'app/page.tsx'
+      - 'app/about/**'
+      - 'app/hi/about/**'
+      - 'app/hi/page.tsx'
+      - 'app/faq/**'
+      - 'app/sitemap.ts'
+      - 'lib/seo-brand.ts'
+      - 'lib/seo-localization.ts'
+      - 'components/schema-markup.tsx'
+      - 'components/legal-policy-page.tsx'
+      - 'components/seo/brand-answers.tsx'
+      - 'components/home/approved-gallery-home.tsx'
+      - 'public/llms.txt'
       - 'lib/blog-content.ts'
       - 'app/blog/**'
       - 'app/learn/page.tsx'
@@ -45,6 +58,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -54,7 +68,7 @@ jobs:
         run: node scripts/seo/submit-indexnow.mjs
       - name: State what has and has not been verified
         run: |
-          echo 'INDEXNOW_SUBMISSION_ATTEMPTED=YES'
+          echo 'INDEXNOW_OUTCOME=SEE_VERIFIED_SCRIPT_LOG'
           echo 'GOOGLE_INDEXING=NOT_CERTIFIED'
           echo 'BING_INDEXING=NOT_CERTIFIED'
           echo 'REAL_ORGANIC_TRAFFIC=NOT_MEASURED'

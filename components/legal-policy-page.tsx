@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { BrandAnswers } from "@/components/seo/brand-answers";
+import { brandDescription } from "@/lib/seo-brand";
 import {
   AlertTriangle,
   BadgeIndianRupee,
@@ -45,9 +47,8 @@ const LAST_UPDATED = "12 July 2026";
 const policyPages: Record<PolicyPageKey, PolicyPage> = {
   about: {
     eyebrow: "About Naksharix",
-    title: "Vedic astrology and spiritual guidance for everyday life",
-    intro:
-      "Naksharix provides Vedic astrology tools, Kundli reports, Panchang, horoscope guidance, numerology, tarot, consultations, and saved digital reports in one account-based experience.",
+    title: "What is Naksharix?",
+    intro: brandDescription,
     badge: "About",
     icon: Sparkles,
     highlights: [
@@ -391,6 +392,7 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
       "Product orders and availability",
     ],
     sections: [
+      { title: "What is Naksharix?", body: brandDescription },
       {
         title: "Are Naksharix predictions guaranteed?",
         body:
@@ -495,6 +497,8 @@ export function LegalPolicyPage({ page }: { page: PolicyPageKey }) {
           ))}
         </div>
 
+        {page === "about" ? <BrandAnswers locale="en" /> : null}
+        {page === "faq" ? <p className="mt-6 text-sm"><Link href="/about" className="font-semibold text-[#70283d] underline">Learn more about Naksharix</Link>{" · "}<Link href="/hi/about" hrefLang="hi" className="font-semibold text-[#70283d] underline">Naksharix क्या है?</Link></p> : null}
         <div className="mt-8 nx-glass-card-strong rounded-2xl p-6 md:flex md:items-center md:justify-between md:gap-6">
           <div>
             <h2 className="font-cinzel text-xl font-bold text-[#17181d]">Need support or clarification?</h2>
