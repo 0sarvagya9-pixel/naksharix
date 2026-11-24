@@ -1,3 +1,4 @@
+import { findKumbhEvent, kumbhEventVisible, kumbhEventScheduleMatches } from "@/lib/puja/service-catalogue";
 import { PUJA_FEE_TERMS_VERSION } from "@/lib/puja/fee-terms";
 import { NextRequest } from "next/server";
 import { PaymentPurpose, ReportPaymentStatus, ReportRequestStatus } from "@prisma/client";
@@ -207,6 +208,8 @@ async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
     // old canceled request or a service whose partner is no longer verified.
     if (!booking || booking.userId !== userId || booking.status !== "SCHEDULED" ||
         !booking.partnerId || !booking.scheduledAt || booking.scheduledAt.getTime() <= Date.now()) return null;
+    const event = findKumbhEvent(booking.topicId);
+    if (event && (!kumbhEventVisible(event) || !kumbhEventScheduleMatches(event,booking.scheduledAt) || booking.city !== event.city)) return null;
     const [offer, partner] = await Promise.all([
       prisma.pujaOffering.findUnique({ where: { topicId: booking.topicId } }),
       prisma.pujaPartner.findUnique({ where: { id: booking.partnerId } })

@@ -5,6 +5,7 @@ import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { notifyCustomerOfFulfilmentChange } from "@/lib/notifications/fulfilment-updates";
 import { partnerSupportsTopic } from "@/lib/puja/launch-readiness";
+import { findKumbhEvent, kumbhEventVisible, kumbhEventScheduleMatches } from "@/lib/puja/service-catalogue";
 export const dynamic="force-dynamic";
 const statuses=["REQUESTED","CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED","CANCELED","REJECTED"] as const;
 const moves:Record<string,readonly string[]>={
@@ -63,6 +64,10 @@ export async function PATCH(request:Request){
       return fail("Record a factual Pandit confirmation / coordination note (15+ characters).", 422);
   }
   const when = input.scheduledAt ? new Date(input.scheduledAt) : existing.scheduledAt;
+  const event = findKumbhEvent(existing.topicId);
+  if (event && ((["CONFIRMED","SCHEDULED"].includes(input.status) && !kumbhEventVisible(event)) ||
+      (when && ["CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED"].includes(input.status) && !kumbhEventScheduleMatches(event,when))))
+    return fail("A Kumbh ceremony must be scheduled on the specified event date in IST; expired events cannot be newly confirmed.", 422);
   if (["SCHEDULED","IN_PROGRESS","COMPLETED"].includes(input.status) &&
       (!when || Number.isNaN(when.valueOf()))) return fail("Confirmed ceremony date/time required.", 422);
   if (input.status === "SCHEDULED" && (when!.getTime() <= Date.now() || !partnerId))

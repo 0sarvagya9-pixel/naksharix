@@ -4,7 +4,7 @@ import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
-import { findPujaTopic } from "@/lib/puja/service-catalogue";
+import { findPujaTopic, findKumbhEvent, kumbhEventRequestOpen } from "@/lib/puja/service-catalogue";
 import { notifyPujaRequestCreated } from "@/lib/puja/request-notifications";
 import { PUJA_STATUS_NOTICES } from "@/lib/puja/customer-notices";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
@@ -55,6 +55,9 @@ export async function POST(request: Request) {
     if (limited) return limited;
     const input = await validateJson(request, requestSchema);
     const topic = findPujaTopic(input.topicId);
+    const event = findKumbhEvent(input.topicId);
+    if (event && (!kumbhEventRequestOpen(event) || input.preferredDate !== event.date || input.city !== event.city))
+      return fail("This Kumbh date or location is no longer available for new requests. Choose an upcoming event.", 422);
     const offer = release.offers[input.topicId];
     if (!topic || !offer) return fail("This Puja is not currently accepting date requests.", 422);
     if (offer.pricePaise !== input.expectedPricePaise)
@@ -64,8 +67,8 @@ export async function POST(request: Request) {
     // NOT a ceremony time or a guaranteed Pandit reservation.
     const day = new Date(input.preferredDate + "T12:00:00+05:30");
     if (!Number.isFinite(day.getTime()) || day.toISOString().slice(0,10) !== input.preferredDate ||
-        day.getTime() < Date.now() + 24 * 3600_000 ||
-        day.getTime() > Date.now() + 90 * 86400_000)
+        (!event && (day.getTime() < Date.now() + 24 * 3600_000 ||
+        day.getTime() > Date.now() + 90 * 86400_000)))
       return fail("Select a valid preferred date between tomorrow and 90 days ahead.", 422);
 
     const result = await prisma.$transaction(async tx => {
@@ -82,6 +85,7 @@ export async function POST(request: Request) {
         select: { id: true }
       });
       if (duplicate) return { kind: "duplicate" as const };
+      if (event && !kumbhEventRequestOpen(event)) return { kind: "expired" as const };
       const booking = await tx.pujaBookingRequest.create({
         data: { userId: user.id, topicId: topic.id, quotedPricePaise: offer.pricePaise,
           preferredDate: day, city: input.city, devoteeName: input.devoteeName,
@@ -92,6 +96,7 @@ export async function POST(request: Request) {
       });
       return { kind: "created" as const, booking };
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    if (result.kind === "expired") return fail("This Kumbh event is closed to new requests.", 422);
     if (result.kind === "limit") return fail("Daily Puja request limit reached.", 429);
     if (result.kind === "duplicate")
       return fail("A request for this Puja and date already exists in My Puja Requests.", 409);

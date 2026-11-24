@@ -758,4 +758,45 @@ export const pujaTopics:readonly PujaTopic[]=Object.freeze([
   }
 ]);
 export const pujaCategories = ["All","Shiva","Devi","Vishnu","Ganesha","Graha","Family","Homa","Festival"] as const;
-export function findPujaTopic(id:string):PujaTopic|undefined {return pujaTopics.find(p=>p.id===id);}
+// Government schedule checked 24 November 2026. These are Naksharix
+// coordination requests, NOT government/temple-run services or Snan tickets.
+export const KUMBH_2027_SOURCE = "https://simhasthamahakumbh.maharashtra.gov.in/snan-calendar";
+export const KUMBH_2027_SCHEDULE_SOURCE = "https://simhasthamahakumbh.maharashtra.gov.in/live-event-schedule";
+export const KUMBH_2027_PROMOTION_START = "2026-11-24T00:00:00+05:30";
+export const KUMBH_2027_PROMOTION_END = "2027-10-01T00:00:00+05:30";
+export type KumbhEvent = {
+  id:string; date:string; city:string; eventTitle:string; pujaName:string;
+  description:string; timing:string; deity:string;
+};
+export const kumbhEvents: readonly KumbhEvent[] = Object.freeze([
+  { id:"kumbh-2027-opening-sankalp",date:"2027-06-15",city:"Nashik",eventTitle:"Main Mela begins",pujaName:"Kumbh Opening Sankalp Puja",description:"Request a devotional Sankalp on the opening date of the main Mela; priest, venue and arrangements remain subject to confirmation.",timing:"Main Mela begins · all-day date",deity:"Godavari"},
+  { id:"kumbh-2027-nagar-pradakshina-puja",date:"2027-07-29",city:"Nashik",eventTitle:"Nagar Pradakshina",pujaName:"Kumbh Nagar Pradakshina Sankalp Puja",description:"Request an independent devotional Sankalp on the procession date; this is not participation in the official procession.",timing:"Procession time to be notified",deity:"Vishnu"},
+  { id:"kumbh-2027-first-amrut-snan-puja",date:"2027-08-02",city:"Nashik",eventTitle:"First Amrut Snan",pujaName:"First Amrut Snan Godavari Puja",description:"Request a priest-led Godavari prayer and Sankalp on the first Amrut Snan date, subject to agreed location and safe arrangements.",timing:"Snan day · exact muhurat to be notified",deity:"Godavari"},
+  { id:"kumbh-2027-second-amrut-snan-puja",date:"2027-08-31",city:"Nashik",eventTitle:"Second Amrut Snan",pujaName:"Second Amrut Snan Pitru Tarpan & Sankalp",description:"Request traditional remembrance prayers or a suitable Sankalp on the second bathing day; the priest will confirm the ritual scope.",timing:"Snan day · exact muhurat to be notified",deity:"Pitru"},
+  { id:"kumbh-2027-nashik-amrut-snan-puja",date:"2027-09-11",city:"Nashik",eventTitle:"Third Amrut Snan — Ramtirth",pujaName:"Nashik Amrut Snan Vishnu Puja",description:"Request an independent Vishnu Puja on the Ramtirth bathing date; temple access and the place of worship are not guaranteed.",timing:"Nashik Snan day · exact muhurat to be notified",deity:"Vishnu"},
+  { id:"kumbh-2027-trimbakeshwar-amrut-snan-puja",date:"2027-09-12",city:"Trimbakeshwar",eventTitle:"Third Amrut Snan — Kushavarta Tirth",pujaName:"Trimbakeshwar Amrut Snan Rudrabhishek",description:"Request a Shiva Rudrabhishek on the Trimbakeshwar bathing date, subject to a genuine Pandit and separately agreed venue.",timing:"Trimbakeshwar Snan day · exact muhurat to be notified",deity:"Shiva"},
+  { id:"kumbh-2027-main-mela-concluding-puja",date:"2027-09-30",city:"Nashik",eventTitle:"Last day of the main Mela period",pujaName:"Kumbh Main Mela Closing Sankalp",description:"Request a devotional gratitude prayer on the last day of the main Mela period; the wider Simhastha continues until July 2028.",timing:"Main Mela period ends · date only",deity:"Godavari"}
+]);
+export const kumbhPujaTopics: readonly PujaTopic[] = Object.freeze(kumbhEvents.map(e=>({
+  id:e.id,name:e.pujaName,category:"Festival" as const,deity:e.deity,description:e.description,graphic:"/pujas/festival-illustration.svg"
+})));
+export const allPujaTopics: readonly PujaTopic[] = Object.freeze([...pujaTopics,...kumbhPujaTopics]);
+export function findPujaTopic(id:string):PujaTopic|undefined {return allPujaTopics.find(p=>p.id===id);}
+export function findKumbhEvent(id:string):KumbhEvent|undefined {return kumbhEvents.find(e=>e.id===id);}
+export function kumbhEventDayStart(e:KumbhEvent):number {return Date.parse(e.date+"T00:00:00+05:30");}
+export function kumbhEventDayEnd(e:KumbhEvent):number {return kumbhEventDayStart(e)+86400_000;}
+export function kumbhEventVisible(e:KumbhEvent,now=Date.now()):boolean {
+  return now>=Date.parse(KUMBH_2027_PROMOTION_START) && now<Date.parse(KUMBH_2027_PROMOTION_END) && now<kumbhEventDayEnd(e);
+}
+export function kumbhEventRequestOpen(e:KumbhEvent,now=Date.now()):boolean {
+  return kumbhEventVisible(e,now) && now<kumbhEventDayStart(e);
+}
+export function kumbhEventScheduleMatches(e:KumbhEvent,when:Date):boolean {
+  const ms=when.getTime();
+  return Number.isFinite(ms) && ms>=kumbhEventDayStart(e) && ms<kumbhEventDayEnd(e);
+}
+export function visibleKumbhEvents(now=Date.now()):KumbhEvent[] {return kumbhEvents.filter(e=>kumbhEventVisible(e,now));}
+export function requestableKumbhEvents(now=Date.now()):KumbhEvent[] {return kumbhEvents.filter(e=>kumbhEventRequestOpen(e,now));}
+export function displayKumbhDate(e:KumbhEvent):string {
+  return new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"numeric",month:"long",year:"numeric"}).format(new Date(e.date+"T12:00:00+05:30"));
+}

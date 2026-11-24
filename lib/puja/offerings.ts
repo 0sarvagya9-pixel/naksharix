@@ -2,7 +2,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { isTransientDatabaseError, retryTransientDatabaseRead } from "@/lib/db-transient";
-import { pujaTopics } from "@/lib/puja/service-catalogue";
+import { allPujaTopics, findKumbhEvent, kumbhEventVisible } from "@/lib/puja/service-catalogue";
 export type PublicPujaOffer = { topicId:string; pricePaise:number; durationMinutes:number|null; note:string };
 export async function getPublishedPujaOffers():Promise<Record<string,PublicPujaOffer>>{
   try{
@@ -10,8 +10,12 @@ export async function getPublishedPujaOffers():Promise<Record<string,PublicPujaO
       where:{available:true,pricePaise:{gte:100}},
       select:{topicId:true,pricePaise:true,durationMinutes:true,note:true}
     }));
-    const known=new Set(pujaTopics.map(p=>p.id));
-    return Object.fromEntries(rows.filter(x=>known.has(x.topicId)&&x.pricePaise!==null).map(x=>[
+    const known=new Set(allPujaTopics.map(p=>p.id));
+    const now=Date.now();
+    return Object.fromEntries(rows.filter(x=>{
+      const event=findKumbhEvent(x.topicId);
+      return known.has(x.topicId)&&x.pricePaise!==null&&(!event||kumbhEventVisible(event,now));
+    }).map(x=>[
       x.topicId,{topicId:x.topicId,pricePaise:x.pricePaise!,durationMinutes:x.durationMinutes,note:/(verified Pandit availability|no payment is collected before confirmation|payment stays disabled until a verified Pandit)/i.test(x.note)?"":x.note}
     ]));
   }catch(error){
