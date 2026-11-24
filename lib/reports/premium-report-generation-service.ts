@@ -1,4 +1,5 @@
 import "server-only";
+import { renderEditorialReport } from "@/lib/reports/editorial-pdf";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont, type RGB } from "pdf-lib";
@@ -169,6 +170,12 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
   pdf.setLanguage(request.language === "hi" ? "hi-IN" : "en-IN");
   const fonts = await loadReportFonts(pdf);
   const logo = await pdf.embedPng(await readFile(path.join(process.cwd(), "public", "images", "naksharix-final-logo-symbol.png"))).catch(() => null);
+  if (automated) {
+    await renderEditorialReport(pdf, request.content, request, fonts, logo);
+    const bytes=Buffer.from(await pdf.save({useObjectStreams:true}));
+    if(bytes.subarray(0,5).toString("ascii")!=="%PDF-")throw Error("PDF serialization returned an invalid document");
+    return {generated:true,status:"generated_internal_unverified",pdfUrl:null,bytes,byteLength:bytes.byteLength,deliveryEnabled:false,reason:"Personalized editorial report generated from validated input; independent chart certification is not claimed."};
+  }
   let page!: PDFPage;
   let y = TOP;
   const newPage = (cover = false) => {
