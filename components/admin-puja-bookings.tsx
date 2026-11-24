@@ -1,7 +1,7 @@
 "use client";
 import { useEffect,useState,type FormEvent } from "react";
 import { secureFetch } from "@/lib/security/csrf";
-type Partner={id:string;name:string;region:string};
+import { shortlistPujaPartners, type ShortlistPartner as Partner } from "@/lib/puja/partner-shortlist";
 type Booking={id:string;userId:string;topicId:string;quotedPricePaise:number;preferredDate:string;city:string;
  devoteeName:string;gotra:string|null;sankalpNote:string;customerPhone:string;status:string;
  partnerId:string|null;scheduledAt:string|null;adminNote:string;evidenceUrl:string|null;version:number;createdAt:string};
@@ -65,11 +65,12 @@ export function AdminPujaBookings(){
        })()}
       </select>
     </label>
-    <label className="block text-sm font-bold">External Pandit/Puja partner (optional)
+    <label className="block text-sm font-bold">Matched Pandit shortlist (up to 10)
      <select value={editing.partnerId??""} onChange={e=>setEditing({...editing,partnerId:e.target.value||null})} className="mt-2 block w-full rounded-lg border p-3">
-      <option value="">Select verified Pandit (required for confirmation)</option>{partners.map(p=><option key={p.id} value={p.id}>{p.name} — {p.region}</option>)}
+      <option value="">Select verified Pandit (required for confirmation)</option>{shortlistPujaPartners(partners,editing.topicId,editing.city).map(p=><option key={p.id} value={p.id}>{p.name} — {p.region}</option>)}
      </select>
     </label>
+    <p className="text-sm">Candidates are verified for the exact Puja, ranked with local matches first. If none accepts, the request stays with the coordination team. A shortlist is not a booking confirmation.</p>
     <div className="rounded-xl border border-[#e6cbaa] bg-[#fff8ee] p-4 text-sm leading-6">
       <p className="font-bold">Before changing a request to Confirmed / Scheduled / In Progress</p>
       <p className="mt-1">You must directly contact and obtain acceptance from the named verified Pandit for this exact Puja. This checkbox records your assertion, not an automated Pandit message.</p>

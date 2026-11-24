@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       return fail("A request for this Puja and date already exists in My Puja Requests.", 409);
 
     const notification = await notifyPujaRequestCreated({
-      id: result.booking.id, userId: user.id, topicName: topic.name
+      id: result.booking.id, userId: user.id, topicName: topic.name, topicId: topic.id, city: input.city
     }).catch(() => ({customer:"unavailable" as const,admin:"unavailable" as const}));
     return ok({ booking: result.booking, charged: false, paymentDueNow: false,
       statusMessage: PUJA_STATUS_NOTICES.REQUESTED,
