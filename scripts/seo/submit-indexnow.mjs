@@ -87,15 +87,10 @@ async function verifyExactProduction() {
   throw new Error("RELEASE_SHA_NOT_LIVE_NO_SUBMISSION");
 }
 
-function changedDiscoveryRoutes(all) {
-  // Explicit manual workflow dispatch is an authorized discovery submission.
-  if (process.env.GITHUB_EVENT_NAME === "workflow_dispatch") return all;
-  const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf8"));
-  if (event.deleted || event.forced || !/^[0-9a-f]{40}$/.test(event.before || "") || !/^[0-9a-f]{40}$/.test(event.after || "") || event.before === "0".repeat(40)) throw new Error("INDEXNOW_CHANGE_SCOPE_UNKNOWN");
-  const changed = execFileSync("git", ["diff","--name-only",event.before,event.after], {encoding:"utf8"}).trim().split("\n");
+export function changedDiscoveryRoutes(all, changedFiles) {
   const selected = new Set();
   const add = route => { const url=ORIGIN+route; if(all.includes(url)) selected.add(url); };
-  for (const file of changed) {
+  for (const file of changedFiles) {
     const direct=file.match(/^app\/(.*?)\/?page\.tsx$/);
     if(direct && !direct[1].includes("["))add(direct[1]?"/"+direct[1]:"/");
     if(file==="components/schema-markup.tsx" || file==="lib/seo-brand.ts" || file==="components/seo/brand-answers.tsx" || file==="components/legal-policy-page.tsx" || file==="lib/seo-localization.ts" || file==="app/sitemap.ts" || file==="public/llms.txt") ["/","/hi","/about","/hi/about","/faq"].forEach(add);
@@ -107,16 +102,26 @@ function changedDiscoveryRoutes(all) {
   return [...selected];
 }
 
+function getChangedFiles() {
+  const event=JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf8"));
+  if (event.deleted || event.forced || !/^[0-9a-f]{40}$/.test(event.before || "") || !/^[0-9a-f]{40}$/.test(event.after || "") || event.before === "0".repeat(40) || event.after !== process.env.GITHUB_SHA) throw new Error("INDEXNOW_CHANGE_SCOPE_UNKNOWN");
+  return execFileSync("git", ["diff","--name-only","--diff-filter=ACMR",event.before,event.after], {encoding:"utf8"}).trim().split("\n");
+}
+
 async function main() {
   const all = assertDiscoveryConfiguration();
   let urlList = all;
   if (process.argv.includes("--validate-only")) {
-    console.log("INDEXNOW_STATIC_CHECK=PASS;ROUTES=" + urlList.length);
+    assert.deepEqual(changedDiscoveryRoutes(all,["app/page.tsx"]),[ORIGIN+"/"]);
+    assert.deepEqual(changedDiscoveryRoutes(all,["app/hi/about/page.tsx"]),[ORIGIN+"/hi/about"]);
+    assert.deepEqual(changedDiscoveryRoutes(all,["app/admin/page.tsx","app/orders/page.tsx","README.md"]),[]);
+    assert.equal(changedDiscoveryRoutes(all,["lib/seo-brand.ts"]).length,5);
+    console.log("INDEXNOW_STATIC_CHECK=PASS;ROUTES=" + urlList.length + ";CHANGE_SCOPE=4/4_PASS");
     return;
   }
   if (process.env.GITHUB_REF !== "refs/heads/complete-production-polish")
     throw new Error("NOT_AUTHORIZED_PRODUCTION_BRANCH");
-  urlList = changedDiscoveryRoutes(all);
+  urlList = process.env.GITHUB_EVENT_NAME === "workflow_dispatch" ? all : changedDiscoveryRoutes(all, getChangedFiles());
   if (!urlList.length) { console.log("INDEXNOW_SKIPPED_NO_CHANGED_PUBLIC_ROUTES"); return; }
   await verifyExactProduction();
 

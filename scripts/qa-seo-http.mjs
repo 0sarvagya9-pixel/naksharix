@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 
 const base = (process.env.PLAYWRIGHT_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
 const canonical = (process.env.NEXT_PUBLIC_APP_URL || base).replace(/\/$/, "");
-const absolute = (path) => canonical + (path === "/" ? "" : path);
+const absolute = (path) => new URL(path, canonical + "/").toString();
 const pairs = [
   ["/", "/hi"],
   ["/free-kundli", "/hi/free-kundli"],

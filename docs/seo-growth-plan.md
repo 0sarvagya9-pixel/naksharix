@@ -98,3 +98,5 @@ Build a metadata inventory and route index/noindex table before adding more SEO 
 - Optional llms.txt is a curated public directory, NOT a ranking requirement or guarantee. Existing public crawler access remains; private endpoints stay protected. Do not expand model-training permission as a marketing tactic.
 - IndexNow selects changed allowlisted public routes from Git push diff, validates exact live release and key file/sitemap/indexability before notifying. Manual dispatch is separate. No repeated unchanged URL submissions on ordinary pushes.
 - No paid OpenSEO tracker/API calls. External authority, neutral AI answer tests, real organic rankings, native review and genuine external mentions remain ongoing outcomes; do not claim AI citations or purchases until measured.
+
+- Robots exclusions cover authenticated order and Puja booking history; public Shop and educational pages remain crawlable. Robots rules are not an access-control mechanism.
