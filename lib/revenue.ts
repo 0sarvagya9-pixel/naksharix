@@ -10,6 +10,7 @@ import {lockCreditAccount} from "@/lib/ai/credit-ledger";
 import {validatePackageCapture} from "@/lib/digital-packages/ledger";
 import {validateExpertCapture} from "@/lib/expert-services/ledger";
 import {isUnrefundedCapture} from "@/lib/payments/capture-evidence";
+import {lockProviderPayment,cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 
 export function getSubscriptionPlan(id: string) {
   return subscriptionPlans.find((plan) => plan.id === id);
@@ -59,11 +60,8 @@ function safeEqual(a: string, b: string) {
 export async function finalizePaidPayment(providerOrderId: string, providerPaymentId: string, metadata: Record<string, unknown> = {}) {
   const payment = await prisma.payment.findUnique({ where: { providerOrderId } });
   if (!payment) return null;
-  // A late captured webhook must never reopen a refunded/waived payment.
-  if (payment.status === PaymentStatus.PAID) {
-    return payment.providerPaymentId === providerPaymentId ? payment : null;
-  }
-  if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.FAILED) return null;
+  if(payment.provider!=="RAZORPAY")return null;
+  if (![PaymentStatus.PAID, PaymentStatus.PENDING, PaymentStatus.FAILED].some(status=>status===payment.status)) return null;
 
   const invoiceNumber = `NXR-${new Date().getFullYear()}-${payment.id.slice(-8).toUpperCase()}`;
   const md = (payment.metadata as Record<string, unknown> | null) ?? {};
@@ -77,6 +75,17 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
   const mergedMetadata = { ...existingMetadata, ...metadata } as Prisma.InputJsonObject;
 
   return prisma.$transaction(async (tx) => {
+    // Serialize with durable signed refund receipt insertion, even when a
+    // refund arrives before providerPaymentId has been linked to this row.
+    // READ COMMITTED below gives the receipt query a fresh snapshot after
+    // waiting for the advisory lock. The purpose-specific locks and
+    // conditional payment transition still serialize each entitlement.
+    await lockProviderPayment(tx,providerPaymentId);
+    if(await cumulativeSignedRefund(tx,providerPaymentId)>0)return null;
+    const currentPayment=await tx.payment.findUnique({where:{id:payment.id}});
+    if(!currentPayment||currentPayment.provider!=="RAZORPAY"||currentPayment.providerOrderId!==providerOrderId||!currentPayment.amount.equals(payment.amount)||currentPayment.currency!==payment.currency)return null;
+    if(currentPayment.status===PaymentStatus.PAID)return currentPayment.providerPaymentId===providerPaymentId?currentPayment:null;
+    if(currentPayment.status!==PaymentStatus.PENDING&&currentPayment.status!==PaymentStatus.FAILED)return null;
     const expertOrder=payment.purpose==="EXPERT_SERVICE"?await validateExpertCapture(tx,payment,metadata.gatewayStatus):null;
     const packageOrderId=payment.purpose==="DIGITAL_PACKAGE"?await validatePackageCapture(tx,payment,metadata.gatewayStatus):null;
     const credit=payment.purpose==="AI_CREDITS"?creditSnapshot(payment.metadata,Math.round(Number(payment.amount)*100),payment.currency):null;
@@ -157,7 +166,7 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
     }
 
     return paid;
-  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }, { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted });
 }
 
 function reportTitle(purpose: PaymentPurpose) {
