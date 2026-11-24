@@ -13,6 +13,8 @@ import { useLanguage } from "@/components/language-provider";
 import { secureFetch } from "@/lib/security/csrf";
 import { errorClass, scrollToFirstError } from "@/lib/form-validation";
 import { cn } from "@/lib/utils";
+import {RazorpayCheckoutButton} from "@/components/razorpay-checkout-button";
+import Link from "next/link";
 
 type Props = {
   userEmail: string;
@@ -23,6 +25,7 @@ type Props = {
   paymentVerified?: boolean;
   automaticDelivery?: boolean;
   adminBypass?: boolean;
+  preflight?:{reportId:string;purpose:"KUNDLI_REPORT"|"YEARLY_REPORT"|"MATCH_REPORT";price:string};
 };
 
 type Errors = Partial<Record<"fullName" | "dateOfBirth" | "timeOfBirth" | "birthPlace" | "concern", string>>;
@@ -35,7 +38,8 @@ export function ReportRequestForm({
   reportName = "Premium Astrology Report",
   paymentVerified = false,
   automaticDelivery = false,
-  adminBypass = false
+  adminBypass = false,
+  preflight
 }: Props) {
   const router = useRouter();
   const { tr, apiLocale, requiredMessage } = useLanguage();
@@ -51,6 +55,8 @@ export function ReportRequestForm({
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prepared,setPrepared]=useState<{token:string;details:Record<string,unknown>}|null>(null);
+  const [capturedId,setCapturedId]=useState<string|null>(null);
   const [offset,setOffset]=useState("");
   const [partnerName,setPartnerName]=useState("");
   const [partnerGender,setPartnerGender]=useState("");
@@ -93,52 +99,44 @@ export function ReportRequestForm({
     return Object.keys(next).length === 0;
   }
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (loading || !validate()) return;
-    setStatus(null);
-    if(automaticDelivery){
-      const checked=checkAutomaticInputs(reportSlug,{name:fullName,gender,dateOfBirth,timeOfBirth,birthPlace:location?.displayName??birthPlace,latitude:location?.latitude,longitude:location?.longitude,timezone:primaryOffset()},autoDetails());
-      if(!checked.ok){setStatus(checked.reason);return;}
-    }
-    setLoading(true);
-    try {
-
-    const response = await secureFetch("/api/report-requests", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderId,
-        planType: plan,
-        reportSlug,
-        adminBypass,
-        deliveryEmail: userEmail,
-        fullName,
-        gender,
-        dateOfBirth,
-        timeOfBirth,
-        birthPlace: location?.displayName ?? birthPlace,
-        latitude: location?.latitude,
-        longitude: location?.longitude,
-        timezone: primaryOffset(),
-        phone,
-        concern,
-        questionOrConcern: concern,
-        language,
-        automaticDetails: automaticDelivery ? autoDetails() : undefined
-      })
-    });
-    const json = await response.json().catch(() => null);
-    if (!response.ok) {
-      setStatus(json?.error ?? tr("errorGeneric"));
-      return;
-    }
-    if(!json?.data?.reportRequest?.id){setStatus("Request could not be confirmed. Check your account before retrying.");return;}
+  async function savePaidDetails(details:Record<string,unknown>,verifiedOrderId?:string){
+    const response=await secureFetch("/api/report-requests",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...details,...(verifiedOrderId?{orderId:verifiedOrderId}:{})})});
+    const json=await response.json().catch(()=>null);
+    if(!response.ok||!json?.data?.reportRequest?.id){setStatus(json?.error??"Request could not be confirmed. Check Payment History before retrying.");return false;}
     if(json.data.automaticQueued)siteNotice.success(autoReportDeliveryMessage(language),"Report request received");
-    router.push(`/report-request/success?id=${json.data.reportRequest.id}`);
-    }catch{setStatus("Connection interrupted. Your payment remains in Payment History; retry the details without paying again.");}
+    router.push(`/report-request/success?id=${encodeURIComponent(json.data.reportRequest.id)}`);
+    return true;
+  }
+  async function submit(event:React.FormEvent<HTMLFormElement>){
+    event.preventDefault();
+    if(loading||!validate())return;
+    setStatus(null);
+    const birth={name:fullName,gender,dateOfBirth,timeOfBirth,birthPlace:location?.displayName??birthPlace,latitude:location?.latitude,longitude:location?.longitude,timezone:primaryOffset()};
+    const automaticDetails=automaticDelivery?autoDetails():undefined;
+    if(automaticDelivery){const checked=checkAutomaticInputs(reportSlug,birth,automaticDetails);if(!checked.ok){setStatus(checked.reason);return;}}
+    const details={orderId,planType:plan,reportSlug,adminBypass,deliveryEmail:userEmail,fullName,gender,dateOfBirth,timeOfBirth,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,phone,concern,questionOrConcern:concern,language,automaticDetails};
+    setLoading(true);
+    try{
+      if(preflight){
+        const response=await secureFetch("/api/report-requests/preflight",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reportSlug,deliveryEmail:userEmail,birth,automaticDetails,concern})});
+        const json=await response.json().catch(()=>null);
+        if(!response.ok||typeof json?.data?.token!=="string"){setStatus(json?.error??"Unable to validate details. No payment was started.");return;}
+        setPrepared({token:json.data.token,details});return;
+      }
+      await savePaidDetails(details);
+    }catch{setStatus(preflight?"Unable to validate details. No payment was started.":"Connection interrupted. Check Payment History; do not pay again.");}
     finally{setLoading(false);}
   }
+  if(preflight&&prepared)return (
+    <section className="space-y-4 rounded-xl border border-[#D4AF37]/30 p-5">
+      <h2 className="font-cinzel text-xl font-bold">{capturedId?"Payment verified":"Details validated - review payment"}</h2>
+      <p>{reportName} · {preflight.price}</p>
+      <p className="text-sm">The validated details are kept only in this open page until payment is verified. If the page closes after payment, finish your report from Payment History without paying again.</p>
+      {!capturedId?<><RazorpayCheckoutButton payload={{purpose:preflight.purpose,reportId:preflight.reportId,preflightToken:prepared.token}} label={`Pay ${preflight.price}`} onVerified={async id=>{setCapturedId(id);setLoading(true);setStatus(null);try{await savePaidDetails(prepared.details,id);}catch{setStatus("Payment verified, report submission interrupted. Continue from Payment History.");}finally{setLoading(false);}}}/><p className="text-xs">Validation is valid for 20 minutes. If expired, reload this page and validate again. If money has been deducted, check Payment History first.</p></>:<Button type="button" disabled={loading} onClick={async()=>{if(!capturedId)return;setLoading(true);try{await savePaidDetails(prepared.details,capturedId);}catch{setStatus("Report details could not be confirmed. Continue from Payment History.");}finally{setLoading(false);}}}>{loading?"Saving report details...":"Retry report submission - no new payment"}</Button>}
+      {status?<p role="alert" className="text-sm text-destructive">{status}</p>:null}
+      <Link className="inline-block underline" href="/dashboard">Open Payment History</Link>
+    </section>
+  );
 
   return (
     <form onSubmit={submit} className="space-y-5">
@@ -163,7 +161,7 @@ export function ReportRequestForm({
                 ? automaticDelivery ? autoReportDeliveryMessage(language) : "Razorpay payment has been verified. This request will be linked to the paid order."
                 : adminBypass
                   ? tr("adminTestingModePaymentBypassed")
-                  : "This is a manual-review request. No payment is collected at this stage."}
+                  : preflight?"Your details will be validated first. No payment is collected by this form.":"This is a manual-review request. No payment is collected at this stage."}
             </span>
           </div>
         </div>
@@ -235,7 +233,7 @@ export function ReportRequestForm({
       {automaticDelivery&&<label className="flex items-start gap-3 rounded-lg border border-[#D4AF37]/30 p-4 text-sm"><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)} className="mt-1"/>I confirm these birth details and birth-time UTC offsets are accurate. I request the private report to be generated and the secure PDF access link to be emailed to my registered account.</label>}
       {status ? <p className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" aria-live="polite">{status}</p> : null}
       <Button type="submit" disabled={loading} className="w-full md:w-auto">
-        {loading ? tr("submittingReportRequest") : automaticDelivery ? "Generate my report" : tr("submitReportRequest")}
+        {loading ? tr("submittingReportRequest") : preflight ? "Validate details and continue" : automaticDelivery ? "Generate my report" : tr("submitReportRequest")}
       </Button>
     </form>
   );

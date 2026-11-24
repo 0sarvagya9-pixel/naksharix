@@ -11,6 +11,7 @@ import { useLanguage } from "@/components/language-provider";
 import { canBypassPayment } from "@/lib/auth/permissions";
 import { PUJA_FEE_NOTICE_EN, PUJA_FEE_NOTICE_HI, PUJA_FEE_TERMS_VERSION } from "@/lib/puja/fee-terms";
 import Link from "next/link";
+import {getReportSlugForPaidId} from "@/lib/reports/checkout-catalogue";
 
 type CheckoutPayload =
   | { purpose: "SUBSCRIPTION"; plan: "PREMIUM" | "VIP" }
@@ -19,6 +20,7 @@ type CheckoutPayload =
       reportId: string;
       savedReportId?: string;
       reportRequestId?: string;
+      preflightToken?: string;
     }
   | { purpose: "PUJA_BOOKING"; bookingId: string }
   | { purpose: "SHOP_ORDER"; shopOrderId: string; expectedTotalPaise?: number; expectedOrderVersion?: number; shippingTermsVersion?: string };
@@ -44,6 +46,7 @@ type Props = {
   variant?: ButtonProps["variant"];
   successHref?: string;
   adminBypassHref?: string;
+  onVerified?: (paymentId:string)=>void|Promise<void>;
 };
 
 export function RazorpayCheckoutButton({
@@ -51,7 +54,8 @@ export function RazorpayCheckoutButton({
   label = "Pay with Razorpay",
   variant = "default",
   successHref,
-  adminBypassHref
+  adminBypassHref,
+  onVerified
 }: Props) {
   const { tr } = useLanguage();
   const router = useRouter();
@@ -85,6 +89,11 @@ export function RazorpayCheckoutButton({
       siteNotice.info("Admin mode skipped a charge. No payment has been collected.", "Admin testing mode");
       router.push(adminBypassHref ?? getAdminBypassTarget(payload));
       return;
+    }
+
+    if("reportId" in payload&&!payload.reportRequestId&&!payload.savedReportId&&!payload.preflightToken){
+      const slug=getReportSlugForPaidId(payload.reportId);
+      if(slug){setLoading(false);router.push(`/report-request/new?reportSlug=${encodeURIComponent(slug)}&prepare=1`);return;}
     }
 
     const scriptLoaded = await loadRazorpayScript();
@@ -153,7 +162,9 @@ export function RazorpayCheckoutButton({
           setStatus(tr("paymentVerified"));
           siteNotice.success("Your payment has been verified. Check the booking/order history for fulfilment status.", "Payment verified");
           const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
-          if (target) router.push(target);
+          if(onVerified){
+            try{await onVerified(paymentId);}catch{setStatus("Payment is verified. Complete your report from Payment History; do not pay again.");}
+          }else if (target) router.push(target);
           else router.refresh();
         } catch {
           setStatus("Payment confirmation could not be checked. Check payment history before trying again; do not pay twice.");

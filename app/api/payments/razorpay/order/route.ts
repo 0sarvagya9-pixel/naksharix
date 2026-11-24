@@ -16,15 +16,17 @@ import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-au
 import { getReportPricing } from "@/lib/reports/pricing";
 import { getSubscriptionPlan, finalizePaidPayment } from "@/lib/revenue";
 import { checkExistingReportOrder } from "@/lib/payments/report-order-recovery";
+import { getReportSlugForPaidId } from "@/lib/reports/checkout-catalogue";
+import { verifyReportPreflight } from "@/lib/reports/preflight-contract";
 import { googleSessionSchema, liveRazorpayAnalyticsOrder, sendGoogleCheckout } from "@/lib/analytics/google";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 import { shippingPayable,SHIPPING_TERMS_VERSION,readShippingSnapshot } from "@/lib/shop/shipping-rules";
 
 const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
-  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
-  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
-  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
   z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) }),
   z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1), feeTermsVersion: z.literal(PUJA_FEE_TERMS_VERSION) }),
   z.object({ purpose: z.literal("SHOP_ORDER"), shopOrderId: z.string().min(1), expectedTotalPaise:z.number().int().positive().max(1000000000).optional(),expectedOrderVersion:z.number().int().positive().optional(),shippingTermsVersion:z.literal(SHIPPING_TERMS_VERSION).optional() }).strict()
@@ -52,6 +54,7 @@ export async function POST(request: NextRequest) {
     if (!item) return fail("Invalid or completed checkout item", 422);
     const reportRequestId = "reportRequestId" in body ? body.reportRequestId : undefined;
     const savedReportId = "savedReportId" in body ? body.savedReportId : undefined;
+    if("reportId" in body && !reportRequestId && !savedReportId && getReportSlugForPaidId(body.reportId) && !verifyReportPreflight(body.preflightToken,{userId:user.id,reportId:body.reportId,purpose:body.purpose,amountPaise:Math.round(item.amount*100)},env.JWT_SECRET))return fail("Complete and validate your report details before starting payment.",422);
 
     if (savedReportId) {
       const alreadyPaid = await prisma.payment.findFirst({

@@ -14,7 +14,7 @@ import { cookies } from "next/headers";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
 
-type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string; reportSlug?: string }>;
+type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string; reportSlug?: string; prepare?: string }>;
 
 export default async function NewReportRequestPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
@@ -24,6 +24,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     if(params.orderId)query.set("orderId",params.orderId);
     if(params.reportSlug)query.set("reportSlug",params.reportSlug);
     if(params.plan)query.set("plan",params.plan);
+    if(params.prepare==="1")query.set("prepare","1");
     redirect("/login?redirectTo="+encodeURIComponent("/report-request/new?"+query.toString()));
   }
   const locale = await readLocale();
@@ -37,10 +38,11 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
   if (!report) redirect("/reports");
 
   const checkout = getManualReportCheckout(report.slug);
+  const preparing=Boolean(checkout&&params.prepare==="1"&&!params.orderId&&!adminMode&&!isAdmin);
   let paymentVerified = false;
   let plan: "PREMIUM" | "VIP" = params.plan?.toLowerCase() === "vip" ? "VIP" : "PREMIUM";
 
-  if (!adminMode && checkout) {
+  if (!adminMode && checkout && !preparing) {
     if (!params.orderId) redirect(`/reports/${report.slug}?checkout=required`);
 
     const payment = await prisma.payment.findUnique({ where: { id: params.orderId } });
@@ -66,14 +68,14 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     redirect(`/reports/${report.slug}`);
   }
 
-  const automaticDelivery=paymentVerified&&env.AUTO_REPORT_DELIVERY_ENABLED==="true";
+  const automaticDelivery=(paymentVerified&&env.AUTO_REPORT_DELIVERY_ENABLED==="true")||preparing;
   return (
     <Section className="max-w-4xl">
       <Card className="glass overflow-visible border-[#D4AF37]/25">
         <CardHeader>
           <CardTitle className="font-cinzel text-3xl">{safeServerTranslation(locale, "reportRequestDetails")}</CardTitle>
           <p className="text-sm naksh-muted-text">
-            {paymentVerified
+            {preparing?"Complete the required details before payment. Your information will not be added to payment metadata.":paymentVerified
               ? automaticDelivery ? autoReportDeliveryMessage(locale) : "Payment is verified. Submit accurate birth details to create the paid report request."
               : "Submit accurate birth details for manual review. No payment is collected for this review-only request."}
           </p>
@@ -88,6 +90,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
             paymentVerified={paymentVerified}
             automaticDelivery={automaticDelivery}
             adminBypass={adminMode && isAdmin}
+            preflight={preparing&&checkout?{reportId:checkout.reportId,purpose:checkout.purpose,price:checkout.price}:undefined}
           />
         </CardContent>
       </Card>

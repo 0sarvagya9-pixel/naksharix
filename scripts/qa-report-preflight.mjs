@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import {issueReportPreflight,verifyReportPreflight,REPORT_PREFLIGHT_TTL_MS} from "../lib/reports/preflight-contract.ts";
+const id={userId:"sample",reportId:"kundli-pro",purpose:"KUNDLI_REPORT",amountPaise:79900};
+const now=1000000,secret="isolated-qa-secret-never-used-in-production";
+const token=issueReportPreflight(id,secret,now);
+assert.ok(verifyReportPreflight(token,id,secret,now));
+for(const wrong of [{...id,userId:"other"},{...id,reportId:"other"},{...id,purpose:"MATCH_REPORT"},{...id,amountPaise:1}])assert.equal(verifyReportPreflight(token,wrong,secret,now),false);
+assert.equal(verifyReportPreflight(token,id,secret,now+REPORT_PREFLIGHT_TTL_MS),false);
+assert.equal(verifyReportPreflight(token,id,"wrong-secret",now),false);
+assert.equal(verifyReportPreflight(token+"x",id,secret,now),false);
+assert.equal(verifyReportPreflight(undefined,id,secret,now),false);
+const claim=JSON.parse(Buffer.from(token.split(".")[0],"base64url").toString());
+assert.deepEqual(Object.keys(claim).sort(),["amountPaise","exp","purpose","reportId","userId","v"]);
+console.log("REPORT_PREFLIGHT_CONTRACT_PASS; no customer data or payment access");
