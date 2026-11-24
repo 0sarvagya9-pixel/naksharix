@@ -5,7 +5,10 @@ export const publishedSeoPairs = [
   { en: "/", hi: "/hi" },
   { en: "/free-kundli", hi: "/hi/free-kundli" },
   { en: "/kundli-matching", hi: "/hi/kundli-milan" },
-  { en: "/about", hi: "/hi/about" }
+  { en: "/about", hi: "/hi/about" },
+  { en: "/kumbh-mela-2027", hi: "/hi/kumbh-mela-2027" },
+  { en: "/festival-calendar", hi: "/hi/festival-calendar" },
+  { en: "/grahan-2027", hi: "/hi/grahan-2027" }
 ] as const;
 
 /** Expansion inventory; these are NOT published or advertised language pages. */

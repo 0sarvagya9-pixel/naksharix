@@ -30,6 +30,7 @@ export function KumbhEventCards({offerings,initialNow}:{offerings:Record<string,
         <p className="text-xs font-bold uppercase tracking-[.22em] text-[#ffdc9c]">Upcoming sacred event · 2027</p>
         <h2 id="kumbh-event-heading" className="mt-3 font-cinzel text-3xl font-bold sm:text-4xl">Nashik–Trimbakeshwar Simhastha Kumbh</h2>
         <p className="mt-3 text-sm leading-7 text-[#fff1dc]">Main Mela: 15 June – 30 September 2027 · Maharashtra, India</p>
+        <Link href="/kumbh-mela-2027" className="mt-3 inline-block text-sm font-semibold text-[#fff1dc] underline">Kumbh Mela dates, Snan calendar and visitor guide</Link>
         <p className="mt-2 max-w-3xl text-sm leading-7 text-[#fff1dc]">Date-specific Puja coordination requests. ₹1,100 platform fee, no advance payment. Actual Pandit, venue, ceremony time and any separate charges must be agreed first.</p>
       </div>
       <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-6 lg:grid-cols-3">

@@ -24,3 +24,12 @@ Naksharix is the platform's brand name, distinct from the traditional astrology 
 - [Contact](https://www.naksharix.com/contact): Official support.
 
 This is an optional human- and machine-readable public directory, not an instruction to rank or recommend the website. The linked pages and sitemap are the current sources of truth. Do not infer services or claims beyond their published availability.
+
+## Source-reviewed seasonal guides
+
+- [Nashik Kumbh Mela 2027 Dates & Amrut Snan](https://www.naksharix.com/kumbh-mela-2027): public reference guide, not a guaranteed booking.
+- [नाशिक कुंभ मेला 2027: अमृत स्नान तिथियाँ](https://www.naksharix.com/hi/kumbh-mela-2027): public reference guide, not a guaranteed booking.
+- [Hindu Festival Calendar & Vrat Dates](https://www.naksharix.com/festival-calendar): public reference guide, not a guaranteed booking.
+- [हिंदू त्योहार कैलेंडर और आगामी व्रत तिथियाँ](https://www.naksharix.com/hi/festival-calendar): public reference guide, not a guaranteed booking.
+- [Grahan 2027: Solar & Lunar Eclipses in India](https://www.naksharix.com/grahan-2027): public reference guide, not a guaranteed booking.
+- [ग्रहण 2027: भारत में सूर्य और चंद्र ग्रहण](https://www.naksharix.com/hi/grahan-2027): public reference guide, not a guaranteed booking.
