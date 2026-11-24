@@ -26,7 +26,7 @@ export function publishedSeoAlternates(path: string, siteUrl: string): Record<st
   const pair = publishedSeoPairs.find((item) => item.en === path || item.hi === path);
   if (!pair) return undefined;
   const origin = siteUrl.replace(/\/+$/, "");
-  return { en: origin + pair.en, hi: origin + pair.hi, "x-default": origin + pair.en };
+  return { en: new URL(pair.en, origin).href, hi: new URL(pair.hi, origin).href, "x-default": new URL(pair.en, origin).href };
 }
 
 export function publishedDestinationForLocale(path: string, locale: "en" | "hi" | "hinglish"): string | undefined {

@@ -13,6 +13,14 @@ const nativeGuides = ["en", "hi", "mr", "bn", "es", "fr"];
 const approvedGuides = ["en", "hi"];
 const guidePath = (language) => language === "en" ? "/learn/kundli-explained" : "/" + language + "/learn/kundli-explained";
 const langValue = (tag, code) => new RegExp('\\bhrefLang="' + code + '"', "i").test(tag);
+// Next metadata serializes a root alternate as the bare origin in some builds.
+// Normalize absolute URL syntax, not host, scheme, path or language.
+function hrefMatches(tag, path) {
+  const href=tag.match(/\bhref="([^"]+)"/i)?.[1];
+  if(!href) return false;
+  try { return new URL(href).href === absolute(path); } catch { return false; }
+}
+
 
 for (const [en, hi] of pairs) {
   for (const [path, locale] of [[en, "en"], [hi, "hi"]]) {
@@ -26,10 +34,12 @@ for (const [en, hi] of pairs) {
     assert.equal(foundHtml[1], locale, "SSR HTML language not tied to URL: " + path);
     const links = [...html.matchAll(/<link\b[^>]*\brel="alternate"[^>]*>/gi)].map((m) => m[0]);
     for (const [code, target] of [["en", en], ["hi", hi], ["x-default", en]]) {
-      assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + absolute(target) + '"')),
+      assert.ok(links.some((tag) => langValue(tag, code) && hrefMatches(tag,target)),
         "Missing reciprocal " + code + " hreflang on " + path);
     }
-    assert.ok(html.includes('href="' + absolute(path) + '"'), "Self canonical missing: " + path);
+    const canonicals=[...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/gi)].map(m=>m[0]);
+    assert.equal(canonicals.length,1,"Expected one canonical: "+path);
+    assert.ok(hrefMatches(canonicals[0],path),"Incorrect self canonical: "+path);
   }
 }
 for (const locale of nativeGuides) {
@@ -42,7 +52,7 @@ for (const locale of nativeGuides) {
   const links = [...html.matchAll(/<link\b[^>]*\brel="alternate"[^>]*>/gi)].map((x) => x[0]);
   if (approvedGuides.includes(locale)) {
     for (const code of approvedGuides) {
-      assert.ok(links.some((tag) => langValue(tag, code) && tag.includes('href="' + absolute(guidePath(code)) + '"')),
+      assert.ok(links.some((tag) => langValue(tag, code) && hrefMatches(tag,guidePath(code))),
         "Missing reciprocal approved guide hreflang " + locale + " to " + code);
     }
   } else {

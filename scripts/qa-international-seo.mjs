@@ -175,7 +175,7 @@ assert.ok(!indexNow.includes("process.env.DATABASE_URL") &&
   "Search-discovery task must not read database, payment or ads configuration");
 console.log("INDEXNOW_STATIC_DISCOVERY=PASS;HOST_KEY_PUBLIC=YES;PRODUCTION_ONLY=YES;PRIVATE_URLS=NO");
 
-console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=3;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
+console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=4;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
 
 
 // Conversion from public tools remains voluntary, and public report sharing
