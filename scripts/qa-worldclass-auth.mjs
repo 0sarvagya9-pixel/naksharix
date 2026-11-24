@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import {createResetToken,validResetToken,passwordResetDigest,resetRoleEligible,resetSessionIsStale} from "../lib/auth/password-reset-contract.ts";
+const tokens=Array.from({length:100},()=>createResetToken());
+assert.equal(new Set(tokens).size,100);assert.ok(tokens.every(validResetToken));
+assert.equal(validResetToken("000000"),false);
+assert.throws(()=>passwordResetDigest(tokens[0],"short"));
+const secret="development-only-secret-for-test-123456789";
+assert.equal(passwordResetDigest(tokens[0],secret),passwordResetDigest(tokens[0],secret));
+assert.notEqual(passwordResetDigest(tokens[0],secret),passwordResetDigest(tokens[1],secret));
+assert.ok(["USER","ASTROLOGER","CONSULTANT"].every(resetRoleEligible));
+assert.ok(["ADMIN","SUPER_ADMIN","MODERATOR"].every(x=>!resetRoleEligible(x)));
+assert.equal(resetSessionIsStale(100,101),true);
+assert.equal(resetSessionIsStale(101,101),true);
+assert.equal(resetSessionIsStale(102,101),false);
+assert.equal(resetSessionIsStale(NaN,101),true);
+console.log("WORLDCLASS_PASSWORD_RESET_CONTRACT=PASS;100_UNIQUE_TOKENS;ROLE_AND_SESSION_GUARDS");

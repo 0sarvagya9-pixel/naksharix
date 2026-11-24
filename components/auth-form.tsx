@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { BriefcaseBusiness, Chrome, UserRound } from "lucide-react";
 import { useForm, type Resolver, type FieldErrors } from "react-hook-form";
@@ -206,7 +207,8 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
           <button type="button" aria-controls="password" aria-pressed={passwordVisible} className="text-sm font-medium underline" onClick={()=>setPasswordVisible(v=>!v)}>{passwordVisible?(apiLocale==="hi"?"पासवर्ड छिपाएँ":apiLocale==="hinglish"?"Password hide karein":"Hide password"):(apiLocale==="hi"?"पासवर्ड दिखाएँ":apiLocale==="hinglish"?"Password dikhayein":"Show password")}</button>
           {fieldError("password") ? <p className="text-sm text-destructive">{fieldError("password")}</p> : null}
         </div>
-        {error ? <p className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">{error}</p> : null}
+        {mode==="login"?<Link href="/forgot-password" className="inline-block text-sm font-semibold underline">{apiLocale==="hi"?"पासवर्ड भूल गए?":apiLocale==="hinglish"?"Password bhool gaye?":"Forgot password?"}</Link>:null}
+        {error ? <p role="alert" className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">{error}</p> : null}
         <Button className="w-full" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? tr("pleaseWait") : mode === "signup" ? roleIntent === "USER" ? tr("createUserAccount") : tr("createProAccount") : tr("login")}
         </Button>

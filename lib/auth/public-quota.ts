@@ -9,6 +9,7 @@ export type AuthQuotaScope =
   | "signup-ip" | "login-ip"
   | "otp-request-ip" | "otp-request-destination"
   | "otp-verify-ip" | "otp-verify-destination"
+  | "password-reset-request-ip" | "password-reset-request-destination" | "password-reset-confirm-ip"
   | "mobile-link-start-ip" | "mobile-link-poll-ip" | "mobile-profile-update-ip";
 
 export function trustedPublicClientIp(request: Request): string {

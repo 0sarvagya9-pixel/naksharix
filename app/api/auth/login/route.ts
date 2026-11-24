@@ -6,7 +6,7 @@ import { loginSchema } from "@/lib/validations/auth";
 import { verifyPassword } from "@/lib/auth/password";
 import { setAuthCookie } from "@/lib/auth/jwt";
 import { claimPublicAuthQuota, trustedPublicClientIp } from "@/lib/auth/public-quota";
-import { createSession } from "@/lib/auth/session";
+import { createSession, revokeSession } from "@/lib/auth/session";
 import { env } from "@/lib/env";
 import type { EffectiveRole } from "@/lib/auth/token";
 
@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
     }
     const effectiveRole: EffectiveRole = user.role === "ASTROLOGER" ? "ASTROLOGER" : user.role === "CONSULTANT" ? "CONSULTANT" : "USER";
     const token = await createSession({ id: user.id, email: user.email, name: user.name, role: user.role, effectiveRole, isAdminLogin: false, canBypassPayment: false }, request);
+    // If a password reset raced the bcrypt check, revoke this newly issued
+    // session rather than allowing a verified old credential to survive reset.
+    const currentPassword=await prisma.user.findUnique({where:{id:user.id},select:{passwordHash:true}});
+    if(!currentPassword||currentPassword.passwordHash!==user.passwordHash){await revokeSession(token);return fail("Credentials changed. Sign in again.",401);}
     await setAuthCookie(token);
     if (process.env.NODE_ENV === "development") {
       console.info("[Naksharix login success]", { selectedMode: body.roleIntent, loginMode, role: user.role, effectiveRole });
