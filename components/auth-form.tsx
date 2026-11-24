@@ -30,6 +30,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
   const router = useRouter();
   const { tr, apiLocale, requiredMessage } = useLanguage();
   const [error, setError] = useState<string | null>(null);
+  const [passwordVisible,setPasswordVisible]=useState(false);
   const [roleIntent, setRoleIntent] = useState<RoleIntent>(loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER");
   const [professionalRole, setProfessionalRole] = useState<"ASTROLOGER" | "CONSULTANT">("ASTROLOGER");
   const schema = mode === "signup" ? signupSchema : loginSchema;
@@ -43,6 +44,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       chooseRole(loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER");
       return;
     }
+    if(mode==="signup" && new URLSearchParams(window.location.search).get("role")==="professional"){chooseRole("ASTROLOGER");return;}
     const saved = window.localStorage.getItem("naksharix-role-intent");
     if (saved === "USER" || saved === "ASTROLOGER") chooseRole(saved);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,6 +79,9 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     if (process.env.NODE_ENV === "development") {
       console.info("[Naksharix login]", { selectedMode: roleIntent, loginMode: selectedLoginMode });
     }
+    const params=new URLSearchParams(window.location.search);
+    const resume=safeInternalAuthPath(params.get("redirectTo")??params.get("next"));
+    const preserveVerificationDestination=()=>{if(resume)window.sessionStorage.setItem("naksharix-verification-return",resume);else window.sessionStorage.removeItem("naksharix-verification-return");};
     const response = await secureFetch(`/api/auth/${mode}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,6 +94,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         result.details?.code === "EMAIL_VERIFICATION_REQUIRED"
       ) {
         window.sessionStorage.setItem("naksharix-pending-email", values.email);
+        preserveVerificationDestination();
         router.push("/verify-email");
         return;
       }
@@ -105,7 +111,8 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         "naksharix-otp-delivery-sent",
         result.data?.deliverySent ? "true" : "false"
       );
-      router.push("/verify-email");
+      preserveVerificationDestination();
+        router.push("/verify-email");
       return;
     }
 
@@ -135,7 +142,8 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     if (process.env.NODE_ENV === "development") {
       console.info("[Naksharix Google login]", { selectedMode: roleIntent, loginMode: selectedLoginMode });
     }
-    const redirectTo = safeInternalAuthPath(new URLSearchParams(window.location.search).get("redirectTo"));
+    const params=new URLSearchParams(window.location.search);
+    const redirectTo = safeInternalAuthPath(params.get("redirectTo")??params.get("next"));
     const resume = redirectTo ? "&redirectTo=" + encodeURIComponent(redirectTo) : "";
     signIn("google", { callbackUrl: `/auth/google-complete?role=${selectedLoginMode}${resume}` });
   }
@@ -189,12 +197,13 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         {mode === "signup" ? <input type="hidden" {...form.register("locale")} value={apiLocale} readOnly /> : null}
         <div className="space-y-2">
           <Label htmlFor="email">{tr("email")}</Label>
-          <Input id="email" data-field="email" type="email" className={errorClass(Boolean(fieldError("email")))} {...form.register("email", { onChange: () => form.clearErrors("email") })} placeholder="you@example.com" aria-invalid={Boolean(fieldError("email"))} />
+          <Input id="email" data-field="email" type="email" autoComplete="email" className={errorClass(Boolean(fieldError("email")))} {...form.register("email", { onChange: () => form.clearErrors("email") })} placeholder="you@example.com" aria-invalid={Boolean(fieldError("email"))} />
           {fieldError("email") ? <p className="text-sm text-destructive">{fieldError("email")}</p> : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">{tr("password")}</Label>
-          <Input id="password" data-field="password" type="password" className={errorClass(Boolean(fieldError("password")))} {...form.register("password", { onChange: () => form.clearErrors("password") })} placeholder={tr("minimumPassword")} aria-invalid={Boolean(fieldError("password"))} />
+          <Input id="password" data-field="password" type={passwordVisible?"text":"password"} autoComplete={mode==="signup"?"new-password":"current-password"} className={errorClass(Boolean(fieldError("password")))} {...form.register("password", { onChange: () => form.clearErrors("password") })} placeholder={tr("minimumPassword")} aria-invalid={Boolean(fieldError("password"))} />
+          <button type="button" aria-controls="password" aria-pressed={passwordVisible} className="text-sm font-medium underline" onClick={()=>setPasswordVisible(v=>!v)}>{passwordVisible?(apiLocale==="hi"?"पासवर्ड छिपाएँ":apiLocale==="hinglish"?"Password hide karein":"Hide password"):(apiLocale==="hi"?"पासवर्ड दिखाएँ":apiLocale==="hinglish"?"Password dikhayein":"Show password")}</button>
           {fieldError("password") ? <p className="text-sm text-destructive">{fieldError("password")}</p> : null}
         </div>
         {error ? <p className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">{error}</p> : null}

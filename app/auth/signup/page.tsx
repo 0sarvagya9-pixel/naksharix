@@ -19,7 +19,7 @@ export default function SignupPage() {
     <Section className="max-w-md">
       <Card className="glass">
         <CardHeader>
-          <CardTitle className="font-cinzel">Create your Naksharix account</CardTitle>
+          <CardTitle as="h1" className="font-cinzel">Create your Naksharix account</CardTitle>
         </CardHeader>
         <CardContent>
           <AuthForm mode="signup" googleEnabled={googleEnabled} />

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { secureFetch } from "@/lib/security/csrf";
+import { safeInternalAuthPath } from "@/lib/auth/safe-redirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,7 +93,9 @@ export function EmailVerificationForm() {
       window.sessionStorage.removeItem("naksharix-pending-email");
       window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
 
-      router.push(landingPath(result.data?.user?.effectiveRole));
+      const resume=safeInternalAuthPath(window.sessionStorage.getItem("naksharix-verification-return"));
+      window.sessionStorage.removeItem("naksharix-verification-return");
+      router.push(resume??landingPath(result.data?.user?.effectiveRole));
       router.refresh();
     } catch {
       setError("Verification could not be completed. Please try again.");

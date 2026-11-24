@@ -19,7 +19,7 @@ export default function LoginPage() {
     <Section className="max-w-md">
       <Card className="glass">
         <CardHeader>
-          <CardTitle className="font-cinzel">Sign in to Naksharix</CardTitle>
+          <CardTitle as="h1" className="font-cinzel">Sign in to Naksharix</CardTitle>
         </CardHeader>
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} />

@@ -14,25 +14,17 @@ export async function POST(request: NextRequest) {
         if (user.role !== "USER" || user.isAdminLogin) return fail("This action is available for user accounts only", 403);
     const body = await validateJson(request, schema);
     const nextRole = body.role;
-    const updatedUser = await prisma.user.update({
-      where: { id: user.id },
-      data: { role: nextRole },
-      select: { id: true, email: true, name: true, role: true }
+    const updatedUser = await prisma.$transaction(async tx=>{
+      const current=await tx.user.findUnique({where:{id:user.id},select:{role:true,emailVerified:true,emailVerifiedAt:true}});
+      if(!current||current.role!=="USER"||(!current.emailVerified&&!current.emailVerifiedAt))return null;
+      const claim=await tx.user.updateMany({where:{id:user.id,role:"USER"},data:{role:nextRole}});
+      if(claim.count!==1)return null;
+      const profile={userId:user.id,displayName:user.name||user.email,bio:"",status:"PENDING_REVIEW" as const};
+      if(nextRole==="ASTROLOGER")await tx.astrologerProfile.upsert({where:{userId:user.id},create:profile,update:{status:"PENDING_REVIEW"}});
+      else await tx.consultantProfile.upsert({where:{userId:user.id},create:profile,update:{status:"PENDING_REVIEW"}});
+      return tx.user.findUniqueOrThrow({where:{id:user.id},select:{id:true,email:true,name:true,role:true}});
     });
-
-    if (nextRole === "ASTROLOGER") {
-      await prisma.astrologerProfile.upsert({
-        where: { userId: user.id },
-        create: { userId: user.id, displayName: user.name || user.email, bio: "", status: "PENDING_REVIEW" },
-        update: { status: "PENDING_REVIEW" }
-      });
-    } else {
-      await prisma.consultantProfile.upsert({
-        where: { userId: user.id },
-        create: { userId: user.id, displayName: user.name || user.email, bio: "", status: "PENDING_REVIEW" },
-        update: { status: "PENDING_REVIEW" }
-      });
-    }
+    if(!updatedUser)return fail("A verified personal account is required; refresh before retrying.",409);
 
     const token = await createSession({
       id: updatedUser.id,

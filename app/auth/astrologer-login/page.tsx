@@ -19,7 +19,7 @@ export default function AstrologerLoginPage() {
     <Section className="max-w-md">
       <Card className="glass">
         <CardHeader>
-          <CardTitle className="font-cinzel">Astrologer / Consultant Login</CardTitle>
+          <CardTitle as="h1" className="font-cinzel">Astrologer / Consultant Login</CardTitle>
         </CardHeader>
         <CardContent>
           <AuthForm mode="login" googleEnabled={googleEnabled} loginMode="ASTROLOGER" showRoleCards={false} />

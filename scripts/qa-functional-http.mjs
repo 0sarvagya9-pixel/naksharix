@@ -85,8 +85,14 @@ await verify("Numerology rejects short name", async () => {
   assert.equal((await post("/api/numerology", { name: "A", dateOfBirth: "1990-01-15" })).status, 422);
 });
 await verify("core astrology calculator produces actual data", async () => {
-  const d = await expectData(await post("/api/calculators/core", { name: "Sample Person", birthDate: "1990-01-15", birthTime: "10:30", latitude: 28.6139, longitude: 77.209 }), "core calculator");
+  const d = await expectData(await post("/api/calculators/core", { name: "Sample Person", birthDate: "1990-01-15", birthTime: "10:30", birthPlace:"Delhi", timezone:"Asia/Kolkata", latitude: 28.6139, longitude: 77.209 }), "core calculator");
   assert.ok(d.calculators?.numerology, "core numerology missing");
+  const c=d.calculators;
+  assert.ok(c.calculationMeta?.provider==="own_engine" && c.moonSign && c.sunSign && c.ascendant && c.nakshatra);
+  assert.equal(c.loveScore,null);assert.equal(c.friendshipScore,null);
+  const renamed=await expectData(await post("/api/calculators/core",{name:"Different Sample",birthDate:"1990-01-15",birthTime:"10:30",birthPlace:"Delhi",timezone:"Asia/Kolkata",latitude:28.6139,longitude:77.209}),"name invariance");
+  for(const field of ["moonSign","sunSign","ascendant","nakshatra","ayanamsa"])assert.equal(renamed.calculators[field],c[field],field+" must not depend on name");
+  const invalid=await post("/api/calculators/core",{name:"Sample Person",birthDate:"1990-01-15",birthTime:"10:30",birthPlace:"Delhi",timezone:"Invalid/Zone",latitude:28.6139,longitude:77.209});assert.equal(invalid.status,422);
 });
 const signs = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"];
 await verify("all 12 horoscope APIs yield independent sign-specific responses", async () => {
@@ -132,6 +138,9 @@ await verify("matchmaking engine returns real compatibility calculation", async 
   };
   const d = await expectData(await post("/api/matchmaking", { bride, groom, locale: "en" }), "matchmaking");
   assert.ok(d.match && Number.isFinite(d.match.compatibilityScore), "computed compatibility missing");
+  assert.equal(d.match.matchingMode,"naksharix_ashtakoot_27_nakshatra_v3");
+  assert.equal(d.match.maxGuna,36);assert.equal(d.match.factors.length,8);
+  const renamed=await expectData(await post("/api/matchmaking",{bride:{...bride,name:"Other Sample Bride"},groom:{...groom,name:"Other Sample Groom"},locale:"en"}),"name-invariant matching");assert.equal(renamed.match.guna,d.match.guna);assert.deepEqual(renamed.match.factors,d.match.factors);
 });
 await verify("weekly, monthly and yearly horoscope APIs produce nonempty sign results", async () => {
   for (const period of ["weekly", "monthly", "yearly"]) {

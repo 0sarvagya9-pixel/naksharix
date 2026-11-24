@@ -90,7 +90,7 @@ export default async function PanchangPage({
                 {[
                   { icon: <MapPin className="h-4 w-4 text-[#c98924]" />,   label: "Location-aware" },
                   { icon: <Clock3 className="h-4 w-4 text-[#c98924]" />,   label: "Timezone-based" },
-                  { icon: <SunMedium className="h-4 w-4 text-[#c98924]" />, label: "Sunrise anchored" },
+                  { icon: <SunMedium className="h-4 w-4 text-[#c98924]" />, label: "Local noon lunar snapshot" },
                 ].map(({ icon, label }) => (
                   <span
                     key={label}

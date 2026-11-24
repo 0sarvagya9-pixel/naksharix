@@ -24,7 +24,7 @@ export default function JoinAstrologerPage() {
         </ol>
         <p className="mt-6 rounded-xl bg-[#fff3e5] p-4 text-sm leading-6">Applications do not guarantee approval, income or bookings. Do not publish personal identity documents or private credentials on public pages.</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/signup" className="inline-flex min-h-12 items-center rounded-xl bg-[#793746] px-6 py-3 font-semibold text-white">Create professional account</Link>
+          <Link href="/signup?role=professional" className="inline-flex min-h-12 items-center rounded-xl bg-[#793746] px-6 py-3 font-semibold text-white">Create professional account</Link>
           <Link href="/auth/astrologer-login" className="inline-flex min-h-12 items-center rounded-xl border border-[#b88f71] px-6 py-3 font-semibold text-[#793746]">Professional sign in</Link>
         </div>
       </div>

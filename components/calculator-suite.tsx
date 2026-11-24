@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Heart, MapPin, Moon, Sparkles, Star, Sun, Users } from "lucide-react";
+import { Calculator, MapPin, Moon, Sparkles, Star, Sun } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,8 +18,8 @@ type CalculatorResult = {
   ascendant?: string;
   nakshatra?: string;
   ayanamsa?: string;
-  loveScore?: number;
-  friendshipScore?: number;
+  loveScore?: number | null;
+  friendshipScore?: number | null;
   guidance?: string;
   numerology?: { lifePathNumber?: number };
 };
@@ -26,7 +27,7 @@ type CalculatorResult = {
 const defaultPlace: ResolvedLocation = { displayName: "Delhi, India", city: "Delhi", state: "Delhi", country: "India", latitude: 28.6139, longitude: 77.209, timezone: "Asia/Kolkata" };
 
 export function CalculatorSuite() {
-  const { tr, requiredMessage } = useLanguage();
+  const { tr, requiredMessage, apiLocale } = useLanguage();
   const [form, setForm] = useState({ name: "", birthDate: "", birthTime: "06:30", birthPlace: "Delhi, India" });
   const [resolvedLocation, setResolvedLocation] = useState<ResolvedLocation | null>(defaultPlace);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -61,12 +62,15 @@ export function CalculatorSuite() {
           birthDate: form.birthDate,
           birthTime: form.birthTime,
           latitude: resolvedLocation?.latitude,
-          longitude: resolvedLocation?.longitude
+          longitude: resolvedLocation?.longitude,
+          birthPlace: resolvedLocation?.displayName,
+          timezone: resolvedLocation?.timezone,
+          locale: apiLocale
         })
       });
       const json = await response.json();
       if (!response.ok) {
-        setError("Please review your birth details and try again.");
+        setError(typeof json.error === "string" ? json.error : "Please review your birth details and try again.");
         return;
       }
       setResult(json.data.calculators);
@@ -131,11 +135,11 @@ export function CalculatorSuite() {
                 <ResultCard icon={<Star />} label={tr("ascendant")} value={result.ascendant} />
                 <ResultCard icon={<Sparkles />} label={tr("nakshatra")} value={result.nakshatra} />
                 <ResultCard icon={<Calculator />} label={tr("ayanamsa")} value={result.ayanamsa} />
-                <ResultCard icon={<Heart />} label={tr("loveScore")} value={`${result.loveScore ?? 0}%`} />
-                <ResultCard icon={<Users />} label={tr("friendshipScore")} value={`${result.friendshipScore ?? 0}%`} />
+
                 <ResultCard icon={<Calculator />} label={tr("lifePath")} value={String(result.numerology?.lifePathNumber ?? "-")} />
               </div>
               <p className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4 text-sm leading-7 naksh-muted-text">{result.guidance}</p>
+              <Link href="/matchmaking" className="inline-flex rounded-lg border px-4 py-3 font-semibold underline">{apiLocale==="hi"?"दो जन्म कुंडलियों का पारंपरिक मिलान":apiLocale==="hinglish"?"Dono kundli ka traditional milan":"Explore traditional two-person Kundli matching"}</Link>
             </div>
           ) : (
             <p className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-5 text-sm leading-6 naksh-muted-text">{tr("calculatorEmpty")}</p>
@@ -151,5 +155,5 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 }
 
 function ResultCard({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string }) {
-  return <div className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><div className="text-[#FFD700]">{icon}</div><p className="mt-3 text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-xl font-bold">{value ?? "Calculated"}</p></div>;
+  return <div className="rounded-lg border border-[#D4AF37]/25 bg-[#061D3C]/70 p-4"><div className="text-[#FFD700]">{icon}</div><p className="mt-3 text-xs uppercase tracking-[0.18em] naksh-muted-text">{label}</p><p className="mt-1 font-cinzel text-xl font-bold">{value ?? "Unavailable"}</p></div>;
 }

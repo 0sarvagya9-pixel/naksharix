@@ -27,7 +27,7 @@ export default async function LoginPage({
     <Section className="max-w-md">
       <Card className="glass">
         <CardHeader>
-          <CardTitle className="font-cinzel">Login to Naksharix</CardTitle>
+          <CardTitle as="h1" className="font-cinzel">Login to Naksharix</CardTitle>
         </CardHeader>
         <CardContent>
           {error === "OAuthAccountNotLinked" ? (
