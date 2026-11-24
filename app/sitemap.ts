@@ -22,6 +22,7 @@ const staticRoutes = [
   "/about",
   "/hi/about",
   "/contact",
+  "/partnerships",
   "/faq",
   "/privacy-policy",
   "/terms-and-conditions",

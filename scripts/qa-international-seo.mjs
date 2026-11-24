@@ -229,3 +229,32 @@ console.log("BRAND_ENTITY_DISCOVERY=PASS;SSR_SCHEMA=YES;BILINGUAL_ABOUT=YES;ROOT
 for(const route of ["/kumbh-mela-2027","/hi/kumbh-mela-2027","/festival-calendar","/hi/festival-calendar","/grahan-2027","/hi/grahan-2027"]){assert.ok(sitemap.includes('"'+route+'"') && indexNow.includes('"'+route+'"') && directory.includes("https://www.naksharix.com"+route),"Seasonal discovery missing "+route);}
 assert.ok(read("lib/seo-seasonal.ts").includes("simhasthamahakumbh.maharashtra.gov.in/snan-calendar") && read("lib/seo-seasonal.ts").includes("eclipse.gsfc.nasa.gov/OH/OH2027.html") && read("lib/seo-seasonal-copy.ts").includes("ISO 12312-2"),"Missing seasonal primary sources and safety");
 console.log("SEASONAL_DISCOVERY=PASS;SIX_PUBLIC_GUIDES");
+
+
+// Partners can communicate through the existing private account inbox without
+// a business-mailbox login. Never collect contact data from a public query or
+// establish an affiliate/payment commitment through a marketing landing page.
+const partnershipPage = read("app/partnerships/page.tsx");
+assert.ok(partnershipPage.includes('href="/support?topic=partnership"') &&
+  partnershipPage.includes("getManualReportCheckout(topic.slug)") &&
+  partnershipPage.includes('kind="report"') &&
+  partnershipPage.includes("No purchase is needed to enquire.") &&
+  partnershipPage.includes("not an affiliate agreement"),
+  "Partnership discovery must be voluntary and catalogue backed");
+assert.ok(!partnershipPage.includes("RazorpayCheckoutButton") && !partnershipPage.includes("fetch(") &&
+  !partnershipPage.includes("mailto:") && !partnershipPage.includes("onSubmit"),
+  "Public partnership page must not charge or collect personal data");
+const partnerSupport = read("app/support/page.tsx");
+assert.ok(partnerSupport.includes('params.topic === "partnership"') &&
+  partnerSupport.includes('getCurrentUser()') &&
+  partnerSupport.includes('encodeURIComponent("/support?topic=partnership")') &&
+  partnerSupport.includes('initialSubject={partnership ? "Partnership enquiry" : ""}'),
+  "Preserve authentication and fixed partnership subject");
+assert.ok(read("app/contact/page.tsx").includes('href="/partnerships"') &&
+  read("app/reports/page.tsx").includes('href="/partnerships"') &&
+  sitemap.includes('"/partnerships"'),
+  "Public collaboration route should be discoverable");
+assert.ok(read("app/api/support/tickets/route.ts").includes("if (!user) return fail") &&
+  read("app/api/admin/support/route.ts").includes("getAdminApiUser()"),
+  "Partner replies must remain within the existing authenticated support desk");
+console.log("PARTNER_PRIVATE_INBOX=PASS;NO_MAILBOX_DEPENDENCY=YES;NO_NEW_PAYMENT=YES");

@@ -24,5 +24,6 @@ export default async function ReportsPage() {
     <div className="mx-auto max-w-6xl px-5 py-4 text-sm text-[#573d48]">
       Before choosing a personalized report, <Link href="/blog/personalized-astrology-report-delivery-guide" className="font-semibold underline underline-offset-4">read how birth details, PDF generation and secure delivery work</Link>.
     </div>
-    <ReportsContent manualOfferings={manualOfferings} automaticDelivery={env.AUTO_REPORT_DELIVERY_ENABLED==="true"}/></>;
+    <ReportsContent manualOfferings={manualOfferings} automaticDelivery={env.AUTO_REPORT_DELIVERY_ENABLED==="true"}/>
+    <section className="mx-auto max-w-6xl px-5 pb-8 text-sm text-[#573d48]" aria-label="Educational collaboration"><p>Publish useful wedding or astrology education? <Link href="/partnerships" className="font-semibold underline underline-offset-4">Explore an optional editorial collaboration</Link>.</p></section></>;
 }

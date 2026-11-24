@@ -18,9 +18,9 @@ type Ticket = {
   messages: unknown;
 };
 
-export function SupportTicketsContent() {
+export function SupportTicketsContent({ initialSubject = "" }: { initialSubject?: string }) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [subject, setSubject] = useState("");
+  const [subject, setSubject] = useState(initialSubject);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);

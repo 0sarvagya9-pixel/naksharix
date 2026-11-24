@@ -14,8 +14,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false }
 };
 
-export default async function SupportPage() {
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ topic?: string }> }) {
+  const params = await searchParams;
+  const partnership = params.topic === "partnership";
   const user = await getCurrentUser();
-  if (!user) redirect("/auth/login?next=%2Fsupport");
-  return <SupportTicketsContent />;
+  if (!user) {
+    if (partnership) redirect("/login?redirectTo=" + encodeURIComponent("/support?topic=partnership"));
+    redirect("/auth/login?next=%2Fsupport");
+  }
+  return <SupportTicketsContent initialSubject={partnership ? "Partnership enquiry" : ""} />;
 }

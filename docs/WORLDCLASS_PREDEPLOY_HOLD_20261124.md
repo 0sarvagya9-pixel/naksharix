@@ -25,3 +25,6 @@ All 35 business opportunities from audit are requested for development, gated by
 
 ## Fourth implementation batch
 - Integrated exact PR #151 consent registry, verified-account opt-in and withdrawal, additive SQL and disposable tests. No production migration, campaign or contact import. Sending-provider suppression acceptance remains mandatory. Original draft PR remains unmerged.
+
+## Fifth implementation batch
+- Reconciled PR #144's public partnership page, private authenticated enquiries, catalogue/contact links and regression checks. Retained the newer production CI isolation workflow instead of replacing it with older browser dependency hunks. No partner onboarding, referral payout, contact spam or production release. Original PR remains unmerged.
