@@ -205,3 +205,31 @@ for (const route of ["/free-kundli","/hi/free-kundli","/kundli-matching","/hi/ku
   assert.ok(indexNow.includes('"'+route+'"'), "Missing public discovery route: "+route);
 }
 console.log("ORGANIC_SALES_CONVERSION=PASS;RELEVANT_REPORTS=4;REPORT_SHARE=PUBLIC_ONLY;SHOP_PRICES=LIVE_CATALOGUE;CONSENT=PRESERVED");
+
+// Partners can communicate through the existing private account inbox without
+// a business-mailbox login. Never collect contact data from a public query or
+// establish an affiliate/payment commitment through a marketing landing page.
+const partnershipPage = read("app/partnerships/page.tsx");
+assert.ok(partnershipPage.includes('href="/support?topic=partnership"') &&
+  partnershipPage.includes("getManualReportCheckout(topic.slug)") &&
+  partnershipPage.includes('kind="report"') &&
+  partnershipPage.includes("No purchase is needed to enquire.") &&
+  partnershipPage.includes("not an affiliate agreement"),
+  "Partnership discovery must be voluntary and catalogue backed");
+assert.ok(!partnershipPage.includes("RazorpayCheckoutButton") && !partnershipPage.includes("fetch(") &&
+  !partnershipPage.includes("mailto:") && !partnershipPage.includes("onSubmit"),
+  "Public partnership page must not charge or collect personal data");
+const partnerSupport = read("app/support/page.tsx");
+assert.ok(partnerSupport.includes('params.topic === "partnership"') &&
+  partnerSupport.includes('getCurrentUser()') &&
+  partnerSupport.includes('encodeURIComponent("/support?topic=partnership")') &&
+  partnerSupport.includes('initialSubject={partnership ? "Partnership enquiry" : ""}'),
+  "Preserve authentication and fixed partnership subject");
+assert.ok(read("app/contact/page.tsx").includes('href="/partnerships"') &&
+  read("app/reports/page.tsx").includes('href="/partnerships"') &&
+  sitemap.includes('"/partnerships"'),
+  "Public collaboration route should be discoverable");
+assert.ok(read("app/api/support/tickets/route.ts").includes("if (!user) return fail") &&
+  read("app/api/admin/support/route.ts").includes("getAdminApiUser()"),
+  "Partner replies must remain within the existing authenticated support desk");
+console.log("PARTNER_PRIVATE_INBOX=PASS;NO_MAILBOX_DEPENDENCY=YES;NO_NEW_PAYMENT=YES");

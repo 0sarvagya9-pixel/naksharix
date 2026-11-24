@@ -20,6 +20,7 @@ const staticRoutes = [
   "/hi/free-kundli",
   "/about",
   "/contact",
+  "/partnerships",
   "/faq",
   "/privacy-policy",
   "/terms-and-conditions",

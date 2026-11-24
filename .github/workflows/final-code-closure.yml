@@ -180,13 +180,24 @@ jobs:
       - run: npx prisma db push --skip-generate
       - run: node scripts/qa-align-disposable-feature-schema.mjs
       - run: npm run build
-      - run: npm install --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
+      - name: Install pinned browser QA dependencies outside the application dependency graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          browser_dir="$(mktemp -d "$RUNNER_TEMP/naksharix-browser-qa.XXXXXX")"
+          printf '%s\n' '{"private":true,"name":"naksharix-browser-qa","version":"1.0.0"}' > "$browser_dir/package.json"
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install --prefix "$browser_dir" --no-save --package-lock=false @playwright/test@1.54.1 @axe-core/playwright@4.10.2
+          test ! -e tests/e2e/node_modules && test ! -L tests/e2e/node_modules
+          ln -s "$browser_dir/node_modules" tests/e2e/node_modules
+          test -x "$browser_dir/node_modules/.bin/playwright"
+          printf 'BROWSER_QA_CLI=%s\n' "$browser_dir/node_modules/.bin/playwright" >> "$GITHUB_ENV"
+          git diff --exit-code -- package.json package-lock.json
       - name: Verify preinstalled Chromium browser
         shell: bash
         run: |
           set -euo pipefail
           test -d /ms-playwright
-          npx playwright --version
+          "$BROWSER_QA_CLI" --version
       - name: Run local production server and browser suite
         shell: bash
         run: |
@@ -201,7 +212,7 @@ jobs:
           done
           node scripts/qa-http-smoke.mjs
           node scripts/qa-seo-http.mjs
-          npx playwright test --config=tests/e2e/playwright.config.ts --workers=1 --project=chromium-desktop
+          "$BROWSER_QA_CLI" test --config=tests/e2e/playwright.config.ts --workers=1 --project=chromium-desktop
 
   gate-6-mobile-companion:
     name: Gate 6 - Mobile companion
