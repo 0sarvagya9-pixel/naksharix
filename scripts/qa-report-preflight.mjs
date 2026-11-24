@@ -59,3 +59,13 @@ assert.ok(captureWebhook.includes("isUnrefundedCapture(payment, Math.round(Numbe
 assert.ok(captureServer.includes("isUnrefundedCapture(payment, Math.round(expectedAmount * 100))"));
 assert.ok(captureWebhook.includes('if (paid) await writeAuditLog({')&&captureWebhook.includes("razorpay_capture_not_finalized_requires_review"));
 console.log("UNREFUNDED_CAPTURE_EVIDENCE_PASS; provider and database integration acceptance pending");
+
+const captureVerify=readFileSync("app/api/payments/razorpay/verify/route.ts","utf8"),refundReconcile=readFileSync("lib/payments/purpose-reconciliation.ts","utf8");
+const lockPos=captureServer.indexOf("await lockProviderPayment(tx,providerPaymentId)"),receiptPos=captureServer.indexOf("await cumulativeSignedRefund(tx,providerPaymentId)"),claimPos=captureServer.indexOf("const claimed = await tx.payment.updateMany");
+assert.ok(lockPos>=0&&receiptPos>lockPos&&claimPos>receiptPos);
+assert.ok(captureServer.includes("Prisma.TransactionIsolationLevel.ReadCommitted"));
+assert.ok(captureWebhook.indexOf("const fresh = await verifyRazorpayCapturedPayment")<captureWebhook.indexOf("const paid = await finalizePaidPayment"));
+assert.ok(captureWebhook.includes("Payment verification temporarily unavailable"));
+assert.ok(captureVerify.includes("Payment requires reconciliation before acknowledgement")&&captureVerify.includes("return ok({ payment: current })"));
+assert.ok(refundReconcile.includes("if(signedTotal===null)return;")&&refundReconcile.includes("const effectiveRefund=signedTotal;"));
+console.log("CAPTURE_REFUND_ORDERING_SOURCE_CONTRACT_PASS; real gateway and concurrent DB acceptance pending");
