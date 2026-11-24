@@ -9,7 +9,7 @@ const middleware = read("middleware.ts");
 const provider = read("components/language-provider.tsx");
 const switcher = read("components/language-switcher.tsx");
 const pairs = [...registry.matchAll(/\{ en: "([^"]+)", hi: "([^"]+)" \}/g)];
-assert.equal(pairs.length, 7, "Exactly seven published bilingual page pairs");
+assert.equal(pairs.length, 8, "Exactly eight published bilingual page pairs");
 assert.ok(pairs.some(([,en,hi])=>en==="/about" && hi==="/hi/about"), "Brand About reciprocal pair missing");
 const paths = pairs.flatMap(([, en, hi]) => [en, hi]);
 assert.equal(new Set(paths).size, paths.length, "Duplicate language-alternate URL");
@@ -175,7 +175,7 @@ assert.ok(!indexNow.includes("process.env.DATABASE_URL") &&
   "Search-discovery task must not read database, payment or ads configuration");
 console.log("INDEXNOW_STATIC_DISCOVERY=PASS;HOST_KEY_PUBLIC=YES;PRODUCTION_ONLY=YES;PRIVATE_URLS=NO");
 
-console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=7;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
+console.log("SEO_LOCALE_GATE=PASS;BILINGUAL_CORE_PAIRS=8;EDUCATIONAL_GUIDE_LANGUAGES=6;OTHER_LANGUAGES_NOT_INDEXED=YES");
 
 
 // Conversion from public tools remains voluntary, and public report sharing

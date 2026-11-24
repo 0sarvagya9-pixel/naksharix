@@ -27,7 +27,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 19 | Sample PDF | SOURCE | Actual renderer-based fictional sample generation for 15 supported reports; outputs not rendered/inspected yet. |
 | 20 | Live report delivery | POST_APPROVAL | Real purchase-to-delivery, email, retry, download and permission acceptance require explicit approval. |
 | 21 | Independent astrology accuracy | OPEN | Cross-check real ephemerides and reference charts; do not claim certification. |
-| 22 | 2027 horoscope | PARTIAL | Paid SKU corrected to rolling twelve-month content; public annual calendar-year engine/routes/API and fixtures remain open. |
+| 22 | 2027 horoscope | SOURCE | Added 12 calculated reference snapshots, sign-relative monthly themes, EN/HI pages, year-aware web/mobile API and QA fixtures. Existing paid report remains rolling twelve months. Independent ephemeris and full acceptance remain pending. |
 | 23 | Astrologer approvals | EXTERNAL | Genuine credential review and provider availability needed. |
 | 24 | Verified Pandit | EXTERNAL | Actual partner due diligence and acceptance. |
 | 25 | Pending Puja requests | EXTERNAL | Operator and partner confirmation with genuine scheduling; preserve historical records. |
@@ -69,7 +69,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 04 | Numerology / Lo Shu | EXISTING | Existing SKU; independently validate calculations. |
 | 05 | Baby name | EXISTING | Existing SKU; name suggestions and limitations. |
 | 06 | Business name numerology | OPEN | Dedicated business-name report scope, engine output and merchant-approved SKU. |
-| 07 | Yearly 2027 | PARTIAL | Rolling 12-month SKU accurate; calendar-year 2027 public product still pending. |
+| 07 | Yearly 2027 | SOURCE | Rolling 12-month paid SKU preserved; actual calculated educational 2027 guide and year-aware APIs staged. No claimed prediction or externally certified ingress timing. |
 | 08 | Complete Life bundle | OPEN | Real component fulfilment, quantity, per-component ledger and approved price. |
 | 09 | Family package | OPEN | Per-person consent, input and distinct private report delivery. |
 | 10 | Marriage planning | OPEN | Real couple report + optional approved consultation; itemized availability and price. |

@@ -27,6 +27,8 @@ export default function robots(): MetadataRoute.Robots {
         "/monthly-horoscope",
         "/weekly-love-horoscope",
         "/yearly-horoscope",
+        "/yearly-horoscope-2027",
+        "/hi/yearly-horoscope-2027",
         "/chinese-horoscope-2026",
         "/numerology-monthly-horoscope",
         "/hi",

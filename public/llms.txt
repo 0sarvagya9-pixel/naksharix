@@ -33,3 +33,6 @@ This is an optional human- and machine-readable public directory, not an instruc
 - [हिंदू त्योहार कैलेंडर और आगामी व्रत तिथियाँ](https://www.naksharix.com/hi/festival-calendar): public reference guide, not a guaranteed booking.
 - [Grahan 2027: Solar & Lunar Eclipses in India](https://www.naksharix.com/grahan-2027): public reference guide, not a guaranteed booking.
 - [ग्रहण 2027: भारत में सूर्य और चंद्र ग्रहण](https://www.naksharix.com/hi/grahan-2027): public reference guide, not a guaranteed booking.
+
+- [2027 yearly rashi guide](https://www.naksharix.com/yearly-horoscope-2027): internally calculated monthly educational Jupiter/Saturn reference; not independent certification or a personal prediction.
+- [2027 वार्षिक राशि मार्गदर्शिका](https://www.naksharix.com/hi/yearly-horoscope-2027): Hindi reference.

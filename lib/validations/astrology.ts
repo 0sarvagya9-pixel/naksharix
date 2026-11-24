@@ -19,6 +19,7 @@ export const birthDetailsSchema = z.object({
 export const horoscopeRequestSchema = z.object({
   zodiac: z.string().min(3).max(20),
   period: z.enum(["daily", "weekly", "monthly", "yearly"]),
+  year: z.number().int().min(1900).max(2100).optional(),
   category: z.enum(["general", "love", "career", "finance", "health", "education", "family", "travel"]).default("general"),
   locale: z.enum(["en", "hi", "hinglish"]).default("en"),
   birthDetails: birthDetailsSchema.optional()

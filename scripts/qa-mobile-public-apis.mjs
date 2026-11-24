@@ -6,7 +6,7 @@ const catalogue=read("app/api/mobile/catalogue/route.ts");
 assert.ok(horoscope.includes('export async function GET(') &&
   horoscope.includes("allowedSigns.has(parsed.data.zodiac)") &&
   horoscope.includes('rateLimitResponse("mobile-horoscope"') &&
-  horoscope.includes('period==="yearly" ? "yearly-2026" : period') &&
+  horoscope.includes('annualApiContent(parsed.data.year??calendarYearInIndia(),zodiac,locale)') &&
   !horoscope.includes("getCurrentUser") &&
   !horoscope.includes("birthDetails") &&
   !horoscope.includes("POST("),

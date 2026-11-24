@@ -10,7 +10,8 @@ const pairs = [
   ["/about", "/hi/about"],
   ["/kumbh-mela-2027", "/hi/kumbh-mela-2027"],
   ["/festival-calendar", "/hi/festival-calendar"],
-  ["/grahan-2027", "/hi/grahan-2027"]
+  ["/grahan-2027", "/hi/grahan-2027"],
+  ["/yearly-horoscope-2027", "/hi/yearly-horoscope-2027"]
 ];
 const nativeGuides = ["en", "hi", "mr", "bn", "es", "fr"];
 const approvedGuides = ["en", "hi"];
@@ -113,7 +114,7 @@ for (const route of ["/","/about","/hi/about"]) {
 const llms=await fetch(base+"/llms.txt");
 assert.equal(llms.status,200);
 assert.ok((await llms.text()).includes("https://www.naksharix.com/hi/about"),"Missing public brand directory");
-console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=14;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");
+console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=16;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");
 
  
 // Check the actual rendered public pages from the previous 50-page audit.
@@ -169,3 +170,5 @@ for(const [path,kind,markers] of [
   assert.ok(!/<meta[^>]*name="robots"[^>]*content="[^"]*noindex/i.test(publicHtml),"Unexpected noindex "+path);
 }
 console.log("SEASONAL_HTTP=PASS;SIX_BILINGUAL_ROUTES;DATES_AND_SAFETY");
+
+for(const path of ["/yearly-horoscope-2027","/hi/yearly-horoscope-2027"]){const r=await fetch(base+path);assert.equal(r.status,200);const html=stripMarkup(await r.text());assert.ok(html.includes("annual-rashi"));assert.ok(html.includes("2027-01-01")&&html.includes("2027-12-01"));assert.equal([...html.matchAll(/<h1\b[^>]*>/gi)].length,1);}
