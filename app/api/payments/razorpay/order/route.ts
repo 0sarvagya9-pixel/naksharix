@@ -22,7 +22,11 @@ import { googleSessionSchema, liveRazorpayAnalyticsOrder, sendGoogleCheckout } f
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 import { shippingPayable,SHIPPING_TERMS_VERSION,readShippingSnapshot } from "@/lib/shop/shipping-rules";
 
+import {availableCreditOffer,lockCreditAccount} from "@/lib/ai/credit-ledger";
+import {AI_CREDIT_TERMS_VERSION,creditSnapshot,offerMatches,validCreditIntent} from "@/lib/ai/credit-contract";
+
 const schema = z.discriminatedUnion("purpose", [
+  z.object({purpose:z.literal("AI_CREDITS"),intent:z.string().refine(validCreditIntent),version:z.string().max(64),units:z.number().int().min(1).max(500),pricePaise:z.number().int().min(100).max(1000000),termsVersion:z.literal(AI_CREDIT_TERMS_VERSION)}).strict(),
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
   z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
   z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
@@ -85,7 +89,12 @@ export async function POST(request: NextRequest) {
       return fail("An earlier order has a different amount. Contact support before trying to pay again.", 409);
     if (reusable?.status === "PAID") return fail("This checkout item is already paid.", 409);
     const reportCheckout = "reportId" in body;
-    if (reusable && reportCheckout) {
+    const creditCheckout=body.purpose==="AI_CREDITS";
+    if(reusable&&body.purpose==="AI_CREDITS"){
+      const prior=creditSnapshot(reusable.metadata,Math.round(Number(reusable.amount)*100),reusable.currency);
+      if(!prior||!offerMatches(prior,body))return fail("Prior credit order terms need reconciliation. Do not pay again.",409);
+    }
+    if (reusable && (reportCheckout||creditCheckout)) {
       // A missing order ID may be an in-flight reservation or ambiguous
       // gateway-create failure. Never replace it with a second order.
       const decision=await checkExistingReportOrder(reusable);
@@ -94,14 +103,14 @@ export async function POST(request: NextRequest) {
         if(paid&&reportRequestId){
           await prisma.reportRequest.updateMany({where:{id:reportRequestId,userId:user.id,paymentId:paid.id,status:{in:[ReportRequestStatus.RECEIVED,ReportRequestStatus.PENDING_REVIEW,ReportRequestStatus.PAYMENT_PENDING]},paymentStatus:{in:[ReportPaymentStatus.PENDING,ReportPaymentStatus.FAILED]}},data:{paymentStatus:ReportPaymentStatus.PAID,status:ReportRequestStatus.PAID}});
         }
-        return fail("Payment already captured. Open your dashboard Payment History to continue the report. Do not pay again.",409);
+        return fail(creditCheckout?"Payment already captured. Refresh your AI credit balance and check Payment History. Do not pay again.":"Payment already captured. Open your dashboard Payment History to continue the report. Do not pay again.",409);
       }
       if(decision.kind!=="retry_same_order"||!reusable.providerOrderId)
         return fail("Previous payment requires merchant reconciliation. Do not pay again; contact support.",409);
     }
-    if (!reportCheckout && reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
+    if (!reportCheckout && !creditCheckout && reusable?.status === "PENDING" && Date.now() - reusable.createdAt.getTime() > 24 * 60 * 60 * 1000)
       return fail("An old payment attempt needs merchant reconciliation. Check payment history or contact support before paying again.", 409);
-    if (reusable && (reusable.status === "PENDING" || (reportCheckout&&reusable.status==="FAILED")) && reusable.providerOrderId) {
+    if (reusable && (reusable.status === "PENDING" || ((reportCheckout||creditCheckout)&&reusable.status==="FAILED")) && reusable.providerOrderId) {
       if (body.purpose === "PUJA_BOOKING") await writeAuditLog({ actor: user, action: "puja.fee_terms_accepted", targetType: "Payment", targetId: reusable.id, metadata: { feeTermsVersion: body.feeTermsVersion } });
       if ("analyticsSession" in body) await sendGoogleCheckout(request,body.analyticsSession,body.purpose,item.amount);
       return ok({
@@ -134,6 +143,11 @@ export async function POST(request: NextRequest) {
       if(!fresh||fresh.userId!==user.id||fresh.status!=="CONFIRMED"||!["UNPAID","FAILED"].includes(fresh.paymentStatus)||
          !("shopOrderVersion" in item.metadata)||fresh.version!==item.metadata.shopOrderVersion||fresh.totalPaise!==Math.round(item.amount*100)||!shippingPayable(fresh))return null;
       const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:"SHOP_ORDER",status:{in:["PENDING","PAID"]},metadata:{path:["shopOrderId"],equals:body.shopOrderId}},select:{id:true}});
+      if(outstanding)return null;
+      return tx.payment.create({data:paymentData});
+    }):body.purpose==="AI_CREDITS"?await prisma.$transaction(async tx=>{
+      await lockCreditAccount(tx,user.id);
+      const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:"AI_CREDITS",OR:[{status:{in:["PENDING","FAILED"]}},{metadata:{path:["aiCreditIntent"],equals:body.intent}}]},select:{id:true}});
       if(outstanding)return null;
       return tx.payment.create({data:paymentData});
     }):reportCheckout?await prisma.$transaction(async tx=>{
@@ -217,11 +231,11 @@ async function findReusablePayment(body: CheckoutBody, userId: string) {
       userId,
       provider: "RAZORPAY",
       purpose: body.purpose as PaymentPurpose,
-      status: { in: "reportId" in body ? ["PENDING", "PAID", "FAILED"] : ["PENDING", "PAID"] },
+      status: { in: ("reportId" in body||body.purpose==="AI_CREDITS") ? ["PENDING", "PAID", "FAILED"] : ["PENDING", "PAID"] },
       metadata: { path: [identity.key], equals: identity.value }
     },
     orderBy: { createdAt: "desc" },
-    select: { id: true, status: true, providerOrderId: true, amount: true, currency: true, createdAt: true }
+    select: { id: true, status: true, providerOrderId: true, amount: true, currency: true, createdAt: true, metadata:true }
   });
 }
 
@@ -230,6 +244,7 @@ function checkoutIdentity(body: CheckoutBody) {
   if (body.purpose === "PUJA_BOOKING") return { key: "pujaBookingId", value: body.bookingId };
   if (body.purpose === "SHOP_ORDER") return { key: "shopOrderId", value: body.shopOrderId };
   if (body.purpose === "SUBSCRIPTION") return null;
+  if (body.purpose === "AI_CREDITS") return {key:"aiCreditIntent",value:body.intent};
   if (body.reportRequestId) return { key: "reportRequestId", value: body.reportRequestId };
   if (body.savedReportId) return { key: "savedReportId", value: body.savedReportId };
   // Prevent repeated accidental charges for the same fixed-price report.
@@ -239,6 +254,13 @@ function checkoutIdentity(body: CheckoutBody) {
 }
 
 async function resolveCheckoutItem(body: CheckoutBody, userId: string) {
+  if(body.purpose==="AI_CREDITS"){
+    const offer=await availableCreditOffer();
+    if(!offer||!offerMatches(offer,body))return null;
+    const account=await prisma.user.findUnique({where:{id:userId},select:{emailVerified:true,emailVerifiedAt:true,role:true}});
+    if(!account||(!account.emailVerified&&!account.emailVerifiedAt)||["ADMIN","SUPER_ADMIN"].includes(account.role))return null;
+    return {name:`Naksharix AI — ${offer.units} completed responses`,amount:offer.pricePaise/100,metadata:{aiCreditIntent:body.intent,aiCreditPack:{...offer,intent:body.intent,termsVersion:AI_CREDIT_TERMS_VERSION}}};
+  }
   if (body.purpose === "SUBSCRIPTION") {
     const plan = getSubscriptionPlan(body.plan);
     if (!plan) return null;

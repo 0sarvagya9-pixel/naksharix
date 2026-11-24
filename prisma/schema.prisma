@@ -78,6 +78,7 @@ enum PaymentPurpose {
   PUJA_BOOKING
   SHOP_ORDER
   WALLET_TOPUP
+  AI_CREDITS
 }
 
 enum ReportPlanType {
@@ -195,6 +196,7 @@ model User {
   shopOrders                   ShopOrder[]
   pujaBookingRequests          PujaBookingRequest[]
   marketingConsent             MarketingConsent?
+  aiCreditUses                 AiCreditUse[]
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -399,6 +401,7 @@ model Payment {
   invoice           Invoice?
   purchasedReport   PurchasedReport?
   reportRequest     ReportRequest?
+  aiCreditGrant    AiCreditGrant?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -1012,4 +1015,32 @@ model MarketingConsent {
   updatedAt      DateTime  @updatedAt
 
   @@index([revokedAt, confirmedAt])
+}
+
+model AiCreditGrant {
+  paymentId   String   @id
+  payment     Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  units       Int
+  remaining   Int
+  offerVersion String
+  suspendedAt DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  uses        AiCreditUse[]
+}
+
+model AiCreditUse {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestId      String
+  grantPaymentId String
+  grant          AiCreditGrant @relation(fields: [grantPaymentId], references: [paymentId], onDelete: Cascade)
+  status         String   @default("RESERVED")
+  expiresAt      DateTime
+  finishedAt     DateTime?
+  createdAt      DateTime @default(now())
+  @@unique([userId, requestId])
+  @@index([userId, createdAt])
+  @@index([userId, status, expiresAt])
 }

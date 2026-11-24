@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { razorpay } from "@/lib/payments/razorpay";
 import { subscriptionPlans } from "@/lib/subscription-plans";
+import {creditSnapshot} from "@/lib/ai/credit-contract";
+import {lockCreditAccount} from "@/lib/ai/credit-ledger";
 
 export function getSubscriptionPlan(id: string) {
   return subscriptionPlans.find((plan) => plan.id === id);
@@ -71,6 +73,11 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
   const mergedMetadata = { ...existingMetadata, ...metadata } as Prisma.InputJsonObject;
 
   return prisma.$transaction(async (tx) => {
+    const credit=payment.purpose==="AI_CREDITS"?creditSnapshot(payment.metadata,Math.round(Number(payment.amount)*100),payment.currency):null;
+    if(payment.purpose==="AI_CREDITS"){
+      if(!credit||payment.provider!=="RAZORPAY"||metadata.gatewayStatus!=="captured"||(process.env.VERCEL_ENV==="production"&&existingMetadata.analyticsLiveOrder!==true))throw new Error("AI_CREDIT_CAPTURE_CONTRACT_INVALID");
+      await lockCreditAccount(tx,payment.userId);
+    }
     const claimed = await tx.payment.updateMany({
       where: { id: payment.id, status: { in: [PaymentStatus.PENDING, PaymentStatus.FAILED] } },
       data: {
@@ -116,6 +123,11 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
           metadata: (paid.metadata as Prisma.InputJsonValue | null) ?? undefined
         }
       });
+    }
+
+    if(paid.purpose==="AI_CREDITS"&&credit){
+      // Capture and unique credit grant commit together. No credits from pending, test-in-production, waived or duplicate payments.
+      await tx.aiCreditGrant.create({data:{paymentId:paid.id,units:credit.units,remaining:credit.units,offerVersion:credit.version}});
     }
 
     if (paid.purpose === PaymentPurpose.SUBSCRIPTION) {

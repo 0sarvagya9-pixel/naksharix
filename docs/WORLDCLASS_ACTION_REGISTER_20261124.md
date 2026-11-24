@@ -52,7 +52,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 44 | Language consistency | OPEN | Complete EN/HI/Hinglish across forms, checkout, account and PDFs. |
 | 45 | International experience | PARTIAL | Explicit IANA/DST and offset calculation repair; global birthplace, international merchant and currency acceptance remain. |
 | 46 | Monitoring | OPEN | Central error tracking, privacy controls, alert verification and incident runbook. |
-| 47 | Scalability | OPEN | Shared cache or proven DB fallback, concurrency and rate-limit qualification. |
+| 47 | Scalability | PARTIAL | Paid AI usage now has separate durable per-account transactional quota, one in-flight reservation and expiry; free flow preserved. Other routes still need cross-instance load and quota qualification. |
 | 48 | Admin acceptance | POST_APPROVAL | Added private live read-only aggregate reconciliation panel for paid Puja anomalies, report requests, onboarding and unpaid shop orders; actual admin workflows, refunds and mobile UI require final acceptance. |
 | 49 | Professional dashboard and payout | PARTIAL | Secure explicit professional application; full schedule, session, earnings and payout acceptance requires real approved provider. |
 | 50 | Real payment lifecycle | POST_APPROVAL | Actual authorized test charge, invoice, capture, recovery and refund evidence. |
@@ -74,7 +74,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 09 | Family package | OPEN | Per-person consent, input and distinct private report delivery. |
 | 10 | Marriage planning | OPEN | Real couple report + optional approved consultation; itemized availability and price. |
 | 11 | Human reviewed add-on | OPEN | Verified reviewer, workflow and truthful review evidence. |
-| 12 | AI credits | OPEN | Metered cost and balance ledger, concurrency, limits and provider acceptance. |
+| 12 | AI credits | SOURCE | Dedicated default-off one-time response packs, approved model/price/quantity gates, immutable captured-payment grant, cross-instance serialized reservation/debit/release, duplicate prevention, partial/full refund suspension, private account controls, additive schema and QA. Actual provider cost, isolated DB/gateway and full acceptance pending; no production activation. |
 | 13 | AI membership | OPEN | Recurring billing, limits, cancellation and renewals, approved price. |
 | 14 | Astrologer chat | EXTERNAL | Existing consultation foundation; genuine availability, session metering and payout. |
 | 15 | Astrologer voice | EXTERNAL | Actual voice channel, consent, duration and settlement. |

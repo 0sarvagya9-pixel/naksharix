@@ -13,7 +13,10 @@ import { PUJA_FEE_NOTICE_EN, PUJA_FEE_NOTICE_HI, PUJA_FEE_TERMS_VERSION } from "
 import Link from "next/link";
 import {getReportSlugForPaidId} from "@/lib/reports/checkout-catalogue";
 
+import {AI_CREDIT_TERMS_VERSION} from "@/lib/ai/credit-contract";
+
 type CheckoutPayload =
+  | {purpose:"AI_CREDITS";intent:string;version:string;units:number;pricePaise:number;termsVersion:typeof AI_CREDIT_TERMS_VERSION}
   | { purpose: "SUBSCRIPTION"; plan: "PREMIUM" | "VIP" }
   | {
       purpose: "KUNDLI_REPORT" | "YEARLY_REPORT" | "MATCH_REPORT";
@@ -85,6 +88,7 @@ export function RazorpayCheckoutButton({
     }
     if (canBypassPayment(userJson?.data?.user)) {
       setLoading(false);
+      if(payload.purpose==="AI_CREDITS"){setStatus("Credit packs require an eligible customer account and captured payment; no admin credits granted.");return;}
       setStatus(tr("adminTestingModePaymentBypassed"));
       siteNotice.info("Admin mode skipped a charge. No payment has been collected.", "Admin testing mode");
       router.push(adminBypassHref ?? getAdminBypassTarget(payload));
@@ -163,7 +167,7 @@ export function RazorpayCheckoutButton({
           siteNotice.success("Your payment has been verified. Check the booking/order history for fulfilment status.", "Payment verified");
           const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
           if(onVerified){
-            try{await onVerified(paymentId);}catch{setStatus("Payment is verified. Complete your report from Payment History; do not pay again.");}
+            try{await onVerified(paymentId);}catch{setStatus("Payment is verified. Review Payment History and the purchased service before retrying; do not pay again.");}
           }else if (target) router.push(target);
           else router.refresh();
         } catch {

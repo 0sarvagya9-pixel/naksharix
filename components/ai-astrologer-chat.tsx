@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { useLanguage } from "@/components/language-provider";
 import { secureFetch } from "@/lib/security/csrf";
+import {AiCreditControls,useCreditAccount} from "@/components/ai-credit-controls";
 
 type ChatMessage = {
   id: string;
@@ -16,7 +17,7 @@ type ChatMessage = {
   content: string;
 };
 
-export function AiAstrologerChat() {
+export function AiAstrologerChat({creditFeature=false}:{creditFeature?:boolean}={}) {
   const { locale, apiLocale } = useLanguage();
   const labels = chatLabels(locale);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -25,6 +26,8 @@ export function AiAstrologerChat() {
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
+  const [paid,setPaid]=useState(false);
+  const creditAccount=useCreditAccount(creditFeature);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,7 +60,10 @@ export function AiAstrologerChat() {
         body: JSON.stringify({
           messages: outbound,
           language: apiLocale,
-          kundliContext: memory || undefined
+          kundliContext: memory || undefined,
+          consent,
+          billing:paid?"credit":"free",
+          creditRequestId:paid?userMessage.id:undefined
         })
       });
       const json = await response.json().catch(() => null);
@@ -77,6 +83,7 @@ export function AiAstrologerChat() {
     } catch {
       setStatus(labels.error);
     } finally {
+      if(paid){await creditAccount.refresh();setPaid(false);}
       setLoading(false);
     }
   }
@@ -217,6 +224,7 @@ export function AiAstrologerChat() {
               </CardContent>
             </Card>
 
+            {creditFeature?<Card className="inner-card"><CardContent className="p-4"><AiCreditControls account={creditAccount} paid={paid} onPaid={setPaid} busy={loading}/></CardContent></Card>:null}
             <Card className="inner-card border-[#263957] bg-[#0f1c3a]/82">
               <CardContent className="p-5">
                 <p className="text-sm font-semibold leading-6 text-[#f3d382]">{consent ? "AI processing consent accepted" : "Privacy consent required before sending"}</p>

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog } from "@/lib/reports/report-audit";
 import { notifyCapturedPujaPayment, notifyProcessedPujaRefund } from "@/lib/puja/payment-notifications";
+import {lockCreditAccount} from "@/lib/ai/credit-ledger";
 
 /** One-gateway post-capture state reconciliation. Idempotent; never reopens canceled work. */
 export async function reconcileCapturedPurpose(payment: Payment) {
@@ -51,6 +52,10 @@ export async function reconcileProcessedRefund(refund: {
   if (!original) return;
   const fullAmountPaise = Math.round(Number(original.amount) * 100);
   if (refund.amount !== fullAmountPaise) {
+    if(original.purpose==="AI_CREDITS"&&refund.amount!<fullAmountPaise){
+      // A signed partial refund requires human reconciliation; prevent any further spending of this grant.
+      await prisma.$transaction(async tx=>{await lockCreditAccount(tx,original.userId);await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null,suspendedAt:null,payment:{status:"PAID"}},data:{suspendedAt:new Date()}});});
+    }
     logger.warn("razorpay_partial_refund_requires_ledger_review", { paymentId: original.id });
     return;
   }
@@ -60,6 +65,7 @@ export async function reconcileProcessedRefund(refund: {
   // must re-run the WHOLE transaction, not leave a refunded payment with a
   // still-paid digital entitlement or an uncanceled shop order.
   const transitioned = await prisma.$transaction(async (tx) => {
+    if(original.purpose==="AI_CREDITS")await lockCreditAccount(tx,original.userId);
     const updated = await tx.payment.updateMany({
       where: { id: original.id, status: "PAID", providerPaymentId: refund.payment_id },
       data: {
@@ -68,6 +74,7 @@ export async function reconcileProcessedRefund(refund: {
       }
     });
     if (updated.count !== 1) return false;
+    if(original.purpose==="AI_CREDITS")await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null},data:{revokedAt:new Date()}});
 
     if (original.purpose === "SHOP_ORDER" && typeof meta.shopOrderId === "string") {
       await tx.shopOrder.updateMany({

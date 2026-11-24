@@ -44,7 +44,7 @@ export function PaymentHistory() {
         {payments.map((payment) => (
           <div key={payment.id} className="flex flex-col gap-3 rounded-md border border-[#D4AF37]/20 bg-[#02112C]/60 p-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="font-medium">{payment.purchasedReport?.title ?? payment.purpose}</p>
+              <p className="font-medium">{payment.purchasedReport?.title ?? (payment.purpose==="AI_CREDITS"?"AI response credits":payment.purpose)}</p>
               <p className="text-sm naksh-muted-text">{payment.currency} {payment.amount} - {payment.status}</p>
             </div>
             {["PENDING","FAILED"].includes(payment.status)&&payment.metadata?.reportId&&getReportSlugForPaidId(payment.metadata.reportId)&&!payment.metadata?.savedReportId&&!payment.reportRequest?(
@@ -60,6 +60,7 @@ export function PaymentHistory() {
               </Button>
             ) : null}
             {payment.reportRequest&&payment.status==="PAID"?<Button variant="outline" size="sm" asChild><Link href={`/report-request/success?id=${encodeURIComponent(payment.reportRequest.id)}`}>View report status</Link></Button>:null}
+            {payment.purpose==="AI_CREDITS"&&["PENDING","FAILED","PAID"].includes(payment.status)?<Button asChild variant="outline" size="sm"><Link href="/ai-astrologer">Review AI credit balance or existing purchase</Link></Button>:null}
             {payment.invoice ? (
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/api/invoices/${payment.invoice.id}`} target="_blank"><ReceiptText className="h-4 w-4" /> Payment receipt</Link>

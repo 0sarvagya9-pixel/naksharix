@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { seo } from "@/lib/seo";
+import {creditUsageEnabled} from "@/lib/ai/credit-ledger";
 
 export function generateMetadata(): Metadata {
   const ready = isAiAstrologerReady();
@@ -26,7 +27,7 @@ export function generateMetadata(): Metadata {
 }
 
 export default function AiAstrologerPage() {
-  return isAiAstrologerReady() ? <AiAstrologerChat /> : <AiUnavailablePage />;
+  return isAiAstrologerReady() ? <AiAstrologerChat creditFeature={creditUsageEnabled()} /> : <AiUnavailablePage />;
 }
 
 const ctaClassName = "mt-auto w-full bg-[#70283d] text-[#fff9f0] hover:bg-[#542032]";
