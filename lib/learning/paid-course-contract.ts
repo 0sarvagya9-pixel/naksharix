@@ -31,9 +31,9 @@ export function courseProgressKey(orderId:string,moduleId:string){
  return "paid-course-v1:"+orderId+":"+moduleId;
 }
 export function courseQuizResult(moduleId:string,answers:readonly number[]){
- const module=courseModules.find(m=>m.id===moduleId);
- if(!module||answers.length!==module.questions.length||answers.some(a=>!Number.isInteger(a)||a<0||a>2))return null;
- const feedback=module.questions.map((q,i)=>({correct:answers[i]===q.correct,explanation:q.explanation}));
+ const selectedModule=courseModules.find(m=>m.id===moduleId);
+ if(!selectedModule||answers.length!==selectedModule.questions.length||answers.some(a=>!Number.isInteger(a)||a<0||a>2))return null;
+ const feedback=selectedModule.questions.map((q,i)=>({correct:answers[i]===q.correct,explanation:q.explanation}));
  return {passed:feedback.every(x=>x.correct),feedback};
 }
 export function publicCourseModule(moduleId:string){

@@ -52,6 +52,7 @@ jobs:
           npx --no-install prisma validate --schema=prisma/schema.prisma
           npx --no-install prisma generate --schema=prisma/schema.prisma
           npm run typecheck
+          npx --no-install eslint lib/learning/paid-course.ts lib/learning/paid-course-contract.ts components/ai-membership-workspace.tsx
       - name: Deterministic contracts only (no live acceptance)
         if: always()
         shell: bash

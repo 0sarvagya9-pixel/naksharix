@@ -17,8 +17,8 @@ export async function readPaidCourse(userId:string,orderId:string,moduleId:strin
   const records=await tx.learningProgress.findMany({where:{userId,lessonId:{in:keys},completedAt:{not:null}},select:{lessonId:true}});
   const selected=moduleId??courseModules[0].id,index=courseModules.findIndex(m=>m.id===selected);
   if(index<0)return null;
-  const module=publicCourseModule(selected);
-  return {orderId,modules:courseModules.map((m,i)=>({id:m.id,title:studyChapters[i].title,completed:records.some(r=>r.lessonId===keys[i])})),lesson:{...module,chapter:studyChapters[index].body,title:studyChapters[index].title,exercise:studyChapters[index].exercise}};
+  const lessonModule=publicCourseModule(selected);
+  return {orderId,modules:courseModules.map((m,i)=>({id:m.id,title:studyChapters[i].title,completed:records.some(r=>r.lessonId===keys[i])})),lesson:{...lessonModule,chapter:studyChapters[index].body,title:studyChapters[index].title,exercise:studyChapters[index].exercise}};
  });
 }
 export async function assessPaidCourse(userId:string,orderId:string,moduleId:string,answers:number[]){
