@@ -161,6 +161,10 @@ const policyPages: Record<PolicyPageKey, PolicyPage> = {
           "Information may be shared with service providers only as needed to operate hosting, authentication, payment processing, email delivery, monitoring, and consultations. Approved astrologers should receive only the information needed for the booked service.",
       },
       {
+        title: "Optional Google Analytics",
+        body: "If separately enabled in Analytics privacy preferences, server-side Google Analytics may receive a random short-lived browser session identifier, a public page category, a general acquisition source and verified digital-report purchase totals with a pseudonymous transaction reference. We do not send birth information, report contents, email, phone, private URLs or payment instrument details to Google Analytics. Analytics is off by default, can be declined or withdrawn, respects Do Not Track and Global Privacy Control, and is not used for advertising personalization. Google handles received data under its own privacy terms. Our anonymous first-party daily counts are a separate preference.",
+      },
+      {
         title: "Advertising and Cookies",
         body:
           "If advertising is activated after site approval, Google and advertising partners may use cookies or similar technologies for ad delivery, measurement, and fraud prevention, subject to applicable privacy controls. Our public educational pages may contain labelled sponsored advertisements; private account data and birth details are not supplied to advertisers as targeting input. Regional consent messaging and choices are subject to the configured certified CMP where required. Learn more at /advertising or contact support.",

@@ -15,14 +15,15 @@ import { getPujaLaunchState, partnerSupportsTopic } from "@/lib/puja/launch-read
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { getReportPricing } from "@/lib/reports/pricing";
 import { getSubscriptionPlan } from "@/lib/revenue";
+import { googleSessionSchema, liveRazorpayAnalyticsOrder, sendGoogleCheckout } from "@/lib/analytics/google";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 import { shippingPayable,SHIPPING_TERMS_VERSION,readShippingSnapshot } from "@/lib/shop/shipping-rules";
 
 const schema = z.discriminatedUnion("purpose", [
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
-  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
-  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
-  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional() }),
+  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
   z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) }),
   z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1), feeTermsVersion: z.literal(PUJA_FEE_TERMS_VERSION) }),
   z.object({ purpose: z.literal("SHOP_ORDER"), shopOrderId: z.string().min(1), expectedTotalPaise:z.number().int().positive().max(1000000000).optional(),expectedOrderVersion:z.number().int().positive().optional(),shippingTermsVersion:z.literal(SHIPPING_TERMS_VERSION).optional() }).strict()
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
       return fail("An old payment attempt needs merchant reconciliation. Check payment history or contact support before paying again.", 409);
     if (reusable?.status === "PENDING" && reusable.providerOrderId) {
       if (body.purpose === "PUJA_BOOKING") await writeAuditLog({ actor: user, action: "puja.fee_terms_accepted", targetType: "Payment", targetId: reusable.id, metadata: { feeTermsVersion: body.feeTermsVersion } });
+      if ("analyticsSession" in body) await sendGoogleCheckout(request,body.analyticsSession,body.purpose,item.amount);
       return ok({
         keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         order: {
@@ -103,7 +105,7 @@ export async function POST(request: NextRequest) {
         status: "PENDING" as const,
         amount: item.amount,
         currency: "INR",
-        metadata: { ...item.metadata, reportRequestId, savedReportId }
+        metadata: { ...item.metadata, reportRequestId, savedReportId, analyticsLiveOrder: liveRazorpayAnalyticsOrder() }
     };
     // Reserve the Shop payment under the same lock as admin quote updates.
     // Do not open a second gateway order during an in-flight reservation.
@@ -165,6 +167,7 @@ export async function POST(request: NextRequest) {
       metadata: { purpose: body.purpose, amount: item.amount, reportRequestLinked: Boolean(reportRequestId) }
     });
 
+    if ("analyticsSession" in body) await sendGoogleCheckout(request,body.analyticsSession,body.purpose,item.amount);
     return ok({
       keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       order,

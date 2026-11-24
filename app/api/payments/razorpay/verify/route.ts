@@ -8,11 +8,13 @@ import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-au
 import { finalizePaidPayment, verifyRazorpayCapturedPayment, verifyRazorpayPaymentSignature } from "@/lib/revenue";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 import { reconcileCapturedPurpose } from "@/lib/payments/purpose-reconciliation";
+import { googleSessionSchema, sendVerifiedGooglePurchase } from "@/lib/analytics/google";
 
 const schema = z.object({
   razorpay_order_id: z.string().min(1),
   razorpay_payment_id: z.string().min(1),
-  razorpay_signature: z.string().min(1)
+  razorpay_signature: z.string().min(1),
+  analyticsSession: googleSessionSchema.optional().catch(undefined)
 });
 
 export async function POST(request: NextRequest) {
@@ -27,13 +29,14 @@ export async function POST(request: NextRequest) {
 
     const existingPayment = await prisma.payment.findUnique({
       where: { providerOrderId: body.razorpay_order_id },
-      select: { id: true, userId: true, amount: true, currency: true, status: true, providerPaymentId: true, metadata: true }
+      select: { id: true, userId: true, amount: true, currency: true, status: true, providerPaymentId: true, metadata: true, provider: true, purpose: true }
     });
     if (!existingPayment || existingPayment.userId !== user.id) return fail("Payment not found", 404);
     if (existingPayment.status === "PAID") {
       if (existingPayment.providerPaymentId !== body.razorpay_payment_id) {
         return fail("Payment ID does not match the completed order", 409);
       }
+      await sendVerifiedGooglePurchase(request,body.analyticsSession,existingPayment);
       return ok({ payment: existingPayment });
     }
     if (existingPayment.status === "REFUNDED" || existingPayment.status === "ADMIN_BYPASS" ||
@@ -92,6 +95,7 @@ export async function POST(request: NextRequest) {
         metadata: { provider: "razorpay" }
       });
     }
+    await sendVerifiedGooglePurchase(request,body.analyticsSession,payment);
     return ok({ payment });
   } catch (error) {
     return handleApiError(error);

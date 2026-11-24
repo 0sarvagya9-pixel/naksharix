@@ -52,9 +52,13 @@ assert(!/(1M\+|millions|98% Accuracy|10k\+ Expert|4\.8★)/i.test(home), "Unsupp
 
 assert(env.includes("GOOGLE_SITE_VERIFICATION"), "Search Console verification env supported", "Google site verification metadata can be configured externally");
 assert(layout.includes("analyticsQueryStringExcluded") === false, "No accidental ops payload marker in layout", "layout only contains analytics client code");
-assert(layout.includes("page_location:window.location.origin+window.location.pathname"), "Analytics excludes URL query strings", "birth/report/payment query data not forwarded in page_location");
-assert(layout.includes("allow_google_signals:false"), "Google Signals disabled", "privacy hardening enabled");
-assert(layout.includes("allow_ad_personalization_signals:false"), "Ad personalization signals disabled", "privacy hardening enabled");
+const gaTransport = source("lib/analytics/google.ts");
+const gaContract = source("lib/analytics/google-contract.ts");
+const gaRoute = source("app/api/analytics/google/route.ts");
+const gaClient = source("lib/analytics/google-client.ts");
+assert(!/googletagmanager|gtag\(/.test(layout) && gaRoute.includes("publicAnalyticsRoute(data.data.path)") && gaRoute.includes(".strict()") && gaContract.includes('page_location:"https://www.naksharix.com"+route.replace'), "Analytics excludes URL query strings and private paths", "no automatic browser tag; server-normalized public route categories only");
+assert(!/googletagmanager|gtag\(/.test(layout) && !/user_id|google_signals|user_data:/.test(gaTransport.replace('ad_user_data:', '')) && gaClient.includes("googleConsentKey"), "Google Signals collection absent from site integration", "no browser tag or account identifier; separate opt-in");
+assert(gaTransport.includes('ad_user_data:"DENIED"') && gaTransport.includes('ad_personalization:"DENIED"'), "Ad personalization signals disabled", "Measurement Protocol advertising consent explicitly denied");
 
 assert(exists("app/api/ops/readiness/route.ts"), "Public non-secret ops readiness endpoint exists", "/api/ops/readiness");
 assert(opsRoute.includes("X-Robots-Tag"), "Ops readiness endpoint is noindex", "operational endpoint not search-indexed");

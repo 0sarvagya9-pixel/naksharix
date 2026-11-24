@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { cookies, headers } from "next/headers";
 import { Cinzel, Cinzel_Decorative, Inter, Poppins } from "next/font/google";
 import "@/app/globals.css";
@@ -16,6 +15,7 @@ import { env, validateProductionEnv } from "@/lib/env";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/footer";
 import { AnalyticsPreferences } from "@/components/analytics-preferences";
+import { googleAnalyticsEnabled } from "@/lib/analytics/google";
 import { PwaRegister } from "@/components/pwa-register";
 import { SchemaMarkup } from "@/components/schema-markup";
 import { LanguageProvider } from "@/components/language-provider";
@@ -84,20 +84,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {children}
             </main>
             <Footer />
-            <AnalyticsPreferences />
+            <AnalyticsPreferences googleEnabled={googleAnalyticsEnabled()} />
           </PremiumGlassShell>
           <SiteNotificationCenter />
         </LanguageProvider>
         <PwaRegister />
         <SchemaMarkup />
-        {env.NEXT_PUBLIC_GA_ID ? (
-          <>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${env.NEXT_PUBLIC_GA_ID}`} strategy="afterInteractive" />
-            <Script id="ga" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${env.NEXT_PUBLIC_GA_ID}',{anonymize_ip:true,allow_google_signals:false,allow_ad_personalization_signals:false,page_location:window.location.origin+window.location.pathname});`}
-            </Script>
-          </>
-        ) : null}
       </body>
     </html>
   );
