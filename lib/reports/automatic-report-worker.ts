@@ -25,12 +25,12 @@ function languageFor(value:string){return value==="hi"||value==="hinglish"?value
 async function loadEntitled(id:string){
   const row=await prisma.reportRequest.findUnique({where:{id},include:{
     user:{select:{id:true,email:true,emailVerified:true,emailVerifiedAt:true,googleId:true}},
-    payment:{select:{id:true,userId:true,status:true,purpose:true,amount:true,currency:true,provider:true,metadata:true}}
+    payment:{select:{id:true,userId:true,status:true,purpose:true,amount:true,currency:true,provider:true,metadata:true,providerPaymentId:true}}
   }});
   if(!row||row.adminBypass||row.paymentStatus!=="PAID"||!row.user||!row.payment||row.status==="CANCELLED")return null;
   const product=getManualReportCheckout(row.reportSlug);
   const p=row.payment,meta=p.metadata as Record<string,unknown>|null;
-  if(!product||p.status!=="PAID"||p.userId!==row.user.id||p.provider!=="RAZORPAY"||p.currency!=="INR"||
+  if(!product||p.status!=="PAID"||!p.providerPaymentId||p.userId!==row.user.id||p.provider!=="RAZORPAY"||p.currency!=="INR"||
       String(p.purpose)!==product.purpose||Number(p.amount)!==product.amount||meta?.reportId!==product.reportId)return null;
   return row;
 }
