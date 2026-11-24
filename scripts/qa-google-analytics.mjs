@@ -24,4 +24,7 @@ check(()=>assert.match(read("app/api/payments/razorpay/verify/route.ts"),/verify
 check(()=>assert.match(read("app/api/payments/razorpay/order/route.ts"),/analyticsLiveOrder: liveRazorpayAnalyticsOrder\(\)/));
 check(()=>assert.match(read("app/api/payments/razorpay/order/route.ts"),/analyticsSession: googleSessionSchema\.optional\(\)\.catch\(undefined\)/));
 check(()=>assert.match(read("app/api/payments/razorpay/verify/route.ts"),/analyticsSession: googleSessionSchema\.optional\(\)\.catch\(undefined\)/));
+check(()=>assert.match(read("lib/analytics/google-client.ts"),/secureFetch\("\/api\/analytics\/google",\{method:"POST",silent:true/));
+check(()=>assert.match(read("lib/analytics/google.ts"),/transport_failed_or_unknown/));
+check(()=>assert.doesNotMatch(read("lib/analytics/google.ts"),/prisma\.auditLog\.delete\(/));
 console.log("GA4_CONTRACT="+n+"/"+n+"_PASS; NO_LIVE_NETWORK_OR_PAYMENT");

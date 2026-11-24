@@ -59,7 +59,8 @@ export async function sendVerifiedGooglePurchase(request:Request,session:GoogleS
   } catch { return; }
   try {
     const accepted=await send(session,[{name:"purchase",params:commerceParams(session,Number(payment.amount),transactionId)}]);
-    if(accepted) await prisma.auditLog.update({where:{id},data:{metadata:{state:"transport_accepted"}}}).catch(()=>{});
-    else await prisma.auditLog.delete({where:{id}}).catch(()=>{});
-  } catch { await prisma.auditLog.delete({where:{id}}).catch(()=>{}); }
+    // A timeout may follow a successful remote receipt. Retain the claim rather
+    // than risk a second purchase submission from another browser session.
+    await prisma.auditLog.update({where:{id},data:{metadata:{state:accepted?"transport_accepted":"transport_failed_or_unknown"}}}).catch(()=>{});
+  } catch { await prisma.auditLog.update({where:{id},data:{metadata:{state:"transport_failed_or_unknown"}}}).catch(()=>{}); }
 }

@@ -1,5 +1,5 @@
 "use client";
-import { getCsrfToken, csrfHeaderName } from "@/lib/security/csrf";
+import { secureFetch } from "@/lib/security/csrf";
 import { publicAnalyticsRoute, type AggregateEventName } from "@/lib/analytics/public-routes";
 import { classifySource, googleConsentKey, googleSessionKey, googleSources, googleMedia, type GoogleSession } from "@/lib/analytics/google-contract";
 
@@ -29,9 +29,8 @@ export function trackGooglePublicEvent(event: AggregateEventName) {
   if (!session || !publicAnalyticsRoute(location.pathname)) return;
   void (async()=>{
     const signal=AbortSignal.timeout(5000);
-    const token=await getCsrfToken(signal);
-    await fetch("/api/analytics/google",{method:"POST",credentials:"same-origin",signal,
-      headers:{"Content-Type":"application/json",[csrfHeaderName]:token},
+    await secureFetch("/api/analytics/google",{method:"POST",silent:true,signal,
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({consent:true,event,path:location.pathname,session})});
   })().catch(()=>{});
 }

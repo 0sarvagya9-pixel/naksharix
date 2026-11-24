@@ -15,6 +15,6 @@ export function trackFirstPartyEvent(eventName:AnalyticsEventName) {
   try {if(localStorage.getItem(analyticsConsentKey)!=='granted')return;}catch{return;}
   const path=publicAnalyticsRoute(window.location.pathname);if(!path)return;
   // Use the original public pathname only for server normalization; never search/hash or referrer.
-  void secureFetch('/api/analytics/aggregate',{method:'POST',headers:{'Content-Type':'application/json'},
+  void secureFetch('/api/analytics/aggregate',{method:'POST',silent:true,headers:{'Content-Type':'application/json'},
     signal:AbortSignal.timeout(6000),body:JSON.stringify({consent:true,event:eventName,path:window.location.pathname})}).catch(()=>{});
 }

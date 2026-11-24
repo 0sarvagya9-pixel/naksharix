@@ -28,7 +28,8 @@ export async function getCsrfToken(signal?: AbortSignal | null) {
  * A successful HTTP response is NEVER interpreted as successful payment or
  * completed fulfilment; those require explicit business confirmation in UI.
  */
-export async function secureFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+export async function secureFetch(input: RequestInfo | URL, options: RequestInit & { silent?: boolean } = {}) {
+  const { silent, ...init } = options;
   const method = (init.method ?? "GET").toUpperCase();
   const isMutation = !["GET", "HEAD", "OPTIONS"].includes(method);
   const headers = new Headers(init.headers);
@@ -41,6 +42,8 @@ export async function secureFetch(input: RequestInfo | URL, init: RequestInit = 
       credentials: init.credentials ?? "same-origin",
       headers
     });
+    // Background analytics must never produce customer-facing business notifications.
+    if (silent) return response;
     // Only acknowledge server-persisted business changes. An HTTP 200
     // from a payment *order/verification* endpoint must NOT be shown here
     // as paid, settled, delivered, or a confirmed ceremony.
@@ -100,7 +103,7 @@ export async function secureFetch(input: RequestInfo | URL, init: RequestInit = 
     }
     return response;
   } catch (error) {
-    if (isMutation && !(error instanceof Error && error.name === "AbortError")) {
+    if (!silent && isMutation && !(error instanceof Error && error.name === "AbortError")) {
       if (pathname.includes("/payments/") || pathname.includes("/razorpay/")) {
         siteNotice.warning(
           "Payment confirmation could not be checked. Review payment history before retrying; do not pay twice.",
