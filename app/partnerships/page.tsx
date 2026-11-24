@@ -45,7 +45,7 @@ export default function PartnershipsPage() {
             <h2 id="partner-enquiry-heading" className="font-cinzel text-xl font-bold">How to discuss a collaboration</h2>
             <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-7">
               <li>Sign in to your own Naksharix account and open the private Support Centre.</li>
-              <li>Describe your organization, relevant audience, public channel link and proposed educational format. Do not include anyone else's personal birth details, passwords or payment credentials.</li>
+              <li>Describe your organization, relevant audience, public channel link and proposed educational format. Do not include anyone else&apos;s personal birth details, passwords or payment credentials.</li>
               <li>Submit your enquiry and check the same Support Centre for any staff response. Submission is not approval, a booking, a fee agreement or a commission commitment.</li>
             </ol>
             <p className="mt-3 text-sm leading-6">No purchase is needed to enquire. Do not make commercial commitments or spend money on behalf of Naksharix without a separate agreement.</p>
@@ -73,7 +73,7 @@ export default function PartnershipsPage() {
           </section>
           <section aria-label="Responsible publishing" className="mt-8 rounded-2xl border border-[#ddc19b] p-5 text-sm leading-7">
             <h2 className="font-cinzel text-lg font-bold">Responsible publishing</h2>
-            <p>Disclose any relationship with Naksharix. Never promise guaranteed predictions, claim a medical or financial outcome, pressure a purchase, collect someone else's private details, or send unsolicited bulk promotions. Astrology is interpretive; free tools and choosing not to purchase remain valid options.</p>
+            <p>Disclose any relationship with Naksharix. Never promise guaranteed predictions, claim a medical or financial outcome, pressure a purchase, collect someone else&apos;s private details, or send unsolicited bulk promotions. Astrology is interpretive; free tools and choosing not to purchase remain valid options.</p>
             <p className="mt-3"><Link className="underline underline-offset-4" href="/blog/personalized-astrology-report-delivery-guide">Read the report delivery guide</Link> · <Link className="underline underline-offset-4" href="/privacy-policy">Privacy policy</Link> · <Link className="underline underline-offset-4" href="/refund-policy">Refund policy</Link></p>
           </section>
         </div>
