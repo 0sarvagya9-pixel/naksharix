@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/jwt";
-import { findPujaTopic } from "@/lib/puja/service-catalogue";
+import { findPujaTopic, findKumbhEvent, kumbhEventVisible, kumbhEventScheduleMatches } from "@/lib/puja/service-catalogue";
 import { getPujaLaunchState, partnerSupportsTopic } from "@/lib/puja/launch-readiness";
 import { pujaStatusNotice } from "@/lib/puja/customer-notices";
 import { getPujaRequestState } from "@/lib/puja/request-readiness";
@@ -61,12 +61,14 @@ export default async function MyPujas(){
       const partner = row.partnerId ? partnersById.get(row.partnerId) : null;
       const validatedPartner = partner ? partnerSupportsTopic(partner,row.topicId) : false;
       const currentOffer = release.offers[row.topicId];
+      const event=findKumbhEvent(row.topicId);
+      const eventPaymentAllowed=!event||(kumbhEventVisible(event)&&!!row.scheduledAt&&kumbhEventScheduleMatches(event,row.scheduledAt)&&row.city===event.city);
       const pendingOld = payment?.status==="PENDING" &&
         Date.now() - new Date(payment.createdAt).getTime() > 86400_000;
       const canCheckout = release.enabled && currentOffer?.pricePaise===row.quotedPricePaise &&
         row.quotedPricePaise === 110000 && row.status === "SCHEDULED" &&
         Boolean(row.scheduledAt && row.scheduledAt.getTime() > Date.now()) && validatedPartner &&
-        !paymentSettled && !pendingOld;
+        !paymentSettled && !pendingOld && eventPaymentAllowed;
       return <div className="mt-4 rounded-xl border border-[#e8cbaa] bg-[#fff8ed] p-4">
         <p className="text-sm font-semibold">Razorpay payment: {payment?.status||"NOT CHARGED"}</p>
         {!paymentSettled && !canCheckout?<p className="mt-2 text-xs">{pendingOld

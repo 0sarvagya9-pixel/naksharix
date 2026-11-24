@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { PUJA_STATUS_NOTICES } from "@/lib/puja/customer-notices";
 import { shortlistPujaPartners } from "@/lib/puja/partner-shortlist";
+import { findKumbhEvent,displayKumbhDate } from "@/lib/puja/service-catalogue";
 
 /** Two minimal transactional notices; never forward private Sankalp/gotra or
  * user phone number to email lists. In-app order history stays authoritative. */
@@ -15,6 +16,8 @@ export async function notifyPujaRequestCreated(input: {
     { customer: "unavailable", admin: "unavailable" };
   const tracking = new URL("/puja-bookings", env.NEXT_PUBLIC_APP_URL).toString();
   const status = PUJA_STATUS_NOTICES.REQUESTED;
+  const event=findKumbhEvent(input.topicId);
+  const eventDetails=event?["Event date: "+displayKumbhDate(event)+" (IST) — "+event.city, "Actual ceremony time and Pandit are not yet confirmed."]:[];
   const customer = await prisma.user.findUnique({
     where: { id: input.userId }, select: { email: true }
   }).catch(() => null);
@@ -26,7 +29,7 @@ export async function notifyPujaRequestCreated(input: {
         idempotencyKey: "puja-request-user-" + input.id,
         text: [
           "Namaste,", "", status.hi, "", status.en,
-          "Puja: " + input.topicName, "Request ID: " + input.id,
+          "Puja: " + input.topicName, "Request ID: " + input.id, ...eventDetails,
           "Track privately: " + tracking,
           "No booking or payment is confirmed by this message.",
           "Support: care@naksharix.com"
@@ -46,7 +49,7 @@ export async function notifyPujaRequestCreated(input: {
         idempotencyKey: "puja-request-admin-" + input.id,
         text: [
           "A new Puja request requires manual review.",
-          "Puja: " + input.topicName, "Reference: " + input.id,
+          "Puja: " + input.topicName, "Reference: " + input.id, ...eventDetails,
           "Check the authenticated admin queue: " + new URL("/admin/puja-bookings", env.NEXT_PUBLIC_APP_URL),
           "Verify Pandit capability, date/time, logistics and the price before inviting any payment.",
           shortlist.length ? "Verified matching candidates (contact individually; acceptance required): " + shortlist.map(p=>p.name+" ("+p.region+")").join(", ") : "No verified matching candidate found. Coordination team must arrange a suitable Pandit; keep the request pending.",

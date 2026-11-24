@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
-import { findPujaTopic } from "@/lib/puja/service-catalogue";
+import { findPujaTopic, findKumbhEvent } from "@/lib/puja/service-catalogue";
 import { PujaRequestClient } from "@/components/puja/booking-request-client";
 import { getCurrentUser } from "@/lib/auth/jwt";
 
@@ -20,5 +20,5 @@ export default async function PujaBookingPage({
   if (!topic) redirect("/pujas");
   const user=await getCurrentUser();
   return <PujaRequestClient topicId={topic.id} name={topic.name}
-    pricePaise={release.offers[item].pricePaise} signedIn={Boolean(user)} />;
+    pricePaise={release.offers[item].pricePaise} signedIn={Boolean(user)} event={findKumbhEvent(item)} />;
 }

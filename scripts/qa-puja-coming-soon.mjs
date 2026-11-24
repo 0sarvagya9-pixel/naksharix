@@ -24,7 +24,7 @@ assert.ok(release.includes('env.PUJA_BOOKINGS_ENABLED !== "true"') &&
   "Puja launch must fail closed without owner, payments, email and exact-topic Pandit");
 assert.ok(page.includes("Coming Soon") && page.includes("पूजा सेवाएँ") &&
   page.includes("नई पूजा बुकिंग") && page.includes('robots: { index: false, follow: true }') &&
-  page.includes("if (release.enabled) return <PujaServicesDirectory offerings={release.offers} />"),
+  page.includes("if (release.enabled) return <PujaServicesDirectory offerings={release.offers} initialNow={Date.now()} />"),
   "Puja page must show Coming Soon by default, live directory only after all checks");
 assert.ok(!page.includes("RazorpayCheckoutButton") && !page.includes("Book Now"),
   "Paused public page must never expose a payment CTA");
@@ -82,3 +82,20 @@ const feeButton=s("components/razorpay-checkout-button.tsx");
 assert.ok(feeButton.includes("feeDialog.current?.showModal()") && feeButton.includes("disabled={!feeAccepted || loading}") && feeButton.includes("feeTermsVersion: PUJA_FEE_TERMS_VERSION"),"Explicit pre-payment consent modal");
 assert.ok(s("lib/puja/partner-shortlist.ts").includes(".slice(0,10)") && notifications.includes("shortlistPujaPartners") && notifications.includes('reviewStatus: "VERIFIED"'),"Shortlist genuine matches; no invented acceptance");
 console.log("NAKSHARIX_PUJA_PAUSED_BY_DEFAULT=PASS;UNPAID_INTAKE_SEPARATE=YES;PAYMENT_BEFORE_SCHEDULE=BLOCKED;FEE_CONSENT_REQUIRED=YES;HISTORY=KEPT");
+
+const eventPromotion=s("components/puja/kumbh-event-promotion.tsx");
+assert.ok(s("app/page.tsx").includes("puja.enabled && <KumbhHomePromotion") && eventPromotion.includes("el.showModal()") &&
+ eventPromotion.includes("sessionStorage.setItem(PROMO_SESSION_KEY") && eventPromotion.includes("5000") && eventPromotion.includes("Close Kumbh promotion") &&
+ eventPromotion.includes("visibleKumbhEvents(now)") && eventPromotion.includes("kumbhEventRequestOpen(event,now)") &&
+ eventPromotion.includes("window.setInterval(update,30_000)") && eventPromotion.includes("Not an official Mela booking"),
+ "Kumbh homepage promotion is dismissible, session-limited, expires, and is independent of official booking");
+assert.ok(s("components/puja/puja-services-directory.tsx").includes("<KumbhEventCards") && s("app/puja-calendar/page.tsx").includes("<KumbhEventCards") &&
+ intake.includes("requestableKumbhEvents(now)") && bookApi.includes("input.preferredDate !== event.date") && bookApi.includes("input.city !== event.city") &&
+ bookApi.includes('if (event && !kumbhEventRequestOpen(event)) return { kind: "expired" as const }') &&
+ bookApi.includes("(!event && (day.getTime() < Date.now() + 24 * 3600_000") && bookApi.includes("paymentDueNow: false"),
+ "Date/location locked in API, exact future event exception to general 90 day intake, expired stale requests blocked in transaction");
+assert.ok(admin.includes("kumbhEventScheduleMatches(event,when)") && pay.includes("kumbhEventScheduleMatches(event,booking.scheduledAt)") &&
+ history.includes("eventPaymentAllowed") && s("lib/puja/offerings.ts").includes("kumbhEventVisible(event,now)") &&
+ sitemap.includes("filter(id=>!findKumbhEvent(id))"),
+ "Event expiration preserves existing history but prevents invalid scheduled payments and stale public listings");
+console.log("KUMBH_EVENT_PROMOTION_AND_SERVER_ADMISSION=PASS");

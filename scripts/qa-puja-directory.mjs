@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { pujaTopics, pujaCategories, findPujaTopic } from "../lib/puja/service-catalogue.ts";
+import { pujaTopics, pujaCategories, findPujaTopic, allPujaTopics, kumbhEvents, visibleKumbhEvents, requestableKumbhEvents, findKumbhEvent, kumbhEventDayStart, kumbhEventDayEnd, kumbhEventVisible, kumbhEventRequestOpen, kumbhEventScheduleMatches, KUMBH_2027_SOURCE } from "../lib/puja/service-catalogue.ts";
 assert.ok(pujaTopics.length >= 90, "PUJA_TYPES_INCOMPLETE");
 assert.equal(new Set(pujaTopics.map(p=>p.id)).size, pujaTopics.length);
 assert.equal(new Set(pujaTopics.map(p=>p.description)).size, pujaTopics.length, "PUJA_COPY_NOT_UNIQUE");
@@ -10,6 +10,36 @@ for(const category of pujaCategories.slice(1))assert.ok(pujaTopics.some(p=>p.cat
 assert.equal(findPujaTopic("rudrabhishek")?.name,"Rudrabhishek");
 assert.equal(findPujaTopic("fake-paid-puja"),undefined);
 console.log("PUJA_DIRECTORY_QA=PASS;TOPICS="+pujaTopics.length+";PAID_BOOKING=OFF");
+
+assert.equal(kumbhEvents.length,7,"All seven date-specific Kumbh Puja offers");
+assert.deepEqual(kumbhEvents.map(e=>e.date),["2027-06-15","2027-07-29","2027-08-02","2027-08-31","2027-09-11","2027-09-12","2027-09-30"]);
+assert.equal(new Set(allPujaTopics.map(p=>p.id)).size,allPujaTopics.length);
+assert.equal(kumbhEvents.find(e=>e.date==="2027-09-12").city,"Trimbakeshwar");
+assert.ok(KUMBH_2027_SOURCE.startsWith("https://simhasthamahakumbh.maharashtra.gov.in/"));
+const campaignStart=Date.parse("2026-11-24T00:00:00+05:30");
+assert.equal(visibleKumbhEvents(campaignStart-1).length,0);
+assert.equal(requestableKumbhEvents(campaignStart).length,7);
+for(const e of kumbhEvents){
+ const start=kumbhEventDayStart(e),end=kumbhEventDayEnd(e);
+ assert.equal(start,Date.parse(e.date+"T00:00:00+05:30"),"IST boundary");
+ assert.equal(end-start,86400000);
+ assert.equal(findKumbhEvent(e.id),e);
+ assert.ok(kumbhEventRequestOpen(e,start-1));
+ assert.ok(!kumbhEventRequestOpen(e,start));
+ assert.ok(kumbhEventVisible(e,start));
+ assert.ok(kumbhEventVisible(e,end-1));
+ assert.ok(!kumbhEventVisible(e,end));
+ assert.ok(kumbhEventScheduleMatches(e,new Date(start)));
+ assert.ok(kumbhEventScheduleMatches(e,new Date(end-1)));
+ assert.ok(!kumbhEventScheduleMatches(e,new Date(start-1)));
+ assert.ok(!kumbhEventScheduleMatches(e,new Date(end)));
+ assert.ok(!kumbhEventScheduleMatches(e,new Date("invalid")));
+ assert.equal(findPujaTopic(e.id)?.name,e.pujaName,"Historical request name survives expiration");
+}
+assert.equal(requestableKumbhEvents(Date.parse("2027-09-30T00:00:00+05:30")).length,0);
+assert.equal(visibleKumbhEvents(Date.parse("2027-09-30T23:59:59.999+05:30")).length,1);
+assert.equal(visibleKumbhEvents(Date.parse("2027-10-01T00:00:00+05:30")).length,0);
+console.log("KUMBH_2027_LIFECYCLE=PASS;7_DATED_PUJAS;IST_CUTOFFS;HISTORY_PRESERVED;SOURCE_REVIEWED");
 
 const photosSource = (await import("node:fs")).readFileSync("lib/puja/editorial-photos.ts","utf8");
 const topicPhotoIds=[...photosSource.matchAll(/^\s*"([a-z0-9-]+)": \{src:/gm)].map(m=>m[1]);

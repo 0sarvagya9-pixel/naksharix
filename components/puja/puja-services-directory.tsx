@@ -8,8 +8,9 @@ import { pujaTopics,pujaCategories } from "@/lib/puja/service-catalogue";
 import { pujaEditorialPhoto, pujaEditorialImage } from "@/lib/puja/editorial-photos";
 import { ResilientEditorialImage } from "@/components/puja/resilient-editorial-image";
 import type { PublicPujaOffer } from "@/lib/puja/offerings";
+import { KumbhEventCards } from "@/components/puja/kumbh-event-promotion";
 
-export function PujaServicesDirectory({offerings}:{offerings:Record<string,PublicPujaOffer>}) {
+export function PujaServicesDirectory({offerings,initialNow}:{offerings:Record<string,PublicPujaOffer>;initialNow:number}) {
   const [query,setQuery]=useState("");
   const [hydrated,setHydrated]=useState(false);
   useEffect(()=>setHydrated(true),[]);
@@ -29,7 +30,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
           <p className="text-xs font-bold uppercase tracking-[.22em] text-[#f8d389]">Naksharix • Sacred traditions</p>
           <h1 className="mt-4 font-cinzel text-4xl font-black leading-tight md:text-6xl">Puja &amp; <span className="text-[#ffcf80]">Vedic Traditions</span></h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[#f1e3e2]">
-            Browse {Object.keys(offerings).length} Puja topics open for preferred-date requests.
+            Browse {pujaTopics.filter(p=>Boolean(offerings[p.id])).length} traditional Puja topics and featured seasonal events.
             Submit a preferred date first. The Pandit must accept your ceremony and the schedule must be confirmed before payment.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
@@ -42,6 +43,7 @@ export function PujaServicesDirectory({offerings}:{offerings:Record<string,Publi
         </div>
       </div>
     </section>
+    <KumbhEventCards offerings={offerings} initialNow={initialNow}/>
     <section id="puja-directory" aria-labelledby="puja-catalogue-heading" className="mx-auto max-w-7xl px-5 pt-12 lg:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>

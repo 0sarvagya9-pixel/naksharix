@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export default async function PujasPage() {
   const release = await getPujaLaunchState();
-  if (release.enabled) return <PujaServicesDirectory offerings={release.offers} />;
+  if (release.enabled) return <PujaServicesDirectory offerings={release.offers} initialNow={Date.now()} />;
   return (
     <main className="relative isolate flex min-h-[75vh] items-center overflow-hidden bg-[#fffaf4] px-4 py-16 text-[#492d33] sm:px-6 sm:py-24">
       <div aria-hidden="true" className="pointer-events-none absolute -left-20 top-0 h-80 w-80 rounded-full bg-[#f5d5a6]/35 blur-3xl" />
