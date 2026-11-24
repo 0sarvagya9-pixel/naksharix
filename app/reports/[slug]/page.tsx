@@ -181,7 +181,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") {
     return {
       request: "Review request submit करें",
-      payAndContinue: "विवरण जाँचें और आगे बढ़ें",
+      payAndContinue: "विवरण जाँचें",
       contactSupport: "सपोर्ट से संपर्क करें",
       emailSupport: "ईमेल सपोर्ट",
       price: "Report fee",
@@ -205,7 +205,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hinglish") {
     return {
       request: "Submit Review Request",
-      payAndContinue: "Validate details & continue",
+      payAndContinue: "Validate details",
       contactSupport: "Contact Support",
       emailSupport: "Email Support",
       price: "Report fee",
@@ -228,7 +228,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
 
   return {
     request: "Submit Review Request",
-    payAndContinue: "Validate details & continue",
+    payAndContinue: "Validate details",
     contactSupport: "Contact Support",
     emailSupport: "Email Support",
     price: "Report fee",

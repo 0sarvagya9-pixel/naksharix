@@ -274,12 +274,15 @@ test.describe("Naksharix release browser QA", () => {
   test("all fifteen premium report cards display fixed verified checkout prices", async ({ page }) => {
     await page.goto(absolute("/reports"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { level: 1, name: "Premium Astrology Reports" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Pay INR [0-9,]+$/ })).toHaveCount(15);
+    await expect(page.getByRole("button", { name: /^Validate details INR [0-9,]+$/ })).toHaveCount(15);
     await expect(page.getByText("Fee confirmation required")).toHaveCount(0);
     await expect(page.getByText("15 clearly priced personalized reports")).toBeVisible();
-    await page.getByRole("button", { name: "Pay INR 399" }).first().click();
+    let orderRequests = 0;
+    await page.route("**/api/payments/razorpay/order", async route => { orderRequests++; await route.abort(); });
+    await page.getByRole("button", { name: "Validate details INR 399" }).first().click();
     await expect(page).toHaveURL(/\/login\?redirectTo=%2Freports/i);
     await expect(page.getByRole("heading", { name: "Login to Naksharix" })).toBeVisible();
+    expect(orderRequests).toBe(0);
   });
 
   test("pricing exposes only active services", async ({ page }) => {
