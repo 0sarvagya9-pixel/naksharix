@@ -1,0 +1,108 @@
+# World-class development scope and release gate
+
+Owner instruction: do not deploy until explicitly authorized. This register distinguishes source changes from verified completion. SOURCE = relevant source implementation staged but not yet qualified. PARTIAL = some implementation only. OPEN = work not closed. EXTERNAL = actual outside evidence/approval/provider/merchant/fulfilment is needed. POST_APPROVAL = real live acceptance deferred. EXISTING = existing product, not proof of this release or revenue. No item marked fully verified on the development branch.
+
+## Audit action register (52)
+
+| ID | Scope | State | Remaining acceptance / implementation |
+|---|---|---|---|
+| 01 | Production backup receipt | OPEN | Investigate failed receipt, restore isolated backup and obtain fresh genuine receipt; no production mutation during hold. |
+| 02 | Shubh Muhurat | SOURCE | Computed Delhi Abhijit and Panchang, explicit local reference; compare authoritative fixtures. |
+| 03 | Core calculators | SOURCE | Replace seeded planetary signs with computed chart provider, timezone and location; test name invariance. |
+| 04 | Legacy matching API | SOURCE | Real chart-based Ashtakoot; verify legacy contract and eight factors. |
+| 05 | Historical paid Puja | EXTERNAL | Read-only merchant and order evidence reconciliation; no invented partner or scheduled time. |
+| 06 | Google callback role mutation | SOURCE | GET read-only, explicit authenticated CSRF POST, verified email and atomic role/profile mutation. |
+| 07 | Password recovery | SOURCE | One-time HMAC reset, expiry, quotas and session invalidation; verify actual email receipt and race cases. |
+| 08 | Password visibility | SOURCE | Accessible password visibility/autocomplete on auth and reset forms. |
+| 09 | OTP checkout return | SOURCE | Preserve sanitized destination through verification; test end-to-end. |
+| 10 | Google redirect | SOURCE | Handle safe next destination; verify provider callback and registration. |
+| 11 | Professional signup | SOURCE | Explicit professional role query preselection. |
+| 12 | Unverified accounts | OPEN | Verify mail configuration, analyze aggregate onboarding; never verify users artificially. |
+| 13 | Authentication heading semantics | SOURCE | Primary H1 semantics; verify keyboard and screen-reader behavior. |
+| 14 | Auth translations | PARTIAL | Reset EN/HI text; all auth/OTP/role messages still need complete locale parity. |
+| 15 | Stale report orders | SOURCE | Exact merchant-order recovery and serialized reservation; unknown/partial/refunded states fail closed; independent gateway tests pending. |
+| 16 | Validate before payment | SOURCE | Direct fixed-price report server preflight, signed eligibility claim, same-page paid detail submission; verify all entry points and legacy compatibility. |
+| 17 | Differentiated report benefits | SOURCE | Integrated PR153, catalogue and detail copy backed by actual report renderer. |
+| 18 | Report comparison | SOURCE | Compare up to three actual priced catalogue entries; verify accessibility and mobile. |
+| 19 | Sample PDF | SOURCE | Actual renderer-based fictional sample generation for 15 supported reports; outputs not rendered/inspected yet. |
+| 20 | Live report delivery | POST_APPROVAL | Real purchase-to-delivery, email, retry, download and permission acceptance require explicit approval. |
+| 21 | Independent astrology accuracy | OPEN | Cross-check real ephemerides and reference charts; do not claim certification. |
+| 22 | 2027 horoscope | PARTIAL | Paid SKU corrected to rolling twelve-month content; public annual calendar-year engine/routes/API and fixtures remain open. |
+| 23 | Astrologer approvals | EXTERNAL | Genuine credential review and provider availability needed. |
+| 24 | Verified Pandit | EXTERNAL | Actual partner due diligence and acceptance. |
+| 25 | Pending Puja requests | EXTERNAL | Operator and partner confirmation with genuine scheduling; preserve historical records. |
+| 26 | Paid Puja activation | EXTERNAL | Existing launch gates remain; real fulfilment readiness and authorization needed. |
+| 27 | Consultation availability | EXTERNAL | Genuine approved practitioners and bookable slots. |
+| 28 | Shop fulfilment | EXTERNAL | Actual supplier, inventory, shipping, payment and tracking evidence. |
+| 29 | Push notifications | OPEN | Permission-based subscription, secure delivery, revoke and actual device testing. |
+| 30 | Google homepage canonical | EXTERNAL | Technical canonical live before hold; Google recrawl/index decision outside direct control. |
+| 31 | Report index coverage | EXTERNAL | Confirm index coverage through Search Console and improve actual content if needed. |
+| 32 | Panchang and matching indexing | EXTERNAL | Search engine indexing evidence; no guaranteed ranking. |
+| 33 | Seasonal indexing | EXTERNAL | Search Console recrawl of deployed seasonal routes. |
+| 34 | Hindi About indexing | EXTERNAL | Search engine discovery/index confirmation. |
+| 35 | Genuine backlinks | EXTERNAL | Earn independently published editorial links; no outreach launch during hold. |
+| 36 | AI citations | EXTERNAL | Independently observe actual citations; no fabricated metrics. |
+| 37 | GA4 data | OPEN | Validate consent-aware measurement and actual reporting; no fake purchase events. |
+| 38 | Durable marketing consent | SOURCE | Integrated PR151 schema, additive migration source, verified opt-in/withdrawal; migration and suppression acceptance pending. |
+| 39 | Opt-in acquisition / partnership | SOURCE | Integrated PR144 private authenticated partner enquiries and public resources; consent operations pending. |
+| 40 | Homepage conversion UI | OPEN | Review and implement prioritized CTA improvements without deceptive claims. |
+| 41 | Mobile popup behavior | OPEN | Collision/dismissal/scroll/keyboard and device QA. |
+| 42 | Report UI | PARTIAL | Comparison, sample links, one-column mobile cards and benefits implemented; sticky CTA and actual responsive acceptance pending. |
+| 43 | Unified authentication UI | PARTIAL | Recovery, redirect and role UX improved; unified layout and complete interaction polish pending. |
+| 44 | Language consistency | OPEN | Complete EN/HI/Hinglish across forms, checkout, account and PDFs. |
+| 45 | International experience | PARTIAL | Explicit IANA/DST and offset calculation repair; global birthplace, international merchant and currency acceptance remain. |
+| 46 | Monitoring | OPEN | Central error tracking, privacy controls, alert verification and incident runbook. |
+| 47 | Scalability | OPEN | Shared cache or proven DB fallback, concurrency and rate-limit qualification. |
+| 48 | Admin acceptance | POST_APPROVAL | Real authenticated admin workflows, refunds, reporting and mobile UI. |
+| 49 | Professional dashboard and payout | PARTIAL | Secure explicit professional application; full schedule, session, earnings and payout acceptance requires real approved provider. |
+| 50 | Real payment lifecycle | POST_APPROVAL | Actual authorized test charge, invoice, capture, recovery and refund evidence. |
+| 51 | Real devices and slow network | POST_APPROVAL | Physical-device acceptance and network tests. |
+| 52 | Independent accessibility | PARTIAL | Heading and label improvements; full keyboard, screen reader, contrast and form-error acceptance pending. |
+
+## Revenue capability register (35)
+
+| ID | Scope | State | Remaining acceptance / implementation |
+|---|---|---|---|
+| 01 | Premium Kundli | EXISTING | Existing SKU; verify full delivery and actual sample. |
+| 02 | Couple matching | EXISTING | Existing SKU; real matching and permission checks. |
+| 03 | Career report | EXISTING | Existing SKU; differentiated content. |
+| 04 | Numerology / Lo Shu | EXISTING | Existing SKU; independently validate calculations. |
+| 05 | Baby name | EXISTING | Existing SKU; name suggestions and limitations. |
+| 06 | Business name numerology | OPEN | Dedicated business-name report scope, engine output and merchant-approved SKU. |
+| 07 | Yearly 2027 | PARTIAL | Rolling 12-month SKU accurate; calendar-year 2027 public product still pending. |
+| 08 | Complete Life bundle | OPEN | Real component fulfilment, quantity, per-component ledger and approved price. |
+| 09 | Family package | OPEN | Per-person consent, input and distinct private report delivery. |
+| 10 | Marriage planning | OPEN | Real couple report + optional approved consultation; itemized availability and price. |
+| 11 | Human reviewed add-on | OPEN | Verified reviewer, workflow and truthful review evidence. |
+| 12 | AI credits | OPEN | Metered cost and balance ledger, concurrency, limits and provider acceptance. |
+| 13 | AI membership | OPEN | Recurring billing, limits, cancellation and renewals, approved price. |
+| 14 | Astrologer chat | EXTERNAL | Existing consultation foundation; genuine availability, session metering and payout. |
+| 15 | Astrologer voice | EXTERNAL | Actual voice channel, consent, duration and settlement. |
+| 16 | Video consultation | EXTERNAL | Actual video channel and verified provider. |
+| 17 | Written consultation | OPEN | Private request, acceptance, deliverable, refund and payout. |
+| 18 | Follow-up packages | OPEN | Multi-session entitlement, provider agreement and expiry. |
+| 19 | Individual Puja | EXTERNAL | Existing booking request foundation; real partner/fulfilment gate. |
+| 20 | Group festival Puja | OPEN | Group capacity, verified organizer, participant fulfilment and refund. |
+| 21 | Kumbh Puja | EXTERNAL | Existing seasonal requests; partner, date and evidence required. |
+| 22 | Annual Puja | OPEN | Actual multi-event entitlement, capacity, cancellation. |
+| 23 | Temple Chadhava | OPEN | Authorized temple contract, accurate services, receipts. |
+| 24 | Prasad delivery | OPEN | Verified fulfilment, food safety, addresses and shipping. |
+| 25 | Premium reminders | OPEN | Opt-in notifications, calendar entitlements, delivery and cancellation. |
+| 26 | Courses | OPEN | Actual course materials, access rights and progress. |
+| 27 | Webinars | OPEN | Host, dates, seat entitlement, delivery and cancellation. |
+| 28 | Ebooks | OPEN | Original/licensed content, secure delivery and price. |
+| 29 | Printed Kundli | OPEN | Print partner, fulfilment and shipping terms. |
+| 30 | Professional SaaS | OPEN | Tenant isolation, access control, report metering and billing. |
+| 31 | White-label | OPEN | Brand licensing, tenant assets and privacy review. |
+| 32 | Astrology API | OPEN | Scoped credentials, documented real endpoints, rate limits and usage billing. |
+| 33 | Matrimonial integration | OPEN | Authorized integration contracts, partner consent and data minimization. |
+| 34 | Publisher widgets | OPEN | Embeddable accessible components, signed tenant origins and licensed use. |
+| 35 | AdSense | EXTERNAL | Maintain compliant existing foundation; actual Google approval and advertising policy. |
+
+## Release checklist
+
+- Preserve production commit and alias; no preview or production deployment.
+- Reconcile original PRs 144/151/153 already incorporated in this branch; do not independently merge them during hold.
+- Review TypeScript and schema contracts, migrations, source and isolated fixtures; no final production testing until owner permits.
+- Close each OPEN/PARTIAL implementation and record concrete evidence. External requirements cannot be counted as complete without real evidence. No proposed prices become live without approval.
+- Independent full CI, build, visual/mobile and security acceptance, database migration plan and rollback, authenticated business flow tests, then explicit approved release and real post-deploy verification. Never claim complete based on this register.
