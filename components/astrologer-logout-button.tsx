@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { LogOut } from "lucide-react";
 import { secureFetch } from "@/lib/security/csrf";
+import {disableCurrentPushDevice} from "@/lib/notifications/push-client";
 
 export function AstrologerLogoutButton() {
   const pending = useRef(false);
@@ -17,6 +18,7 @@ export function AstrologerLogoutButton() {
     const timeout = setTimeout(() => controller.abort(), 20000);
     let confirmed = false;
     try {
+      await disableCurrentPushDevice().catch(()=>{});
       const response = await secureFetch("/api/auth/logout", { method: "POST", signal: controller.signal });
       const body = await response.json();
       if (!response.ok || body?.data?.loggedOut !== true) throw new Error("Logout not confirmed");

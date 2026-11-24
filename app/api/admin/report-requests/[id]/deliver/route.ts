@@ -6,6 +6,7 @@ import { env } from "@/lib/env";
 import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { sendReportDeliveryEmail } from "@/lib/reports/report-delivery-service";
+import {notifyAccountUpdate} from "@/lib/notifications/web-push";
 
 type Params = Promise<{ id: string }>;
 
@@ -79,6 +80,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       targetId: reportRequest.id,
       metadata: { deliveryMode: "email", storageDriver: reportRequest.generatedPdfStorageDriver ?? "database" }
     });
+    if(updated.userId&&!updated.adminBypass&&updated.paymentStatus==="PAID")await notifyAccountUpdate({userId:updated.userId,kind:"report",reference:updated.id,status:"PDF_READY"});
     return ok({ reportRequest: updated, delivery: sent });
   } catch (error) {
     return handleApiError(error);

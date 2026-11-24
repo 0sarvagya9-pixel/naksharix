@@ -34,7 +34,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 | 26 | Paid Puja activation | EXTERNAL | Existing launch gates remain; real fulfilment readiness and authorization needed. |
 | 27 | Consultation availability | EXTERNAL | Genuine approved practitioners and bookable slots. |
 | 28 | Shop fulfilment | EXTERNAL | Actual supplier, inventory, shipping, payment and tracking evidence. |
-| 29 | Push notifications | OPEN | Permission-based subscription, secure delivery, revoke and actual device testing. |
+| 29 | Push notifications | SOURCE | Default-off opt-in device registration, encrypted endpoints, strict HTTPS push-service allowlist, RFC 8292 VAPID payloadless delivery, real report/Puja/shop status hooks, provider-outcome dedupe, revoke and logout controls, additive migration and QA. Actual key configuration and device/provider delivery acceptance pending. |
 | 30 | Google homepage canonical | EXTERNAL | Technical canonical live before hold; Google recrawl/index decision outside direct control. |
 | 31 | Report index coverage | EXTERNAL | Confirm index coverage through Search Console and improve actual content if needed. |
 | 32 | Panchang and matching indexing | EXTERNAL | Search engine indexing evidence; no guaranteed ranking. |

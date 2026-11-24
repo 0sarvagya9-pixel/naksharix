@@ -3,6 +3,7 @@ import { Section } from "@/components/section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
+import {PushPreferences} from "@/components/push-preferences";
 
 export default async function ProfilePage() {
   const user = await requireRole(["USER", "ASTROLOGER", "CONSULTANT", "ADMIN", "SUPER_ADMIN"]);
@@ -22,6 +23,7 @@ export default async function ProfilePage() {
         </CardContent>
       </Card>
 
+      <PushPreferences/>
       <Card className="glass mt-6">
         <CardHeader>
           <CardTitle className="font-cinzel">My Orders / My Report Requests</CardTitle>

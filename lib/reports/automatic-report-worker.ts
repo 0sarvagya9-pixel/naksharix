@@ -9,6 +9,7 @@ import { assembleAutomaticPaidReport } from "@/lib/reports/automatic-report-cont
 import { generatePremiumReportPdf } from "@/lib/reports/premium-report-generation-service";
 import { saveReportPdf,loadReportPdf } from "@/lib/storage/report-storage";
 import { sendReportDeliveryEmail } from "@/lib/reports/report-delivery-service";
+import {notifyAccountUpdate} from "@/lib/notifications/web-push";
 import { writeAuditLog,writeReportStatusHistory } from "@/lib/reports/report-audit";
 import type { ReportRequest } from "@prisma/client";
 
@@ -88,6 +89,7 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
           generatedPdfStorageDriver:stored.storageDriver,generatedPdfSize:stored.size,generatedAt:new Date(),deliveryError:null}
       });
       if(write.count!==1)return "skipped";
+      if(row.userId)await notifyAccountUpdate({userId:row.userId,kind:"report",reference:id,status:"PDF_READY"});
       await writeReportStatusHistory({reportRequestId:id,oldStatus:"IN_PROGRESS",newStatus:"GENERATED",note:"Automatic report calculated from validated customer inputs; PDF stored.",metadata:{source:"automatic_paid_report",size:stored.size}});
       await writeAuditLog({action:"report_pdf.automatically_generated",targetType:"ReportRequest",targetId:id,metadata:{reportSlug:row.reportSlug,size:stored.size,storageDriver:stored.storageDriver}});
     }catch{

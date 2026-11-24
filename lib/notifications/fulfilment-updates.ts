@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email/email-service";
 import { logger } from "@/lib/monitoring/logger";
 import { env } from "@/lib/env";
 import { pujaStatusNotice } from "@/lib/puja/customer-notices";
+import {notifyAccountUpdate} from "@/lib/notifications/web-push";
 
 type FulfilmentKind = "shop" | "puja";
 export type FulfilmentNotice = {
@@ -49,6 +50,11 @@ export async function notifyCustomerOfFulfilmentChange(input: {
   const detail = input.kind === "puja" ? pujaStatusNotice(input.status) : null;
   const description = detail ? detail.en : statusMessages[input.kind][input.status];
   if (!description) return { outcome: "not_needed" };
+  // The caller persists actual fulfilment state first. Reconfirm ownership/status before generic push.
+  if(env.WEB_PUSH_ENABLED==="true"){
+    const current=input.kind==="puja"?await prisma.pujaBookingRequest.findFirst({where:{id:input.reference,userId:input.userId,status:input.status},select:{id:true}}).catch(()=>null):await prisma.shopOrder.findFirst({where:{id:input.reference,userId:input.userId,status:input.status},select:{id:true}}).catch(()=>null);
+    if(current)await notifyAccountUpdate({userId:input.userId,kind:input.kind,reference:input.reference,status:input.status});
+  }
   let email: string | undefined;
   try {
     const user = await prisma.user.findUnique({ where: { id: input.userId }, select: { email: true } });
