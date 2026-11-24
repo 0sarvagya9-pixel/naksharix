@@ -69,3 +69,9 @@ assert.ok(captureWebhook.includes("Payment verification temporarily unavailable"
 assert.ok(captureVerify.includes("Payment requires reconciliation before acknowledgement")&&captureVerify.includes("return ok({ payment: current })"));
 assert.ok(refundReconcile.includes("if(signedTotal===null)return;")&&refundReconcile.includes("const effectiveRefund=signedTotal;"));
 console.log("CAPTURE_REFUND_ORDERING_SOURCE_CONTRACT_PASS; real gateway and concurrent DB acceptance pending");
+
+const reportCreate=readFileSync("app/api/report-requests/route.ts","utf8");
+const reportLock=reportCreate.indexOf("await lockProviderPayment(tx,providerPaymentId)"),reportRefund=reportCreate.indexOf("await cumulativeSignedRefund(tx,providerPaymentId)"),reportRowLock=reportCreate.indexOf("FOR UPDATE"),reportRead=reportCreate.indexOf("const current=await tx.payment.findUnique"),reportDuplicate=reportCreate.indexOf("const existing=await tx.reportRequest.findUnique"),reportInsert=reportCreate.indexOf("const row=await tx.reportRequest.create");
+assert.ok(reportLock>=0&&reportRefund>reportLock&&reportRowLock>reportRefund&&reportRead>reportRowLock&&reportDuplicate>reportRead&&reportInsert>reportDuplicate);
+assert.ok(reportCreate.includes("current.status!==PaymentStatus.PAID")&&reportCreate.includes("current.userId!==user.id")&&reportCreate.includes("current.providerPaymentId!==providerPaymentId")&&reportCreate.includes("if(existing)return {row:existing,created:false}")&&reportCreate.includes("if(!result.created)"));
+console.log("PAID_REPORT_REQUEST_REFUND_AND_DUPLICATE_SOURCE_GUARD_PASS");
