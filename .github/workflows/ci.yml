@@ -98,6 +98,8 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - name: Run complete QA suite
+        env:
+          REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
         shell: bash
         run: |
           set +e
@@ -114,6 +116,17 @@ jobs:
           name: quality-qa-log
           path: quality-qa.log
           if-no-files-found: warn
+      - name: Verify and upload synthetic premium report renderings
+        shell: bash
+        env:
+          REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
+        run: test "$(find "$REPORT_VISUAL_QA_DIR" -type f -name '*.pdf' | wc -l)" = 45
+      - uses: actions/upload-artifact@v4
+        with:
+          name: premium-report-editorial-visual-fixtures
+          path: ${{ runner.temp }}/report-visual-qa
+          retention-days: 3
+          if-no-files-found: error
       - run: node scripts/qa-csrf-coverage.mjs
       - run: node scripts/qa-i18n-safety.mjs
       - run: npm run lint

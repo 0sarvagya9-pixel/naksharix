@@ -16,7 +16,6 @@ jobs:
       EMAIL_PROVIDER: disabled
       AI_ASTROLOGER_ENABLED: "false"
       AI_REPORT_GENERATOR_ENABLED: "false"
-      REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +29,11 @@ jobs:
       - run: npx prisma generate
       - run: npm run typecheck
       - run: node scripts/qa-automatic-report-delivery.mjs
+        env:
+          REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
       - name: Verify 45 genuine synthetic PDF samples
+        env:
+          REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
         run: |
           set -euo pipefail
           test "$(find "$REPORT_VISUAL_QA_DIR" -type f -name '*.pdf' | wc -l)" = 45
