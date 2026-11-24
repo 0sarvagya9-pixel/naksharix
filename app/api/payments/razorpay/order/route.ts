@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${body.shopOrderId}),hashtext('naksharix-shop-payment-v1'))::text`;
       const fresh=await tx.shopOrder.findUnique({where:{id:body.shopOrderId}});
       if(!fresh||fresh.userId!==user.id||fresh.status!=="CONFIRMED"||!["UNPAID","FAILED"].includes(fresh.paymentStatus)||
-         fresh.version!==item.metadata.shopOrderVersion||fresh.totalPaise!==Math.round(item.amount*100)||!shippingPayable(fresh))return null;
+         !("shopOrderVersion" in item.metadata)||fresh.version!==item.metadata.shopOrderVersion||fresh.totalPaise!==Math.round(item.amount*100)||!shippingPayable(fresh))return null;
       const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:"SHOP_ORDER",status:{in:["PENDING","PAID"]},metadata:{path:["shopOrderId"],equals:body.shopOrderId}},select:{id:true}});
       if(outstanding)return null;
       return tx.payment.create({data:paymentData});
