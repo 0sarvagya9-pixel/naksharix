@@ -29,6 +29,13 @@ const downloadApi = source("app/api/report-requests/[id]/download/route.ts");
 const generatePdfApi = source("app/api/admin/report-requests/[id]/generate-pdf/route.ts");
 const deliverApi = source("app/api/admin/report-requests/[id]/deliver/route.ts");
 const workflow = source("lib/reports/report-workflow-status.ts");
+const verifyPayment = source("app/api/payments/razorpay/verify/route.ts");
+const webhookPayment = source("app/api/payments/razorpay/webhook/route.ts");
+assert((verifyPayment.match(/await finalizePaidPayment\(/g)||[]).length===1 && !verifyPayment.includes("return ok({ payment: current })") && verifyPayment.includes("await reconcileCapturedPurpose(payment)"), "Already-paid retries share reconciliation", "no early acknowledgement before retrying dependent workflow");
+assert(verifyPayment.includes('paymentId: payment.id,\n            payment: { is: { status: "PAID", providerPaymentId: body.razorpay_payment_id } }'), "Client report capture bound to current exact payment", "stale payment cannot change a replacement request");
+assert(webhookPayment.includes('paymentId: paid.id,\n                payment: { is: { status: "PAID", providerPaymentId: payment.id } }'), "Webhook report capture bound to current exact payment", "capture cannot reopen a different order");
+assert(webhookPayment.includes('paymentId: existingPayment.id,\n              payment: { is: { status: "FAILED" } }'), "Webhook failure bound to current exact payment", "stale failure cannot downgrade a replacement order");
+assert(verifyPayment.includes('bookingId && payment.purpose === "CONSULTATION"') && webhookPayment.includes('bookingId && paid.purpose === "CONSULTATION"') && webhookPayment.includes('bookingId && existingPayment.purpose === "CONSULTATION"'), "Consultation callback purpose isolation", "unrelated payment metadata is not sufficient");
 
 assert(schema.includes("model ReportRequest"), "ReportRequest model exists", "Prisma persistence surface present");
 assert(schema.includes("reportSlug") && schema.includes("adminNotes") && schema.includes("generatedPdfBytes"), "ReportRequest stores workflow and PDF fields", "real report workflow metadata");

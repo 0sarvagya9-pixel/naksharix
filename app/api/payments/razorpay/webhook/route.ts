@@ -43,11 +43,12 @@ export async function POST(request: NextRequest) {
         const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
         const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
 
-        if (paid && reportRequestId) {
+        if (paid && reportRequestId && ["KUNDLI_REPORT", "YEARLY_REPORT", "MATCH_REPORT"].includes(paid.purpose)) {
           const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
           if (reportRequest && reportRequest.userId === paid.userId) {
             const updated = await prisma.reportRequest.updateMany({
-              where: { id: reportRequestId, userId: paid.userId,
+              where: { id: reportRequestId, userId: paid.userId, paymentId: paid.id,
+                payment: { is: { status: "PAID", providerPaymentId: payment.id } },
                 status: { in: [ReportRequestStatus.RECEIVED, ReportRequestStatus.PENDING_REVIEW, ReportRequestStatus.PAYMENT_PENDING] },
                 paymentStatus: { in: [ReportPaymentStatus.PENDING, ReportPaymentStatus.FAILED] } },
               data: { paymentStatus: ReportPaymentStatus.PAID, status: ReportRequestStatus.PAID }
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        if (paid && bookingId) {
+        if (paid && bookingId && paid.purpose === "CONSULTATION") {
           await prisma.consultationBooking.updateMany({
             where: {
               id: bookingId,
@@ -104,16 +105,17 @@ export async function POST(request: NextRequest) {
         const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
         const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
 
-        if (reportRequestId) {
+        if (reportRequestId && ["KUNDLI_REPORT", "YEARLY_REPORT", "MATCH_REPORT"].includes(existingPayment.purpose)) {
           await prisma.reportRequest.updateMany({
-            where: { id: reportRequestId, userId: existingPayment.userId,
+            where: { id: reportRequestId, userId: existingPayment.userId, paymentId: existingPayment.id,
+              payment: { is: { status: "FAILED" } },
               status: { in: [ReportRequestStatus.RECEIVED, ReportRequestStatus.PENDING_REVIEW, ReportRequestStatus.PAYMENT_PENDING] },
               paymentStatus: ReportPaymentStatus.PENDING },
             data: { paymentStatus: ReportPaymentStatus.FAILED }
           });
         }
 
-        if (bookingId) {
+        if (bookingId && existingPayment.purpose === "CONSULTATION") {
           await prisma.consultationBooking.updateMany({
             where: { id: bookingId, userId: existingPayment.userId,
               paymentStatus: "PENDING" },
