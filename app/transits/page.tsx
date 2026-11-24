@@ -1,20 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Section } from "@/components/section";
+import { seo } from "@/lib/seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { calculateInternalTransitSnapshot, calculateUpcomingTransitTimeline } from "@/lib/astrology/transit/engine";
 
-export const metadata: Metadata = {
-  title: "Current Gochar Snapshot | Naksharix",
-  description: "Planetary transit positions and upcoming changes for traditional reflection.",
-  alternates: { canonical: "https://www.naksharix.com/transits" },
-  openGraph: {
-    title: "Current Gochar Snapshot | Naksharix",
-    description: "Explore planetary transits and upcoming changes in Vedic astrology.",
-    url: "https://www.naksharix.com/transits",
-    siteName: "Naksharix"
-  }
-};
+export const metadata: Metadata = seo({
+  title: "Current Gochar: Planetary Transit Snapshot",
+  description: "Explore planetary transit positions and upcoming changes for traditional reflection using Delhi as the reference location.",
+  path: "/transits"
+});
 
 const planetMeanings: Record<string, string> = {
   Sun: "identity, vitality, and visible direction",
@@ -55,7 +50,7 @@ export default function TransitsPage() {
         {snapshot.positions.map((position) => (
           <Card key={position.planet} className="border-[#1e293b] bg-[#0f1c3a]">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-lg text-white">
+              <CardTitle as="h2" className="flex items-center justify-between text-lg text-white">
                 {position.planet}
                 <span className="rounded-full border border-[#dca956]/30 px-3 py-1 text-xs text-[#f3d382]">{position.sign}</span>
               </CardTitle>
@@ -72,7 +67,7 @@ export default function TransitsPage() {
 
       <Card className="border-[#dca956]/25 bg-[#0a1224]">
         <CardHeader>
-          <CardTitle className="text-white">Upcoming Planetary Changes</CardTitle>
+          <CardTitle as="h2" className="text-white">Upcoming Planetary Changes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm text-slate-300">
           {timeline.length ? (
@@ -94,7 +89,7 @@ export default function TransitsPage() {
 
       <Card className="border-[#dca956]/25 bg-[#0a1224]">
         <CardHeader>
-          <CardTitle className="text-white">About these timings</CardTitle>
+          <CardTitle as="h2" className="text-white">About these timings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-slate-300">
           

@@ -17,7 +17,7 @@ function normalizeTitle(title: string) {
   return title.replace(new RegExp(`\\s*(?:\\||-|—)\\s*${escapedAppName}\\s*$`, "i"), "").trim();
 }
 
-export function seo({ title, description, path = "/", image = "/og.svg", keywords = [], type = "website" }: SeoInput): Metadata {
+export function seo({ title, description, path = "/", image = "/og.png", keywords = [], type = "website" }: SeoInput): Metadata {
   const normalizedTitle = normalizeTitle(title);
   const origin = canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL);
   const url = new URL(path, origin).toString();

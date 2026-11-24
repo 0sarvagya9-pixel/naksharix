@@ -7,8 +7,8 @@ import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { env } from "@/lib/env";
 
 export const metadata: Metadata = seo({
-  title: "What is Naksharix? Vedic Astrology Tools and Digital Reports",
-  description: brandDescription,
+  title: "What is Naksharix? Vedic Astrology Platform",
+  description: "Naksharix is an online Vedic astrology platform for free Kundli, Panchang, horoscope, numerology and optional personalized digital reports.",
   path: "/about",
   keywords: ["About Naksharix", "Vedic Astrology Platform", "Digital Kundli Reports", "Astrology Consultations"],
 });

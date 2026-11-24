@@ -9,7 +9,7 @@ import { seo } from "@/lib/seo";
 import { zodiacSigns } from "@/lib/zodiac";
 
 export const metadata: Metadata = seo({
-  title: "Vedic Horoscope Hub - Daily, Weekly & Yearly Predictions | Naksharix",
+  title: "Vedic Horoscope: Daily, Weekly & Yearly",
   description: "Explore daily, weekly, and yearly horoscope guidance. Find alignment and deep cosmic insights with Naksharix.",
   path: "/horoscope",
   keywords: ["Daily Horoscope", "Weekly Horoscope", "Yearly Horoscope", "Zodiac Signs", "Astrology Hub"]
@@ -44,7 +44,7 @@ export default function HoroscopeHubPage() {
             <Card key={title} className="glass hover:border-[#D4AF37]/50 transition duration-300">
               <CardHeader className="space-y-2">
                 <Icon className="h-6 w-6 text-[#FFD700]" />
-                <CardTitle className="font-cinzel text-xl font-bold">{title}</CardTitle>
+                <CardTitle as="h2" className="font-cinzel text-xl font-bold">{title}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm naksh-muted-text">{desc}</p>
@@ -86,7 +86,7 @@ export default function HoroscopeHubPage() {
         <Card className="glass overflow-hidden border-[#D4AF37]/30 bg-gradient-to-r from-[#D4AF37]/5 via-[#0C152B]/20 to-[#D4AF37]/5 mb-12">
           <CardContent className="p-8 text-center space-y-4 max-w-2xl mx-auto">
             <Star className="mx-auto h-8 w-8 text-[#FFD700] animate-pulse" />
-            <h3 className="font-cinzel text-2xl font-bold">Looking for Deeper Personalization?</h3>
+            <h2 className="font-cinzel text-2xl font-bold">Looking for Deeper Personalization?</h2>
             <p className="text-sm naksh-muted-text">
               Zodiac signs provide general sign-level themes. A personalized Kundli calculates exact planetary degrees, ascendant temperament, and mahadasha timelines for your precise place and second of birth.
             </p>

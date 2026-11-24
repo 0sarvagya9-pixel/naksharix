@@ -4,7 +4,7 @@ import { Section } from "@/components/section";
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Astrology Calculators - Moon Sign, Sun Sign, Ascendant and Nakshatra",
+  title: "Astrology Calculators: Moon Sign & Lagna",
   description: "Use Naksharix calculators for Moon Sign, Sun Sign, Ascendant, Nakshatra, Ayanamsa, Love, Friendship, and Numerology.",
   path: "/calculators",
   keywords: ["Moon Sign Calculator", "Sun Sign Calculator", "Ascendant Calculator", "Nakshatra Calculator", "Ayanamsa Calculator"]
