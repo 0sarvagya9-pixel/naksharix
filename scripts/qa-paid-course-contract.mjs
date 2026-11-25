@@ -9,7 +9,7 @@ for(const m of courseModules){const publicLesson=publicCourseModule(m.id);assert
 assert.notEqual(courseProgressKey("first","civil-time"),courseProgressKey("second","civil-time"));assert.throws(()=>courseProgressKey("../private","civil-time"));assert.equal(publicCourseModule("missing"),null);
 assert.deepEqual(getPackageDefinition("astrology-course").kinds,["study-workbook"]);assert.equal(packagePriceOffers(undefined,true).length,0);
 const read=p=>readFileSync(p,"utf8"),ledger=read("lib/learning/paid-course.ts"),route=read("app/api/learn/paid-course/route.ts");
-assert.ok(ledger.includes("packageEntitled(order,order.payment)")&&ledger.includes("await lockPackage(tx,orderId)")&&ledger.includes("productKey:COURSE_KEY"));
+assert.ok(ledger.includes("await hasUnrefundedPackageEntitlement(tx,order,order.payment)")&&ledger.includes("await lockPackage(tx,orderId)")&&ledger.includes("productKey:COURSE_KEY"));
 assert.ok(route.includes("getCurrentUser")&&route.includes("sharedRateLimitResponse"));
 assert.ok(read("app/api/learn/progress/route.ts").includes("lessonId:{in:[...FREE_LESSON_IDS]}"));
 console.log("PAID_COURSE_CONTRACT_PASS;DB_AND_BROWSER_ACCEPTANCE_PENDING");

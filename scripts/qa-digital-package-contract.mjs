@@ -19,7 +19,7 @@ assert.equal(packageEntitled(o,p),true);
 for(const patch of [{status:"REFUNDED"},{userId:"other"},{amount:1},{providerPaymentId:null},{metadata:{}},{currency:"USD"}])assert.equal(packageEntitled(o,{...p,...patch}),false);
 assert.equal(packageEntitled({...o,status:"REVIEW"},p),false);
 const read=p=>readFileSync(p,"utf8"),ledger=read("lib/digital-packages/ledger.ts"),capture=read("lib/revenue.ts"),refund=read("lib/payments/purpose-reconciliation.ts"),order=read("app/api/payments/razorpay/order/route.ts");
-assert.ok(ledger.includes("pg_advisory_xact_lock")&&ledger.includes("packageEntitled(order,order.payment)")&&ledger.includes("privateInput:RuntimePrisma.DbNull"));
+assert.ok(ledger.includes("pg_advisory_xact_lock")&&ledger.includes("await hasUnrefundedPackageEntitlement(tx,order,order.payment)")&&ledger.includes("await cumulativeSignedRefund(tx,payment.providerPaymentId)")&&ledger.includes("privateInput:RuntimePrisma.DbNull"));
 assert.ok(capture.includes("validatePackageCapture")&&capture.includes('data:{status:"PAID"}'));
 assert.ok(refund.includes('data:{status:"REVIEW"}')&&refund.includes('data:{status:"REFUNDED"}'));
 assert.ok(order.includes("resolvePackageCheckout")&&order.includes("lockPackage(tx,body.packageOrderId)"));

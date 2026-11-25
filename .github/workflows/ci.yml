@@ -143,6 +143,16 @@ jobs:
           node scripts/qa-align-disposable-feature-schema.mjs
       - name: Exercise paid-report worker with disposable database and isolated email transport
         run: node scripts/qa-automatic-report-delivery.mjs --database
+      - name: Qualify six digital products and course entitlements with disposable PostgreSQL
+        env:
+          PACKAGE_QA_DIR: ${{ runner.temp }}/package-qa
+        run: node scripts/qa-digital-package-runtime.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: digital-package-synthetic-renderings
+          path: ${{ runner.temp }}/package-qa
+          retention-days: 3
+          if-no-files-found: error
       - name: Run local production HTTP smoke
         shell: bash
         run: |

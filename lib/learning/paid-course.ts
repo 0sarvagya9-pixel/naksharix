@@ -1,13 +1,12 @@
 import "server-only";
 import {prisma} from "@/lib/db";
-import {packageEntitled} from "@/lib/digital-packages/catalogue";
-import {lockPackage} from "@/lib/digital-packages/ledger";
+import {lockPackage,hasUnrefundedPackageEntitlement} from "@/lib/digital-packages/ledger";
 import {studyChapters} from "@/lib/digital-packages/workbooks";
 import {COURSE_KEY,COURSE_VERSION,courseModules,courseProgressKey,courseQuizResult,publicCourseModule} from "@/lib/learning/paid-course-contract";
 import type {Prisma} from "@prisma/client";
 export async function loadPaidCourse(userId:string,orderId:string,tx:Prisma.TransactionClient=prisma){
  const order=await tx.digitalPackageOrder.findFirst({where:{id:orderId,userId,productKey:COURSE_KEY,productVersion:COURSE_VERSION},include:{payment:true}});
- return order&&packageEntitled(order,order.payment)?order:null;
+ return order&&await hasUnrefundedPackageEntitlement(tx,order,order.payment)?order:null;
 }
 export async function readPaidCourse(userId:string,orderId:string,moduleId:string|undefined){
  return prisma.$transaction(async tx=>{

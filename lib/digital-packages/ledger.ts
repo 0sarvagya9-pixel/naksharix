@@ -4,6 +4,7 @@ import {Prisma as RuntimePrisma,type Prisma,type Payment,type DigitalPackageOrde
 import {env} from "@/lib/env";
 import {prisma} from "@/lib/db";
 import {getRazorpayReadiness} from "@/lib/payments/readiness";
+import {cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 import {getActiveAstrologyProviderName} from "@/lib/astrology/provider";
 import {getReportStorageReadiness} from "@/lib/storage/report-storage";
 import {getPackageDefinition,packagePriceOffers,packagePriceMatches,PACKAGE_TERMS_VERSION,packageEntitled} from "@/lib/digital-packages/catalogue";
@@ -78,11 +79,17 @@ export async function validatePackageCapture(tx:Prisma.TransactionClient,payment
  if(!order||order.status!=="PAYMENT_PENDING"||!exactPackagePayment(order,payment))throw Error("PACKAGE_CAPTURE_MISMATCH");
  return order.id;
 }
+/** Signed refund receipts may arrive before the dependent ledger transition.
+ * Never render, serve or continue a course against a known refunded capture. */
+export async function hasUnrefundedPackageEntitlement(tx:Prisma.TransactionClient,order:DigitalPackageOrder,payment:Payment|null){
+ if(!payment||!packageEntitled(order,payment)||!payment.providerPaymentId)return false;
+ return (await cumulativeSignedRefund(tx,payment.providerPaymentId))===0;
+}
 export async function claimPackageItem(userId:string,orderId:string,itemId:string){
  return prisma.$transaction(async tx=>{
   await lockPackage(tx,orderId);const now=new Date();
   const order=await tx.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
-  if(!order||!packageEntitled(order,order.payment))return {kind:"denied" as const};
+  if(!order||!await hasUnrefundedPackageEntitlement(tx,order,order.payment))return {kind:"denied" as const};
   const item=await tx.digitalPackageItem.findFirst({where:{id:itemId,orderId},select:{id:true,kind:true,position:true,status:true,leaseUntil:true,attempts:true,privateInput:true}});
   if(!item||getPackageDefinition(order.productKey)?.kinds[item.position]!==item.kind)return {kind:"denied" as const};
   if(item.status==="READY")return {kind:"ready" as const};
@@ -101,7 +108,9 @@ export async function completePackageItem(userId:string,orderId:string,itemId:st
  return prisma.$transaction(async tx=>{
   await lockPackage(tx,orderId);
   const order=await tx.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
-  if(!order||!packageEntitled(order,order.payment))return false;
+  if(!order||!await hasUnrefundedPackageEntitlement(tx,order,order.payment))return false;
+  const item=await tx.digitalPackageItem.findFirst({where:{id:itemId,orderId},select:{position:true,kind:true}});
+  if(!item||getPackageDefinition(order.productKey)?.kinds[item.position]!==item.kind)return false;
   const updated=await tx.digitalPackageItem.updateMany({where:{id:itemId,orderId,status:"GENERATING",leaseToken,leaseUntil:{gt:new Date()}},data:{status:"READY",pdfBytes:new Uint8Array(bytes),pdfChecksum:checksum,pdfSize:bytes.length,pdfStorageDriver:"database",pdfStorageKey:"db://digital-package-items/"+itemId,generatedAt:new Date(),leaseToken:null,leaseUntil:null,privateInput:RuntimePrisma.DbNull}});
   return updated.count===1;
  });
@@ -111,12 +120,12 @@ export async function releasePackageItem(userId:string,orderId:string,itemId:str
 }
 export async function loadPackageItemForDownload(userId:string,orderId:string,itemId:string){
  const order=await prisma.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
- if(!order||!packageEntitled(order,order.payment))return null;
- const item=await prisma.digitalPackageItem.findFirst({where:{id:itemId,orderId,status:"READY"},select:{pdfBytes:true,pdfChecksum:true,pdfSize:true,kind:true}});
- if(!item?.pdfBytes||!item.pdfChecksum||item.pdfSize!==item.pdfBytes.byteLength||item.pdfBytes.byteLength>8*1024*1024)return null;
+ if(!order||!await hasUnrefundedPackageEntitlement(prisma,order,order.payment))return null;
+ const item=await prisma.digitalPackageItem.findFirst({where:{id:itemId,orderId,status:"READY"},select:{pdfBytes:true,pdfChecksum:true,pdfSize:true,kind:true,position:true}});
+ if(!item||getPackageDefinition(order.productKey)?.kinds[item.position]!==item.kind||!item.pdfBytes||!item.pdfChecksum||item.pdfSize!==item.pdfBytes.byteLength||item.pdfBytes.byteLength>8*1024*1024)return null;
  const bytes=Buffer.from(item.pdfBytes);
  if(createHash("sha256").update(bytes).digest("hex")!==item.pdfChecksum||bytes.subarray(0,5).toString("ascii")!=="%PDF-")throw Error("PACKAGE_PDF_CHECKSUM_INVALID");
  const current=await prisma.digitalPackageOrder.findFirst({where:{id:orderId,userId},include:{payment:true}});
- if(!current||!packageEntitled(current,current.payment))return null;
+ if(!current||!await hasUnrefundedPackageEntitlement(prisma,current,current.payment))return null;
  return {bytes,kind:item.kind};
 }
