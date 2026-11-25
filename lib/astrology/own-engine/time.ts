@@ -40,9 +40,10 @@ export function normalizeBirthDate(dateOfBirth: string | Date) {
 export function normalizeBirthTime(timeOfBirth: string) {
   const parts = parseTimeParts(timeOfBirth);
 
-  return `${parts.hour.toString().padStart(2, "0")}:${parts.minute
-    .toString()
-    .padStart(2, "0")}`;
+  const minuteTime=`${parts.hour.toString().padStart(2,"0")}:${parts.minute.toString().padStart(2,"0")}`;
+  // Preserve explicitly supplied birth seconds while retaining legacy HH:MM
+  // for minute-only/zero-second inputs. Both engines use this normalization.
+  return parts.second===0?minuteTime:`${minuteTime}:${parts.second.toString().padStart(2,"0")}`;
 }
 
 function parseDateParts(dateInput: string | Date): ParsedDateParts {

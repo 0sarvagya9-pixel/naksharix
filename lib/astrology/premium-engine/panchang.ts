@@ -1,6 +1,6 @@
 import * as Astronomy from "astronomy-engine";
 import { nakshatraFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
-import { julianDayFromUtc, normalizeDegrees, parseTimezoneOffsetToHours } from "@/lib/astrology/own-engine/time";
+import { julianDayFromUtc, normalizeDegrees, parseTimezoneOffsetToHours,parseBirthDateTime,localBirthToUtcDate } from "@/lib/astrology/own-engine/time";
 import { tropicalToSidereal } from "@/lib/astrology/own-engine/zodiac";
 
 export type PremiumPanchangInput = {
@@ -63,10 +63,10 @@ export function calculatePremiumPanchang(input: PremiumPanchangInput): PremiumPa
   const elongation = normalizeDegrees(moonLongitude - sunLongitude);
   const nakshatra = nakshatraFromLongitude(moonLongitude);
   const yogaLongitude = normalizeDegrees(sunLongitude + moonLongitude);
-  const sunTimes = riseSet(Astronomy.Body.Sun, localDay, latitude, longitude, timezoneOffset);
-  const moonTimes = riseSet(Astronomy.Body.Moon, localDay, latitude, longitude, timezoneOffset);
+  const sunTimes = riseSet(Astronomy.Body.Sun, dateText, latitude, longitude, timezoneText,timezoneOffset);
+  const moonTimes = riseSet(Astronomy.Body.Moon, dateText, latitude, longitude, timezoneText,timezoneOffset);
   const weekday = weekdayName(localNoonUtc, timezoneOffset);
-  const dayWindow = sunTimes.rise && sunTimes.set ? daySegmentWindows(sunTimes.rise, sunTimes.set, weekday) : null;
+  const dayWindow = sunTimes.rise && sunTimes.set && parseClock(sunTimes.set)>parseClock(sunTimes.rise) ? daySegmentWindows(sunTimes.rise, sunTimes.set, weekday) : null;
   const missingFields = [
     sunTimes.rise ? null : "Sunrise",
     sunTimes.set ? null : "Sunset",
@@ -116,15 +116,25 @@ function siderealMoonLongitude(time: Astronomy.AstroTime, julianDay: number) {
   return tropicalToSidereal(Astronomy.EclipticGeoMoon(time).lon, julianDay);
 }
 
-function riseSet(body: Astronomy.Body, localDay: { year: number; month: number; day: number }, latitude: number, longitude: number, timezoneOffset: number) {
-  const observer = new Astronomy.Observer(latitude, longitude, 0);
-  const startUtc = new Date(Date.UTC(localDay.year, localDay.month - 1, localDay.day) - timezoneOffset * 60 * 60 * 1000);
-  const rise = Astronomy.SearchRiseSet(body, observer, +1, startUtc, 1);
-  const set = Astronomy.SearchRiseSet(body, observer, -1, startUtc, 1);
-  return {
-    rise: rise ? formatTimeWithOffset(rise.date, timezoneOffset) : null,
-    set: set ? formatTimeWithOffset(set.date, timezoneOffset) : null
+function riseSet(body:Astronomy.Body,dateText:string,latitude:number,longitude:number,timezoneText:string,noonOffset:number){
+  const observer=new Astronomy.Observer(latitude,longitude,0);
+  const midnight=parseBirthDateTime(dateText,"00:00");
+  const nextDate=new Date(Date.UTC(midnight.year,midnight.month-1,midnight.day+1)).toISOString().slice(0,10);
+  // Resolve both local-midnight boundaries independently: a civil day may
+  // last 23 or 25 hours. Ambiguous/nonexistent midnight fails closed.
+  const startUtc=localBirthToUtcDate(midnight,parseTimezoneOffsetToHours(timezoneText,dateText,"00:00"));
+  const endUtc=localBirthToUtcDate(parseBirthDateTime(nextDate,"00:00"),parseTimezoneOffsetToHours(timezoneText,nextDate,"00:00"));
+  const limitDays=(endUtc.getTime()-startUtc.getTime())/86400000;
+  if(!Number.isFinite(limitDays)||limitDays<=0||limitDays>2)throw Error("Invalid civil day boundary.");
+  const fixedOffset=/^[+-]?\d{1,2}(?:\.\d+)?$/.test(timezoneText)||/^[+-]\d{1,2}:?\d{2}$/.test(timezoneText);
+  const formatter=fixedOffset?null:new Intl.DateTimeFormat("en-GB",{timeZone:timezoneText,hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
+  const find=(direction:1|-1)=>{
+    const event=Astronomy.SearchRiseSet(body,observer,direction,startUtc,limitDays);
+    if(!event||event.date.getTime()<startUtc.getTime()||event.date.getTime()>=endUtc.getTime())return null;
+    // Use the timezone at the event instant, not the offset sampled at noon.
+    return formatter?formatter.format(event.date):formatTimeWithOffset(event.date,noonOffset);
   };
+  return {rise:find(1),set:find(-1)};
 }
 
 function daySegmentWindows(sunrise: string, sunset: string, weekday: string) {

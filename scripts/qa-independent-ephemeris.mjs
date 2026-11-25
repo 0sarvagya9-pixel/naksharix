@@ -21,3 +21,6 @@ for(const fixture of fixtures){
 }
 assert.equal(count,50);
 console.log(JSON.stringify({check:"independent_numeric_reference",count,maxErrorDegrees:max,toleranceDegrees:provenance.toleranceDegrees,scope:"fixture adapter only, no professional or predictive certification"}));
+
+// Keep the previous five fixture-adapter cases; also execute the actual application engine.
+await import("./qa-independent-runtime-ephemeris.mjs");
