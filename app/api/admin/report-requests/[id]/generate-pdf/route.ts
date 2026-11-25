@@ -55,7 +55,8 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     }
     const requiresPaidEntitlement=!reportRequest.adminBypass&&Boolean(fixedReportCheckout(reportRequest.reportSlug));
     if(requiresPaidEntitlement&&!await hasCurrentPaidReportEntitlement(reportRequest))return fail("Current payment evidence requires reconciliation before generating this report.",409);
-    if (reportRequest.latitude === null || reportRequest.longitude === null || reportRequest.timezone === null) {
+    const {latitude,longitude,timezone}=reportRequest;
+    if (latitude === null || longitude === null || timezone === null) {
       return fail("Birth latitude, longitude, and timezone are required before PDF generation.", 422);
     }
 
@@ -73,9 +74,9 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       dateOfBirth: reportRequest.dateOfBirth,
       timeOfBirth: reportRequest.timeOfBirth,
       birthPlace: reportRequest.birthPlace,
-      latitude: reportRequest.latitude,
-      longitude: reportRequest.longitude,
-      timezone: String(reportRequest.timezone),
+      latitude,
+      longitude,
+      timezone: String(timezone),
       language: reportRequest.language === "hi" || reportRequest.language === "hinglish" ? reportRequest.language : "en",
       ayanamsa: "lahiri",
       houseSystem: "whole_sign"
@@ -83,17 +84,17 @@ export async function POST(_request: Request, { params }: { params: Params }) {
 
     const panchang = calculatePremiumPanchang({
       date: reportRequest.dateOfBirth,
-      latitude: reportRequest.latitude,
-      longitude: reportRequest.longitude,
-      timezone: String(reportRequest.timezone),
+      latitude,
+      longitude,
+      timezone: String(timezone),
       place: reportRequest.birthPlace
     });
 
     const transit = calculateInternalTransitSnapshot({
       date: new Date().toISOString().slice(0, 10),
-      latitude: reportRequest.latitude,
-      longitude: reportRequest.longitude,
-      timezone: String(reportRequest.timezone),
+      latitude,
+      longitude,
+      timezone: String(timezone),
       place: reportRequest.birthPlace,
       ayanamsa: "lahiri"
     });
