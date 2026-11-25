@@ -161,6 +161,18 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
    table([tr("Major / sub","महादशा / अंतर्दशा"),tr("Start UTC","आरंभ UTC"),tr("End UTC","समाप्ति UTC")],upcoming.map(r=>[display(r.major)+" / "+display(r.planet),shown(r.startsAtUtc),shown(r.endsAtUtc)]),[1.1,1.55,1.55],8.9,30);
    paragraph(tr("Intervals retain their actual calculated boundaries, even when they start before today or extend beyond the 12-month horizon. They are not predicted life events.","अवधियों की वास्तविक गणना सीमाएँ बनी रहती हैं, भले ही आरंभ आज से पहले हो या अंत 12 माह के बाद हो। ये जीवन घटनाओं की भविष्यवाणियाँ नहीं हैं।","Actual calculated boundaries retain hoti hain, chahe start aaj se pehle ya end 12 months se baad ho. Yeh life event predictions nahi hain."),9,muted);
   }
+  const pratyantar=records(d.pratyantarWindow);
+  if(pratyantar.length){
+   subhead(tr("Pratyantar periods overlapping the next 12 months","अगले 12 माह की प्रत्यंतर दशाएँ","Next 12 months ki pratyantar dasha"));
+   table([tr("Major / sub / third","महा / अंतर / प्रत्यंतर","Maha / antar / pratyantar"),tr("Start UTC","आरंभ UTC"),tr("End UTC","समाप्ति UTC")],pratyantar.map(r=>[display(r.mahadashaLord)+" / "+display(r.antardashaLord)+" / "+display(r.lord),shown(r.startsAt),shown(r.endsAt)]),[1.35,1.35,1.35],8.6,28);
+   paragraph(tr("Exact calculated third-level boundaries are shown for the named fixed-year convention. Selection does not reset a parent period; these intervals do not predict events.","निर्धारित वर्ष पद्धति की गणना से प्रत्यंतर की सीमाएँ दी गई हैं। अवधि चुनने से मूल दशा दोबारा आरंभ नहीं होती। ये घटनाओं की भविष्यवाणी नहीं हैं।","Named fixed-year method ki calculated boundaries hain; window selection parent dasha ko restart nahi karta. Yeh event predictions nahi hain."),9,muted);
+  }
+  const allSub=records(d.allAntardashas);
+  if(allSub.length){
+   subhead(tr("Full modeled Antardasha chronology","संपूर्ण गणितीय अंतर्दशा क्रम","Full modeled Antardasha sequence"));
+   paragraph(tr("These are mathematical periods beginning at birth, not a lifespan estimate. The first elapsed parent is not restarted.","ये जन्म से आरंभ गणितीय अवधियाँ हैं, आयु का अनुमान नहीं। पहली बीती मूल दशा फिर से शुरू नहीं होती।","Yeh birth se modeled periods hain, lifespan estimate nahi. Pehli elapsed dasha reset nahi hoti."),9,muted);
+   table([tr("Major / sub","महा / अंतर","Maha / antar"),tr("Start UTC","आरंभ UTC"),tr("End UTC","समाप्ति UTC")],allSub.map(r=>[display(r.major)+" / "+display(r.planet),shown(r.startsAtUtc),shown(r.endsAtUtc)]),[1.25,1.4,1.4],8.5,23);
+  }
  }
  function numCard(r:R,k:string){return {label:term(s(r.label)||k),title:shown(r.value)+" / "+s(r.meaning),body:[s(r.guidance),s(r.strengths)?tr("Strength themes: ","गुण विषय: ")+s(r.strengths):"",s(r.growthAreas)?tr("Reflection areas: ","चिंतन क्षेत्र: ")+s(r.growthAreas):""].filter(Boolean).join("\n")}}
  function loShu(grid:R[]){if(grid.length!==9)return;subhead("LO SHU / "+tr("BIRTH-DATE DIGITS","जन्म तिथि के अंक"));const z=76,gap=5,gw=3*z+2*gap;ensure(3*z+2*gap+20);

@@ -65,3 +65,43 @@ const transition=time(canonical.current.mahadasha.endsAt);
 eq(legacy(lateMoon,birth,"en",new Date(transition-1)).currentMahadasha.planet,"Ketu","half-open boundary before");
 eq(legacy(lateMoon,birth,"en",new Date(transition)).currentMahadasha.planet,"Venus","half-open boundary at");
 console.log("DASHA_TIMELINE_RUNTIME_PASS="+JSON.stringify({cases,assertions,yearDays:365.2425,scope:"independent arithmetic reference for fixed year convention, actual canonical and public functions; no predictive certification"}));
+
+{
+ const D=require("@/lib/astrology/premium-engine/dasha"),V=require("@/lib/astrology/varga/partition"),C=require("@/lib/astrology/core-calculations");
+ let windowCases=0,windowChecks=0,d60Checks=0,chalitChecks=0;
+ // Independent cumulative integer-millisecond partition, beginning with the
+ // original complete parent rather than a clipped report period.
+ for(let n=0;n<27;n++)for(const f of [.005,.25,.5,.9,.9999]){
+  const moonLongitude=(n+f)*span,d=D.calculateVimshottariDasha({moonLongitude,birthDateTime:birth,currentDate:birth});
+  for(const m of d.mahadashas.slice(0,3)){
+   const t=Date.parse(m.endsAt),from=new Date(Math.max(base,t-30*86400000)),to=new Date(t+40*86400000);
+   const actual=D.calculateVimshottariPratyantarWindow({moonLongitude,birthDateTime:birth,from,to}),reference=[];
+   for(const p of d.antardashas){
+    const start=Date.parse(p.startsAt),end=Date.parse(p.endsAt);if(end<=from.getTime()||start>=to.getTime())continue;
+    const i=order.indexOf(p.lord);let cumulative=0,last=start;
+    for(let j=0;j<9;j++){const idx=(i+j)%9;cumulative+=weights[idx];const next=j===8?end:start+Math.round((end-start)*cumulative/120);
+     if(next>from.getTime()&&last<to.getTime())reference.push([p.mahadashaLord,p.lord,order[idx],last,next]);last=next;}
+   }
+   assert.deepEqual(actual.map(p=>[p.mahadashaLord,p.antardashaLord,p.lord,Date.parse(p.startsAt),Date.parse(p.endsAt)]),reference);
+   assert.ok(actual.length&&Date.parse(actual[0].startsAt)<=from.getTime()&&Date.parse(actual.at(-1).endsAt)>=to.getTime());windowChecks+=2;windowCases++;
+   for(let i=1;i<actual.length;i++){assert.equal(actual[i].startsAt,actual[i-1].endsAt);windowChecks++;}
+  }
+ }
+ assert.throws(()=>D.calculateVimshottariPratyantarWindow({moonLongitude:1,birthDateTime:birth,from:birth,to:birth}));
+ assert.deepEqual(D.calculateVimshottariPratyantarWindow({moonLongitude:1,birthDateTime:birth,from:new Date("1999-01-01"),to:birth}),[]);windowChecks+=2;
+ for(let s=0;s<12;s++)for(let part=0;part<60;part++){
+  const lon=s*30+part/2;assert.equal(V.natalSeedD60Coordinates(lon).signIndex,(s+part)%12);
+  assert.equal(V.classicalVargaCoordinates("D60",lon).signIndex,part%12);d60Checks+=2;
+ }
+ assert.equal(V.natalSeedD60Coordinates(222+58/60).signIndex,8);d60Checks++;
+ const zodiac=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+ for(let a=0;a<12;a++){
+  const asc=a*30+15,p=zodiac.map((sign,i)=>({planet:String(i),sign,degree:7,absoluteLongitude:i*30+7,house:(i-a+12)%12+1}));
+  for(const input of [p,[...p].reverse(),p.slice(3),[]]){
+   const result=C.calculateChalitChart(input,asc);
+   assert.deepEqual(result.houses.map(h=>h.sign),Array.from({length:12},(_,i)=>zodiac[(a+i)%12]));
+   assert.equal(result.houses.flatMap(h=>h.planets).length,input.length);chalitChecks+=2;
+  }
+ }
+ console.log("P0_NESTED_TIMELINE_D60_CHALIT_PASS "+JSON.stringify({windowCases,windowChecks,d60Checks,chalitChecks,scope:"fixed-year arithmetic, named D60 convention and existing equal-house Chalit labels; not professional astrology certification"}));
+}

@@ -199,3 +199,15 @@ function addYears(date: Date, years: number) {
 function round(value: number, digits = 6) {
   return Number(value.toFixed(digits));
 }
+
+/** Build a third-level timeline from each original, unclipped parent.
+ * Window selection does not restart any parent or round its duration. */
+export function calculateVimshottariPratyantarWindow(input:{moonLongitude:number;birthDateTime:Date;from:Date;to:Date}):PratyantarDashaPeriod[]{
+ const from=input.from.getTime(),to=input.to.getTime(),birth=input.birthDateTime.getTime();
+ if(![from,to,birth].every(Number.isFinite)||to<=from)throw Error("INVALID_PRATYANTAR_WINDOW");
+ const start=Math.max(from,birth);
+ if(to<=start)return [];
+ const result=calculateVimshottariDasha({moonLongitude:input.moonLongitude,birthDateTime:input.birthDateTime,currentDate:new Date(start)});
+ return result.antardashas.filter(p=>Date.parse(p.endsAt)>start&&Date.parse(p.startsAt)<to)
+  .flatMap(buildPratyantarDashas).filter(p=>Date.parse(p.endsAt)>start&&Date.parse(p.startsAt)<to);
+}

@@ -344,6 +344,19 @@ if(!dbMode){
   for(let i=0;i<periods.length;i++)assert.ok(cards[i].label.includes(periods[i].startsAtUtc)&&cards[i].label.includes(periods[i].endsAtUtc));
   periodCases++;
  }
+ const allSubs=dashaData.allAntardashas,third=dashaData.pratyantarWindow;
+ assert.ok(Array.isArray(allSubs)&&allSubs.length>50);
+ assert.equal(allSubs[0].startsAtUtc,dashaData.periods[0].startsAtUtc);
+ for(let i=1;i<allSubs.length;i++)assert.equal(allSubs[i-1].endsAtUtc,allSubs[i].startsAtUtc);
+ assert.equal(allSubs.at(-1).endsAtUtc,dashaData.periods.at(-1).endsAtUtc);
+ assert.ok(third.length>0&&third.every(p=>Date.parse(p.endsAt)>Date.parse(dashaData.asOf)&&Date.parse(p.startsAt)<Date.parse(dashaData.asOf)+365.2425*86400000&&p.lord&&p.antardashaLord&&p.mahadashaLord));
+ for(let i=1;i<third.length;i++)assert.equal(third[i-1].endsAt,third[i].startsAt);
+ let thirdCases=0;
+ for(const language of ["en","hi","hinglish"])for(const [slug,key] of [["career-report","career-dasha"],["wealth-report","wealth-dasha"],["love-report","relationship-timing"],["fortune-report","fortune-dasha"],["yearly-horoscope-report","yearly-dasha"]]){
+  const assembled=await assembleAutomaticPaidReport({slug,birth,extra,question,language,now:new Date("2026-11-24T12:00:00Z")});
+  assert.deepEqual(assembled.content.sections.find(s=>s.key===key).data.pratyantarWindow,third);thirdCases++;
+ }
+ console.log("P0_PRATYANTAR_REPORT_CONTRACT_PASS "+JSON.stringify({thirdCases,allSubPeriods:allSubs.length,thirdLevelPeriods:third.length,scope:"calculated boundaries, not prediction"}));
  console.log("P0_SPECIALTY_PERIOD_AND_NAME_CONTRACT_PASS",JSON.stringify({periodCases,nameCases:22,scientificPrediction:false}));
  console.log("REPORT_TIMING_AND_NAME_EVIDENCE_PASS; NON_ROMAN_NO_INVENTED_NAME_NUMBER; EXACT_UPCOMING_SUBPERIODS; MAJOR_BOUNDARIES");
  assert.equal(pairs,15);assert.equal(measurements.length,45);

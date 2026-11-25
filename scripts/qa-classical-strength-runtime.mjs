@@ -478,3 +478,48 @@ const dual=PATTERN.evaluateTraditionalPatterns(chartAt([15,15,45,345,75,105,135]
 assert.equal(dual.lunar.durudhara,true);assert.equal(dual.lunar.sunapha,false);assert.equal(dual.lunar.anapha,false);
 assert.equal(PATTERN.evaluateTraditionalPatterns(complete,"Unknown"),null);assert.equal(PATTERN.evaluateTraditionalPatterns(complete.slice(1),"Aries"),null);yogaPatternChecks+=5;
 console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaPatternChecks,scope:"Phaladeepika 6.1–5 placement conditions; Gajakesari full verdict withheld; complete nodal geometry and invalid data safety; no independent expert certification"}));
+
+{
+ const F=JSON.parse(fs.readFileSync("fixtures/astrology/published-classical-comparison.json","utf8"));
+ const V=require("@/lib/astrology/varga/partition"),B=require("@/lib/astrology/strength/classical-components"),S=require("@/lib/astrology/strength/shadbala"),birth=require("@/lib/astrology/strength/birth-context");
+ const dms=([s,d,m,a])=>30*(s-1)+d+m/60+a/3600;
+ const positions=F.positionsDms.map(dms),midpoints=B.buildQuadrantBhavaMidpoints(positions[0],dms(F.midpointDms[9])).midpoints;
+ const mismatches=[],originalMismatches=[];let publishedDivisions=0,geometryChecks=0,strengthChecks=0;
+ for(const [key,expected] of Object.entries(F.divisions))for(const [i,lon] of positions.entries()){
+  const original=V.classicalVargaCoordinates(key,lon).signIndex+1;
+  const actual=key==="D60"?V.natalSeedD60Coordinates(lon).signIndex+1:original;
+  if(original!==expected[i])originalMismatches.push({key,point:F.order[i],actual:original,expected:expected[i]});
+  if(actual!==expected[i])mismatches.push({key,point:F.order[i],actual,expected:expected[i]});publishedDivisions++;
+ }
+ assert.equal(publishedDivisions,160);assert.equal(originalMismatches.length,12);
+ assert.deepEqual(mismatches,[{key:"D7",point:"Moon",actual:9,expected:8},{key:"D7",point:"Saturn",actual:10,expected:9}]);
+ // BPHS 6.10–11 equal sevenths independently give the two D7 values;
+ // preserve source disagreements rather than fitting to competitor output.
+ assert.equal(Math.floor((positions[2]%30)*7/30),4);
+ assert.equal(Math.floor((positions[7]%30)*7/30),5);
+ for(let i=0;i<12;i++){assert.ok(Math.abs(midpoints[i]-dms(F.midpointDms[i]))<1/3600);geometryChecks++;}
+ const planets=positions.slice(1).map((lon,i)=>({planet:F.order[i+1],sign:signs[Math.floor(lon/30)],degree:lon%30,absoluteLongitude:lon,house:(Math.floor(lon/30)-Math.floor(positions[0]/30)+12)%12+1}));
+ for(const [i,p] of planets.slice(0,7).entries()){
+  assert.ok(Math.abs(S.calculateClassicalStrengthBasis(p).uchchaVirupas-F.strength.uchcha[i])<=.006);
+  assert.ok(Math.abs(B.calculateExactDirectionalBala(p.planet,p.absoluteLongitude,midpoints).virupas-F.strength.dig[i])<=.006);strengthChecks+=2;
+ }
+ // Independent published full totals comparison is deliberately separate
+ // from arithmetic regression. A failed comparison is never scored as a
+ // passed certification or used to enable a public module.
+ const actual=birth.calculateBirthStrengthEvidence(F.birth);
+ const residuals=[];
+ function compare(scope,point,component,actual,expected){
+  const delta=typeof actual==="number"&&Number.isFinite(actual)?actual-expected:null;
+  residuals.push({scope,point,component,actual:delta===null?null:actual,expected,delta,matched:delta!==null&&Math.abs(delta)<=.25});
+ }
+ for(const [i,planet] of F.order.slice(1,8).entries()){
+  const row=actual.classicalStrengthCandidate.rows.find(r=>r.planet===planet),components=row?.components;
+  const values={sthana:components?.sthana,dig:components?.dig,kala:typeof components?.kalaBeforeWar==="number"&&typeof row?.warVirupas==="number"?components.kalaBeforeWar+row.warVirupas:null,cheshta:components?.cheshta,naisargika:components?.naisargika,drik:components?.drik,total:row?.total};
+  for(const key of Object.keys(values))compare("shadbala",planet,key,values[key],F.strength[key][i]);
+ }
+ for(const [i,h] of actual.bhavaCandidate.houses.entries()){
+  for(const [key,value] of Object.entries({lord:h.lordStrengthVirupas,direction:h.directionalVirupas,aspect:h.aspect?.virupas,total:h.arithmeticTotalVirupas}))compare("bhava",i+1,key,value,F.bhava[key][i]);
+ }
+ assert.equal(residuals.length,97);assert.equal(actual.fullShadbalaVerified,false);assert.equal(actual.fullBhavaBalaVerified,false);
+ console.log("P0_PUBLISHED_REFERENCE_DIAGNOSTIC "+JSON.stringify({publishedDivisions,matchedWithNamedD60:publishedDivisions-mismatches.length,originalMatched:publishedDivisions-originalMismatches.length,mismatches,geometryChecks,strengthChecks,fullComponentComparisons:residuals.length,fullComponentMatches:residuals.filter(r=>r.matched).length,fullComponentMismatches:residuals.filter(r=>!r.matched).length,toleranceVirupas:.25,fullParityAccepted:false,residuals}));
+}

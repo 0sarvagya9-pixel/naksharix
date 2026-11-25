@@ -112,7 +112,7 @@ export function calculateChalitChart(planets: PlanetPosition[], ascendantLongitu
     available: true,
     method: "Equal-house Chalit from available ascendant and planetary longitude data",
     placements,
-    houses: placementsToHouses(placements, planets)
+    houses: placementsToHouses(placements, ascendantLongitude!)
   };
 }
 
@@ -186,8 +186,9 @@ function calculateKaalSarp(planets: PlanetPosition[], locale: Locale): DoshaStat
   };
 }
 
-function placementsToHouses(placements: ChalitPlacement[], planets: PlanetPosition[]): HousePosition[] {
-  const firstSign = planets.find((planet) => typeof planet.house === "number")?.sign ?? "Aries";
+function placementsToHouses(placements: ChalitPlacement[], ascendantLongitude: number): HousePosition[] {
+  // House labels follow the ascendant, not the first planet in an input array.
+  const firstSign = signs[Math.floor(normalizeDegrees(ascendantLongitude)/30)];
   return Array.from({ length: 12 }, (_, index) => {
     const house = index + 1;
     return {

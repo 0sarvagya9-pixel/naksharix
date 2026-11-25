@@ -65,3 +65,10 @@ export function classicalVargaCoordinates(chart:ClassicalVargaKey,longitude:numb
  }
  return {signIndex:target%12,part,degree};
 }
+
+/** Separate P.V.R. Narasimha Rao (6.2.20) sign-counting convention.
+ * Do not replace the literal Aries-remainder D60 path or activate public output. */
+export function natalSeedD60Coordinates(longitude:number){
+ const {signIndex,part,degree}=divisionCoordinates(longitude,60);
+ return {signIndex:(signIndex+part)%12,part,degree,method:"d60_natal_sign_seed" as const};
+}
