@@ -172,3 +172,22 @@ for(const [path,kind,markers] of [
 console.log("SEASONAL_HTTP=PASS;SIX_BILINGUAL_ROUTES;DATES_AND_SAFETY");
 
 for(const path of ["/yearly-horoscope-2027","/hi/yearly-horoscope-2027"]){const r=await fetch(base+path);assert.equal(r.status,200);const html=stripMarkup(await r.text());assert.ok(html.includes("annual-rashi"));assert.ok(html.includes("2027-01-01")&&html.includes("2027-12-01"));assert.equal([...html.matchAll(/<h1\b[^>]*>/gi)].length,1);}
+
+// Query-led helpful content: visible answers and valid, voluntary public tool links.
+for (const [path,topic,english,hindi,links] of [
+  ["/weekly-love-horoscope","love","How to read a weekly love horoscope","साप्ताहिक प्रेम राशिफल कैसे पढ़ें?",["/free-kundli","/kundli-matching"]],
+  ["/numerology","numerology","What is a numerology reading?","अंक ज्योतिष रीडिंग क्या है?",["/free-calculators/name-number-calculator","/free-calculators/lo-shu-grid-calculator"]]
+]) {
+  for(const [locale,heading] of [["en",english],["hi",hindi]]) {
+    const r=await fetch(base+path,{headers:{Cookie:"naksharix-language="+locale}});
+    assert.equal(r.status,200);
+    const html=stripMarkup(await r.text());
+    assert.equal([...html.matchAll(/<h1\\b[^>]*>/gi)].length,1,"One H1 "+path);
+    assert.ok(html.includes('id="reading-guide-'+topic+'"')&&html.includes(heading),"Missing rendered reading guide "+locale+" "+path);
+    if(locale==="en")for(const link of links){assert.ok(html.includes('href="'+link+'"'),"Missing resource link "+link);assert.equal((await fetch(base+link)).status,200);}
+    assert.ok([...html.matchAll(/<link\\b[^>]*\\brel="canonical"[^>]*>/gi)].map(m=>m[0]).some(tag=>hrefMatches(tag,path)),"Guide canonical "+path);
+  }
+}
+const guideDirectory=await(await fetch(base+"/llms.txt")).text();
+assert.ok(guideDirectory.includes("https://www.naksharix.com/weekly-love-horoscope")&&guideDirectory.includes("https://www.naksharix.com/free-calculators/name-number-calculator"));
+console.log("QUERY_LED_PUBLIC_GUIDES_HTTP=PASS;2_EXISTING_ROUTES;EN_HI_VISIBLE;CANONICAL;PUBLIC_TOOL_LINKS");

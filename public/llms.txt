@@ -13,7 +13,9 @@ Naksharix is the platform's brand name, distinct from the traditional astrology 
 - [Hindi Free Kundli](https://www.naksharix.com/hi/free-kundli): Hindi birth-chart introduction.
 - [Kundli Matching](https://www.naksharix.com/kundli-matching): Compatibility and Guna Milan guidance.
 - [Panchang](https://www.naksharix.com/panchang): Location- and date-specific traditional calendar.
+- [Weekly Love Horoscope](https://www.naksharix.com/weekly-love-horoscope): general sign-based relationship reflection, not a personal prediction.
 - [Numerology](https://www.naksharix.com/numerology): Traditional number interpretations.
+- [Name Number Calculator](https://www.naksharix.com/free-calculators/name-number-calculator): letter mapping, worked arithmetic and method limitations.
 - [Lo Shu Grid](https://www.naksharix.com/free-calculators/lo-shu-grid-calculator): Worked example and calculator.
 - [Digital reports](https://www.naksharix.com/reports): Current report catalogue.
 - [Report delivery guide](https://www.naksharix.com/blog/personalized-astrology-report-delivery-guide): Purchase and delivery information.

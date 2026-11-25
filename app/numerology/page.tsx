@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
 import { NumerologyContent } from "@/components/numerology-content";
 import { RelevantReportDiscovery } from "@/components/relevant-report-discovery";
+import { PublicReadingGuide } from "@/components/public-reading-guide";
 
 export const metadata: Metadata = seo({
   title: "Numerology - Life Path, Destiny and Name Numerology",
@@ -16,5 +17,5 @@ export default function NumerologyPage() {
     headline="Explore the language of numbers"
     caption="Discover traditional number symbolism and use the calculators with clear assumptions."
     image="/naksharix/editorial-reports.svg" imageAlt="Original illustrated numerology and chart report"
-    link="/free-calculators/destiny-number-calculator" linkLabel="Try a free number calculator" /><NumerologyContent /><RelevantReportDiscovery topic="numerology" /></>;
+    link="/free-calculators/destiny-number-calculator" linkLabel="Try a free number calculator" /><NumerologyContent /><PublicReadingGuide topic="numerology" /><RelevantReportDiscovery topic="numerology" /></>;
 }
