@@ -33,6 +33,7 @@ const envSchema = z.object({
   DIGITAL_PACKAGE_SALES_ENABLED: z.enum(["true","false"]).default("false"),
   DIGITAL_PACKAGE_APPROVED_OFFERS: z.string().optional(),
   DIGITAL_PACKAGE_GENERATION_ENABLED: z.enum(["true","false"]).default("false"),
+  PREMIUM_REMINDERS_ENABLED: z.enum(["true","false"]).default("false"),
   WEB_PUSH_ENABLED: z.enum(["true","false"]).default("false"),
   WEB_PUSH_PUBLIC_KEY: z.string().optional(),
   WEB_PUSH_PRIVATE_KEY: z.string().optional(),

@@ -23,6 +23,7 @@ export function preparePackageItems(input:PackageDraft):{kind:string;privateInpu
   return [{kind:"business-name",privateInput:{names:input.names}}];
  }
  if(input.names.length)throw Error("Candidate business names are only used in the business-name report.");
+ if(def.key==="reference-reminders-2027"){if(input.question)throw Error("No personal details are needed for the reference calendar.");return [{kind:"reference-calendar-2027",privateInput:{language:"en"}}];}
  if(def.key==="astrology-workbook"||def.key==="astrology-course"){
   if(input.question)throw Error("This learning product does not require personal details.");
   return [{kind:"study-workbook",privateInput:{language:"en"}}];

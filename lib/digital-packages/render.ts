@@ -4,6 +4,7 @@ import {assembleAutomaticPaidReport} from "@/lib/reports/automatic-report-conten
 import {generatePremiumReportPdf} from "@/lib/reports/premium-report-generation-service";
 import {reportItemSchema,nameItemSchema} from "@/lib/digital-packages/input";
 import {compareBusinessNames} from "@/lib/digital-packages/business-names";
+import {referenceReminderEvents} from "@/lib/calendar/reminder-contract";
 import {studyChapters,marriageChapters,type WorkbookChapter} from "@/lib/digital-packages/workbooks";
 
 const INK=rgb(.19,.15,.17),WINE=rgb(.42,.13,.22),GOLD=rgb(.7,.52,.24),PAPER=rgb(.99,.97,.94),MUTED=rgb(.35,.30,.32),WHITE=rgb(1,1,1);
@@ -51,6 +52,7 @@ function workbook(title:string,chapters:WorkbookChapter[]){
  });
 }
 export async function renderPackageItem(item:{id:string;kind:string;privateInput:unknown},referenceDate:Date){
+ if(item.kind==="reference-calendar-2027")return simpleDocument("2027 India-reference Calendar",doc=>{doc.paragraph("Reviewed dates only. Verify the local Panchang and current official notices. No booking or guaranteed muhurat. Manage optional reminders in your private account at www.naksharix.com/reference-reminders.");for(const e of referenceReminderEvents()){doc.paragraph(e.date+" | "+e.name,11,true);doc.paragraph("Reference: "+e.sourceUrl,9);}});
  if(item.kind==="study-workbook")return workbook("Understanding Your Kundli",studyChapters);
  if(item.kind==="marriage-workbook")return workbook("Marriage Planning Workbook",marriageChapters);
  if(item.kind==="business-name"){

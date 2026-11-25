@@ -18,8 +18,8 @@ const baseline=execFileSync("git",["show",base+":prisma/schema.prisma"],{encodin
 const hash=createHash("sha256").update(baseline).digest("hex");
 writeFileSync("prisma/release-fixture-baseline.prisma",baseline);
 execFileSync("npx",["--no-install","prisma","db","push","--skip-generate","--schema=prisma/release-fixture-baseline.prisma"],{stdio:"inherit"});
-const names=["MarketingConsent","AiCreditGrant","AiCreditUse","WebPushSubscription","DigitalPackageOrder","DigitalPackageItem","BusinessTenant","BusinessApiKey","BusinessUsageMonth","BusinessUsageCall","ExpertServiceRequest","AiMembership","AiMembershipCycle"];
-const files=["20261124-marketing-consent.sql","20261124-ai-credit-ledger.sql","20261124-web-push.sql","20261124-digital-packages.sql","20261124-business-integrations.sql","20261124-expert-services.sql","20261124-ai-membership.sql"];
+const names=["MarketingConsent","AiCreditGrant","AiCreditUse","WebPushSubscription","DigitalPackageOrder","DigitalPackageItem","BusinessTenant","BusinessApiKey","BusinessUsageMonth","BusinessUsageCall","ExpertServiceRequest","AiMembership","AiMembershipCycle","ReferenceReminder"];
+const files=["20261124-marketing-consent.sql","20261124-ai-credit-ledger.sql","20261124-web-push.sql","20261124-digital-packages.sql","20261124-business-integrations.sql","20261124-expert-services.sql","20261124-ai-membership.sql","20261125-reference-reminders.sql"];
 const qnames=names.map(n=>"'"+n+"'").join(",");
 const list=()=>psql(["-Atc","SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name IN ("+qnames+") ORDER BY table_name"]).trim().split("\n").filter(Boolean);
 assert.equal(list().length,0);
@@ -54,4 +54,4 @@ for(const name of names){
 }
 const purposes=psql(["-Atc","SELECT e.enumlabel FROM pg_enum e JOIN pg_type t ON e.enumtypid=t.oid WHERE t.typname='PaymentPurpose' ORDER BY e.enumlabel"]).trim().split("\n");
 for(const purpose of ["AI_CREDITS","DIGITAL_PACKAGE","EXPERT_SERVICE","AI_MEMBERSHIP"])assert.ok(purposes.includes(purpose),purpose);
-console.log(JSON.stringify({result:"ISOLATED_ADDITIVE_MIGRATION_REHEARSAL_PASS",migrations:7,passes:2,newTables:names.length,columnsChecked:checked,baselineCommit:base,baselineSchemaSha256:hash,scope:"synthetic localhost only"}));
+console.log(JSON.stringify({result:"ISOLATED_ADDITIVE_MIGRATION_REHEARSAL_PASS",migrations:files.length,passes:2,newTables:names.length,columnsChecked:checked,baselineCommit:base,baselineSchemaSha256:hash,scope:"synthetic localhost only"}));

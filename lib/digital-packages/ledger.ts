@@ -9,6 +9,7 @@ import {getActiveAstrologyProviderName} from "@/lib/astrology/provider";
 import {getReportStorageReadiness} from "@/lib/storage/report-storage";
 import {getPackageDefinition,packagePriceOffers,packagePriceMatches,PACKAGE_TERMS_VERSION,packageEntitled} from "@/lib/digital-packages/catalogue";
 import {preparePackageItems,type PackageDraft} from "@/lib/digital-packages/input";
+import {reminderServiceReady} from "@/lib/calendar/reminder-readiness";
 export const packageOrderSelect={id:true,productKey:true,productVersion:true,pricePaise:true,status:true,expiresAt:true,createdAt:true,items:{select:{id:true,kind:true,position:true,status:true,attempts:true,pdfSize:true},orderBy:{position:"asc" as const}}} satisfies Prisma.DigitalPackageOrderSelect;
 export async function packageSchemaReady(){
  try{const [row]=await prisma.$queryRaw<{ready:boolean}[]>`SELECT to_regclass('public."DigitalPackageOrder"') IS NOT NULL AND to_regclass('public."DigitalPackageItem"') IS NOT NULL AND EXISTS(SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname='PaymentPurpose' AND e.enumlabel='DIGITAL_PACKAGE') AS ready`;return row?.ready===true;}catch{return false;}
@@ -19,7 +20,8 @@ export async function availablePackageOffers(){
  if(!allowed)return [];
  const all=packagePriceOffers(env.DIGITAL_PACKAGE_APPROVED_OFFERS,true);
  if(!all.length||!await packageSchemaReady())return [];
- return all.filter(p=>!p.subjects||getActiveAstrologyProviderName()==="own_engine");
+ const reminderReady=all.some(p=>p.key==="reference-reminders-2027")?await reminderServiceReady():false;
+ return all.filter(p=>(!p.subjects||getActiveAstrologyProviderName()==="own_engine")&&(p.key!=="reference-reminders-2027"||reminderReady));
 }
 export async function lockPackage(tx:Prisma.TransactionClient,orderId:string){
  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${orderId}),hashtext('naksharix-digital-package-v1'))::text`;

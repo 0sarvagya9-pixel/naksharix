@@ -46,7 +46,7 @@ try{
  assert.equal(await ledger.cancelPackageDraft(user.id,cancellation.order.id),true);
  const canceled=await prisma.digitalPackageOrder.findUniqueOrThrow({where:{id:cancellation.order.id},include:{items:true}});
  assert.equal(canceled.status,"CANCELED");assert.ok(canceled.items.every(i=>i.privateInput===null));
- for(const def of packageDefinitions){
+ for(const def of packageDefinitions.filter(d=>defs.includes(d.key))){
   const input=draft(def),saved=await ledger.preparePackage(user.id,input);
   assert.equal(saved.kind,"saved",def.key);const order=saved.order;
   assert.deepEqual(order.items.map(i=>i.kind),[...def.kinds]);

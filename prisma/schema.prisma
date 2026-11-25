@@ -202,6 +202,7 @@ model User {
   aiCreditUses                 AiCreditUse[]
   webPushSubscriptions         WebPushSubscription[]
   digitalPackageOrders         DigitalPackageOrder[]
+  referenceReminders            ReferenceReminder[]
   businessTenants              BusinessTenant[]
   expertServiceRequests         ExpertServiceRequest[]
   aiMemberships                 AiMembership[]
@@ -1089,6 +1090,7 @@ model DigitalPackageOrder {
   paymentId     String?  @unique
   payment       Payment? @relation(fields:[paymentId], references:[id], onDelete:SetNull)
   items         DigitalPackageItem[]
+  referenceReminders ReferenceReminder[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   @@unique([userId,clientIntent])
@@ -1252,4 +1254,26 @@ model AiMembershipCycle {
  @@unique([membershipId,cycleNumber])
  @@unique([membershipId,periodStart])
  @@index([membershipId,periodEnd])
+}
+
+model ReferenceReminder {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  orderId String
+  order DigitalPackageOrder @relation(fields:[orderId],references:[id],onDelete:Cascade)
+  eventId String
+  eventDate String
+  leadDays Int
+  dueAt DateTime
+  consentVersion String
+  recipientDigest String
+  status String @default("SCHEDULED")
+  claimedAt DateTime?
+  acceptedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId,eventId])
+  @@index([status,dueAt])
+  @@index([orderId])
 }
