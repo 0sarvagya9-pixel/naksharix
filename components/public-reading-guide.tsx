@@ -13,6 +13,15 @@ const resources = {
       ],
       links: [["/free-kundli", "Explore a free birth chart"], ["/kundli-matching", "Explore traditional Kundli matching"]]
     },
+    hinglish: {
+      heading: "Weekly love horoscope kaise padhein?",
+      intro: "Weekly love horoscope chuni hui rashi ke liye relationship se jude general reflection points deta hai. Ise personal birth-chart calculation ya kisi doosre insaan ke decisions ki prediction na samjhein.",
+      questions: [
+        ["Kya weekly love horoscope compatibility bata sakta hai?", "Nahi. Sirf ek hi rashi hone se compatibility tay nahi hoti. Traditional Kundli matching mein dono birth charts dekhe jaate hain; woh bhi consent, communication aur real-life compatibility ka replacement nahi hai."],
+        ["Is guidance ko kaise use karein?", "Apni rashi choose karein, communication aur relationship themes padhein aur ek practical step par sochain. Favorable dates ya symbolic advice ko guarantee na samjhein."]
+      ],
+      links: [["/free-kundli", "Free birth chart dekhein"], ["/kundli-matching", "Traditional Kundli matching dekhein"]]
+    },
     hi: {
       heading: "साप्ताहिक प्रेम राशिफल कैसे पढ़ें?",
       intro: "साप्ताहिक प्रेम राशिफल चुनी हुई राशि के लिए संबंधों से जुड़े सामान्य चिंतन संकेत देता है। इसे व्यक्तिगत जन्मकुंडली की गणना या किसी दूसरे व्यक्ति के निर्णय की भविष्यवाणी न समझें।",
@@ -33,6 +42,15 @@ const resources = {
       ],
       links: [["/free-calculators/name-number-calculator", "Name Number calculator and worked example"], ["/free-calculators/lo-shu-grid-calculator", "Lo Shu grid calculator and method"]]
     },
+    hinglish: {
+      heading: "Numerology reading kya hoti hai?",
+      intro: "Numerology reading birth date ya likhe hue naam se milne wale numbers ki traditional symbolic interpretation hai. Arithmetic verify ki ja sakti hai, lekin symbolic interpretations health, wealth, personality ya relationships ki scientifically proven predictions nahi hain.",
+      questions: [
+        ["Birth date se main numbers kaise nikalte hain?", "Moolank aam taur par birth day ke digits ko reduce karta hai; Life Path ya Bhagyank poori birth date ke digits ko reduce karta hai. Misal ke liye, 24 tareekh ka Moolank usual single-digit reduction se 2 + 4 = 6 hota hai."],
+        ["Kya Name Number aur Lo Shu grid same hain?", "Nahi. Name Number letter values use karta hai, jabki Lo Shu grid birth-date digits ko nau positions mein rakhta hai. Spelling aur numerical mapping badalne se result alag ho sakta hai, isliye readings compare karne se pehle method check karein."]
+      ],
+      links: [["/free-calculators/name-number-calculator", "Name Number calculator aur worked example"], ["/free-calculators/lo-shu-grid-calculator", "Lo Shu grid calculator aur method"]]
+    },
     hi: {
       heading: "अंक ज्योतिष रीडिंग क्या है?",
       intro: "अंक ज्योतिष रीडिंग जन्मतिथि या लिखे गए नाम से प्राप्त अंकों की एक पारंपरिक सांकेतिक व्याख्या है। गणना की जाँच की जा सकती है, लेकिन इसकी व्याख्याएँ स्वास्थ्य, धन, व्यक्तित्व या संबंधों की वैज्ञानिक रूप से प्रमाणित भविष्यवाणियाँ नहीं हैं।",
@@ -47,7 +65,7 @@ const resources = {
 
 export async function PublicReadingGuide({ topic }: { topic: keyof typeof resources }) {
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
-  const content = resources[topic][locale === "hi" ? "hi" : "en"];
+  const content = resources[topic][locale];
   return (
     <section aria-labelledby={`reading-guide-${topic}`} className="mx-auto mb-12 max-w-6xl px-4 sm:px-6">
       <div className="rounded-3xl border border-[#e7cda3] bg-white/90 p-5 text-[#17181d] sm:p-8">
@@ -59,7 +77,7 @@ export async function PublicReadingGuide({ topic }: { topic: keyof typeof resour
             <p className="mt-2 max-w-4xl text-sm leading-7 text-[#525866]">{answer}</p>
           </div>
         ))}
-        <nav aria-label={locale === "hi" ? "संबंधित मुफ्त संसाधन" : "Related free resources"} className="mt-6 flex flex-wrap gap-3 text-sm font-semibold">
+        <nav aria-label={({ en: "Related free resources", hi: "संबंधित मुफ्त संसाधन", hinglish: "Related free resources dekhein" } as const)[locale]} className="mt-6 flex flex-wrap gap-3 text-sm font-semibold">
           {content.links.map(([href, label]) => (
             <Link key={href} href={href} className="rounded-lg border border-[#dca956]/45 px-4 py-2 text-[#8c571a] underline">{label}</Link>
           ))}
