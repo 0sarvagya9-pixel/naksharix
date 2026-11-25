@@ -112,3 +112,126 @@ assert.equal(calculateClassicalStrengthBasis({planet:"Sun",sign:"Aries",absolute
 const incomplete=calculateInternalShadbala([{...point("Sun",7),house:1}],{ascendantLongitude:0});
 assert.ok(incomplete.scores.every(x=>x.total===null)&&!incomplete.publicEnabled);negative++;
 console.log("CLASSICAL_STRENGTH_RUNTIME_PASS "+JSON.stringify({vargaChecks,contributionChecks,reductionChecks,strengthChecks,negative,traditionalDivisions:16,publishedSunCells:12,publishedSarvaCells:12-observed.length,publishedSarvaDifferences:observed,scope:"textual arithmetic plus independent Swiss source longitudes; no public activation or predictive certification; full Shadbala/Bhavabala remain unqualified"}));
+
+
+// P0: directed friendship, seven-division dignity, actual midpoint geometry
+// and precise angular aspect arithmetic. Reference rules transcribed from
+// BPHS 3.51–58, 26.6–12 and 27.1–7, 26–31. Not software parity.
+const C=require("@/lib/astrology/strength/classical-components");
+let friendshipChecks=0,dignityChecks=0,angleChecks=0,aspectChecks=0,bhavaChecks=0,strictNegative=0;
+const traditional=["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];
+// Directed natural relationship matrix, columns in the same stated order.
+// 1=friendly, 0=neutral, -1=hostile. Self intentionally not evaluated.
+const natalMatrix=[
+ [0,1,1,0,1,-1,-1],
+ [1,0,0,1,0,0,0],
+ [1,1,0,-1,1,0,0],
+ [1,-1,0,0,0,1,0],
+ [1,1,1,-1,0,-1,0],
+ [-1,-1,0,1,0,0,1],
+ [-1,-1,-1,1,0,1,0]
+];
+for(const [a,from] of traditional.entries())for(const [b,to] of traditional.entries())if(a!==b)for(let x=0;x<12;x++)for(let y=0;y<12;y++){
+ const r=C.classicalRelationship(from,to,x,y),gap=Math.abs(x-y),temporary=Math.min(gap,12-gap)>=1&&Math.min(gap,12-gap)<=3?1:-1;
+ assert.equal(r.natural,natalMatrix[a][b]);assert.equal(r.temporary,temporary);
+ assert.equal(r.compound,natalMatrix[a][b]+temporary);assert.equal(r.virupas,[2,4,10,15,20][r.compound+2]);friendshipChecks++;
+}
+const synthetic=traditional.map((planet,i)=>({...point(planet,[130,40,5,166,245,190,310][i]),house:i+1}));
+const relationship=C.calculateFivefoldFriendship(synthetic);assert.equal(relationship.relationships.length,42);
+for(const p of synthetic){
+ const result=C.calculateSaptavargajaEvidence(synthetic,p.planet);
+ assert.equal(result.rows.length,7);assert.equal(result.rows[0].dignity,"moolatrikona");
+ assert.equal(result.rows[0].virupas,45);
+ assert.equal(result.totalVirupas,result.rows.reduce((a,b)=>a+b.virupas,0));
+ // independently select the natal sign lord from the conventional list and
+ // verify every division's grade without using the production lookup table.
+ for(const r of result.rows){
+  const expected=expectedSign(r.chart,p.absoluteLongitude),lord=["Mars","Venus","Mercury","Moon","Sun","Mercury","Venus","Mars","Jupiter","Saturn","Saturn","Jupiter"][signs.indexOf(expected)];
+  assert.equal(r.sign,expected);assert.equal(r.lord,lord);
+  if(r.chart==="D1")assert.equal(r.virupas,45);
+  else if(lord===p.planet)assert.equal(r.virupas,30);
+  else{
+   const gap=Math.abs(signs.indexOf(p.sign)-signs.indexOf(synthetic.find(x=>x.planet===lord).sign));
+   const temp=Math.min(gap,12-gap)>=1&&Math.min(gap,12-gap)<=3?1:-1;
+   const n=natalMatrix[traditional.indexOf(p.planet)][traditional.indexOf(lord)];
+   assert.equal(r.virupas,[2,4,10,15,20][n+temp+2]);
+  }
+  dignityChecks++;
+ }
+}
+const boundaries=[
+ ["Sun",120,140],["Moon",33,60],["Mars",0,12],["Mercury",165,170],["Jupiter",240,250],["Venus",180,195],["Saturn",300,320]
+];
+for(const [planet,start,end] of boundaries)for(const [lon,expected] of [[start,true],[end-1e-6,true],[end,false],[start-1e-6,false]]){
+ const p=synthetic.map(p=>p.planet===planet?{...point(planet,lon),house:p.house}:p);
+ const r=C.calculateSaptavargajaEvidence(p,planet);
+ assert.equal(r.rows[0].dignity==="moolatrikona",expected,planet+" moola "+lon);dignityChecks++;
+}
+for(const p of [synthetic.slice(1),[...synthetic,synthetic[0]],synthetic.map((p,i)=>i?p:{...p,absoluteLongitude:NaN}),synthetic.map((p,i)=>i?p:{...p,sign:"Aries"})]){
+ assert.equal(C.calculateFivefoldFriendship(p).available,false);
+ assert.equal(C.calculateSaptavargajaEvidence(p,"Sun"),null);strictNegative++;
+}
+// Deliberately unequal angles: Asc=20, MC=310, IC=130, Desc=200.
+const mid=C.buildQuadrantBhavaMidpoints(20,310).midpoints;
+const expectedMid=[20,56.666666666666664,93.33333333333333,130,153.33333333333334,176.66666666666666,200,236.66666666666666,273.3333333333333,310,333.3333333333333,356.6666666666667];
+for(let i=0;i<12;i++){
+ assert.ok(Math.abs(mid[i]-expectedMid[i])<1e-8);
+ assert.equal(C.assignMidpointBhava(mid[i],mid),i+1);angleChecks++;
+}
+const weak={Sun:4,Mars:4,Mercury:7,Jupiter:7,Saturn:1,Moon:10,Venus:10};
+for(const g of traditional)for(const gap of [0,30,60,90,120,150,180,210,240,270,300,330]){
+ const lon=(mid[weak[g]-1]+gap)%360;
+ const r=C.calculateExactDirectionalBala(g,lon,mid);
+ assert.equal(r.weakHouse,weak[g]);assert.ok(Math.abs(r.virupas-Math.min(gap,360-gap)/3)<1e-8);
+ angleChecks++;
+}
+// Specified verse values at the exact aspect anchors and one published
+// worked example; independent piecewise check between anchor points.
+const ordinary=[[0,0],[30,0],[45,7.5],[60,15],[75,30],[90,45],[105,37.5],[120,30],[135,15],[150,0],[165,30],[180,60],[195,52.5],[210,45],[240,30],[270,15],[300,0],[359,0]];
+for(const g of ["Sun","Moon","Mercury","Venus"])for(const [a,v] of ordinary){
+ assert.equal(C.classicalAspectVirupas(g,0,a).virupas,v);
+ assert.equal(C.classicalAspectVirupas(g,350,(350+a)%360).virupas,v);aspectChecks+=2;
+}
+const special={
+ Saturn:[[30,0],[45,30],[60,60],[75,52.5],[90,45],[240,30],[255,45],[270,60],[285,30],[300,0]],
+ Mars:[[60,15],[75,37.5],[90,60],[105,45],[120,30],[180,60],[195,60],[210,60],[225,45],[240,30]],
+ Jupiter:[[90,45],[105,52.5],[120,60],[135,30],[150,0],[210,45],[225,52.5],[240,60],[255,30],[270,15]]
+};
+for(const [g,values] of Object.entries(special))for(const [a,v] of values){assert.equal(C.classicalAspectVirupas(g,0,a).virupas,v);aspectChecks++;}
+for(const g of traditional)for(let a=0;a<360;a+=.5){
+ const v=C.classicalAspectVirupas(g,0,a).virupas;assert.ok(v>=0&&v<=60);aspectChecks++;
+}
+assert.ok(Math.abs(C.classicalAspectVirupas("Saturn",266+9/60,48+55/60).virupas-(7+14/60))<1e-9);aspectChecks++;
+const classes=[[0,4],[30,4],[60,7],[90,1],[120,4],[150,7],[180,7],[210,1],[240,7],[255,4],[270,4],[285,10],[300,7],[330,10]];
+for(const [lon,house] of classes){assert.equal(C.classifyBhavaDirection(lon).weakHouse,house);bhavaChecks++;}
+const incompleteBhava=C.calculateBhavaBalaEvidence(synthetic,mid);
+assert.equal(incompleteBhava.houses.length,12);assert.ok(incompleteBhava.houses.every(h=>h.arithmeticTotalVirupas===null));assert.ok(incompleteBhava.missingDependencies.length>0);
+const polarity={Sun:"malefic",Moon:"benefic",Mars:"malefic",Mercury:"benefic",Jupiter:"benefic",Venus:"benefic",Saturn:"malefic"};
+const lordStrengthVirupas=Object.fromEntries(traditional.map((g,i)=>[g,300+i*10]));
+for(const aspectReading of ["additional_full_mercury_jupiter","full_instead_of_quarter"])for(const birthPhase of ["day","twilight","night"]){
+ const r=C.calculateBhavaBalaEvidence(synthetic,mid,{polarity,aspectReading,birthPhase,lordStrengthVirupas});
+ assert.equal(r.publicEnabled,false);assert.equal(r.verified,false);assert.equal(r.missingDependencies.length,0);
+ assert.equal(r.houses.flatMap(h=>h.occupants).length,7);
+ for(const h of r.houses){
+  const d=Math.abs(h.midpoint-mid[h.weakHouse-1]),dir=Math.min(d,360-d)/3;
+  assert.ok(Math.abs(h.directionalVirupas-dir)<1e-8);
+  const aspects=h.aspect.rows.reduce((sum,a)=>sum+((aspectReading==="full_instead_of_quarter"&&["Jupiter","Mercury"].includes(a.planet))?a.virupas:(polarity[a.planet]==="benefic"?1:-1)*a.virupas/4+(["Jupiter","Mercury"].includes(a.planet)?a.virupas:0)),0);
+  assert.ok(Math.abs(h.aspect.virupas-aspects)<1e-8);
+  assert.ok(Math.abs(h.arithmeticTotalVirupas-(dir+h.occupantVirupas+aspects+h.birthPhaseVirupas+lordStrengthVirupas[h.lord]))<1e-8);
+  bhavaChecks++;
+ }
+}
+assert.equal(C.calculateAspectStrengthEvidence(synthetic,0,{},"additional_full_mercury_jupiter"),null);strictNegative++;
+for(const bad of [[],Array(12).fill(0),[...mid.slice(0,11),NaN]]){assert.throws(()=>C.calculateBhavaBalaEvidence(synthetic,bad));strictNegative++;}
+assert.throws(()=>C.buildQuadrantBhavaMidpoints(20,200));strictNegative++;
+assert.throws(()=>C.classicalRelationship("Sun","Sun",0,0));strictNegative++;
+assert.throws(()=>C.classicalAspectVirupas("Sun",NaN,60));strictNegative++;
+const fixed=calculateInternalShadbala(synthetic,{ascendantLongitude:20,bhavaMidpoints:mid});
+for(const p of fixed.scores){
+ const basis=calculateClassicalStrengthBasis(synthetic.find(x=>x.planet===p.planet));
+ const sapta=C.calculateSaptavargajaEvidence(synthetic,p.planet);
+ assert.ok(Math.abs(p.components.sthanaBala-(basis.uchchaVirupas+basis.ojayugmaVirupas+basis.kendradiVirupas+basis.drekkanaVirupas+sapta.totalVirupas))<.00011);
+ assert.ok(Math.abs(p.components.digBala-C.calculateExactDirectionalBala(p.planet,synthetic.find(x=>x.planet===p.planet).absoluteLongitude,mid).virupas)<.00011);
+ dignityChecks+=2;
+}
+console.log("CLASSICAL_POSITIONAL_BHAVA_EVIDENCE_PASS "+JSON.stringify({friendshipChecks,dignityChecks,angleChecks,aspectChecks,bhavaChecks,strictNegative,scope:"named traditional arithmetic, supplied midpoint/polarity/lord context; independent full Shadbala and Bhava Bala software parity still required"}));
