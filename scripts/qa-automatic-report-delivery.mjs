@@ -379,6 +379,12 @@ if(!dbMode){
   assert.equal(nameRows[0].soulUrge,null);assert.equal(nameRows[1].personality,null);
   assert.equal(depthFor(names,"numerology-arithmetic").cards.length,3);depthContractCases++;
  }
+ for(const language of ["en","hi","hinglish"]){
+  const report=await assembleAutomaticPaidReport({slug:"manglik-kaal-sarp-report",birth,extra,question,language,now:new Date("2026-11-24T12:00:00Z")});
+  assert.equal(depthFor(report,"manglik-reference-evidence").cards.length,3);
+  assert.equal(depthFor(report,"nodal-geometry-evidence").cards.length,7);
+  depthContractCases++;
+ }
  console.log("P0_REPORT_DEPTH_AND_ARITHMETIC_PASS "+JSON.stringify({depthContractCases,nameArithmeticChecks:7,scope:"calculation-grounded content and empty-group safety; not independent editorial scoring"}));
  console.log("P0_PRATYANTAR_REPORT_CONTRACT_PASS "+JSON.stringify({thirdCases,allSubPeriods:allSubs.length,thirdLevelPeriods:third.length,scope:"calculated boundaries, not prediction"}));
  console.log("P0_SPECIALTY_PERIOD_AND_NAME_CONTRACT_PASS",JSON.stringify({periodCases,nameCases:22,scientificPrediction:false}));

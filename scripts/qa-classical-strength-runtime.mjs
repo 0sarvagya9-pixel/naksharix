@@ -676,3 +676,42 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  assert.equal(detail.length,63);assert.equal(residuals.length,97);assert.equal(actual.fullShadbalaVerified,false);assert.equal(actual.fullBhavaBalaVerified,false);
  console.log("P0_LONGITUDE_TEMPORAL_DIAGNOSTIC "+JSON.stringify({projectionChecks,boundaryChecks,negativeChecks,publishedTemporalMatches:detail.filter(x=>x.matched).length,publishedTemporalCells:63,actualBirthMatched:residuals.filter(x=>x.matched).length,actualBirthMismatches:residuals.filter(x=>!x.matched).length,toleranceVirupas:.25,fullParityAccepted:false,detail,residuals}));
 }
+
+{
+ const P=require("@/lib/astrology/strength/traditional-patterns"),CORE=require("@/lib/astrology/core-calculations");
+ let manglikChecks=0,advancedChecks=0,negativeChecks=0;
+ for(let asc=0;asc<12;asc++)for(let moon=0;moon<12;moon++)for(let mars=0;mars<12;mars++)for(let venus=0;venus<12;venus++){
+  const input=[{planet:"Moon",sign:signs[moon]},{planet:"Mars",sign:signs[mars]},{planet:"Venus",sign:signs[venus]}],e=P.evaluateManglikReferenceEvidence(input,signs[asc],signs[moon]);
+  const hs=[asc,moon,venus].map(s=>(mars-s+12)%12+1);
+  assert.deepEqual(e.references.map(r=>r.house),hs);
+  assert.equal(e.sixHouseHits,hs.filter(h=>[1,2,4,7,8,12].includes(h)).length);
+  assert.equal(e.fiveHouseHits,hs.filter(h=>[1,4,7,8,12].includes(h)).length);manglikChecks+=3;
+ }
+ const sample=[{planet:"Mars",sign:"Aries",house:1},{planet:"Moon",sign:"Gemini"},{planet:"Venus",sign:"Cancer"}];
+ assert.equal(CORE.calculateDoshaAnalysis(sample,"Aries","Gemini").manglik.available,true);manglikChecks++;
+ for(const bad of [[],sample.slice(1),[...sample,sample[0]],sample.map((x,i)=>i?x:{...x,house:2}),sample.map((x,i)=>i?x:{...x,absoluteLongitude:35}),sample.map((x,i)=>i?x:{...x,sign:"Unknown"})]){
+  assert.equal(P.evaluateManglikReferenceEvidence(bad,"Aries","Gemini"),null);
+  const d=CORE.calculateDoshaAnalysis(bad,"Aries","Gemini").manglik;assert.equal(d.available,false);assert.equal(d.present,false);negativeChecks+=3;
+ }
+ assert.equal(P.evaluateManglikReferenceEvidence(sample,"Aries","Taurus"),null);negativeChecks++;
+ const chart=(angles,asc="Gemini")=>P.evaluateBphs36NamedPatterns([...classical.map((g,i)=>point(g,angles[i])),point("Rahu",5),point("Ketu",185)],asc);
+ const positive=[15,75,45,105,255,75,315];
+ assert.equal(chart(positive).gajakesari.satisfied,true);assert.ok(chart(positive).gajakesari.support.includes("Venus"));advancedChecks+=2;
+ const noSupport=chart([15,16,45,225,255,45,315]);
+ assert.equal(noSupport.gajakesari.angular,true);assert.equal(noSupport.gajakesari.support.length,0);assert.equal(noSupport.gajakesari.satisfied,false);advancedChecks+=3;
+ const enemy=chart([15,255,45,105,75,255,315]);assert.equal(enemy.gajakesari.naturalEnemySign,true);assert.equal(enemy.gajakesari.satisfied,false);advancedChecks+=2;
+ const deb=chart([15,105,45,165,285,105,315],"Aries");assert.equal(deb.gajakesari.debilitated,true);assert.equal(deb.gajakesari.satisfied,false);assert.equal(deb.amala.references[0].satisfied,true);advancedChecks+=3;
+ const mixed=chart([15,105,285,165,285,105,315],"Aries");assert.equal(mixed.amala.references[0].satisfied,false);advancedChecks++;
+ for(const sep of [10.999,11,11.001]){
+  const v=chart([255-sep,75,45,105,255,75,315]);
+  assert.equal(v.gajakesari.combustionApproximation,sep<11);assert.equal(v.gajakesari.satisfied,sep>=11);advancedChecks+=2;
+ }
+ const vedic=chart([15,75,45,105,255,345,315]);
+ assert.equal(vedic.solar.ubhayachari,true);assert.equal(vedic.solar.vesi,false);assert.equal(vedic.solar.vosi,false);advancedChecks+=3;
+ assert.equal(vedic.verified,false);assert.equal(vedic.publicEnabled,false);advancedChecks+=2;
+ assert.equal(P.evaluateBphs36NamedPatterns(classical.map((g,i)=>point(g,positive[i])),"Gemini"),null);negativeChecks++;
+ const birthRef=JSON.parse(fs.readFileSync("fixtures/astrology/published-classical-comparison.json","utf8"));
+ const actual=require("@/lib/astrology/strength/birth-context").calculateBirthStrengthEvidence(birthRef.birth);
+ assert.ok(actual.namedAdvancedPatterns);assert.equal(actual.namedAdvancedPatterns.publicEnabled,false);advancedChecks+=2;
+ console.log("P0_ADVANCED_PATTERN_AND_DOSHA_SAFETY_PASS "+JSON.stringify({manglikChecks,advancedChecks,negativeChecks,scope:"named source rule geometry; no predictive or independent expert certification"}));
+}

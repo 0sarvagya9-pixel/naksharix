@@ -3,6 +3,7 @@ import type {PremiumReportContentSection} from "./premium-report-content-engine"
 import type {EditorialCard} from "./editorial-insights";
 import {editorialTerm} from "./editorial-display";
 import {isFullRomanNumerologyName,calculateRomanNameEvidence} from "./roman-name";
+import {evaluateManglikReferenceEvidence,evaluateNodalContainment} from "@/lib/astrology/strength/traditional-patterns";
 type L=readonly [string,string,string];
 type R=Record<string,unknown>;
 const object=(v:unknown):R=>v&&typeof v==="object"&&!Array.isArray(v)?v as R:{};
@@ -50,6 +51,18 @@ export function buildReportDepth(chart:BirthChartData,slug:string,sections:Premi
   return {label:(i+1)+" / "+term(str(r.koot??r.name)),title:str(r.score)+" / "+str(r.maxScore),body:t(["Recorded traditional result: ","दर्ज पारंपरिक परिणाम: ","Recorded traditional result: "])+str(r.result??r.explanation??r.meaning)+". "+t(prompts[i]??prompts[0])};
  }));
 
+ if(slug==="manglik-kaal-sarp-report"){
+  const m=evaluateManglikReferenceEvidence(chart.planetPositions,chart.avakhada.ascendant,chart.avakhada.moonSign);
+  if(m)add("manglik-reference-evidence",["Manglik rule: three reference points","मांगलिक नियम: तीन संदर्भ","Manglik rule: teen reference points"],["The existing six-house placement rule is shown explicitly. A hit is not a marriage outcome, severity measurement or proof of harm. No cancellation or exception is presumed.","छह भावों का मौजूदा नियम स्पष्ट है। नियम मिलने से विवाह का परिणाम या हानि सिद्ध नहीं होती। किसी अपवाद या दोष-निवारण का अनुमान नहीं है।","Existing six-house rule explicit hai. Hit marriage outcome, severity measure ya harm ka proof nahi. Koi exception ya cancellation presume nahi kiya."],m.references.map(r=>({
+   label:term(r.reference)+" / "+term(r.referenceSign),title:term("Mars")+" / "+term(r.marsSign)+" / "+house(r.house),
+   body:t(["Six-house set: 1, 2, 4, 7, 8, 12. ","छह भाव: 1, 2, 4, 7, 8, 12। ","Six-house set: 1, 2, 4, 7, 8, 12. "])+t(r.hitSixHouse?["The calculated reference house belongs to that set.","गणितीय संदर्भ भाव इस समूह में है।","Calculated reference bhav set mein hai."]:["The calculated reference house does not belong to that set.","गणितीय संदर्भ भाव इस समूह में नहीं है।","Calculated reference bhav set mein nahi hai."])+" "+t(["Do not interpret a placement as a relationship decision; discuss actual behavior, consent and values.","किसी स्थिति से संबंध का निर्णय न लें; वास्तविक व्यवहार, सहमति और मूल्यों पर बात करें।","Placement se relationship decision na lein; actual behavior, consent aur values discuss karein."])
+  })));
+  const n=evaluateNodalContainment(chart.planetPositions);
+  if(n)add("nodal-geometry-evidence",["Nodal semicircle geometry","राहु-केतु अर्धवृत्त गणना","Rahu-Ketu semicircle geometry"],["The same closed-arc geometry used by the existing assessment is shown in degrees. Exact boundary contacts are convention dependent. This is not a prediction of misfortune.","मौजूदा नियम की वही बंद अर्धवृत्त गणना अंशों में है। सीमा-स्पर्श पर परंपराएँ अलग हो सकती हैं। यह दुर्भाग्य की भविष्यवाणी नहीं है।","Existing assessment ki wahi closed-arc geometry degrees mein hai. Boundary contact tradition dependent hai. Misfortune ki prediction nahi."],n.offsets.map(r=>({
+   label:term(r.planet),title:t(["Nodal offsets","राहु-केतु से अंश","Nodal offsets"]),
+   body:t(["Forward distance from Rahu: ","राहु से आगे की दूरी: ","Rahu se forward distance: "])+r.fromRahu.toFixed(4)+"°. "+t(["Forward distance from Ketu: ","केतु से आगे की दूरी: ","Ketu se forward distance: "])+r.fromKetu.toFixed(4)+"°. "+t(["These are angular coordinates, not a strength or danger score.","ये कोणीय गणनाएँ हैं, बल या खतरे का अंक नहीं।","Yeh angular coordinates hain, strength ya danger score nahi."])
+  })));
+ }
  if(slug==="couple-kundli"){
   const partner=object(data("partner")),partnerHouses=rows(partner.houses),partnerPlanets=rows(partner.positions);
   if(partnerHouses.length!==12||partnerPlanets.length!==9)throw Error("REPORT_PARTNER_CONTEXT_INCOMPLETE");

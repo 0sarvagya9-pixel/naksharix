@@ -6,7 +6,7 @@ import {calculateInternalShadbala,calculateClassicalStrengthBasis,calculateRaman
 import {calculateSolarStrengthContext,calculateTemporalStrengthEvidence} from "./temporal-components";
 import {calculateClassicalCalendarCandidate} from "./calendar-lords";
 import {calculateLongitudeTemporalCandidate} from "./longitude-temporal";
-import {evaluateTraditionalPatterns} from "./traditional-patterns";
+import {evaluateTraditionalPatterns,evaluateBphs36NamedPatterns} from "./traditional-patterns";
 import {STAR_GRAHAS,type StarGraha,calculateMotionalEpochCandidate} from "./motional-epoch";
 import {GRAHAS,assembleClassicalStrengthCandidate} from "./strength-total";
 import {calculateAspectStrengthEvidence,calculateExactDirectionalBala,calculateRamanDrikCandidate,calculateRamanBhavaCandidate} from "./classical-components";
@@ -42,7 +42,9 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput){
  const geometry=calculateBirthBhavaGeometry(input);
  const planets=geometry.chart.planets.map(p=>({...p,house:typeof p.absoluteLongitude==="number"?assignMidpointBhava(p.absoluteLongitude,geometry.midpoints):null}));
  const friendship=calculateFivefoldFriendship(planets);
- const traditionalPatterns=evaluateTraditionalPatterns(planets.map(p=>({planet:p.planet,sign:p.sign??"",degree:p.degree??undefined,absoluteLongitude:p.absoluteLongitude??undefined,house:p.house??undefined})),geometry.chart.ascendant.sign??"");
+ const patternPlanets=planets.map(p=>({planet:p.planet,sign:p.sign??"",degree:p.degree??undefined,absoluteLongitude:p.absoluteLongitude??undefined,house:p.house??undefined}));
+ const traditionalPatterns=evaluateTraditionalPatterns(patternPlanets,geometry.chart.ascendant.sign??"");
+ const namedAdvancedPatterns=evaluateBphs36NamedPatterns(patternPlanets,geometry.chart.ascendant.sign??"");
  const positional=planets.map(p=>{
   const basis=calculateClassicalStrengthBasis(p);
   if(!basis)return null;
@@ -95,5 +97,5 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput){
  }),longitudeTemporal?.warPairs??null,solar.declinations);
  const temporalLords=temporalVariantStrength.completeArithmetic&&temporalVariantStrength.rows.every(r=>typeof r.total==="number"&&r.total>=0)?Object.fromEntries(temporalVariantStrength.rows.map(r=>[r.planet,r.total!])):undefined;
  const temporalVariantBhava=calculateRamanBhavaCandidate(planets,geometry.midpoints,{lordConvention:"whole_sign_lagna",lordStrengthVirupas:temporalLords});
- return {geometry,friendship,traditionalPatterns,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,ramanDrik,aspectVariantStrength,ramanBhavaCandidate,wholeSignLordBhavaCandidate,ramanPositional,positionalVariantStrength,positionalVariantBhava,longitudeTemporal,doubledTemporal,temporalVariantStrength,temporalVariantBhava,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
+ return {geometry,friendship,traditionalPatterns,namedAdvancedPatterns,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,ramanDrik,aspectVariantStrength,ramanBhavaCandidate,wholeSignLordBhavaCandidate,ramanPositional,positionalVariantStrength,positionalVariantBhava,longitudeTemporal,doubledTemporal,temporalVariantStrength,temporalVariantBhava,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
 }

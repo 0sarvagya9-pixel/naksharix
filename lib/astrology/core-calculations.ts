@@ -14,13 +14,12 @@ import type {
 } from "@/lib/astrology/types";
 
 import {calculateVimshottariDasha as calculateExactDasha, type DashaPeriod as ExactDashaPeriod} from "@/lib/astrology/premium-engine/dasha";
-import {evaluateNodalContainment} from "@/lib/astrology/strength/traditional-patterns";
+import {evaluateNodalContainment,evaluateManglikReferenceEvidence} from "@/lib/astrology/strength/traditional-patterns";
 import {localBirthToUtcDate,normalizeBirthDate,normalizeBirthTime,parseBirthDateTime,parseTimezoneOffsetToHours} from "@/lib/astrology/own-engine/time";
 
 type Locale = "en" | "hi" | "hinglish";
 
 const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"] as const;
-const manglikHouses = new Set([1, 2, 4, 7, 8, 12]);
 
 export function enrichBirthChartWithCoreCalculations(chart: BirthChartData, input: AstrologyBirthInput): BirthChartData {
   const locale = input.language ?? input.locale ?? "en";
@@ -117,24 +116,16 @@ export function calculateChalitChart(planets: PlanetPosition[], ascendantLongitu
 }
 
 export function calculateDoshaAnalysis(planets: PlanetPosition[], ascendantSign: string, moonSign: string, locale: Locale = "en"): DoshaAnalysis {
-  const mars = planets.find((planet) => samePlanet(planet.planet, "Mars"));
-  const venus = planets.find((planet) => samePlanet(planet.planet, "Venus"));
-  const marsHouseFromLagna = mars?.house;
-  const marsHouseFromMoon = mars ? relativeHouse(mars.sign, moonSign) : undefined;
-  const marsHouseFromVenus = mars && venus ? relativeHouse(mars.sign, venus.sign) : undefined;
-  const lagnaHit = typeof marsHouseFromLagna === "number" && manglikHouses.has(marsHouseFromLagna);
-  const moonHit = typeof marsHouseFromMoon === "number" && manglikHouses.has(marsHouseFromMoon);
-  const venusHit = typeof marsHouseFromVenus === "number" && manglikHouses.has(marsHouseFromVenus);
-  const hitCount = [lagnaHit, moonHit, venusHit].filter(Boolean).length;
-  const severity = manglikSeverity(hitCount, locale);
-  const manglik: DoshaAnalysis["manglik"] = {
-    present: hitCount > 0,
-    severity,
-    marsHouseFromLagna,
-    marsHouseFromMoon,
-    marsHouseFromVenus,
-    summary: manglikSummary(locale, hitCount, marsHouseFromLagna, marsHouseFromMoon, marsHouseFromVenus),
-    remedies: manglikRemedies(locale)
+  const evidence=evaluateManglikReferenceEvidence(planets,ascendantSign,moonSign);
+  const manglik:DoshaAnalysis["manglik"]=evidence?{
+    available:true,present:evidence.sixHouseHits>0,severity:manglikSeverity(evidence.sixHouseHits,locale),
+    marsHouseFromLagna:evidence.references[0].house,marsHouseFromMoon:evidence.references[1].house,marsHouseFromVenus:evidence.references[2].house,
+    summary:manglikSummary(locale,evidence.sixHouseHits,evidence.references[0].house,evidence.references[1].house,evidence.references[2].house),
+    remedies:manglikRemedies(locale)
+  }:{
+    available:false,present:false,severity:notEnoughData(locale),
+    summary:locale==="hi"?"मांगलिक नियम की जाँच के लिए लग्न, चंद्र, मंगल और शुक्र की सुसंगत स्थितियाँ आवश्यक हैं।":locale==="hinglish"?"Manglik niyam ke liye Lagna, Moon, Mars aur Venus ki consistent positions zaroori hain.":"Consistent Lagna, Moon, Mars and Venus positions are required to evaluate the Manglik rule.",
+    remedies:[doshaCaveat(locale)]
   };
 
   const kaalSarp = calculateKaalSarp(planets, locale);
