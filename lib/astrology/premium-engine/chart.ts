@@ -12,7 +12,7 @@ import {
   parseBirthDateTime,
   parseTimezoneOffsetToHours
 } from "@/lib/astrology/own-engine/time";
-import { lahiriAyanamsa, longitudeToRashi, tropicalToSidereal, wholeSignHouse } from "@/lib/astrology/own-engine/zodiac";
+import { lahiriAyanamsa, longitudeToRashi, tropicalToSidereal, wholeSignHouse, boundedDegreeDisplay } from "@/lib/astrology/own-engine/zodiac";
 import type { CanonicalChartInput, CanonicalChartResult, CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
 
 type SupportedBody = "Sun" | "Moon" | "Mars" | "Mercury" | "Jupiter" | "Venus" | "Saturn";
@@ -65,8 +65,8 @@ export function calculateInternalChart(input: InternalChartInput): CanonicalChar
     },
     ascendant: {
       sign: ascendantRashi.rashi,
-      degree: round(ascendantRashi.degreeInSign),
-      absoluteLongitude: round(ascendantLongitude)
+      degree: boundedDegreeDisplay(ascendantRashi.degreeInSign,6),
+      absoluteLongitude: ascendantLongitude
     },
     moon: {
       sign: moon?.sign ?? null,
@@ -153,14 +153,14 @@ function buildCanonicalPlanets(longitudes: Record<PlanetName, number>, ascendant
   const sunLongitude = longitudes.Sun;
 
   return planetOrder.map((planet) => {
-    const absoluteLongitude = round(longitudes[planet]);
+    const absoluteLongitude = longitudes[planet];
     const rashi = longitudeToRashi(absoluteLongitude);
     const motion=estimateSiderealMotion(days=>planet==="Rahu"||planet==="Ketu"?normalizeDegrees(meanRahuLongitude(julianDay+days)+(planet==="Ketu"?180:0)):siderealLongitude(planet,Astronomy.MakeTime(new Date(time.date.getTime()+days*86400000)),julianDay+days));
 
     return {
       planet,
       sign: rashi.rashi,
-      degree: round(rashi.degreeInSign),
+      degree: boundedDegreeDisplay(rashi.degreeInSign,6),
       absoluteLongitude,
       house: wholeSignHouse(rashi.rashiNumber, ascendantSignNumber),
       ...motion,

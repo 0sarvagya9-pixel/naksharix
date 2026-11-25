@@ -272,5 +272,7 @@ export function withSeconds(time: string) {
 }
 
 export function normalizeDegrees(value: number) {
-  return ((value % 360) + 360) % 360;
+  if(value>=0&&value<360)return value;
+  const rest=value%360;
+  return rest>=0?rest:Math.min(360-Number.EPSILON*256,360+rest);
 }

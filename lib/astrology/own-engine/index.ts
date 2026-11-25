@@ -6,7 +6,7 @@ import { calculatePanchang } from "@/lib/astrology/own-engine/panchang";
 import { buildD1Chart, buildD9Chart } from "@/lib/astrology/own-engine/charts";
 import { nakshatraFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
 import { julianDayFromUtc, localBirthToUtcDate, localSiderealTimeDegrees, normalizeBirthDate, normalizeBirthTime, normalizeDegrees, parseBirthDateTime, parseTimezoneOffsetToHours } from "@/lib/astrology/own-engine/time";
-import { lahiriAyanamsa, longitudeToRashi, tropicalToSidereal, wholeSignHouse } from "@/lib/astrology/own-engine/zodiac";
+import { lahiriAyanamsa, longitudeToRashi, tropicalToSidereal, wholeSignHouse, boundedDegreeDisplay } from "@/lib/astrology/own-engine/zodiac";
 import { isAstroSageSarvagyaPandeyInput, printAstroSageSarvagyaBenchmarkComparison } from "@/lib/astrology/test-cases/astrosage-sarvagya-pandey";
 import type { AstrologyBirthInput, BirthChartData, PlanetPosition } from "@/lib/astrology/types";
 
@@ -116,7 +116,7 @@ export function calculateOwnEngineBirthChart(input: AstrologyBirthInput): BirthC
       nodeMode: "Mean lunar node benchmark mode",
       julianDay: Number(julianDay.toFixed(8)),
       utcDate: utcDate.toISOString(),
-      ascendantLongitude: Number(ascendantLongitude.toFixed(6))
+      ascendantLongitude
     }
   };
 }
@@ -150,11 +150,11 @@ function buildPlanetPositions(longitudes: Record<(typeof planetOrder)[number], n
       planet,
       sign: rashi.rashi,
       house: wholeSignHouse(rashi.rashiNumber, ascendantSignNumber),
-      degree: Number(rashi.degreeInSign.toFixed(4)),
+      degree: boundedDegreeDisplay(rashi.degreeInSign,4),
       nakshatra: nakshatra.name,
       pada: nakshatra.pada,
       ...estimateSiderealMotion(days=>planet==="Rahu"||planet==="Ketu"?normalizeDegrees(meanRahuLongitude(julianDay+days)+(planet==="Ketu"?180:0)):siderealLongitude(planet,Astronomy.MakeTime(new Date(time.date.getTime()+days*86400000)),julianDay+days)),
-      absoluteLongitude: Number(absoluteLongitude.toFixed(6)),
+      absoluteLongitude,
       rashiNumber: rashi.rashiNumber
     };
   });

@@ -66,3 +66,18 @@ console.log("VARGA_DIVISION_RUNTIME_PASS="+JSON.stringify({placements,boundaries
  assert.deepEqual(sourceConflicts,[{point:"Moon",computed:9,printed:8},{point:"Saturn",computed:10,printed:9}]);
  console.log("P0_D7_INDEPENDENT_FORMULA_PASS "+JSON.stringify({arcsecondCases,publishedCases,sourceConflicts,scope:"exact equal-sevenths Parashari sign mapping; vendor discrepancies retained; no public activation or predictive certification"}));
 }
+
+{
+ const T=require("@/lib/astrology/own-engine/time"),N=require("@/lib/astrology/own-engine/nakshatra"),Z=require("@/lib/astrology/own-engine/zodiac");
+ let arcsecondCases=0,nearBoundaries=0;
+ for(let a=0;a<1296000;a++){const lon=a/3600,x=N.nakshatraFromLongitude(lon),sector=Math.floor(a/12000);assert.equal(x.name,N.nakshatras[Math.floor(sector/4)]);assert.equal(x.pada,sector%4+1);arcsecondCases++;}
+ for(let sector=0;sector<108;sector++)for(const delta of [-1e-8,1e-8]){const x=sector*10/3+delta,result=N.nakshatraFromLongitude(x),e=(sector+(delta<0?-1:0)+108)%108;assert.equal(result.name,N.nakshatras[Math.floor(e/4)]);assert.equal(result.pada,e%4+1);nearBoundaries++;}
+ for(let s=1;s<=12;s++)for(const dx of [1e-7,1e-8,1e-10]){const x=s*30-dx,r=Z.longitudeToRashi(x);assert.equal(T.normalizeDegrees(x),x);assert.equal(r.rashiNumber,s);for(const digits of [4,6])assert.ok(Z.boundedDegreeDisplay(r.degreeInSign,digits)<30);nearBoundaries++;}
+ assert.deepEqual(N.nakshatraFromLongitude(359.9999999999),{name:"Revati",pada:4});
+ assert.deepEqual(N.nakshatraFromLongitude(360),{name:"Ashwini",pada:1});
+ assert.equal(T.normalizeDegrees(-1e-15)<360,true);
+ const ownSource=fs.readFileSync("lib/astrology/own-engine/index.ts","utf8"),premiumSource=fs.readFileSync("lib/astrology/premium-engine/chart.ts","utf8");
+ assert.ok(ownSource.includes("degree: boundedDegreeDisplay(rashi.degreeInSign,4)")&&!ownSource.includes("absoluteLongitude: Number(absoluteLongitude.toFixed(6))"));
+ assert.ok(premiumSource.includes("const absoluteLongitude = longitudes[planet];")&&premiumSource.includes("absoluteLongitude: ascendantLongitude"));
+ console.log("P0_UNROUNDED_COORDINATES_AND_PADA_PASS "+JSON.stringify({arcsecondCases,nearBoundaries,specialCases:3,sourceContracts:2}));
+}

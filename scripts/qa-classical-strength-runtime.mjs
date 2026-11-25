@@ -715,3 +715,22 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  assert.ok(actual.namedAdvancedPatterns);assert.equal(actual.namedAdvancedPatterns.publicEnabled,false);advancedChecks+=2;
  console.log("P0_ADVANCED_PATTERN_AND_DOSHA_SAFETY_PASS "+JSON.stringify({manglikChecks,advancedChecks,negativeChecks,scope:"named source rule geometry; no predictive or independent expert certification"}));
 }
+
+{
+ const F=JSON.parse(fs.readFileSync("fixtures/astrology/independent-heldout-strength-reference.json","utf8"));
+ const C=require("@/lib/astrology/strength/classical-components"),S=require("@/lib/astrology/strength/shadbala"),M=require("@/lib/astrology/strength/motional-epoch");
+ const dms=([s,d,m,a])=>(s-1)*30+d+m/60+a/3600,p=F.positionsDms.slice(1).map((x,i)=>point(F.order[i+1],dms(x)));
+ let positionalMatches=0,aspectMatches=0;const residuals=[];
+ for(const [i,g] of F.order.slice(1,8).entries()){
+  const positional=S.calculateRamanPositionalCandidate(p,g,dms(F.positionsDms[0])).virupas;
+  const aspect=C.calculateRamanDrikCandidate(p,g).virupas;
+  assert.ok(Math.abs(positional-F.sthana[i])<.01);assert.ok(Math.abs(aspect-F.drik[i])<.01);
+  positionalMatches++;aspectMatches++;
+ }
+ const m=M.calculateMotionalEpochCandidate(new Date(F.dateUtc),Object.fromEntries(p.map(x=>[x.planet,x.absoluteLongitude])));
+ for(const row of m.rows){const expected=F.cheshta[F.order.indexOf(row.planet)-1];residuals.push({planet:row.planet,actual:row.virupas,expected,delta:row.virupas-expected,matched:Math.abs(row.virupas-expected)<=.25});}
+ assert.equal(m.publicEnabled,false);assert.equal(m.verified,false);
+ // No offsets fitted to the two samples. A held-out source can corroborate
+ // positional and aspect formula while still disagreeing on motion model.
+ console.log("P0_HELDOUT_STRENGTH_REFERENCE "+JSON.stringify({positionalMatches,aspectMatches,motionMatches:residuals.filter(x=>x.matched).length,motionComparisons:residuals.length,residuals,fullParityAccepted:false}));
+}
