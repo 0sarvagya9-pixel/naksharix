@@ -46,6 +46,11 @@ jobs:
           node -e 'const u=new URL(process.env.DATABASE_URL);if(process.env.CI!=="true"||u.hostname!=="localhost"||u.pathname!=="/naksharix")process.exit(1)'
           npx prisma db push --skip-generate
           node scripts/qa-align-disposable-feature-schema.mjs
+      - name: Exercise actual shared rate counter across independent processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-durable-rate-concurrency.mjs | tee durable-rate-concurrency.log
       - run: npm run build
       - name: Run real HTTP conflict and consent tests
         shell: bash
@@ -77,4 +82,5 @@ jobs:
           path: |
             operations-http.log
             encrypted-restore.log
+            durable-rate-concurrency.log
           if-no-files-found: warn
