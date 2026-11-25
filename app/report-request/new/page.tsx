@@ -68,7 +68,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     redirect(`/reports/${report.slug}`);
   }
 
-  const automaticDelivery=(paymentVerified&&env.AUTO_REPORT_DELIVERY_ENABLED==="true")||preparing;
+  const automaticDelivery=paymentVerified&&env.AUTO_REPORT_DELIVERY_ENABLED==="true";
   return (
     <Section className="max-w-4xl">
       <Card className="glass overflow-visible border-[#D4AF37]/25">
@@ -89,6 +89,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
             reportName={report.name[locale]}
             paymentVerified={paymentVerified}
             automaticDelivery={automaticDelivery}
+            specialistDetails={Boolean(checkout)}
             adminBypass={adminMode && isAdmin}
             preflight={preparing&&checkout?{reportId:checkout.reportId,purpose:checkout.purpose,price:checkout.price}:undefined}
           />

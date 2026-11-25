@@ -17,6 +17,8 @@ export type PremiumReportGenerationRequest = {
   reviewedByAdmin?: boolean;
   // Only the server-owned paid report worker supplies this validation mode.
   automatedInputValidated?: boolean;
+  // Validated specialty content generated only after explicit operator review.
+  specialistInputValidated?: boolean;
   reportTitle?: string;
   customerName?: string;
   language?: "en" | "hi" | "hinglish";
@@ -161,6 +163,7 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
   const status = getPremiumEngineActivationStatus("pdf_generation");
   if (!request.content) return blocked("blocked_until_report_content", "Real chart-based report content is required.");
   const automated = request.automatedInputValidated === true && request.status === "ready_for_generation" && request.content.sections.length >= 5;
+  const reviewedSpecialist=request.reviewedByAdmin===true&&request.specialistInputValidated===true&&request.status==="ready_for_generation"&&request.content.sections.length>=5;
   if (!request.reviewedByAdmin && !automated) return blocked("blocked_until_admin_review", "Admin review or validated paid-report automation is required before creating a report PDF.");
 
   const pdf = await PDFDocument.create();
@@ -170,7 +173,7 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
   pdf.setLanguage(request.language === "hi" ? "hi-IN" : "en-IN");
   const fonts = await loadReportFonts(pdf);
   const logo = await pdf.embedPng(await readFile(path.join(process.cwd(), "public", "images", "naksharix-final-logo-symbol.png"))).catch(() => null);
-  if (automated) {
+  if (automated||reviewedSpecialist) {
     await renderEditorialReport(pdf, request.content, request, fonts, logo);
     const bytes=Buffer.from(await pdf.save({useObjectStreams:true}));
     if(bytes.subarray(0,5).toString("ascii")!=="%PDF-")throw Error("PDF serialization returned an invalid document");

@@ -24,6 +24,7 @@ type Props = {
   reportName?: string;
   paymentVerified?: boolean;
   automaticDelivery?: boolean;
+  specialistDetails?: boolean;
   adminBypass?: boolean;
   preflight?:{reportId:string;purpose:"KUNDLI_REPORT"|"YEARLY_REPORT"|"MATCH_REPORT";price:string};
 };
@@ -38,6 +39,7 @@ export function ReportRequestForm({
   reportName = "Premium Astrology Report",
   paymentVerified = false,
   automaticDelivery = false,
+  specialistDetails = false,
   adminBypass = false,
   preflight
 }: Props) {
@@ -78,14 +80,16 @@ export function ReportRequestForm({
     try{dialog.showModal();try{sessionStorage.setItem(key,"shown")}catch{/* no session storage */}}catch{/* fallback to inline notice */}
     return()=>{if(dialog.open)dialog.close()};
   },[automaticDelivery,paymentVerified,orderId]);
-  const couple=automaticDelivery&&reportSlug==="couple-kundli";
-  const nameCorrection=automaticDelivery&&reportSlug==="name-correction-report";
-  const babyName=automaticDelivery&&reportSlug==="baby-name-report";
-  const numerologyName=automaticDelivery&&reportSlug==="numerology-lo-shu-report";
+  // Fulfilment mode must not determine which purchased report inputs are collected.
+  const needsSpecialistDetails=specialistDetails||automaticDelivery||Boolean(preflight);
+  const couple=needsSpecialistDetails&&reportSlug==="couple-kundli";
+  const nameCorrection=needsSpecialistDetails&&reportSlug==="name-correction-report";
+  const babyName=needsSpecialistDetails&&reportSlug==="baby-name-report";
+  const numerologyName=needsSpecialistDetails&&reportSlug==="numerology-lo-shu-report";
   function autoDetails(){return {confirmed,partnerPermission:couple?partnerPermission:undefined,
     partner:couple&&partnerLocation?{name:partnerName,gender:partnerGender,dateOfBirth:partnerDate,timeOfBirth:partnerTime,birthPlace:partnerLocation.displayName,latitude:partnerLocation.latitude,longitude:partnerLocation.longitude,timezone:partnerOffset.trim()===""?undefined:Number(partnerOffset)}:undefined,
     romanName:nameCorrection||numerologyName?romanName:undefined,candidateNames:nameCorrection||babyName?names.split(/[\n,]/).map(s=>s.trim()).filter(Boolean):undefined};}
-  function primaryOffset(){return automaticDelivery?(offset.trim()===""?undefined:Number(offset)):location?.timezoneOffset;}
+  function primaryOffset(){return needsSpecialistDetails?(offset.trim()===""?undefined:Number(offset)):location?.timezoneOffset;}
 
   function validate() {
     const next: Errors = {};
@@ -112,8 +116,8 @@ export function ReportRequestForm({
     if(loading||!validate())return;
     setStatus(null);
     const birth={name:fullName,gender,dateOfBirth,timeOfBirth,birthPlace:location?.displayName??birthPlace,latitude:location?.latitude,longitude:location?.longitude,timezone:primaryOffset()};
-    const automaticDetails=automaticDelivery?autoDetails():undefined;
-    if(automaticDelivery){const checked=checkAutomaticInputs(reportSlug,birth,automaticDetails);if(!checked.ok){setStatus(checked.reason);return;}}
+    const automaticDetails=needsSpecialistDetails?autoDetails():undefined;
+    if(needsSpecialistDetails){const checked=checkAutomaticInputs(reportSlug,birth,automaticDetails);if(!checked.ok){setStatus(checked.reason);return;}}
     const details={orderId,planType:plan,reportSlug,adminBypass,deliveryEmail:userEmail,fullName,gender,dateOfBirth,timeOfBirth,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,phone,concern,questionOrConcern:concern,language,automaticDetails};
     setLoading(true);
     try{
@@ -196,7 +200,7 @@ export function ReportRequestForm({
             error={errors.birthPlace}
           />
         </div>
-        {automaticDelivery&&<div className="space-y-2 md:col-span-2"><Label>UTC offset at birth (hours)</Label><Input type="number" step="any" min={-12} max={14} required value={offset} onChange={e=>setOffset(e.target.value)}/><p className="text-xs naksh-muted-text">Confirm the actual offset at your birth, including daylight saving if applicable. India: usually +5.5. The location suggestion is only a starting value.</p></div>}
+        {needsSpecialistDetails&&<div className="space-y-2 md:col-span-2"><Label htmlFor="report-birth-offset">UTC offset at birth (hours)</Label><Input id="report-birth-offset" type="number" step="any" min={-12} max={14} required value={offset} onChange={e=>setOffset(e.target.value)}/><p className="text-xs naksh-muted-text">Confirm the actual offset at your birth, including daylight saving if applicable. India: usually +5.5. The location suggestion is only a starting value.</p></div>}
         <Field label={tr("phone")}>
           <Input value={phone} onChange={(event) => setPhone(event.target.value)} />
         </Field>
@@ -230,7 +234,7 @@ export function ReportRequestForm({
       </fieldset>}
       {numerologyName&&<Field label="Full name in Roman letters (for name numerology)"><Input required maxLength={100} value={romanName} onChange={e=>setRomanName(e.target.value)} placeholder="Example: Asha Sharma"/></Field>}
       {(nameCorrection||babyName)&&<fieldset className="space-y-4 rounded-xl border border-[#D4AF37]/30 p-4"><legend className="px-2 font-semibold">{nameCorrection?"Name spelling comparison":"Baby name preferences"}</legend>{nameCorrection&&<Field label="Current name in Roman letters"><Input required maxLength={100} value={romanName} onChange={e=>setRomanName(e.target.value)}/></Field>}<Field label={nameCorrection?"Alternative name spellings (at least one)":"Preferred names (optional)"}><textarea required={nameCorrection} value={names} maxLength={1200} onChange={e=>setNames(e.target.value)} rows={3} className="cosmic-textarea" placeholder="Enter Roman-letter names, separated by commas"/></Field></fieldset>}
-      {automaticDelivery&&<label className="flex items-start gap-3 rounded-lg border border-[#D4AF37]/30 p-4 text-sm"><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)} className="mt-1"/>I confirm these birth details and birth-time UTC offsets are accurate. I request the private report to be generated and the secure PDF access link to be emailed to my registered account.</label>}
+      {needsSpecialistDetails&&<label className="flex items-start gap-3 rounded-lg border border-[#D4AF37]/30 p-4 text-sm"><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)} className="mt-1"/>I confirm these birth details and birth-time UTC offsets are accurate. I request the selected private report and a secure access link to my registered account when delivery is available.</label>}
       {status ? <p className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" aria-live="polite">{status}</p> : null}
       <Button type="submit" disabled={loading} className="w-full md:w-auto">
         {loading ? tr("submittingReportRequest") : preflight ? "Validate details and continue" : automaticDelivery ? "Generate my report" : tr("submitReportRequest")}

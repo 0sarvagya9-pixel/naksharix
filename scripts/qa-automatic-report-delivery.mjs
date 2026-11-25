@@ -93,6 +93,22 @@ if(!dbMode){
    console.log("PASS "+slug+" "+language+" editorial PDF "+localized.getPageCount()+" pages");
    }
  }
+ const {prepareReviewedSpecialistInput}=require("@/lib/reports/reviewed-report-input");
+ const reviewRow={reportSlug:"couple-kundli",fullName:birth.name,gender:birth.gender,dateOfBirth:birth.dateOfBirth,timeOfBirth:birth.timeOfBirth,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,concern:input.encodeAutomaticReportInput(question,extra),language:"hi"};
+ assert.equal(prepareReviewedSpecialistInput({...reviewRow,concern:"Missing partner input"}).kind,"invalid");
+ assert.equal(prepareReviewedSpecialistInput({...reviewRow,reportSlug:"name-correction-report",concern:"Missing alternate names"}).kind,"invalid");
+ assert.equal(prepareReviewedSpecialistInput({...reviewRow,reportSlug:"premium-kundli",concern:question}).kind,"specialist");
+ for(const slug of input.AUTO_REPORT_SLUGS){
+  const reviewed=prepareReviewedSpecialistInput({...reviewRow,reportSlug:slug});
+  assert.equal(reviewed.kind,"specialist",slug);
+  const assembled=await assembleAutomaticPaidReport(reviewed);
+  assert.ok(assembled.content.sections.some(s=>s.key===sections[slug]),slug+" reviewed specialty section");
+  if(slug==="couple-kundli"||slug==="name-correction-report"){
+   const pdf=await generatePremiumReportPdf({requestId:"reviewed-fixture-"+slug,templateId:slug,status:"ready_for_generation",content:assembled.content,reviewedByAdmin:true,specialistInputValidated:true,reportTitle:assembled.title,customerName:birth.name,language:"hi"});
+   assert.equal(pdf.generated,true);const parsed=await PDFDocument.load(pdf.bytes);assert.ok(parsed.getPageCount()>=4);assert.ok(parsed.getTitle().includes(assembled.title));
+  }
+ }
+ console.log("REVIEWED_SPECIALIST_REPORT_PASS;15 differentiated assemblies; 2 localized editorial PDF renders; missing specialist inputs rejected");
  const {buildFictionalReportSample}=require("@/lib/reports/fictional-sample");
  for(const slug of input.AUTO_REPORT_SLUGS){
    const preview=await PDFDocument.load(await buildFictionalReportSample(slug));

@@ -50,3 +50,5 @@ const counts = results.reduce((acc, result) => {
 for (const result of results) console.log(`${result.status}: ${result.name}${result.detail ? ` - ${result.detail}` : ""}`);
 console.log(`\nStorage QA summary: ${JSON.stringify(counts)}`);
 if (counts.FAILED) process.exit(1);
+
+await import("./qa-report-storage-runtime.mjs");

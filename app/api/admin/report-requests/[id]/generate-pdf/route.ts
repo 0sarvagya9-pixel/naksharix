@@ -11,6 +11,9 @@ import { assemblePremiumReportContent } from "@/lib/reports/premium-report-conte
 import { generatePremiumReportPdf } from "@/lib/reports/premium-report-generation-service";
 import { saveReportPdf } from "@/lib/storage/report-storage";
 import {fixedReportCheckout,hasCurrentPaidReportEntitlement} from "@/lib/reports/paid-entitlement";
+import {prepareReviewedSpecialistInput} from "@/lib/reports/reviewed-report-input";
+import {assembleAutomaticPaidReport} from "@/lib/reports/automatic-report-content";
+import {getActiveAstrologyProviderName} from "@/lib/astrology/provider";
 import { rateLimitResponse } from "@/lib/security/rate-limit";
 
 type Params = Promise<{ id: string }>;
@@ -56,6 +59,14 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       return fail("Birth latitude, longitude, and timezone are required before PDF generation.", 422);
     }
 
+    const specialist=prepareReviewedSpecialistInput(reportRequest);
+    if(specialist.kind==="invalid")return fail("Specialist input required: "+specialist.reason,422);
+    if(specialist.kind==="specialist"&&getActiveAstrologyProviderName()!=="own_engine")return fail("The selected report calculation provider is unavailable. Do not deliver a substitute report.",503);
+    const generated=await (async()=>{
+      if(specialist.kind==="specialist"){
+        const assembled=await assembleAutomaticPaidReport(specialist);
+        return generatePremiumReportPdf({requestId:reportRequest.id,templateId:specialist.slug,status:"ready_for_generation",content:assembled.content,reviewedByAdmin:true,specialistInputValidated:true,reportTitle:assembled.title,customerName:reportRequest.fullName,language:specialist.language});
+      }
     const chart = calculateInternalChart({
       name: reportRequest.fullName,
       gender: reportRequest.gender ?? undefined,
@@ -88,13 +99,16 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     });
 
     const content = assemblePremiumReportContent({ chart, includePanchang: panchang, includeTransit: transit });
-    const generated = await generatePremiumReportPdf({
+    return generatePremiumReportPdf({
       requestId: reportRequest.id,
       templateId: reportRequest.reportSlug,
       status: "ready_for_generation",
       content,
-      reviewedByAdmin: Boolean(approvedReview.note)
+      reviewedByAdmin: Boolean(approvedReview.note),
+      customerName:reportRequest.fullName,
+      language:reportRequest.language==="hi"||reportRequest.language==="hinglish"?reportRequest.language:"en"
     });
+    })();
 
     if (generated.status !== "generated_internal_unverified" || !generated.bytes?.byteLength) {
       return fail("PDF generation did not produce a file.", 500);

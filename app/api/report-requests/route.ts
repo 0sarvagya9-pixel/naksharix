@@ -89,7 +89,10 @@ export async function POST(request: NextRequest) {
     const automatic = env.AUTO_REPORT_DELIVERY_ENABLED==="true" && paymentStatus===ReportPaymentStatus.PAID && !adminBypass && Boolean(checkout);
     const question=(body.questionOrConcern??body.concern).trim();
     let concern=question;
-    if(automatic){
+    // Preserve the validated, private specialist input even if delivery is
+    // operator-reviewed instead of automatic. Older clients without this
+    // envelope remain review-only; the renderer must not invent missing data.
+    if(automatic||Boolean(checkout&&body.automaticDetails)){
       const checked=checkAutomaticInputs(report.slug,{name:body.fullName,gender:body.gender,dateOfBirth:body.dateOfBirth,timeOfBirth:body.timeOfBirth,birthPlace:body.birthPlace,latitude:body.latitude,longitude:body.longitude,timezone:body.timezone},body.automaticDetails);
       if(!checked.ok)return fail(checked.reason,422);
       if(question.length>2000)return fail("Please limit the main question to 2,000 characters.",422);
