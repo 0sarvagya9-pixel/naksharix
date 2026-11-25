@@ -46,6 +46,217 @@ const question="Test fixture: reflective personal planning.";
 const sections={
  "premium-kundli":"planets","couple-kundli":"guna","career-report":"career-houses","wealth-report":"wealth-houses","love-report":"relationship-houses","baby-name-report":"name-options","sade-sati-report":"sade-sati-months","manglik-kaal-sarp-report":"manglik","numerology-lo-shu-report":"lo-shu","name-correction-report":"name-comparison","yearly-horoscope-report":"yearly-months","transit-report":"transit-months","rahu-ketu-report":"node-transits","jupiter-transit-report":"jupiter-transits","fortune-report":"fortune-houses"
 };
+// Independent crosswalk: each of the three published promises per SKU must
+// be backed by populated renderer sections in every supported language.
+const promiseSections={
+  "premium-kundli": [
+    [
+      "planets",
+      "houses"
+    ],
+    [
+      "dasha",
+      "panchang"
+    ],
+    [
+      "yoga-dosha",
+      "numerology"
+    ]
+  ],
+  "couple-kundli": [
+    [
+      "birth",
+      "partner"
+    ],
+    [
+      "guna"
+    ],
+    [
+      "match-dosha",
+      "compatibility-guidance"
+    ]
+  ],
+  "career-report": [
+    [
+      "career-houses"
+    ],
+    [
+      "career-planets",
+      "career-dasha"
+    ],
+    [
+      "career-plan"
+    ]
+  ],
+  "wealth-report": [
+    [
+      "wealth-houses"
+    ],
+    [
+      "wealth-planets",
+      "wealth-dasha"
+    ],
+    [
+      "money-plan"
+    ]
+  ],
+  "love-report": [
+    [
+      "relationship-houses",
+      "relationship-planets"
+    ],
+    [
+      "relationship-timing"
+    ],
+    [
+      "relationship-plan"
+    ]
+  ],
+  "baby-name-report": [
+    [
+      "naming"
+    ],
+    [
+      "name-options"
+    ],
+    [
+      "birth-numerology"
+    ]
+  ],
+  "sade-sati-report": [
+    [
+      "sade-sati-basis"
+    ],
+    [
+      "sade-sati-months"
+    ],
+    [
+      "sade-sati-guidance"
+    ]
+  ],
+  "manglik-kaal-sarp-report": [
+    [
+      "dosha-positions"
+    ],
+    [
+      "manglik"
+    ],
+    [
+      "kaal-sarp",
+      "dosha-guidance"
+    ]
+  ],
+  "numerology-lo-shu-report": [
+    [
+      "numerology-profile"
+    ],
+    [
+      "lo-shu"
+    ],
+    [
+      "numerology-guidance"
+    ]
+  ],
+  "name-correction-report": [
+    [
+      "current-name"
+    ],
+    [
+      "name-comparison"
+    ],
+    [
+      "name-guidance"
+    ]
+  ],
+  "yearly-horoscope-report": [
+    [
+      "yearly-dasha"
+    ],
+    [
+      "yearly-months"
+    ],
+    [
+      "yearly-houses",
+      "yearly-plan"
+    ]
+  ],
+  "transit-report": [
+    [
+      "current-transit"
+    ],
+    [
+      "transit-months"
+    ],
+    [
+      "transit-context"
+    ]
+  ],
+  "rahu-ketu-report": [
+    [
+      "natal-nodes"
+    ],
+    [
+      "node-transits"
+    ],
+    [
+      "node-guidance"
+    ]
+  ],
+  "jupiter-transit-report": [
+    [
+      "natal-jupiter"
+    ],
+    [
+      "jupiter-transits"
+    ],
+    [
+      "jupiter-guidance"
+    ]
+  ],
+  "fortune-report": [
+    [
+      "fortune-houses"
+    ],
+    [
+      "fortune-planets",
+      "fortune-dasha"
+    ],
+    [
+      "fortune-plan"
+    ]
+  ]
+};
+let promiseChecks=0,requiredDisclosureChecks=0;
+function verifyPromiseCoverage(slug,language,content){
+ const {automaticReportPublicPreview}=require("@/lib/reports/public-preview");
+ const {publicReportRequiredDetails,reportIntakeScope}=require("@/lib/reports/public-intake");
+ const preview=automaticReportPublicPreview(slug,language),expected=promiseSections[slug];
+ assert.equal(expected.length,preview.features.length,slug+" promise coverage");
+ const sections=new Map(content.sections.map(s=>[s.key,s]));
+ assert.equal(sections.size,content.sections.length,slug+" duplicate section");
+ for(const [index,keys] of expected.entries()){
+  for(const key of keys){
+   const section=sections.get(key);
+   assert.ok(section&&section.title.trim().length>0&&section.data!==null&&section.data!==undefined,slug+" "+language+" missing "+key);
+   assert.ok(typeof section.data==="string"?section.data.trim().length>0:Array.isArray(section.data)?section.data.length>0:typeof section.data==="object"&&Object.keys(section.data).length>0,slug+" "+key+" empty data");
+  }
+  assert.ok(preview.features[index].trim().length>5);
+  promiseChecks++;
+ }
+ if(slug==="premium-kundli"){assert.equal(sections.get("planets").data.length,9);assert.equal(sections.get("houses").data.lagna.length,12);}
+ if(slug==="couple-kundli"){assert.equal(sections.get("partner").data.positions.length,9);assert.equal(sections.get("guna").data.ashtakoot.length,8);assert.equal(sections.get("guna").data.maxScore,36);}
+ if(slug==="career-report")assert.equal(sections.get("career-plan").data.length,3);
+ if(slug==="yearly-horoscope-report"){assert.equal(sections.get("yearly-months").data.length,12);assert.equal(sections.get("yearly-plan").data.length,4);}
+ if(slug==="sade-sati-report")assert.equal(sections.get("sade-sati-months").data.length,13);
+ if(slug==="transit-report")assert.equal(sections.get("transit-months").data.length,6);
+ if(slug==="rahu-ketu-report")assert.equal(sections.get("node-transits").data.length,13);
+ if(slug==="jupiter-transit-report")assert.equal(sections.get("jupiter-transits").data.length,13);
+ if(slug==="name-correction-report")assert.ok(sections.get("name-comparison").data.length>=2);
+ const fields=publicReportRequiredDetails(slug,language),scope=reportIntakeScope(slug);
+ assert.equal(fields.length,5+(scope.couple?2:0)+(scope.numerologyName?1:0)+(scope.nameCorrection?2:0)+(scope.babyName?1:0));
+ assert.ok(fields.every(x=>x.trim().length>0));assert.equal(new Set(fields).size,fields.length);
+ requiredDisclosureChecks++;
+}
 let sent=[];
 let emailStatus=200;
 globalThis.fetch=async(url,options)=>{
@@ -72,6 +283,7 @@ if(!dbMode){
  for(const slug of input.AUTO_REPORT_SLUGS){
    assert.ok(getManualReportCheckout(slug),slug+" has a paid SKU");
    const {title,content}=await assembleAutomaticPaidReport({slug,birth,extra,question,language:"en",now:new Date("2026-11-24T12:00:00Z")});
+   verifyPromiseCoverage(slug,"en",content);
    assert.ok(content.sections.some(s=>s.key===sections[slug]),slug+" specific content");
    assert.ok(content.sections.length>=5);
    const result=await generatePremiumReportPdf({requestId:"fixture-"+slug,templateId:slug,status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:title,customerName:birth.name,language:"en"});
@@ -87,12 +299,15 @@ if(!dbMode){
  for(const language of ["hi","hinglish"]){
    for(const slug of input.AUTO_REPORT_SLUGS){
    const {title,content}=await assembleAutomaticPaidReport({slug,birth,extra,question,language});
+   verifyPromiseCoverage(slug,language,content);
    const result=await generatePremiumReportPdf({requestId:"fixture-"+language,templateId:slug,status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:title,customerName:birth.name,language});
    assert.equal(result.generated,true);const localized=await PDFDocument.load(result.bytes);assert.ok(localized.getPageCount()>=4&&localized.getPageCount()<=35,slug+" "+language+" pagination");
    if(process.env.REPORT_VISUAL_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,slug+"-"+language+".pdf"),result.bytes);
    console.log("PASS "+slug+" "+language+" editorial PDF "+localized.getPageCount()+" pages");
    }
  }
+ assert.equal(promiseChecks,135);assert.equal(requiredDisclosureChecks,45);
+ console.log("REPORT_PROMISE_OUTPUT_CROSSWALK_PASS "+JSON.stringify({products:15,languages:3,promiseChecks,requiredDisclosureChecks,scope:"reviewed section-to-feature mapping and real computed content; PDF render follows each assembly; no predictive or live delivery claim"}));
  // Worst-case validated, fictional Latin/Devanagari birth details must
  // remain renderable rather than failing the cover layout.
  for(const language of ["en","hi","hinglish"]){

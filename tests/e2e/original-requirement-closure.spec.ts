@@ -71,3 +71,66 @@ test("A17 and A18 report comparison uses the renderer-backed benefits and exact 
  await career.check();await expect(box.getByRole("status")).toHaveText("1/3");
  await box.getByRole("link",{name:"View details"}).click();await expect(page).toHaveURL(/\/reports\/career-report$/);
 });
+
+
+test("A18 keyboard-only comparison respects the three-item cap, preserves focus and navigates at mobile width",async({page,browserName},info)=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto("/reports",{waitUntil:"domcontentloaded"});
+ const details=page.locator("#compare-reports"),summary=details.locator("summary");
+ await summary.focus();await expect(summary).toBeFocused();await page.keyboard.press("Enter");
+ await expect(details).toHaveAttribute("open","");
+ const box=details.locator('section[aria-labelledby="compare-reports-heading"]');
+ const premium=box.getByRole("checkbox",{name:"Premium Personalized Kundli Report",exact:true});
+ const career=box.getByRole("checkbox",{name:"Career Report",exact:true});
+ await expect(career).toBeDisabled();
+ if(browserName!=="webkit"){await page.keyboard.press("Tab");await expect(premium).toBeFocused();}
+ else await premium.focus(); // WebKit platform Tab preferences differ; exercise native keyboard activation.
+ await page.keyboard.press("Space");await expect(premium).not.toBeChecked();await expect(premium).toBeFocused();
+ await expect(box.getByRole("status")).toHaveText("2/3");await expect(career).toBeEnabled();
+ await career.focus();await page.keyboard.press("Space");await expect(career).toBeChecked();await expect(career).toBeFocused();
+ await expect(box.getByRole("status")).toHaveText("3/3");await expect(box.locator("article")).toHaveCount(3);
+ const card=box.locator("article").filter({has:page.locator('a[href="/reports/career-report"]')});
+ await expect(card.getByText("INR 599",{exact:true})).toBeVisible();
+ const dimensions=await box.evaluate(el=>({client:el.clientWidth,scroll:el.scrollWidth}));
+ expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client+2);
+ const link=card.getByRole("link",{name:"View details",exact:true});
+ await expect(link).toHaveAttribute("aria-describedby","comparison-title-career-report");
+ await page.screenshot({path:info.outputPath("report-comparison-keyboard.png"),animations:"disabled"});
+ await link.focus();await expect(link).toBeFocused();await page.keyboard.press("Enter");
+ await expect(page).toHaveURL(/\/reports\/career-report$/);
+ console.log("A18_KEYBOARD_COMPARISON_PASS "+JSON.stringify({project:info.project.name,viewport:390,keyboardActivation:true,tabTraversal:browserName!=="webkit"}));
+});
+
+test("A42 all 15 report detail pages show exact price, fictional sample, requirements and mobile review action",async({page},info)=>{
+ test.setTimeout(180000);
+ await page.setViewportSize({width:390,height:844});
+ const prices=[
+ ["premium-kundli",799],["couple-kundli",699],["career-report",599],["wealth-report",599],["love-report",499],
+ ["baby-name-report",399],["sade-sati-report",399],["manglik-kaal-sarp-report",499],["numerology-lo-shu-report",399],
+ ["name-correction-report",399],["yearly-horoscope-report",999],["transit-report",449],["rahu-ketu-report",399],["jupiter-transit-report",399],["fortune-report",499]
+ ] as const;
+ for(const [slug,price] of prices){
+  const response=await page.goto("/reports/"+slug,{waitUntil:"domcontentloaded"});expect(response?.ok(),slug).toBeTruthy();
+  await expect(page.getByRole("heading",{level:1})).toHaveCount(1);
+  const purchase=page.locator("#report-purchase");await expect(purchase.getByRole("button",{name:"Validate details INR "+price,exact:true})).toBeVisible();
+  const sample=page.getByRole("link",{name:"View fictional sample PDF (English)",exact:true});
+  await expect(sample).toHaveAttribute("href","/reports/"+slug+"/sample");
+  await expect(sample).toHaveAttribute("target","_blank");
+  await expect(page.getByText("Actual UTC offset at birth (including daylight saving where applicable)",{exact:true})).toBeVisible();
+  if(slug==="couple-kundli")await expect(page.getByText("Permission to submit the other person's birth details",{exact:true})).toBeVisible();
+  if(slug==="name-correction-report")await expect(page.getByText("Alternative name spellings (at least one)",{exact:true})).toBeVisible();
+  if(slug==="numerology-lo-shu-report")await expect(page.getByText("Full name in Roman letters (for name numerology)",{exact:true})).toBeVisible();
+  if(slug==="baby-name-report")await expect(page.getByText("Preferred names (optional)",{exact:true})).toBeVisible();
+  const sticky=page.locator("[data-report-mobile-action]");await expect(sticky).toBeVisible();await expect(sticky.getByText("INR "+price,{exact:true})).toBeVisible();
+  await expect(sticky.getByRole("link",{name:"Review & continue",exact:true})).toHaveAttribute("href","#report-purchase");
+  const bounds=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));expect(bounds.scroll,slug+" overflow").toBeLessThanOrEqual(bounds.client+2);
+ }
+ // Confirm the existing anonymous CTA still preserves its exact chosen SKU.
+ await page.goto("/reports/name-correction-report",{waitUntil:"domcontentloaded"});
+ await page.locator("[data-report-mobile-action]").getByRole("link",{name:"Review & continue"}).click();
+ await expect(page).toHaveURL(/#report-purchase$/);
+ await page.locator("#report-purchase").getByRole("button",{name:"Validate details INR 399"}).click();
+ await expect(page).toHaveURL(/\/login\?/);
+ expect(new URL(page.url()).searchParams.get("redirectTo")).toBe("/report-request/new?reportSlug=name-correction-report&prepare=1");
+ console.log("A42_ALL_REPORT_DETAIL_UI_PASS "+JSON.stringify({project:info.project.name,products:15,viewport:390,selectedReportReturn:true}));
+});

@@ -4,6 +4,7 @@ import { cloneElement,useEffect,useId,useRef,useState,type ReactElement } from "
 import { useRouter } from "next/navigation";
 import { CheckCircle2,Mail,X } from "lucide-react";
 import { autoReportDeliveryMessage,checkNewReportInputs } from "@/lib/reports/automatic-report-input";
+import {reportIntakeScope} from "@/lib/reports/public-intake";
 import {reportRequestCopy,reportRequestErrorKey,type ReportRequestCopyKey} from "@/lib/reports/report-request-copy";
 import { siteNotice } from "@/lib/ui/site-notification";
 import { Button } from "@/components/ui/button";
@@ -84,10 +85,11 @@ export function ReportRequestForm({
   },[automaticDelivery,paymentVerified,orderId]);
   // Fulfilment mode must not determine which purchased report inputs are collected.
   const needsSpecialistDetails=specialistDetails||automaticDelivery||Boolean(preflight);
-  const couple=needsSpecialistDetails&&reportSlug==="couple-kundli";
-  const nameCorrection=needsSpecialistDetails&&reportSlug==="name-correction-report";
-  const babyName=needsSpecialistDetails&&reportSlug==="baby-name-report";
-  const numerologyName=needsSpecialistDetails&&reportSlug==="numerology-lo-shu-report";
+  const intake=reportIntakeScope(reportSlug);
+  const couple=needsSpecialistDetails&&intake.couple;
+  const nameCorrection=needsSpecialistDetails&&intake.nameCorrection;
+  const babyName=needsSpecialistDetails&&intake.babyName;
+  const numerologyName=needsSpecialistDetails&&intake.numerologyName;
   function autoDetails(fields:FormData,form:HTMLFormElement){
     const field=(name:string)=>reportField(fields,name);
     const partnerOffsetValue=field("reportPartnerOffset");

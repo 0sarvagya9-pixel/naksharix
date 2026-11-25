@@ -14,20 +14,21 @@ import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
 import { automaticReportPublicPreview } from "@/lib/reports/public-preview";
 import { ReportComparison } from "@/components/report-comparison";
+import {reportSurfaceCopy} from "@/lib/reports/public-intake";
 export function ReportsContent({manualOfferings,automaticDelivery=false}:{automaticDelivery?:boolean;manualOfferings:Record<string,{pricePaise:number;deliveryDays:number|null;note:string}>}) {
   const { locale } = useLanguage();
-  const labels = reportLabels(locale);
+  const labels = reportLabels(locale),surface=reportSurfaceCopy[locale];
 
   return (
     <main className="min-h-screen bg-[#fffbf5] text-[#372630]">
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_18%_10%,rgba(216,175,102,0.22),transparent_26rem),radial-gradient(circle_at_86%_18%,rgba(137,169,197,0.24),transparent_30rem),linear-gradient(135deg,#fffaf1_0%,#fbf6ea_52%,#eef5fb_100%)]" />
       <Section>
         <div className="nx-gallery-reports-intro">
-          <p>CURATED DIGITAL REPORTS</p>
+          <p>{surface.eyebrow}</p>
           <h1>{labels.title}</h1>
-          <h2>{locale === "hi" ? "व्यक्तिगत रिपोर्ट देखें" : "Explore personal insights"}</h2>
-          <span>Clear report formats and the actual published prices for your account.</span>
-          <a href="#report-information">How reports work</a>
+          <h2>{surface.intro}</h2>
+          <span>{surface.priceNote}</span>
+          <a href="#report-information">{surface.how}</a>
         </div>
         <details className="mt-2 rounded-xl border border-[#e7d8be] bg-white px-3 py-2 sm:px-4" id="compare-reports">
           <summary className="min-h-10 cursor-pointer py-2 text-sm font-semibold text-[#70283d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{locale === "hi" ? "अधिकतम तीन रिपोर्ट की तुलना करें" : locale==="hinglish"?"Teen reports tak compare karein":"Compare up to three reports"}</summary>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import {reportIntakeScope} from "./public-intake";
 
 // Store versioned specialist details in the existing private request concern
 // field. Older text-only requests remain readable; no production migration or
@@ -66,9 +67,8 @@ export function checkNewReportInputs(slug:string,birth:unknown,extra:unknown) {
   const checked=checkAutomaticInputs(slug,birth,extra);
   if(!checked.ok)return checked;
   const details=checked.extra;
-  const allowedPartner=slug==="couple-kundli";
-  const allowedRoman=slug==="numerology-lo-shu-report"||slug==="name-correction-report";
-  const allowedCandidates=slug==="baby-name-report"||slug==="name-correction-report";
+  const scope=reportIntakeScope(slug);
+  const allowedPartner=scope.couple,allowedRoman=scope.romanName,allowedCandidates=scope.candidateNames;
   if((!allowedPartner&&(details.partner!==undefined||details.partnerPermission!==undefined))||
      (!allowedRoman&&details.romanName!==undefined)||
      (!allowedCandidates&&details.candidateNames!==undefined))

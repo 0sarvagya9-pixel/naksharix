@@ -18,6 +18,7 @@ import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
 import { automaticReportPublicPreview } from "@/lib/reports/public-preview";
+import {publicReportRequiredDetails,reportSurfaceCopy} from "@/lib/reports/public-intake";
 import { autoReportSlugSet } from "@/lib/reports/automatic-report-input";
 import { getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 
@@ -49,7 +50,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   if (!report) notFound();
 
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
-  const labels = detailLabels(locale);
+  const labels = detailLabels(locale),surface=reportSurfaceCopy[locale];
   const checkout = getManualReportCheckout(report.slug);
   const automaticDelivery=Boolean(checkout)&&env.AUTO_REPORT_DELIVERY_ENABLED==="true";
   const publicPreview = checkout ? automaticReportPublicPreview(report.slug, locale) : null;
@@ -99,7 +100,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
           <InfoSection title={labels.included} items={publicPreview?.features ?? report.includes[locale]} />
           <InfoSection title={labels.whoShouldRequest} items={report.who[locale]} />
-          <InfoSection title={labels.requiredDetails} items={report.required[locale]} />
+          <InfoSection title={labels.requiredDetails} items={checkout?publicReportRequiredDetails(report.slug,locale):report.required[locale]} />
           <InfoSection title={labels.languageOptions} items={labels.languages} />
         </div>
 
@@ -108,8 +109,8 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             <CardContent className="p-6">
               <Sparkles className="h-6 w-6 text-[#dca956]" />
               <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.samplePreview}</h2>
-              <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{report.preview[locale]}</p>
-              {autoReportSlugSet.has(report.slug)&&getActiveAstrologyProviderName()==="own_engine"?<div className="mt-4 space-y-2"><Button asChild variant="outline"><Link href={`/reports/${report.slug}/sample`} target="_blank" rel="noopener noreferrer">{locale==="hi"?"काल्पनिक नमूना PDF देखें":"View fictional sample PDF"} (English)</Link></Button><p className="text-xs text-[#a8b3c7]">{locale==="hi"?"वास्तविक रिपोर्ट प्रारूप के चुनिंदा पृष्ठ। इसमें किसी ग्राहक का डेटा नहीं है।":"Selected pages from the actual report format. Fictional demonstration, not a customer report."}</p></div>:null}
+              <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{checkout?surface.sampleDescription:report.preview[locale]}</p>
+              {autoReportSlugSet.has(report.slug)&&getActiveAstrologyProviderName()==="own_engine"?<div className="mt-4 space-y-2"><Button asChild variant="outline"><Link href={`/reports/${report.slug}/sample`} target="_blank" rel="noopener noreferrer">{surface.sample} ({surface.sampleLanguage})</Link></Button><p className="text-xs text-[#a8b3c7]">{surface.sampleNote}</p></div>:null}
             </CardContent>
           </Card>
           <Card className="inner-card">
@@ -117,7 +118,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
               <ShieldCheck className="h-6 w-6 text-[#00f5a0]" />
               <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.deliveryProcess}</h2>
               <ol className="mt-4 grid gap-3 text-sm text-[#dbeafe]">
-                {(automaticDelivery?[...labels.paidSteps.slice(0,3),autoReportDeliveryMessage(locale),locale==="hi"?"रिपोर्ट की स्थिति अपने खाते में देखें और निजी PDF डाउनलोड करें।":"Track your report in your account and download the private PDF."]:checkout ? labels.paidSteps : labels.manualSteps).map((step, index) => (
+                {(automaticDelivery?[...labels.paidSteps.slice(0,3),autoReportDeliveryMessage(locale),surface.track]:checkout ? labels.paidSteps : labels.manualSteps).map((step, index) => (
                   <li key={step} className="rounded-lg border border-[#263957] bg-[#142647]/72 p-3"><span className="mr-2 text-[#fbc02d]">{index + 1}.</span>{step}</li>
                 ))}
               </ol>
@@ -148,18 +149,18 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             </div>
           </CardContent>
         </Card>
-        <aside className="mt-10 rounded-2xl border border-[#ddc19b] bg-[#fffaf1] p-5 text-[#402a2d]" aria-label="Report buying guidance">
-          <h2 className="font-cinzel text-xl font-bold">Before you buy</h2>
-          <p className="mt-2 text-sm leading-7">Review what is included, how to receive your report and the applicable refund policy before paying. Your personal results are private.</p>
+        <aside className="mt-10 rounded-2xl border border-[#ddc19b] bg-[#fffaf1] p-5 text-[#402a2d]" aria-label={surface.guidance}>
+          <h2 className="font-cinzel text-xl font-bold">{surface.buying}</h2>
+          <p className="mt-2 text-sm leading-7">{surface.buyingDescription}</p>
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-            <Link href="/blog/personalized-astrology-report-delivery-guide" className="underline underline-offset-4">Report delivery guide</Link>
-            <Link href="/refund-policy" className="underline underline-offset-4">Refund policy</Link>
-            <Link href="/reports" className="underline underline-offset-4">Compare all reports</Link>
+            <Link href="/blog/personalized-astrology-report-delivery-guide" className="underline underline-offset-4">{surface.deliveryGuide}</Link>
+            <Link href="/refund-policy" className="underline underline-offset-4">{surface.refund}</Link>
+            <Link href="/reports" className="underline underline-offset-4">{surface.compare}</Link>
           </div>
           <ProductShareActions name={report.name[locale]} productUrl={publicReportUrl} kind="report" />
         </aside>
       </Section>
-      {checkout?<div className="sticky bottom-0 z-20 border-t border-[#e4cbaa] bg-[#fffdf8] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-[#372630] lg:hidden"><div className="mx-auto flex max-w-xl items-center justify-between gap-3"><div><p className="text-xs">{locale==="hi"?"एक बार का शुल्क":locale==="hinglish"?"One-time fee":"One-time fee"}</p><p className="font-bold">{checkout.price}</p></div><Button asChild><a href="#report-purchase">{locale==="hi"?"विवरण और खरीद":locale==="hinglish"?"Details aur purchase":"Review & continue"}</a></Button></div></div>:null}
+      {checkout?<div data-report-mobile-action className="sticky bottom-0 z-20 border-t border-[#e4cbaa] bg-[#fffdf8] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-[#372630] lg:hidden"><div className="mx-auto flex max-w-xl flex-wrap items-center justify-between gap-3"><div className="min-w-0"><p className="text-xs">{locale==="hi"?"एक बार का शुल्क":locale==="hinglish"?"One-time fee":"One-time fee"}</p><p className="font-bold">{checkout.price}</p></div><Button asChild className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-center"><a href="#report-purchase">{locale==="hi"?"विवरण और खरीद":locale==="hinglish"?"Details aur purchase":"Review & continue"}</a></Button></div></div>:null}
     </main>
   );
 }
