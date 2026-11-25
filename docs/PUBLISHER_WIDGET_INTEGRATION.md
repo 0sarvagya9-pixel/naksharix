@@ -1,0 +1,10 @@
+# Publisher widget integration (development only)
+
+Feature gate: B2B_INTEGRATION_ENABLED. No real contract, publication, charge, deployment or publisher activation is authorized by this document.
+
+1. On the publisher **server**, POST JSON to /api/partner/v1/calculate with the contracted panchang-widget bearer key. Supply a new UUID requestId, scope "panchang-widget", location {date,latitude,longitude,offsetMinutes}, and browserOrigin equal to the exact canonical HTTPS origin of the publisher page. The response is a RESERVED usage unit, grant and expiresAt, not a billable completion. Existing server-rendered HTML requests omit browserOrigin.
+2. Transfer only the five-minute single-use grant to the browser, never the partner key. POST {grant} as JSON to /api/partner/v1/widget with credentials:"omit". Browsers supply Origin. The server verifies the exact signed origin, signature, expiry, active tenant and key scope, and reserved request identity. CORS is not treated as authentication. Keep the grant in memory, not a URL, analytics, browser persistent storage or logs.
+3. Render returned result.date, result.tithi, result.nakshatra, result.sunrise, result.sunset and mandatory attribution as text. Do not render third-party-supplied HTML. Link the attribution to https://www.naksharix.com/panchang. Include the traditional-calculation limitations. Do not reuse a consumed grant; obtain a new server-issued grant only for a new authorized calculation. No charge is implied by grant issuance, and failed/abandoned attempts are not completed-unit statements.
+4. HTTP 401 = invalid, expired or mismatched grant; 409 = already consumed or revoked reservation; 429 = quota/rate exhausted; 503 = disabled or unavailable. Do not auto-retry an ambiguous redemption as a new paid unit. Provider onboarding, contract terms, pricing approval and live integration remain separate acceptance gates.
+
+Origin validation rejects wildcard hostnames, credentials, paths, query strings, fragments, and noncanonical origins. Global framing protections are unchanged. This is a cross-origin JSON widget, not an iframe.
