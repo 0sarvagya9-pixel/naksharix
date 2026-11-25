@@ -1,46 +1,22 @@
 import { NextRequest } from "next/server";
-import { z } from "zod";
+import { matchingRequestSchema } from "@/lib/matching/request-schema";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { completeAstrologyPrompt } from "@/lib/ai/gemini";
 import { buildKundliMatchPrompt } from "@/lib/ai/prompts/kundli-match";
 import { getActiveAstrologyProviderName, getAstrologyProvider, AstrologyProviderUnavailableError } from "@/lib/astrology/provider";
 import { normalizeBirthInput } from "@/lib/astrology/normalize";
-import { normalizeBirthDate, normalizeBirthTime } from "@/lib/astrology/own-engine/time";
 import { cacheGetOrSet } from "@/lib/cache";
 import { cacheTtl, createBirthHash, matchCacheKey } from "@/lib/report-hash";
 import { readLanguageFromRequest, translatedApiMessage } from "@/lib/server-language";
 import { buildPremiumCompatibilityReport } from "@/lib/matching/kundli-matching";
 import type { AstrologyLanguage, BirthChartData } from "@/lib/astrology/types";
 
-const birthDateSchema = z.string().trim().min(8).transform((value) => normalizeBirthDate(value));
-const birthTimeSchema = z.string().trim().min(1).transform((value) => normalizeBirthTime(value));
-
-const personSchema = z.object({
-  name: z.string().trim().min(2).max(80),
-  gender: z.string().trim().min(1),
-  dateOfBirth: birthDateSchema,
-  birthDate: birthDateSchema.optional(),
-  timeOfBirth: birthTimeSchema,
-  birthTime: birthTimeSchema.optional(),
-  birthPlace: z.string().trim().min(2).max(160),
-  latitude: z.coerce.number().min(-90).max(90),
-  longitude: z.coerce.number().min(-180).max(180),
-  timezone: z.string().trim().min(1).default("Asia/Kolkata")
-});
-
-const schema = z.object({
-  bride: personSchema,
-  groom: personSchema,
-  language: z.enum(["en", "hi", "hinglish"]).optional(),
-  locale: z.enum(["en", "hi", "hinglish"]).optional()
-});
-
 export async function POST(request: NextRequest) {
   try {
-    const body = await validateJson(request, schema);
+    const body = await validateJson(request, matchingRequestSchema);
     const language = readLanguageFromRequest(request, body.language ?? body.locale);
-    const bride = normalizeBirthInput({ ...body.bride, dateOfBirth: body.bride.dateOfBirth ?? body.bride.birthDate, timeOfBirth: body.bride.timeOfBirth ?? body.bride.birthTime, language });
-    const groom = normalizeBirthInput({ ...body.groom, dateOfBirth: body.groom.dateOfBirth ?? body.groom.birthDate, timeOfBirth: body.groom.timeOfBirth ?? body.groom.birthTime, language });
+    const bride = normalizeBirthInput({ ...body.bride, language });
+    const groom = normalizeBirthInput({ ...body.groom, language });
     const providerName = getActiveAstrologyProviderName();
     logMatchStep("input", { provider: providerName, inputsAccepted: true });
 

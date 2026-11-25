@@ -1,9 +1,8 @@
 import { NextRequest } from "next/server";
 import { fail, ok, handleApiError, validateJson } from "@/lib/api";
-import { matchMakingSchema } from "@/lib/validations/astrology";
+import { matchingRequestSchema } from "@/lib/matching/request-schema";
 import { getAstrologyProvider, AstrologyProviderUnavailableError } from "@/lib/astrology/provider";
 import { normalizeBirthInput } from "@/lib/astrology/normalize";
-import { normalizeBirthDate, normalizeBirthTime } from "@/lib/astrology/own-engine/time";
 import { buildPremiumCompatibilityReport } from "@/lib/matching/kundli-matching";
 import { createBirthHash, matchCacheKey } from "@/lib/report-hash";
 import type { BirthChartData } from "@/lib/astrology/types";
@@ -13,11 +12,9 @@ import type { BirthChartData } from "@/lib/astrology/types";
  */
 export async function POST(request:NextRequest){
   try {
-    const body=await validateJson(request,matchMakingSchema);
-    const language=body.locale;
-    const toInput=(person:typeof body.bride)=>normalizeBirthInput({
-      name:person.name,gender:person.gender,dateOfBirth:normalizeBirthDate(person.birthDate.toISOString().slice(0,10)),timeOfBirth:normalizeBirthTime(person.birthTime),birthPlace:person.birthPlace,latitude:person.latitude,longitude:person.longitude,timezone:person.timezone,language
-    });
+    const body=await validateJson(request,matchingRequestSchema);
+    const language=body.language??body.locale??"en";
+    const toInput=(person:typeof body.bride)=>normalizeBirthInput({...person,language});
     const bride=toInput(body.bride),groom=toInput(body.groom);
     const provider=getAstrologyProvider();
     const [a,b]=await Promise.all([provider.getBirthChart(bride) as Promise<BirthChartData>,provider.getBirthChart(groom) as Promise<BirthChartData>]);

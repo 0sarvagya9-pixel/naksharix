@@ -142,6 +142,34 @@ await verify("matchmaking engine returns real compatibility calculation", async 
   assert.equal(d.match.maxGuna,36);assert.equal(d.match.factors.length,8);
   const renamed=await expectData(await post("/api/matchmaking",{bride:{...bride,name:"Other Sample Bride"},groom:{...groom,name:"Other Sample Groom"},locale:"en"}),"name-invariant matching");assert.equal(renamed.match.guna,d.match.guna);assert.deepEqual(renamed.match.factors,d.match.factors);
 });
+await verify("A04 all three existing matching paths return the same eight traditional factors and reject invalid aliases",async()=>{
+  const bride={name:"Synthetic Bride",gender:"female",birthDate:"1992-02-02",birthTime:"13:15",birthPlace:"Delhi",latitude:28.6139,longitude:77.209,timezone:"Asia/Kolkata"};
+  const groom={name:"Synthetic Groom",gender:"male",birthDate:"1990-01-15",birthTime:"10:30",birthPlace:"Delhi",latitude:28.6139,longitude:77.209,timezone:"Asia/Kolkata"};
+  const canonical=({birthDate,birthTime,...rest})=>({...rest,dateOfBirth:birthDate,timeOfBirth:birthTime});
+  const legacy=(await expectData(await post("/api/matchmaking",{bride,groom,locale:"en"}),"legacy")).match;
+  const current=(await expectData(await post("/api/kundli-match/generate",{bride:canonical(bride),groom:canonical(groom),language:"en"}),"current")).report;
+  const alias=(await expectData(await post("/api/kundli-match",{bride,groom,locale:"en"}),"alias")).report;
+  for(const report of [current,alias]){
+    const factors=report.gunaMilan.ashtakoot;
+    assert.equal(report.matchingMode,legacy.matchingMode);
+    assert.equal(factors.length,8);
+    assert.deepEqual(factors.map(f=>f.maxScore).sort((a,b)=>a-b),[1,2,3,4,5,6,7,8]);
+    assert.ok(factors.every(f=>f.available===true&&Number.isFinite(f.score)&&f.score>=0&&f.score<=f.maxScore));
+    assert.ok(Math.abs(factors.reduce((s,f)=>s+f.score,0)-report.gunaMilan.totalScore)<0.051);
+    assert.equal(report.gunaMilan.maxScore,36);
+    assert.equal(report.gunaMilan.totalScore,legacy.guna);
+    assert.deepEqual(factors.map(f=>({name:f.name,score:f.score,max:f.maxScore,meaning:f.meaning})),legacy.factors);
+  }
+  const alternate=await expectData(await post("/api/matchmaking",{bride:canonical(bride),groom:canonical(groom),language:"en"}),"legacy canonical inputs");
+  assert.deepEqual(alternate.match.factors,legacy.factors);
+  for(const route of ["/api/matchmaking","/api/kundli-match/generate","/api/kundli-match"]){
+    for(const patch of [{birthDate:"1992-02-31"},{birthTime:"25:00"},{timezone:"Unknown/Zone"},{latitude:null},{latitude:""},{dateOfBirth:"1993-02-02"},{timeOfBirth:"12:00"}]){
+      const response=await post(route,{bride:{...bride,...patch},groom,locale:"en"});
+      assert.equal(response.status,422,route+" "+Object.keys(patch).join(","));
+      assert.ok((await response.json()).error);
+    }
+  }
+});
 await verify("weekly, monthly and yearly horoscope APIs produce nonempty sign results", async () => {
   for (const period of ["weekly", "monthly", "yearly"]) {
     const d = await expectData(await post("/api/horoscope", { zodiac: "aries", period, category: "general" }), period);
