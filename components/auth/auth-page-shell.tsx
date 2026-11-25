@@ -13,7 +13,7 @@ export function AuthPageShell({mode,googleEnabled,resume,legacy=false,oauthAccou
   const loginPath=legacy?"/auth/login":"/login";
   const signupPath=legacy?"/auth/signup":"/signup";
   const pro=mode==="professional";
-  const linkStyle="text-[#01A361] underline";
+  const linkStyle="text-[#176346] underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
   return <Section className="max-w-md"><Card className="glass">
     <CardHeader><CardTitle as="h1" className="font-cinzel">{copy[mode]}</CardTitle></CardHeader>
     <CardContent>

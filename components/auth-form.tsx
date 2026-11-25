@@ -171,18 +171,18 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     <div className="space-y-5">
       {showRoleCards ? <RoleCards selected={roleIntent} onSelect={chooseRole} /> : null}
       {roleIntent === "ASTROLOGER" ? (
-        <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
-          <Label htmlFor="professionalRole">{tr("professionalType")}</Label>
+        <div className="rounded-lg border border-[#b69b78] bg-[#fff9ef] p-4 text-[#372630]">
+          <Label htmlFor="professionalRole" className="text-[#372630]">{tr("professionalType")}</Label>
           <select
             id="professionalRole"
             value={professionalRole}
             onChange={(event) => chooseProfessionalRole(event.target.value as "ASTROLOGER" | "CONSULTANT")}
-            className="mt-2 h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm"
+            className="mt-2 h-10 w-full rounded-md border border-[#947c68] bg-white px-3 text-sm text-[#372630] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#70283d]"
           >
             <option value="ASTROLOGER">{tr("astrologer")}</option>
             <option value="CONSULTANT">{tr("consultant")}</option>
           </select>
-          {mode === "signup" ? <p className="mt-2 text-xs leading-5 naksh-muted-text">{tr("pendingApprovalNote")}</p> : null}
+          {mode === "signup" ? <p className="mt-2 text-xs leading-5 text-[#55474b]">{tr("pendingApprovalNote")}</p> : null}
         </div>
       ) : null}
       {googleEnabled ? (

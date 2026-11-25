@@ -43,7 +43,7 @@ test("A13 every authentication entry has one accessible H1 and labelled credenti
   const fields=await page.locator("main input:not([type=hidden])").evaluateAll(nodes=>nodes.filter(n=>n.getClientRects().length>0).map(n=>({id:n.id,labels:(n as HTMLInputElement).labels?.length||0,aria:n.getAttribute("aria-label")||n.getAttribute("aria-labelledby")})));
   expect(fields.every(f=>f.labels>0||f.aria),route+" labelled fields").toBe(true);
   const result=await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
-  expect(result.violations.filter(v=>v.impact==="serious"||v.impact==="critical").map(v=>v.id),route+" accessible semantics").toEqual([]);
+  expect.soft(result.violations.filter(v=>v.impact==="serious"||v.impact==="critical").map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,reason:n.failureSummary}))})),route+" accessible semantics").toEqual([]);
  }
 });
 test("A17 and A18 report comparison uses the renderer-backed benefits and exact catalogue prices",async({page})=>{
