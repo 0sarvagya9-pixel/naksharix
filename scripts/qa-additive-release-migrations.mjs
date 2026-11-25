@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {execFileSync} from "node:child_process";
 import {readFileSync,writeFileSync} from "node:fs";
 import {createHash} from "node:crypto";
+import {compareReleaseCatalog,RELEASE_CATALOG_SQL,RELEASE_SCHEMA_EXPECTED} from "../lib/ops/release-schema-contract.ts";
 const base="adbcd7e9c14a4bfe15f1f8ad829c1afe9f366204";
 assert.equal(process.env.CI,"true");
 for(const key of ["DATABASE_URL","DIRECT_URL","PSQL_URL"]){
@@ -23,6 +24,12 @@ const files=["20261124-marketing-consent.sql","20261124-ai-credit-ledger.sql","2
 const qnames=names.map(n=>"'"+n+"'").join(",");
 const list=()=>psql(["-Atc","SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name IN ("+qnames+") ORDER BY table_name"]).trim().split("\n").filter(Boolean);
 assert.equal(list().length,0);
+assert.deepEqual(RELEASE_SCHEMA_EXPECTED.tables,names,"Contract tracks the original migration table set");
+const catalog=()=>JSON.parse(psql(["-Atc",RELEASE_CATALOG_SQL]).trim());
+const before=compareReleaseCatalog(catalog());
+assert.equal(before.ready,false);assert.equal(before.missing.tables.length,17);
+assert.equal(before.missing.columns.length,208);assert.equal(before.missing.enumValues.length,4);
+let firstCatalog;
 for(let round=1;round<=2;round++){
  for(const name of files){
   const path="deploy/sql/"+name;
@@ -33,6 +40,11 @@ for(let round=1;round<=2;round++){
   console.log("ADDITIVE_MIGRATION_PASS",round,name,createHash("sha256").update(sql).digest("hex"));
  }
  assert.deepEqual(list(),[...names].sort());
+ const observed=catalog(),gate=compareReleaseCatalog(observed);
+ assert.equal(gate.ready,true,JSON.stringify(gate.missing));
+ if(round===1)firstCatalog=observed;
+ else assert.deepEqual(compareReleaseCatalog(firstCatalog),gate);
+ console.log("RELEASE_SCHEMA_CATALOG_PASS="+JSON.stringify({round,...gate.checked,missing:gate.missingCount}));
 }
 const schema=readFileSync("prisma/schema.prisma","utf8");
 const columns=JSON.parse(psql(["-Atc","SELECT COALESCE(json_agg(json_build_object('table',table_name,'column',column_name,'type',data_type,'nullable',is_nullable)),'[]'::json) FROM information_schema.columns WHERE table_schema='public' AND table_name IN ("+qnames+")"]).trim());
@@ -54,4 +66,21 @@ for(const name of names){
 }
 const purposes=psql(["-Atc","SELECT e.enumlabel FROM pg_enum e JOIN pg_type t ON e.enumtypid=t.oid WHERE t.typname='PaymentPurpose' ORDER BY e.enumlabel"]).trim().split("\n");
 for(const purpose of ["AI_CREDITS","DIGITAL_PACKAGE","EXPERT_SERVICE","AI_MEMBERSHIP"])assert.ok(purposes.includes(purpose),purpose);
+const qualified=catalog();
+const broken=structuredClone(qualified);
+const firstIndex=RELEASE_SCHEMA_EXPECTED.indexes.find(x=>x.unique&&!x.primary);
+broken.indexes=broken.indexes.filter(x=>!(x.table===firstIndex.table&&x.unique===firstIndex.unique&&x.primary===firstIndex.primary&&JSON.stringify(x.columns)===JSON.stringify(firstIndex.columns)));
+assert.equal(compareReleaseCatalog(broken).ready,false,"Missing uniqueness must block release");
+const brokenFk=structuredClone(qualified);
+const firstFk=RELEASE_SCHEMA_EXPECTED.foreignKeys[0];
+brokenFk.foreignKeys=brokenFk.foreignKeys.filter(x=>!(x.table===firstFk.table&&JSON.stringify(x.columns)===JSON.stringify(firstFk.columns)));
+assert.equal(compareReleaseCatalog(brokenFk).ready,false,"Missing ownership foreign key must block release");
+const wrongColumn=structuredClone(qualified);
+const required=RELEASE_SCHEMA_EXPECTED.columns.find(x=>!x.nullable);
+wrongColumn.columns.find(x=>x.table===required.table&&x.column===required.column).nullable=true;
+assert.equal(compareReleaseCatalog(wrongColumn).ready,false,"Nullable required column must block release");
+const missingChecks=structuredClone(qualified);missingChecks.checkCounts=[];
+assert.equal(compareReleaseCatalog(missingChecks).ready,false,"Missing reviewed CHECK constraints must block release");
+assert.equal(compareReleaseCatalog(null).ready,false);
+console.log("RELEASE_SCHEMA_NEGATIVE_GATES=5/5_PASS");
 console.log(JSON.stringify({result:"ISOLATED_ADDITIVE_MIGRATION_REHEARSAL_PASS",migrations:files.length,passes:2,newTables:names.length,columnsChecked:checked,baselineCommit:base,baselineSchemaSha256:hash,scope:"synthetic localhost only"}));

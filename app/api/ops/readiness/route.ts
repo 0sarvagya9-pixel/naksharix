@@ -7,12 +7,13 @@ import { getReportStorageReadiness } from "@/lib/storage/report-storage";
 import { getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 import { isAiAstrologerEnabled, isAiAstrologerReady } from "@/lib/ai/feature-status";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
+import { getReleaseSchemaReadiness } from "@/lib/ops/release-schema-readiness";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const schema = await getSchemaReadiness().catch(() => null);
+  const [schema,releaseSchema] = await Promise.all([getSchemaReadiness().catch(() => null),getReleaseSchemaReadiness()]);
   const email = getEmailReadiness();
   const monitoring = getMonitoringReadiness();
   const storage = getReportStorageReadiness();
@@ -39,6 +40,8 @@ export async function GET() {
     },
     services: {
       databaseSchema: { ready: schema?.ready ?? false, missingCount: schema?.missingCount ?? 2 },
+      // Do not expose schema names or falsely certify the new release from the two legacy tables.
+      releaseSchema: {ready:releaseSchema.ready,checked:releaseSchema.checked,missingCount:releaseSchema.missingCount},
       email: {
         provider: email.provider,
         enabled: email.emailEnabled,

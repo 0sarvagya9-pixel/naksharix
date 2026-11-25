@@ -10,6 +10,7 @@ import { getEmailReadiness } from "@/lib/email/email-service";
 import { AdminEmailAcceptanceTest } from "@/components/admin/admin-email-acceptance-test";
 import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
+import { getReleaseSchemaReadiness } from "@/lib/ops/release-schema-readiness";
 import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
 import { getThreePhaseAcceptance } from "@/lib/ops/three-phase-acceptance";
 import { seo } from "@/lib/seo";
@@ -43,6 +44,7 @@ export default async function AdminReadinessPage() {
 
   let newTables: Awaited<ReturnType<typeof getSchemaReadiness>> | null = null;
   try { newTables = await getSchemaReadiness(); } catch { newTables = null; }
+  const releaseSchema=await getReleaseSchemaReadiness();
   const email = getEmailReadiness();
   const monitoring = getMonitoringReadiness();
   const commercial = await getCommercialReadiness();
@@ -63,6 +65,13 @@ export default async function AdminReadinessPage() {
         : newTables.ready
           ? "LearningProgress and PujaPartner with required indexes are present."
           : "Missing required objects: " + newTables.checks.filter((item) => !item.present).map((item) => item.object).join(", ") + ". Deploy only after verified backup, reviewed migration, and independent restore proof."
+    },
+    {
+      name: "Additive release schema",
+      status: releaseSchema.ready?"ok":"missing",
+      note: releaseSchema.ready
+        ? "All "+releaseSchema.checked.tables+" release tables, "+releaseSchema.checked.columns+" typed columns, required ordered indexes, foreign keys, minimum validated CHECK counts and four enum values match. Production backup, exact CHECK semantics and operational acceptance are separate gates."
+        : "Missing or mismatched catalog checks: "+releaseSchema.missingCount+". Missing tables: "+releaseSchema.missing.tables.join(", ")+". Hold migration/deployment until real backup and reviewed migration evidence are available."
     },
     {
       name: "Distributed Redis",
