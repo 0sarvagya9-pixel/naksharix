@@ -3,7 +3,7 @@ import {calculateVimshottariDasha,resolveDashaBirthInstant} from "@/lib/astrolog
 import {calculateVimshottariPratyantarWindow} from "@/lib/astrology/premium-engine/dasha";
 import { buildEditorialInsights,editorialHouse } from "@/lib/reports/editorial-insights";
 import {buildReportDepth} from "@/lib/reports/editorial-depth";
-import {isFullRomanNumerologyName} from "@/lib/reports/roman-name";
+import {isFullRomanNumerologyName,calculateRomanNameEvidence} from "@/lib/reports/roman-name";
 import { getAstrologyProvider,getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 import { calculateInternalTransitSnapshot } from "@/lib/astrology/transit/engine";
 import { buildPremiumCompatibilityReport } from "@/lib/matching/kundli-matching";
@@ -92,6 +92,7 @@ export async function assembleAutomaticPaidReport(input:{
   const suppliedRoman=checked.extra.romanName||birth.name;
   // A non-Roman-only name does not establish a Pythagorean name number.
   const nameNumberAvailable=isFullRomanNumerologyName(suppliedRoman);
+  const nameEvidence=calculateRomanNameEvidence(suppliedRoman);
   const num=calculateNumerologyReport({name:suppliedRoman,dateOfBirth:birth.dateOfBirth,gender:birth.gender,locale:l});
   const transitInput={latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,place:birth.birthPlace,ayanamsa:"lahiri" as const};
   const snapshot=(on:string,names?:string[])=>{
@@ -172,7 +173,7 @@ export async function assembleAutomaticPaidReport(input:{
       reflection("dosha-guidance",["Practical and respectful guidance","व्यावहारिक और सम्मानजनक मार्गदर्शन","Practical aur respectful guidance"],[["Do not make marriage or health decisions from a dosha label alone. Discuss evidence and actual circumstances; optional prayer is a personal choice.","केवल दोष के आधार पर विवाह या स्वास्थ्य निर्णय न लें। वास्तविक परिस्थितियों पर विचार करें; प्रार्थना व्यक्तिगत विकल्प है।","Sirf dosha label se marriage ya health decision na lein. Actual circumstances dekhein; prayer personal choice hai."]]);
       break;
     case "numerology-lo-shu-report":
-      section("numerology-profile",["Personal numerology profile","व्यक्तिगत अंक ज्योतिष प्रोफ़ाइल","Personal numerology profile"],{moolank:num.moolank,lifePath:num.lifePath,destiny:num.destiny,nameNumber:num.nameNumber,soulUrge:num.soulUrge,personality:num.personality});
+      section("numerology-profile",["Personal numerology profile","व्यक्तिगत अंक ज्योतिष प्रोफ़ाइल","Personal numerology profile"],{moolank:num.moolank,lifePath:num.lifePath,destiny:num.destiny,nameNumber:num.nameNumber,soulUrge:nameEvidence?.vowels?num.soulUrge:null,personality:nameEvidence?.consonants?num.personality:null},[tr(l,["Vowel-only and consonant-only numbers are unavailable if the corresponding letter group is empty. Y is treated as a consonant in this named method.","स्वर या व्यंजन समूह खाली होने पर संबंधित अंक उपलब्ध नहीं है। इस विधि में Y को व्यंजन माना जाता है।","Vowel ya consonant group empty ho to corresponding number available nahi hai. Is method mein Y consonant hai."])]);
       section("lo-shu",["Lo Shu grid and missing/repeated digits","लो शू ग्रिड और अनुपस्थित/दोहराए अंक","Lo Shu grid aur missing/repeated digits"],{grid:num.loShuGrid,missing:num.missingNumbers,repeated:num.repeatedNumbers});
       section("numerology-guidance",["Reflection and daily practices","आत्मचिंतन और दैनिक अभ्यास","Reflection aur daily practices"],num.remedies,[num.disclaimer]);
       break;
@@ -180,7 +181,7 @@ export async function assembleAutomaticPaidReport(input:{
       const current=checked.extra.romanName!;
       const candidates=[...new Set([current,...(checked.extra.candidateNames??[])])];
       section("current-name",["Current name and birth numbers","वर्तमान नाम और जन्म अंक","Current name aur birth numbers"],{current,number:num.nameNumber,birthNumber:num.moolank,lifePath:num.lifePath});
-      section("name-comparison",["Compare proposed spellings","प्रस्तावित वर्तनी की तुलना","Proposed spellings compare karein"],candidates.map(name=>{const r=calculateNumerologyReport({name,dateOfBirth:birth.dateOfBirth,locale:l});return {name,nameNumber:r.nameNumber,soulUrge:r.soulUrge,personality:r.personality};}),["Numerology is a symbolic comparison, not proof that a spelling changes luck."]);
+      section("name-comparison",["Compare proposed spellings","प्रस्तावित वर्तनी की तुलना","Proposed spellings compare karein"],candidates.map(name=>{const r=calculateNumerologyReport({name,dateOfBirth:birth.dateOfBirth,locale:l});const evidence=calculateRomanNameEvidence(name);if(!evidence)throw Error("REPORT_NAME_ARITHMETIC_INVALID");return {name,nameNumber:r.nameNumber,soulUrge:evidence.vowels?r.soulUrge:null,personality:evidence.consonants?r.personality:null};}),["Numerology is a symbolic comparison, not proof that a spelling changes luck.",tr(l,["An empty vowel or consonant group has no corresponding number; Y counts as a consonant in this method.","खाली स्वर या व्यंजन समूह का अंक नहीं निकाला जाता। इस विधि में Y व्यंजन है।","Empty vowel ya consonant group ka number nahi nikala jata. Y is method mein consonant hai."])]);
       reflection("name-guidance",["Name choice checklist","नाम चयन सूची","Name choice checklist"],[["Consider pronunciation, personal identity and spelling consistency. No legal name change is needed for symbolic reflection.","उच्चारण, व्यक्तिगत पहचान और वर्तनी की स्थिरता पर विचार करें। प्रतीकात्मक चिंतन के लिए कानूनी नाम बदलना जरूरी नहीं।","Pronunciation, personal identity aur spelling consistency consider karein. Legal name change zaroori nahi."]]);
       break;}
     case "yearly-horoscope-report":

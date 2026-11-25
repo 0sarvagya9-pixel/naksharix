@@ -356,6 +356,30 @@ if(!dbMode){
   const assembled=await assembleAutomaticPaidReport({slug,birth,extra,question,language,now:new Date("2026-11-24T12:00:00Z")});
   assert.deepEqual(assembled.content.sections.find(s=>s.key===key).data.pratyantarWindow,third);thirdCases++;
  }
+ const {calculateRomanNameEvidence}=require("@/lib/reports/roman-name");
+ const arithmetic=calculateRomanNameEvidence("Asha Test");
+ assert.equal(arithmetic.all.sum,21);assert.equal(arithmetic.all.number,3);assert.equal(arithmetic.vowels.sum,7);assert.equal(arithmetic.consonants.sum,14);
+ assert.equal(calculateRomanNameEvidence("SKY").vowels,null);assert.equal(calculateRomanNameEvidence("AEIOU").consonants,null);assert.equal(calculateRomanNameEvidence("आशा Test"),null);
+ let depthContractCases=0;
+ const depthFor=(c,key)=>c.content.sections.find(s=>s.key==="editorial-depth").data.find(x=>x.key===key);
+ for(const language of ["en","hi","hinglish"]){
+  const get=(slug,extraData=extra)=>assembleAutomaticPaidReport({slug,birth,extra:extraData,question,language,now:new Date("2026-11-24T12:00:00Z")});
+  const match=await get("couple-kundli");assert.equal(depthFor(match,"two_person_house_context").cards.length,5);depthContractCases++;
+  for(const slug of ["premium-kundli","career-report","wealth-report","love-report","fortune-report"]){const r=await get(slug);assert.ok(depthFor(r,"ruler_network").cards.length>0);depthContractCases++;}
+  const yearly=await get("yearly-horoscope-report");const months=yearly.content.sections.find(s=>s.key==="yearly-months").data;
+  assert.deepEqual(depthFor(yearly,"monthly_natal_review").cards.map(c=>c.label),months.map(m=>m.date));depthContractCases++;
+  for(const slug of ["transit-report","sade-sati-report","rahu-ketu-report","jupiter-transit-report"]){const r=await get(slug);assert.ok(depthFor(r,"sampled_transition_windows").cards.length>0);depthContractCases++;}
+  const numerology=await get("numerology-lo-shu-report",{confirmed:true,romanName:"SKY"});
+  assert.equal(numerology.content.sections.find(s=>s.key==="numerology-profile").data.soulUrge,null);
+  const grid=numerology.content.sections.find(s=>s.key==="lo-shu").data.grid;
+  assert.equal(grid.find(c=>c.number===9).count,2);
+  assert.equal(depthFor(numerology,"lo_shu_geometry").cards.length,8);depthContractCases++;
+  const names=await get("name-correction-report",{confirmed:true,romanName:"SKY",candidateNames:["AEIOU"]});
+  const nameRows=names.content.sections.find(s=>s.key==="name-comparison").data;
+  assert.equal(nameRows[0].soulUrge,null);assert.equal(nameRows[1].personality,null);
+  assert.equal(depthFor(names,"numerology-arithmetic").cards.length,3);depthContractCases++;
+ }
+ console.log("P0_REPORT_DEPTH_AND_ARITHMETIC_PASS "+JSON.stringify({depthContractCases,nameArithmeticChecks:7,scope:"calculation-grounded content and empty-group safety; not independent editorial scoring"}));
  console.log("P0_PRATYANTAR_REPORT_CONTRACT_PASS "+JSON.stringify({thirdCases,allSubPeriods:allSubs.length,thirdLevelPeriods:third.length,scope:"calculated boundaries, not prediction"}));
  console.log("P0_SPECIALTY_PERIOD_AND_NAME_CONTRACT_PASS",JSON.stringify({periodCases,nameCases:22,scientificPrediction:false}));
  console.log("REPORT_TIMING_AND_NAME_EVIDENCE_PASS; NON_ROMAN_NO_INVENTED_NAME_NUMBER; EXACT_UPCOMING_SUBPERIODS; MAJOR_BOUNDARIES");
