@@ -159,3 +159,23 @@ test("A43 all authentication flows share the approved layout without overflow an
  }
  console.log("A43_AUTH_LAYOUT_MATRIX_PASS "+JSON.stringify({project:info.project.name,routes:8,locales:3,width:320,layoutCases:24}));
 });
+
+
+test("A22 2027 annual guide supports all twelve rashi selections in both published languages on a narrow viewport",async({page},info)=>{
+ test.setTimeout(120000);await page.setViewportSize({width:390,height:844});
+ const signs=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"],hindi=["मेष","वृषभ","मिथुन","कर्क","सिंह","कन्या","तुला","वृश्चिक","धनु","मकर","कुंभ","मीन"];
+ // January independent reference: Jupiter Leo, Saturn Pisces.
+ for(const locale of ["en","hi"]){
+  await page.goto(locale==="hi"?"/hi/yearly-horoscope-2027":"/yearly-horoscope-2027",{waitUntil:"domcontentloaded"});
+  const select=page.locator("#annual-rashi");await expect(select).toBeVisible();
+  const months=page.locator('article').filter({has:page.locator("time[datetime]")});await expect(months).toHaveCount(12);
+  const january=months.filter({has:page.locator('time[datetime="2027-01-01"]')});
+  for(const [i,sign] of signs.entries()){
+   await select.selectOption(sign);await expect(page.getByRole("status").filter({hasText:"2027"})).toHaveText((locale==="hi"?hindi[i]:sign)+" · 2027");
+   await expect(january).toContainText((locale==="hi"?"भाव ":"House ")+((4-i+12)%12+1));
+   await expect(january).toContainText((locale==="hi"?"भाव ":"House ")+((11-i+12)%12+1));
+  }
+  const size=await page.evaluate(()=>({w:document.documentElement.clientWidth,s:document.documentElement.scrollWidth}));expect(size.s).toBeLessThanOrEqual(size.w+2);
+ }
+ console.log("A22_ANNUAL_WEB_UI_PASS "+JSON.stringify({project:info.project.name,signs:12,locales:2,viewport:390,referenceYear:2027}));
+});
