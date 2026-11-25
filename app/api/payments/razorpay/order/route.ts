@@ -16,7 +16,8 @@ import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-au
 import { getReportPricing } from "@/lib/reports/pricing";
 import { getSubscriptionPlan, finalizePaidPayment } from "@/lib/revenue";
 import { checkExistingReportOrder } from "@/lib/payments/report-order-recovery";
-import { getReportSlugForPaidId } from "@/lib/reports/checkout-catalogue";
+import { getReportSlugForPaidId, getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
+import {isSavedKundliCheckout,hasSavedKundliPayload} from "@/lib/reports/saved-kundli-contract";
 import { verifyReportPreflight } from "@/lib/reports/preflight-contract";
 import { googleSessionSchema, liveRazorpayAnalyticsOrder, sendGoogleCheckout } from "@/lib/analytics/google";
 import { getRequestIp, sharedRateLimitResponse as rateLimitResponse } from "@/lib/security/rate-limit";
@@ -66,7 +67,12 @@ export async function POST(request: NextRequest) {
     const savedReportId = "savedReportId" in body ? body.savedReportId : undefined;
     if("reportId" in body && !reportRequestId && !savedReportId && getReportSlugForPaidId(body.reportId) && !verifyReportPreflight(body.preflightToken,{userId:user.id,reportId:body.reportId,purpose:body.purpose,amountPaise:Math.round(item.amount*100)},env.JWT_SECRET))return fail("Complete and validate your report details before starting payment.",422);
 
+    if(reportRequestId&&savedReportId)return fail("Choose exactly one report checkout context.",422);
     if (savedReportId) {
+      if(!("reportId" in body)||!isSavedKundliCheckout(body.purpose,body.reportId))return fail("Saved Kundli checkout requires its exact report product.",422);
+      const saved=await prisma.kundliReport.findFirst({where:{id:savedReportId,userId:user.id},select:{id:true,reportJson:true}});
+      if(!saved)return fail("Saved report not found",404);
+      if(!hasSavedKundliPayload(saved.reportJson))return fail("Saved chart needs review before payment. No new order was created.",422);
       const alreadyPaid = await prisma.payment.findFirst({
         where: {
           userId: user.id,
@@ -75,7 +81,7 @@ export async function POST(request: NextRequest) {
         },
         select: { id: true }
       });
-      if (alreadyPaid) return fail("This report is already unlocked.", 409);
+      if (alreadyPaid) return fail("A prior paid record exists for this saved report. Check Payment History or contact support before paying again.", 409);
     }
 
     let previousReportStatus: ReportRequestStatus | null = null;
@@ -83,6 +89,9 @@ export async function POST(request: NextRequest) {
       const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
       if (!reportRequest || reportRequest.userId !== user.id) return fail("Report request not found", 404);
       if (reportRequest.paymentStatus === ReportPaymentStatus.PAID) return fail("This report request is already paid.", 409);
+      if(reportRequest.adminBypass||["REFUNDED","ADMIN_BYPASS"].includes(reportRequest.paymentStatus)||["CANCELLED","DELIVERED","SENT"].includes(reportRequest.status))return fail("This report request requires review before any new payment.",409);
+      const expectedReportId=getManualReportCheckout(reportRequest.reportSlug)?.reportId??reportRequest.reportSlug;
+      if(!("reportId" in body)||body.reportId!==expectedReportId)return fail("Report product does not match the saved request.",422);
       previousReportStatus = reportRequest.status;
       const pricing = getReportPricing(reportRequest.reportSlug);
       if (!pricing || pricing.amount !== item.amount || pricing.reportType !== body.purpose) {
@@ -180,6 +189,12 @@ export async function POST(request: NextRequest) {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${user.id}),hashtext(${body.reportId}))::text`;
       const identity=checkoutIdentity(body);
       if(!identity)return null;
+      if(savedReportId){
+        const saved=await tx.$queryRaw<Array<{id:string}>>`SELECT id FROM public."KundliReport" WHERE id=${savedReportId} AND "userId"=${user.id} FOR UPDATE`;
+        if(!saved.length)return null;
+        const paid=await tx.payment.findFirst({where:{userId:user.id,status:"PAID",metadata:{path:["savedReportId"],equals:savedReportId}},select:{id:true}});
+        if(paid)return null;
+      }
       const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:body.purpose,status:{in:["PENDING","PAID","FAILED"]},metadata:{path:[identity.key],equals:identity.value}},select:{id:true}});
       if(outstanding)return null;
       return tx.payment.create({data:paymentData});

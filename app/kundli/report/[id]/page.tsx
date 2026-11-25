@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { normalizeLocale } from "@/lib/i18n";
 import { canBypassPayment } from "@/lib/auth/permissions";
+import { savedKundliAccessMap } from "@/lib/reports/saved-kundli-access";
 
 type Params = Promise<{ id: string }>;
 
@@ -18,17 +19,8 @@ export default async function SavedKundliReportPage({ params }: { params: Params
   if (!saved) notFound();
 
   const isAdmin = canBypassPayment(user);
-  const isUnlocked = isAdmin || Boolean(await prisma.payment.findFirst({
-    where: {
-      userId: user.id,
-      status: "PAID",
-      purpose: "KUNDLI_REPORT",
-      metadata: {
-        path: ["savedReportId"],
-        equals: id
-      }
-    }
-  }));
+  const access=isAdmin?"UNLOCKED":(await savedKundliAccessMap(user.id,[id])).get(id);
+  const isUnlocked=access==="UNLOCKED";
 
   return (
     <main className="star-field">
@@ -39,6 +31,7 @@ export default async function SavedKundliReportPage({ params }: { params: Params
           language={normalizeLocale(saved.language)}
           createdAt={saved.createdAt.toISOString()}
           isUnlocked={isUnlocked}
+          paymentReviewRequired={access==="REVIEW"}
         />
       </Section>
     </main>

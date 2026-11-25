@@ -15,13 +15,15 @@ export function SavedKundliReportActions({
   reportId,
   language,
   showView = true,
-  isUnlocked = false
+  isUnlocked = false,
+  paymentReviewRequired = false
 }: {
   report: unknown;
   reportId: string;
   language: Locale;
   showView?: boolean;
   isUnlocked?: boolean;
+  paymentReviewRequired?: boolean;
 }) {
   const { tr } = useLanguage();
   const router = useRouter();
@@ -36,7 +38,7 @@ export function SavedKundliReportActions({
       const response = await secureFetch("/api/kundli/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ report, language, pdfType: isUnlocked ? "PREMIUM" : "FREE" })
+        body: JSON.stringify(isUnlocked ? {savedReportId:reportId,language,pdfType:"PREMIUM"} : {report,language,pdfType:"FREE"})
       });
       if (!response.ok) throw new Error("PDF download failed");
       const blob = await response.blob();
@@ -98,6 +100,8 @@ export function SavedKundliReportActions({
           <span className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-[#D4AF37]/50 bg-[#D4AF37]/10 px-3 text-xs font-bold uppercase tracking-[0.12em] text-[#FFD700]">
             Premium Active
           </span>
+        ) : paymentReviewRequired ? (
+          <Link href="/dashboard" className="text-sm font-semibold underline">Payment requires review — do not pay again</Link>
         ) : (
           <RazorpayCheckoutButton
             payload={{ purpose: "KUNDLI_REPORT", reportId: "kundli-pro", savedReportId: reportId }}

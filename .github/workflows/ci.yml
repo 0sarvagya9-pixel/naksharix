@@ -143,6 +143,8 @@ jobs:
           node scripts/qa-align-disposable-feature-schema.mjs
       - name: Qualify preflight admission for all fifteen priced reports and private-input boundaries
         run: node scripts/qa-report-preflight-runtime.mjs
+      - name: Qualify saved Kundli purchase identity, private PDF authorization and free cache isolation
+        run: node scripts/qa-saved-kundli-access-runtime.mjs
       - name: Exercise paid-report worker with disposable database and isolated email transport
         run: node scripts/qa-automatic-report-delivery.mjs --database
       - name: Qualify six digital products and course entitlements with disposable PostgreSQL

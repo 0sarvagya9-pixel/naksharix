@@ -17,6 +17,7 @@ type SavedReportCard = {
   reportJson: unknown;
   createdAt: Date;
   isUnlocked?: boolean;
+  paymentReviewRequired?: boolean;
 };
 
 export function SavedKundliReportList({ reports, emptyText }: { reports: SavedReportCard[]; emptyText: string }) {
@@ -50,7 +51,7 @@ export function SavedKundliReportList({ reports, emptyText }: { reports: SavedRe
                 <Meta icon={<MapPin className="h-4 w-4" />} label="Place" value={report.birthPlace} />
                 <Meta icon={<UserRound className="h-4 w-4" />} label="Saved" value={formatDateTime(report.createdAt, language)} />
               </div>
-              <SavedKundliReportActions report={report.reportJson} reportId={report.id} language={language} isUnlocked={report.isUnlocked} />
+              <SavedKundliReportActions report={report.reportJson} reportId={report.id} language={language} isUnlocked={report.isUnlocked} paymentReviewRequired={report.paymentReviewRequired} />
             </CardContent>
           </Card>
         );
