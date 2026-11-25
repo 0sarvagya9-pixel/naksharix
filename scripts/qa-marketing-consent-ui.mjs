@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { marketingConsentAcknowledged as ack, marketingPreferenceCopy, marketingInterests, normalizeMarketingLocale, marketingConsentText, marketingConsentVersion } from "../lib/marketing-consent.ts";
+import { marketingConsentAcknowledged as ack, marketingPreferenceCopy, marketingInterests, normalizeMarketingLocale, marketingConsentText, marketingConsentVersion, marketingPageCopy } from "../lib/marketing-consent.ts";
 const valid = "2026-11-25T01:05:00.000Z";
 const cases = [
   ["subscribe", {subscribed:true, confirmedAt:valid, consentVersion:marketingConsentVersion}, true],
@@ -42,3 +42,20 @@ assert.match(api,/consentVersion: z\.literal\(marketingConsentVersion\)/);
 assert.match(api,/consentVersion: body\.consentVersion/);
 assert.match(api,/consentVersion: saved\.consentVersion/);
 console.log("Marketing consent acknowledgement: 15 runtime cases; locale and form contract assertions passed.");
+
+const page = readFileSync("app/email-updates/page.tsx", "utf8");
+for (const locale of ["en","hi","hinglish"]) {
+  const copy = marketingPageCopy[locale];
+  assert.deepEqual(Object.keys(copy), Object.keys(marketingPageCopy.en));
+  for (const [key,value] of Object.entries(copy)) {
+    assert.ok(value.trim());
+    assert.ok(page.includes(`copy.${key}`), `Missing page translation binding: ${key}`);
+  }
+}
+assert.notEqual(marketingPageCopy.hi.signIn, marketingPageCopy.en.signIn);
+assert.notEqual(marketingPageCopy.hinglish.intro, marketingPageCopy.en.intro);
+assert.match(page,/normalizeMarketingLocale\(cookieLocale \?\? account\?\.locale \?\? existing\?\.locale\)/);
+assert.match(page,/initialLocale=\{existing\?\.locale \?\? uiLocale\}/);
+assert.ok(page.includes('href="/login?redirectTo=%2Femail-updates"'));
+assert.ok(page.includes('href="/signup?redirectTo=%2Femail-updates"'));
+console.log("Email acquisition page chrome: three complete locale dictionaries and route bindings verified.");

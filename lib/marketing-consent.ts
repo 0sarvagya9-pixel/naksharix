@@ -59,3 +59,40 @@ export const marketingPreferenceCopy = {
     labels: ["Kundli reports", "Couple Kundli aur matching", "Numerology reports", "Career reports", "Yearly horoscope reports", "Puja service ki information", "Other digital reports"]
   }
 } as const;
+
+/** Page chrome follows the website language; the email preference remains independent. */
+export const marketingPageCopy = {
+  "en": {
+    "title": "Naksharix email updates",
+    "intro": "Choose which optional report offers or service updates you want to receive. There is no charge to subscribe, and your account or purchases do not require marketing consent.",
+    "verify": "Use your verified Naksharix account to confirm that the email address belongs to you.",
+    "signIn": "Sign in to subscribe",
+    "signUp": "Create a free account",
+    "ineligible": "A verified customer account is required to subscribe. Marketing preferences do not affect your other services.",
+    "privacyBefore": "See our ",
+    "privacyLink": "Privacy Policy",
+    "privacyAfter": ". You can withdraw permission here at any time; promotional emails will also include an unsubscribe link."
+  },
+  "hi": {
+    "title": "Naksharix ईमेल अपडेट",
+    "intro": "अपनी पसंद के वैकल्पिक रिपोर्ट ऑफ़र या सेवा अपडेट चुनें। सदस्यता निःशुल्क है। खाता बनाने या खरीदारी करने के लिए मार्केटिंग की अनुमति देना आवश्यक नहीं है।",
+    "verify": "अपने ईमेल पते का स्वामित्व पुष्टि करने के लिए सत्यापित Naksharix खाते का उपयोग करें।",
+    "signIn": "सदस्यता लेने के लिए साइन इन करें",
+    "signUp": "निःशुल्क खाता बनाएँ",
+    "ineligible": "सदस्यता के लिए सत्यापित ग्राहक खाता आवश्यक है। मार्केटिंग प्राथमिकताएँ आपकी अन्य सेवाओं को प्रभावित नहीं करतीं।",
+    "privacyBefore": "हमारी ",
+    "privacyLink": "गोपनीयता नीति",
+    "privacyAfter": " देखें। आप यहाँ किसी भी समय अनुमति वापस ले सकते हैं; प्रचार संबंधी ईमेल में सदस्यता रद्द करने का लिंक भी होगा।"
+  },
+  "hinglish": {
+    "title": "Naksharix email updates",
+    "intro": "Apni pasand ke optional report offers ya service updates select karein. Subscription free hai. Account banane ya purchase karne ke liye marketing permission zaroori nahi hai.",
+    "verify": "Apne email address ka ownership confirm karne ke liye verified Naksharix account use karein.",
+    "signIn": "Subscribe karne ke liye sign in karein",
+    "signUp": "Free account banayein",
+    "ineligible": "Subscribe karne ke liye verified customer account zaroori hai. Marketing preferences aapki doosri services ko affect nahi karti hain.",
+    "privacyBefore": "Hamari ",
+    "privacyLink": "Privacy Policy",
+    "privacyAfter": " dekhein. Aap yahan kabhi bhi permission wapas le sakte hain; promotional emails mein unsubscribe link bhi hoga."
+  }
+} as const;
