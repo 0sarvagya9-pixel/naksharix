@@ -1088,6 +1088,52 @@ try {
     console.log("REPORT_ENTITLEMENT_HTTP=PASS;ORPHAN_REFUNDED_WRONG_PRODUCT_RECEIPT_AND_CORRUPT_CHECKSUM_DENIED");
   });
 
+  await check("manual delivery preserves specialist inputs and generates the selected couple report",async()=>{
+    // Entirely synthetic local purchase fixture; never calls Razorpay or email.
+    assert.notEqual(process.env.AUTO_REPORT_DELIVERY_ENABLED,"true");
+    const payment=await prisma.payment.create({data:{userId,provider:"RAZORPAY",purpose:"MATCH_REPORT",status:"PAID",amount:699,currency:"INR",providerOrderId:"order_QAcouple"+unique.replace(/[^a-zA-Z0-9]/g,""),providerPaymentId:"pay_QAcouple"+unique.replace(/[^a-zA-Z0-9]/g,""),metadata:{reportId:"marriage-report"}}});
+    let requestId;
+    try{
+      const partner={name:"Synthetic Partner",gender:"male",dateOfBirth:"1991-11-23",timeOfBirth:"17:20",birthPlace:"Mumbai, India",latitude:19.076,longitude:72.8777,timezone:5.5};
+      const details={orderId:payment.id,planType:"PREMIUM",reportSlug:"couple-kundli",deliveryEmail:email,fullName:"Synthetic Primary",gender:"female",dateOfBirth:"1992-05-18",timeOfBirth:"08:15",birthPlace:"Delhi, India",latitude:28.6139,longitude:77.209,timezone:5.5,concern:"Synthetic relationship discussion only.",language:"en",automaticDetails:{confirmed:true,partner,partnerPermission:true}};
+      const denied=await post("/api/report-requests",{...details,automaticDetails:{confirmed:true,partner,partnerPermission:false}},userCookie);
+      assert.equal(denied.status,422,"Missing partner consent must not create a reviewed order");
+      assert.equal(await prisma.reportRequest.count({where:{paymentId:payment.id}}),0);
+      const created=await post("/api/report-requests",details,userCookie);
+      const result=await created.json();assert.equal(created.status,200,JSON.stringify(result).slice(0,400));
+      assert.equal(result.data.automaticQueued,false,"Manual delivery must not be activated by specialist input");
+      requestId=result.data.reportRequest.id;
+      const stored=await prisma.reportRequest.findUniqueOrThrow({where:{id:requestId}});
+      assert.equal(stored.deliveryStatus,"not_ready");
+      const envelope=JSON.parse(stored.concern);
+      assert.equal(envelope.extra.partner.name,partner.name);
+      assert.equal(envelope.extra.partnerPermission,true);
+      const replay=await post("/api/report-requests",details,userCookie);
+      assert.equal(replay.status,200);
+      assert.equal((await replay.json()).data.reportRequest.id,requestId);
+      const endpoint="/api/admin/report-requests";
+      const reviewNote="Reviewed both synthetic subjects, permission and the selected matching-report limitations in isolated QA.";
+      assert.equal((await post(endpoint,{id:requestId,status:"IN_PROGRESS",adminNotes:reviewNote},adminCookie,"PATCH")).status,200);
+      assert.equal((await post(endpoint,{id:requestId,status:"READY_FOR_GENERATION",adminNotes:reviewNote,reviewConfirmed:true},adminCookie,"PATCH")).status,200);
+      const generated=await post("/api/admin/report-requests/"+requestId+"/generate-pdf",{},adminCookie);
+      assert.equal(generated.status,200,await generated.text());
+      const response=await req("/api/report-requests/"+requestId+"/download",{headers:{cookie:userCookie}});
+      assert.equal(response.status,200);
+      const {PDFDocument}=await import("pdf-lib");
+      const pdf=await PDFDocument.load(await response.arrayBuffer());
+      assert.match(pdf.getTitle(),/Couple Kundli/);
+      assert.ok(pdf.getPageCount()>=4);
+      assert.equal((await req("/api/report-requests/"+requestId+"/download",{headers:{cookie:astroCookie}})).status,403);
+      console.log("MANUAL_SPECIALTY_REPORT_HTTP=PASS;VALIDATED_PARTNER_CONSENT;PERSISTED_SPECIALIST_INPUT;REVIEWED_MATCHING_PDF;OWNER_ONLY;AUTOMATION_DISABLED");
+    }finally{
+      if(requestId){
+        await prisma.auditLog.deleteMany({where:{targetId:requestId}});
+        await prisma.reportRequest.delete({where:{id:requestId}});
+      }
+      await prisma.payment.delete({where:{id:payment.id}});
+    }
+  });
+
 } finally {
   try {
     if (adminId) await prisma.adminActionLog.deleteMany({ where: { adminId } });

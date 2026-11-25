@@ -21,7 +21,8 @@ export async function POST(request:NextRequest){
   if(body.deliveryEmail.toLowerCase()!==user.email.toLowerCase())return fail("Delivery email must match your account.",403);
   const checkout=getManualReportCheckout(body.reportSlug);
   if(!checkout)return fail("Unknown fixed-price report.",422);
-  if(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&getActiveAstrologyProviderName()!=="own_engine")return fail("Report calculation is temporarily unavailable. No payment is required.",503);
+  // Both reviewed and automatic specialty reports need the qualified engine.
+  if(getActiveAstrologyProviderName()!=="own_engine")return fail("Report calculation is temporarily unavailable. No payment is required.",503);
   const checked=checkAutomaticInputs(body.reportSlug,body.birth,body.automaticDetails);
   if(!checked.ok)return fail(checked.reason,422);
   // The server only validates the submitted details and signs a short-lived

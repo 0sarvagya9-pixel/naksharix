@@ -40,7 +40,8 @@ try{
   assert.deepEqual(Buffer.from(await loadReportPdf(args(b))),second);
   const replay=await saveReportPdf({...base,bytes:first});
   assert.equal(replay.storageKey,a.storageKey);
-  const key=[...objects.keys()].find(k=>k.includes(a.storageKey));
+  const host=driver==="r2"?"qa.r2.cloudflarestorage.com":"fixture.s3.us-east-1.amazonaws.com";
+  const key=[...objects.keys()].find(k=>new URL(k).hostname===host&&k.includes(a.storageKey));
   assert.ok(key);objects.set(key,new Uint8Array(second));
   await assert.rejects(()=>saveReportPdf({...base,bytes:first}),/integrity/);
   await assert.rejects(()=>loadReportPdf(args(a)),/checksum/);
