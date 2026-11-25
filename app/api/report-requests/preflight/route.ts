@@ -4,12 +4,12 @@ import {env} from "@/lib/env";
 import {getCurrentUser} from "@/lib/auth/jwt";
 import {canBypassPayment} from "@/lib/auth/permissions";
 import {getManualReportCheckout} from "@/lib/reports/checkout-catalogue";
-import {checkAutomaticInputs} from "@/lib/reports/automatic-report-input";
+import {checkNewReportInputs} from "@/lib/reports/automatic-report-input";
 import {getActiveAstrologyProviderName} from "@/lib/astrology/provider";
 import {issueReportPreflight} from "@/lib/reports/preflight-contract";
 import {getRequestIp,sharedRateLimitResponse as rateLimitResponse} from "@/lib/security/rate-limit";
 import {fail,ok,validateJson,handleApiError} from "@/lib/api";
-const schema=z.object({reportSlug:z.string().min(1).max(100),deliveryEmail:z.string().email(),birth:z.unknown(),automaticDetails:z.unknown(),concern:z.string().trim().min(1).max(2000)});
+const schema=z.object({reportSlug:z.string().min(1).max(100),deliveryEmail:z.string().email(),birth:z.unknown(),automaticDetails:z.unknown(),concern:z.string().trim().min(1).max(2000)}).strict();
 export async function POST(request:NextRequest){
  try{
   const user=await getCurrentUser();
@@ -23,12 +23,12 @@ export async function POST(request:NextRequest){
   if(!checkout)return fail("Unknown fixed-price report.",422);
   // Both reviewed and automatic specialty reports need the qualified engine.
   if(getActiveAstrologyProviderName()!=="own_engine")return fail("Report calculation is temporarily unavailable. No payment is required.",503);
-  const checked=checkAutomaticInputs(body.reportSlug,body.birth,body.automaticDetails);
+  const checked=checkNewReportInputs(body.reportSlug,body.birth,body.automaticDetails);
   if(!checked.ok)return fail(checked.reason,422);
   // The server only validates the submitted details and signs a short-lived
   // eligibility claim. No birth data, concern or email is placed in the token
   // or payment metadata, and no draft is written to the database.
   const token=issueReportPreflight({userId:user.id,reportId:checkout.reportId,purpose:checkout.purpose,amountPaise:Math.round(checkout.amount*100)},env.JWT_SECRET);
   return ok({token,reportId:checkout.reportId,price:checkout.price,expiresInSeconds:1200});
- }catch(error){return handleApiError(error);}
+ }catch(error){if(error instanceof SyntaxError)return fail("Validation failed",422);return handleApiError(error);}
 }

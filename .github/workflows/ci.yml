@@ -141,6 +141,8 @@ jobs:
           node -e 'const u = new URL(process.env.DATABASE_URL || ""); if (process.env.CI !== "true" || u.hostname !== "localhost" || u.port !== "5432" || u.pathname !== "/naksharix") { process.exit(1); }'
           npx prisma db push --skip-generate
           node scripts/qa-align-disposable-feature-schema.mjs
+      - name: Qualify preflight admission for all fifteen priced reports and private-input boundaries
+        run: node scripts/qa-report-preflight-runtime.mjs
       - name: Exercise paid-report worker with disposable database and isolated email transport
         run: node scripts/qa-automatic-report-delivery.mjs --database
       - name: Qualify six digital products and course entitlements with disposable PostgreSQL

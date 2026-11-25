@@ -54,7 +54,8 @@ export const reportRequestCopy = {
     "invalidSpellings": "Provide Roman-letter spellings for name numerology.",
     "signIn": "Your session may have expired. Sign in again. Check Payment History before paying.",
     "busy": "Too many requests. Please wait before retrying.",
-    "unavailable": "Report calculation is temporarily unavailable. No payment is required."
+    "unavailable": "Report calculation is temporarily unavailable. No payment is required.",
+    "invalidExtra": "Remove extra personal details that are not required for this report."
   },
   "hi": {
     "preparing": "भुगतान से पहले आवश्यक विवरण भरें। आपकी जानकारी भुगतान के मेटाडेटा में शामिल नहीं होगी।",
@@ -110,7 +111,8 @@ export const reportRequestCopy = {
     "invalidSpellings": "नाम अंकशास्त्र के लिए रोमन अक्षरों में वर्तनी लिखें।",
     "signIn": "आपका सत्र समाप्त हो सकता है। फिर साइन इन करें। भुगतान से पहले भुगतान इतिहास देखें।",
     "busy": "बहुत अधिक अनुरोध हुए हैं। फिर कोशिश करने से पहले प्रतीक्षा करें।",
-    "unavailable": "रिपोर्ट गणना अस्थायी रूप से उपलब्ध नहीं है। कोई भुगतान आवश्यक नहीं है।"
+    "unavailable": "रिपोर्ट गणना अस्थायी रूप से उपलब्ध नहीं है। कोई भुगतान आवश्यक नहीं है।",
+    "invalidExtra": "इस रिपोर्ट के लिए आवश्यक न होने वाले अतिरिक्त निजी विवरण हटाएँ।"
   },
   "hinglish": {
     "preparing": "Payment se pehle zaroori details bharein. Aapki jaankari payment metadata mein nahi jodee jayegi.",
@@ -166,13 +168,14 @@ export const reportRequestCopy = {
     "invalidSpellings": "Name numerology ke liye Roman-letter spellings dein.",
     "signIn": "Session expire ho sakta hai. Dobara sign in karein. Pay karne se pehle Payment History dekhein.",
     "busy": "Bahut zyada requests hui hain. Dobara try karne se pehle thoda rukhein.",
-    "unavailable": "Report calculation abhi unavailable hai. Koi payment zaroori nahi."
+    "unavailable": "Report calculation abhi unavailable hai. Koi payment zaroori nahi.",
+    "invalidExtra": "Is report ke liye zaroori na hone wali extra personal details hata dein."
   }
 } as const;
 export type ReportRequestLocale=keyof typeof reportRequestCopy;
 export type ReportRequestCopyKey=keyof typeof reportRequestCopy.en;
 export type ReportRequestStage="preflight"|"paid"|"manual";
-const validationKeys=["invalidCatalogue","invalidBirth","invalidPartner","invalidRoman","invalidAlternative","invalidSpellings"] as const;
+const validationKeys=["invalidCatalogue","invalidBirth","invalidPartner","invalidRoman","invalidAlternative","invalidSpellings","invalidExtra"] as const;
 export function reportRequestErrorKey(error:unknown,stage:ReportRequestStage,status?:number):ReportRequestCopyKey {
   // Only known public validation messages may cross this presentation boundary.
   const key=validationKeys.find(k=>reportRequestCopy.en[k]===error);

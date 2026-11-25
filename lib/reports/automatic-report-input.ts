@@ -60,6 +60,21 @@ export function checkAutomaticInputs(slug:string,birth:unknown,extra:unknown) {
     return {ok:false as const,reason:"Provide Roman-letter spellings for name numerology."};
   return {ok:true as const,birth:b.data,extra:e.data};
 }
+// New intake must not collect unrelated birth/name data. Keep the existing
+// renderer validator compatible with historical saved report envelopes.
+export function checkNewReportInputs(slug:string,birth:unknown,extra:unknown) {
+  const checked=checkAutomaticInputs(slug,birth,extra);
+  if(!checked.ok)return checked;
+  const details=checked.extra;
+  const allowedPartner=slug==="couple-kundli";
+  const allowedRoman=slug==="numerology-lo-shu-report"||slug==="name-correction-report";
+  const allowedCandidates=slug==="baby-name-report"||slug==="name-correction-report";
+  if((!allowedPartner&&(details.partner!==undefined||details.partnerPermission!==undefined))||
+     (!allowedRoman&&details.romanName!==undefined)||
+     (!allowedCandidates&&details.candidateNames!==undefined))
+    return {ok:false as const,reason:"Remove extra personal details that are not required for this report."};
+  return checked;
+}
 export function autoReportDeliveryMessage(language:string) {
   return language==="hi"?"पूरी और सही जन्म जानकारी जमा करने के बाद आपकी रिपोर्ट तैयार करके पंजीकृत ईमेल पर भेजी जाएगी। अनुमानित समय: 24 घंटे के भीतर।":
     language==="hinglish"?"Complete aur correct birth details submit karne ke baad report aapke registered email par bheji jayegi. Estimated delivery: 24 hours ke andar.":

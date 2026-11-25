@@ -3,7 +3,7 @@
 import { cloneElement,useEffect,useId,useRef,useState,type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2,Mail,X } from "lucide-react";
-import { autoReportDeliveryMessage,checkAutomaticInputs } from "@/lib/reports/automatic-report-input";
+import { autoReportDeliveryMessage,checkNewReportInputs } from "@/lib/reports/automatic-report-input";
 import {reportRequestCopy,reportRequestErrorKey,type ReportRequestCopyKey} from "@/lib/reports/report-request-copy";
 import { siteNotice } from "@/lib/ui/site-notification";
 import { Button } from "@/components/ui/button";
@@ -116,10 +116,10 @@ export function ReportRequestForm({
   }
 
   async function savePaidDetails(details:Record<string,unknown>,verifiedOrderId?:string){
-    const response=await secureFetch("/api/report-requests",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...details,...(verifiedOrderId?{orderId:verifiedOrderId}:{})})});
+    const response=await secureFetch("/api/report-requests",{silent:true,method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...details,...(verifiedOrderId?{orderId:verifiedOrderId}:{})})});
     const json=await response.json().catch(()=>null);
     if(!response.ok||!json?.data?.reportRequest?.id){setStatus(reportRequestErrorKey(json?.error,verifiedOrderId||paymentVerified?"paid":"manual",response.status));return false;}
-    if(json.data.automaticQueued)siteNotice.success(autoReportDeliveryMessage(apiLocale),copy.received);
+    siteNotice.success(json.data.automaticQueued?autoReportDeliveryMessage(apiLocale):copy.received,copy.received);
     router.push(`/report-request/success?id=${encodeURIComponent(json.data.reportRequest.id)}`);
     return true;
   }
@@ -137,7 +137,7 @@ export function ReportRequestForm({
     const timezone=needsSpecialistDetails?(offsetValue.trim()===""?undefined:Number(offsetValue)):location?.timezoneOffset;
     const birth={name:fullName,gender,dateOfBirth:actualDate,timeOfBirth:actualTime,birthPlace:location?.displayName??actualPlace,latitude:location?.latitude,longitude:location?.longitude,timezone};
     const automaticDetails=needsSpecialistDetails?autoDetails(fields,form):undefined;
-    if(needsSpecialistDetails){const checked=checkAutomaticInputs(reportSlug,birth,automaticDetails);if(!checked.ok){setStatus(reportRequestErrorKey(checked.reason,preflight?"preflight":paymentVerified?"paid":"manual"));return;}}
+    if(needsSpecialistDetails){const checked=checkNewReportInputs(reportSlug,birth,automaticDetails);if(!checked.ok){setStatus(reportRequestErrorKey(checked.reason,preflight?"preflight":paymentVerified?"paid":"manual"));return;}}
     const preferred=reportField(fields,"reportLanguage");
     const selectedLanguage=preferred==="en"||preferred==="hi"||preferred==="hinglish"?preferred:language;
     const details={orderId,planType:plan,reportSlug,adminBypass,deliveryEmail:userEmail,fullName,gender,dateOfBirth:actualDate,timeOfBirth:actualTime,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,phone:reportField(fields,"reportPhone"),concern,questionOrConcern:concern,language:selectedLanguage,automaticDetails};
@@ -145,7 +145,7 @@ export function ReportRequestForm({
     setLoading(true);
     try{
       if(preflight){
-        const response=await secureFetch("/api/report-requests/preflight",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reportSlug,deliveryEmail:userEmail,birth,automaticDetails,concern})});
+        const response=await secureFetch("/api/report-requests/preflight",{silent:true,method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reportSlug,deliveryEmail:userEmail,birth,automaticDetails,concern})});
         const json=await response.json().catch(()=>null);
         if(!response.ok||typeof json?.data?.token!=="string"||json.data.reportId!==preflight.reportId||json.data.price!==preflight.price||json.data.expiresInSeconds!==1200){setStatus(reportRequestErrorKey(json?.error,"preflight",response.status));return;}
         setPrepared({token:json.data.token,details});return;

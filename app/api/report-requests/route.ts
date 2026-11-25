@@ -1,6 +1,6 @@
 import { NextRequest, after } from "next/server";
 import { env } from "@/lib/env";
-import { automaticExtraSchema,checkAutomaticInputs,encodeAutomaticReportInput } from "@/lib/reports/automatic-report-input";
+import { automaticExtraSchema,checkNewReportInputs,encodeAutomaticReportInput } from "@/lib/reports/automatic-report-input";
 import { processAutomaticReport } from "@/lib/reports/automatic-report-worker";
 
 export const runtime="nodejs";
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     // operator-reviewed instead of automatic. Older clients without this
     // envelope remain review-only; the renderer must not invent missing data.
     if(automatic||Boolean(checkout&&body.automaticDetails)){
-      const checked=checkAutomaticInputs(report.slug,{name:body.fullName,gender:body.gender,dateOfBirth:body.dateOfBirth,timeOfBirth:body.timeOfBirth,birthPlace:body.birthPlace,latitude:body.latitude,longitude:body.longitude,timezone:body.timezone},body.automaticDetails);
+      const checked=checkNewReportInputs(report.slug,{name:body.fullName,gender:body.gender,dateOfBirth:body.dateOfBirth,timeOfBirth:body.timeOfBirth,birthPlace:body.birthPlace,latitude:body.latitude,longitude:body.longitude,timezone:body.timezone},body.automaticDetails);
       if(!checked.ok)return fail(checked.reason,422);
       if(question.length>2000)return fail("Please limit the main question to 2,000 characters.",422);
       concern=encodeAutomaticReportInput(question,checked.extra);
