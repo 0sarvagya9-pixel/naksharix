@@ -281,6 +281,14 @@ if(!dbMode){
  assert.equal(input.checkAutomaticInputs("couple-kundli",birth,{confirmed:true}).ok,false);
  assert.equal(input.checkAutomaticInputs("name-correction-report",birth,{confirmed:true}).ok,false);
  assert.equal(input.checkAutomaticInputs("premium-kundli",{...birth,timezone:99},extra).ok,false);
+ const {isFullRomanNumerologyName}=require("@/lib/reports/roman-name");
+ for(const valid of ["Asha Test","Anne-Marie","O’Neil","A. Kumar"])assert.equal(isFullRomanNumerologyName(valid),true);
+ for(const invalid of ["आशा Test","José","Asha 123","李 Asha","",null,123])assert.equal(isFullRomanNumerologyName(invalid),false);
+ for(const invalid of ["आशा Test","José","Asha 123"]){
+  assert.equal(input.checkAutomaticInputs("numerology-lo-shu-report",birth,{confirmed:true,romanName:invalid}).ok,false);
+  assert.equal(input.checkAutomaticInputs("name-correction-report",birth,{confirmed:true,romanName:"Asha",candidateNames:[invalid]}).ok,false);
+  assert.equal(input.checkAutomaticInputs("baby-name-report",birth,{confirmed:true,candidateNames:[invalid]}).ok,false);
+ }
  assert.equal(input.decodeAutomaticReportInput(input.encodeAutomaticReportInput(question,extra)).question,question);
  for(const slug of input.AUTO_REPORT_SLUGS){
    assert.ok(getManualReportCheckout(slug),slug+" has a paid SKU");
@@ -319,9 +327,24 @@ if(!dbMode){
  assert.throws(()=>calculateNumerologyReport({name:"Asha Test",dateOfBirth:"1990-02-30",locale:"en"}));
  const noRoman=await assembleAutomaticPaidReport({slug:"premium-kundli",birth:{...birth,name:"आशा"},extra:{confirmed:true},question,language:"hi",now:new Date("2026-11-24T12:00:00Z")});
  const noRomanNumber=noRoman.content.sections.find(s=>s.key==="numerology").data;assert.equal(noRomanNumber.nameNumber,null);assert.ok(noRomanNumber.nameNumberUnavailableReason);
+ const mixedRoman=await assembleAutomaticPaidReport({slug:"premium-kundli",birth:{...birth,name:"आशा Test"},extra:{confirmed:true},question,language:"hi",now:new Date("2026-11-24T12:00:00Z")});
+ assert.equal(mixedRoman.content.sections.find(s=>s.key==="numerology").data.nameNumber,null);
+ assert.equal(mixedRoman.content.sections.find(s=>s.key==="editorial-depth").data.find(c=>c.key==="numerology-arithmetic").cards.length,1);
  const timing=await assembleAutomaticPaidReport({slug:"premium-kundli",birth,extra,question,language:"en",now:new Date("2026-11-24T12:00:00Z")});
  const dashaData=timing.content.sections.find(s=>s.key==="dasha").data;assert.ok(dashaData.periods.length>0&&dashaData.nextTwelveMonths.length>0);assert.ok(dashaData.nextTwelveMonths.every(p=>Date.parse(p.endsAtUtc)>Date.parse(dashaData.asOf)&&Date.parse(p.startsAtUtc)<Date.parse(dashaData.asOf)+365.2425*86400000&&Date.parse(p.endsAtUtc)>Date.parse(p.startsAtUtc)&&p.major&&p.planet));
  for(let i=1;i<dashaData.periods.length;i++)assert.equal(dashaData.periods[i-1].endsAtUtc,dashaData.periods[i].startsAtUtc,"major periods must remain contiguous");
+ let periodCases=0;
+ for(const language of ["en","hi","hinglish"])for(const [slug,key] of [["career-report","career-dasha"],["wealth-report","wealth-dasha"],["love-report","relationship-timing"],["fortune-report","fortune-dasha"],["yearly-horoscope-report","yearly-dasha"]]){
+  const assembled=await assembleAutomaticPaidReport({slug,birth,extra,question,language,now:new Date("2026-11-24T12:00:00Z")});
+  const periods=assembled.content.sections.find(s=>s.key===key).data.nextTwelveMonths;
+  const exact=p=>[p.major,p.planet,p.startsAtUtc,p.endsAtUtc];
+  assert.deepEqual(periods.map(exact),dashaData.nextTwelveMonths.map(exact),slug+" exact cross-report periods");
+  const cards=assembled.content.sections.find(s=>s.key==="editorial-depth").data.find(c=>c.key==="period-lord-context").cards;
+  assert.equal(cards.length,periods.length);
+  for(let i=0;i<periods.length;i++)assert.ok(cards[i].label.includes(periods[i].startsAtUtc)&&cards[i].label.includes(periods[i].endsAtUtc));
+  periodCases++;
+ }
+ console.log("P0_SPECIALTY_PERIOD_AND_NAME_CONTRACT_PASS",JSON.stringify({periodCases,nameCases:22,scientificPrediction:false}));
  console.log("REPORT_TIMING_AND_NAME_EVIDENCE_PASS; NON_ROMAN_NO_INVENTED_NAME_NUMBER; EXACT_UPCOMING_SUBPERIODS; MAJOR_BOUNDARIES");
  assert.equal(pairs,15);assert.equal(measurements.length,45);
  console.log("REPORT_DEPTH_QUALIFICATION_PASS "+JSON.stringify({depthChecks,personalizationPairs:pairs,timezoneCases:4,measurements,scope:"synthetic generation measurements; not live cost or expert review"}));

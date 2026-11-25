@@ -2,6 +2,7 @@ import "server-only";
 import {calculateVimshottariDasha,resolveDashaBirthInstant} from "@/lib/astrology/core-calculations";
 import { buildEditorialInsights,editorialHouse } from "@/lib/reports/editorial-insights";
 import {buildReportDepth} from "@/lib/reports/editorial-depth";
+import {isFullRomanNumerologyName} from "@/lib/reports/roman-name";
 import { getAstrologyProvider,getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 import { calculateInternalTransitSnapshot } from "@/lib/astrology/transit/engine";
 import { buildPremiumCompatibilityReport } from "@/lib/matching/kundli-matching";
@@ -85,7 +86,7 @@ export async function assembleAutomaticPaidReport(input:{
   const dasha={asOf:now.toISOString(),method:exactDasha.method,currentMajor:exactDasha.currentMahadasha,currentSubPeriod:exactDasha.currentAntardasha,birthBalanceYears:exactDasha.birthBalanceYears,periods:exactDasha.mahadashas.map(p=>({planet:p.planet,startsAt:p.startsAt,endsAt:p.endsAt,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc,durationYears:p.durationYears})),nextTwelveMonths:exactDasha.mahadashas.flatMap(m=>m.antardashas??[]).filter(p=>Date.parse(p.endsAtUtc??p.endsAt)>now.getTime()&&Date.parse(p.startsAtUtc??p.startsAt)<now.getTime()+365.2425*86400000).map(p=>({major:p.parentPlanet,planet:p.planet,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc,startsAt:p.startsAt,endsAt:p.endsAt}))};
   const suppliedRoman=checked.extra.romanName||birth.name;
   // A non-Roman-only name does not establish a Pythagorean name number.
-  const nameNumberAvailable=/[A-Za-z]/.test(suppliedRoman);
+  const nameNumberAvailable=isFullRomanNumerologyName(suppliedRoman);
   const num=calculateNumerologyReport({name:suppliedRoman,dateOfBirth:birth.dateOfBirth,gender:birth.gender,locale:l});
   const transitInput={latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,place:birth.birthPlace,ayanamsa:"lahiri" as const};
   const snapshot=(on:string,names?:string[])=>{
@@ -107,7 +108,7 @@ export async function assembleAutomaticPaidReport(input:{
       section("dasha",["Vimshottari Dasha","विंशोत्तरी दशा","Vimshottari Dasha"],dasha);
       section("panchang",["Birth Panchang","जन्म पंचांग","Birth Panchang"],chart.panchang);
       section("yoga-dosha",["Traditional yoga and dosha indicators","पारंपरिक योग और दोष संकेत","Traditional yoga aur dosha"],{yoga:chart.yogaAnalysis,dosha:chart.doshaAnalysis},["Rule-based indicators, not guarantees or diagnoses."]);
-      section("numerology",["Birth number and Lo Shu","मूलांक और लो शू","Moolank aur Lo Shu"],{birthNumber:num.moolank,lifePath:num.lifePath,nameNumber:nameNumberAvailable?num.nameNumber:null,nameNumberUnavailableReason:nameNumberAvailable?null:tr(l,["No Roman-letter spelling was supplied; a name number is not calculated.","रोमन अक्षरों में नाम नहीं दिया गया; नामांक की गणना नहीं की गई है।","Roman-letter spelling nahi di gayi; name number calculate nahi hua."]),grid:num.loShuGrid});
+      section("numerology",["Birth number and Lo Shu","मूलांक और लो शू","Moolank aur Lo Shu"],{birthNumber:num.moolank,lifePath:num.lifePath,nameNumber:nameNumberAvailable?num.nameNumber:null,nameNumberUnavailableReason:nameNumberAvailable?null:tr(l,["A complete A–Z name spelling was not supplied; a name number is not calculated.","A–Z अक्षरों में पूरा नाम नहीं दिया गया; नामांक की गणना नहीं की गई है।","A–Z mein poori spelling nahi di gayi; name number calculate nahi hua."]),grid:num.loShuGrid});
       break;
     case "couple-kundli":{
       if(!checked.extra.partner)throw new Error("REPORT_PARTNER_MISSING");
@@ -123,19 +124,19 @@ export async function assembleAutomaticPaidReport(input:{
     case "career-report":
       section("career-houses",["Career, skill and work houses","करियर, कौशल और कार्य भाव","Career, skill aur work houses"],houseReview([2,3,6,10,11]));
       section("career-planets",["Professional indicators","व्यावसायिक ग्रह संकेत","Professional indicators"],selected(["Sun","Mercury","Saturn","Jupiter","Mars"]));
-      section("career-dasha",["Current work timing framework","वर्तमान कार्य समय का संदर्भ","Current work timing framework"],{major:dasha.currentMajor,sub:dasha.currentSubPeriod});
+      section("career-dasha",["Current work timing framework","वर्तमान कार्य समय का संदर्भ","Current work timing framework"],{major:dasha.currentMajor,sub:dasha.currentSubPeriod,asOf:dasha.asOf,nextTwelveMonths:dasha.nextTwelveMonths});
       reflection("career-plan",["90-day practical career plan","90 दिन की व्यावहारिक करियर योजना","90-day practical career plan"],[["Days 1–30: Choose one role-relevant skill, establish a baseline and set a measurable weekly learning target.","दिन 1–30: भूमिका से जुड़ा एक कौशल चुनें, शुरुआती स्तर दर्ज करें और साप्ताहिक लक्ष्य तय करें।","Din 1–30: Role se related ek skill chunein, baseline note karein aur weekly target set karein."],["Days 31–60: Complete a practical project, update your portfolio and seek specific feedback.","दिन 31–60: एक व्यावहारिक प्रोजेक्ट पूरा करें, पोर्टफोलियो सुधारें और स्पष्ट प्रतिक्रिया लें।","Din 31–60: Practical project complete karein, portfolio update karein aur specific feedback lein."],["Days 61–90: Compare results against your baseline, track real opportunities and revise the plan before a job change.","दिन 61–90: शुरुआती स्तर से प्रगति की तुलना करें, वास्तविक अवसर देखें और नौकरी बदलने से पहले योजना सुधारें।","Din 61–90: Baseline se progress compare karein, real opportunities track karein aur job change se pehle plan revise karein."]]);
       break;
     case "wealth-report":
       section("wealth-houses",["Income, resources and expenditure houses","आय, संसाधन और व्यय भाव","Income, resources aur expenditure houses"],houseReview([2,5,8,9,11,12]));
       section("wealth-planets",["Money-related traditional indicators","धन से जुड़े पारंपरिक संकेत","Money-related traditional indicators"],selected(["Jupiter","Venus","Mercury","Saturn"]));
-      section("wealth-dasha",["Current Dasha context","वर्तमान दशा संदर्भ","Current Dasha context"],{major:dasha.currentMajor,sub:dasha.currentSubPeriod});
+      section("wealth-dasha",["Current Dasha context","वर्तमान दशा संदर्भ","Current Dasha context"],{major:dasha.currentMajor,sub:dasha.currentSubPeriod,asOf:dasha.asOf,nextTwelveMonths:dasha.nextTwelveMonths});
       reflection("money-plan",["Financial reflection checklist","वित्तीय आत्मचिंतन सूची","Financial reflection checklist"],[["Track essential expenses and review your emergency reserve before discretionary spending.","जरूरी खर्च लिखें और आपातकालीन बचत की समीक्षा करें।","Essential expenses track karein aur emergency savings review karein."],["Do not make investment, borrowing or trading decisions from this chart; use qualified advice and actual financial data.","कुंडली के आधार पर निवेश, ऋण या ट्रेडिंग न करें; वास्तविक वित्तीय जानकारी और योग्य सलाह लें।","Chart ke basis par investment, loan ya trading na karein; real financial data aur qualified advice use karein."]]);
       break;
     case "love-report":
       section("relationship-houses",["Relationship and emotional context","संबंध और भावनात्मक संदर्भ","Relationship aur emotional context"],houseReview([4,5,7,8,11]));
       section("relationship-planets",["Moon, Venus and Mars","चंद्र, शुक्र और मंगल","Moon, Venus aur Mars"],selected(["Moon","Venus","Mars","Jupiter"]));
-      section("relationship-timing",["Dasha context for reflection","आत्मचिंतन के लिए दशा संदर्भ","Reflection ke liye Dasha context"],{major:dasha.currentMajor,sub:dasha.currentSubPeriod});
+      section("relationship-timing",["Dasha context for reflection","आत्मचिंतन के लिए दशा संदर्भ","Reflection ke liye Dasha context"],{major:dasha.currentMajor,sub:dasha.currentSubPeriod,asOf:dasha.asOf,nextTwelveMonths:dasha.nextTwelveMonths});
       reflection("relationship-plan",["Communication and shared values","संवाद और साझा मूल्य","Communication aur shared values"],[["Discuss expectations, boundaries and how each person wants to receive support.","अपेक्षाओं, सीमाओं और सहयोग के तरीके पर खुलकर चर्चा करें।","Expectations, boundaries aur support ke tareeke par khulkar baat karein."],["Judge compatibility by consent, safety, behavior and mutual respect; this one-person report cannot assess another person's feelings.","सहमति, सुरक्षा, व्यवहार और सम्मान को प्राथमिकता दें; यह रिपोर्ट दूसरे व्यक्ति की भावनाएँ नहीं बता सकती।","Consent, safety, behavior aur respect ko priority dein; yeh report kisi aur ke feelings nahi bata sakti."]]);
       break;
     case "baby-name-report":{
@@ -201,7 +202,7 @@ export async function assembleAutomaticPaidReport(input:{
     case "fortune-report":
       section("fortune-houses",["Traditional fortune and opportunity houses","पारंपरिक भाग्य और अवसर भाव","Traditional fortune aur opportunity houses"],houseReview([1,5,9,10,11]));
       section("fortune-planets",["Sun, Jupiter, Saturn and Moon","सूर्य, गुरु, शनि और चंद्र","Sun, Jupiter, Saturn aur Moon"],selected(["Sun","Jupiter","Saturn","Moon"]));
-      section("fortune-dasha",["Current Dasha and life-path context","वर्तमान दशा और जीवन पथ संदर्भ","Current Dasha aur life-path context"],{major:dasha.currentMajor,sub:dasha.currentSubPeriod,birthNumber:num.moolank,lifePath:num.lifePath});
+      section("fortune-dasha",["Current Dasha and life-path context","वर्तमान दशा और जीवन पथ संदर्भ","Current Dasha aur life-path context"],{major:dasha.currentMajor,sub:dasha.currentSubPeriod,asOf:dasha.asOf,nextTwelveMonths:dasha.nextTwelveMonths,birthNumber:num.moolank,lifePath:num.lifePath});
       reflection("fortune-plan",["Build opportunities through action","प्रयास से अवसर बनाएँ","Action se opportunities build karein"],[["Set one achievable goal, ask for feedback and review progress weekly. No lucky outcome, lottery or financial gain can be guaranteed.","एक संभव लक्ष्य तय करें, प्रतिक्रिया लें और साप्ताहिक प्रगति देखें। किसी भाग्य, लॉटरी या लाभ की गारंटी नहीं।","Ek achievable goal set karein, feedback lein aur weekly progress review karein. Koi lottery ya financial gain guaranteed nahi."]]);
       break;
     default:throw new Error("REPORT_UNKNOWN");
