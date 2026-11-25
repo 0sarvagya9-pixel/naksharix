@@ -36,6 +36,8 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     siteNotice.error(copy[key], copy.errorTitle);
   }
   const [passwordVisible,setPasswordVisible]=useState(false);
+  const [hydrated,setHydrated]=useState(false);
+  useEffect(()=>setHydrated(true),[]);
   const submission=useRef(false),[busy,setBusy]=useState(false);
   const [roleIntent, setRoleIntent] = useState<RoleIntent>(loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER");
   const [professionalRole, setProfessionalRole] = useState<"ASTROLOGER" | "CONSULTANT">(loginMode === "CONSULTANT" ? "CONSULTANT" : "ASTROLOGER");
@@ -211,7 +213,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
           </div>
         </>
       ) : null}
-      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-4" noValidate aria-busy={busy}><fieldset className="space-y-4 min-w-0" disabled={busy}>
+      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-4" noValidate aria-busy={busy||!hydrated}><fieldset className="space-y-4 min-w-0" disabled={busy||!hydrated}>
         {mode === "signup" ? (
           <div className="space-y-2">
             <Label htmlFor="name">{tr("name")}</Label>
@@ -230,7 +232,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         <div className="space-y-2">
           <Label htmlFor="password">{tr("password")}</Label>
           <Input id="password" data-field="password" type={passwordVisible?"text":"password"} autoComplete={mode==="signup"?"new-password":"current-password"} className={errorClass(Boolean(fieldError("password")))} {...form.register("password", { onChange: () => form.clearErrors("password") })} placeholder={mode === "signup" ? tr("minimumPassword") : copy.loginPlaceholder} aria-invalid={Boolean(fieldError("password"))} aria-describedby={fieldError("password")?"auth-password-error":undefined} />
-          <button type="button" aria-controls="password" aria-pressed={passwordVisible} className="text-sm font-medium underline" onClick={()=>setPasswordVisible(v=>!v)}>{passwordVisible?(apiLocale==="hi"?"पासवर्ड छिपाएँ":apiLocale==="hinglish"?"Password hide karein":"Hide password"):(apiLocale==="hi"?"पासवर्ड दिखाएँ":apiLocale==="hinglish"?"Password dikhayein":"Show password")}</button>
+          <button type="button" aria-controls="password" aria-pressed={passwordVisible} className="min-h-10 text-sm font-medium underline" disabled={!hydrated||busy} onClick={()=>setPasswordVisible(v=>!v)}>{passwordVisible?(apiLocale==="hi"?"पासवर्ड छिपाएँ":apiLocale==="hinglish"?"Password hide karein":"Hide password"):(apiLocale==="hi"?"पासवर्ड दिखाएँ":apiLocale==="hinglish"?"Password dikhayein":"Show password")}</button>
           {fieldError("password") ? <p id="auth-password-error" role="alert" className="text-sm text-destructive">{fieldError("password")}</p> : null}
         </div>
         {mode==="login"?<Link href="/forgot-password" className="inline-block text-sm font-semibold underline">{apiLocale==="hi"?"पासवर्ड भूल गए?":apiLocale==="hinglish"?"Password bhool gaye?":"Forgot password?"}</Link>:null}

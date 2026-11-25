@@ -170,14 +170,14 @@ export function calculateNumerologyReport(input: NumerologyInput): NumerologyRep
   const name = input.name.trim();
   const digits = dateDigits(dob);
   const nameValues = nameNumerologyValues(name);
-  const birthDay = dob.getDate();
+  const birthDay = dob.getUTCDate();
   const day = new Date();
   const lifePath = reduceNumber(digits.reduce((sum, digit) => sum + digit, 0));
   const moolank = reduceNumber(birthDay);
   const destiny = reduceNumber(nameValues.total);
   const soulUrge = reduceNumber(nameValues.vowels || nameValues.total);
   const personality = reduceNumber(Math.max(1, nameValues.consonants || nameValues.total));
-  const dateText = format(dob, "yyyy-MM-dd");
+  const dateText = dob.toISOString().slice(0,10);
   const counts = loShuCounts(digits);
   const mobile = input.mobile ? reduceNumber(digitsFromString(input.mobile).reduce((sum, digit) => sum + digit, 0)) : undefined;
   const vehicle = input.vehicle ? reduceNumber(alphaNumericValue(input.vehicle)) : undefined;
@@ -225,13 +225,16 @@ function numberResult(label: string, value: number, locale: Locale, overrideMean
 }
 
 function normalizeBirthDate(value: string | Date) {
-  const date = value instanceof Date ? value : new Date(`${String(value).slice(0, 10)}T00:00:00.000Z`);
-  if (Number.isNaN(date.getTime())) throw new Error("Invalid date of birth");
+  const text=value instanceof Date?(Number.isFinite(value.getTime())?value.toISOString().slice(0,10):""):String(value).slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(text))throw new Error("Invalid date of birth");
+  const date=new Date(text+"T00:00:00.000Z");
+  if(!Number.isFinite(date.getTime())||date.toISOString().slice(0,10)!==text)throw new Error("Invalid date of birth");
   return date;
 }
 
 function dateDigits(date: Date) {
-  return format(date, "ddMMyyyy").split("").map(Number).filter((digit) => Number.isFinite(digit));
+  const iso=date.toISOString().slice(0,10);
+  return (iso.slice(8,10)+iso.slice(5,7)+iso.slice(0,4)).split("").map(Number);
 }
 
 function digitsFromString(value: string) {

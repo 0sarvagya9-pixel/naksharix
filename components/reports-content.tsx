@@ -31,7 +31,7 @@ export function ReportsContent({manualOfferings,automaticDelivery=false}:{automa
           <a href="#report-information">{surface.how}</a>
         </div>
         <details className="mt-2 rounded-xl border border-[#e7d8be] bg-white px-3 py-2 sm:px-4" id="compare-reports">
-          <summary className="min-h-10 cursor-pointer py-2 text-sm font-semibold text-[#70283d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{locale === "hi" ? "अधिकतम तीन रिपोर्ट की तुलना करें" : locale==="hinglish"?"Teen reports tak compare karein":"Compare up to three reports"}</summary>
+          <summary tabIndex={0} className="min-h-10 cursor-pointer py-2 text-sm font-semibold text-[#70283d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{locale === "hi" ? "अधिकतम तीन रिपोर्ट की तुलना करें" : locale==="hinglish"?"Teen reports tak compare karein":"Compare up to three reports"}</summary>
           <ReportComparison/>
         </details>
         <div id="report-catalogue" className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

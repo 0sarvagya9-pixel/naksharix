@@ -2,6 +2,7 @@ import "server-only";
 import { PDFDocument, StandardFonts, rgb, radians, type PDFPage,type PDFFont,type PDFImage,type RGB } from "pdf-lib";
 import type { PremiumReportContentResult } from "@/lib/reports/premium-report-content-engine";
 import type { EditorialCard,EditorialInsights } from "@/lib/reports/editorial-insights";
+import type {DepthChapter} from "@/lib/reports/editorial-depth";
 import {editorialTerm,editorialDate} from "@/lib/reports/editorial-display";
 
 type R=Record<string,unknown>;
@@ -79,7 +80,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   kicker=term(kicker);
   const headingHeight=wrap(title,CW,18,"title").length*22+43;
   if(firstSpecialist||y+headingHeight+minBody>BOTTOM){firstSpecialist=false;interior(kicker,title);return}
-  chapter=kicker;heading=title;rule(M,y+2,W-M,y+2,gold,.65);y+=14;caps(M,y,kicker, gold,8);y+=15;
+  chapter=kicker;heading=title;starts.push({title,page:pdf.getPageCount()});rule(M,y+2,W-M,y+2,gold,.65);y+=14;caps(M,y,kicker, gold,8);y+=15;
   y+=fixed(M,y,title,CW,18,"title",wine,22)+13;
  }
  function ensure(h:number){if(h>BOTTOM-160)throw Error("REPORT_EDITORIAL_BLOCK_TOO_TALL");if(y+h>BOTTOM)interior(chapter,heading,"",true)}
@@ -228,6 +229,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  caps(cx,767,"NAKSHARIX.COM",glow,8,"center");
  tx(cx,780,"Ref: "+request.requestId,7.1,"body",light,"center");
 
+ const contentsPage=pdf.addPage([W,H]);
  interior(tr("01 / YOUR PROFILE","01 / आपकी प्रोफ़ाइल"),tr("Your chart at a glance","आपकी कुंडली एक नज़र में"),tr("A clear reading of the calculated birth chart, before the detailed tables.","विस्तृत गणनाओं से पहले जन्म कुंडली का संक्षिप्त परिचय।"));
  if(profileContinuation){
   subhead(tr("Private birth details","निजी जन्म विवरण","Private janm vivaran"));
@@ -235,9 +237,9 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  }
  tiles([{label:"Lagna",value:shown(birth.ascendant)},{label:"Moon sign",value:shown(birth.moonSign)},{label:"Nakshatra",value:shown(birth.nakshatra),sub:birth.pada?term("Pada")+" "+s(birth.pada):""},{label:"Sun sign",value:shown(birth.sunSign)}]);
  cardRows([insights.overview],1,true);cardRows(insights.cards,2);
- const tocPage=page,tocY=y;let tocHeight=0;
- if(request.templateId==="premium-kundli"&&y+115<BOTTOM){subhead(tr("How to use this report","इस रिपोर्ट का उपयोग"));tocHeight=104;y+=104;}
- else {paragraph(tr("Your full report includes the specialist calculation, its traditional interpretation and a personal reflection plan.","इस रिपोर्ट में विषय की गणना, पारंपरिक व्याख्या और व्यक्तिगत चिंतन योजना है।"),9.7,muted);}
+ subhead(tr("Calculation record","गणना विवरण","Calculation record"));
+ table([tr("Parameter","विवरण"),tr("Actual input or calculation","वास्तविक विवरण या गणना")],[[tr("UTC birth instant","UTC जन्म समय"),shown(birth.utcBirthInstant)],[tr("Latitude / longitude","अक्षांश / देशांतर"),shown(birth.latitude)+" / "+shown(birth.longitude)],[tr("Birth UTC offset","जन्म का UTC अंतर"),shown(birth.utcOffsetAtBirth)],[tr("Ayanamsha","अयनांश"),shown(birth.ayanamsa)+" / "+deg(birth.ayanamsaDegree)],[tr("Ascendant longitude","लग्न देशांतर"),deg(birth.ascendantLongitude)],[tr("House and node system","भाव और नोड पद्धति"),shown(birth.houseSystem)+" / "+shown(birth.nodeMode)]],[1.4,2.6],9,25);
+ note(tr("Approximate birth times may alter house and divisional chart results. The supplied birth offset is used for the birth instant.","अनुमानित जन्म समय से भाव और वर्ग कुंडली बदल सकती है। दिए गए UTC अंतर से जन्म समय की गणना होती है।","Approximate birth time se bhav aur varga change ho sakte hain. Supplied UTC offset birth instant ke liye use hota hai."));
  const slug=request.templateId;
  if(slug==="premium-kundli"){
   const h=obj(data("houses")),d1=records(h.lagna),d9=records(h.navamsa);
@@ -251,7 +253,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   // Each specialist uses a semantic renderer, never a raw recursive JSON dump.
   for(const sec of content.sections){
    const k=sec.key,v=sec.data,r=obj(v);
-   if(["birth","editorial-insights","your-question","trust"].includes(k))continue;
+   if(["birth","editorial-depth","editorial-insights","your-question","trust"].includes(k))continue;
    if(k==="partner"){
     specialist("02 / COMPATIBILITY",sec.title,345);paragraph(shown(r.name)+" · "+date(obj(r.birth).dateOfBirth)+" · "+shown(obj(r.birth).timeOfBirth)+" · "+shown(obj(r.birth).birthPlace),10.5,wine,"bold");charts(records(r.primaryHouses),records(r.houses),"PERSON 1 / D1","PERSON 2 / D1");planetTable(records(r.positions));
    }else if(k==="guna"){
@@ -288,7 +290,10 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   }
   if(insights.planetNotes.length){specialist("PERSONAL INTERPRETATION",tr("What your placements suggest for reflection","ग्रह स्थितियों से चिंतन के विषय"),145);cardRows(insights.planetNotes,2)}
  }
+ const depth=data("editorial-depth") as DepthChapter[]|undefined;
+ if(depth){for(const part of depth){interior(tr("DETAILED READING","विस्तृत विवेचन","Detailed reading"),part.title,part.intro);cardRows(part.cards,1);}}
  reflectionPlan();
- if(tocHeight){const saved=page;page=tocPage;const list=starts.slice(1);list.forEach((p,i)=>{const x=M+i%2*(CW/2+6),top=tocY+22+Math.floor(i/2)*24;const w=CW/2-12;tx(x,top,String(p.page).padStart(2,"0"),8,"bold",gold);fixed(x+25,top,p.title,w-25,8.5,"bold",ink,11);rule(x,top+21,x+w,top+21,light)});page=saved}
+ {const saved=page;page=contentsPage;rect(0,0,W,H,iv);brand(24);caps(W-M,32,tr("PRIVATE REPORT","निजी रिपोर्ट"),muted,8,"right");rule(M,68,W-M,68,gold,1);caps(M,84,tr("YOUR READING GUIDE","पठन मार्गदर्शिका"));fixed(M,104,tr("Contents","विषय सूची"),CW,29,"title",wine,35);let top=155;
+ for(const item of starts){const lines=wrap(item.title,CW-58,10.2,"bold"),height=lines.length*14+10;if(top+height>BOTTOM)throw Error("REPORT_CONTENTS_OVERFLOW");tx(M,top,String(item.page).padStart(2,"0"),10,"bold",gold);fixed(M+38,top,item.title,CW-58,10.2,"bold",ink,14);top+=height;rule(M+38,top-5,W-M,top-5,light);}page=saved;}
  const pages=pdf.getPages();pages.forEach((p,i)=>{if(i===0)return;page=p;rule(M,H-44,W-M,H-44,gold);tx(M,H-34,"NAKSHARIX / care@naksharix.com",7.7,"bold",muted);tx(W-M,H-34,String(i+1).padStart(2,"0")+" / "+String(pages.length).padStart(2,"0"),8.3,"bold",muted,"right")});
 }

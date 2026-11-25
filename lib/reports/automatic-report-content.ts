@@ -1,6 +1,7 @@
 import "server-only";
 import {calculateVimshottariDasha,resolveDashaBirthInstant} from "@/lib/astrology/core-calculations";
 import { buildEditorialInsights,editorialHouse } from "@/lib/reports/editorial-insights";
+import {buildReportDepth} from "@/lib/reports/editorial-depth";
 import { getAstrologyProvider,getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 import { calculateInternalTransitSnapshot } from "@/lib/astrology/transit/engine";
 import { buildPremiumCompatibilityReport } from "@/lib/matching/kundli-matching";
@@ -92,7 +93,7 @@ export async function assembleAutomaticPaidReport(input:{
   };
   section("birth",["Your birth details and calculation basis","आपके जन्म विवरण और गणना का आधार","Aapki birth details aur calculation basis"],{
     name:birth.name,dateOfBirth:birth.dateOfBirth,timeOfBirth:birth.timeOfBirth,birthPlace:birth.birthPlace,
-    latitude:birth.latitude,longitude:birth.longitude,utcOffsetAtBirth:birth.timezone,ascendant:chart.avakhada.ascendant,moonSign:chart.avakhada.moonSign,sunSign:chart.avakhada.sunSign,nakshatra:chart.avakhada.nakshatra,pada:planet("Moon")?.pada,ayanamsa:"Lahiri",houseSystem:"Whole sign",generatedOn:date
+    latitude:birth.latitude,longitude:birth.longitude,utcOffsetAtBirth:birth.timezone,utcBirthInstant:resolveDashaBirthInstant(birth).toISOString(),ayanamsaDegree:chart.calculationMeta.ayanamsaDegree,ascendantLongitude:chart.calculationMeta.ascendantLongitude,nodeMode:chart.calculationMeta.nodeMode,ascendant:chart.avakhada.ascendant,moonSign:chart.avakhada.moonSign,sunSign:chart.avakhada.sunSign,nakshatra:chart.avakhada.nakshatra,pada:planet("Moon")?.pada,ayanamsa:"Lahiri",houseSystem:"Whole sign",generatedOn:date
   },[BOUNDARY],"provider_verified");
   const question=input.question.trim();
   const reflection=(key:string,title:LocalText,notes:LocalText[])=>section(key,title,notes.map(n=>tr(l,n)));
@@ -202,6 +203,7 @@ export async function assembleAutomaticPaidReport(input:{
       break;
     default:throw new Error("REPORT_UNKNOWN");
   }
+  section("editorial-depth",["Calculation-led detailed reading","गणना आधारित विस्तृत विवेचन","Calculation-led detailed reading"],buildReportDepth(chart,input.slug,sections,l,checked.extra.romanName||birth.name),["Traditional interpretations are not causal or predictive certification."]);
   section("editorial-insights",["Personal interpretation and reflection plan","व्यक्तिगत व्याख्या और चिंतन योजना","Personal interpretation aur reflection plan"],buildEditorialInsights(chart,input.slug,question,l),["Traditional interpretations are not scientific predictions; no outcome is guaranteed."]);
   section("your-question",["Your submitted question and reflection","आपका प्रश्न और आत्मचिंतन","Aapka question aur reflection"],{
     submittedQuestion:question,focus:tr(l,["Use the report's specific calculated indicators and practical checklist to reflect on your question. No exact event or outcome is predicted.","अपने प्रश्न पर विचार करने के लिए रिपोर्ट के गणना आधारित संकेत और व्यावहारिक सूची देखें। निश्चित घटना या परिणाम की भविष्यवाणी नहीं की गई है।","Apne question par report ke calculated indicators aur practical checklist se reflect karein. Exact outcome predict nahi kiya gaya hai."])

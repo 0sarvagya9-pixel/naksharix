@@ -257,6 +257,8 @@ function verifyPromiseCoverage(slug,language,content){
  assert.ok(fields.every(x=>x.trim().length>0));assert.equal(new Set(fields).size,fields.length);
  requiredDisclosureChecks++;
 }
+let depthChecks=0;const measurements=[];
+function verifyDepth(slug,content){const depth=content.sections.find(s=>s.key==="editorial-depth")?.data;assert.ok(Array.isArray(depth)&&depth.length&&depth.every(x=>x.cards.length&&x.cards.every(c=>c.label&&c.title&&c.body.length>30)),slug+" missing depth");depthChecks++;return depth.flatMap(x=>x.cards).length;}
 let sent=[];
 let emailStatus=200;
 globalThis.fetch=async(url,options)=>{
@@ -282,7 +284,7 @@ if(!dbMode){
  assert.equal(input.decodeAutomaticReportInput(input.encodeAutomaticReportInput(question,extra)).question,question);
  for(const slug of input.AUTO_REPORT_SLUGS){
    assert.ok(getManualReportCheckout(slug),slug+" has a paid SKU");
-   const {title,content}=await assembleAutomaticPaidReport({slug,birth,extra,question,language:"en",now:new Date("2026-11-24T12:00:00Z")});
+   const started=performance.now();const {title,content}=await assembleAutomaticPaidReport({slug,birth,extra,question,language:"en",now:new Date("2026-11-24T12:00:00Z")});const assemblyMs=performance.now()-started,depthCards=verifyDepth(slug,content);
    verifyPromiseCoverage(slug,"en",content);
    assert.ok(content.sections.some(s=>s.key===sections[slug]),slug+" specific content");
    assert.ok(content.sections.length>=5);
@@ -292,21 +294,32 @@ if(!dbMode){
    assert.ok(doc.getPageCount()>=4 && doc.getPageCount()<=30,"Editorial pagination "+slug+": "+doc.getPageCount());
    assert.ok(content.sections.some(s=>s.key==="editorial-insights"));
    if(process.env.REPORT_VISUAL_QA_DIR){fs.mkdirSync(process.env.REPORT_VISUAL_QA_DIR,{recursive:true});fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,slug+"-en.pdf"),result.bytes);}
+   measurements.push({slug,language:"en",assemblyMs:Math.round(assemblyMs),totalMs:Math.round(performance.now()-started),pages:doc.getPageCount(),bytes:result.bytes.length,depthCards});
    assert.equal(doc.getAuthor(),"NAKSHARIX");
    assert.ok(doc.getTitle().includes(title));
    console.log("PASS "+slug+" "+doc.getPageCount()+" pages / "+result.bytes.length+" bytes");
  }
  for(const language of ["hi","hinglish"]){
    for(const slug of input.AUTO_REPORT_SLUGS){
-   const {title,content}=await assembleAutomaticPaidReport({slug,birth,extra,question,language});
+   const started=performance.now();const {title,content}=await assembleAutomaticPaidReport({slug,birth,extra,question,language,now:new Date("2026-11-24T12:00:00Z")});const assemblyMs=performance.now()-started,depthCards=verifyDepth(slug,content);
    verifyPromiseCoverage(slug,language,content);
    const result=await generatePremiumReportPdf({requestId:"fixture-"+language,templateId:slug,status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:title,customerName:birth.name,language});
    assert.equal(result.generated,true);const localized=await PDFDocument.load(result.bytes);assert.ok(localized.getPageCount()>=4&&localized.getPageCount()<=35,slug+" "+language+" pagination");
    if(process.env.REPORT_VISUAL_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,slug+"-"+language+".pdf"),result.bytes);
+   measurements.push({slug,language,assemblyMs:Math.round(assemblyMs),totalMs:Math.round(performance.now()-started),pages:localized.getPageCount(),bytes:result.bytes.length,depthCards});
    console.log("PASS "+slug+" "+language+" editorial PDF "+localized.getPageCount()+" pages");
    }
  }
- assert.equal(promiseChecks,135);assert.equal(requiredDisclosureChecks,45);
+ assert.equal(promiseChecks,135);assert.equal(requiredDisclosureChecks,45);assert.equal(depthChecks,45);
+ const alt={...birth,name:"Synthetic second profile",dateOfBirth:"2001-02-28",timeOfBirth:"23:45",birthPlace:"New York, USA",latitude:40.7128,longitude:-74.006,timezone:-5};
+ const altExtra={...extra,romanName:"Ravi Test",candidateNames:["Ravi","Raavi"]};let pairs=0;
+ for(const slug of input.AUTO_REPORT_SLUGS){const now=new Date("2026-11-24T12:00:00Z");const a=await assembleAutomaticPaidReport({slug,birth,extra,question,language:"en",now}),b=await assembleAutomaticPaidReport({slug,birth:alt,extra:altExtra,question,language:"en",now});assert.notDeepEqual(a.content.sections.find(s=>s.key==="editorial-depth").data,b.content.sections.find(s=>s.key==="editorial-depth").data,slug+" differentiation");pairs++;}
+ const {calculateNumerologyReport}=require("@/lib/numerology"),oldZone=process.env.TZ;
+ try{for(const zone of ["UTC","America/Los_Angeles","Asia/Kolkata","Pacific/Auckland"]){process.env.TZ=zone;const r=calculateNumerologyReport({name:"Asha Test",dateOfBirth:"1992-05-18",locale:"en"});assert.equal(r.dateOfBirth,"1992-05-18");assert.equal(r.moolank.value,9);assert.equal(r.lifePath.value,8);assert.equal(r.loShuGrid.find(x=>x.number===8).count,1);}}finally{if(oldZone===undefined)delete process.env.TZ;else process.env.TZ=oldZone;}
+ assert.throws(()=>calculateNumerologyReport({name:"Asha Test",dateOfBirth:"1990-02-30",locale:"en"}));
+ assert.equal(pairs,15);assert.equal(measurements.length,45);
+ console.log("REPORT_DEPTH_QUALIFICATION_PASS "+JSON.stringify({depthChecks,personalizationPairs:pairs,timezoneCases:4,measurements,scope:"synthetic generation measurements; not live cost or expert review"}));
+ if(process.env.REPORT_VISUAL_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,"report-production-measurements.json"),JSON.stringify(measurements,null,2));
  console.log("REPORT_PROMISE_OUTPUT_CROSSWALK_PASS "+JSON.stringify({products:15,languages:3,promiseChecks,requiredDisclosureChecks,scope:"reviewed section-to-feature mapping and real computed content; PDF render follows each assembly; no predictive or live delivery claim"}));
  // Worst-case validated, fictional Latin/Devanagari birth details must
  // remain renderable rather than failing the cover layout.
