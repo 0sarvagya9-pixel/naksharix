@@ -33,9 +33,9 @@ async function saveProviderState(row:AiMembership,value:Record<string,unknown>){
  });
 }
 export async function listMemberships(userId:string){
- const rows=await prisma.aiMembership.findMany({where:{userId},include:{cycles:{select:{cycleNumber:true,periodStart:true,periodEnd:true,payment:{select:{status:true,aiCreditGrant:{select:{remaining:true,suspendedAt:true,revokedAt:true,validFrom:true,validUntil:true}}}}},orderBy:{cycleNumber:"desc"},take:12}},orderBy:{createdAt:"desc"},take:12});
+ const rows=await prisma.aiMembership.findMany({where:{userId},include:{cycles:{select:{cycleNumber:true,periodStart:true,periodEnd:true,payment:{select:{status:true,providerPaymentId:true,aiCreditGrant:{select:{remaining:true,suspendedAt:true,revokedAt:true,validFrom:true,validUntil:true}}}}},orderBy:{cycleNumber:"desc"},take:12}},orderBy:{createdAt:"desc"},take:12});
  const now=Date.now();
- return rows.map(r=>({...publicMembership(r),cycles:r.cycles.map(c=>({cycleNumber:c.cycleNumber,periodStart:c.periodStart,periodEnd:c.periodEnd,paymentStatus:c.payment.status,availableUnits:c.payment.status==="PAID"&&c.payment.aiCreditGrant&&!c.payment.aiCreditGrant.suspendedAt&&!c.payment.aiCreditGrant.revokedAt&&c.periodStart.getTime()<=now&&c.periodEnd.getTime()>now?c.payment.aiCreditGrant.remaining:0}))}));
+ return Promise.all(rows.map(async r=>({...publicMembership(r),cycles:await Promise.all(r.cycles.map(async c=>({cycleNumber:c.cycleNumber,periodStart:c.periodStart,periodEnd:c.periodEnd,paymentStatus:c.payment.status,availableUnits:c.payment.status==="PAID"&&c.payment.aiCreditGrant&&!c.payment.aiCreditGrant.suspendedAt&&!c.payment.aiCreditGrant.revokedAt&&c.periodStart.getTime()<=now&&c.periodEnd.getTime()>now&&!!c.payment.providerPaymentId&&(await cumulativeSignedRefund(prisma,c.payment.providerPaymentId))===0?c.payment.aiCreditGrant.remaining:0})))})));
 }
 export async function startMembership(userId:string,clientIntent:string,requested:MembershipOffer){
  const offer=await availableMembershipOffer();if(!offer||!sameMembershipOffer(offer,requested))return null;

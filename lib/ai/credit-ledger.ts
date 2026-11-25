@@ -4,6 +4,7 @@ import {prisma} from "@/lib/db";
 import {env} from "@/lib/env";
 import {isAiAstrologerReady} from "@/lib/ai/feature-status";
 import {getRazorpayReadiness} from "@/lib/payments/readiness";
+import {cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 import {approvedCreditOffer,creditSnapshot,type CreditOffer} from "@/lib/ai/credit-contract";
 
 export function creditUsageEnabled(){
@@ -23,7 +24,23 @@ export async function availableCreditOffer():Promise<CreditOffer|null>{
 export async function lockCreditAccount(tx:Prisma.TransactionClient,userId:string){
  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}),hashtext('naksharix-ai-credit-v1'))::text`;
 }
-const availableWhere=(userId:string,now=new Date()):Prisma.AiCreditGrantWhereInput=>({suspendedAt:null,revokedAt:null,OR:[{validFrom:null,validUntil:null,payment:{purpose:"AI_CREDITS"}},{validFrom:{lte:now},validUntil:{gt:now},payment:{purpose:"AI_MEMBERSHIP"}}],payment:{userId,provider:"RAZORPAY",purpose:{in:["AI_CREDITS","AI_MEMBERSHIP"]},status:"PAID",...(process.env.VERCEL_ENV==="production"?{metadata:{path:["analyticsLiveOrder"],equals:true}}:{})}});
+const availableWhere=(userId:string,now=new Date()):Prisma.AiCreditGrantWhereInput=>({suspendedAt:null,revokedAt:null,OR:[{validFrom:null,validUntil:null,payment:{purpose:"AI_CREDITS"}},{validFrom:{lte:now},validUntil:{gt:now},payment:{purpose:"AI_MEMBERSHIP"}}],payment:{userId,provider:"RAZORPAY",providerPaymentId:{not:null},purpose:{in:["AI_CREDITS","AI_MEMBERSHIP"]},status:"PAID",...(process.env.VERCEL_ENV==="production"?{metadata:{path:["analyticsLiveOrder"],equals:true}}:{})}});
+// Signed receipts are durable before dependent grant flags are reconciled.
+// Keep the existing credit-account lock order; do not acquire provider locks here.
+async function unrefundedAvailableWhere(tx:Prisma.TransactionClient,userId:string,now:Date):Promise<Prisma.AiCreditGrantWhereInput>{
+ const base=availableWhere(userId,now);
+ const rows=await tx.aiCreditGrant.findMany({where:base,select:{paymentId:true,payment:{select:{providerPaymentId:true}}}});
+ const denied:string[]=[];
+ // Batched lookup: any durable signed receipt blocks the grant, including malformed evidence.
+ for(let start=0;start<rows.length;start+=200){
+  const chunk=rows.slice(start,start+200);
+  const ids=chunk.flatMap(g=>g.payment.providerPaymentId?[g.payment.providerPaymentId]:[]);
+  const receipts=await tx.auditLog.findMany({where:{action:"payment.razorpay_refund_processed_receipt",targetType:"RazorpayPayment",targetId:{in:ids}},select:{targetId:true}});
+  const refunded=new Set(receipts.map(r=>r.targetId));
+  denied.push(...chunk.filter(g=>!g.payment.providerPaymentId||refunded.has(g.payment.providerPaymentId)).map(g=>g.paymentId));
+ }
+ return {...base,...(denied.length?{paymentId:{notIn:denied}}:{})};
+}
 async function releaseUse(tx:Prisma.TransactionClient,id:string,grantPaymentId:string,now:Date){
  const changed=await tx.aiCreditUse.updateMany({where:{id,status:"RESERVED"},data:{status:"RELEASED",finishedAt:now}});
  if(changed.count===1)await tx.aiCreditGrant.update({where:{paymentId:grantPaymentId},data:{remaining:{increment:1}}});
@@ -35,10 +52,11 @@ async function expireReservations(tx:Prisma.TransactionClient,userId:string,now:
 export async function creditAccountSummary(userId:string){
  return prisma.$transaction(async tx=>{
   await lockCreditAccount(tx,userId);const now=new Date();
+  const eligible=await unrefundedAvailableWhere(tx,userId,now);
   const [balance,pending,reclaimable]=await Promise.all([
-   tx.aiCreditGrant.aggregate({where:availableWhere(userId,now),_sum:{remaining:true}}),
+   tx.aiCreditGrant.aggregate({where:eligible,_sum:{remaining:true}}),
    tx.payment.findFirst({where:{userId,provider:"RAZORPAY",purpose:"AI_CREDITS",status:{in:["PENDING","FAILED"]}},select:{metadata:true,amount:true,currency:true},orderBy:{createdAt:"desc"}}),
-   tx.aiCreditUse.count({where:{userId,status:"RESERVED",expiresAt:{lte:now},grant:availableWhere(userId,now)}})
+   tx.aiCreditUse.count({where:{userId,status:"RESERVED",expiresAt:{lte:now},grant:eligible}})
   ]);
   const attempt=pending?creditSnapshot(pending.metadata,Math.round(Number(pending.amount)*100),pending.currency):null;
   return {remaining:(balance._sum.remaining??0)+reclaimable,unresolvedPurchase:Boolean(pending),pendingIntent:attempt?.intent??null,pendingOffer:attempt?{version:attempt.version,units:attempt.units,pricePaise:attempt.pricePaise}:null};
@@ -53,7 +71,8 @@ export async function reserveAiCredit(userId:string,requestId:string){
   if(await tx.aiCreditUse.count({where:{userId,status:"RESERVED"}}))return {kind:"busy" as const};
   // Attempts, including provider failures, count toward this cross-instance budget.
   if(await tx.aiCreditUse.count({where:{userId,createdAt:{gte:new Date(now.getTime()-86400000)}}})>=60)return {kind:"limit" as const};
-  const grant=await tx.aiCreditGrant.findFirst({where:{...availableWhere(userId,now),remaining:{gt:0}},orderBy:[{validUntil:{sort:"asc",nulls:"last"}},{createdAt:"asc"},{paymentId:"asc"}],select:{paymentId:true,validUntil:true}});
+  const eligible=await unrefundedAvailableWhere(tx,userId,now);
+  const grant=await tx.aiCreditGrant.findFirst({where:{...eligible,remaining:{gt:0}},orderBy:[{validUntil:{sort:"asc",nulls:"last"}},{createdAt:"asc"},{paymentId:"asc"}],select:{paymentId:true,validUntil:true}});
   if(!grant)return {kind:"empty" as const};
   const claimed=await tx.aiCreditGrant.updateMany({where:{paymentId:grant.paymentId,remaining:{gt:0},revokedAt:null,suspendedAt:null},data:{remaining:{decrement:1}}});
   if(claimed.count!==1)return {kind:"busy" as const};
@@ -64,9 +83,9 @@ export async function reserveAiCredit(userId:string,requestId:string){
 export async function finishAiCredit(userId:string,id:string,completed:boolean){
  return prisma.$transaction(async tx=>{
   await lockCreditAccount(tx,userId);const now=new Date();
-  const use=await tx.aiCreditUse.findFirst({where:{id,userId},select:{id:true,status:true,expiresAt:true,grantPaymentId:true,grant:{select:{revokedAt:true,suspendedAt:true,validFrom:true,validUntil:true,payment:{select:{status:true,userId:true}}}}}});
+  const use=await tx.aiCreditUse.findFirst({where:{id,userId},select:{id:true,status:true,expiresAt:true,grantPaymentId:true,grant:{select:{revokedAt:true,suspendedAt:true,validFrom:true,validUntil:true,payment:{select:{status:true,userId:true,providerPaymentId:true}}}}}});
   if(!use||use.status!=="RESERVED")return false;
-  if(!completed||use.expiresAt<=now||use.grant.revokedAt||use.grant.suspendedAt||(use.grant.validFrom&&use.grant.validFrom>now)||(use.grant.validUntil&&use.grant.validUntil<=now)||use.grant.payment.status!=="PAID"||use.grant.payment.userId!==userId){
+  if(!completed||use.expiresAt<=now||use.grant.revokedAt||use.grant.suspendedAt||(use.grant.validFrom&&use.grant.validFrom>now)||(use.grant.validUntil&&use.grant.validUntil<=now)||use.grant.payment.status!=="PAID"||use.grant.payment.userId!==userId||!use.grant.payment.providerPaymentId||(await cumulativeSignedRefund(tx,use.grant.payment.providerPaymentId))>0){
    await releaseUse(tx,use.id,use.grantPaymentId,now);return false;
   }
   const changed=await tx.aiCreditUse.updateMany({where:{id:use.id,userId,status:"RESERVED"},data:{status:"CONSUMED",finishedAt:now}});

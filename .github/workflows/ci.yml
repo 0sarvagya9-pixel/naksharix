@@ -157,6 +157,8 @@ jobs:
         run: node scripts/qa-business-integrations-runtime.mjs
       - name: Qualify expert service and report-review runtime on disposable PostgreSQL
         run: node scripts/qa-expert-services-runtime.mjs
+      - name: Qualify credit reservation, expiry and refund runtime on disposable PostgreSQL
+        run: node scripts/qa-ai-credit-runtime.mjs
       - name: Run local production HTTP smoke
         shell: bash
         run: |

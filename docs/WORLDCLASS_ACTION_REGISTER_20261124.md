@@ -217,3 +217,7 @@ Owner instruction: do not deploy until explicitly authorized. This register dist
 
 ### Human-reviewed and written-service refund boundary — 25 November 2026
 - R11/R17: source-report and expert-service entitlement checks now inspect durable signed refund evidence, including the interval before payment reconciliation. Prevent new review of a refunded report, private source/response exposure, service delivery or settlement on a revoked entitlement. Existing approval, quote and consent gates preserved. Added isolated runtime covering both service types, wrong-owner/role denial, source-read requirement, duplicate intents and delivery, genuine application state transitions with synthetic payments, and signed refund revocation. No actual practitioner approval, payout or merchant action. Exact CI pending.
+
+
+### AI credits and membership-credit refund boundary — 25 November 2026
+- R12/R13: credit balance, reservations, final consumption and membership cycle display now deny credits with durable signed refund receipts, including the pre-reconciliation interval. Batch receipt lookup excludes affected grant IDs without reversing existing provider/account lock ordering. Added disposable DB runtime for simultaneous reservation, duplicate request, release on failed response, expiry recovery, signed refund arriving mid-response, and active/expired/future membership grant boundaries. No actual model request, provider mandate or merchant charge. Exact runtime CI pending; actual membership provider lifecycle and commercial approval remain open.
