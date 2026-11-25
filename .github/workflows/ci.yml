@@ -169,6 +169,8 @@ jobs:
         run: node scripts/qa-ai-credit-runtime.mjs
       - name: Qualify password recovery and quota isolation on disposable PostgreSQL
         run: node scripts/qa-password-reset-runtime.mjs
+      - name: Verify deferred service review persistence and retry safety
+        run: node scripts/qa-deferred-service-runtime.mjs
       - name: Run local production HTTP smoke
         shell: bash
         run: |

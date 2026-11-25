@@ -258,3 +258,7 @@ Read-only first-party Search Console query/page window 26 October–22 November,
 ### 2026-11-25 — Keyboard reopening regression repair (development hold)
 
 At `2146e4d1`, Gate 5 job `138993887498` returned 98 passes, one skip, one failure: after Escape, ArrowDown did not focus the first Horoscope submenu link. Quality and Android internal APK jobs succeeded. Make the expanded DOM state synchronous before focusing the first link, and animate opacity only (visibility must be immediate). Preserve all existing keyboard and browser assertions. New revision requires exact-head regression readback; no release or production deployment.
+
+### 2026-11-25 — seven deferred revenue services, review-only intake
+
+R-18, R-20, R-22, R-23, R-24, R-27 and R-29: staged a separate private, default-disabled review request form and handler using the existing user-owned support ledger. Verified customer accounts only, explicit non-commercial acknowledgement, bounded request quantities, destination/date validation, rate limits, deterministic account-scoped idempotency and duplicate conflict rejection. No new schema, payment, entitlement, provider appointment, seat allocation, Puja activation, or shipment. Quantity limits are intake bounds, not capacity. Owner approval is required before enabling DEFERRED_SERVICE_REQUESTS_ENABLED. Contract and isolated PostgreSQL handler QA added; original commercial acceptance criteria remain open until actual partners, capacity/entitlements, offers, fulfilment, merchant and release evidence are accepted. No production activation.
