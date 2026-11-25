@@ -14,7 +14,7 @@ export function prepareServiceRequest(input:ServiceInput, today:string) {
   const item=SERVICES.find(s=>s.kind===input.kind);
   if(!item||!Number.isInteger(input.units)||input.units<item.min||input.units>item.max||input.consent!==REQUEST_TERMS)return null;
   const target=input.target.trim();
-  if(/[\x00-\x1f\x7f<>]/.test(target)||target.length>100)return null;
+  if(target.length>100||Array.from(target).some(char=>char.charCodeAt(0)<32||char.charCodeAt(0)===127||char==="<"||char===">"))return null;
   if(item.target==="none"&&target!=="")return null;
   if(item.target==="country"&&!/^[A-Z]{2}$/.test(target))return null;
   if((item.target==="city"||item.target==="temple")&&target.length<2)return null;

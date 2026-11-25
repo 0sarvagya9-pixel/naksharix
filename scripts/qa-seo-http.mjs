@@ -92,7 +92,7 @@ for (const locale of approvedGuides) {
 for (const locale of nativeGuides.filter((x) => !approvedGuides.includes(x))) {
   assert.ok(!xml.includes("<loc>" + absolute(guidePath(locale)) + "</loc>"), "Unreviewed guide sitemap leak: " + locale);
 }
-for (const route of ["/commerce-enquiry", "/ask-astrologer", "/puja-enquiry"]) {
+for (const route of ["/commerce-enquiry", "/ask-astrologer", "/puja-enquiry", "/dashboard/deferred-services"]) {
   assert.ok(!xml.includes("<loc>" + absolute(route) + "</loc>"), "Private intake sitemap leak: " + route);
 }
 const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
@@ -131,7 +131,11 @@ for(const path of focusedSeoRoutes){
   assert.equal(response.status,200,"Audit page unavailable "+path);
   const html=stripMarkup(await response.text());
   const title=decodeBasic(html.match(/<title>([^<]+)<\/title>/i)?.[1]??"");
-  assert.ok(title.length>=15 && title.length<=65,"Missing/overlong editorial title "+path+": "+title);
+  assert.ok(title.length>=15 && title.length<=60,"Missing/overlong editorial title "+path+": "+title);
+  if(path==="/panchang"){
+    const description=decodeBasic([...html.matchAll(/<meta\b[^>]*>/gi)].map(m=>m[0]).find(tag=>/\bname="description"/i.test(tag))?.match(/\bcontent="([^"]*)"/i)?.[1]??"");
+    assert.ok(description.length>=70&&description.length<=160,"Missing/overlong Panchang description: "+description);
+  }
   if(["/calculators","/horoscope","/transits"].includes(path)){
     const levels=[...html.matchAll(/<h([1-6])\b[^>]*>/gi)].map(m=>Number(m[1]));
     const start=levels.indexOf(1);
