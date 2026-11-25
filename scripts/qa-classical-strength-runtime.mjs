@@ -388,7 +388,12 @@ const expectedMotion={Mars:22.28,Mercury:2.13,Jupiter:35.33,Venus:5.76,Saturn:21
 for(const r of motion.rows)maxBala=Math.max(maxBala,closeMotion(r.virupas,expectedMotion[r.planet],.03));
 const other=M.calculateRamanEpochMeanCandidate(new Date("1912-08-08T06:56:00Z"));
 closeMotion(other.meanSun,113.693,.01);closeMotion(other.mean.Mars,162.02,.02);closeMotion(other.mean.Saturn,35.65,.02);
+// The printed worked example on p.115 selected the tens column for 2 days
+// and miscopied 4,000 days. Retain original and corrected references.
 const jupiter1912Error=Math.abs(other.mean.Jupiter-240.48);assert.ok(jupiter1912Error>1);motionChecks++;
+const correctedJupiter1912=332.39+49.86+0.17+0.04+220.04-3.41-360;
+const correctedJupiterError=closeMotion(other.mean.Jupiter,correctedJupiter1912,.02);
+assert.ok(Math.abs(correctedJupiter1912-239.09)<1e-9);motionChecks++;
 for(const d of [new Date(NaN),new Date("1899-01-01"),new Date("2051-01-01")]){assert.equal(M.calculateRamanEpochMeanCandidate(d),null);motionChecks++;}
 for(const data of [{},{Mars:NaN,Mercury:2,Jupiter:3,Venus:4,Saturn:5},{Mars:360,Mercury:2,Jupiter:3,Venus:4,Saturn:5}]){assert.equal(M.calculateMotionalEpochCandidate(historical,data),null);motionChecks++;}
 for(const d of ["1900-01-01T00:00:00Z","2000-02-29T12:00:00Z","2026-11-25T00:00:00Z","2050-12-30T00:00:00Z"]){const r=M.calculateMotionalEpochCandidate(new Date(d),{Mars:359.9,Mercury:0,Jupiter:359,Venus:1,Saturn:90});assert.ok(r&&r.rows.length===5&&r.rows.every(x=>x.virupas>=0&&x.virupas<=60)&&!r.verified&&!r.publicEnabled);motionChecks++;}
@@ -420,7 +425,7 @@ for(const [date,pairs,winners] of warReference){
  if(strength.rows.every(x=>x.total>=0))assert.ok(r.bhavaCandidate.houses.every(h=>Number.isFinite(h.arithmeticTotalVirupas)));
  chartChecks++;
 }
-console.log("P0_CLASSICAL_CANDIDATE_ARITHMETIC "+JSON.stringify({motionChecks,totalChecks,chartChecks,maxMean,maxSeeghrocha,maxBala,jupiter1912Error,knownParityFailure:"Raman 1912 Jupiter",publicEnabled:false,certified:false}));
+console.log("P0_CLASSICAL_CANDIDATE_ARITHMETIC "+JSON.stringify({motionChecks,totalChecks,chartChecks,maxMean,maxSeeghrocha,maxBala,jupiter1912Error,correctedJupiter1912,correctedJupiterError,printedReferenceDiscrepancy:"Raman Table VI p.114 versus example p.115; original printed 240.48 retained",publicEnabled:false,certified:false}));
 
 /** Keep the Aiyar mismatch evidence. Resolve the cause by selecting a named
  * independently published BPHS convention rather than overriding cells. */
@@ -448,3 +453,28 @@ assert.equal(calculateInternalAshtakvarga(bphsPositions.slice(1),"Leo","bphs_66_
 assert.equal(calculateInternalAshtakvarga(bphsPositions,"Leo").method,"brihat_jataka_aiyar_raw");
 assert.deepEqual(calculateInternalAshtakvarga(positions,sample.referenceSigns.Ascendant).sarva,raw.sarva);
 console.log("P0_ASHTAKAVARGA_NAMED_PARITY "+JSON.stringify({publishedCells:bphsChecks,rotatedCells:bphsRotationChecks,negativeAndPreservation:4,priorSAVDiscrepanciesExplained:4,publicEnabled:false,expertCertified:false}));
+
+const PATTERN=require("@/lib/astrology/strength/traditional-patterns");
+const CORE=require("@/lib/astrology/core-calculations");
+const chartAt=(offsets,rahu=0,ketu=180)=>[...traditional.map((planet,i)=>point(planet,offsets[i])),point("Rahu",rahu),point("Ketu",ketu)];
+const complete=chartAt([10,20,40,60,80,100,120]);
+let nodalChecks=0,yogaPatternChecks=0;
+assert.equal(PATTERN.evaluateNodalContainment(complete).contained,true);nodalChecks++;
+assert.equal(PATTERN.evaluateNodalContainment(chartAt([190,200,210,230,250,280,340])).contained,true);nodalChecks++;
+assert.equal(PATTERN.evaluateNodalContainment(chartAt([10,20,40,60,80,100,220])).contained,false);nodalChecks++;
+assert.equal(PATTERN.evaluateNodalContainment(chartAt([0,20,40,60,80,100,180])).boundary,true);nodalChecks++;
+for(const bad of [[],complete.slice(1),[...complete,complete[0]],complete.map((p,i)=>i===2?{...p,absoluteLongitude:NaN}:p),complete.map((p,i)=>i===2?{...p,sign:"Aries"}:p),chartAt([10,20,40,60,80,100,120],0,179),[...complete,complete.at(-1)]]){
+ assert.equal(PATTERN.evaluateNodalContainment(bad),null);const d=CORE.calculateDoshaAnalysis(bad,"Aries","Aries").kaalSarp;assert.equal(d.present,false);assert.equal(d.available,false);nodalChecks+=3;
+}
+for(let rotate=0;rotate<12;rotate++){const shifted=complete.map(p=>point(p.planet,(p.absoluteLongitude+rotate*30)%360));assert.equal(PATTERN.evaluateNodalContainment(shifted).contained,true);assert.equal(CORE.calculateDoshaAnalysis(shifted,signs[rotate],signs[rotate]).kaalSarp.present,true);nodalChecks+=2;}
+const dignities={Mars:["Aries","Scorpio","Capricorn"],Mercury:["Gemini","Virgo"],Jupiter:["Sagittarius","Pisces","Cancer"],Venus:["Taurus","Libra","Pisces"],Saturn:["Capricorn","Aquarius","Libra"]};
+for(let a=0;a<12;a++)for(let m=0;m<12;m++)for(let j=0;j<12;j++){
+ const p=chartAt([15,m*30+15,j*30+15,j*30+15,j*30+15,j*30+15,j*30+15]);
+ const r=PATTERN.evaluateTraditionalPatterns(p,signs[a]);assert.ok(r);assert.equal(r.publicEnabled,false);
+ for(const row of r.mahapurusha){const eligible=dignities[row.planet].includes(signs[j]);assert.equal(row.fromLagna,eligible&&[0,3,6,9].includes((j-a+12)%12));assert.equal(row.fromMoon,eligible&&[0,3,6,9].includes((j-m+12)%12));yogaPatternChecks+=2;}
+ const expectedLunar=(j-m+12)%12;assert.equal(r.lunar.sunapha,expectedLunar===1);assert.equal(r.lunar.anapha,expectedLunar===11);assert.equal(r.lunar.kemadrumaUnderNamedCancellation,![1,11,0,3,6,9].includes(expectedLunar)&&![0,3,6,9].includes((m-a+12)%12));assert.equal(r.gajakesari.fullTraditionalVerdict,null);yogaPatternChecks+=4;
+}
+const dual=PATTERN.evaluateTraditionalPatterns(chartAt([15,15,45,345,75,105,135]),"Taurus");
+assert.equal(dual.lunar.durudhara,true);assert.equal(dual.lunar.sunapha,false);assert.equal(dual.lunar.anapha,false);
+assert.equal(PATTERN.evaluateTraditionalPatterns(complete,"Unknown"),null);assert.equal(PATTERN.evaluateTraditionalPatterns(complete.slice(1),"Aries"),null);yogaPatternChecks+=5;
+console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaPatternChecks,scope:"Phaladeepika 6.1–5 placement conditions; Gajakesari full verdict withheld; complete nodal geometry and invalid data safety; no independent expert certification"}));

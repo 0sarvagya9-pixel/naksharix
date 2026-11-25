@@ -5,6 +5,7 @@ import {buildQuadrantBhavaMidpoints,assignMidpointBhava,calculateBhavaBalaEviden
 import {calculateInternalShadbala,calculateClassicalStrengthBasis} from "./shadbala";
 import {calculateSolarStrengthContext,calculateTemporalStrengthEvidence} from "./temporal-components";
 import {calculateClassicalCalendarCandidate} from "./calendar-lords";
+import {evaluateTraditionalPatterns} from "./traditional-patterns";
 import {STAR_GRAHAS,type StarGraha,calculateMotionalEpochCandidate} from "./motional-epoch";
 import {GRAHAS,assembleClassicalStrengthCandidate} from "./strength-total";
 import {calculateAspectStrengthEvidence,calculateExactDirectionalBala} from "./classical-components";
@@ -40,6 +41,7 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput){
  const geometry=calculateBirthBhavaGeometry(input);
  const planets=geometry.chart.planets.map(p=>({...p,house:typeof p.absoluteLongitude==="number"?assignMidpointBhava(p.absoluteLongitude,geometry.midpoints):null}));
  const friendship=calculateFivefoldFriendship(planets);
+ const traditionalPatterns=evaluateTraditionalPatterns(planets.map(p=>({planet:p.planet,sign:p.sign??"",degree:p.degree??undefined,absoluteLongitude:p.absoluteLongitude??undefined,house:p.house??undefined})),geometry.chart.ascendant.sign??"");
  const positional=planets.map(p=>{
   const basis=calculateClassicalStrengthBasis(p);
   if(!basis)return null;
@@ -71,5 +73,5 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput){
  const classicalStrengthCandidate=assembleClassicalStrengthCandidate(sixComponents,temporalWithCalendarCandidate?.warPairs??null,solar.declinations);
  const candidateLords=classicalStrengthCandidate.completeArithmetic&&classicalStrengthCandidate.rows.every(r=>typeof r.total==="number"&&r.total>=0)?Object.fromEntries(classicalStrengthCandidate.rows.map(r=>[r.planet,r.total!])):undefined;
  const bhavaCandidate=calculateBhavaBalaEvidence(planets,geometry.midpoints,{polarity:temporal.polarity??undefined,aspectReading:"additional_full_mercury_jupiter",birthPhase:solar.birthPhase??undefined,lordStrengthVirupas:candidateLords});
- return {geometry,friendship,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
+ return {geometry,friendship,traditionalPatterns,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
 }

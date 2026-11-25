@@ -121,6 +121,8 @@ export type YogaAnalysis = {
 };
 
 export type DoshaStatus = {
+  /** Explicitly false for incomplete or invalid geometry. Absence retains the historical contract. */
+  available?: boolean;
   present: boolean;
   severity?: string;
   summary: string;

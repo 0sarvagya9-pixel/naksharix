@@ -14,13 +14,13 @@ import type {
 } from "@/lib/astrology/types";
 
 import {calculateVimshottariDasha as calculateExactDasha, type DashaPeriod as ExactDashaPeriod} from "@/lib/astrology/premium-engine/dasha";
+import {evaluateNodalContainment} from "@/lib/astrology/strength/traditional-patterns";
 import {localBirthToUtcDate,normalizeBirthDate,normalizeBirthTime,parseBirthDateTime,parseTimezoneOffsetToHours} from "@/lib/astrology/own-engine/time";
 
 type Locale = "en" | "hi" | "hinglish";
 
 const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"] as const;
 const manglikHouses = new Set([1, 2, 4, 7, 8, 12]);
-const classicalPlanets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
 
 export function enrichBirthChartWithCoreCalculations(chart: BirthChartData, input: AstrologyBirthInput): BirthChartData {
   const locale = input.language ?? input.locale ?? "en";
@@ -172,18 +172,13 @@ export function detectBasicYogas(planets: PlanetPosition[], ascendantSign: strin
 }
 
 function calculateKaalSarp(planets: PlanetPosition[], locale: Locale): DoshaStatus {
-  const rahu = findPlanet(planets, "Rahu");
-  const ketu = findPlanet(planets, "Ketu");
-  const rahuLong = absoluteLongitudeFor(rahu);
-  const ketuLong = absoluteLongitudeFor(ketu);
-  const bodies = planets.filter((planet) => classicalPlanets.some((name) => samePlanet(planet.planet, name)));
-  if (rahuLong === undefined || ketuLong === undefined || bodies.some((planet) => absoluteLongitudeFor(planet) === undefined)) {
-    return { present: false, severity: notEnoughData(locale), summary: kaalSarpMissing(locale), remedies: [doshaCaveat(locale)] };
-  }
-  const inRahuKetuArc = bodies.every((planet) => inClockwiseArc(absoluteLongitudeFor(planet)!, rahuLong, ketuLong));
-  const inKetuRahuArc = bodies.every((planet) => inClockwiseArc(absoluteLongitudeFor(planet)!, ketuLong, rahuLong));
-  const present = inRahuKetuArc || inKetuRahuArc;
+  // Do not allow an empty or incomplete array to pass an every() check.
+  // Require unique valid bodies and antipodal nodes before interpreting geometry.
+  const evidence=evaluateNodalContainment(planets);
+  if(!evidence) return { available:false,present:false,severity:notEnoughData(locale),summary:kaalSarpMissing(locale),remedies:[doshaCaveat(locale)] };
+  const present=evidence.contained;
   return {
+    available:true,
     present,
     severity: present ? kaalSarpSeverity(locale) : noneSeverity(locale),
     summary: present ? kaalSarpPresent(locale) : kaalSarpAbsent(locale),
@@ -242,10 +237,6 @@ function signIndex(sign: string | undefined) {
 
 function isKendra(house: number | undefined) {
   return house === 1 || house === 4 || house === 7 || house === 10;
-}
-
-function inClockwiseArc(value: number, start: number, end: number) {
-  return normalizeDegrees(value - start) <= normalizeDegrees(end - start);
 }
 
 function normalizeDegrees(value: number) {
