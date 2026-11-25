@@ -331,8 +331,11 @@ test.describe("Naksharix release browser QA", () => {
     await expect(link).toHaveAttribute("href","/support?topic=partnership");
     await link.click();
     await expect(page).toHaveURL(/\/login\?redirectTo=%2Fsupport%3Ftopic%3Dpartnership$/i);
-    const privateResponse = await request.get(absolute("/api/support/tickets"), { maxRedirects: 0 });
+    // Read-only GET only: close the HTTP socket, and recover at most once from
+    // ECONNRESET. HTTP status failures are never retried or ignored.
+    const privateResponse = await request.get(absolute("/api/support/tickets"), {maxRedirects:0,maxRetries:1,headers:{connection:"close"}});
     expect(privateResponse.status()).toBe(401);
+    expect((await privateResponse.json()).error).toBe("Unauthenticated");
   });
 
   test("security headers are present on public pages", async ({ request }) => {

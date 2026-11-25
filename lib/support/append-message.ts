@@ -12,7 +12,7 @@ type AppendInput = {
 };
 type Result =
   | { kind: "ok"; duplicate: boolean }
-  | { kind: "not_found" | "closed" | "full" };
+  | { kind: "not_found" | "closed" | "full" | "conflict" };
 
 export async function appendSupportMessage(input: AppendInput): Promise<Result> {
   return prisma.$transaction(async (tx) => {
@@ -24,10 +24,12 @@ export async function appendSupportMessage(input: AppendInput): Promise<Result> 
       return { kind: "not_found" };
     }
     const previous = Array.isArray(ticket.messages) ? ticket.messages : [];
-    if (previous.some((item) =>
-      item && typeof item === "object" && !Array.isArray(item) &&
-      "clientMutationId" in item && item.clientMutationId === input.clientMutationId
-    )) return { kind: "ok", duplicate: true };
+    const replay=previous.find((item)=>
+      item&&typeof item==="object"&&!Array.isArray(item)&&"clientMutationId" in item&&item.clientMutationId===input.clientMutationId);
+    if(replay){
+      if(typeof replay!=="object"||Array.isArray(replay)||replay.author!==input.sender||replay.text!==input.message)return {kind:"conflict"};
+      return {kind:"ok",duplicate:true};
+    }
     if (ticket.status === "CLOSED" || ticket.status === "RESOLVED") return { kind: "closed" };
     if (previous.length >= 100) return { kind: "full" };
 

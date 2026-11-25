@@ -327,5 +327,6 @@ jobs:
           name: browser-release-qa
           path: |
             browser-qa.log
+            /tmp/naksharix-browser-server.log
             test-results
           if-no-files-found: warn

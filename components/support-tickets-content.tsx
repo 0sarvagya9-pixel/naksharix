@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Section } from "@/components/section";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ export function SupportTicketsContent({ initialSubject = "" }: { initialSubject?
   const [subject, setSubject] = useState(initialSubject);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const inFlight=useRef(false);
+  const pending=useRef<{id:string;subject:string;message:string}|null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -50,24 +52,39 @@ export function SupportTicketsContent({ initialSubject = "" }: { initialSubject?
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy) return;
+    if (inFlight.current) return;
+    inFlight.current=true;
     setBusy(true);
     setError("");
     setNotice("");
     try {
+      const details={subject:subject.trim(),message:message.trim()};
+      // Keep the same intent if a response is lost. Never automatically resend.
+      if(pending.current&&(pending.current.subject!==details.subject||pending.current.message!==details.message)){
+        setError("A previous request is not confirmed. Check Your requests or retry the original details before starting a different request.");
+        return;
+      }
+      const intent=pending.current??{id:crypto.randomUUID(),...details};
+      pending.current=intent;
       const response = await secureFetch("/api/support/tickets", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, message })
+        method: "POST", headers: { "Content-Type": "application/json" },silent:true,
+        body: JSON.stringify({...details,clientMutationId:intent.id})
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Request could not be submitted.");
+      if(!response.ok){
+        if(response.status===422||response.status===401||response.status===403)pending.current=null;
+        throw new Error(result.error||"Request could not be submitted.");
+      }
+      if(result.data?.clientMutationId!==intent.id||typeof result.data?.ticket?.id!=="string"||typeof result.data?.duplicate!=="boolean")throw Error("Request confirmation is incomplete. Retry the same details.");
+      pending.current=null;
       setSubject("");
       setMessage("");
       setNotice("Your support request has been recorded.");
-      await load();
+      try{await load();}catch{setError("Request recorded, but the list could not refresh. Refresh this page to view it.");}
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Support request failed.");
+      setError((cause instanceof Error ? cause.message : "Support request failed.")+(pending.current?" Check existing requests before retrying unchanged details.":""));
     } finally {
+      inFlight.current=false;
       setBusy(false);
     }
   }
@@ -90,13 +107,14 @@ export function SupportTicketsContent({ initialSubject = "" }: { initialSubject?
               <form onSubmit={submit} className="space-y-4">
                 <label className="block space-y-2 text-sm">
                   <span>Subject</span>
-                  <Input required minLength={5} maxLength={140} value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="What do you need help with?" />
+                  <Input required minLength={5} maxLength={140} value={subject} disabled={busy} onChange={(event) => setSubject(event.target.value)} placeholder="What do you need help with?" />
                 </label>
                 <label className="block space-y-2 text-sm">
                   <span>Details</span>
-                  <textarea required minLength={10} maxLength={2000} rows={6} value={message} onChange={(event) => setMessage(event.target.value)} className="w-full rounded-lg border border-[#263957] bg-[#02112C] p-3 text-white" placeholder="Describe the issue without sharing passwords or payment credentials."/>
+                  <textarea required minLength={10} maxLength={2000} rows={6} value={message} disabled={busy} onChange={(event) => setMessage(event.target.value)} className="w-full rounded-lg border border-[#263957] bg-[#02112C] p-3 text-white" placeholder="Describe the issue without sharing passwords or payment credentials."/>
                 </label>
                 <Button type="submit" disabled={busy}>{busy ? "Submitting..." : "Submit support request"}</Button>
+                {error&&pending.current?<Button type="button" variant="outline" disabled={busy} onClick={()=>{setSubject(pending.current?.subject??subject);setMessage(pending.current?.message??message);}}>Restore unconfirmed details</Button>:null}
                 {notice ? <p role="status" className="text-sm text-[#00f5a0]">{notice}</p> : null}
                 {error ? <p role="alert" className="text-sm text-[#fda4af]">{error}</p> : null}
               </form>

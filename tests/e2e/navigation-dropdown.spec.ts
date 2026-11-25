@@ -31,6 +31,17 @@ test.describe("NAKSHARIX live menu accessibility and positioning", () => {
       const navigation = page.getByRole("navigation", { name: "Primary navigation" });
       const trigger = navigation.getByRole("link", { name: "Horoscope", exact: true });
       await expect(trigger, "Desktop header missing on " + route).toBeVisible();
+      // Reproduce an actual pointer entry after each navigation. Firefox may
+      // preserve the previous pointer coordinates while a new header loads.
+      // Wait for font layout and hit-test the rendered trigger; no assertion
+      // retries, forced visibility or synthetic DOM event dispatch.
+      await page.evaluate(async()=>{await document.fonts.ready;});
+      await page.mouse.move(2,850);
+      await expect.poll(()=>trigger.evaluate(el=>{
+        const r=el.getBoundingClientRect();
+        const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+        return r.width>0&&r.height>0&&!!hit&&el.contains(hit);
+      }),{message:"Actual pointer hit target on "+route}).toBe(true);
       await trigger.hover();
       const popup = navigation.getByRole("region", { name: "Horoscope options" });
       await expect(popup, "Dropdown not accessible on " + route).toBeVisible();

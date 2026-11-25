@@ -459,7 +459,7 @@ try {
   await check("support tickets are owned by the user and triaged only by admin", async () => {
     const anonRead = await req("/api/support/tickets");
     assert.equal(anonRead.status, 401);
-    const payload = { subject: "Account access assistance", message: "Please help with my account settings and access." };
+    const payload = { subject: "Account access assistance", message: "Please help with my account settings and access.",clientMutationId:randomUUID() };
     const created = await post("/api/support/tickets", payload, userCookie);
     const createBody = await created.json();
     assert.equal(created.status, 201, JSON.stringify(createBody));
@@ -467,6 +467,22 @@ try {
       "New support ticket should expose provider acceptance without changing record durability");
     const ticketId = createBody.data.ticket.id;
     assert.equal(createBody.data.ticket.status, "OPEN");
+    assert.equal(createBody.data.clientMutationId,payload.clientMutationId);
+    assert.equal(createBody.data.duplicate,false);
+    const dup=await post("/api/support/tickets",payload,userCookie);
+    assert.equal(dup.status,200);
+    const dupBody=await dup.json();
+    assert.equal(dupBody.data.ticket.id,ticketId);
+    assert.equal(dupBody.data.duplicate,true);
+    assert.equal(dupBody.data.notification,"not_needed");
+    assert.equal((await post("/api/support/tickets",{...payload,message:"Changed details for the same ticket reference."},userCookie)).status,409);
+    const concurrent={...payload,subject:"Concurrent partnership enquiry",clientMutationId:randomUUID()};
+    const parallel=await Promise.all([post("/api/support/tickets",concurrent,userCookie),post("/api/support/tickets",concurrent,userCookie)]);
+    assert.deepEqual(parallel.map(r=>r.status).sort(),[200,201]);
+    const parallelBodies=await Promise.all(parallel.map(r=>r.json()));
+    assert.equal(new Set(parallelBodies.map(r=>r.data.ticket.id)).size,1);
+    assert.equal(await prisma.supportTicket.count({where:{userId,subject:concurrent.subject}}),1);
+    assert.equal(parallelBodies.filter(r=>r.data.notification==="not_needed").length,1);
 
     const owned = await req("/api/support/tickets", { headers: { cookie: userCookie } });
     const ownedBody = await owned.json();
@@ -504,6 +520,9 @@ try {
     const replayBody = await replay.json();
     assert.equal(replay.status, 200);
     assert.equal(replayBody.data.duplicate, true);
+    assert.equal(replayBody.data.clientMutationId,userMutation);
+    assert.equal((await post("/api/support/tickets/reply",{...userReply,message:"Different reply text for the same reference."},userCookie)).status,409);
+    assert.equal((await post("/api/admin/support/reply",userReply,adminCookie)).status,409,"Staff cannot claim a customer mutation ID");
     const deniedStaff = await post("/api/admin/support/reply", {
       ticketId, message: "I should not be able to respond as staff.", clientMutationId: randomUUID()
     }, userCookie);
@@ -536,6 +555,7 @@ try {
       ticketId, message: "I need more help.", clientMutationId: randomUUID()
     }, userCookie);
     assert.equal(closedReply.status, 409);
+    console.log("SUPPORT_IDEMPOTENCY_HTTP=PASS;DUPLICATE_CREATE_AND_REPLY_CONFLICTS_DENIED;CONCURRENT_CREATE_SINGLE_RECORD");
   });
 
   await check("push subscription API does not falsely claim unimplemented delivery", async () => {
