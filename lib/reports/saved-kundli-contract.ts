@@ -26,5 +26,5 @@ export function matchesSavedKundliPayment(payment:SavedKundliPayment,userId:stri
   isSavedKundliCheckout(payment.purpose,typeof meta?.reportId==="string"?meta.reportId:"")&&
   payment.currency==="INR"&&Number(payment.amount)===amount&&Number.isFinite(amount)&&amount>0&&
   typeof payment.providerPaymentId==="string"&&/^pay_[A-Za-z0-9]{5,80}$/.test(payment.providerPaymentId)&&
-  meta?.savedReportId===savedReportId&&meta.gatewayStatus==="captured";
+  meta?.savedReportId===savedReportId&&(meta.reportRequestId===undefined||meta.reportRequestId===null)&&meta.gatewayStatus==="captured";
 }

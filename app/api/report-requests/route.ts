@@ -14,6 +14,7 @@ import { canBypassPayment } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db";
 import { getManualReport } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
+import {isPersonalizedPaymentCandidate,personalizedPaymentContext} from "@/lib/reports/checkout-context";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { getRequestIp, sharedRateLimitResponse as rateLimitResponse } from "@/lib/security/rate-limit";
 
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
         && String(payment.purpose) === checkout.purpose
         && Number(payment.amount) === checkout.amount
         && metadata.reportId === checkout.reportId
+        && isPersonalizedPaymentCandidate(metadata)
         && (env.AUTO_REPORT_DELIVERY_ENABLED!=="true"||(payment.provider==="RAZORPAY"&&payment.currency==="INR"));
 
       if (!validPayment) {
@@ -111,8 +113,9 @@ export async function POST(request: NextRequest) {
         if(!locked.length)return null;
         const current=await tx.payment.findUnique({where:{id:paymentId}});
         const metadata=(current?.metadata as Record<string,unknown>|null)??{};
-        if(!current||current.userId!==user.id||current.status!==PaymentStatus.PAID||current.providerPaymentId!==providerPaymentId||String(current.purpose)!==checkout.purpose||Number(current.amount)!==checkout.amount||metadata.reportId!==checkout.reportId||(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&(current.provider!=="RAZORPAY"||current.currency!=="INR")))return null;
+        if(!current||current.userId!==user.id||current.status!==PaymentStatus.PAID||current.providerPaymentId!==providerPaymentId||String(current.purpose)!==checkout.purpose||Number(current.amount)!==checkout.amount||metadata.reportId!==checkout.reportId||!isPersonalizedPaymentCandidate(metadata)||(env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&(current.provider!=="RAZORPAY"||current.currency!=="INR")))return null;
         const existing=await tx.reportRequest.findUnique({where:{paymentId}});
+        if(!personalizedPaymentContext(metadata,existing?.id)||(existing&&(existing.userId!==user.id||existing.reportSlug!==report.slug)))return null;
         if(existing)return {row:existing,created:false};
       }
       const row=await tx.reportRequest.create({

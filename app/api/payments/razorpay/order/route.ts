@@ -1,7 +1,7 @@
 import { findKumbhEvent, kumbhEventVisible, kumbhEventScheduleMatches } from "@/lib/puja/service-catalogue";
 import { PUJA_FEE_TERMS_VERSION } from "@/lib/puja/fee-terms";
 import { NextRequest } from "next/server";
-import { PaymentPurpose, ReportPaymentStatus, ReportRequestStatus } from "@prisma/client";
+import { PaymentPurpose, ReportPaymentStatus, ReportRequestStatus, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
@@ -18,6 +18,7 @@ import { getSubscriptionPlan, finalizePaidPayment } from "@/lib/revenue";
 import { checkExistingReportOrder } from "@/lib/payments/report-order-recovery";
 import { getReportSlugForPaidId, getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import {isSavedKundliCheckout,hasSavedKundliPayload} from "@/lib/reports/saved-kundli-contract";
+import {reportReservationScope,matchesReportCheckoutContext,type ReportCheckoutContext} from "@/lib/reports/checkout-context";
 import { verifyReportPreflight } from "@/lib/reports/preflight-contract";
 import { googleSessionSchema, liveRazorpayAnalyticsOrder, sendGoogleCheckout } from "@/lib/analytics/google";
 import { getRequestIp, sharedRateLimitResponse as rateLimitResponse } from "@/lib/security/rate-limit";
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
     if("reportId" in body && !reportRequestId && !savedReportId && getReportSlugForPaidId(body.reportId) && !verifyReportPreflight(body.preflightToken,{userId:user.id,reportId:body.reportId,purpose:body.purpose,amountPaise:Math.round(item.amount*100)},env.JWT_SECRET))return fail("Complete and validate your report details before starting payment.",422);
 
     if(reportRequestId&&savedReportId)return fail("Choose exactly one report checkout context.",422);
+    if((reportRequestId&&!reportRequestId.trim())||(savedReportId&&!savedReportId.trim()))return fail("Invalid report checkout context.",422);
     if (savedReportId) {
       if(!("reportId" in body)||!isSavedKundliCheckout(body.purpose,body.reportId))return fail("Saved Kundli checkout requires its exact report product.",422);
       const saved=await prisma.kundliReport.findFirst({where:{id:savedReportId,userId:user.id},select:{id:true,reportJson:true}});
@@ -187,16 +189,21 @@ export async function POST(request: NextRequest) {
       // Serialize every fixed-price report purchase for this account/SKU.
       // Preserve any pending, paid or failed reservation for reconciliation.
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${user.id}),hashtext(${body.reportId}))::text`;
-      const identity=checkoutIdentity(body);
-      if(!identity)return null;
+      if(!("reportId" in body))return null;
       if(savedReportId){
         const saved=await tx.$queryRaw<Array<{id:string}>>`SELECT id FROM public."KundliReport" WHERE id=${savedReportId} AND "userId"=${user.id} FOR UPDATE`;
         if(!saved.length)return null;
         const paid=await tx.payment.findFirst({where:{userId:user.id,status:"PAID",metadata:{path:["savedReportId"],equals:savedReportId}},select:{id:true}});
         if(paid)return null;
       }
-      const outstanding=await tx.payment.findFirst({where:{userId:user.id,provider:"RAZORPAY",purpose:body.purpose,status:{in:["PENDING","PAID","FAILED"]},metadata:{path:[identity.key],equals:identity.value}},select:{id:true}});
-      if(outstanding)return null;
+      const outstanding=await findReportReservations(tx,user.id,body);
+      if(outstanding.length)return null;
+      if(reportRequestId){
+        const locked=await tx.$queryRaw<Array<{id:string}>>`SELECT id FROM public."ReportRequest" WHERE id=${reportRequestId} AND "userId"=${user.id} FOR UPDATE`;
+        if(!locked.length)return null;
+        const fresh=await tx.reportRequest.findUnique({where:{id:reportRequestId}});
+        if(!fresh||fresh.paymentId||fresh.adminBypass||["PAID","REFUNDED","ADMIN_BYPASS"].includes(fresh.paymentStatus)||["CANCELLED","DELIVERED","SENT"].includes(fresh.status)|| (getManualReportCheckout(fresh.reportSlug)?.reportId??fresh.reportSlug)!==body.reportId)return null;
+      }
       return tx.payment.create({data:paymentData});
     }):await prisma.payment.create({data:paymentData});
     if(!payment)return fail("An order or payment attempt already exists. Review Payment History or My Orders before trying again.",409);
@@ -257,11 +264,28 @@ export async function POST(request: NextRequest) {
       reused: false
     });
   } catch (error) {
+    if(error instanceof ReportContextConflict)return fail("An earlier report order requires reconciliation. Do not pay again; contact support.",409);
     return handleApiError(error);
   }
 }
 
+class ReportContextConflict extends Error{}
+async function findReportReservations(db:Pick<Prisma.TransactionClient,"payment">,userId:string,context:ReportCheckoutContext){
+  const key=context.savedReportId?"savedReportId":context.reportRequestId?"reportRequestId":"reportId";
+  const value=context.savedReportId??context.reportRequestId??context.reportId;
+  const candidates=await db.payment.findMany({where:{userId,provider:"RAZORPAY",status:{in:["PENDING","PAID","FAILED"]},metadata:{path:[key],equals:value}},orderBy:{createdAt:"desc"},select:{id:true,status:true,providerOrderId:true,amount:true,currency:true,createdAt:true,metadata:true,purpose:true}});
+  return candidates.filter(p=>reportReservationScope(p.metadata,context));
+}
+
 async function findReusablePayment(body: CheckoutBody, userId: string) {
+  if("reportId" in body){
+    const scoped=await findReportReservations(prisma,userId,body);
+    if(scoped.some(p=>p.purpose!==body.purpose||!matchesReportCheckoutContext(p.metadata,body)))throw new ReportContextConflict();
+    const paid=scoped.find(p=>p.status==="PAID");
+    if(paid)return paid;
+    if(scoped.length>1)throw new ReportContextConflict();
+    return scoped[0]??null;
+  }
   const identity = checkoutIdentity(body);
   if (!identity) return null;
 
@@ -270,7 +294,7 @@ async function findReusablePayment(body: CheckoutBody, userId: string) {
       userId,
       provider: "RAZORPAY",
       purpose: body.purpose as PaymentPurpose,
-      status: { in: ("reportId" in body||body.purpose==="AI_CREDITS"||body.purpose==="DIGITAL_PACKAGE"||body.purpose==="EXPERT_SERVICE") ? ["PENDING", "PAID", "FAILED"] : ["PENDING", "PAID"] },
+      status: { in: (body.purpose==="AI_CREDITS"||body.purpose==="DIGITAL_PACKAGE"||body.purpose==="EXPERT_SERVICE") ? ["PENDING", "PAID", "FAILED"] : ["PENDING", "PAID"] },
       metadata: { path: [identity.key], equals: identity.value }
     },
     orderBy: { createdAt: "desc" },

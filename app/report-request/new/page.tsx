@@ -10,6 +10,7 @@ import { normalizeLocale, type Locale } from "@/lib/i18n";
 import { safeServerTranslation } from "@/lib/i18n-server";
 import { getManualReport } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
+import {isPersonalizedPaymentCandidate,personalizedPaymentContext} from "@/lib/reports/checkout-context";
 import { cookies } from "next/headers";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
@@ -56,12 +57,14 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
       && payment.purpose === checkout.purpose
       && Number(payment.amount) === checkout.amount
       && metadata.reportId === checkout.reportId
+      && isPersonalizedPaymentCandidate(metadata)
       && (env.AUTO_REPORT_DELIVERY_ENABLED!=="true"||(payment.provider==="RAZORPAY"&&payment.currency==="INR"))
     );
 
     if (!validPayment || !payment) redirect(`/reports/${report.slug}?checkout=invalid`);
 
     const existingRequest = await prisma.reportRequest.findUnique({ where: { paymentId: payment.id } });
+    if(!personalizedPaymentContext(metadata,existingRequest?.id)||(existingRequest&&(existingRequest.userId!==user.id||existingRequest.reportSlug!==report.slug)))redirect(`/reports/${report.slug}?checkout=invalid`);
     if (existingRequest) redirect(`/report-request/success?id=${existingRequest.id}`);
 
     paymentVerified = true;

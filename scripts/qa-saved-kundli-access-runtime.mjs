@@ -33,6 +33,8 @@ require.extensions[".ts"]=function(module,file){module._compile(ts.transpileModu
 const {prisma}=require("@/lib/db"),{POST:pdf}=require("@/app/api/kundli/pdf/route"),{POST:order}=require("@/app/api/payments/razorpay/order/route");
 const {savedKundliAccessMap}=require("@/lib/reports/saved-kundli-access"),{recordSignedRefundReceipt}=require("@/lib/payments/refund-evidence");
 const {matchesSavedKundliPayment}=require("@/lib/reports/saved-kundli-contract");
+const {POST:createRequest}=require("@/app/api/report-requests/route");
+const {issueReportPreflight}=require("@/lib/reports/preflight-contract"),{env}=require("@/lib/env");
 const ids=[],receiptIds=[],run=randomUUID().replaceAll("-","");let checks=0;
 function check(v,m){assert.ok(v,m);checks++}
 function payload(marker){return {profile:{name:marker},birthDetails:{dateOfBirth:"1990-01-15",timeOfBirth:"10:30",birthPlace:"Delhi, India"},reportHash:"synthetic-same-untrusted-hash"}}
@@ -84,6 +86,16 @@ try{
  const ok=await status(order,payInput(unpaid.id),200,"owned valid saved report can reserve legitimate exact SKU");
  const ack=await ok.json(),created=await prisma.payment.findUniqueOrThrow({where:{id:ack.data.paymentId}});
  check(merchantCalls===1&&created.status==="PENDING"&&Number(created.amount)===799&&created.metadata.reportId==="kundli-pro"&&created.metadata.savedReportId===unpaid.id,"isolated gateway order with exact pending record only");
+ const direct={purpose:"KUNDLI_REPORT",reportId:"kundli-pro"};
+ const preflightToken=issueReportPreflight({userId:owner.id,reportId:direct.reportId,purpose:direct.purpose,amountPaise:79900},env.JWT_SECRET);
+ const directRes=await status(order,{...direct,preflightToken},200,"saved-chart purchases cannot block a valid personalized checkout");
+ const directAck=await directRes.json(),directPayment=await prisma.payment.findUniqueOrThrow({where:{id:directAck.data.paymentId}});
+ check(merchantCalls===2&&directPayment.id!==created.id&&directPayment.metadata.savedReportId==null&&directPayment.metadata.reportRequestId==null,"distinct personalized reservation");
+ await status(order,{...direct,preflightToken},409,"ambiguous duplicate direct attempt requires reconciliation");
+ check(merchantCalls===2,"duplicate direct purchase cannot create another merchant order");
+ const privateRequest={orderId:captured.id,planType:"PREMIUM",reportSlug:"premium-kundli",deliveryEmail:owner.email,fullName:"Synthetic report customer",dateOfBirth:"1990-01-15",timeOfBirth:"10:30",birthPlace:"Delhi, India",concern:"Synthetic question",language:"en"};
+ await status(createRequest,privateRequest,422,"saved-chart unlock cannot fund a personalized report");
+ check(await prisma.reportRequest.count({where:{paymentId:captured.id}})===0,"no personalized entitlement from a saved-chart purchase");
  console.log("SAVED_KUNDLI_ACCESS_RUNTIME_PASS "+JSON.stringify({checks,isolatedMerchantOrders:merchantCalls,renderCalls,freeCacheWrites:cacheWrites.length,scope:"real API handlers and disposable PostgreSQL; isolated identity, cache, PDF renderer and merchant transport; zero real charges"}));
 }finally{
  await prisma.auditLog.deleteMany({where:{id:{in:receiptIds}}});
