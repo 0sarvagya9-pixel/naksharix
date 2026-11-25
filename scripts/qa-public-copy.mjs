@@ -63,4 +63,22 @@ assert.ok(read("components/reports-content.tsx").includes("RazorpayCheckoutButto
 assert.ok(read("app/panchang/page.tsx").includes("Daily Panchang") &&
   !read("app/panchang/page.tsx").includes("provider-verified regression"),
   "CUSTOMER_PANCHANG_HEADING_REGRESSION");
+
+const optionalReportCard=read("components/optional-report-next-step.tsx");
+const relevantDiscovery=read("components/relevant-report-discovery.tsx");
+assert.ok(optionalReportCard.includes('locale === "hinglish"') &&
+  optionalReportCard.includes("Free tool use karne ke liye report kharidna zaroori nahi hai") &&
+  optionalReportCard.includes("Report ki details dekhein") &&
+  optionalReportCard.includes("getManualReportCheckout(reportSlug)") &&
+  optionalReportCard.includes("checkout.price") &&
+  optionalReportCard.includes('href={`/reports/${report.slug}`}'),
+  "OPTIONAL_REPORT_HINGLISH_OR_CATALOGUE_LINK_REGRESSION");
+assert.ok(relevantDiscovery.includes("hinglish: {") &&
+  relevantDiscovery.includes("Free card reading ke liye purchase zaroori nahi hai") &&
+  relevantDiscovery.includes("Personalized report lena bilkul optional hai") &&
+  relevantDiscovery.includes("}[locale]") &&
+  relevantDiscovery.includes('topic === "tarot" ? copy.tarot : copy.general') &&
+  relevantDiscovery.includes("locale={locale}"),
+  "RELEVANT_DISCOVERY_HINGLISH_OR_VOLUNTARY_COPY_REGRESSION");
+
 console.log("PUBLIC_COPY_QA=PASS;PUBLIC_SURFACES="+publicScreens.length+";LICENSE_CREDITS=AVAILABLE;CHECKOUT_LOGIC=PRESERVED");

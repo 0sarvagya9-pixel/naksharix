@@ -294,3 +294,7 @@ Actual Search Console inspection (25 Nov, 10 URLs, no credits): indexed apex hom
 ### 25 November — seven service internal planning and evidence ledger
 
 Extended R18/R20/R22/R23/R24/R27/R29 private review requests with durable operator-reviewed capacity plans, exact scope/date matching, time-bounded holds, owner-only unpaid acknowledgement and cancellation, serialized capacity, immutable progress receipts and unused-unit release. Three additive tables, guarded admin/customer API/UI, no merchant/payment writes, provider activation or guarantee. Separate operations flag defaults off. Real handler and isolated PostgreSQL tests added; original commercial entitlement, real provider and fulfilment criteria remain separate. Production untouched.
+
+
+### 25 November — optional report discovery language parity
+- A39/A44: added explicit Hinglish voluntary report-card and topic discovery copy instead of falling back to English. Hindi/English wording, original report destinations, catalogue-backed exact fees, free-tool independence and tarot-method disclosure preserved. Two source assertions failed on original and passed on edited source; included in existing public-copy QA. Browser/runtime acceptance still pending. No live release, campaign, payment, price or analytics modification.
