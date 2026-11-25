@@ -32,16 +32,16 @@ const prices={
  "couple-kundli":["marriage-report","MATCH_REPORT",699],
  "career-report":["career-report","KUNDLI_REPORT",599],
  "wealth-report":["finance-report","KUNDLI_REPORT",599],
- "love-report":["love-relationship-report","KUNDLI_REPORT",499],
+ "love-report":["love-relationship-report","MATCH_REPORT",499],
  "baby-name-report":["baby-name-personalized","KUNDLI_REPORT",399],
  "sade-sati-report":["sade-sati-personalized","KUNDLI_REPORT",399],
  "manglik-kaal-sarp-report":["manglik-kaal-sarp-personalized","KUNDLI_REPORT",499],
  "numerology-lo-shu-report":["numerology-report","KUNDLI_REPORT",399],
  "name-correction-report":["name-correction-personalized","KUNDLI_REPORT",399],
  "yearly-horoscope-report":["yearly-ai","YEARLY_REPORT",999],
- "transit-report":["transit-personalized","KUNDLI_REPORT",449],
+ "transit-report":["transit-personalized","YEARLY_REPORT",449],
  "rahu-ketu-report":["rahu-ketu-personalized","KUNDLI_REPORT",399],
- "jupiter-transit-report":["jupiter-transit-personalized","KUNDLI_REPORT",399],
+ "jupiter-transit-report":["jupiter-transit-personalized","YEARLY_REPORT",399],
  "fortune-report":["fortune-personalized","KUNDLI_REPORT",499]
 };
 const birth={name:"Synthetic primary person",dateOfBirth:"1990-01-15",timeOfBirth:"10:30",birthPlace:"Delhi, India",latitude:28.6139,longitude:77.209,timezone:5.5};
