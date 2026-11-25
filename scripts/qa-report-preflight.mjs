@@ -85,3 +85,17 @@ const reportLock=reportCreate.indexOf("await lockProviderPayment(tx,providerPaym
 assert.ok(reportLock>=0&&reportRefund>reportLock&&reportRowLock>reportRefund&&reportRead>reportRowLock&&reportDuplicate>reportRead&&reportInsert>reportDuplicate);
 assert.ok(reportCreate.includes("current.status!==PaymentStatus.PAID")&&reportCreate.includes("current.userId!==user.id")&&reportCreate.includes("current.providerPaymentId!==providerPaymentId")&&reportCreate.includes("if(existing)return {row:existing,created:false}")&&reportCreate.includes("if(!result.created)"));
 console.log("PAID_REPORT_REQUEST_REFUND_AND_DUPLICATE_SOURCE_GUARD_PASS");
+
+import {reportRequestCopy,reportRequestErrorKey} from "../lib/reports/report-request-copy.ts";
+const reportCopyKeys=Object.keys(reportRequestCopy.en).sort();
+for(const locale of ["en","hi","hinglish"]){assert.deepEqual(Object.keys(reportRequestCopy[locale]).sort(),reportCopyKeys);assert.ok(Object.values(reportRequestCopy[locale]).every(v=>typeof v==="string"&&v.trim().length>0));}
+for(const k of ["invalidCatalogue","invalidBirth","invalidPartner","invalidRoman","invalidAlternative","invalidSpellings"])for(const stage of ["preflight","paid","manual"])assert.equal(reportRequestErrorKey(reportRequestCopy.en[k],stage,422),k);
+for(const raw of [undefined,null,{},["bad"],"Internal database error: synthetic private value","__proto__"]){assert.equal(reportRequestErrorKey(raw,"preflight",500),"preflightFailed");assert.equal(reportRequestErrorKey(raw,"paid",500),"requestUnconfirmed");assert.equal(reportRequestErrorKey(raw,"manual",500),"manualUnconfirmed");}
+assert.equal(reportRequestErrorKey("Unauthorized","paid",401),"signIn");
+assert.equal(reportRequestErrorKey(null,"preflight",503),"unavailable");
+assert.equal(reportRequestErrorKey(null,"manual",429),"busy");
+assert.equal(reportRequestErrorKey(null,"paid",429),"requestUnconfirmed");
+const requestForm=readFileSync("components/report-request/report-request-form.tsx","utf8");
+assert.ok(!requestForm.includes("setStatus(json?.error")&&!requestForm.includes("setStatus(checked.reason)"));
+assert.ok(requestForm.includes("reportRequestCopy[apiLocale]")&&requestForm.includes("autoReportDeliveryMessage(apiLocale)")&&requestForm.includes("language:selectedLanguage"));
+console.log("REPORT_REQUEST_LOCALIZATION_CONTRACT_PASS;KEYS="+reportCopyKeys.length+";LOCALES=3;RAW_ERROR_FALLBACK=SAFE");

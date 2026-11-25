@@ -13,6 +13,7 @@ import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import { cookies } from "next/headers";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
+import {reportRequestCopy} from "@/lib/reports/report-request-copy";
 
 type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string; reportSlug?: string; prepare?: string }>;
 
@@ -28,6 +29,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     redirect("/login?redirectTo="+encodeURIComponent("/report-request/new?"+query.toString()));
   }
   const locale = await readLocale();
+  const copy=reportRequestCopy[locale==="hi"||locale==="hinglish"?locale:"en"];
   const adminMode = params.mode === "admin";
   const isAdmin = canBypassPayment(user);
 
@@ -75,9 +77,9 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
         <CardHeader>
           <CardTitle as="h1" className="font-cinzel text-3xl">{safeServerTranslation(locale, "reportRequestDetails")}</CardTitle>
           <p className="text-sm naksh-muted-text">
-            {preparing?"Complete the required details before payment. Your information will not be added to payment metadata.":paymentVerified
-              ? automaticDelivery ? autoReportDeliveryMessage(locale) : "Payment is verified. Submit accurate birth details to create the paid report request."
-              : "Submit accurate birth details for manual review. No payment is collected for this review-only request."}
+            {preparing?copy.preparing:paymentVerified
+              ? automaticDelivery ? autoReportDeliveryMessage(locale) : copy.verifiedIntro
+              : copy.manualIntro}
           </p>
         </CardHeader>
         <CardContent className="overflow-visible">
