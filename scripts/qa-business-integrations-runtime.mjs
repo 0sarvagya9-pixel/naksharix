@@ -118,10 +118,10 @@ try{
  assert.equal((await runPdf({...pdfInput,brand:"Unapproved override"},pdfKey.key)).status,422);
  const pdfResponse=await runPdf(pdfInput,pdfKey.key);assert.equal(pdfResponse.status,200);
  assert.equal(pdfResponse.headers.get("cache-control"),"private, no-store");
- const result=(await pdfResponse.json()).data;assert.equal(result.brand.name,"Synthetic Example Partner");
- assert.equal(result.usageUnits,2);assert.equal(result.result.pages,2);
- const bytes=Buffer.from(result.result.pdfBase64,"base64");assert.equal(bytes.length,result.result.byteLength);
- assert.equal(createHash("sha256").update(bytes).digest("hex"),result.result.sha256);
+ const pdfResult=(await pdfResponse.json()).data;assert.equal(pdfResult.brand.name,"Synthetic Example Partner");
+ assert.equal(pdfResult.usageUnits,2);assert.equal(pdfResult.result.pages,2);
+ const bytes=Buffer.from(pdfResult.result.pdfBase64,"base64");assert.equal(bytes.length,pdfResult.result.byteLength);
+ assert.equal(createHash("sha256").update(bytes).digest("hex"),pdfResult.result.sha256);
  const {PDFDocument}=require("pdf-lib");const pdf=await PDFDocument.load(bytes);
  assert.equal(pdf.getPageCount(),2);assert.equal(pdf.getTitle(),"Synthetic Example Partner | Chart reference | Powered by Naksharix");
  assert.equal((await runPdf(pdfInput,pdfKey.key)).status,409,"No duplicate usage");
@@ -130,7 +130,7 @@ try{
  assert.equal((await runPdf({...pdfInput,requestId:randomUUID()},pdfKey.key)).status,429);
  const pdfMonth=await prisma.businessUsageMonth.findUniqueOrThrow({where:{tenantId_period:{tenantId:pdfTenant.id,period:usagePeriod()}}});assert.equal(pdfMonth.attemptedUnits,4);assert.equal(pdfMonth.completedUnits,4);
  const pdfCalls=await prisma.businessUsageCall.findMany({where:{tenantId:pdfTenant.id}});
- assert.equal(pdfCalls.length,2);assert.ok(!JSON.stringify(pdfCalls).includes(birth.date)&&!JSON.stringify(pdfCalls).includes(result.result.pdfBase64));
+ assert.equal(pdfCalls.length,2);assert.ok(!JSON.stringify(pdfCalls).includes(birth.date)&&!JSON.stringify(pdfCalls).includes(pdfResult.result.pdfBase64));
  if(process.env.PACKAGE_QA_DIR){fs.mkdirSync(process.env.PACKAGE_QA_DIR,{recursive:true});fs.writeFileSync(path.join(process.env.PACKAGE_QA_DIR,"partner-chart-reference.pdf"),bytes);}
  console.log("B2B_CHART_PDF_RUNTIME_PASS "+JSON.stringify({pages:2,documents:2,exactBrand:true,consentDenied:true,scopeEscalationDenied:true,overrideDenied:true,duplicateDenied:true,quotaDenied:true,privateResponse:true,usageUnits:4,persistedInputOrPdf:false}));
  console.log("B2B_WIDGET_RUNTIME_PASS "+JSON.stringify({signedOrigin:true,originMismatchDenied:true,expiredDenied:true,tamperDenied:true,concurrentReplayDenied:true,revokedKeyDenied:true,completedUnits:1,attemptedUnits:2,scope:"local request handlers and disposable database; external publisher integration not active"}));
