@@ -3,6 +3,7 @@ import {prisma} from "@/lib/db";
 import {env} from "@/lib/env";
 import {getRazorpayReadiness} from "@/lib/payments/readiness";
 import {getManualReportCheckout} from "@/lib/reports/checkout-catalogue";
+import {cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 import {EXPERT_TERMS_VERSION,expertNames,expertEntitled,exactExpertPayment,validExpertQuote,sourceMatches,expertProviderAccess,type ExpertKind} from "@/lib/expert-services/contract";
 import type {Prisma,Payment,ExpertServiceRequest} from "@prisma/client";
 import type {requestSchema,adminSchema,providerSchema} from "@/lib/expert-services/input";
@@ -16,11 +17,15 @@ export async function approvedExpert(tx:Prisma.TransactionClient,profileId:strin
  const p=await tx.astrologerProfile.findUnique({where:{id:profileId},select:profileSelect});
  return p?.status==="APPROVED"&&p.approvedAt&&p.user.role==="ASTROLOGER"&&(p.user.emailVerified||p.user.emailVerifiedAt)?p:null;
 }
+async function expertUnrefunded(tx:Prisma.TransactionClient,order:Parameters<typeof expertEntitled>[0],payment:Parameters<typeof expertEntitled>[1]){
+ return expertEntitled(order,payment)&&!!payment?.providerPaymentId&&(await cumulativeSignedRefund(tx,payment.providerPaymentId))===0;
+}
 async function verifiedSource(tx:Prisma.TransactionClient,userId:string,reportId:string){
  const row=await tx.reportRequest.findFirst({where:{id:reportId,userId,paymentStatus:"PAID",adminBypass:false},include:{payment:true}});
  const product=row&&getManualReportCheckout(row.reportSlug),payment=row?.payment;
  const meta=payment?.metadata as Record<string,unknown>|null|undefined;
  if(!row||!product||!payment||payment.userId!==userId||payment.status!=="PAID"||payment.provider!=="RAZORPAY"||!payment.providerPaymentId||payment.currency!=="INR"||payment.purpose!==product.purpose||Number(payment.amount)!==product.amount||meta?.reportId!==product.reportId||meta?.gatewayStatus!=="captured"||!row.generatedPdfSize||!row.generatedPdfChecksum||!/^[a-f0-9]{64}$/.test(row.generatedPdfChecksum)||(!row.generatedPdfBytes&&!row.generatedPdfStorageKey))return null;
+ if((await cumulativeSignedRefund(tx,payment.providerPaymentId))>0)return null;
  return row;
 }
 async function sourceStillValid(tx:Prisma.TransactionClient,row:Pick<ExpertServiceRequest,"kind"|"userId"|"sourceReportId"|"sourceChecksum">){
@@ -47,7 +52,7 @@ export async function createExpertRequest(userId:string,input:z.infer<typeof req
 }
 export async function listExpertCustomer(userId:string){
  const [rows,reports]=await Promise.all([prisma.expertServiceRequest.findMany({where:{userId},select:{...publicSelect,response:true,payment:true,userId:true,paymentId:true,astrologerProfileId:true,consentVersion:true,sourceChecksum:true},orderBy:{createdAt:"desc"},take:30}),prisma.reportRequest.findMany({where:{userId,paymentStatus:"PAID",adminBypass:false,generatedPdfSize:{not:null}},select:{id:true,reportSlug:true,createdAt:true},orderBy:{createdAt:"desc"},take:20})]);
- return {requests:await Promise.all(rows.map(async ({payment,userId:uid,paymentId,astrologerProfileId,consentVersion,response,expertFeePaise,settlementStatus,sourceChecksum,...row})=>({...row,response:row.status==="DELIVERED"&&expertEntitled({...row,userId:uid,paymentId,astrologerProfileId,consentVersion},payment)&&await sourceStillValid(prisma,{...row,userId:uid,sourceChecksum})?response:null}))),reports};
+ return {requests:await Promise.all(rows.map(async ({payment,userId:uid,paymentId,astrologerProfileId,consentVersion,response,expertFeePaise,settlementStatus,sourceChecksum,...row})=>({...row,response:row.status==="DELIVERED"&&await expertUnrefunded(prisma,{...row,userId:uid,paymentId,astrologerProfileId,consentVersion},payment)&&await sourceStillValid(prisma,{...row,userId:uid,sourceChecksum})?response:null}))),reports};
 }
 export async function cancelExpertCustomer(userId:string,id:string){
  return prisma.$transaction(async tx=>{await lockExpertService(tx,id);const changed=await tx.expertServiceRequest.updateMany({where:{id,userId,paymentId:null,status:{in:["REQUESTED","ASSIGNED","QUOTED"]}},data:{status:"CANCELED"}});if(changed.count)await audit(tx,userId,id,"canceled");return changed.count===1;});
@@ -70,7 +75,7 @@ export async function actExpertAdmin(adminId:string,input:z.infer<typeof adminSc
   await tx.expertServiceRequest.update({where:{id:row.id},data:{status:"CANCELED"}});
  }else{
   // Record an independently executed manual payout only. This endpoint never transfers money.
-  if(row.status!=="DELIVERED"||row.settlementStatus!=="PAYABLE"||!row.expertFeePaise||!expertEntitled(row,row.payment)||!await sourceStillValid(tx,row)||await tx.expertServiceRequest.findUnique({where:{settlementReference:input.reference},select:{id:true}}))return false;
+  if(row.status!=="DELIVERED"||row.settlementStatus!=="PAYABLE"||!row.expertFeePaise||!await expertUnrefunded(tx,row,row.payment)||!await sourceStillValid(tx,row)||await tx.expertServiceRequest.findUnique({where:{settlementReference:input.reference},select:{id:true}}))return false;
   await tx.expertServiceRequest.update({where:{id:row.id},data:{settlementStatus:"SETTLED",settlementReference:input.reference,settledAt:new Date()}});
  }
  await audit(tx,adminId,row.id,input.action.toLowerCase());return true;
@@ -83,7 +88,7 @@ export async function listExpertProvider(userId:string){
  const ready=await approvedExpert(tx,profile.id);if(!ready)return [];
  const rows=await tx.expertServiceRequest.findMany({where:{astrologerProfileId:profile.id},select:{...publicSelect,response:true,sourceReadAt:true,sourceReadChecksum:true,sourceChecksum:true,payment:true,paymentId:true,userId:true,astrologerProfileId:true,consentVersion:true,settledAt:true},orderBy:{createdAt:"desc"},take:50});
  return Promise.all(rows.map(async ({payment,userId,paymentId,astrologerProfileId,consentVersion,sourceChecksum,sourceReadChecksum,response,...row})=>{
- const entitled=expertEntitled({...row,userId,paymentId,astrologerProfileId,consentVersion},payment);
+ const entitled=await expertUnrefunded(tx,{...row,userId,paymentId,astrologerProfileId,consentVersion},payment);
  // Recheck the current paid report and checksum even after the review itself
  // was purchased. A refunded/replaced source must not expose its private notes.
  const sourceValid=await sourceStillValid(tx,{...row,userId,sourceChecksum});
@@ -105,7 +110,7 @@ export async function actExpertProvider(userId:string,input:z.infer<typeof provi
   if(!["ASSIGNED","QUOTED"].includes(row.status)||row.paymentId||row.quoteVersion!==input.quoteVersion)return false;
   await tx.expertServiceRequest.update({where:{id:row.id},data:{status:"REQUESTED",astrologerProfileId:null,pricePaise:null,expertFeePaise:null,dueAt:null,providerAcceptedAt:null}});
  }else{
-  if(row.status!=="PAID"||!expertEntitled(row,row.payment)||!await sourceStillValid(tx,row)||!sourceMatches(row.kind,row.sourceChecksum,row.sourceReadChecksum))return false;
+  if(row.status!=="PAID"||!await expertUnrefunded(tx,row,row.payment)||!await sourceStillValid(tx,row)||!sourceMatches(row.kind,row.sourceChecksum,row.sourceReadChecksum))return false;
   await tx.expertServiceRequest.update({where:{id:row.id},data:{status:"DELIVERED",response:input.response,completedAt:new Date(),settlementStatus:"PAYABLE"}});
  }
  await audit(tx,userId,row.id,input.action.toLowerCase());return true;
@@ -131,7 +136,7 @@ export async function validateExpertCapture(tx:Prisma.TransactionClient,payment:
 export async function providerSourceForDownload(userId:string,id:string){
  return prisma.$transaction(async tx=>{
  await lockExpertService(tx,id);const r=await tx.expertServiceRequest.findUnique({where:{id},include:{payment:true}});
- if(!r||r.kind!=="REPORT_REVIEW"||r.status!=="PAID"||!r.sourceReportId||!r.astrologerProfileId||!expertEntitled(r,r.payment))return null;
+ if(!r||r.kind!=="REPORT_REVIEW"||r.status!=="PAID"||!r.sourceReportId||!r.astrologerProfileId||!await expertUnrefunded(tx,r,r.payment))return null;
  const p=await approvedExpert(tx,r.astrologerProfileId);if(!p||p.userId!==userId)return null;
  const source=await verifiedSource(tx,r.userId,r.sourceReportId);if(!source||!sourceMatches(r.kind,r.sourceChecksum,source.generatedPdfChecksum))return null;
  return {storageDriver:source.generatedPdfStorageDriver,storageKey:source.generatedPdfStorageKey,databaseBytes:source.generatedPdfBytes,expectedChecksum:source.generatedPdfChecksum};
@@ -140,7 +145,7 @@ export async function providerSourceForDownload(userId:string,id:string){
 export async function recordExpertSourceRead(userId:string,id:string,checksum:string){
  return prisma.$transaction(async tx=>{
  await lockExpertService(tx,id);const r=await tx.expertServiceRequest.findUnique({where:{id},include:{payment:true}});
- if(!r||r.status!=="PAID"||!r.astrologerProfileId||r.kind!=="REPORT_REVIEW"||!expertEntitled(r,r.payment)||!sourceMatches(r.kind,r.sourceChecksum,checksum)||!await sourceStillValid(tx,r))return false;
+ if(!r||r.status!=="PAID"||!r.astrologerProfileId||r.kind!=="REPORT_REVIEW"||!await expertUnrefunded(tx,r,r.payment)||!sourceMatches(r.kind,r.sourceChecksum,checksum)||!await sourceStillValid(tx,r))return false;
  const p=await approvedExpert(tx,r.astrologerProfileId);if(!p||p.userId!==userId)return false;
  await tx.expertServiceRequest.update({where:{id:r.id},data:{sourceReadAt:new Date(),sourceReadChecksum:checksum}});await audit(tx,userId,r.id,"source_access_authorized");return true;
  });
