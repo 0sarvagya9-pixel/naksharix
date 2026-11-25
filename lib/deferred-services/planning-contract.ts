@@ -8,7 +8,15 @@ export function consumedCapacity(rows:CapacityRow[],now:Date){
   return sum+(row.state==="CANCELED"||(row.state==="HELD"&&row.holdUntil<=now)?row.completedUnits:row.units);
  },0);
 }
-export function visibleAllocationState(row:CapacityRow,now:Date){return row.state==="HELD"&&row.holdUntil<=now?"EXPIRED":row.state;}
+export type AllocationPlanWindow={state:string;endsAt:Date};
+export function visibleAllocationState(row:CapacityRow,now:Date,plan?:AllocationPlanWindow){
+ return row.state==="HELD"&&(row.holdUntil<=now||(plan&&(plan.state!=="REVIEWED"||plan.endsAt<=now)))?"EXPIRED":row.state;
+}
+// A request can be reissued only if it has no recorded work. Completion and
+// partial fulfilment are immutable at this boundary; use their original records.
+export function canReissueReview(row:CapacityRow,plan:AllocationPlanWindow,now:Date){
+ return row.completedUnits===0&&(row.state==="CANCELED"||visibleAllocationState(row,now,plan)==="EXPIRED");
+}
 export function preparePlanTarget(kind:string,target:string){
  const item=SERVICES.find(x=>x.kind===kind);
  if(!item)return null;

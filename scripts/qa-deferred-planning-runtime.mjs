@@ -55,9 +55,46 @@ try{
  identity=winner.userId===other.id?other:third;check((await success(await post(customer.POST,{action:"CANCEL",allocationId:a.id,version:a.version}))).allocation.state==="CANCELED","customer cancellation");
  identity=operator;const second=winner.ticketId===t1?t2:t1;check((await success(await post(admin.POST,{action:"ALLOCATE",planId:p.id,ticketId:second}))).allocation.state==="HELD","unused capacity released");
  const adminView=await success(await admin.GET());check(adminView.plans.some(x=>x.id===p.id&&x.remaining===0),"admin persisted capacity");
+ // The old unique ticket allocation prevented recovery after cancellation.
+ // Reissue must never bypass capacity, prior receipt, ownership or version gates.
+ const old=await prisma.deferredServiceAllocation.findUniqueOrThrow({where:{id:a.id}});
+ check((await post(admin.POST,{action:"REISSUE",allocationId:a.id,planId:p.id,version:old.version})).status===409,"full plan reissue refused");
+ const replacement=(await success(await post(admin.POST,createBody(service,1)))).plan;plans.push(replacement.id);
+ check((await post(admin.POST,{action:"REISSUE",allocationId:a.id,planId:replacement.id,version:old.version})).status===409,"draft replacement denied");
+ await success(await post(admin.POST,{action:"REVIEW_PLAN",planId:replacement.id,acknowledge:true}));
+ const wrong=(await success(await post(admin.POST,createBody(SERVICES.find(s=>s.kind==="prasad"),1)))).plan;plans.push(wrong.id);
+ await success(await post(admin.POST,{action:"REVIEW_PLAN",planId:wrong.id,acknowledge:true}));
+ check((await post(admin.POST,{action:"REISSUE",allocationId:a.id,planId:wrong.id,version:old.version})).status===409,"different service scope refused");
+ const retryInput={action:"REISSUE",allocationId:a.id,planId:replacement.id,version:old.version};
+ const reissueRace=await Promise.all([post(admin.POST,retryInput),post(admin.POST,retryInput)]);
+ check(reissueRace.map(r=>r.status).sort().join(",")==="200,409","one reissue despite concurrent stale operations");
+ const reissued=(await success(reissueRace.find(r=>r.status===200))).allocation;
+ check(reissued.id===a.id&&reissued.state==="HELD"&&reissued.version===old.version+1&&reissued.acceptedAt===null,"fresh hold and version");
+ const moved=await prisma.deferredServiceAllocation.findUniqueOrThrow({where:{id:a.id}});
+ check(moved.planId===replacement.id&&moved.acceptedAt===null&&moved.canceledAt===null&&moved.completedUnits===0,"persisted consent reset");
+ const reissueAudit=await prisma.adminActionLog.findMany({where:{action:"deferred_allocation.reissued",targetId:a.id}});
+ check(reissueAudit.length===1&&reissueAudit[0].metadata.previous.planId===p.id&&reissueAudit[0].metadata.next.planId===replacement.id,"prior state audited");
+ identity=winner.userId===other.id?other:third;
+ check((await post(customer.POST,{action:"ACCEPT",allocationId:a.id,version:old.version,consent:PLAN_TERMS})).status===409,"stale acknowledgement refused");
+ const fresh=(await success(await post(customer.POST,{action:"ACCEPT",allocationId:a.id,version:reissued.version,consent:PLAN_TERMS}))).allocation;
+ check(fresh.state==="ACCEPTED","fresh customer acknowledgement");
+ identity=operator;check((await post(admin.POST,{action:"REISSUE",allocationId:a.id,planId:replacement.id,version:fresh.version})).status===409,"accepted proposal cannot be reissued");
+ const completeRow=await prisma.deferredServiceAllocation.findFirstOrThrow({where:{userId:owner.id,state:"COMPLETED"}});
+ check((await post(admin.POST,{action:"REISSUE",allocationId:completeRow.id,planId:replacement.id,version:completeRow.version})).status===409,"completed work cannot be reissued");
+ const held=await prisma.deferredServiceAllocation.findUniqueOrThrow({where:{ticketId:second}});
+ await success(await post(admin.POST,{action:"CLOSE_PLAN",planId:p.id}));
+ identity=held.userId===other.id?other:third;
+ const closedView=await success(await customer.GET());
+ check(closedView.allocations.some(x=>x.id===held.id&&x.state==="EXPIRED"),"closed-plan hold correctly displayed as expired");
+ check((await post(customer.POST,{action:"ACCEPT",allocationId:held.id,version:held.version,consent:PLAN_TERMS})).status===409,"closed plan cannot be acknowledged");
+ identity=operator;
+ check((await post(admin.POST,{action:"REISSUE",allocationId:held.id,planId:replacement.id,version:held.version})).status===409,"replacement capacity enforced");
+ const available=(await success(await post(admin.POST,createBody(service,1)))).plan;plans.push(available.id);
+ await success(await post(admin.POST,{action:"REVIEW_PLAN",planId:available.id,acknowledge:true}));
+ check((await success(await post(admin.POST,{action:"REISSUE",allocationId:held.id,planId:available.id,version:held.version}))).allocation.state==="HELD","closed-plan unacknowledged hold may be reissued safely");
  identity=owner;const view=await success(await customer.GET());check(view.allocations.length===7&&view.allocations.every(x=>x.state==="COMPLETED"),"customer private readback");
  check(await prisma.payment.count({where:{userId:{in:ids}}})===0,"zero payment records");
- console.log("DEFERRED_PLANNING_RUNTIME_PASS "+JSON.stringify({checks,serviceKinds:7,plans:plans.length,capacityRace:true,paymentRecords:0,scope:"disposable PostgreSQL, real handlers, synthetic operator attestations and isolated identity"}));
+ console.log("DEFERRED_PLANNING_RUNTIME_PASS "+JSON.stringify({checks,serviceKinds:7,plans:plans.length,capacityRace:true,reissueRace:true,consentReset:true,paymentRecords:0,scope:"disposable PostgreSQL, real handlers, synthetic operator attestations and isolated identity"}));
 }finally{
  delete process.env.DEFERRED_SERVICE_OPERATIONS_ENABLED;delete process.env.DEFERRED_SERVICE_REQUESTS_ENABLED;
  await prisma.deferredServiceAllocation.deleteMany({where:{planId:{in:plans}}});
