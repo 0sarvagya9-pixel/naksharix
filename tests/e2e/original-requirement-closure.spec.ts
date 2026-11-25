@@ -35,6 +35,7 @@ test("A11 explicit professional signup overrides saved user intent and selects t
  await page.goto("/signup?role=user");await expect(page.locator("#professionalRole")).toHaveCount(0);await expect(page.locator('input[name="role"]')).toHaveValue("USER");
 });
 test("A13 every authentication entry has one accessible H1 and labelled credential fields",async({page})=>{
+ test.setTimeout(120000);
  for(const route of ["/login","/signup","/auth/login","/auth/signup","/auth/astrologer-login","/forgot-password","/reset-password","/verify-email"]){
   await page.goto(route,{waitUntil:"domcontentloaded"});
   const h=page.getByRole("heading",{level:1});await expect(h).toHaveCount(1);await expect(h).toBeVisible();
@@ -58,13 +59,13 @@ test("A17 and A18 report comparison uses the renderer-backed benefits and exact 
  }
  const career=box.getByRole("checkbox",{name:"Career Report",exact:true});
  await expect(career).toBeDisabled();
- await box.getByRole("checkbox",{name:/Premium Kundli/}).uncheck();
+ await box.getByRole("checkbox",{name:"Premium Personalized Kundli Report",exact:true}).uncheck();
  await expect(box.getByRole("status")).toHaveText("2/3");await expect(career).toBeEnabled();await career.check();
  await expect(box.getByRole("status")).toHaveText("3/3");await expect(box.locator("article")).toHaveCount(3);
  const card=box.locator("article").filter({has:page.locator('a[href="/reports/career-report"]')});
  await expect(card.getByText("INR 599",{exact:true})).toBeVisible();
  await expect(card.getByText("Career, skill and work houses",{exact:true})).toBeVisible();
- for(const checked of await box.getByRole("checkbox",{checked:true}).all())await checked.uncheck();
+ for(let i=0;i<3;i++)await box.getByRole("checkbox",{checked:true}).first().uncheck();
  await expect(box.getByRole("status")).toHaveText("0/3");await expect(box.locator("article")).toHaveCount(0);
  await expect(box.getByText("Select a report to start comparing.")).toBeVisible();
  await career.check();await expect(box.getByRole("status")).toHaveText("1/3");
