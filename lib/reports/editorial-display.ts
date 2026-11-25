@@ -3,7 +3,18 @@
  * English output remains unchanged; Hindi/Hinglish use reviewed field labels.
  */
 export type EditorialLocale="en"|"hi"|"hinglish";
+// Shared layout contract: leave room for the widest normal-language house heading.
+export const EDITORIAL_HOUSE_TABLE_FRACTIONS=[.72,.85,1.3,3.34] as const;
 const TERMS:Record<string,readonly [string,string]>={
+ "Mild": ["हल्का","Halka"],
+ "Moderate": ["मध्यम","Madhyam"],
+ "Severe": ["गंभीर","Gambhir"],
+ "High": ["उच्च","Zyada"],
+ "Low": ["कम","Kam"],
+ "Near station": ["स्थिरता के निकट","Station ke paas"],
+ "Not clearly detected": ["स्पष्ट रूप से नहीं पाया गया","Spasht roop se nahi mila"],
+ "Current Mahadasha": ["वर्तमान महादशा","Vartaman Mahadasha"],
+ "Current Antardasha": ["वर्तमान अंतर्दशा","Vartaman Antardasha"],
  "Graha": [
   "ग्रह",
   "Graha"

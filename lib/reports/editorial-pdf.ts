@@ -3,7 +3,7 @@ import { PDFDocument, StandardFonts, rgb, radians, type PDFPage,type PDFFont,typ
 import type { PremiumReportContentResult } from "@/lib/reports/premium-report-content-engine";
 import type { EditorialCard,EditorialInsights } from "@/lib/reports/editorial-insights";
 import type {DepthChapter} from "@/lib/reports/editorial-depth";
-import {editorialTerm,editorialDate} from "@/lib/reports/editorial-display";
+import {editorialTerm,editorialDate,EDITORIAL_HOUSE_TABLE_FRACTIONS} from "@/lib/reports/editorial-display";
 
 type R=Record<string,unknown>;
 const obj=(v:unknown):R=>v!==null&&typeof v==="object"&&!Array.isArray(v)?v as R:{};
@@ -70,7 +70,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  function brand(top:number,dark=false){if(logo){const l=logo.scaleToFit(34,34);page.drawImage(logo,{x:M+1,y:H-top-l.height,width:l.width,height:l.height});}tx(M+42,top+3,"NAKSHARIX",13,"bold",dark?glow:wine);tx(M+42,top+20,term("VEDIC ASTROLOGY"),7,"body",dark?light:muted);}
  function interior(kicker:string,title:string,sub="",continuation=false){
   kicker=term(kicker);chapter=kicker;heading=title;page=pdf.addPage([W,H]);rect(0,0,W,H,iv);brand(24);
-  caps(W-M,32,tr("PRIVATE REPORT","निजी रिपोर्ट"),muted,8,"right");rule(M,68,W-M,68,gold,1);
+  caps(W-M,32,tr("PRIVATE REPORT","निजी रिपोर्ट","NIJI REPORT"),muted,8,"right");rule(M,68,W-M,68,gold,1);
   if(!continuation)starts.push({title,page:pdf.getPageCount()});
   caps(M,84,kicker);y=102+fixed(M,102,title+(continuation?tr(" (continued)"," (जारी)"):""),CW,25,"title",wine,30)+8;
   if(sub)y+=fixed(M,y,sub,CW,10.1,"body",muted,14.7)+15;
@@ -126,9 +126,9 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   values.forEach((v,i)=>{const x=M+i*(w+10);rect(x,y,w,height,white,light);let t=y+11;t+=fixed(x+10,t,v.label.toUpperCase(),w-20,8,"bold",gold,11)+9;t+=fixed(x+10,t,v.value,w-20,sizes[i],"title",wine,sizes[i]+4)+8;if(v.sub)fixed(x+10,t,v.sub,w-20,8.5,"body",muted,12)});
   y+=height+16;
  }
- function motionLabel(r:R){return r.motionState==="near_station"?tr("Near station","स्थिरता के निकट"):r.retrograde===true?tr("Retrograde","वक्री"):r.retrograde===false?tr("Direct","मार्गी"):tr("Unavailable","उपलब्ध नहीं")}
+ function motionLabel(r:R){return r.motionState==="near_station"?term("Near station"):r.retrograde===true?term("Retrograde"):r.retrograde===false?term("Direct"):tr("Unavailable","उपलब्ध नहीं","Available nahi")}
  function planetTable(rows:R[]){if(!rows.length)return;table(["Graha",tr("Sign","राशि"),tr("House","भाव"),tr("Degree","अंश"),tr("Nakshatra","नक्षत्र"),tr("Motion","गति")],rows.map(r=>[display(r.planet),display(r.sign),shown(r.house),deg(r.degree),display(r.nakshatra),motionLabel(r)]),[1,1.05,.55,.8,1.4,1.05],9.2,33)}
- function houseTable(rows:R[]){if(!rows.length)return;table([tr("House","भाव"),tr("Sign","राशि"),tr("Planets","ग्रह"),tr("Reflection theme","चिंतन विषय")],rows.map(r=>[shown(r.house),display(r.sign),list(r.planets).map(p=>term(typeof p==="string"?p:s(obj(p).planet))).join(", ")||"-",s(r.title)+"\n"+s(r.compact??r.interpretation)]),[.56,.85,1.3,3.5],8.5,36)}
+ function houseTable(rows:R[]){if(!rows.length)return;table([tr("House","भाव"),tr("Sign","राशि"),tr("Planets","ग्रह"),tr("Reflection theme","चिंतन विषय")],rows.map(r=>[shown(r.house),display(r.sign),list(r.planets).map(p=>term(typeof p==="string"?p:s(obj(p).planet))).join(", ")||"-",s(r.title)+"\n"+s(r.compact??r.interpretation)]),[...EDITORIAL_HOUSE_TABLE_FRACTIONS],8.5,36)}
  function chart(x:number,top:number,size:number,houses:R[]){
   rect(x,top,size,size,white,gold);
   const shade=(poly:number[][],col:RGB)=>{const p=poly.map(([a,b],i)=>(i?"L":"M")+" "+(a*size)+" "+(b*size)).join(" ")+" Z";page.drawSvgPath(p,{x,y:H-top,color:col});};
@@ -167,7 +167,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   [4,9,2,3,5,7,8,1,6].forEach((n,i)=>{const g=grid.find(r=>number(r.number)===n),ct=number(g?.count),x=M+i%3*(z+gap),t=y+Math.floor(i/3)*(z+gap);rect(x,t,z,z,ct?green:sand);caps(x+9,t+7,String(n),ct?glow:muted,8);tx(x+z/2,t+25,ct?String(n).repeat(Math.min(ct,10)):"-",ct>4?12:22,"title",ct?iv:muted,"center");tx(x+z/2,t+57,ct?"x "+ct:tr("Not present","अनुपस्थित"),8.1,"body",ct?iv:muted,"center")});
   const present=grid.filter(r=>number(r.count)>0).map(r=>s(r.number)),absent=grid.filter(r=>!number(r.count)).map(r=>s(r.number));let t=y+6;const x=M+gw+20,w=CW-gw-20;caps(x,t,tr("Present digits","उपस्थित अंक"));t+=17;t+=fixed(x,t,present.join(" · ")||"-",w,21,"title",wine,24)+12;caps(x,t,tr("Not present","अनुपस्थित"));t+=16;t+=fixed(x,t,absent.join(" · ")||"-",w,17,"title",wine,21)+12;fixed(x,t,tr("Absent digits are not deficiencies. This is a symbolic tradition, not a measure of ability.","अनुपस्थित अंक किसी कमी का प्रमाण नहीं हैं। यह प्रतीकात्मक परंपरा है, क्षमता का माप नहीं।"),w,10,"body",muted,14.5);y+=gw+20;
  }
- function doshaCard(r:R,title:string):EditorialCard{const reference=["marsHouseFromLagna","marsHouseFromMoon","marsHouseFromVenus"].filter(k=>r[k]!=null).map(k=>field(k)+": "+s(r[k])).join(" · ");return {label:term(title),title:r.present===true?(s(r.severity)||tr("Rule detected","नियम पाया गया")):tr("Not clearly detected","स्पष्ट रूप से नहीं पाया गया"),body:[s(r.summary),reference,s(r.remedies)].filter(Boolean).join("\n")}}
+ function doshaCard(r:R,title:string):EditorialCard{const reference=["marsHouseFromLagna","marsHouseFromMoon","marsHouseFromVenus"].filter(k=>r[k]!=null).map(k=>field(k)+": "+s(r[k])).join(" · ");return {label:term(title),title:r.present===true?(term(s(r.severity))||tr("Rule detected","नियम पाया गया","Niyam mila")):term("Not clearly detected"),body:[s(r.summary),reference,s(r.remedies)].filter(Boolean).join("\n")}}
  function dosha(r:R,title:string){if(Object.keys(r).length)cardRows([doshaCard(r,title)],1)}
  function panchangGrid(r:R){
   const fields=["tithi","paksha","vaar","yoga","karan","nakshatra","sunrise","sunset"];
@@ -185,7 +185,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   }else table([tr("Date","तिथि"),"Graha / sign","Degree",tr("From Moon","चंद्र से"),tr("From Lagna","लग्न से"),tr("Phase / motion","चरण / गति")],flat.map(r=>[date(r.date),display(r.planet)+" / "+display(r.sign),deg(r.degree),shown(r.houseFromMoon),shown(r.houseFromAscendant),s(r.traditionalPhase)?term(s(r.traditionalPhase)):motionLabel(r)]),[1.05,1.15,.85,.75,.75,1.6],8.7,30);
  }
  function reflectionPlan(){
-  const kicker=tr("REFLECTION PLAN","चिंतन योजना"),title=tr("Turn insight into action","चिंतन को कार्य में बदलें"),intro=tr("Use this report as a structured reflection exercise, not a directive for major decisions.","इसे चिंतन के साधन की तरह उपयोग करें, बड़े निर्णयों के निर्देश की तरह नहीं।");
+  const kicker=tr("REFLECTION PLAN","चिंतन योजना","CHINTAN YOJANA"),title=tr("Turn insight into action","चिंतन को कार्य में बदलें","Chintan se vyavaharik kadam"),intro=tr("Use this report as a structured reflection exercise, not a directive for major decisions.","इसे चिंतन के साधन की तरह उपयोग करें, बड़े निर्णयों के निर्देश की तरह नहीं।","Is report ko chintan ke liye use karein, bade decisions ka nirdesh na samjhein.");
   // Avoid leaving a nearly empty specialist continuation page immediately
   // before the reflection plan. Preserve dedicated Kundli chapters and keep
   // the original typography, margins and measured block pagination.
@@ -215,15 +215,15 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  for(let i=0;i<24;i++){const a=i*Math.PI/12,r=i%2?141:132;rule(cx+r*Math.cos(a),cy+r*Math.sin(a),cx+148*Math.cos(a),cy+148*Math.sin(a),gold,.65)}
  for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6;rule(cx+88*Math.cos(a),cy+88*Math.sin(a),cx+120*Math.cos(b),cy+120*Math.sin(b),gold,.65);rule(cx+120*Math.cos(a),cy+120*Math.sin(a),cx+88*Math.cos(b),cy+88*Math.sin(b),gold,.65)}
  for(let i=0;i<8;i++){const a=i*Math.PI/4;page.drawEllipse({x:cx+35*Math.cos(a),y:H-cy-35*Math.sin(a),xScale:23,yScale:10,rotate:radians(-a),borderColor:gold,borderWidth:.65})}
- caps(cx,466,tr("BIRTH CHART · LIFE THEMES · PERSONAL GUIDANCE","जन्म कुंडली · जीवन विषय · व्यक्तिगत मार्गदर्शन"),glow,8,"center");
+ caps(cx,466,tr("BIRTH CHART · LIFE THEMES · PERSONAL GUIDANCE","जन्म कुंडली · जीवन विषय · व्यक्तिगत मार्गदर्शन","JANM KUNDLI · JEEVAN VISHAY · PERSONAL GUIDANCE"),glow,8,"center");
  const shortTitles:Record<string,string>={"premium-kundli":"Premium Kundli","couple-kundli":"Couple Kundli","career-report":"Career Report","wealth-report":"Wealth Report","love-report":"Love & Relationship","baby-name-report":"Baby Name","sade-sati-report":"Sade Sati","manglik-kaal-sarp-report":"Manglik & Kaal Sarp","numerology-lo-shu-report":"Numerology & Lo Shu","name-correction-report":"Name Correction","yearly-horoscope-report":"Yearly Horoscope","transit-report":"Transit Report","rahu-ketu-report":"Rahu & Ketu","jupiter-transit-report":"Jupiter Transit","fortune-report":"Fortune Report"};
  const rawTitle=request.reportTitle??label(request.templateId);
  const title=lang==="en"&&!rawTitle.startsWith("QA DEMO")?(shortTitles[request.templateId]??rawTitle):rawTitle;
  const name=request.customerName??shown(birth.name),place=shown(birth.birthPlace);
  const titleSize=measure(title,40,"title")>CW-46?30:40,nameSize=name.length>55?15:21,placeSize=place.length>100?8.5:10;
  let coverY=491+fixed(M+23,491,title,CW-46,titleSize,"title",iv,titleSize+5,"center")+16;
- coverY+=fixed(M+39,coverY,tr("A personalized guide to traditional calculation, interpretation and thoughtful next steps.","पारंपरिक गणना, व्याख्या और विचारपूर्ण अगले कदमों की व्यक्तिगत मार्गदर्शिका।"),CW-78,11.4,"body",light,16,"center")+17;
- rule(M+50,coverY,W-M-50,coverY,gold);coverY+=16;caps(cx,coverY,tr("Prepared for","इनके लिए तैयार"),glow,8,"center");coverY+=18;
+ coverY+=fixed(M+39,coverY,tr("A personalized guide to traditional calculation, interpretation and thoughtful next steps.","पारंपरिक गणना, व्याख्या और विचारपूर्ण अगले कदमों की व्यक्तिगत मार्गदर्शिका।","Paramparik ganana, vyakhya aur soch-samajh kar agle kadmon ke liye personal guide."),CW-78,11.4,"body",light,16,"center")+17;
+ rule(M+50,coverY,W-M-50,coverY,gold);coverY+=16;caps(cx,coverY,tr("Prepared for","इनके लिए तैयार","Inke liye taiyar"),glow,8,"center");coverY+=18;
  const birthLine=date(birth.dateOfBirth)+" | "+shown(birth.timeOfBirth)+" (UTC "+(number(birth.utcOffsetAtBirth)>=0?"+":"")+s(birth.utcOffsetAtBirth)+")";
  const personalHeight=wrap(name,CW-36,nameSize,"title").length*(nameSize+4)+8+wrap(birthLine,CW-44,10).length*14+3+wrap(place,CW-44,placeSize).length*placeSize*1.4;
  const profileContinuation=coverY+personalHeight>754;
@@ -241,7 +241,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  tx(cx,780,"Ref: "+request.requestId,7.1,"body",light,"center");
 
  const contentsPage=pdf.addPage([W,H]);
- interior(tr("01 / YOUR PROFILE","01 / आपकी प्रोफ़ाइल"),tr("Your chart at a glance","आपकी कुंडली एक नज़र में"),tr("A clear reading of the calculated birth chart, before the detailed tables.","विस्तृत गणनाओं से पहले जन्म कुंडली का संक्षिप्त परिचय।"));
+ interior(tr("01 / YOUR PROFILE","01 / आपकी प्रोफ़ाइल","01 / AAPKI PROFILE"),tr("Your chart at a glance","आपकी कुंडली एक नज़र में","Aapki kundli ek nazar mein"),tr("A clear reading of the calculated birth chart, before the detailed tables.","विस्तृत गणनाओं से पहले जन्म कुंडली का संक्षिप्त परिचय।","Detailed tables se pehle ganit se bani janm kundli ka sankshipt parichay."));
  if(profileContinuation){
   subhead(tr("Private birth details","निजी जन्म विवरण","Private janm vivaran"));
   paragraph(name,12,wine,"bold",5);paragraph(birthLine,10,ink,"body",5);paragraph(place,10,ink,"body",12);
@@ -304,7 +304,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  const depth=data("editorial-depth") as DepthChapter[]|undefined;
  if(depth){for(const part of depth){interior(tr("DETAILED READING","विस्तृत विवेचन","Detailed reading"),part.title,part.intro);cardRows(part.cards,1);}}
  reflectionPlan();
- {const saved=page;page=contentsPage;rect(0,0,W,H,iv);brand(24);caps(W-M,32,tr("PRIVATE REPORT","निजी रिपोर्ट"),muted,8,"right");rule(M,68,W-M,68,gold,1);caps(M,84,tr("YOUR READING GUIDE","पठन मार्गदर्शिका"));fixed(M,104,tr("Contents","विषय सूची"),CW,29,"title",wine,35);let top=155;
+ {const saved=page;page=contentsPage;rect(0,0,W,H,iv);brand(24);caps(W-M,32,tr("PRIVATE REPORT","निजी रिपोर्ट","NIJI REPORT"),muted,8,"right");rule(M,68,W-M,68,gold,1);caps(M,84,tr("YOUR READING GUIDE","पठन मार्गदर्शिका"));fixed(M,104,tr("Contents","विषय सूची"),CW,29,"title",wine,35);let top=155;
  for(const item of starts){const lines=wrap(item.title,CW-58,10.2,"bold"),height=lines.length*14+10;if(top+height>BOTTOM)throw Error("REPORT_CONTENTS_OVERFLOW");tx(M,top,String(item.page).padStart(2,"0"),10,"bold",gold);fixed(M+38,top,item.title,CW-58,10.2,"bold",ink,14);top+=height;rule(M+38,top-5,W-M,top-5,light);}page=saved;}
  const pages=pdf.getPages();pages.forEach((p,i)=>{if(i===0)return;page=p;rule(M,H-44,W-M,H-44,gold);tx(M,H-34,"NAKSHARIX / care@naksharix.com",7.7,"bold",muted);tx(W-M,H-34,String(i+1).padStart(2,"0")+" / "+String(pages.length).padStart(2,"0"),8.3,"bold",muted,"right")});
 }
