@@ -56,6 +56,8 @@ function toTransitPositions(chart: ReturnType<typeof calculateInternalChart>): T
     degree: planet.degree,
     absoluteLongitude: planet.absoluteLongitude ?? null,
     retrograde: planet.retrograde ?? null,
+    speedDegreesPerDay: planet.speedDegreesPerDay ?? null,
+    motionState: planet.motionState,
     verified: true
   }));
 }

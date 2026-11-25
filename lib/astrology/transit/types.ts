@@ -33,6 +33,8 @@ export type TransitPosition = {
   degree: number | null;
   absoluteLongitude: number | null;
   retrograde: boolean | null;
+  speedDegreesPerDay?: number | null;
+  motionState?: "direct" | "retrograde" | "near_station";
   verified: boolean;
 };
 

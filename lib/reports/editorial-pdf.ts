@@ -126,7 +126,8 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   values.forEach((v,i)=>{const x=M+i*(w+10);rect(x,y,w,height,white,light);let t=y+11;t+=fixed(x+10,t,v.label.toUpperCase(),w-20,8,"bold",gold,11)+9;t+=fixed(x+10,t,v.value,w-20,sizes[i],"title",wine,sizes[i]+4)+8;if(v.sub)fixed(x+10,t,v.sub,w-20,8.5,"body",muted,12)});
   y+=height+16;
  }
- function planetTable(rows:R[]){if(!rows.length)return;table(["Graha",tr("Sign","राशि"),tr("House","भाव"),tr("Degree","अंश"),tr("Nakshatra","नक्षत्र")],rows.map(r=>[display(r.planet),display(r.sign),shown(r.house),deg(r.degree),display(r.nakshatra)]),[1.05,1.2,.65,.85,1.65],9.8,33)}
+ function motionLabel(r:R){return r.motionState==="near_station"?tr("Near station","स्थिरता के निकट"):r.retrograde===true?tr("Retrograde","वक्री"):r.retrograde===false?tr("Direct","मार्गी"):tr("Unavailable","उपलब्ध नहीं")}
+ function planetTable(rows:R[]){if(!rows.length)return;table(["Graha",tr("Sign","राशि"),tr("House","भाव"),tr("Degree","अंश"),tr("Nakshatra","नक्षत्र"),tr("Motion","गति")],rows.map(r=>[display(r.planet),display(r.sign),shown(r.house),deg(r.degree),display(r.nakshatra),motionLabel(r)]),[1,1.05,.55,.8,1.4,1.05],9.2,33)}
  function houseTable(rows:R[]){if(!rows.length)return;table([tr("House","भाव"),tr("Sign","राशि"),tr("Planets","ग्रह"),tr("Reflection theme","चिंतन विषय")],rows.map(r=>[shown(r.house),display(r.sign),list(r.planets).map(p=>term(typeof p==="string"?p:s(obj(p).planet))).join(", ")||"-",s(r.title)+"\n"+s(r.compact??r.interpretation)]),[.56,.85,1.3,3.5],8.5,36)}
  function chart(x:number,top:number,size:number,houses:R[]){
   rect(x,top,size,size,white,gold);
@@ -179,9 +180,9 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   if(!flat.length)return;
   const planets=[...new Set(flat.map(r=>s(r.planet)))];
   if(planets.length>1&&rows.some(r=>Array.isArray(r.positions))){
-   table([tr("Date","तिथि"),...planets.map(term)],rows.map(r=>[date(r.date),...planets.map(p=>{const a=records(r.positions).find(t=>t.planet===p);return a?(lang==="hi"?display(a.sign):s(a.sign).slice(0,3))+" / "+deg(a.degree)+"\nH"+s(a.houseFromMoon)+(a.retrograde===true?" R":""):"-"})]),[1.15,...planets.map(()=>1)],8.2,32);
-   paragraph(tr("H = house counted from natal Moon; R = retrograde at snapshot. Dates are sampling checkpoints, not exact event predictions.","H = जन्म चंद्र से भाव; R = उस तिथि पर वक्री। तिथियाँ गणना संदर्भ हैं, निश्चित भविष्यवाणियाँ नहीं।"),9,muted);
-  }else table([tr("Date","तिथि"),"Graha / sign","Degree",tr("From Moon","चंद्र से"),tr("From Lagna","लग्न से"),tr("Phase / motion","चरण / गति")],flat.map(r=>[date(r.date),display(r.planet)+" / "+display(r.sign),deg(r.degree),shown(r.houseFromMoon),shown(r.houseFromAscendant),term(s(r.traditionalPhase)|| (r.retrograde===true?"Retrograde":"Direct"))]),[1.05,1.15,.85,.75,.75,1.6],8.7,30);
+   table([tr("Date","तिथि"),...planets.map(term)],rows.map(r=>[date(r.date),...planets.map(p=>{const a=records(r.positions).find(t=>t.planet===p);return a?(lang==="hi"?display(a.sign):s(a.sign).slice(0,3))+" / "+deg(a.degree)+"\nH"+s(a.houseFromMoon)+(a.motionState==="near_station"?" S":a.retrograde===true?" R":a.retrograde===false?"":" ?"):"-"})]),[1.15,...planets.map(()=>1)],8.2,32);
+   paragraph(tr("H = house from natal Moon; R = retrograde; S = near station; ? = unavailable. Motion is estimated at the snapshot, not an exact station prediction.","H = जन्म चंद्र से भाव; R = वक्री; S = स्थिरता के निकट; ? = अनुपलब्ध। गति उस समय का अनुमान है, सटीक स्थिरता की भविष्यवाणी नहीं।"),9,muted);
+  }else table([tr("Date","तिथि"),"Graha / sign","Degree",tr("From Moon","चंद्र से"),tr("From Lagna","लग्न से"),tr("Phase / motion","चरण / गति")],flat.map(r=>[date(r.date),display(r.planet)+" / "+display(r.sign),deg(r.degree),shown(r.houseFromMoon),shown(r.houseFromAscendant),s(r.traditionalPhase)?term(s(r.traditionalPhase)):motionLabel(r)]),[1.05,1.15,.85,.75,.75,1.6],8.7,30);
  }
  function reflectionPlan(){
   const kicker=tr("REFLECTION PLAN","चिंतन योजना"),title=tr("Turn insight into action","चिंतन को कार्य में बदलें"),intro=tr("Use this report as a structured reflection exercise, not a directive for major decisions.","इसे चिंतन के साधन की तरह उपयोग करें, बड़े निर्णयों के निर्देश की तरह नहीं।");

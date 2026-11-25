@@ -113,3 +113,35 @@ for(const locale of ["en","hi","hinglish"])for(const [i,sign] of signs.entries()
 }
 assert.equal(annualPositions,24);assert.equal(annualHouseChecks,864);
 console.log("ANNUAL_2027_REFERENCE_PASS "+JSON.stringify({annualPositions,annualHouseChecks,annualMaxDegrees,localizedGuides:36,scope:"monthly numeric reference and sign-relative educational guide; not prediction certification"}));
+
+// Motion uses an independently generated Swiss speed reference, not an
+// expected value calculated by the implementation under test.
+const {calculateOwnEngineBirthChart}=require("@/lib/astrology/own-engine");
+const {estimateSiderealMotion}=require("@/lib/astrology/own-engine/motion");
+const motionFixture=JSON.parse(fs.readFileSync(new URL("../fixtures/astrology/independent-motion-swiss-reference.json",import.meta.url),"utf8"));
+assert.equal(motionFixture.rows.length,15);
+assert.equal(estimateSiderealMotion(d=>(359.99+d*1+360)%360).motionState,"direct");
+assert.equal(estimateSiderealMotion(d=>(0.01-d*1+360)%360).motionState,"retrograde");
+assert.equal(estimateSiderealMotion(()=>23).motionState,"near_station");
+assert.throws(()=>estimateSiderealMotion(()=>NaN),/INVALID_MOTION_LONGITUDE/);
+let motionChecks=0,motionDirectionChecks=0,stationChecks=0,motionMaxError=0,referenceRetrogrades=0;
+for(const row of motionFixture.rows){
+ const input=row.input??fixtures.find(f=>f.id===row.id)?.input;assert.ok(input,row.id);
+ const baseInput={...input,name:"Synthetic reference",gender:"not_specified",birthPlace:"Synthetic reference location",language:"en",dateOfBirth:input.date,timeOfBirth:input.time};
+ const canonical=calculateInternalChart({...baseInput,ayanamsa:"lahiri",houseSystem:"whole_sign"}).planets;
+ const natal=calculateOwnEngineBirthChart(baseInput).planetPositions;
+ for(const positions of [canonical,natal]){
+  assert.equal(positions.length,9);
+  for(const p of positions){
+   const expected=row.speedDegreesPerDay[p.planet];
+   assert.ok(Number.isFinite(expected)&&Number.isFinite(p.speedDegreesPerDay),row.id+" "+p.planet);
+   const error=Math.abs(p.speedDegreesPerDay-expected);assert.ok(error<=motionFixture.provenance.speedToleranceDegreesPerDay,row.id+" "+p.planet+" speed error "+error);
+   motionMaxError=Math.max(motionMaxError,error);motionChecks++;
+   if(Math.abs(expected)>.02){assert.equal(p.retrograde,expected<0,row.id+" "+p.planet+" wrong direction");assert.equal(p.motionState,expected<0?"retrograde":"direct");motionDirectionChecks++;if(expected<0)referenceRetrogrades++;}
+   if(row.stationPlanet===p.planet){assert.ok(Math.abs(expected)<.001);assert.equal(p.motionState,"near_station",row.id+" near station");stationChecks++;}
+  }
+ }
+ assert.deepEqual(natal.map(p=>[p.planet,p.retrograde,p.motionState,p.speedDegreesPerDay]),canonical.map(p=>[p.planet,p.retrograde,p.motionState,p.speedDegreesPerDay]),row.id+" public/canonical motion mismatch");
+}
+assert.equal(motionChecks,270);assert.equal(stationChecks,10);assert.ok(referenceRetrogrades>0);
+console.log("INDEPENDENT_PLANETARY_MOTION_PASS "+JSON.stringify({charts:motionFixture.rows.length,enginePaths:2,motionChecks,motionDirectionChecks,stationChecks,referenceRetrogrades,motionMaxError,scope:"sampled speed and direction, not exact event timing"}));

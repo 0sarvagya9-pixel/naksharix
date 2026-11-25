@@ -1,4 +1,5 @@
 import * as Astronomy from "astronomy-engine";
+import {estimateSiderealMotion} from "@/lib/astrology/own-engine/motion";
 import { calculateVimshottariDasha } from "@/lib/astrology/premium-engine/dasha";
 import { nakshatraFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
 import {
@@ -154,9 +155,7 @@ function buildCanonicalPlanets(longitudes: Record<PlanetName, number>, ascendant
   return planetOrder.map((planet) => {
     const absoluteLongitude = round(longitudes[planet]);
     const rashi = longitudeToRashi(absoluteLongitude);
-    const retrograde = isPhysicalBody(planet) && planet !== "Sun" && planet !== "Moon"
-      ? isRetrograde(planet, time, julianDay)
-      : planet === "Rahu" || planet === "Ketu";
+    const motion=estimateSiderealMotion(days=>planet==="Rahu"||planet==="Ketu"?normalizeDegrees(meanRahuLongitude(julianDay+days)+(planet==="Ketu"?180:0)):siderealLongitude(planet,Astronomy.MakeTime(new Date(time.date.getTime()+days*86400000)),julianDay+days));
 
     return {
       planet,
@@ -164,24 +163,12 @@ function buildCanonicalPlanets(longitudes: Record<PlanetName, number>, ascendant
       degree: round(rashi.degreeInSign),
       absoluteLongitude,
       house: wholeSignHouse(rashi.rashiNumber, ascendantSignNumber),
-      retrograde,
+      ...motion,
       combust: combustionFlag(planet, absoluteLongitude, sunLongitude)
     };
   });
 }
 
-function isRetrograde(body: SupportedBody, time: Astronomy.AstroTime, julianDay: number) {
-  const laterDate = new Date(time.date.getTime() + 24 * 60 * 60 * 1000);
-  const laterJulian = julianDay + 1;
-  const later = siderealLongitude(body, Astronomy.MakeTime(laterDate), laterJulian);
-  const now = siderealLongitude(body, time, julianDay);
-  const delta = signedDelta(later - now);
-  return delta < 0;
-}
-
-function isPhysicalBody(planet: PlanetName): planet is SupportedBody {
-  return physicalBodies.includes(planet as SupportedBody);
-}
 
 function combustionFlag(planet: PlanetName, planetLongitude: number, sunLongitude: number) {
   if (planet === "Sun" || planet === "Moon" || planet === "Rahu" || planet === "Ketu") return null;

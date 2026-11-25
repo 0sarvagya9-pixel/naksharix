@@ -49,7 +49,7 @@ function relativeHouse(sign:string|null|undefined,base:string|null|undefined){
   const i=signIndex(sign),j=signIndex(base);return i<0||j<0?null:(i-j+12)%12+1;
 }
 function compactPlanet(p:BirthChartData["planetPositions"][number]){
-  return {planet:p.planet,sign:p.sign,house:p.house,degree:p.degree,nakshatra:p.nakshatra,pada:p.pada};
+  return {planet:p.planet,sign:p.sign,house:p.house,degree:p.degree,nakshatra:p.nakshatra,pada:p.pada,retrograde:p.retrograde,speedDegreesPerDay:p.speedDegreesPerDay,motionState:p.motionState};
 }
 const PLANET_THEMES:Record<string,LocalText>={
  Sun:["leadership and responsibility","नेतृत्व और जिम्मेदारी","leadership aur responsibility"],Moon:["emotions and security","भावनाएँ और सुरक्षा","emotions aur security"],
@@ -90,7 +90,7 @@ export async function assembleAutomaticPaidReport(input:{
   const transitInput={latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,place:birth.birthPlace,ayanamsa:"lahiri" as const};
   const snapshot=(on:string,names?:string[])=>{
     const data=calculateInternalTransitSnapshot({...transitInput,date:on});
-    const rows=data.positions.filter(p=>!names||names.includes(p.planet)).map(p=>({planet:p.planet,sign:p.sign,degree:p.degree,retrograde:p.retrograde,houseFromAscendant:relativeHouse(p.sign,chart.avakhada.ascendant),houseFromMoon:relativeHouse(p.sign,chart.avakhada.moonSign)}));
+    const rows=data.positions.filter(p=>!names||names.includes(p.planet)).map(p=>({planet:p.planet,sign:p.sign,degree:p.degree,retrograde:p.retrograde,speedDegreesPerDay:p.speedDegreesPerDay,motionState:p.motionState,houseFromAscendant:relativeHouse(p.sign,chart.avakhada.ascendant),houseFromMoon:relativeHouse(p.sign,chart.avakhada.moonSign)}));
     if(!rows.length||rows.some(p=>p.houseFromAscendant===null||p.houseFromMoon===null))throw new Error("REPORT_TRANSIT_INVALID");
     return {date:on,positions:rows};
   };

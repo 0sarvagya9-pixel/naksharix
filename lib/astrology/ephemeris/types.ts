@@ -44,6 +44,8 @@ export type CanonicalPoint = {
 export type CanonicalPlanet = CanonicalPoint & {
   planet: "Sun" | "Moon" | "Mars" | "Mercury" | "Jupiter" | "Venus" | "Saturn" | "Rahu" | "Ketu";
   retrograde?: boolean | null;
+  speedDegreesPerDay?: number | null;
+  motionState?: "direct" | "retrograde" | "near_station";
   combust?: boolean | null;
   house?: number | null;
 };

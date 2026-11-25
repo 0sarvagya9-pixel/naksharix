@@ -1,6 +1,7 @@
 import "server-only";
 
 import * as Astronomy from "astronomy-engine";
+import {estimateSiderealMotion} from "@/lib/astrology/own-engine/motion";
 import { calculatePanchang } from "@/lib/astrology/own-engine/panchang";
 import { buildD1Chart, buildD9Chart } from "@/lib/astrology/own-engine/charts";
 import { nakshatraFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
@@ -31,7 +32,7 @@ export function calculateOwnEngineBirthChart(input: AstrologyBirthInput): BirthC
   const ascendantLongitude = calculateAscendant(julianDay, input.latitude, input.longitude);
   const ascendant = longitudeToRashi(ascendantLongitude);
   const planetLongitudes = calculateSiderealLongitudes(astronomyTime, julianDay);
-  const planets = buildPlanetPositions(planetLongitudes, ascendant.rashiNumber);
+  const planets = buildPlanetPositions(planetLongitudes, ascendant.rashiNumber, astronomyTime, julianDay);
   const sun = planets.find((planet) => planet.planet === "Sun");
   const moon = planets.find((planet) => planet.planet === "Moon");
   const moonNakshatra = nakshatraFromLongitude(moon?.absoluteLongitude ?? 0);
@@ -95,7 +96,9 @@ export function calculateOwnEngineBirthChart(input: AstrologyBirthInput): BirthC
       absoluteLongitude: planet.absoluteLongitude,
       nakshatra: planet.nakshatra,
       pada: planet.pada,
-      retrograde: planet.retrograde
+      retrograde: planet.retrograde,
+      speedDegreesPerDay: planet.speedDegreesPerDay,
+      motionState: planet.motionState
     })),
     housePositions: d1,
     vimshottariDasha: [],
@@ -138,7 +141,7 @@ function meanRahuLongitude(julianDay: number) {
   return tropicalToSidereal(normalizeDegrees(tropicalNode), julianDay);
 }
 
-function buildPlanetPositions(longitudes: Record<(typeof planetOrder)[number], number>, ascendantSignNumber: number): ComputedPlanet[] {
+function buildPlanetPositions(longitudes: Record<(typeof planetOrder)[number], number>, ascendantSignNumber: number, time: Astronomy.AstroTime, julianDay:number): ComputedPlanet[] {
   return planetOrder.map((planet) => {
     const absoluteLongitude = longitudes[planet];
     const rashi = longitudeToRashi(absoluteLongitude);
@@ -150,7 +153,7 @@ function buildPlanetPositions(longitudes: Record<(typeof planetOrder)[number], n
       degree: Number(rashi.degreeInSign.toFixed(4)),
       nakshatra: nakshatra.name,
       pada: nakshatra.pada,
-      retrograde: false,
+      ...estimateSiderealMotion(days=>planet==="Rahu"||planet==="Ketu"?normalizeDegrees(meanRahuLongitude(julianDay+days)+(planet==="Ketu"?180:0)):siderealLongitude(planet,Astronomy.MakeTime(new Date(time.date.getTime()+days*86400000)),julianDay+days)),
       absoluteLongitude: Number(absoluteLongitude.toFixed(6)),
       rashiNumber: rashi.rashiNumber
     };

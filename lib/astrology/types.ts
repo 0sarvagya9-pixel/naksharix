@@ -24,6 +24,9 @@ export type PlanetPosition = {
   absoluteLongitude?: number;
   house?: number;
   retrograde?: boolean;
+  /** Centered sidereal angular derivative; unavailable for unqualified external providers. */
+  speedDegreesPerDay?: number;
+  motionState?: "direct" | "retrograde" | "near_station";
 };
 
 export type HousePosition = {
