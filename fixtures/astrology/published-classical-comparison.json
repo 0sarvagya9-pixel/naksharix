@@ -534,5 +534,93 @@
       507.55,
       497.95
     ]
+  },
+  "temporal": {
+    "source": "https://www.astrosage.com/pdf/brihat-horoscope.pdf",
+    "printedPage": 121,
+    "ayanamsaDegrees": 23.572222222222223,
+    "obliquityDegrees": 23.441944444444445,
+    "natonnata": [
+      2.55,
+      57.45,
+      57.45,
+      60,
+      2.55,
+      2.55,
+      57.45
+    ],
+    "paksha": [
+      56.22,
+      56.22,
+      56.22,
+      3.78,
+      3.78,
+      3.78,
+      56.22
+    ],
+    "tribhaga": [
+      0,
+      0,
+      0,
+      0,
+      60,
+      60,
+      0
+    ],
+    "year": [
+      0,
+      0,
+      0,
+      15,
+      0,
+      0,
+      0
+    ],
+    "month": [
+      0,
+      30,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "day": [
+      0,
+      0,
+      0,
+      0,
+      45,
+      0,
+      0
+    ],
+    "hora": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      60,
+      0
+    ],
+    "ayana": [
+      89.26,
+      20.75,
+      59.28,
+      51.7,
+      47.85,
+      44.83,
+      22.48
+    ],
+    "yuddha": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scope": "Raw printed cells; same-input and actual-birth comparisons kept separate. Projection and actual declination differ; no vendor fitting."
   }
 }

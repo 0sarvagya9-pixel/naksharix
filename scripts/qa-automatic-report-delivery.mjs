@@ -387,6 +387,41 @@ if(!dbMode){
  console.log("REPORT_DEPTH_QUALIFICATION_PASS "+JSON.stringify({depthChecks,personalizationPairs:pairs,timezoneCases:4,measurements,scope:"synthetic generation measurements; not live cost or expert review"}));
  if(process.env.REPORT_VISUAL_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,"report-production-measurements.json"),JSON.stringify(measurements,null,2));
  console.log("REPORT_PROMISE_OUTPUT_CROSSWALK_PASS "+JSON.stringify({products:15,languages:3,promiseChecks,requiredDisclosureChecks,scope:"reviewed section-to-feature mapping and real computed content; PDF render follows each assembly; no predictive or live delivery claim"}));
+ // Same process, bounded concurrent requests (no claim of multicore or
+ // production load). Render each SKU with an independent synthetic marker.
+ // Existing 45 baseline artifact PDFs are not overwritten.
+ const concurrentRows=[],concurrentStart=performance.now(),cpuStart=process.cpuUsage(),heapBefore=process.memoryUsage().heapUsed;
+ const normalText=v=>String(v??"").replace(/\s+/g," ").trim();
+ let repeatedCardBodies=0,duplicateCards=0;
+ for(let offset=0;offset<input.AUTO_REPORT_SLUGS.length;offset+=3){
+  const slugs=input.AUTO_REPORT_SLUGS.slice(offset,offset+3);
+  const batch=await Promise.all(slugs.map(async(slug,i)=>{
+   const serial=offset+i,language=["en","hi","hinglish"][serial%3],marker="QAConcurrent"+String(serial).padStart(2,"0"),otherMarker="QA Partner "+serial;
+   const profile={...(serial%2?alt:birth),name:marker};
+   const extraData={...extra,partner:{...partner,name:otherMarker},romanName:marker.replace(/\d/g,"")+" Test",candidateNames:["Asha Test","Ravi Test"]};
+   const started=performance.now(),assembled=await assembleAutomaticPaidReport({slug,birth:profile,extra:extraData,question:"Synthetic concurrent request "+serial,language,now:new Date("2026-11-24T12:00:00Z")});
+   const assemblyMs=performance.now()-started,sec=assembled.content.sections;
+   assert.equal(sec.find(s=>s.key==="birth").data.name,marker);
+   assert.equal(sec.find(s=>s.key==="birth").data.dateOfBirth,profile.dateOfBirth);
+   const serialized=JSON.stringify(sec);
+   for(let j=0;j<input.AUTO_REPORT_SLUGS.length;j++)if(j!==serial)assert.ok(!serialized.includes("QAConcurrent"+String(j).padStart(2,"0")),"Cross-request content leakage");
+   if(slug==="couple-kundli")assert.equal(sec.find(s=>s.key==="partner").data.name,otherMarker);
+   const cards=sec.find(s=>s.key==="editorial-depth").data.flatMap(c=>c.cards);
+   const unique=new Set(cards.map(c=>[c.label,c.title,c.body].map(normalText).join("\u0000"))),bodies=new Set(cards.map(c=>normalText(c.body)));
+   assert.equal(unique.size,cards.length,slug+" duplicate complete depth card");
+   duplicateCards+=cards.length-unique.size;repeatedCardBodies+=cards.length-bodies.size;
+   const out=await generatePremiumReportPdf({requestId:"concurrent-"+serial,templateId:slug,status:"ready_for_generation",content:assembled.content,automatedInputValidated:true,reportTitle:assembled.title,customerName:marker,language});
+   assert.equal(out.generated,true);const parsed=await PDFDocument.load(out.bytes);
+   assert.equal(parsed.getAuthor(),"NAKSHARIX");assert.ok(parsed.getTitle().includes(assembled.title));assert.ok(parsed.getPageCount()>=4);
+   return {slug,language,assemblyMs:Math.round(assemblyMs),totalMs:Math.round(performance.now()-started),pages:parsed.getPageCount(),bytes:out.bytes.length};
+  }));
+  concurrentRows.push(...batch);
+ }
+ assert.equal(concurrentRows.length,15);assert.equal(duplicateCards,0);
+ const cpu=process.cpuUsage(cpuStart),concurrentEvidence={requests:15,maxSimultaneousPromises:3,passed:concurrentRows.length,duplicateCards,repeatedCardBodies,wallMs:Math.round(performance.now()-concurrentStart),cpuUserMicros:cpu.user,cpuSystemMicros:cpu.system,heapBeforeBytes:heapBefore,heapAfterBytes:process.memoryUsage().heapUsed,measurements:concurrentRows,scope:"one isolated Node process, synthetic profiles, actual PDF output; no production capacity, cost or privacy certification"};
+ console.log("P0_CONCURRENT_REPORT_RENDER_PASS "+JSON.stringify(concurrentEvidence));
+ if(process.env.REPORT_VISUAL_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,"report-concurrent-measurements.json"),JSON.stringify(concurrentEvidence,null,2));
+
  // Worst-case validated, fictional Latin/Devanagari birth details must
  // remain renderable rather than failing the cover layout.
  for(const language of ["en","hi","hinglish"]){

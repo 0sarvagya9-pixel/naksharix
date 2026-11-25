@@ -628,3 +628,51 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  assert.equal(residuals.length,97);assert.equal(actual.fullShadbalaVerified,false);assert.equal(actual.fullBhavaBalaVerified,false);
  console.log("P0_POSITIONAL_CONVENTION_PASS "+JSON.stringify({boundaryChecks,publishedChecks,publishedMatches:publishedChecks-publishedMismatches.length,publishedMismatches,actualBirthMatched:residuals.filter(x=>x.matched).length,actualBirthMismatches:residuals.filter(x=>!x.matched).length,fullParityAccepted:false,residuals}));
 }
+
+{
+ const B=require("@/lib/astrology/strength/birth-context"),T=require("@/lib/astrology/strength/longitude-temporal");
+ const F=JSON.parse(fs.readFileSync("fixtures/astrology/published-classical-comparison.json","utf8")),R=F.temporal;
+ // Independently evaluated Swiss Ephemeris 2.10.03 swe.cotrans
+ // of zero-latitude ecliptic coordinates, at the stated obliquity.
+ const projected=[[0,0],[15,5.909202765983082],[30,11.471973574208508],[45,16.336072015945213],[60,20.150368786781765],[75,22.595525667172755],[90,23.439290999999997],[105,22.595525667172755],[120,20.15036878678177],[150,11.471973574208508],[180,0],[210,-11.471973574208514],[240,-20.150368786781762],[270,-23.439290999999997],[300,-20.150368786781765],[330,-11.47197357420852],[359.9999,-.000039777715416175176]];
+ let projectionChecks=0,boundaryChecks=0,negativeChecks=0;
+ for(const [l,d] of projected){assert.ok(Math.abs(T.projectLongitudeDeclination(l,23.439291)-d)<1e-10);projectionChecks++;}
+ for(const g of classical)for(let l=0;l<360;l++){
+  const x=T.longitudeAyanaCandidate(g,l,23.439291);
+  assert.ok(x.virupas>=0&&x.virupas<=(g==="Sun"?120:60));
+  const other=T.longitudeAyanaCandidate(g,(l+180)%360,23.439291);
+  assert.ok(Math.abs((g==="Mercury"?x.virupas-other.virupas:x.virupas+other.virupas-(g==="Sun"?120:60)))<1e-8);boundaryChecks+=2;
+ }
+ for(const [s,m,a,b] of [[0,0,30,0],[90,270,60,60],[180,0,30,60],[270,270,0,0],[359,1,89/3,2/3]]){
+  const x=T.luminaryKendraCandidate(s,m);assert.ok(Math.abs(x.Sun-a)<1e-10);assert.ok(Math.abs(x.Moon-b)<1e-10);boundaryChecks+=2;
+ }
+ const actual=B.calculateBirthStrengthEvidence(F.birth),dms=([s,d,m,a])=>30*(s-1)+d+m/60+a/3600;
+ const p=F.positionsDms.slice(1).map((v,i)=>point(F.order[i+1],dms(v)));
+ const printed=T.calculateLongitudeTemporalCandidate(p,actual.solar,actual.calendarCandidate??undefined,R.ayanamsaDegrees,R.obliquityDegrees,"separate_kendra");
+ const doubled=T.calculateLongitudeTemporalCandidate(p,actual.solar,actual.calendarCandidate??undefined,R.ayanamsaDegrees,R.obliquityDegrees,"doubled_in_kala");
+ assert.ok(printed&&doubled);
+ assert.equal(printed.publicEnabled,false);assert.equal(doubled.verified,false);
+ for(const g of ["Sun","Moon"]){
+  const a=printed.rows.find(r=>r.planet===g),b=doubled.rows.find(r=>r.planet===g);
+  assert.ok(Math.abs(a.luminaryCheshta-F.strength.cheshta[F.order.indexOf(g)-1])<.01);
+  assert.equal(b.luminaryCheshta,0);boundaryChecks+=2;
+  if(g==="Moon"){assert.equal(b.components.paksha,2*a.components.paksha);boundaryChecks++;}
+ }
+ for(const bad of [[-1,23],[360,23],[0,0],[0,90],[NaN,23],[0,NaN]]){assert.throws(()=>T.projectLongitudeDeclination(...bad));negativeChecks++;}
+ assert.equal(T.calculateLongitudeTemporalCandidate(p.slice(1),actual.solar,undefined,R.ayanamsaDegrees,R.obliquityDegrees,"separate_kendra"),null);negativeChecks++;
+ assert.throws(()=>T.calculateLongitudeTemporalCandidate(p,actual.solar,undefined,R.ayanamsaDegrees,R.obliquityDegrees,"unknown"));negativeChecks++;
+ const noCalendar=T.calculateLongitudeTemporalCandidate(p,actual.solar,undefined,R.ayanamsaDegrees,R.obliquityDegrees,"separate_kendra");assert.ok(noCalendar.rows.every(r=>r.kalaBeforeWar===null));negativeChecks++;
+ const detail=[];
+ for(const [i,r] of printed.rows.entries())for(const [k,value] of Object.entries(r.components)){
+  const expected=R[k][i],delta=typeof value==="number"?value-expected:null;detail.push({planet:r.planet,key:k,value,expected,delta,matched:delta!==null&&Math.abs(delta)<=.25});
+ }
+ const residuals=[];
+ function compare(scope,point,key,value,expected){const delta=typeof value==="number"&&Number.isFinite(value)?value-expected:null;residuals.push({scope,point,key,value,expected,delta,matched:delta!==null&&Math.abs(delta)<=.25});}
+ for(const [i,g] of F.order.slice(1,8).entries()){
+  const row=actual.temporalVariantStrength.rows.find(r=>r.planet===g),c=row?.components;
+  for(const [key,value] of Object.entries({sthana:c?.sthana,dig:c?.dig,kala:typeof c?.kalaBeforeWar==="number"&&typeof row?.warVirupas==="number"?c.kalaBeforeWar+row.warVirupas:null,cheshta:c?.cheshta,naisargika:c?.naisargika,drik:c?.drik,total:row?.total}))compare("shadbala",g,key,value,F.strength[key][i]);
+ }
+ for(const [i,r] of actual.temporalVariantBhava.houses.entries())for(const [key,value] of Object.entries({lord:r.lordStrengthVirupas,direction:r.directionalVirupas,aspect:r.aspect?.virupas,total:r.arithmeticTotalVirupas}))compare("bhava",i+1,key,value,F.bhava[key][i]);
+ assert.equal(detail.length,63);assert.equal(residuals.length,97);assert.equal(actual.fullShadbalaVerified,false);assert.equal(actual.fullBhavaBalaVerified,false);
+ console.log("P0_LONGITUDE_TEMPORAL_DIAGNOSTIC "+JSON.stringify({projectionChecks,boundaryChecks,negativeChecks,publishedTemporalMatches:detail.filter(x=>x.matched).length,publishedTemporalCells:63,actualBirthMatched:residuals.filter(x=>x.matched).length,actualBirthMismatches:residuals.filter(x=>!x.matched).length,toleranceVirupas:.25,fullParityAccepted:false,detail,residuals}));
+}
