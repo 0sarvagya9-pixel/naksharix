@@ -60,9 +60,24 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
    await expect(page.locator("#report-birth-offset")).toHaveValue("5.5");
    await page.locator('[data-field="concern"]').fill("Synthetic private career reflection for QA only.");
    await page.getByRole("checkbox",{name:/I confirm these birth details/}).check();
-   const responsePromise=page.waitForResponse(res=>new URL(res.url()).pathname==="/api/report-requests/preflight"&&res.request().method()==="POST");
-   await page.getByRole("button",{name:"Validate details and continue"}).click();
-   const preflight=await responsePromise;expect(preflight.status()).toBe(200);
+   const submit=page.getByRole("button",{name:"Validate details and continue"});
+   const form=page.locator("form").filter({has:submit});
+   // Preserve the real user click and server acceptance. Diagnose native browser
+   // validity separately instead of waiting two minutes for a missing POST.
+   await expect(page.locator('[data-field="dateOfBirth"]')).toHaveValue("1990-01-15");
+   await expect(page.locator('[data-field="timeOfBirth"]')).toHaveValue(/^10:30(?::00(?:\.0+)?)?$/);
+   const nativeInvalid=await form.evaluate(node=>Array.from(node.querySelectorAll<HTMLInputElement>("input:invalid, textarea:invalid, select:invalid")).map(el=>({field:el.dataset.field||el.name||el.type,valueMissing:el.validity.valueMissing,badInput:el.validity.badInput,stepMismatch:el.validity.stepMismatch})));
+   expect(nativeInvalid,"Native form constraints must allow valid synthetic inputs").toEqual([]);
+   const [preflight]=await Promise.all([
+    page.waitForResponse(res=>new URL(res.url()).pathname==="/api/report-requests/preflight"&&res.request().method()==="POST",{timeout:15000}),
+    submit.click()
+   ]).catch(async error=>{
+    const messages=await form.locator('[role="alert"],[aria-live="polite"]').allTextContents().catch(()=>[]);
+    console.error("REPORT_PREFLIGHT_NO_RESPONSE "+JSON.stringify({project:info.project.name,submitted:requests.includes("/api/report-requests/preflight"),messages:messages.map(m=>m.slice(0,240))}));
+    throw error;
+   });
+   expect(preflight.status()).toBe(200);
+   const submitted=preflight.request().postDataJSON();expect(submitted.birth.dateOfBirth).toBe("1990-01-15");expect(submitted.birth.timeOfBirth).toBe("10:30");
    const result=await preflight.json();expect(result.data.reportId).toBe("kundli-pro");expect(result.data.price).toBe("INR 799");expect(result.data.expiresInSeconds).toBe(1200);
    const claim=JSON.parse(Buffer.from(result.data.token.split(".")[0],"base64url").toString("utf8"));
    expect(Object.keys(claim).sort()).toEqual(["amountPaise","exp","purpose","reportId","userId","v"]);expect(claim.userId).toBe(account.id);expect(claim.amountPaise).toBe(79900);
