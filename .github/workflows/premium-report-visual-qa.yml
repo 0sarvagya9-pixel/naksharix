@@ -31,6 +31,7 @@ jobs:
       - run: node scripts/qa-automatic-report-delivery.mjs
         env:
           REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
+          REPORT_SAMPLE_QA_DIR: ${{ runner.temp }}/public-sample-qa
       - name: Verify 45 genuine synthetic PDF samples
         env:
           REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
@@ -44,4 +45,12 @@ jobs:
           path: ${{ runner.temp }}/report-visual-qa
           retention-days: 3
           compression-level: 1
+          if-no-files-found: error
+      - name: Verify all 15 public fictional sample renderings
+        run: test "$(find "$RUNNER_TEMP/public-sample-qa" -type f -name '*.pdf' | wc -l)" = 15
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-fictional-sample-pdfs
+          path: ${{ runner.temp }}/public-sample-qa
+          retention-days: 3
           if-no-files-found: error

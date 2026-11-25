@@ -45,6 +45,7 @@ jobs:
         run: |
           node --input-type=module -e 'import fs from "node:fs";import assert from "node:assert/strict";assert.equal(JSON.parse(fs.readFileSync("vercel.json","utf8")).git.deploymentEnabled["internal-naksharix-development-hold-20261124"],false)'
           git diff --check
+          find scripts -maxdepth 1 -type f -name "*.mjs" -print0 | xargs -0 -r -n1 node --check
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Source validation and TypeScript

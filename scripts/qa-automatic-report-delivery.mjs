@@ -110,12 +110,17 @@ if(!dbMode){
  }
  console.log("REVIEWED_SPECIALIST_REPORT_PASS;15 differentiated assemblies; 2 localized editorial PDF renders; missing specialist inputs rejected");
  const {buildFictionalReportSample}=require("@/lib/reports/fictional-sample");
+ if(process.env.REPORT_SAMPLE_QA_DIR)fs.mkdirSync(process.env.REPORT_SAMPLE_QA_DIR,{recursive:true});
  for(const slug of input.AUTO_REPORT_SLUGS){
-   const preview=await PDFDocument.load(await buildFictionalReportSample(slug));
+   const bytes=await buildFictionalReportSample(slug);
+   const preview=await PDFDocument.load(bytes);
    assert.ok(preview.getPageCount()>0&&preview.getPageCount()<=3);
    assert.match(preview.getTitle(),/FICTIONAL SAMPLE/);
    assert.equal(preview.getAuthor(),"NAKSHARIX");
+   assert.ok(preview.getSubject().includes("fixed fictional inputs"));
+   if(process.env.REPORT_SAMPLE_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_SAMPLE_QA_DIR,slug+"-fictional-sample.pdf"),bytes);
  }
+ console.log("PUBLIC_SAMPLE_PDF_QA=15/15_PASS;ACTUAL_RENDERER;FICTIONAL_ONLY");
  await assert.rejects(()=>buildFictionalReportSample("unknown-slug"));
  const mail=require("@/lib/reports/report-delivery-service");
  const result=await mail.sendReportDeliveryEmail({to:"test@example.invalid",fullName:"Asha <Test>",reportName:"Test Kundli",reportRequestId:"test-fixture",downloadUrl:"http://localhost:3000/report-request/success?id=test-fixture"});

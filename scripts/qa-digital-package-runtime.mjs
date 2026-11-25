@@ -113,6 +113,8 @@ try{
    assert.equal(saved.recipientDigest.length,64);assert.ok(!saved.recipientDigest.includes(user.email));
    const mine=await reminder.reminderAccount(user.id,clock);assert.ok(mine.orders.some(o=>o.id===order.id));
    const stranger=await reminder.reminderAccount(other.id,clock);assert.equal(stranger.orders.length,0);assert.equal(stranger.reminders.length,0);
+   // A bounded worker must never sell more scheduling slots for the same day than it can process.
+   assert.equal(reference.REMINDER_DAILY_CAPACITY,5);
    const messages=[];const transport=async message=>{messages.push(message);return {sent:true,reason:"Synthetic provider acceptance only",missing:[]};};
    const due=new Date(saved.dueAt.getTime()+7*60000);
    await Promise.all([reminder.runReferenceReminderRecovery(due,transport),reminder.runReferenceReminderRecovery(due,transport)]);

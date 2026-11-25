@@ -1,6 +1,8 @@
 import {pujaObservances} from "@/lib/puja/observances";
 import {kumbhGuideDates,indiaEclipseDates,seasonalSources} from "@/lib/seo-seasonal";
 export const REMINDER_PRODUCT_KEY="reference-reminders-2027";
+// Match the bounded existing daily worker until a larger capacity is qualified.
+export const REMINDER_DAILY_CAPACITY=5;
 export const REMINDER_CONSENT_VERSION="reference-email-reminder-v1";
 export const REMINDER_END=new Date("2028-01-01T00:00:00Z");
 export type ReferenceEvent={id:string;date:string;name:string;sourceUrl:string};
