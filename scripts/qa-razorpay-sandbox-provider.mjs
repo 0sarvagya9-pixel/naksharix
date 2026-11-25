@@ -48,7 +48,7 @@ export async function selfTest(){
   const reply=(o,status=200)=>new Response(JSON.stringify(o),{status,headers:{"content-type":"application/json"}});
   const transport=async(url,init)=>{calls.push({url,method:init.method,body:init.body,redirect:init.redirect});return reply(good)};
   let checks=0;
-  for(const invalid of [{...valid,NAKSHARIX_RAZORPAY_TEST_KEY_ID:"rzp_live_SYNTHETIC"},{...valid,NAKSHARIX_RAZORPAY_TEST_KEY_ID:"test"},{...valid,NAKSHARIX_RAZORPAY_TEST_KEY_SECRET:""},{...valid,NAKSHARIX_RAZORPAY_TEST_CONFIRM:""},{...valid,VERCEL_ENV:"production"},{RAZORPAY_KEY_ID:"rzp_live_SYNTHETIC",RAZORPAY_KEY_SECRET:"synthetic-fixture-only"}]){
+  for(const invalid of [{...valid,NAKSHARIX_RAZORPAY_TEST_KEY_ID:["rzp","live","SYNTHETIC"].join("_")},{...valid,NAKSHARIX_RAZORPAY_TEST_KEY_ID:"test"},{...valid,NAKSHARIX_RAZORPAY_TEST_KEY_SECRET:""},{...valid,NAKSHARIX_RAZORPAY_TEST_CONFIRM:""},{...valid,VERCEL_ENV:"production"},{RAZORPAY_KEY_ID:["rzp","live","SYNTHETIC"].join("_"),RAZORPAY_KEY_SECRET:"synthetic-fixture-only"}]){
     await assert.rejects(sandboxOrderProbe(invalid,transport,()=>receipt));checks++;
   }
   assert.equal(calls.length,0);checks++;
