@@ -273,3 +273,66 @@ for(const patch of [{latitude:66},{latitude:NaN},{longitude:181},{latitude:null}
  assert.throws(()=>birthGeometry.calculateBirthBhavaGeometry({...basicInput,...patch}));geometryNegative++;
 }
 console.log("INDEPENDENT_BHAVA_GEOMETRY_PASS "+JSON.stringify({charts:midRef.rows.length,midpointComparisons,midpointMaxError,actualHouseAssignments,geometryNegative,scope:"Swiss Porphyry division points used as named quadrant midpoints, independent astronomical geometry only; full Bhava Bala not certified"}));
+
+
+const T=require("@/lib/astrology/strength/temporal-components");
+const solarRef=JSON.parse(fs.readFileSync("fixtures/astrology/independent-solar-strength-swiss-reference.json","utf8"));
+let declinationChecks=0,solarTimeChecks=0,solarEventChecks=0,temporalChecks=0,cheshtaChecks=0,temporalNegative=0;
+let maxDeclinationError=0,maxSolarTimeSeconds=0,maxSolarEventSeconds=0;
+for(const row of solarRef.rows){
+ const b=midRef.rows.find(x=>x.id===row.id),utc=new Date(b.utc);
+ const actual=T.calculateSolarStrengthContext(utc,b.latitude,b.longitude);
+ const diff=Math.abs(actual.apparentSolarHours-row.apparentSolarHours),timeError=Math.min(diff,24-diff)*3600;
+ assert.ok(timeError<=solarRef.provenance.apparentSolarTimeToleranceSeconds,row.id+" solar time "+timeError);
+ maxSolarTimeSeconds=Math.max(maxSolarTimeSeconds,timeError);solarTimeChecks++;
+ for(const [i,planet] of traditional.entries()){
+  const err=Math.abs(actual.declinations[planet]-row.declinations[i]);
+  assert.ok(err<=solarRef.provenance.declinationToleranceDegrees,row.id+" "+planet+" declination "+err);
+  maxDeclinationError=Math.max(maxDeclinationError,err);declinationChecks++;
+ }
+ for(const key of ["sunriseUtc","sunsetUtc","nextSunriseUtc"]){
+  assert.ok(actual[key],row.id+" "+key);
+  const err=Math.abs(Date.parse(actual[key])-Date.parse(row[key]))/1000;
+  assert.ok(err<=solarRef.provenance.riseSetToleranceSeconds,row.id+" "+key+" error "+err);
+  maxSolarEventSeconds=Math.max(maxSolarEventSeconds,err);solarEventChecks++;
+ }
+ const [date,time]=b.utc.slice(0,-1).split("T");
+ const result=birthGeometry.calculateBirthStrengthEvidence({date,time,timezone:"UTC",latitude:b.latitude,longitude:b.longitude});
+ assert.equal(result.temporal.rows.length,7);assert.ok(result.temporal.rows.every(x=>x.conditionalKalaVirupas===null));
+ assert.ok(result.bhava.houses.every(h=>h.arithmeticTotalVirupas===null));
+ assert.ok(result.temporal.missingDependencies.some(x=>x.includes("year and month")));
+ const expectedDay=utc.getTime()<Date.parse(row.sunsetUtc);
+ assert.equal(actual.dayNight,expectedDay?"day":"night");
+ const fraction=expectedDay?(utc-Date.parse(row.sunriseUtc))/(Date.parse(row.sunsetUtc)-Date.parse(row.sunriseUtc)):(utc-Date.parse(row.sunsetUtc))/(Date.parse(row.nextSunriseUtc)-Date.parse(row.sunsetUtc));
+ const expectedThird=(expectedDay?["Mercury","Sun","Saturn"]:["Moon","Venus","Mars"])[Math.floor(fraction*3)];
+ assert.equal(actual.thirdLord,expectedThird);assert.equal(result.temporal.rows.filter(p=>p.components.tribhaga===60).length,2);
+ temporalChecks+=5;
+}
+for(const g of traditional)for(const h of [0,3,6,9,12,15,18,21,23.99]){
+ const day=5*Math.min(h,24-h);
+ assert.ok(Math.abs(T.classicalNatonnata(g,h)-(g==="Mercury"?60:["Sun","Jupiter","Venus"].includes(g)?day:60-day))<1e-10);
+ temporalChecks++;
+}
+for(const g of traditional)for(const d of [-28,-24,-12,0,12,24,28]){
+ const x=g==="Mercury"?Math.abs(d):g==="Moon"||g==="Saturn"?-d:d;
+ assert.equal(T.classicalAyanaBase(g,d),Math.max(0,Math.min(60,30+1.25*x)));temporalChecks++;
+}
+for(const g of traditional)for(const moon of [0,45,90,135,180,225,270,315,359]){
+ for(const polarity of ["benefic","malefic"]){
+  const bright=Math.min(moon,360-moon)/3,expected=polarity==="benefic"?bright:60-bright;
+  const p=T.classicalPaksha(g,0,moon,polarity);
+  assert.equal(p.undoubledVirupas,expected);assert.equal(p.virupas,g==="Moon"?2*expected:expected);temporalChecks++;
+ }
+}
+for(const [motion,v] of [["vakra",60],["anuvakra",30],["vikala",15],["manda",30],["mandatara",15],["sama",7.5],["chara",45],["atichara",30]]){
+ assert.equal(T.classicalMotionClassVirupas(motion),v);cheshtaChecks++;
+}
+for(const [mean,trueLon,seeghrocha,midpoint,expected] of [[350,10,180,0,60],[10,350,90,0,30],[30,50,40,40,0],[90,110,280,100,60]]){
+ const r=T.classicalCheshtaFromMeanTrue(mean,trueLon,seeghrocha);assert.ok(Math.abs(r.midpoint-midpoint)<1e-10);assert.equal(r.virupas,expected);cheshtaChecks++;
+}
+assert.throws(()=>T.classicalCheshtaFromMeanTrue(0,180,30));temporalNegative++;
+assert.throws(()=>T.classicalMotionClassVirupas("unknown"));temporalNegative++;
+assert.throws(()=>T.classicalAyanaBase("Sun",NaN));temporalNegative++;
+const polar=T.calculateSolarStrengthContext(new Date("2025-06-21T12:00:00Z"),89,0);
+assert.equal(polar.solarDayLord,null);assert.equal(polar.thirdLord,null);assert.equal(polar.sunriseUtc,null);temporalNegative++;
+console.log("INDEPENDENT_TEMPORAL_STRENGTH_PASS "+JSON.stringify({declinationChecks,solarTimeChecks,solarEventChecks,temporalChecks,cheshtaChecks,temporalNegative,maxDeclinationError,maxSolarTimeSeconds,maxSolarEventSeconds,scope:"actual astronomy context and named arithmetic; year/month epoch, war transfer, complete motion and full independent strength parity remain open"}));

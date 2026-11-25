@@ -1,0 +1,141 @@
+{
+  "provenance": {
+    "engine": "PySwissEph 2.10.03",
+    "flags": 2052,
+    "method": "Moshier geocentric equatorial of date; apparent solar hours from Swiss sidtime and Sun RA; rise_trans with observer at sea level, 1013.25 hPa and 15 C. Inputs share independent-bhava-midpoints-swiss-reference.json synthetic UTC charts.",
+    "declinationToleranceDegrees": 0.02,
+    "apparentSolarTimeToleranceSeconds": 12,
+    "riseSetToleranceSeconds": 180,
+    "scope": "Independent physical context; traditional strengths remain separately qualified."
+  },
+  "rows": [
+    {
+      "id": "delhi",
+      "apparentSolarHours": 10.457499902,
+      "declinations": [
+        19.60630124,
+        -24.03854227,
+        2.50327691,
+        14.00818075,
+        10.79680643,
+        17.02480032,
+        -16.10173543
+      ],
+      "sunriseUtc": "1992-05-17T23:58:47Z",
+      "sunsetUtc": "1992-05-18T13:36:37Z",
+      "nextSunriseUtc": "1992-05-18T23:58:16Z"
+    },
+    {
+      "id": "london",
+      "apparentSolarHours": 0.390092687,
+      "declinations": [
+        1.75814868,
+        -2.95177361,
+        -22.42742071,
+        -9.67854222,
+        20.89596321,
+        12.65915878,
+        17.72485168
+      ],
+      "sunriseUtc": "2001-03-24T05:54:12Z",
+      "sunsetUtc": "2001-03-24T18:20:19Z",
+      "nextSunriseUtc": "2001-03-25T05:51:55Z"
+    },
+    {
+      "id": "new-york",
+      "apparentSolarHours": 1.840471602,
+      "declinations": [
+        -15.22939669,
+        -24.39697015,
+        21.65151387,
+        -22.41742721,
+        22.37026879,
+        -24.90701207,
+        -8.71551521
+      ],
+      "sunriseUtc": "2024-11-02T11:28:12Z",
+      "sunsetUtc": "2024-11-02T21:50:25Z",
+      "nextSunriseUtc": "2024-11-03T11:29:22Z"
+    },
+    {
+      "id": "sydney",
+      "apparentSolarHours": 10.023253228,
+      "declinations": [
+        -22.99821456,
+        -25.86037708,
+        23.5452077,
+        -21.94142965,
+        21.78741812,
+        -13.58640587,
+        -7.91673195
+      ],
+      "sunriseUtc": "2024-12-31T18:47:42Z",
+      "sunsetUtc": "2025-01-01T09:09:25Z",
+      "nextSunriseUtc": "2025-01-01T18:48:27Z"
+    },
+    {
+      "id": "quito",
+      "apparentSolarHours": 12.87895898,
+      "declinations": [
+        20.38085028,
+        9.24090288,
+        21.63891547,
+        11.55074123,
+        -17.48119258,
+        20.51485772,
+        -16.03826317
+      ],
+      "sunriseUtc": "1985-07-21T11:17:00Z",
+      "sunsetUtc": "1985-07-21T23:23:29Z",
+      "nextSunriseUtc": "1985-07-22T11:17:02Z"
+    },
+    {
+      "id": "reykjavik",
+      "apparentSolarHours": 9.73320304,
+      "declinations": [
+        -23.43973964,
+        19.68943461,
+        -22.65762045,
+        -24.2425301,
+        -2.24511459,
+        -19.70982041,
+        -1.47699565
+      ],
+      "sunriseUtc": "1980-12-20T11:22:02Z",
+      "sunsetUtc": "1980-12-20T15:29:03Z",
+      "nextSunriseUtc": "1980-12-21T11:22:38Z"
+    },
+    {
+      "id": "ushuaia",
+      "apparentSolarHours": 19.240060081,
+      "declinations": [
+        -7.55124214,
+        -21.01626207,
+        5.09061211,
+        -3.63009848,
+        11.45480131,
+        -17.03582793,
+        13.49622319
+      ],
+      "sunriseUtc": "2000-02-29T09:55:08Z",
+      "sunsetUtc": "2000-02-29T23:34:51Z",
+      "nextSunriseUtc": "2000-03-01T09:57:11Z"
+    },
+    {
+      "id": "kathmandu",
+      "apparentSolarHours": 23.731277828,
+      "declinations": [
+        -7.62977346,
+        26.99622975,
+        17.76938605,
+        -10.52336066,
+        7.44827502,
+        10.31888707,
+        22.75853925
+      ],
+      "sunriseUtc": "2004-02-29T00:44:13Z",
+      "sunsetUtc": "2004-02-29T12:18:36Z",
+      "nextSunriseUtc": "2004-03-01T00:43:13Z"
+    }
+  ]
+}
