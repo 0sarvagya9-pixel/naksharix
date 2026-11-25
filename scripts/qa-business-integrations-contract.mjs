@@ -4,9 +4,11 @@ assert.equal(canonicalWidgetOrigin("https://publisher.example"),"https://publish
 for(const value of ["http://publisher.example","https://publisher.example/","https://publisher.example/path","https://publisher.example?x=1","https://user@publisher.example","https://publisher.example#x","https://publisher.example.evil/","null","https://*.example"])assert.equal(canonicalWidgetOrigin(value),null,value);
 assert.equal(WIDGET_GRANT_MAX_AGE_SECONDS,300);
 import {readFileSync} from "node:fs";
-import {scopeSubset,scopeUnits,parseBusinessAuthorization,usageFits,usagePeriod,renderPanchangWidget,qualifyBusinessMatchingFactors} from "../lib/business-integrations/contract.ts";
-assert.equal(scopeUnits("matching"),2);assert.equal(scopeUnits("chart"),1);
+import {scopeSubset,scopeUnits,parseBusinessAuthorization,usageFits,usagePeriod,renderPanchangWidget,qualifyBusinessMatchingFactors,validPdfBrand} from "../lib/business-integrations/contract.ts";
+assert.equal(scopeUnits("matching"),2);assert.equal(scopeUnits("chart"),1);assert.equal(scopeUnits("chart-pdf"),2);
+assert.equal(scopeSubset(["chart-pdf"],["chart","matching"]),false);
 assert.equal(scopeSubset(["chart"],["chart","matching"]),true);assert.equal(scopeSubset(["chart","chart"],["chart"]),false);assert.equal(scopeSubset(["matching"],["chart"]),false);
+assert.ok(validPdfBrand("Licensed Partner"));for(const v of ["","A"," x","x ","a".repeat(81),"Unlicensed\u0000","हिंदी"])assert.equal(validPdfBrand(v),false);
 const raw="nxk_"+"a".repeat(32)+"_"+"b".repeat(43);
 assert.equal(parseBusinessAuthorization("Bearer "+raw).id,"a".repeat(32));
 assert.equal(parseBusinessAuthorization("Basic "+raw),null);assert.equal(parseBusinessAuthorization(raw),null);assert.equal(parseBusinessAuthorization("Bearer "+raw+"x"),null);

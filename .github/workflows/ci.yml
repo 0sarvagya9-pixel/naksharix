@@ -154,7 +154,15 @@ jobs:
           retention-days: 3
           if-no-files-found: error
       - name: Qualify B2B calculations and concurrent tenant quota on disposable PostgreSQL
+        env:
+          PACKAGE_QA_DIR: ${{ runner.temp }}/partner-qa
         run: node scripts/qa-business-integrations-runtime.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: partner-chart-synthetic-pdf
+          path: ${{ runner.temp }}/partner-qa
+          retention-days: 3
+          if-no-files-found: error
       - name: Qualify expert service and report-review runtime on disposable PostgreSQL
         run: node scripts/qa-expert-services-runtime.mjs
       - name: Qualify credit reservation, expiry and refund runtime on disposable PostgreSQL

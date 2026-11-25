@@ -182,10 +182,10 @@ for (const [path,topic,english,hindi,links] of [
     const r=await fetch(base+path,{headers:{Cookie:"naksharix-language="+locale}});
     assert.equal(r.status,200);
     const html=stripMarkup(await r.text());
-    assert.equal([...html.matchAll(/<h1\\b[^>]*>/gi)].length,1,"One H1 "+path);
+    assert.equal([...html.matchAll(/<h1\b[^>]*>/gi)].length,1,"One H1 "+path);
     assert.ok(html.includes('id="reading-guide-'+topic+'"')&&html.includes(heading),"Missing rendered reading guide "+locale+" "+path);
     if(locale==="en")for(const link of links){assert.ok(html.includes('href="'+link+'"'),"Missing resource link "+link);assert.equal((await fetch(base+link)).status,200);}
-    assert.ok([...html.matchAll(/<link\\b[^>]*\\brel="canonical"[^>]*>/gi)].map(m=>m[0]).some(tag=>hrefMatches(tag,path)),"Guide canonical "+path);
+    assert.ok([...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/gi)].map(m=>m[0]).some(tag=>hrefMatches(tag,path)),"Guide canonical "+path);
   }
 }
 const guideDirectory=await(await fetch(base+"/llms.txt")).text();

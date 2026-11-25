@@ -4,6 +4,7 @@ import {calculatePremiumPanchang} from "@/lib/astrology/premium-engine/panchang"
 import {getAstrologyProvider,getActiveAstrologyProviderName} from "@/lib/astrology/provider";
 import {buildPremiumCompatibilityReport,validateAshtakootFactors} from "@/lib/matching/kundli-matching";
 import {renderPanchangWidget,qualifyBusinessMatchingFactors} from "@/lib/business-integrations/contract";
+import {renderPartnerChartPdf} from "@/lib/business-integrations/chart-pdf";
 import type {BusinessCalculation} from "@/lib/business-integrations/input";
 import type {AstrologyBirthInput,BirthChartData} from "@/lib/astrology/types";
 const disclaimer="Internally computed traditional framework; not externally certified, not a prediction, and not a substitute for personal consent or professional advice.";
@@ -11,9 +12,10 @@ function asBirth(b:{date:string;time:string;latitude:number;longitude:number;off
  return {name:label,dateOfBirth:b.date,timeOfBirth:b.time,birthPlace:"Supplied coordinates",latitude:b.latitude,longitude:b.longitude,timezone:String(b.offsetMinutes/60),language:"en"};
 }
 export async function calculateBusinessResult(input:BusinessCalculation,brand:string){
- if(input.scope==="chart"){
+ if(input.scope==="chart"||input.scope==="chart-pdf"){
  const chart=calculateInternalChart({...asBirth(input.birth,"Subject"),ayanamsa:"lahiri",houseSystem:"whole_sign"});
  if(chart.planets.length!==9||chart.planets.some(p=>typeof p.absoluteLongitude!=="number"||!Number.isFinite(p.absoluteLongitude)))throw Error("CHART_UNAVAILABLE");
+ if(input.scope==="chart-pdf")return renderPartnerChartPdf(chart,brand);
  return {ascendant:chart.ascendant,moon:chart.moon,nakshatra:chart.nakshatra,planets:chart.planets,houses:chart.houses,ayanamsa:chart.ayanamsa,calculation:chart.metadata,disclaimer};
  }
  if(input.scope==="matching"){

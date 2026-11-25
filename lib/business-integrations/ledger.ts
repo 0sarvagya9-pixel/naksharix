@@ -3,10 +3,11 @@ import {createHmac,randomBytes,timingSafeEqual} from "node:crypto";
 import type {Prisma} from "@prisma/client";
 import {env} from "@/lib/env";
 import {prisma} from "@/lib/db";
-import {parseBusinessAuthorization,scopeSubset,scopeUnits,usageFits,usagePeriod,isBusinessScope,type BusinessScope} from "@/lib/business-integrations/contract";
+import {parseBusinessAuthorization,scopeSubset,scopeUnits,usageFits,usagePeriod,isBusinessScope,validPdfBrand,type BusinessScope} from "@/lib/business-integrations/contract";
 import type {keySchema,tenantSchema} from "@/lib/business-integrations/input";
 import type {z} from "zod";
 export const businessEnabled=()=>env.B2B_INTEGRATION_ENABLED==="true";
+export const businessPdfEnabled=()=>businessEnabled()&&env.B2B_CHART_PDF_ENABLED==="true";
 const keyDigest=(raw:string)=>createHmac("sha256",env.JWT_SECRET).update("naksharix-b2b-key-v1:"+raw).digest("hex");
 function keyDigestMatches(raw:string,digest:string){if(!/^[a-f0-9]{64}$/.test(digest))return false;return timingSafeEqual(Buffer.from(keyDigest(raw),"hex"),Buffer.from(digest,"hex"));}
 export async function businessSchemaReady(){
@@ -16,6 +17,7 @@ export async function lockBusinessTenant(tx:Prisma.TransactionClient,id:string){
 export const tenantSelect={id:true,displayName:true,brandName:true,status:true,contractExpiresAt:true,monthlyUnitLimit:true,unitPricePaise:true,scopes:true,createdAt:true} satisfies Prisma.BusinessTenantSelect;
 const keySelect={id:true,label:true,scopes:true,expiresAt:true,revokedAt:true,createdAt:true} satisfies Prisma.BusinessApiKeySelect;
 export async function createTenant(adminId:string,input:z.infer<typeof tenantSchema>){
+ if(input.scopes.includes("chart-pdf")&&!businessPdfEnabled())return null;
  const expiry=new Date(input.contractExpiresAt+"T00:00:00Z"),now=new Date();
  if(expiry<=now||expiry.getTime()>now.getTime()+366*86400000)return null;
  const owner=await prisma.user.findFirst({where:{email:{equals:input.ownerEmail,mode:"insensitive"}},select:{id:true,role:true,emailVerified:true,emailVerifiedAt:true}});
@@ -64,6 +66,7 @@ export async function revokeBusinessKey(userId:string,tenantId:string,keyId:stri
  });
 }
 export async function claimBusinessCalculation(authorization:string|null,scope:BusinessScope,requestId:string){
+ if(scope==="chart-pdf"&&!businessPdfEnabled())return {kind:"unauthorized" as const};
  const token=parseBusinessAuthorization(authorization);if(!token)return {kind:"unauthorized" as const};
  const initial=await prisma.businessApiKey.findUnique({where:{id:token.id},select:{tenantId:true,digest:true}});
  if(!initial||!keyDigestMatches(token.raw,initial.digest))return {kind:"unauthorized" as const};
@@ -72,6 +75,7 @@ export async function claimBusinessCalculation(authorization:string|null,scope:B
  const key=await tx.businessApiKey.findFirst({where:{id:token.id,tenantId:initial.tenantId,revokedAt:null,expiresAt:{gt:now}},include:{tenant:true}});
  if(!key||!keyDigestMatches(token.raw,key.digest)||key.tenant.status!=="ACTIVE"||key.tenant.contractExpiresAt<=now||!scopeSubset([scope],key.scopes)||!scopeSubset([scope],key.tenant.scopes))return {kind:"unauthorized" as const};
  const t=key.tenant,period=usagePeriod(now),units=scopeUnits(scope);
+ if(scope==="chart-pdf"&&!validPdfBrand(t.brandName))return {kind:"unauthorized" as const};
  if(await tx.businessUsageCall.findUnique({where:{tenantId_requestId:{tenantId:t.id,requestId}},select:{requestId:true}}))return {kind:"duplicate" as const};
  const month=await tx.businessUsageMonth.findUnique({where:{tenantId_period:{tenantId:t.id,period}}});
  if(!usageFits(month?.attemptedUnits??0,t.monthlyUnitLimit,units))return {kind:"limit" as const};
@@ -97,7 +101,7 @@ export async function finishBusinessCalculation(tenantId:string,requestId:string
  const now=new Date();
  const key=await tx.businessApiKey.findFirst({where:{id:call.keyId,tenantId,revokedAt:null,expiresAt:{gt:now}},select:{id:true,scopes:true}});
  // A calculation must not escape a revoked or narrowed contract while it was running.
- const complete=success&&!!key&&isBusinessScope(call.scope)&&scopeSubset([call.scope],key.scopes)&&scopeSubset([call.scope],call.tenant.scopes)&&call.tenant.status==="ACTIVE"&&call.tenant.contractExpiresAt>now;
+ const complete=success&&!!key&&(call.scope!=="chart-pdf"||businessPdfEnabled())&&isBusinessScope(call.scope)&&scopeSubset([call.scope],key.scopes)&&scopeSubset([call.scope],call.tenant.scopes)&&call.tenant.status==="ACTIVE"&&call.tenant.contractExpiresAt>now;
  const changed=await tx.businessUsageCall.updateMany({where:{tenantId,requestId,state:"RESERVED"},data:{state:complete?"COMPLETED":"FAILED",finishedAt:new Date()}});
  if(changed.count!==1)return false;
  await tx.businessUsageMonth.update({where:{tenantId_period:{tenantId,period:call.period}},data:complete?{completedUnits:{increment:call.units}}:{failedUnits:{increment:call.units}}});

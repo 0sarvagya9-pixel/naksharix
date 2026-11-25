@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import Module,{createRequire} from "node:module";
-import {randomUUID} from "node:crypto";
+import {randomUUID,createHash} from "node:crypto";
 const db=new URL(process.env.DATABASE_URL||"postgresql://invalid/invalid");
 assert.equal(process.env.CI,"true");
 assert.ok(["postgresql:","postgres:"].includes(db.protocol)&&["localhost","127.0.0.1"].includes(db.hostname)&&db.port==="5432"&&db.pathname==="/naksharix"&&db.username==="postgres","DISPOSABLE_DB_ONLY");
@@ -11,6 +11,7 @@ assert.equal(process.env.EMAIL_PROVIDER,"disabled");
 process.env.NODE_ENV="test";
 process.env.ASTROLOGY_PROVIDER="own_engine";
 process.env.B2B_INTEGRATION_ENABLED="true";
+process.env.B2B_CHART_PDF_ENABLED="true";
 globalThis.fetch=async()=>{throw Error("EXTERNAL_NETWORK_FORBIDDEN");};
 const require=createRequire(import.meta.url),ts=require("typescript");
 const originalResolve=Module._resolveFilename,originalLoad=Module._load;
@@ -23,6 +24,7 @@ const {issueWidgetGrant,readWidgetGrant}=require("@/lib/business-integrations/wi
 const widgetRoute=require("@/app/api/partner/v1/widget/route");
 const calculateRoute=require("@/app/api/partner/v1/calculate/route");
 const ids=[];const run=randomUUID();
+const originalScopes=businessScopes.filter(s=>s!=="chart-pdf");
 const verified=new Date(),expires=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
 const birth={date:"1992-05-18",time:"08:15",latitude:28.6139,longitude:77.209,offsetMinutes:330};
 const second={date:"1991-11-23",time:"17:20",latitude:19.076,longitude:72.8777,offsetMinutes:330};
@@ -32,7 +34,7 @@ try{
  assert.equal(await ledger.businessSchemaReady(),true);
  async function user(suffix,role="USER"){const u=await prisma.user.create({data:{name:"QA synthetic "+suffix,email:"b2b-"+run+"-"+suffix+"@example.invalid",emailVerified:verified,role}});ids.push(u.id);return u;}
  const admin=await user("admin","SUPER_ADMIN"),owner=await user("owner"),other=await user("other");
- const request=tenantSchema.parse({ownerEmail:owner.email,displayName:"Synthetic partner",brandName:"QA <partner>",contractReference:"QA "+run,contractExpiresAt:expires,monthlyUnitLimit:8,unitPricePaise:100,scopes:[...businessScopes],ownerConfirmed:true});
+ const request=tenantSchema.parse({ownerEmail:owner.email,displayName:"Synthetic partner",brandName:"QA <partner>",contractReference:"QA "+run,contractExpiresAt:expires,monthlyUnitLimit:8,unitPricePaise:100,scopes:[...originalScopes],ownerConfirmed:true});
  const tenant=await ledger.createTenant(admin.id,request);
  assert.ok(tenant);
  assert.equal(await ledger.createTenant(admin.id,request),null,"duplicate contract");
@@ -42,7 +44,7 @@ try{
  assert.equal(await issue(other.id,["chart"]),null);
  const restricted=await issue(owner.id,["panchang"]);assert.ok(restricted?.key);
  assert.equal((await ledger.claimBusinessCalculation("Bearer "+restricted.key,"chart",randomUUID())).kind,"unauthorized");
- const key=await issue(owner.id,[...businessScopes]);assert.ok(key?.key);
+ const key=await issue(owner.id,[...originalScopes]);assert.ok(key?.key);
  const auth="Bearer "+key.key;
  const stored=await prisma.businessApiKey.findUniqueOrThrow({where:{id:key.record.id}});
  assert.notEqual(stored.digest,key.key);assert.equal(stored.digest.length,64);
@@ -52,7 +54,7 @@ try{
  assert.equal(businessCalculationSchema.safeParse({...fixture("chart"),subjectPermission:false}).success,false);
  assert.equal(businessCalculationSchema.safeParse({...fixture("matching"),subjectPermission:false}).success,false);
  assert.equal(businessCalculationSchema.safeParse({...fixture("chart"),birth:{...birth,date:"2026-02-30"}}).success,false);
- for(const scope of businessScopes){
+ for(const scope of originalScopes){
   const input=businessCalculationSchema.parse(fixture(scope));
   const c=await ledger.claimBusinessCalculation(auth,scope,input.requestId);assert.equal(c.kind,"claimed");
   assert.equal((await ledger.claimBusinessCalculation(auth,scope,input.requestId)).kind,"duplicate");
@@ -68,7 +70,7 @@ try{
  const midflight=randomUUID();assert.equal((await ledger.claimBusinessCalculation(auth,"chart",midflight)).kind,"claimed");
  await prisma.businessApiKey.update({where:{id:key.record.id},data:{scopes:["panchang"]}});
  assert.equal(await ledger.finishBusinessCalculation(tenant.id,midflight,true),false);
- await prisma.businessApiKey.update({where:{id:key.record.id},data:{scopes:[...businessScopes]}});
+ await prisma.businessApiKey.update({where:{id:key.record.id},data:{scopes:[...originalScopes]}});
  // Six attempted units; two remain. Concurrent distinct reservations may not oversell.
  const requests=Array.from({length:5},()=>randomUUID());
  const claims=await Promise.all(requests.map(id=>ledger.claimBusinessCalculation(auth,"panchang",id)));
@@ -106,6 +108,31 @@ try{
  assert.equal((await redeem(grant)).status,409);
  const secondGrant=await mint();assert.equal(await ledger.revokeBusinessKey(owner.id,widgetTenant.id,widgetKey.record.id),true);assert.equal((await redeem(secondGrant)).status,409);
  const widgetMonth=await prisma.businessUsageMonth.findUniqueOrThrow({where:{tenantId_period:{tenantId:widgetTenant.id,period:usagePeriod()}}});assert.equal(widgetMonth.attemptedUnits,2);assert.equal(widgetMonth.completedUnits,1);
+ // Separate approved synthetic contract. Existing chart-only keys cannot gain PDF scope.
+ const pdfTenant=await ledger.createTenant(admin.id,{...request,brandName:"Synthetic Example Partner",contractReference:"chart pdf "+run,monthlyUnitLimit:4,scopes:["chart-pdf"]});assert.ok(pdfTenant);
+ const pdfKey=await ledger.issueBusinessKey(owner.id,keySchema.parse({tenantId:pdfTenant.id,label:"PDF only",scopes:["chart-pdf"]}));assert.ok(pdfKey?.key);
+ const pdfInput={scope:"chart-pdf",requestId:randomUUID(),subjectPermission:true,birth};
+ const runPdf=(data,token)=>calculateRoute.POST(new Request("http://localhost/api/partner/v1/calculate",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify(data)}));
+ assert.equal((await runPdf(pdfInput,key.key)).status,401,"Existing scope cannot access PDF");
+ assert.equal((await runPdf({...pdfInput,subjectPermission:false},pdfKey.key)).status,422);
+ assert.equal((await runPdf({...pdfInput,brand:"Unapproved override"},pdfKey.key)).status,422);
+ const pdfResponse=await runPdf(pdfInput,pdfKey.key);assert.equal(pdfResponse.status,200);
+ assert.equal(pdfResponse.headers.get("cache-control"),"private, no-store");
+ const result=(await pdfResponse.json()).data;assert.equal(result.brand.name,"Synthetic Example Partner");
+ assert.equal(result.usageUnits,2);assert.equal(result.result.pages,2);
+ const bytes=Buffer.from(result.result.pdfBase64,"base64");assert.equal(bytes.length,result.result.byteLength);
+ assert.equal(createHash("sha256").update(bytes).digest("hex"),result.result.sha256);
+ const {PDFDocument}=require("pdf-lib");const pdf=await PDFDocument.load(bytes);
+ assert.equal(pdf.getPageCount(),2);assert.equal(pdf.getTitle(),"Synthetic Example Partner | Chart reference | Powered by Naksharix");
+ assert.equal((await runPdf(pdfInput,pdfKey.key)).status,409,"No duplicate usage");
+ assert.equal((await runPdf({...pdfInput,requestId:randomUUID(),scope:"chart"},pdfKey.key)).status,401);
+ const secondPdf={...pdfInput,requestId:randomUUID()};assert.equal((await runPdf(secondPdf,pdfKey.key)).status,200);
+ assert.equal((await runPdf({...pdfInput,requestId:randomUUID()},pdfKey.key)).status,429);
+ const pdfMonth=await prisma.businessUsageMonth.findUniqueOrThrow({where:{tenantId_period:{tenantId:pdfTenant.id,period:usagePeriod()}}});assert.equal(pdfMonth.attemptedUnits,4);assert.equal(pdfMonth.completedUnits,4);
+ const pdfCalls=await prisma.businessUsageCall.findMany({where:{tenantId:pdfTenant.id}});
+ assert.equal(pdfCalls.length,2);assert.ok(!JSON.stringify(pdfCalls).includes(birth.date)&&!JSON.stringify(pdfCalls).includes(result.result.pdfBase64));
+ if(process.env.PACKAGE_QA_DIR){fs.mkdirSync(process.env.PACKAGE_QA_DIR,{recursive:true});fs.writeFileSync(path.join(process.env.PACKAGE_QA_DIR,"partner-chart-reference.pdf"),bytes);}
+ console.log("B2B_CHART_PDF_RUNTIME_PASS "+JSON.stringify({pages:2,documents:2,exactBrand:true,consentDenied:true,scopeEscalationDenied:true,overrideDenied:true,duplicateDenied:true,quotaDenied:true,privateResponse:true,usageUnits:4,persistedInputOrPdf:false}));
  console.log("B2B_WIDGET_RUNTIME_PASS "+JSON.stringify({signedOrigin:true,originMismatchDenied:true,expiredDenied:true,tamperDenied:true,concurrentReplayDenied:true,revokedKeyDenied:true,completedUnits:1,attemptedUnits:2,scope:"local request handlers and disposable database; external publisher integration not active"}));
  console.log("B2B_RUNTIME_PASS "+JSON.stringify({scopes:4,attemptedUnits:8,completedUnits:6,failedUnits:2,concurrentReservations:5,acceptedReservations:2,tenantIsolation:true,revocation:true,scopeNarrowing:true,privacy:true,syntheticContract:true}));
 }finally{

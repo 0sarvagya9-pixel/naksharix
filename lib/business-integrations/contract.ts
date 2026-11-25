@@ -1,8 +1,10 @@
 /** Server-to-server only; no browser-embedded secret, no anonymous quota. */
-export const businessScopes=["chart","panchang","matching","panchang-widget"] as const;
+export const businessScopes=["chart","panchang","matching","panchang-widget","chart-pdf"] as const;
 export type BusinessScope=typeof businessScopes[number];
 export function isBusinessScope(value:unknown):value is BusinessScope{return typeof value==="string"&&(businessScopes as readonly string[]).includes(value);}
-export function scopeUnits(scope:BusinessScope){return scope==="matching"?2:1;}
+export function scopeUnits(scope:BusinessScope){return scope==="matching"||scope==="chart-pdf"?2:1;}
+/** PDF scope currently supports a reviewed English/printable ASCII display brand. */
+export function validPdfBrand(value:unknown):value is string{return typeof value==="string"&&value===value.trim()&&value.length>=2&&value.length<=80&&/^[\x20-\x7e]+$/.test(value);}
 export function scopeSubset(requested:readonly string[],allowed:readonly string[]){
  return requested.length>0&&new Set(requested).size===requested.length&&requested.every(s=>isBusinessScope(s)&&allowed.includes(s));
 }
