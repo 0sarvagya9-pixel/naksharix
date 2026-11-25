@@ -13,29 +13,19 @@ import type {
   YogaDetection
 } from "@/lib/astrology/types";
 
+import {calculateVimshottariDasha as calculateExactDasha, type DashaPeriod as ExactDashaPeriod} from "@/lib/astrology/premium-engine/dasha";
+import {localBirthToUtcDate,normalizeBirthDate,normalizeBirthTime,parseBirthDateTime,parseTimezoneOffsetToHours} from "@/lib/astrology/own-engine/time";
+
 type Locale = "en" | "hi" | "hinglish";
 
 const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"] as const;
-const dashaOrder = ["Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Saturn", "Mercury"] as const;
-const dashaYears: Record<(typeof dashaOrder)[number], number> = {
-  Ketu: 7,
-  Venus: 20,
-  Sun: 6,
-  Moon: 10,
-  Mars: 7,
-  Rahu: 18,
-  Jupiter: 16,
-  Saturn: 19,
-  Mercury: 17
-};
 const manglikHouses = new Set([1, 2, 4, 7, 8, 12]);
 const classicalPlanets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
-const nakshatraSpan = 360 / 27;
 
 export function enrichBirthChartWithCoreCalculations(chart: BirthChartData, input: AstrologyBirthInput): BirthChartData {
   const locale = input.language ?? input.locale ?? "en";
   const ascendantLongitude = getAscendantLongitude(chart);
-  const dasha = calculateVimshottariDasha(chart.planetPositions, input.dateOfBirth, locale);
+  const dasha = calculateVimshottariDasha(chart.planetPositions, resolveDashaBirthInstant(input), locale);
   const chalit = calculateChalitChart(chart.planetPositions, ascendantLongitude, locale);
   const dosha = calculateDoshaAnalysis(chart.planetPositions, chart.avakhada.ascendant, chart.avakhada.moonSign, locale);
   const yoga = detectBasicYogas(chart.planetPositions, chart.avakhada.ascendant, locale);
@@ -52,55 +42,43 @@ export function enrichBirthChartWithCoreCalculations(chart: BirthChartData, inpu
   };
 }
 
+export function resolveDashaBirthInstant(input:Pick<AstrologyBirthInput,"dateOfBirth"|"timeOfBirth"|"timezone">):Date {
+  const date=normalizeBirthDate(input.dateOfBirth),time=normalizeBirthTime(input.timeOfBirth);
+  return localBirthToUtcDate(parseBirthDateTime(date,time),parseTimezoneOffsetToHours(input.timezone,date,time));
+}
+
 export function calculateVimshottariDasha(
   planets: PlanetPosition[],
   birthDate: string | Date,
   locale: Locale = "en",
   currentDate = new Date()
 ): VimshottariDashaCalculation {
-  const moonLongitude = absoluteLongitudeFor(planets.find((planet) => samePlanet(planet.planet, "Moon")));
-  const birth = normalizeDate(birthDate);
-  if (moonLongitude === undefined || !birth) {
-    return {
-      available: false,
-      method: "Moon nakshatra birth balance",
-      note: dashaMissingNote(locale),
-      mahadashas: [],
-      currentAntardashas: []
-    };
-  }
-
-  const nakshatraIndex = Math.min(26, Math.floor(normalizeDegrees(moonLongitude) / nakshatraSpan));
-  const birthLord = dashaOrder[nakshatraIndex % dashaOrder.length];
-  const progress = (normalizeDegrees(moonLongitude) % nakshatraSpan) / nakshatraSpan;
-  const birthBalanceYears = round((1 - progress) * dashaYears[birthLord], 4);
-  const mahadashas: DashaPeriod[] = [];
-  let cursor = new Date(birth);
-  const lordIndex = dashaOrder.indexOf(birthLord);
-
-  for (let i = 0; i < 9; i += 1) {
-    const lord = dashaOrder[(lordIndex + i) % dashaOrder.length];
-    const years = i === 0 ? birthBalanceYears : dashaYears[lord];
-    const end = addYearsAsDays(cursor, years);
-    const period = makePeriod(lord, cursor, end, "mahadasha", undefined, years);
-    period.antardashas = buildAntardashas(period);
-    mahadashas.push(period);
-    cursor = end;
-  }
-
-  const current = mahadashas.find((period) => containsDate(currentDate, period.startsAt, period.endsAt)) ?? mahadashas[0];
-  const currentAntardashas = current?.antardashas ?? [];
-  const currentAntardasha = currentAntardashas.find((period) => containsDate(currentDate, period.startsAt, period.endsAt));
-
+  const moonLongitude=absoluteLongitudeFor(planets.find(p=>samePlanet(p.planet,"Moon")));
+  const birth=birthDate instanceof Date?birthDate:new Date(String(birthDate).slice(0,10)+"T00:00:00.000Z");
+  if(moonLongitude===undefined||!Number.isFinite(birth.getTime())||!Number.isFinite(currentDate.getTime()))return {
+    available:false,method:"Moon nakshatra birth balance",note:dashaMissingNote(locale),mahadashas:[],currentAntardashas:[]
+  };
+  const exact=calculateExactDasha({moonLongitude,birthDateTime:birth,currentDate});
+  // The customer-facing timeline historically begins at birth. Clip elapsed
+  // portions but never restart the first remaining major period's sub-cycle.
+  const at=birth.getTime(),yearMs=365.2425*86400000;
+  const convert=(period:ExactDashaPeriod,level:"mahadasha"|"antardasha",parentPlanet?:string):DashaPeriod=>{
+    const from=new Date(Math.max(at,Date.parse(period.startsAt))),to=new Date(period.endsAt);
+    const startsAt=from.toISOString().slice(0,10),endsAt=to.toISOString().slice(0,10);
+    return {planet:period.lord,startsAt,endsAt,startsAtUtc:from.toISOString(),endsAtUtc:to.toISOString(),period:startsAt+" to "+endsAt,level,parentPlanet,durationYears:round((to.getTime()-from.getTime())/yearMs,6)};
+  };
+  const mahadashas=exact.mahadashas.filter(p=>Date.parse(p.endsAt)>at).map(p=>{
+    const result=convert(p,"mahadasha");
+    result.antardashas=exact.antardashas.filter(a=>a.mahadashaLord===p.lord&&a.startsAt>=p.startsAt&&a.endsAt<=p.endsAt&&Date.parse(a.endsAt)>at).map(a=>convert(a,"antardasha",p.lord));
+    return result;
+  });
+  const contains=(p:DashaPeriod)=>Date.parse(p.startsAtUtc!)<=currentDate.getTime()&&currentDate.getTime()<Date.parse(p.endsAtUtc!);
+  const currentMahadasha=mahadashas.find(contains);
+  const currentAntardashas=currentMahadasha?.antardashas??[];
   return {
-    available: true,
-    method: "Vimshottari dasha from Moon sidereal nakshatra position",
-    birthMahadasha: birthLord,
-    currentMahadasha: current,
-    currentAntardasha,
-    birthBalanceYears,
-    mahadashas,
-    currentAntardashas
+    available:true,method:"Vimshottari dasha from Moon sidereal nakshatra position (365.2425-day year)",
+    birthMahadasha:exact.startingMahadashaLord,birthBalanceYears:exact.balanceAtBirthYears,
+    currentMahadasha,currentAntardasha:currentAntardashas.find(contains),mahadashas,currentAntardashas
   };
 }
 
@@ -193,28 +171,6 @@ export function detectBasicYogas(planets: PlanetPosition[], ascendantSign: strin
   };
 }
 
-function buildAntardashas(mahadasha: DashaPeriod): DashaPeriod[] {
-  const parentIndex = dashaOrder.indexOf(mahadasha.planet as (typeof dashaOrder)[number]);
-  const start = new Date(`${mahadasha.startsAt}T00:00:00.000Z`);
-  const end = new Date(`${mahadasha.endsAt}T00:00:00.000Z`);
-  const totalDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000));
-  let cursor = start;
-  return dashaOrder.map((_, index) => {
-    const lord = dashaOrder[(parentIndex + index) % dashaOrder.length];
-    const durationDays = totalDays * dashaYears[lord] / 120;
-    const subEnd = index === dashaOrder.length - 1 ? end : addDays(cursor, durationDays);
-    const period = makePeriod(lord, cursor, subEnd, "antardasha", mahadasha.planet, round(durationDays / 365.2425, 4));
-    cursor = subEnd;
-    return period;
-  });
-}
-
-function makePeriod(planet: string, startsAt: Date, endsAt: Date, level: "mahadasha" | "antardasha", parentPlanet?: string, durationYears?: number): DashaPeriod {
-  const start = formatDate(startsAt);
-  const end = formatDate(endsAt);
-  return { planet, startsAt: start, endsAt: end, period: `${start} to ${end}`, level, parentPlanet, durationYears };
-}
-
 function calculateKaalSarp(planets: PlanetPosition[], locale: Locale): DoshaStatus {
   const rahu = findPlanet(planets, "Rahu");
   const ketu = findPlanet(planets, "Ketu");
@@ -294,28 +250,6 @@ function inClockwiseArc(value: number, start: number, end: number) {
 
 function normalizeDegrees(value: number) {
   return ((value % 360) + 360) % 360;
-}
-
-function normalizeDate(value: string | Date) {
-  const date = value instanceof Date ? value : new Date(`${String(value).slice(0, 10)}T00:00:00.000Z`);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function addYearsAsDays(date: Date, years: number) {
-  return addDays(date, years * 365.2425);
-}
-
-function addDays(date: Date, days: number) {
-  return new Date(date.getTime() + Math.round(days * 86400000));
-}
-
-function containsDate(date: Date, start: string, end: string) {
-  const time = date.getTime();
-  return time >= new Date(`${start}T00:00:00.000Z`).getTime() && time < new Date(`${end}T00:00:00.000Z`).getTime();
-}
-
-function formatDate(date: Date) {
-  return date.toISOString().slice(0, 10);
 }
 
 function round(value: number, digits = 2) {

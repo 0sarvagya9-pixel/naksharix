@@ -1,4 +1,5 @@
 import "server-only";
+import {calculateVimshottariDasha,resolveDashaBirthInstant} from "@/lib/astrology/core-calculations";
 import { buildEditorialInsights,editorialHouse } from "@/lib/reports/editorial-insights";
 import { getAstrologyProvider,getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 import { calculateInternalTransitSnapshot } from "@/lib/astrology/transit/engine";
@@ -79,7 +80,8 @@ export async function assembleAutomaticPaidReport(input:{
   const planet=(name:string)=>chart.planetPositions.find(p=>p.planet===name);
   const selected=(names:string[])=>chart.planetPositions.filter(p=>names.includes(p.planet)).map(compactPlanet);
   const houseReview=(nums:number[])=>nums.map(n=>editorialHouse(chart,n,l));
-  const dasha={asOf:date,method:chart.calculatedDasha?.method,currentMajor:chart.calculatedDasha?.currentMahadasha,currentSubPeriod:chart.calculatedDasha?.currentAntardasha,periods:chart.vimshottariDasha.map(p=>({planet:p.planet,startsAt:p.startsAt,endsAt:p.endsAt}))};
+  const exactDasha=calculateVimshottariDasha(chart.planetPositions,resolveDashaBirthInstant(birth),l,now);
+  const dasha={asOf:now.toISOString(),method:exactDasha.method,currentMajor:exactDasha.currentMahadasha,currentSubPeriod:exactDasha.currentAntardasha,periods:exactDasha.mahadashas.map(p=>({planet:p.planet,startsAt:p.startsAt,endsAt:p.endsAt,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc}))};
   const num=calculateNumerologyReport({name:checked.extra.romanName||birth.name,dateOfBirth:birth.dateOfBirth,gender:birth.gender,locale:l});
   const transitInput={latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,place:birth.birthPlace,ayanamsa:"lahiri" as const};
   const snapshot=(on:string,names?:string[])=>{

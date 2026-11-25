@@ -53,6 +53,9 @@ export type DashaPeriod = {
   planet: string;
   startsAt: string;
   endsAt: string;
+  // Exact UTC boundaries are additive; date-only display fields remain compatible.
+  startsAtUtc?: string;
+  endsAtUtc?: string;
   period?: string;
   level?: "mahadasha" | "antardasha";
   parentPlanet?: string;

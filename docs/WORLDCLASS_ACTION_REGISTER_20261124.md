@@ -298,3 +298,7 @@ Extended R18/R20/R22/R23/R24/R27/R29 private review requests with durable operat
 
 ### 25 November — optional report discovery language parity
 - A39/A44: added explicit Hinglish voluntary report-card and topic discovery copy instead of falling back to English. Hindi/English wording, original report destinations, catalogue-backed exact fees, free-tool independence and tarot-method disclosure preserved. Two source assertions failed on original and passed on edited source; included in existing public-copy QA. Browser/runtime acceptance still pending. No live release, campaign, payment, price or analytics modification.
+
+### 2026-11-25 — A03/A21/R01–R10 Dasha timing continuity
+
+Actual baseline 3f3cd33f reproduced first remaining Mahadasha bug: at Moon 12 degrees (90% of Ashwini), birth 2000-01-01T00:00Z, legacy engine reported Ketu antardasha instead of Mercury; future-birth evaluation falsely returned a current period. Consolidated public and paid-report calculation onto existing precise canonical engine; exact birth timezone/seconds and explicit report evaluation instant; clip elapsed periods only, retain date-only fields with additive UTC boundaries; calculate nested periods from cumulative actual parent milliseconds, preserve half-open intervals and no prebirth/out-of-range current claim. Independent fixed-year arithmetic reference across 135 placements, boundaries and nested partition regressions added. Numerical convention qualification only, no professional/predictive certification. Existing commercial/release holds preserved.

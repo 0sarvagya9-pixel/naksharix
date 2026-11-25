@@ -133,13 +133,14 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   const a=obj(d.currentMajor??d.major),b=obj(d.currentSubPeriod??d.sub);
   const make=(r:R,k:string)=>({label:k,title:shown(r.planet),body:r.planet?date(r.startsAt)+" - "+date(r.endsAt):tr("No active period available.","वर्तमान दशा उपलब्ध नहीं।")});
   cardRows([make(a,tr("Current Mahadasha","वर्तमान महादशा")),make(b,tr("Current Antardasha","वर्तमान अंतर्दशा"))],2,true);
-  const rows=records(a.antardashas),from=Date.parse(s(a.startsAt)),until=Date.parse(s(a.endsAt)),now=Date.parse(s(d.asOf)||s(birth.generatedOn));
+  const boundary=(r:R,field:"startsAt"|"endsAt")=>Date.parse(s(r[field+"Utc"])||s(r[field]));
+  const rows=records(a.antardashas),from=boundary(a,"startsAt"),until=boundary(a,"endsAt"),now=Date.parse(s(d.asOf)||s(birth.generatedOn));
   if(rows.length&&Number.isFinite(from)&&until>from){
    subhead(tr("Mahadasha / sub-period timeline","महादशा / उप-अवधि समयरेखा"));ensure(56);
-   for(const [i,r] of rows.entries()){const x=M+CW*Math.max(0,(Date.parse(s(r.startsAt))-from)/(until-from)),end=M+CW*Math.min(1,(Date.parse(s(r.endsAt))-from)/(until-from));if(end<=x)continue;const current=now>=Date.parse(s(r.startsAt))&&now<Date.parse(s(r.endsAt));rect(x,y,end-x,23,current?green:[gold,sand,pale,C("B8ADA4")][i%4]);if(end-x>25)tx((x+end)/2,y+6,s(r.planet).slice(0,3),8,"bold",current?iv:ink,"center");}
+   for(const [i,r] of rows.entries()){const x=M+CW*Math.max(0,(boundary(r,"startsAt")-from)/(until-from)),end=M+CW*Math.min(1,(boundary(r,"endsAt")-from)/(until-from));if(end<=x)continue;const current=now>=boundary(r,"startsAt")&&now<boundary(r,"endsAt");rect(x,y,end-x,23,current?green:[gold,sand,pale,C("B8ADA4")][i%4]);if(end-x>25)tx((x+end)/2,y+6,s(r.planet).slice(0,3),8,"bold",current?iv:ink,"center");}
    if(now>=from&&now<until){const x=M+CW*(now-from)/(until-from);rule(x,y-4,x,y+31,wine,1.4);caps(x,y+32,"NOW",wine,7,"center")}
    tx(M,y+26,s(a.startsAt).slice(0,4),8,"body",muted);tx(W-M,y+26,s(a.endsAt).slice(0,4),8,"body",muted,"right");y+=55;
-   table([tr("Sub-period","उप-अवधि"),tr("From","से"),tr("To","तक"),tr("Status","स्थिति")],rows.map(r=>[shown(r.planet),date(r.startsAt),date(r.endsAt),now>=Date.parse(s(r.startsAt))&&now<Date.parse(s(r.endsAt))?"Current":now>=Date.parse(s(r.endsAt))?"Past":"Upcoming"]),[1,1.2,1.2,.8],9.2,25)
+   table([tr("Sub-period","उप-अवधि"),tr("From","से"),tr("To","तक"),tr("Status","स्थिति")],rows.map(r=>[shown(r.planet),date(r.startsAt),date(r.endsAt),now>=boundary(r,"startsAt")&&now<boundary(r,"endsAt")?"Current":now>=boundary(r,"endsAt")?"Past":"Upcoming"]),[1,1.2,1.2,.8],9.2,25)
   }
   else if(records(d.periods).length)table(["Mahadasha","From","To"],records(d.periods).map(r=>[shown(r.planet),date(r.startsAt),date(r.endsAt)]),[1,1,1]);
  }
