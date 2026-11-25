@@ -523,3 +523,18 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  assert.equal(residuals.length,97);assert.equal(actual.fullShadbalaVerified,false);assert.equal(actual.fullBhavaBalaVerified,false);
  console.log("P0_PUBLISHED_REFERENCE_DIAGNOSTIC "+JSON.stringify({publishedDivisions,matchedWithNamedD60:publishedDivisions-mismatches.length,originalMatched:publishedDivisions-originalMismatches.length,mismatches,geometryChecks,strengthChecks,fullComponentComparisons:residuals.length,fullComponentMatches:residuals.filter(r=>r.matched).length,fullComponentMismatches:residuals.filter(r=>!r.matched).length,toleranceVirupas:.25,fullParityAccepted:false,residuals}));
 }
+
+{
+ const F=JSON.parse(fs.readFileSync("fixtures/astrology/published-classical-comparison.json","utf8")),C=require("@/lib/astrology/strength/classical-components");
+ const dms=([s,d,m,a])=>30*(s-1)+d+m/60+a/3600;
+ const mid=F.midpointDms.map(dms);
+ assert.deepEqual(mid.map((l,i)=>C.calculateRamanBhavaDirectionalCandidate(i+1,l).virupas),F.bhava.direction);
+ let checks=12;
+ for(let h=1;h<=12;h++)for(let s=0;s<12;s++)for(const d of [0,14.999,15,29.999]){
+  const peak=[2,5,6,10].includes(s)||s===8&&d<15?1:[0,1,4].includes(s)||s===8&&d>=15||s===9&&d<15?10:s===7?7:4;
+  const r=C.calculateRamanBhavaDirectionalCandidate(h,s*30+d);const dist=Math.abs(h-peak);
+  assert.equal(r.virupas,60-10*Math.min(dist,12-dist));assert.equal(r.publicEnabled,false);checks+=2;
+ }
+ for(const [h,d] of [[0,0],[13,0],[1,360],[1,-1],[1,NaN],[1.5,0]]){assert.throws(()=>C.calculateRamanBhavaDirectionalCandidate(h,d));checks++;}
+ console.log("P0_RAMAN_BHAVA_DIRECTION_PASS "+JSON.stringify({publishedDirection:12,checks,method:"named Raman candidate; not certified"}));
+}

@@ -181,3 +181,14 @@ export function calculateBhavaBalaEvidence(planets:CanonicalPlanet[],midpoints:r
   missingDependencies:[...(!positions?["complete classical positions"]:[]),...(!fullPolarities(context?.polarity)||!validReading(context?.aspectReading)?["reviewed aspect polarity and reading"]:[]),...(!validPhase?["observed birth phase"]:[]),...(!allLords?["independently established lord Shadbala"]:[])],
   limitations:["Named BPHS house-sign convention; other editions differ. Midpoints are supplied, never inferred from whole-sign houses. Conditional totals are arithmetic only; no strength or prediction certification."]};
 }
+
+/** Separate Raman-style whole-house distance candidate. Cancer is watery,
+ * not the BPHS translation's Cancer/Scorpio group. No public activation. */
+export function calculateRamanBhavaDirectionalCandidate(house:number,midpoint:number){
+ if(!Number.isInteger(house)||house<1||house>12||!angle(midpoint))throw Error("INVALID_RAMAN_BHAVA_DIRECTION_INPUT");
+ const s=zodiac(midpoint),d=midpoint%30;
+ const weakHouse=[2,5,6,10].includes(s)||(s===8&&d<15)?7:
+  [0,1,4].includes(s)||(s===8&&d>=15)||(s===9&&d<15)?4:s===7?1:10;
+ const delta=Math.abs(house-weakHouse);
+ return {house,weakHouse,virupas:10*Math.min(delta,12-delta),method:"raman_whole_bhava_distance" as const,publicEnabled:false as const,verified:false as const};
+}
