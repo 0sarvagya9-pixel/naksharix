@@ -126,7 +126,9 @@ assert.ok(staffReply.includes('getAdminApiUser()') &&
   staffReply.includes('await notifyCustomerOfSupportReply(input.ticketId, input.clientMutationId)') &&
   newTicket.includes('await notifySupportTeamOfNewTicket(ticket.id)') &&
   guidance.includes('await notifySupportTeamOfNewTicket(ticket.id)') &&
-  staffReply.includes('return ok({ recorded: true, duplicate: result.duplicate, notification })') &&
+  staffReply.includes('return ok({ recorded:true,duplicate:result.duplicate,notification,clientMutationId:input.clientMutationId })') &&
+  newTicket.includes('duplicate:true,clientMutationId:input.clientMutationId,notification:"not_needed"') &&
+  newTicket.includes('skipDuplicates:true') &&
   supportUi.includes('Email provider accepted a customer notification; inbox delivery is not confirmed.'),
   "Admin replies and new support/enquiry tickets must notify without duplicate sends or fake delivery");
 assert.ok(newTicket.indexOf('supportTicket.create(') < newTicket.indexOf('notifySupportTeamOfNewTicket(ticket.id)') &&
