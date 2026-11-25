@@ -93,6 +93,18 @@ if(!dbMode){
    console.log("PASS "+slug+" "+language+" editorial PDF "+localized.getPageCount()+" pages");
    }
  }
+ // Worst-case validated, fictional Latin/Devanagari birth details must
+ // remain renderable rather than failing the cover layout.
+ for(const language of ["en","hi","hinglish"]){
+  const longBirth={...birth,name:language==="hi"?"अनन्या ".repeat(12).trim():"Alexandria ".repeat(9).trim(),birthPlace:language==="hi"?"लंबा जन्मस्थान विवरण ".repeat(10).trim():"Long fictional locality name ".repeat(7).trim()};
+  assert.ok(longBirth.name.length<=100&&longBirth.birthPlace.length<=220);
+  const {title,content}=await assembleAutomaticPaidReport({slug:"premium-kundli",birth:longBirth,extra,question,language});
+  const result=await generatePremiumReportPdf({requestId:"long-fixture-"+language,templateId:"premium-kundli",status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:title,customerName:longBirth.name,language});
+  assert.equal(result.generated,true,"Long valid birth fields must render: "+language);
+  assert.ok((await PDFDocument.load(result.bytes)).getPageCount()>=4);
+  if(process.env.REPORT_EDGE_QA_DIR){fs.mkdirSync(process.env.REPORT_EDGE_QA_DIR,{recursive:true});fs.writeFileSync(path.join(process.env.REPORT_EDGE_QA_DIR,"long-cover-"+language+".pdf"),result.bytes);}
+ }
+ console.log("LONG_VALID_REPORT_COVER_PASS=3/3");
  const {prepareReviewedSpecialistInput}=require("@/lib/reports/reviewed-report-input");
  const reviewRow={reportSlug:"couple-kundli",fullName:birth.name,gender:birth.gender,dateOfBirth:birth.dateOfBirth,timeOfBirth:birth.timeOfBirth,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,concern:input.encodeAutomaticReportInput(question,extra),language:"hi"};
  assert.equal(prepareReviewedSpecialistInput({...reviewRow,concern:"Missing partner input"}).kind,"invalid");
