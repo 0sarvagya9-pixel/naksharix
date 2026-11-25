@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState,type FormEvent} from "react";
+import {useEffect,useRef,useState,type FormEvent} from "react";
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -11,23 +11,25 @@ import {passwordRecoveryCopy,recoveryErrorKey,recoveryPasswordLengthValid,type R
 export function PasswordRecoveryForm({mode}:{mode:"request"|"confirm"}){
  const {apiLocale}=useLanguage(),copy=passwordRecoveryCopy[apiLocale];
  const [email,setEmail]=useState(""),[token,setToken]=useState(""),[password,setPassword]=useState(""),[confirm,setConfirm]=useState(""),[show,setShow]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState<RecoveryKey|null>(null),[error,setError]=useState<RecoveryKey|null>(null),[done,setDone]=useState(false);
+ const lock=useRef(false);
  useEffect(()=>{if(mode!=="confirm")return;const raw=new URLSearchParams(window.location.hash.slice(1)).get("token");if(raw&&/^[A-Za-z0-9_-]{43}$/.test(raw))setToken(raw);window.history.replaceState(null,"",window.location.pathname);},[mode]);
  async function submit(e:FormEvent){
-  e.preventDefault();if(busy||done)return;setMessage(null);setError(null);
+  e.preventDefault();if(lock.current||busy||done)return;setMessage(null);setError(null);
   if(mode==="confirm"){
    if(!token){setError("missingToken");return;}
    if(!recoveryPasswordLengthValid(password)||!isUnchangedCredential(password)){setError("length");return;}
    if(password!==confirm){setError("mismatch");return;}
   }
-  setBusy(true);
+  lock.current=true;setBusy(true);
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
   try{
-   const r=await secureFetch("/api/auth/password-reset/"+mode,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(mode==="request"?{email}:{token,password}),silent:true});
+   const r=await secureFetch("/api/auth/password-reset/"+mode,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(mode==="request"?{email}:{token,password}),signal:controller.signal,silent:true});
    if(!r.ok){setError(recoveryErrorKey(r.status,mode));return;}
    const body=await r.json();
    if((mode==="request"?body?.data?.accepted:body?.data?.reset)!==true){setError("failed");return;}
    setDone(true);setPassword("");setConfirm("");setToken("");setShow(false);
    setMessage(mode==="request"?"accepted":"changed");
-  }catch{setError("failed");}finally{setBusy(false);}
+  }catch{setError("failed");}finally{clearTimeout(timer);lock.current=false;setBusy(false);}
  }
  return <div className="space-y-5"><h1 className="font-cinzel text-2xl font-bold">{copy[mode==="request"?"requestTitle":"confirmTitle"]}</h1>
  {!done&&<form className="space-y-4" onSubmit={submit} aria-busy={busy}>

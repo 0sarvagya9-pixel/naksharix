@@ -134,3 +134,28 @@ test("A42 all 15 report detail pages show exact price, fictional sample, require
  expect(new URL(page.url()).searchParams.get("redirectTo")).toBe("/report-request/new?reportSlug=name-correction-report&prepare=1");
  console.log("A42_ALL_REPORT_DETAIL_UI_PASS "+JSON.stringify({project:info.project.name,products:15,viewport:390,selectedReportReturn:true}));
 });
+
+
+test("A43 all authentication flows share the approved layout without overflow and retain localized interaction controls",async({page},info)=>{
+ test.setTimeout(180000);
+ const routes=["/login?role=user","/signup?role=user","/auth/login?role=user","/auth/signup?role=professional","/auth/astrologer-login","/forgot-password","/reset-password#token="+"a".repeat(43),"/verify-email"];
+ for(const locale of ["en","hi","hinglish"]){
+  await page.context().addCookies([{name:"naksharix-language",value:locale,url:"http://127.0.0.1:3000"}]);
+  await page.setViewportSize({width:320,height:760});
+  for(const path of routes){
+   await page.goto(path,{waitUntil:"domcontentloaded"});
+   const frame=page.locator("[data-auth-frame]");await expect(frame).toBeVisible();
+   await expect(frame.getByRole("heading",{level:1})).toHaveCount(1);
+   const dims=await frame.evaluate(el=>({client:el.clientWidth,scroll:el.scrollWidth,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,viewport:document.documentElement.clientWidth}));
+   expect(dims.scroll,path+" "+locale+" overflow").toBeLessThanOrEqual(dims.client+2);expect(dims.left).toBeGreaterThanOrEqual(-1);expect(dims.right).toBeLessThanOrEqual(dims.viewport+1);
+   const fields=frame.locator("input:not([type=hidden]),select");
+   const unlabelled=await fields.evaluateAll(nodes=>nodes.filter(n=>n.getClientRects().length>0&&!(n as HTMLInputElement).labels?.length&&!n.getAttribute("aria-label")&&!n.getAttribute("aria-labelledby")).length);
+   expect(unlabelled,path+" "+locale+" missing labels").toBe(0);
+   if(path.startsWith("/login")||path.startsWith("/signup")||path.startsWith("/auth/")){
+    const password=frame.locator("#password"),toggle=frame.locator('button[aria-controls="password"]');
+    await password.fill("Synthetic-Layout-QA-2026!");await toggle.click();await expect(password).toHaveAttribute("type","text");await expect(password).toHaveValue("Synthetic-Layout-QA-2026!");await toggle.click();await expect(password).toHaveAttribute("type","password");
+   }
+  }
+ }
+ console.log("A43_AUTH_LAYOUT_MATRIX_PASS "+JSON.stringify({project:info.project.name,routes:8,locales:3,width:320,layoutCases:24}));
+});

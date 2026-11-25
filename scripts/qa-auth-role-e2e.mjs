@@ -324,6 +324,39 @@ try {
     assert.equal(callback.status, 410);
     assert.doesNotMatch(callback.headers.get("set-cookie") || "", /naksharix_session/);
   });
+  await check("A06 professional confirmation GET is read-only and concurrent role conversion is atomic",async()=>{
+    const fixture=await prisma.user.create({data:{name:"QA Personal Applicant",email:"qa-application-"+unique+"@example.test",role:"USER",passwordHash:await bcrypt.hash(password,10),emailVerified:new Date(),emailVerifiedAt:new Date()}});
+    usersToClean.add(fixture.id);
+    const login=await req("/api/auth/login",{method:"POST",headers:{"content-type":"application/json","x-csrf-token":csrf,cookie:csrfCookie,"x-forwarded-for":"203.0.113.219"},body:JSON.stringify({email:fixture.email,password,roleIntent:"USER",loginMode:"USER"})});
+    assert.equal(login.status,200,await login.clone().text());
+    const session=(login.headers.get("set-cookie")||"").split(";")[0];assert.ok(session);
+    const before=await prisma.user.findUniqueOrThrow({where:{id:fixture.id}});
+    const page=await req("/auth/google-complete?role=ASTROLOGER&redirectTo=%2Freports",{headers:{cookie:session}});
+    assert.equal(page.status,200);assert.match(await page.text(),/Confirm professional application/);
+    assert.equal((await prisma.user.findUniqueOrThrow({where:{id:fixture.id}})).role,"USER");
+    assert.equal(await prisma.astrologerProfile.count({where:{userId:fixture.id}}),0);
+    assert.equal(await prisma.consultantProfile.count({where:{userId:fixture.id}}),0);
+    assert.equal((await post("/api/astrologer/become",{role:"ASTROLOGER"})).status,401);
+    const noCsrf=await req("/api/astrologer/become",{method:"POST",headers:{"content-type":"application/json",cookie:session},body:JSON.stringify({role:"ASTROLOGER"})});assert.equal(noCsrf.status,403);
+    for(const body of [{},{role:"ADMIN"},{role:"ASTROLOGER",userId:astroId},{role:"ASTROLOGER",canBypassPayment:true}])assert.equal((await post("/api/astrologer/become",body,session)).status,422);
+    await prisma.user.update({where:{id:fixture.id},data:{emailVerified:null,emailVerifiedAt:null}});
+    assert.equal((await post("/api/astrologer/become",{role:"ASTROLOGER"},session)).status,409);
+    await prisma.user.update({where:{id:fixture.id},data:{emailVerified:before.emailVerified,emailVerifiedAt:before.emailVerifiedAt}});
+    const sessionsBefore=await prisma.session.count({where:{userId:fixture.id}});
+    const pair=await Promise.all(["ASTROLOGER","CONSULTANT"].map(role=>post("/api/astrologer/become",{role},session)));
+    assert.equal(pair.filter(r=>r.status===200).length,1);assert.ok(pair.every(r=>[200,403,409].includes(r.status)));
+    const won=pair.find(r=>r.status===200),ack=(await won.json()).data;
+    const current=await prisma.user.findUniqueOrThrow({where:{id:fixture.id}});
+    assert.equal(ack.role,current.role);assert.equal(ack.effectiveRole,current.role);assert.equal(ack.isAdminLogin,false);assert.equal(ack.canBypassPayment,false);
+    const ap=await prisma.astrologerProfile.findUnique({where:{userId:fixture.id}}),cp=await prisma.consultantProfile.findUnique({where:{userId:fixture.id}});
+    assert.equal(Number(Boolean(ap))+Number(Boolean(cp)),1);
+    assert.equal((ap||cp).status,"PENDING_REVIEW");
+    assert.equal(await prisma.session.count({where:{userId:fixture.id}}),sessionsBefore+1);
+    const nextCookie=(won.headers.get("set-cookie")||"").split(";")[0];assert.ok(nextCookie);
+    const me=await req("/api/auth/me",{headers:{cookie:nextCookie}});assert.equal(me.status,200);assert.equal((await me.json()).data.user.effectiveRole,current.role);
+    assert.equal((await post("/api/astrologer/become",{role:"ASTROLOGER"},nextCookie)).status,403);
+    console.log("A06_PROFESSIONAL_ROLE_HTTP_PASS "+JSON.stringify({getReadOnly:true,csrf:true,explicitRole:true,verifiedAccount:true,oneConcurrentRole:true,onePendingProfile:true,oneNewSession:true,scope:"real local HTTP and database, credential-session fixture; external Google OAuth not exercised"}));
+  });
   await check("second unpaid booking of same astrologer slot is rejected", async () => {
     const slot = await prisma.availabilitySlot.findFirstOrThrow({ where: { astrologerProfileId: astroProfileId } });
     const collision = await post("/api/consultation-bookings", {

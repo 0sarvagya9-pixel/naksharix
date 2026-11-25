@@ -1,0 +1,10 @@
+export const professionalApplicationCopy={
+ en:{title:"Confirm professional application",description:"This changes your account to a professional applicant. Public bookings remain disabled until your profile and credentials are reviewed.",confirm:"Confirm application",busy:"Submitting application…",keep:"Keep my personal account",failed:"The application was not confirmed. Sign in again and check your account before retrying.",verification:"A verified personal account is required. Check your account before retrying.",rate:"Too many attempts. Please try again later."},
+ hi:{title:"पेशेवर खाते का आवेदन",description:"आपका व्यक्तिगत खाता पेशेवर आवेदन में बदलेगा। प्रोफ़ाइल और दस्तावेज़ की समीक्षा से पहले सार्वजनिक बुकिंग उपलब्ध नहीं होगी।",confirm:"आवेदन की पुष्टि करें",busy:"आवेदन भेज रहे हैं…",keep:"व्यक्तिगत खाते में रहें",failed:"आवेदन की पुष्टि नहीं हुई। दोबारा प्रयास करने से पहले साइन इन करके अपना खाता जाँचें।",verification:"सत्यापित व्यक्तिगत खाता आवश्यक है। फिर प्रयास करने से पहले खाता जाँचें।",rate:"बहुत अधिक प्रयास हुए हैं। बाद में प्रयास करें।"},
+ hinglish:{title:"Professional application confirm karein",description:"Aapka personal account professional applicant mein badlega. Profile aur credentials review hone se pehle public bookings enabled nahi hongi.",confirm:"Application confirm karein",busy:"Application submit ho rahi hai…",keep:"Personal account rakhein",failed:"Application confirm nahi hui. Dobara try karne se pehle sign in karke apna account check karein.",verification:"Verified personal account zaroori hai. Dobara try karne se pehle account check karein.",rate:"Bahut zyada attempts hue hain. Baad mein try karein."}
+} as const;
+export function professionalApplicationAcknowledged(value:unknown,role:"ASTROLOGER"|"CONSULTANT"){
+ if(!value||typeof value!=="object"||Array.isArray(value))return false;
+ const d=(value as {data?:{role?:unknown;effectiveRole?:unknown;redirectTo?:unknown;isAdminLogin?:unknown;canBypassPayment?:unknown}}).data;
+ return Boolean(d&&d.role===role&&d.effectiveRole===role&&d.redirectTo==="/astrologer/profile"&&d.isAdminLogin===false&&d.canBypassPayment===false);
+}
