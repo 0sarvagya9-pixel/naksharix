@@ -26,7 +26,10 @@ export async function POST(request:Request){
  }
  const result=await calculateBusinessResult(parsed.data,claim.brandName);
  if(!await finishBusinessCalculation(claim.tenantId,claim.requestId,true))return fail("Contract or key changed during calculation.",409);
- return ok({requestId:claim.requestId,usageUnits:claim.units,brand:{name:claim.brandName,poweredBy:"Naksharix"},result},{headers:{"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow"}});
+ const response=ok({requestId:claim.requestId,usageUnits:claim.units,brand:{name:claim.brandName,poweredBy:"Naksharix"},result},{headers:{"X-Robots-Tag":"noindex, nofollow"}});
+ // Shared ok() sets no-store; explicitly retain the narrower private directive.
+ response.headers.set("Cache-Control","private, no-store");
+ return response;
  }catch{
  await finishBusinessCalculation(claim.tenantId,claim.requestId,false).catch(()=>false);
  return fail("Calculation unavailable. Failed attempts are not included in completed-unit statements.",503);

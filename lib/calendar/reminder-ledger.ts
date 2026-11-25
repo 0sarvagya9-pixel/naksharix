@@ -22,7 +22,7 @@ export async function reminderAccount(userId:string,now=new Date()){
  return {available:await reminderServiceReady(now),orders,events:referenceReminderEvents(),reminders:await prisma.referenceReminder.findMany({where:{userId},select,orderBy:{dueAt:"asc"},take:100}),consentVersion:REMINDER_CONSENT_VERSION};
 }
 export async function scheduleReminder(userId:string,input:{orderId:string;eventId:string;leadDays:1|7;consent:true;consentVersion:string},now=new Date()){
- if(!await reminderServiceReady(now)||!input.consent||input.consentVersion!==REMINDER_CONSENT_VERSION)return null;
+ if(!await reminderServiceReady(now)||input.consent!==true||input.consentVersion!==REMINDER_CONSENT_VERSION||![1,7].includes(input.leadDays))return null;
  const event=referenceReminderEvents().find(e=>e.id===input.eventId);if(!event)return null;
  const dueAt=reminderDueAt(event,input.leadDays);if(dueAt<=now||dueAt>=REMINDER_END)return null;
  return prisma.$transaction(async tx=>{
