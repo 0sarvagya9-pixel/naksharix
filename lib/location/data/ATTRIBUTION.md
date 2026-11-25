@@ -1,0 +1,3 @@
+# Offline city data
+
+GeoNames geographical database (https://www.geonames.org/), Creative Commons Attribution 4.0 (https://creativecommons.org/licenses/by/4.0/). Pinned intermediate extract https://github.com/dasmig/city-generator/tree/63d14f0e6878b9e64633c5ea639b108a5a6781c1/resources/lite ; source blob a5e06c8dc35c6754e370752b094f966224ddd4db. Source rows 33521; 33521 retained, 0 excluded, 244 country/territory codes. Retained ID/name/ASCII name/latitude/longitude/country/admin1/IANA timezone/population; validated coordinates and timezone; sharded by ID mod 8. Data as-is, city centres approximate. Smaller settlements may require manual coordinates. No private data. No external provider calls.

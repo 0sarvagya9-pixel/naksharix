@@ -16,6 +16,9 @@ export type ResolvedLocation = {
   longitude: number;
   timezone?: string;
   timezoneOffset?: number;
+  source?: "built-in"|"geonames"|"manual";
+  regionCode?: string;
+  geonameId?: number;
 };
 
 type LocationAutocompleteProps = {
@@ -39,11 +42,14 @@ export function LocationAutocomplete({
   required,
   dataField
 }: LocationAutocompleteProps) {
-  const { tr } = useLanguage();
+  const {tr,locale}=useLanguage();
+  const copy=locale==="hi"?{manual:"निर्देशांक स्वयं भरें",lat:"अक्षांश",lon:"देशांतर",offset:"जन्म के समय UTC अंतर (घंटे)",use:"स्थान की पुष्टि करें",cancel:"रद्द करें",error:"स्थान और सही निर्देशांक व समय अंतर भरें।",note:"सूची में जन्म स्थान न हो तो सही निर्देशांक भरें।"}:locale==="hinglish"?{manual:"Coordinates manually bharein",lat:"Latitude",lon:"Longitude",offset:"Janm ke samay UTC offset (hours)",use:"Location confirm karein",cancel:"Cancel",error:"Place, valid coordinates aur UTC offset bharein.",note:"Exact birth location ke liye confirmed coordinates use karein."}:{manual:"Enter coordinates manually",lat:"Latitude",lon:"Longitude",offset:"UTC offset at birth (hours)",use:"Confirm location",cancel:"Cancel",error:"Enter a place, valid coordinates and the correct UTC offset.",note:"If your birthplace is not listed, use confirmed coordinates and UTC offset."};
   const inputId = useId();
   const listId = useId();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const requestId = useRef(0);
+  const selectedValue=useRef<string|null>(null);
+  const [manual,setManual]=useState(false),[latitude,setLatitude]=useState(""),[longitude,setLongitude]=useState(""),[offset,setOffset]=useState(""),[manualError,setManualError]=useState(false);
   const [suggestions, setSuggestions] = useState<ResolvedLocation[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,7 +66,7 @@ export function LocationAutocomplete({
   useEffect(() => {
     const query = value.trim();
     const currentRequest = ++requestId.current;
-    if (query.length < 2) {
+    if (query.length < 2 || selectedValue.current===value || manual) {
       setSuggestions([]);
       setLoading(false);
       setOpen(false);
@@ -88,9 +94,10 @@ export function LocationAutocomplete({
     }, 400);
 
     return () => window.clearTimeout(timer);
-  }, [value]);
+  }, [value,manual]);
 
   function selectLocation(location: ResolvedLocation) {
+    selectedValue.current=location.displayName;++requestId.current;setLoading(false);setManual(false);setManualError(false);
     onChange(location.displayName);
     onResolvedLocation(location);
     setSuggestions([]);
@@ -98,11 +105,18 @@ export function LocationAutocomplete({
   }
 
   function handleChange(next: string) {
+    selectedValue.current=null;++requestId.current;
     onChange(next);
     onResolvedLocation(null);
-    if (next.trim().length >= 2) setOpen(true);
+    if (!manual&&next.trim().length>=2)setOpen(true);
   }
 
+  function confirmManual(){
+   const lat=Number(latitude),lon=Number(longitude),off=Number(offset);
+   if(value.trim().length<2||value.trim().length>220||![latitude,longitude,offset].every(x=>x.trim()!=="")||!Number.isFinite(lat)||Math.abs(lat)>89||!Number.isFinite(lon)||Math.abs(lon)>180||!Number.isFinite(off)||off< -12||off>14||!Number.isInteger(off*60)){setManualError(true);return;}
+   const mins=Math.abs(Math.round(off*60)),tz=(off<0?"-":"+")+String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");
+   selectLocation({displayName:value.trim(),latitude:lat,longitude:lon,timezone:tz,timezoneOffset:off,source:"manual"});
+  }
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Escape") {
       setOpen(false);
@@ -139,11 +153,14 @@ export function LocationAutocomplete({
           value={value}
           placeholder={placeholder ?? tr("searchLocationPlaceholder")}
           onChange={(event) => handleChange(event.target.value)}
-          onFocus={() => value.trim().length >= 2 && setOpen(true)}
+          onFocus={() => !manual&&selectedValue.current!==value&&value.trim().length>=2&&setOpen(true)}
           onKeyDown={handleKeyDown}
           role="combobox"
           aria-expanded={open}
-          aria-controls={listId}
+          aria-controls={open?listId:undefined}
+          aria-activedescendant={open&&suggestions.length?listId+"-"+activeIndex:undefined}
+          aria-required={required||undefined}
+          aria-describedby={error?inputId+"-error":undefined}
           aria-autocomplete="list"
           aria-invalid={Boolean(error)}
           className={cn(
@@ -153,7 +170,7 @@ export function LocationAutocomplete({
         />
         {loading ? <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[#c98924]" /> : null}
       </div>
-      {error ? <p className="text-sm text-[#FF4D4F]">{error}</p> : null}
+      {error ? <p id={inputId+"-error"} role="alert" className="text-sm text-destructive">{error}</p> : null}
       {open ? (
         <div
           id={listId}
@@ -173,6 +190,7 @@ export function LocationAutocomplete({
               key={`${location.displayName}-${location.latitude}-${location.longitude}`}
               type="button"
               role="option"
+              id={listId+"-"+index}
               aria-selected={index === activeIndex}
               onMouseEnter={() => setActiveIndex(index)}
               onClick={() => selectLocation(location)}
@@ -184,6 +202,7 @@ export function LocationAutocomplete({
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#c98924]" />
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{location.displayName}</span>
+                {location.source==="geonames"?<span className="mt-0.5 block text-xs text-[#525866]">{location.regionCode?location.regionCode+" · ":""}{location.latitude.toFixed(4)}, {location.longitude.toFixed(4)} · {location.timezone}</span>:null}
                 {[location.city, location.state, location.country].filter(Boolean).length ? (
                   <span className="mt-0.5 block text-xs text-[#525866]">{[location.city, location.state, location.country].filter(Boolean).join(", ")}</span>
                 ) : null}
@@ -193,6 +212,20 @@ export function LocationAutocomplete({
           ))}
         </div>
       ) : null}
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <button type="button" className="font-semibold underline" aria-expanded={manual} onClick={()=>{setManual(v=>!v);setOpen(false);setManualError(false);++requestId.current;setLoading(false);}}>{manual?copy.cancel:copy.manual}</button>
+        <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer" className="underline">GeoNames (CC BY 4.0)</a>
+      </div>
+      {manual?<div className="space-y-3 rounded-lg border border-[#ccbda6] bg-[#fff9ef] p-3 text-[#372630]">
+        <p className="text-xs">{copy.note}</p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <label className="text-xs font-medium">{copy.lat}<input type="number" step="any" min={-89} max={89} value={latitude} onChange={e=>setLatitude(e.target.value)} className="mt-1 w-full rounded border bg-white p-2 text-sm"/></label>
+          <label className="text-xs font-medium">{copy.lon}<input type="number" step="any" min={-180} max={180} value={longitude} onChange={e=>setLongitude(e.target.value)} className="mt-1 w-full rounded border bg-white p-2 text-sm"/></label>
+          <label className="text-xs font-medium">{copy.offset}<input type="number" step="any" min={-12} max={14} value={offset} onChange={e=>setOffset(e.target.value)} className="mt-1 w-full rounded border bg-white p-2 text-sm"/></label>
+        </div>
+        {manualError?<p role="alert" className="text-xs text-red-800">{copy.error}</p>:null}
+        <button type="button" className="rounded border border-[#70283d] bg-white px-3 py-2 font-semibold" onClick={confirmManual}>{copy.use}</button>
+      </div>:null}
     </div>
   );
 }

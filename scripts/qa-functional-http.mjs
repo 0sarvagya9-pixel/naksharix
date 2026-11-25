@@ -60,6 +60,12 @@ await verify("public operational endpoints", async () => {
     assert.ok(body.data && typeof body.data === "object", pathname);
   }
 });
+await verify("offline global place directory returns real IANA coordinates",async()=>{
+ for(const [q,zone] of [["Delhi","Asia/Kolkata"],["London","Europe/London"],["Tokyo","Asia/Tokyo"],["Sydney","Australia/Sydney"],["New York","America/New_York"],["São Paulo","America/Sao_Paulo"]]){
+  const d=await expectData(await request("/api/location/search?q="+encodeURIComponent(q)),q);assert.ok(d.suggestions.some(p=>p.timezone===zone&&Number.isFinite(p.latitude)&&Number.isFinite(p.longitude)),q+" missing actual location");assert.equal(d.manualCoordinatesSupported,true);assert.match(d.attribution,/GeoNames/);
+ }
+ const d=await expectData(await request("/api/location/search?q=qqzzxx-no-city-000"),"unknown");assert.deepEqual(d.suggestions,[]);assert.equal(d.manualCoordinatesSupported,true);
+});
 await verify("mandatory OTP verification page", async () => {
   const res = await request("/verify-email");
   assert.equal(res.status, 200);
