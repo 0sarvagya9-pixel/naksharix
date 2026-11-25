@@ -69,6 +69,7 @@ jobs:
             node --experimental-strip-types scripts/$audit.mjs || failed=1
           done
           node scripts/qa-backup-worker-fixtures.mjs || failed=1
+          node --experimental-strip-types scripts/qa-marketing-consent-ui.mjs || failed=1
           node scripts/qa-csrf-coverage.mjs || failed=1
           node scripts/qa-source-hygiene.mjs || failed=1
           exit "$failed"
