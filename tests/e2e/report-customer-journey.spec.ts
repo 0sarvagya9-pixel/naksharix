@@ -94,6 +94,25 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
    await expect(page.getByRole("button",{name:"Pay INR 799"})).toBeVisible();
    expect(await prisma.payment.count({where:{userId:account.id}})).toBe(0);expect(await prisma.reportRequest.count({where:{userId:account.id}})).toBe(0);
    expect(blocked).toEqual([]);expect(requests).toContain("/api/auth/signup");expect(requests).toContain("/api/auth/otp/verify");expect(requests).toContain("/api/report-requests/preflight");
+   // Verify independent server-cookie and hydrated UI language on the same
+   // authenticated pre-payment flow. Never create an order or payment.
+   const localeCases=[
+    {locale:"hi",offset:"जन्म के समय UTC से अंतर (घंटों में)",submit:"विवरण सत्यापित करें और आगे बढ़ें",consent:"मैं पुष्टि करता/करती हूँ कि जन्म विवरण"},
+    {locale:"hinglish",offset:"Janm ke samay UTC offset (ghanton mein)",submit:"Details validate karein aur aage badhein",consent:"Main confirm karta/karti hoon ki birth details"}
+   ];
+   for(const c of localeCases){
+    await context.addCookies([{name:"naksharix-language",value:c.locale,url:origin}]);
+    await page.goto(origin+"/report-request/new?reportSlug=premium-kundli&prepare=1");
+    await expect(page.getByLabel(c.offset,{exact:true})).toBeVisible();
+    await expect(page.getByRole("button",{name:c.submit,exact:true})).toBeVisible();
+    await expect(page.getByRole("checkbox",{name:c.consent,exact:false})).toBeVisible();
+    await expect(page.locator('select[name="reportLanguage"]')).toHaveValue(c.locale);
+   }
+   expect(requests.filter(p=>p==="/api/report-requests/preflight")).toHaveLength(1);
+   expect(blocked).toEqual([]);
+   expect(await prisma.payment.count({where:{userId:account.id}})).toBe(0);
+   expect(await prisma.reportRequest.count({where:{userId:account.id}})).toBe(0);
+   console.log("REPORT_REQUEST_UI_LOCALE_JOURNEY_PASS "+JSON.stringify({project:info.project.name,locales:["en","hi","hinglish"],merchantRequests:0}));
    console.log("REPORT_CUSTOMER_JOURNEY_PASS "+JSON.stringify({project:info.project.name,realSignup:true,realOtpSession:true,preflightReport:"premium-kundli",pricePaise:79900,merchantRequests:0,paymentRows:0,reportRows:0,syntheticOtpHashOnly:true}));
   }finally{await prisma.user.deleteMany({where:{email}}).catch(()=>{});await prisma.$disconnect();await new Promise<void>(resolve=>proxy.close(()=>resolve()));rmSync(directory,{recursive:true,force:true});}
  });
