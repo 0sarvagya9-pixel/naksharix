@@ -145,3 +145,30 @@ for(const row of motionFixture.rows){
 }
 assert.equal(motionChecks,270);assert.equal(stationChecks,10);assert.ok(referenceRetrogrades>0);
 console.log("INDEPENDENT_PLANETARY_MOTION_PASS "+JSON.stringify({charts:motionFixture.rows.length,enginePaths:2,motionChecks,motionDirectionChecks,stationChecks,referenceRetrogrades,motionMaxError,scope:"sampled speed and direction, not exact event timing"}));
+
+
+const {calculateRefinedTransitTimeline}=require("@/lib/astrology/transit/engine");
+const eventRef=JSON.parse(fs.readFileSync(new URL("../fixtures/astrology/independent-transit-events-swiss-reference.json",import.meta.url),"utf8"));
+const residuals=[];let ingressChecks=0,stationChecks=0;
+const baseTransit={timezone:"UTC",ayanamsa:"lahiri",latitude:0,longitude:0};
+for(const row of eventRef.rows){
+ const target=Date.parse(row.utc),date=new Date(target-86400000).toISOString().slice(0,10);
+ const events=calculateRefinedTransitTimeline({...baseTransit,date},3);
+ const matches=events.filter(e=>e.planet===row.planet&&e.eventType===row.eventType&&e.from===row.from&&e.to===row.to);
+ assert.ok(matches.length,row.planet+" "+row.eventType+" missing reference event");
+ const event=matches.sort((a,b)=>Math.abs(Date.parse(a.occurredAt)-target)-Math.abs(Date.parse(b.occurredAt)-target))[0];
+ const errorMinutes=Math.abs(Date.parse(event.occurredAt)-target)/60000;
+ residuals.push({planet:row.planet,eventType:row.eventType,referenceUtc:row.utc,internalUtc:event.occurredAt,errorMinutes,toleranceMinutes:row.toleranceMinutes});
+ assert.ok(errorMinutes<=row.toleranceMinutes,row.planet+" "+row.eventType+" external discrepancy "+errorMinutes+" minutes, tolerance "+row.toleranceMinutes);
+ assert.ok(event.bracketSeconds>0&&event.bracketSeconds<=60);
+ assert.equal(Date.parse(event.bracketEndUtc)-Date.parse(event.bracketStartUtc),event.bracketSeconds*1000);
+ assert.equal(event.externalValidationRequired,true);assert.equal(event.verificationLevel,"needs_external_validation");
+ assert.ok(events.every((e,i)=>i===0||e.occurredAt>=events[i-1].occurredAt));
+ if(row.eventType==="sign_ingress")ingressChecks++;else stationChecks++;
+}
+for(const input of [{date:"2025-02-30"},{date:"bad"},{date:"2025-01-01",ayanamsa:"raman"}]){
+ assert.throws(()=>calculateRefinedTransitTimeline({...baseTransit,...input},3));
+}
+for(const days of [0,181,1.5,NaN])assert.throws(()=>calculateRefinedTransitTimeline({...baseTransit,date:"2025-01-01"},days));
+assert.equal(ingressChecks,9);assert.equal(stationChecks,10);
+console.log("INDEPENDENT_TRANSIT_EVENTS_PASS "+JSON.stringify({ingressChecks,stationChecks,residuals,maximumIngressErrorMinutes:Math.max(...residuals.filter(r=>r.eventType==="sign_ingress").map(r=>r.errorMinutes)),maximumStationErrorMinutes:Math.max(...residuals.filter(r=>r.eventType!=="sign_ingress").map(r=>r.errorMinutes)),scope:"19 bounded numerical event references, no public exact event or prediction certification"}));

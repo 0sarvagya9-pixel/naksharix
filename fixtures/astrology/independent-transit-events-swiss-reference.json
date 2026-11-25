@@ -1,0 +1,202 @@
+{
+  "provenance": {
+    "engine": "PySwissEph 2.10.03",
+    "flags": 65796,
+    "method": "Independent Swiss calc_ut Moshier + Lahiri sidereal + speed, mean nodes. Six-hour reference brackets; bisection to <0.25 second; root UTC rounded to second. Nine first selected sign ingresses and both station directions for five classical moving planets.",
+    "tolerances": {
+      "ingress": {
+        "Sun": 15,
+        "Moon": 5,
+        "Mars": 90,
+        "Mercury": 60,
+        "Jupiter": 180,
+        "Venus": 90,
+        "Saturn": 240,
+        "Rahu": 240,
+        "Ketu": 240
+      },
+      "station": {
+        "Mars": 120,
+        "Mercury": 120,
+        "Venus": 120,
+        "Jupiter": 360,
+        "Saturn": 360
+      }
+    },
+    "toleranceRationale": "Predeclared internal engineering bounds, reflecting slow-body longitude and station-speed sensitivity; not a one-minute accuracy or public release criterion. Record actual residuals, even if within bound.",
+    "scope": "No personal data, no Swiss executable or ephemeris files redistributed."
+  },
+  "rows": [
+    {
+      "planet": "Sun",
+      "eventType": "sign_ingress",
+      "utc": "2025-01-14T03:25:42Z",
+      "from": "Sagittarius",
+      "to": "Capricorn",
+      "longitude": 269.99999986,
+      "toleranceMinutes": 15
+    },
+    {
+      "planet": "Moon",
+      "eventType": "sign_ingress",
+      "utc": "2025-01-01T00:31:23Z",
+      "from": "Sagittarius",
+      "to": "Capricorn",
+      "longitude": 270.00000373,
+      "toleranceMinutes": 5
+    },
+    {
+      "planet": "Mars",
+      "eventType": "sign_ingress",
+      "utc": "2025-01-21T04:34:25Z",
+      "from": "Cancer",
+      "to": "Gemini",
+      "longitude": 90.00000035,
+      "toleranceMinutes": 90
+    },
+    {
+      "planet": "Mars",
+      "eventType": "station_direct",
+      "utc": "2025-02-24T02:07:26Z",
+      "from": true,
+      "to": false,
+      "longitude": 82.80634026,
+      "toleranceMinutes": 120
+    },
+    {
+      "planet": "Mars",
+      "eventType": "station_retrograde",
+      "utc": "2027-01-10T12:54:38Z",
+      "from": false,
+      "to": true,
+      "longitude": 136.19122506,
+      "toleranceMinutes": 120
+    },
+    {
+      "planet": "Mercury",
+      "eventType": "sign_ingress",
+      "utc": "2025-01-04T06:35:35Z",
+      "from": "Scorpio",
+      "to": "Sagittarius",
+      "longitude": 240.00000051,
+      "toleranceMinutes": 60
+    },
+    {
+      "planet": "Mercury",
+      "eventType": "station_retrograde",
+      "utc": "2025-03-15T06:46:12Z",
+      "from": false,
+      "to": true,
+      "longitude": 345.3794878,
+      "toleranceMinutes": 120
+    },
+    {
+      "planet": "Mercury",
+      "eventType": "station_direct",
+      "utc": "2025-04-07T11:08:07Z",
+      "from": true,
+      "to": false,
+      "longitude": 332.61609597,
+      "toleranceMinutes": 120
+    },
+    {
+      "planet": "Jupiter",
+      "eventType": "station_direct",
+      "utc": "2025-02-04T09:54:14Z",
+      "from": true,
+      "to": false,
+      "longitude": 47.07041361,
+      "toleranceMinutes": 360
+    },
+    {
+      "planet": "Jupiter",
+      "eventType": "sign_ingress",
+      "utc": "2025-05-14T17:06:21Z",
+      "from": "Taurus",
+      "to": "Gemini",
+      "longitude": 60.00000007,
+      "toleranceMinutes": 180
+    },
+    {
+      "planet": "Jupiter",
+      "eventType": "station_retrograde",
+      "utc": "2025-11-11T16:21:27Z",
+      "from": false,
+      "to": true,
+      "longitude": 90.93329266,
+      "toleranceMinutes": 360
+    },
+    {
+      "planet": "Venus",
+      "eventType": "sign_ingress",
+      "utc": "2025-01-28T01:32:36Z",
+      "from": "Aquarius",
+      "to": "Pisces",
+      "longitude": 329.99999956,
+      "toleranceMinutes": 90
+    },
+    {
+      "planet": "Venus",
+      "eventType": "station_retrograde",
+      "utc": "2025-03-02T00:36:01Z",
+      "from": false,
+      "to": true,
+      "longitude": 346.62665618,
+      "toleranceMinutes": 120
+    },
+    {
+      "planet": "Venus",
+      "eventType": "station_direct",
+      "utc": "2025-04-13T01:02:48Z",
+      "from": true,
+      "to": false,
+      "longitude": 330.41459034,
+      "toleranceMinutes": 120
+    },
+    {
+      "planet": "Saturn",
+      "eventType": "sign_ingress",
+      "utc": "2025-03-29T16:14:40Z",
+      "from": "Aquarius",
+      "to": "Pisces",
+      "longitude": 330.00000001,
+      "toleranceMinutes": 240
+    },
+    {
+      "planet": "Saturn",
+      "eventType": "station_retrograde",
+      "utc": "2025-07-13T03:27:18Z",
+      "from": false,
+      "to": true,
+      "longitude": 337.71971124,
+      "toleranceMinutes": 360
+    },
+    {
+      "planet": "Saturn",
+      "eventType": "station_direct",
+      "utc": "2025-11-28T04:15:28Z",
+      "from": true,
+      "to": false,
+      "longitude": 330.93755169,
+      "toleranceMinutes": 360
+    },
+    {
+      "planet": "Rahu",
+      "eventType": "sign_ingress",
+      "utc": "2025-05-18T14:04:33Z",
+      "from": "Pisces",
+      "to": "Aquarius",
+      "longitude": 330,
+      "toleranceMinutes": 240
+    },
+    {
+      "planet": "Ketu",
+      "eventType": "sign_ingress",
+      "utc": "2025-05-18T14:04:33Z",
+      "from": "Virgo",
+      "to": "Leo",
+      "longitude": 150,
+      "toleranceMinutes": 240
+    }
+  ]
+}
