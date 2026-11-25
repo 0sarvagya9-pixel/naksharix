@@ -374,3 +374,50 @@ for(const row of solarRef.rows){
  calendarIntegrationChecks++;
 }
 console.log("CLASSICAL_CALENDAR_CANDIDATE_PASS "+JSON.stringify({calendarChecks,calendarIntegrationChecks,scope:"named 30/360 local-mean-sunrise arithmetic; independent expert convention review pending; no public activation"}));
+
+const M=require("@/lib/astrology/strength/motional-epoch"),TOTAL=require("@/lib/astrology/strength/strength-total");
+const historical=new Date("1918-10-16T08:56:00Z"),v=M.calculateRamanEpochMeanCandidate(historical);
+const publishedMean={Mars:266.34,Mercury:181.2275,Jupiter:66.91,Venus:181.2275,Saturn:111.23};
+const publishedApogee={Mars:181.2275,Mercury:174.49,Jupiter:181.2275,Venus:158.35,Saturn:181.2275};
+let motionChecks=0,maxMean=0,maxSeeghrocha=0,maxBala=0;
+function closeMotion(a,b,tol){const e=Math.abs(a-b);assert.ok(e<=tol,`${a} vs ${b} (${e})`);motionChecks++;return e;}
+closeMotion(v.days,6862.583333333333,1e-8);
+for(const g of M.STAR_GRAHAS){maxMean=Math.max(maxMean,closeMotion(v.mean[g],publishedMean[g],.1));maxSeeghrocha=Math.max(maxSeeghrocha,closeMotion(v.seeghrocha[g],publishedApogee[g],.03));}
+const motion=M.calculateMotionalEpochCandidate(historical,{Mars:229+49/60,Mercury:180+33/60,Jupiter:83+35/60,Venus:170+4/60,Saturn:124+51/60});
+const expectedMotion={Mars:22.28,Mercury:2.13,Jupiter:35.33,Venus:5.76,Saturn:21.06};
+for(const r of motion.rows)maxBala=Math.max(maxBala,closeMotion(r.virupas,expectedMotion[r.planet],.03));
+const other=M.calculateRamanEpochMeanCandidate(new Date("1912-08-08T06:56:00Z"));
+closeMotion(other.meanSun,113.693,.01);closeMotion(other.mean.Mars,162.02,.02);closeMotion(other.mean.Saturn,35.65,.02);
+const jupiter1912Error=Math.abs(other.mean.Jupiter-240.48);assert.ok(jupiter1912Error>1);motionChecks++;
+for(const d of [new Date(NaN),new Date("1899-01-01"),new Date("2051-01-01")]){assert.equal(M.calculateRamanEpochMeanCandidate(d),null);motionChecks++;}
+for(const data of [{},{Mars:NaN,Mercury:2,Jupiter:3,Venus:4,Saturn:5},{Mars:360,Mercury:2,Jupiter:3,Venus:4,Saturn:5}]){assert.equal(M.calculateMotionalEpochCandidate(historical,data),null);motionChecks++;}
+for(const d of ["1900-01-01T00:00:00Z","2000-02-29T12:00:00Z","2026-11-25T00:00:00Z","2050-12-30T00:00:00Z"]){const r=M.calculateMotionalEpochCandidate(new Date(d),{Mars:359.9,Mercury:0,Jupiter:359,Venus:1,Saturn:90});assert.ok(r&&r.rows.length===5&&r.rows.every(x=>x.virupas>=0&&x.virupas<=60)&&!r.verified&&!r.publicEnabled);motionChecks++;}
+const syntheticRows=TOTAL.GRAHAS.map((planet,i)=>({planet,components:{sthana:100+i*10,dig:30,kalaBeforeWar:100,cheshta:20,naisargika:30,drik:-10}}));
+const sumStrength=r=>r.rows.reduce((n,x)=>n+x.total,0);
+const baseStrength=TOTAL.assembleClassicalStrengthCandidate(syntheticRows,[],{});assert.equal(baseStrength.completeArithmetic,true);assert.equal(baseStrength.verified,false);assert.equal(baseStrength.publicEnabled,false);assert.equal(baseStrength.rows[0].total,270);assert.ok(baseStrength.rows.every(r=>r.warVirupas===0));let totalChecks=5;
+for(const [i,a] of TOTAL.GRAHAS.slice(2).entries())for(const b of TOTAL.GRAHAS.slice(i+3))for(const north of [a,b]){
+ const x=TOTAL.assembleClassicalStrengthCandidate(syntheticRows,[[a,b]],{[a]:north===a?2:-2,[b]:north===b?2:-2});assert.equal(x.completeArithmetic,true);assert.equal(x.winners[0].winner,north);assert.equal(sumStrength(x),sumStrength(baseStrength));assert.equal(x.rows.reduce((s,r)=>s+r.warVirupas,0),0);const w=x.rows.find(r=>r.planet===north);assert.equal(w.total,w.prewar+x.winners[0].transfer);totalChecks+=5;
+}
+for(const [p,d] of [[null,{}],[[["Sun","Mars"]],{Sun:10,Mars:2}],[[["Mars","Mars"]],{Mars:1}],[[["Mars","Mercury"],["Mars","Jupiter"]],{Mars:1,Mercury:2,Jupiter:3}],[[["Mars","Mercury"]],{Mars:1,Mercury:1.001}],[[["Mars","Mercury"]],{Mars:NaN,Mercury:1}],[[["Mars","Mercury"]],{Mars:92,Mercury:1}]]){const r=TOTAL.assembleClassicalStrengthCandidate(syntheticRows,p,d);assert.equal(r.completeArithmetic,false);assert.ok(r.rows.every(x=>x.total===null));totalChecks+=2;}
+for(const r of [syntheticRows.slice(1),[...syntheticRows,syntheticRows[0]],syntheticRows.map((r,i)=>i?r:{...r,components:{...r.components,cheshta:null}})]){assert.equal(TOTAL.assembleClassicalStrengthCandidate(r,[],{}).completeArithmetic,false);totalChecks++;}
+const disjoint=TOTAL.assembleClassicalStrengthCandidate(syntheticRows,[["Mars","Mercury"],["Jupiter","Saturn"]],{Mars:1,Mercury:2,Jupiter:3,Saturn:4});assert.equal(disjoint.completeArithmetic,true);assert.equal(disjoint.winners.length,2);assert.equal(sumStrength(disjoint),sumStrength(baseStrength));totalChecks+=3;
+// Independently generated Swiss Ephemeris 2.10.03 Moshier, Lahiri apparent ecliptic and tropical equatorial coordinates; synthetic noon UTC dates.
+const warReference=[
+ ["2020-01-01",[],[]],["2020-01-02",[["Mercury","Jupiter"]],["Jupiter"]],["2020-01-12",[["Mercury","Saturn"]],["Saturn"]],
+ ["2020-03-19",[["Mars","Jupiter"]],["Jupiter"]],["2020-03-30",[["Mars","Saturn"]],["Saturn"]],["2020-05-22",[["Mercury","Venus"]],["Venus"]],
+ ["2020-12-13",[["Jupiter","Saturn"]],["Saturn"]],["2021-02-05",[["Venus","Saturn"]],["Saturn"]],["2021-02-11",[["Jupiter","Venus"]],["Jupiter"]],
+ ["2021-07-12",[["Mars","Venus"]],["Venus"]],["2021-08-18",[["Mars","Mercury"]],["Mercury"]],["2022-03-02",[["Mars","Venus"],["Mercury","Saturn"]],["Venus","Saturn"]]
+];
+let chartChecks=0;
+for(const [date,pairs,winners] of warReference){
+ const r=birthGeometry.calculateBirthStrengthEvidence({date,time:"12:00:00",timezone:"UTC",latitude:23.18,longitude:76});
+ assert.deepEqual(r.temporal.warPairs,pairs);assert.equal(r.motionalCandidate?.rows.length,5);
+ const strength=r.classicalStrengthCandidate;
+ assert.equal(strength.completeArithmetic,true,JSON.stringify(strength.issues));assert.deepEqual(strength.winners.map(w=>w.winner),winners);
+ assert.equal(strength.verified,false);assert.equal(strength.publicEnabled,false);assert.equal(r.fullShadbalaVerified,false);assert.equal(r.fullBhavaBalaVerified,false);
+ assert.ok(Math.abs(strength.rows.reduce((n,x)=>n+x.warVirupas,0))<1e-8);assert.ok(strength.rows.every(x=>typeof x.total==="number"&&Number.isFinite(x.total)));
+ assert.ok(r.bhava.houses.every(h=>h.arithmeticTotalVirupas===null));assert.equal(r.bhavaCandidate.verified,false);
+ if(strength.rows.every(x=>x.total>=0))assert.ok(r.bhavaCandidate.houses.every(h=>Number.isFinite(h.arithmeticTotalVirupas)));
+ chartChecks++;
+}
+console.log("P0_CLASSICAL_CANDIDATE_ARITHMETIC "+JSON.stringify({motionChecks,totalChecks,chartChecks,maxMean,maxSeeghrocha,maxBala,jupiter1912Error,knownParityFailure:"Raman 1912 Jupiter",publicEnabled:false,certified:false}));

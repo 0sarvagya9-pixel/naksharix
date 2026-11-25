@@ -5,6 +5,9 @@ import {buildQuadrantBhavaMidpoints,assignMidpointBhava,calculateBhavaBalaEviden
 import {calculateInternalShadbala,calculateClassicalStrengthBasis} from "./shadbala";
 import {calculateSolarStrengthContext,calculateTemporalStrengthEvidence} from "./temporal-components";
 import {calculateClassicalCalendarCandidate} from "./calendar-lords";
+import {STAR_GRAHAS,type StarGraha,calculateMotionalEpochCandidate} from "./motional-epoch";
+import {GRAHAS,assembleClassicalStrengthCandidate} from "./strength-total";
+import {calculateAspectStrengthEvidence,calculateExactDirectionalBala} from "./classical-components";
 
 /** Internal named quadrant geometry. Not a change to the approved D1
  * whole-sign chart; do not present these as independently accepted
@@ -50,5 +53,23 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput){
  // Preserve the original unqualified path. Evaluate the named calendar convention separately.
  const temporalWithCalendarCandidate=calendarCandidate?calculateTemporalStrengthEvidence(planets,solar,calendarCandidate):null;
  const bhava=calculateBhavaBalaEvidence(planets,geometry.midpoints,{polarity:temporal.polarity??undefined,aspectReading:"additional_full_mercury_jupiter",birthPhase:solar.birthPhase??undefined});
- return {geometry,friendship,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
+ const trueLongitudes:Partial<Record<StarGraha,number>>={};
+ for(const g of STAR_GRAHAS){const p=planets.find(p=>p.planet===g);if(typeof p?.absoluteLongitude==="number")trueLongitudes[g]=p.absoluteLongitude;}
+ const motionalCandidate=calculateMotionalEpochCandidate(new Date(geometry.utc),trueLongitudes);
+ const sixComponents=GRAHAS.map(planet=>{
+  const p=planets.find(p=>p.planet===planet),pos=positional.find(r=>r.basis.planet===planet),t=temporalWithCalendarCandidate?.rows.find(r=>r.planet===planet);
+  const vals=t?Object.entries(t.components).filter(([k])=>k!=="yuddha").map(([,v])=>v):null;
+  let kalaBeforeWar=vals&&vals.every(v=>typeof v==="number"&&Number.isFinite(v))?vals.reduce<number>((n,v)=>n+Number(v),0):null;
+  const cheshta=planet==="Sun"||planet==="Moon"?t?.luminaryCheshtaBasis??null:motionalCandidate?.rows.find(r=>r.planet===planet)?.virupas??null;
+  // Separate the doubled Moon Paksha into two equal terms; Sun Ayana appears in both Kala and Cheshta. Named BPHS 27.18 interpretation only.
+  if(planet==="Moon"&&kalaBeforeWar!==null&&cheshta!==null)kalaBeforeWar-=cheshta;
+  const sthana=pos?.dignity&&pos.basis.kendradiVirupas!==null?pos.basis.uchchaVirupas+pos.basis.ojayugmaVirupas+pos.basis.kendradiVirupas+pos.basis.drekkanaVirupas+pos.dignity.totalVirupas:null;
+  const dig=typeof p?.absoluteLongitude==="number"?calculateExactDirectionalBala(planet,p.absoluteLongitude,geometry.midpoints).virupas:null;
+  const drik=typeof p?.absoluteLongitude==="number"&&temporalWithCalendarCandidate?.polarity?calculateAspectStrengthEvidence(planets,p.absoluteLongitude,temporalWithCalendarCandidate.polarity,"additional_full_mercury_jupiter",planet)?.virupas??null:null;
+  return {planet,components:{sthana,dig,kalaBeforeWar,cheshta,naisargika:pos?.basis.naisargikaVirupas??null,drik}};
+ });
+ const classicalStrengthCandidate=assembleClassicalStrengthCandidate(sixComponents,temporalWithCalendarCandidate?.warPairs??null,solar.declinations);
+ const candidateLords=classicalStrengthCandidate.completeArithmetic&&classicalStrengthCandidate.rows.every(r=>typeof r.total==="number"&&r.total>=0)?Object.fromEntries(classicalStrengthCandidate.rows.map(r=>[r.planet,r.total!])):undefined;
+ const bhavaCandidate=calculateBhavaBalaEvidence(planets,geometry.midpoints,{polarity:temporal.polarity??undefined,aspectReading:"additional_full_mercury_jupiter",birthPhase:solar.birthPhase??undefined,lordStrengthVirupas:candidateLords});
+ return {geometry,friendship,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
 }
