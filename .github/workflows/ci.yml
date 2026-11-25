@@ -167,6 +167,8 @@ jobs:
         run: node scripts/qa-expert-services-runtime.mjs
       - name: Qualify credit reservation, expiry and refund runtime on disposable PostgreSQL
         run: node scripts/qa-ai-credit-runtime.mjs
+      - name: Qualify password recovery and quota isolation on disposable PostgreSQL
+        run: node scripts/qa-password-reset-runtime.mjs
       - name: Run local production HTTP smoke
         shell: bash
         run: |
