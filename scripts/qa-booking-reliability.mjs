@@ -2,7 +2,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { availableBookingActions, consultationIntervalsOverlap } from '../lib/consultations/booking-policy.ts';
 import { consultationDayBounds, parseConsultationLocalDateTime } from '../lib/consultations/slot-time.ts';
-import {validConsultationSlotWindow,isBookableConsultationSlot,verifiedConsultationPractitioner,validOptionalConsultationBirth} from '../lib/consultations/slot-contract.ts';
+import { createRequire } from 'node:module';
+const require=createRequire(import.meta.url),ts=require('typescript');
+require.extensions['.ts']=function(module,file){
+ const code=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}});
+ module._compile(code.outputText,file);
+};
+const {validConsultationSlotWindow,isBookableConsultationSlot,verifiedConsultationPractitioner,validOptionalConsultationBirth}=require('../lib/consultations/slot-contract.ts');
 let count = 0;
 const check = (name, fn) => { fn(); count++; console.log('BOOKING_RELIABILITY_PASS '+name); };
 check('IST midnight is independent of process timezone', () => {

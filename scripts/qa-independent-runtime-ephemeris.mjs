@@ -76,3 +76,40 @@ const observed=distance(actualCharts.get("delhi-noon").ascendant,actualCharts.ge
 assert.ok(observed>.25,"Same-minute birth seconds were discarded");
 assert.equal(angular,100);assert.equal(riseSet,32);assert.equal(muhuratEndpoints,64);
 console.log("INDEPENDENT_RUNTIME_EPHEMERIS_PASS "+JSON.stringify({charts:fixtures.length,angular,riseSet,labels,nearBoundary,maxDegrees,maxMinutes,muhuratEndpoints,maxMuhuratMinutes,sameMinuteAscendantDelta:observed,scope:"actual chart and Panchang runtime; independent synthetic reference; no predictive certification"}));
+
+// Annual-guide numerical and localized interpretation acceptance, separate from prediction claims.
+const originalLoad=Module._load;
+Module._load=function(name,...args){if(name==="server-only")return {};return originalLoad.call(this,name,...args);};
+const {calculateInternalTransitSnapshot}=require("@/lib/astrology/transit/engine");
+const {getAnnualSnapshots,getAnnualGuide}=require("@/lib/horoscope/annual");
+const {createHash}=require("node:crypto");
+const annual=JSON.parse(fs.readFileSync(new URL("../fixtures/astrology/independent-2027-annual-swiss-reference.json",import.meta.url),"utf8"));
+assert.equal(createHash("sha256").update(JSON.stringify(annual.rows)).digest("hex"),annual.provenance.sha256CompactRows);
+assert.equal(annual.rows.length,12);
+let annualPositions=0,annualHouseChecks=0,annualMaxDegrees=0;
+const annualExpected=annual.rows.map(row=>{
+ const snap=calculateInternalTransitSnapshot({date:row.date,timezone:"+05:30",latitude:28.6139,longitude:77.209,place:"New Delhi, India",ayanamsa:"lahiri"});
+ for(const planet of ["Jupiter","Saturn"]){
+  const p=snap.positions.find(x=>x.planet===planet);
+  assert.ok(p&&Number.isFinite(p.absoluteLongitude));
+  const error=distance(p.absoluteLongitude,row[planet]);annualMaxDegrees=Math.max(annualMaxDegrees,error);
+  assert.ok(error<=annual.provenance.angularToleranceDegrees,row.date+" "+planet+" discrepancy "+error);
+  assert.ok(away(row[planet],30));assert.equal(p.sign,signs[Math.floor(row[planet]/30)]);
+  annualPositions++;
+ }
+ return {date:row.date,jupiter:signs[Math.floor(row.Jupiter/30)],saturn:signs[Math.floor(row.Saturn/30)]};
+});
+assert.deepEqual(getAnnualSnapshots(2027),annualExpected);
+const cachedCopy=getAnnualSnapshots(2027);cachedCopy[0].jupiter="invalid";assert.deepEqual(getAnnualSnapshots(2027),annualExpected);
+for(const locale of ["en","hi","hinglish"])for(const [i,sign] of signs.entries()){
+ const guide=getAnnualGuide(2027,sign,locale);assert.equal(guide.year,2027);assert.equal(guide.referenceSign,sign);assert.equal(guide.personalPrediction,false);
+ assert.equal(guide.rows.length,12);
+ for(const [n,row] of guide.rows.entries()){
+  const e=annualExpected[n];assert.equal(row.date,e.date);
+  assert.equal(row.growthHouse,(signs.indexOf(e.jupiter)-i+12)%12+1);
+  assert.equal(row.structureHouse,(signs.indexOf(e.saturn)-i+12)%12+1);
+  assert.ok(row.growthTheme&&row.structureTheme);annualHouseChecks+=2;
+ }
+}
+assert.equal(annualPositions,24);assert.equal(annualHouseChecks,864);
+console.log("ANNUAL_2027_REFERENCE_PASS "+JSON.stringify({annualPositions,annualHouseChecks,annualMaxDegrees,localizedGuides:36,scope:"monthly numeric reference and sign-relative educational guide; not prediction certification"}));

@@ -216,6 +216,30 @@ await verify("anonymous booking is rejected before data mutation", async () => {
   });
   assert.equal(res.status, 401, "anonymous booking access");
 });
+await verify("A22 2027 web and mobile APIs match independent monthly references across all signs and locales",async()=>{
+ const {readFileSync}=await import("node:fs");
+ const {rows}=JSON.parse(readFileSync(new URL("../fixtures/astrology/independent-2027-annual-swiss-reference.json",import.meta.url),"utf8"));
+ const signs=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+ let guides=0;
+ for(const locale of ["en","hi","hinglish"])for(const [i,sign] of signs.entries()){
+  const zodiac=sign.toLowerCase();
+  const web=(await expectData(await post("/api/horoscope",{zodiac,period:"yearly",category:"general",locale,year:2027}),"annual web")).horoscope;
+  const mobile=await expectData(await request("/api/mobile/horoscope?"+new URLSearchParams({zodiac,period:"yearly",locale,year:"2027"})),"annual mobile");
+  const g=web.annualGuide;assert.deepEqual(g,mobile.annualGuide);assert.equal(g.year,2027);assert.equal(g.referenceSign,sign);assert.equal(g.personalPrediction,false);assert.equal(g.rows.length,12);
+  assert.equal(web.luckyNumber,null);
+  for(const [j,r] of g.rows.entries()){
+   assert.equal(r.date,rows[j].date);
+   assert.equal(r.jupiter,signs[Math.floor(rows[j].Jupiter/30)]);assert.equal(r.saturn,signs[Math.floor(rows[j].Saturn/30)]);
+   assert.equal(r.growthHouse,(Math.floor(rows[j].Jupiter/30)-i+12)%12+1);
+   assert.equal(r.structureHouse,(Math.floor(rows[j].Saturn/30)-i+12)%12+1);
+  }
+  guides++;
+ }
+ assert.equal(guides,36);
+ assert.equal((await post("/api/horoscope",{zodiac:"aries",period:"daily",category:"general",year:2027})).status,422);
+ assert.equal((await request("/api/mobile/horoscope?zodiac=aries&period=daily&year=2027")).status,422);
+ console.log("A22_ANNUAL_HTTP_PASS "+JSON.stringify({webGuides:guides,mobileGuides:guides,scope:"local API runtime; no physical device or prediction certification"}));
+});
 console.log("NAKSHARIX_FUNCTIONAL_HTTP=" + passed + "/" + (passed + failed) + "_PASS;FAILED=" + failed);
 for (const item of errors) console.error(JSON.stringify(item));
 if (failed) process.exit(1);
