@@ -1,4 +1,5 @@
 import type { CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
+import {classicalVargaCoordinates,type ClassicalVargaKey} from "@/lib/astrology/varga/partition";
 import type { PartialShadbalaResult, ShadbalaComponent, ShadbalaPlanetScore, StrengthFoundationStatus } from "@/lib/astrology/strength/types";
 
 const classicalPlanets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"] as const;
@@ -57,9 +58,9 @@ function angularDistance(a: number, b: number) {
 }
 
 function absoluteLongitude(planet: CanonicalPlanet) {
-  if (typeof planet.absoluteLongitude === "number") return normalize(planet.absoluteLongitude);
+  if (typeof planet.absoluteLongitude === "number") return Number.isFinite(planet.absoluteLongitude)?normalize(planet.absoluteLongitude):null;
   const index = signs.indexOf(planet.sign as (typeof signs)[number]);
-  return index >= 0 && typeof planet.degree === "number" ? normalize(index * 30 + planet.degree) : null;
+  return index >= 0 && typeof planet.degree === "number" && Number.isFinite(planet.degree) && planet.degree>=0 && planet.degree<30 ? normalize(index * 30 + planet.degree) : null;
 }
 
 function dignityScore(planet: ClassicalPlanet, sign: string) {
@@ -71,22 +72,9 @@ function dignityScore(planet: ClassicalPlanet, sign: string) {
   return 15;
 }
 
-function vargaSigns(longitude: number) {
-  const value = normalize(longitude);
-  const signIndex = Math.floor(value / 30);
-  const degree = value % 30;
-  const odd = signIndex % 2 === 0;
-  const d2 = odd ? (degree < 15 ? "Leo" : "Cancer") : (degree < 15 ? "Cancer" : "Leo");
-  const d3Part = Math.min(2, Math.floor(degree / 10));
-  const d3 = signs[[signIndex, (signIndex + 4) % 12, (signIndex + 8) % 12][d3Part]];
-  const d7Part = Math.min(6, Math.floor(degree / (30 / 7)));
-  const d7 = signs[((odd ? signIndex : (signIndex + 6) % 12) + d7Part) % 12];
-  const d9Part = Math.min(8, Math.floor(degree / (30 / 9)));
-  const d9Start = [0, 3, 6, 9].includes(signIndex) ? signIndex : [1, 4, 7, 10].includes(signIndex) ? (signIndex + 8) % 12 : (signIndex + 4) % 12;
-  const d9 = signs[(d9Start + d9Part) % 12];
-  const d12 = signs[(signIndex + Math.min(11, Math.floor(degree / 2.5))) % 12];
-  const d30 = signs[(signIndex + Math.min(29, Math.floor(degree))) % 12];
-  return [signs[signIndex], d2, d3, d7, d9, d12, d30];
+export function shadbalaSaptavargaSigns(longitude:number){
+ const keys:ClassicalVargaKey[]=["D1","D2","D3","D7","D9","D12","D30"];
+ return keys.map(key=>signs[classicalVargaCoordinates(key,longitude).signIndex]);
 }
 
 function uchchaBala(planet: ClassicalPlanet, longitude: number) {
@@ -106,16 +94,29 @@ function drekkanaBala(planet: ClassicalPlanet, longitude: number) {
 }
 
 function ojayugmaBala(planet: ClassicalPlanet, longitude: number) {
-  if (planet === "Mercury") return 30;
   const rashiOdd = Math.floor(normalize(longitude) / 30) % 2 === 0;
-  const d9 = vargaSigns(longitude)[4];
+  const d9 = shadbalaSaptavargaSigns(longitude)[4];
   const d9Odd = signs.indexOf(d9 as (typeof signs)[number]) % 2 === 0;
-  const preferredOdd = ["Sun", "Mars", "Jupiter"].includes(planet);
+  const preferredOdd = planet!=="Moon"&&planet!=="Venus";
   return (rashiOdd === preferredOdd ? 15 : 0) + (d9Odd === preferredOdd ? 15 : 0);
 }
 
+// Individually traceable BPHS 27.1–6 subcomponents, not a complete strength.
+export function calculateClassicalStrengthBasis(planet:CanonicalPlanet){
+ if(!isClassicalPlanet(planet.planet))return null;
+ const longitude=absoluteLongitude(planet);
+ if(longitude===null)return null;
+ const validHouse=Number.isInteger(planet.house)&&Number(planet.house)>=1&&Number(planet.house)<=12;
+ return {planet:planet.planet,uchchaVirupas:uchchaBala(planet.planet,longitude),
+  naisargikaVirupas:60*(["Saturn","Mars","Mercury","Jupiter","Venus","Moon","Sun"].indexOf(planet.planet)+1)/7,
+  ojayugmaVirupas:ojayugmaBala(planet.planet,longitude),
+  kendradiVirupas:validHouse?kendradiBala(planet.house):null,
+  drekkanaVirupas:drekkanaBala(planet.planet,longitude),
+  saptavargaSigns:shadbalaSaptavargaSigns(longitude),
+  method:"classical_component_basis_only" as const,fullShadbalaVerified:false as const};
+}
 function sthanaBala(planet: ClassicalPlanet, value: CanonicalPlanet, longitude: number) {
-  const saptavargaja = vargaSigns(longitude).reduce((sum, sign) => sum + dignityScore(planet, sign), 0);
+  const saptavargaja = shadbalaSaptavargaSigns(longitude).reduce((sum, sign) => sum + dignityScore(planet, sign), 0);
   return round(uchchaBala(planet, longitude) + saptavargaja + ojayugmaBala(planet, longitude) + kendradiBala(value.house) + drekkanaBala(planet, longitude));
 }
 
@@ -239,7 +240,13 @@ function scorePlanet(value: CanonicalPlanet, planets: CanonicalPlanet[], context
 }
 
 export function calculateInternalShadbala(planets: CanonicalPlanet[], context: InternalShadbalaContext): PartialShadbalaResult {
-  const scores = planets.map((planet) => scorePlanet(planet, planets, context)).filter((score): score is ShadbalaPlanetScore => Boolean(score));
+  const classical=planets.filter(p=>isClassicalPlanet(p.planet));
+  const complete=classical.length===7&&new Set(classical.map(p=>p.planet)).size===7&&Number.isFinite(context.ascendantLongitude)&&classical.every(p=>absoluteLongitude(p)!==null&&Number.isInteger(p.house)&&Number(p.house)>=1&&Number(p.house)<=12);
+  if(!complete){
+    const result=calculatePartialShadbala(classical.filter((p,i)=>classical.findIndex(v=>v.planet===p.planet)===i));
+    return {...result,verificationLevel:"needs_external_validation",missingDependencies:["Unique complete finite classical positions, valid houses and ascendant are required.",...result.missingDependencies]};
+  }
+  const scores = classical.map((planet) => scorePlanet(planet, classical, context)).filter((score): score is ShadbalaPlanetScore => Boolean(score));
   const missing = classicalPlanets.filter((planet) => !scores.some((score) => score.planet === planet));
   return {
     scores,
@@ -250,7 +257,8 @@ export function calculateInternalShadbala(planets: CanonicalPlanet[], context: I
       "Independent full-component Shadbala reference fixtures and accepted tolerances."
     ],
     limitations: [
-      "All six top-level components are numerically calculated from available internal chart data.",
+      "All six top-level components are approximate internal engineering indicators, not complete classical Shadbala. Corrected D30 and parity calculations do not qualify the remaining approximations.",
+      "Saptavargaja still lacks verified compound friendship and moolatrikona scoring; directional strength still uses equal-spaced cusps, not independently verified Bhava midpoints.",
       "Kala Bala includes Natonnata, Paksha, Tribhaga, weekday and Hora contributions; Ayana/Yuddha calibration remains external-validation work.",
       "Cheshta uses exact retrograde state where available and a conservative direct-motion fallback until mean/true speed-state fixtures are imported.",
       "Drik uses deterministic classical full/special aspect geometry; exact reference-software parity remains fixture-gated.",

@@ -26,7 +26,7 @@
     "qa:ephemeris": "node scripts/qa-external-ephemeris.mjs",
     "qa:transit": "node scripts/qa-transit-fixtures.mjs",
     "qa:varga": "node scripts/qa-varga-fixtures.mjs",
-    "qa:strength": "node scripts/qa-strength-fixtures.mjs",
+    "qa:strength": "node scripts/qa-strength-fixtures.mjs && node scripts/qa-classical-strength-runtime.mjs",
     "qa:panchang": "node scripts/qa-panchang-fixtures.mjs",
     "qa:production-safety": "node scripts/qa-production-safety.mjs",
     "qa:release-state": "node scripts/qa-release-state.mjs",

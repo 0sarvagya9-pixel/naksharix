@@ -1,0 +1,184 @@
+{
+  "provenance": {
+    "rawConvention": "Brihat Jataka IX.1–7, Aiyar translation, sign ordered Aries through Pisces",
+    "source": "https://chestofbooks.com/new-age/astrology/Brihat-Jataka/Chapter-IX-On-Ashtakavargas.html",
+    "reductionSource": "https://chestofbooks.com/new-age/astrology/Brihat-Jataka/On-Ashtakavargas-Part-2.html",
+    "vargaSource": "https://divyachadhava.com/en/sanatan-sahitya/bphs-chapter-6-the-sixteen-divisions-of-a-r-i",
+    "strengthSource": "https://vedicpupil.in/library/books/brihat-parashara-hora-shastra/chapter-27",
+    "scope": "Traditional arithmetic references, not predictive evidence. Distinct conventions retained; do not promote public activation."
+  },
+  "aiyarMarsReduction": {
+    "raw": [
+      3,
+      3,
+      3,
+      4,
+      5,
+      2,
+      5,
+      1,
+      2,
+      5,
+      3,
+      3
+    ],
+    "occupiedSigns": [
+      "Aries",
+      "Taurus",
+      "Cancer",
+      "Libra",
+      "Capricorn",
+      "Pisces"
+    ],
+    "trikona": [
+      1,
+      1,
+      0,
+      3,
+      3,
+      0,
+      2,
+      0,
+      0,
+      3,
+      0,
+      2
+    ],
+    "ekadhipatya": [
+      1,
+      1,
+      0,
+      3,
+      3,
+      0,
+      2,
+      0,
+      0,
+      3,
+      0,
+      2
+    ],
+    "total": 15
+  },
+  "publishedSample": {
+    "source": "https://kundli.studio/ashtakavarga",
+    "referenceSigns": {
+      "Sun": "Sagittarius",
+      "Moon": "Aquarius",
+      "Mars": "Scorpio",
+      "Mercury": "Capricorn",
+      "Jupiter": "Gemini",
+      "Venus": "Capricorn",
+      "Saturn": "Sagittarius",
+      "Ascendant": "Pisces"
+    },
+    "sun": [
+      2,
+      3,
+      6,
+      5,
+      4,
+      4,
+      4,
+      4,
+      7,
+      3,
+      3,
+      3
+    ],
+    "sarva": [
+      29,
+      30,
+      30,
+      24,
+      27,
+      30,
+      31,
+      29,
+      32,
+      25,
+      21,
+      29
+    ],
+    "knownSarvaDifferences": [
+      {
+        "sign": "Taurus",
+        "aiyar": 31,
+        "published": 30
+      },
+      {
+        "sign": "Libra",
+        "aiyar": 30,
+        "published": 31
+      },
+      {
+        "sign": "Aquarius",
+        "aiyar": 20,
+        "published": 21
+      },
+      {
+        "sign": "Pisces",
+        "aiyar": 30,
+        "published": 29
+      }
+    ]
+  },
+  "trimshamshaExamples": {
+    "odd": [
+      {
+        "degree": 0,
+        "sign": "Aries"
+      },
+      {
+        "degree": 5,
+        "sign": "Aquarius"
+      },
+      {
+        "degree": 10,
+        "sign": "Sagittarius"
+      },
+      {
+        "degree": 18,
+        "sign": "Gemini"
+      },
+      {
+        "degree": 25,
+        "sign": "Libra"
+      }
+    ],
+    "even": [
+      {
+        "degree": 0,
+        "sign": "Taurus"
+      },
+      {
+        "degree": 5,
+        "sign": "Virgo"
+      },
+      {
+        "degree": 12,
+        "sign": "Pisces"
+      },
+      {
+        "degree": 20,
+        "sign": "Capricorn"
+      },
+      {
+        "degree": 25,
+        "sign": "Scorpio"
+      }
+    ]
+  },
+  "uchchaExamples": [
+    {
+      "planet": "Sun",
+      "longitude": 342.25,
+      "expected": 50.75
+    },
+    {
+      "planet": "Jupiter",
+      "longitude": 95.6,
+      "expected": 59.8
+    }
+  ]
+}

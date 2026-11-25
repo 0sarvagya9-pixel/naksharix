@@ -28,6 +28,8 @@ export type AshtakvargaScore = {
   planet: CanonicalPlanet["planet"];
   bhinna: Array<number | null>;
   sarva?: Array<number | null>;
+  /** Unreduced sign-ordered 0/1 contributor rows, for auditable Prastara. */
+  contributions?: Array<{reference:string;sign:string;bindus:number[]}>;
   verified: boolean;
 };
 
@@ -58,6 +60,7 @@ export type PartialAshtakvargaResult = {
   scores: AshtakvargaScore[];
   sarva?: number[];
   checksums?: Record<string, number>;
+  method?: "brihat_jataka_aiyar_raw";
   verificationLevel: "blocked_until_verified_formula" | "needs_external_validation";
   publicEnabled: false;
   missingDependencies: string[];
