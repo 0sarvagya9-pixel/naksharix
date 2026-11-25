@@ -82,8 +82,11 @@ export async function assembleAutomaticPaidReport(input:{
   const selected=(names:string[])=>chart.planetPositions.filter(p=>names.includes(p.planet)).map(compactPlanet);
   const houseReview=(nums:number[])=>nums.map(n=>editorialHouse(chart,n,l));
   const exactDasha=calculateVimshottariDasha(chart.planetPositions,resolveDashaBirthInstant(birth),l,now);
-  const dasha={asOf:now.toISOString(),method:exactDasha.method,currentMajor:exactDasha.currentMahadasha,currentSubPeriod:exactDasha.currentAntardasha,periods:exactDasha.mahadashas.map(p=>({planet:p.planet,startsAt:p.startsAt,endsAt:p.endsAt,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc}))};
-  const num=calculateNumerologyReport({name:checked.extra.romanName||birth.name,dateOfBirth:birth.dateOfBirth,gender:birth.gender,locale:l});
+  const dasha={asOf:now.toISOString(),method:exactDasha.method,currentMajor:exactDasha.currentMahadasha,currentSubPeriod:exactDasha.currentAntardasha,birthBalanceYears:exactDasha.birthBalanceYears,periods:exactDasha.mahadashas.map(p=>({planet:p.planet,startsAt:p.startsAt,endsAt:p.endsAt,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc,durationYears:p.durationYears})),nextTwelveMonths:exactDasha.mahadashas.flatMap(m=>m.antardashas??[]).filter(p=>Date.parse(p.endsAtUtc??p.endsAt)>now.getTime()&&Date.parse(p.startsAtUtc??p.startsAt)<now.getTime()+365.2425*86400000).map(p=>({major:p.parentPlanet,planet:p.planet,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc,startsAt:p.startsAt,endsAt:p.endsAt}))};
+  const suppliedRoman=checked.extra.romanName||birth.name;
+  // A non-Roman-only name does not establish a Pythagorean name number.
+  const nameNumberAvailable=/[A-Za-z]/.test(suppliedRoman);
+  const num=calculateNumerologyReport({name:suppliedRoman,dateOfBirth:birth.dateOfBirth,gender:birth.gender,locale:l});
   const transitInput={latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,place:birth.birthPlace,ayanamsa:"lahiri" as const};
   const snapshot=(on:string,names?:string[])=>{
     const data=calculateInternalTransitSnapshot({...transitInput,date:on});
@@ -104,7 +107,7 @@ export async function assembleAutomaticPaidReport(input:{
       section("dasha",["Vimshottari Dasha","विंशोत्तरी दशा","Vimshottari Dasha"],dasha);
       section("panchang",["Birth Panchang","जन्म पंचांग","Birth Panchang"],chart.panchang);
       section("yoga-dosha",["Traditional yoga and dosha indicators","पारंपरिक योग और दोष संकेत","Traditional yoga aur dosha"],{yoga:chart.yogaAnalysis,dosha:chart.doshaAnalysis},["Rule-based indicators, not guarantees or diagnoses."]);
-      section("numerology",["Birth number and Lo Shu","मूलांक और लो शू","Moolank aur Lo Shu"],{birthNumber:num.moolank,lifePath:num.lifePath,nameNumber:num.nameNumber,grid:num.loShuGrid});
+      section("numerology",["Birth number and Lo Shu","मूलांक और लो शू","Moolank aur Lo Shu"],{birthNumber:num.moolank,lifePath:num.lifePath,nameNumber:nameNumberAvailable?num.nameNumber:null,nameNumberUnavailableReason:nameNumberAvailable?null:tr(l,["No Roman-letter spelling was supplied; a name number is not calculated.","रोमन अक्षरों में नाम नहीं दिया गया; नामांक की गणना नहीं की गई है।","Roman-letter spelling nahi di gayi; name number calculate nahi hua."]),grid:num.loShuGrid});
       break;
     case "couple-kundli":{
       if(!checked.extra.partner)throw new Error("REPORT_PARTNER_MISSING");

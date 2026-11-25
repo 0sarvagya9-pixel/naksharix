@@ -317,6 +317,12 @@ if(!dbMode){
  const {calculateNumerologyReport}=require("@/lib/numerology"),oldZone=process.env.TZ;
  try{for(const zone of ["UTC","America/Los_Angeles","Asia/Kolkata","Pacific/Auckland"]){process.env.TZ=zone;const r=calculateNumerologyReport({name:"Asha Test",dateOfBirth:"1992-05-18",locale:"en"});assert.equal(r.dateOfBirth,"1992-05-18");assert.equal(r.moolank.value,9);assert.equal(r.lifePath.value,8);assert.equal(r.loShuGrid.find(x=>x.number===8).count,1);}}finally{if(oldZone===undefined)delete process.env.TZ;else process.env.TZ=oldZone;}
  assert.throws(()=>calculateNumerologyReport({name:"Asha Test",dateOfBirth:"1990-02-30",locale:"en"}));
+ const noRoman=await assembleAutomaticPaidReport({slug:"premium-kundli",birth:{...birth,name:"आशा"},extra:{confirmed:true},question,language:"hi",now:new Date("2026-11-24T12:00:00Z")});
+ const noRomanNumber=noRoman.content.sections.find(s=>s.key==="numerology").data;assert.equal(noRomanNumber.nameNumber,null);assert.ok(noRomanNumber.nameNumberUnavailableReason);
+ const timing=await assembleAutomaticPaidReport({slug:"premium-kundli",birth,extra,question,language:"en",now:new Date("2026-11-24T12:00:00Z")});
+ const dashaData=timing.content.sections.find(s=>s.key==="dasha").data;assert.ok(dashaData.periods.length>0&&dashaData.nextTwelveMonths.length>0);assert.ok(dashaData.nextTwelveMonths.every(p=>Date.parse(p.endsAtUtc)>Date.parse(dashaData.asOf)&&Date.parse(p.startsAtUtc)<Date.parse(dashaData.asOf)+365.2425*86400000&&Date.parse(p.endsAtUtc)>Date.parse(p.startsAtUtc)&&p.major&&p.planet));
+ for(let i=1;i<dashaData.periods.length;i++)assert.equal(dashaData.periods[i-1].endsAtUtc,dashaData.periods[i].startsAtUtc,"major periods must remain contiguous");
+ console.log("REPORT_TIMING_AND_NAME_EVIDENCE_PASS; NON_ROMAN_NO_INVENTED_NAME_NUMBER; EXACT_UPCOMING_SUBPERIODS; MAJOR_BOUNDARIES");
  assert.equal(pairs,15);assert.equal(measurements.length,45);
  console.log("REPORT_DEPTH_QUALIFICATION_PASS "+JSON.stringify({depthChecks,personalizationPairs:pairs,timezoneCases:4,measurements,scope:"synthetic generation measurements; not live cost or expert review"}));
  if(process.env.REPORT_VISUAL_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,"report-production-measurements.json"),JSON.stringify(measurements,null,2));
