@@ -545,3 +545,12 @@ body.naksh-page-bg [data-layout="workspace"] header {
     display:block;
   }
 }
+
+/* Stable, accessible desktop disclosure after navigation/hydration. Before hydration,
+   the existing :hover/:focus-within utility rules remain a usable fallback. */
+html body.naksh-page-bg header nav[aria-label="Primary navigation"] [data-nav-parent][data-menu-ready="true"] > .nx-nav-dropdown {
+  visibility:hidden; opacity:0; pointer-events:none;
+}
+html body.naksh-page-bg header nav[aria-label="Primary navigation"] [data-nav-parent][data-menu-ready="true"][data-menu-open="true"] > .nx-nav-dropdown {
+  visibility:visible; opacity:1; pointer-events:auto;
+}

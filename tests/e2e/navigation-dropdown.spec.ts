@@ -45,6 +45,7 @@ test.describe("NAKSHARIX live menu accessibility and positioning", () => {
       await trigger.hover();
       const popup = navigation.getByRole("region", { name: "Horoscope options" });
       await expect(popup, "Dropdown not accessible on " + route).toBeVisible();
+      await expect(trigger).toHaveAttribute("aria-expanded","true");
       const link = popup.getByRole("link", { name: "Weekly Horoscope", exact: true });
       await expect(link).toBeVisible();
       const actual = await popup.evaluate((el) => {
@@ -98,6 +99,12 @@ test.describe("NAKSHARIX live menu accessibility and positioning", () => {
       bg: getComputedStyle(el).backgroundColor,
     }));
     expect(contrast(shades.fg, shades.bg)).toBeGreaterThanOrEqual(4.5);
+    await page.keyboard.press("Escape");
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveAttribute("aria-expanded","false");
+    await expect(region).toBeHidden();
+    await page.keyboard.press("ArrowDown");
+    await expect(region.getByRole("link",{name:"Daily Horoscope",exact:true})).toBeFocused();
   });
 
   test("wide-screen More menu exposes utility links with legible text", async ({ page }) => {

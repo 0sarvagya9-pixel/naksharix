@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type PointerEvent } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
@@ -175,7 +175,7 @@ export function MainNav() {
                 {navText(item.label)}
               </Link>
             ))}
-            <MoreMenu label={navText("More")} />
+            <MoreMenu label={navText("More")} pathname={pathname} />
           </nav>
 
           <div className="nx-main-actions ml-auto flex flex-shrink-0 items-center gap-1 border-l border-[rgba(126,39,37,0.15)] pl-2 sm:gap-2 sm:pl-3">
@@ -280,12 +280,61 @@ export function MainNav() {
   );
 }
 
+// Keep the server-rendered CSS fallback, then track actual pointer/focus events
+// as well. A navigation or hydration relayout must not depend solely on :hover.
+function useDesktopDisclosure(routeKey: string) {
+  const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
+  const [hover, setHover] = useState(false);
+  const [focus, setFocus] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const element=root.current;
+    setHover(!!element?.matches(":hover"));
+    setFocus(!!element?.contains(document.activeElement));
+    setPinned(false); setDismissed(false); setReady(true);
+  },[routeKey]);
+  const pointer = (event: PointerEvent<HTMLDivElement>) => {
+    if(event.pointerType==="touch")return;
+    setHover(true); setDismissed(false);
+  };
+  const onFocusCapture = (event: FocusEvent<HTMLDivElement>) => {
+    setFocus(true);
+    if(!event.currentTarget.contains(event.relatedTarget as Node|null))setDismissed(false);
+  };
+  const onBlurCapture = (event: FocusEvent<HTMLDivElement>) => {
+    if(!event.currentTarget.contains(event.relatedTarget as Node|null)){
+      setFocus(false);setPinned(false);
+    }
+  };
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if(event.key==="Escape"){
+      event.preventDefault();event.stopPropagation();
+      trigger.current?.focus();setPinned(false);setDismissed(true);
+    }
+    if(event.key==="ArrowDown"&&event.target===trigger.current){
+      event.preventDefault();setDismissed(false);setPinned(true);
+      requestAnimationFrame(()=>root.current?.querySelector<HTMLElement>(".nx-nav-dropdown-link")?.focus());
+    }
+  };
+  const open=!dismissed&&(hover||focus||pinned);
+  return {root,trigger,open,toggle:()=>{if(pinned||dismissed===false&&open){setPinned(false);setDismissed(true);}else{setPinned(true);setDismissed(false);}},props:{
+    "data-menu-ready":ready?"true":"false","data-menu-open":open?"true":"false","data-menu-dismissed":dismissed?"true":"false",
+    onPointerEnter:pointer,onPointerMove:(event:PointerEvent<HTMLDivElement>)=>{if(!dismissed&&event.pointerType!=="touch")setHover(true);},
+    onPointerLeave:()=>{setHover(false);setDismissed(false);},
+    onFocusCapture,onBlurCapture,onKeyDown
+  }};
+}
+
 function HoroscopeMenu({ pathname, label }: { pathname: string; label: string }) {
   const active = pathname.includes("horoscope") || pathname.includes("zodiac");
+  const menu=useDesktopDisclosure(pathname);
   return (
-    <div className="group relative" data-nav-parent="horoscope">
-      <Link href="/daily-horoscope" className={navLinkClass(active)}>{label}</Link>
-      <div className="nx-nav-dropdown invisible pointer-events-auto absolute left-1/2 top-full z-[1000] w-[480px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100" role="region" aria-label="Horoscope options" style={dropdownStyle}>
+    <div ref={menu.root} {...menu.props} className="group relative" data-nav-parent="horoscope">
+      <Link ref={node=>{menu.trigger.current=node;}} href="/daily-horoscope" aria-expanded={menu.open} aria-controls="nx-horoscope-dropdown" className={navLinkClass(active)}>{label}</Link>
+      <div className="nx-nav-dropdown invisible pointer-events-auto absolute left-1/2 top-full z-[1000] w-[480px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100" id="nx-horoscope-dropdown" role="region" aria-label="Horoscope options" style={dropdownStyle}>
         <div className="grid grid-cols-[160px_1fr] gap-4 text-left">
           <MenuColumn title="Horoscopes" links={horoscopeOptions} />
           <div>
@@ -300,11 +349,12 @@ function HoroscopeMenu({ pathname, label }: { pathname: string; label: string })
   );
 }
 
-function MoreMenu({ label }: { label: string }) {
+function MoreMenu({ label, pathname }: { label: string; pathname: string }) {
+  const menu=useDesktopDisclosure(pathname);
   return (
-    <div className="nx-gallery-more group relative" data-nav-parent="more">
-      <button type="button" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">{label}</button>
-      <div className="nx-nav-dropdown invisible pointer-events-auto absolute right-0 top-full z-[1000] w-[460px] max-w-[calc(100vw-24px)] rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100" style={dropdownStyle} role="region" aria-label="More site sections">
+    <div ref={menu.root} {...menu.props} className="nx-gallery-more group relative" data-nav-parent="more">
+      <button ref={node=>{menu.trigger.current=node;}} type="button" aria-expanded={menu.open} aria-controls="nx-more-dropdown" onClick={menu.toggle} className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#492b32] transition hover:text-[#9b2d36]">{label}</button>
+      <div className="nx-nav-dropdown invisible pointer-events-auto absolute right-0 top-full z-[1000] w-[460px] max-w-[calc(100vw-24px)] rounded-xl p-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100" style={dropdownStyle} id="nx-more-dropdown" role="region" aria-label="More site sections">
         <div className="grid grid-cols-3 gap-4 text-left">
           <MenuColumn title="Explore" links={exploreLinks} />
           <MenuColumn title="Tools" links={toolsLinks} />
