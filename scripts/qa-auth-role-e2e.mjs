@@ -112,11 +112,13 @@ try {
   });
   await check("marketing consent requires verified account and explicit unspoofable permission", async () => {
     const endpoint = "/api/marketing-consent";
-    const selected = { action: "subscribe", consent: true, interest: "kundli", locale: "hi", country: "India" };
+    const selected = { action: "subscribe", consent: true, consentVersion: "email-updates-v1-20261124", interest: "kundli", locale: "hi", country: "India" };
     assert.equal((await post(endpoint, selected)).status, 401);
     assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 0);
     for (const invalid of [
       { ...selected, consent: false },
+      { ...selected, consentVersion: undefined },
+      { ...selected, consentVersion: "obsolete-consent" },
       { ...selected, email: "someone-else@example.invalid" },
       { ...selected, userId: "another-user" },
       { ...selected, interest: "unknown-interest" }
@@ -138,10 +140,15 @@ try {
     assert.equal(consentRow.consentVersion, "email-updates-v1-20261124");
     assert.ok(consentRow.confirmedAt instanceof Date);
     assert.equal(acknowledgement.confirmedAt, consentRow.confirmedAt.toISOString());
+    assert.equal(acknowledgement.consentVersion, consentRow.consentVersion);
     assert.equal(consentRow.revokedAt, null);
     const repeated = await post(endpoint, selected, userCookie);
     assert.equal(repeated.status, 200, await repeated.text());
     assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 1);
+    const beforeStale = await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } });
+    const stale = await post(endpoint, { ...selected, interest: "career", consentVersion: "obsolete-consent" }, userCookie);
+    assert.equal(stale.status, 422, await stale.text());
+    assert.deepEqual(await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } }), beforeStale, "Obsolete consent cannot mutate active preferences");
     const active = await req("/email-updates", { headers: { cookie: userCookie } });
     assert.equal(active.status, 200);
     const activeHtml = await active.text();

@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState, type FormEvent } from "react";
 import { secureFetch } from "@/lib/security/csrf";
-import { marketingInterests, marketingConsentAcknowledged, marketingPreferenceCopy, normalizeMarketingLocale } from "@/lib/marketing-consent";
+import { marketingInterests, marketingConsentAcknowledged, marketingPreferenceCopy, normalizeMarketingLocale, marketingConsentVersion } from "@/lib/marketing-consent";
 
 type Props = { eligible: boolean; initialSubscribed: boolean; initialInterest: string; initialCountry: string; initialLocale: string };
 export function EmailUpdatesForm({ eligible, initialSubscribed, initialInterest, initialCountry, initialLocale }: Props) {
@@ -24,7 +24,7 @@ export function EmailUpdatesForm({ eligible, initialSubscribed, initialInterest,
     try {
       const response = await secureFetch("/api/marketing-consent", {
         method: "POST", headers: { "Content-Type": "application/json" }, signal: controller.signal, silent: true,
-        body: JSON.stringify(action === "unsubscribe" ? { action } : { action, consent, interest, country, locale })
+        body: JSON.stringify(action === "unsubscribe" ? { action } : { action, consent, consentVersion: marketingConsentVersion, interest, country, locale })
       });
       const result = await response.json();
       if (!response.ok || !marketingConsentAcknowledged(action, result.data)) throw new Error("Preference acknowledgement unconfirmed");

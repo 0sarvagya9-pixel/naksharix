@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { marketingConsentAcknowledged as ack, marketingPreferenceCopy, marketingInterests, normalizeMarketingLocale, marketingConsentText } from "../lib/marketing-consent.ts";
+import { marketingConsentAcknowledged as ack, marketingPreferenceCopy, marketingInterests, normalizeMarketingLocale, marketingConsentText, marketingConsentVersion } from "../lib/marketing-consent.ts";
 const valid = "2026-11-25T01:05:00.000Z";
 const cases = [
-  ["subscribe", {subscribed:true, confirmedAt:valid}, true],
+  ["subscribe", {subscribed:true, confirmedAt:valid, consentVersion:marketingConsentVersion}, true],
+  ["subscribe", {subscribed:true, confirmedAt:valid}, false],
+  ["subscribe", {subscribed:true, confirmedAt:valid, consentVersion:"obsolete-consent"}, false],
+  ["subscribe", {subscribed:true, confirmedAt:valid, consentVersion:null}, false],
   ["subscribe", {subscribed:false}, false],
   ["subscribe", {subscribed:true}, false],
-  ["subscribe", {subscribed:true, confirmedAt:"invalid"}, false],
-  ["subscribe", {subscribed:true, confirmedAt:"2026-02-30T00:00:00.000Z"}, false],
-  ["subscribe", {subscribed:"true", confirmedAt:valid}, false],
+  ["subscribe", {subscribed:true, confirmedAt:"invalid", consentVersion:marketingConsentVersion}, false],
+  ["subscribe", {subscribed:true, confirmedAt:"2026-02-30T00:00:00.000Z", consentVersion:marketingConsentVersion}, false],
+  ["subscribe", {subscribed:"true", confirmedAt:valid, consentVersion:marketingConsentVersion}, false],
   ["subscribe", null, false],
   ["subscribe", [], false],
   ["unsubscribe", {subscribed:false}, true],
@@ -33,4 +36,9 @@ assert.match(source,/disabled=\{busy \|\| uncertain\}/);
 for(const field of ["setLocale","setInterest","setCountry"]) assert.match(source,new RegExp(field+"\\([^;]+; setConsent\\(false\\)"));
 assert.match(source,/setUncertain\(true\)/);
 assert.match(source,/clearTimeout\(timeout\)/);
-console.log("Marketing consent acknowledgement: 12 runtime cases; locale and form contract assertions passed.");
+assert.match(source,/consentVersion: marketingConsentVersion/);
+const api=readFileSync("app/api/marketing-consent/route.ts","utf8");
+assert.match(api,/consentVersion: z\.literal\(marketingConsentVersion\)/);
+assert.match(api,/consentVersion: body\.consentVersion/);
+assert.match(api,/consentVersion: saved\.consentVersion/);
+console.log("Marketing consent acknowledgement: 15 runtime cases; locale and form contract assertions passed.");

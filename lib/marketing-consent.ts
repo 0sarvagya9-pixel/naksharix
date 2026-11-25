@@ -18,9 +18,9 @@ export function normalizeMarketingLocale(value: unknown): MarketingLocale {
 /** An HTTP success or opposite-action boolean cannot establish a saved preference. */
 export function marketingConsentAcknowledged(action: "subscribe" | "unsubscribe", value: unknown): boolean {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const result = value as { subscribed?: unknown; confirmedAt?: unknown };
+  const result = value as { subscribed?: unknown; confirmedAt?: unknown; consentVersion?: unknown };
   if (action === "unsubscribe") return result.subscribed === false;
-  if (result.subscribed !== true || typeof result.confirmedAt !== "string") return false;
+  if (result.subscribed !== true || result.consentVersion !== marketingConsentVersion || typeof result.confirmedAt !== "string") return false;
   const time = Date.parse(result.confirmedAt);
   return Number.isFinite(time) && new Date(time).toISOString() === result.confirmedAt;
 }
