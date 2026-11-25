@@ -538,3 +538,60 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  for(const [h,d] of [[0,0],[13,0],[1,360],[1,-1],[1,NaN],[1.5,0]]){assert.throws(()=>C.calculateRamanBhavaDirectionalCandidate(h,d));checks++;}
  console.log("P0_RAMAN_BHAVA_DIRECTION_PASS "+JSON.stringify({publishedDirection:12,checks,method:"named Raman candidate; not certified"}));
 }
+
+{
+ const C=require("@/lib/astrology/strength/classical-components");
+ const B=require("@/lib/astrology/strength/birth-context");
+ const F=JSON.parse(fs.readFileSync("fixtures/astrology/published-classical-comparison.json","utf8"));
+ const R=JSON.parse(fs.readFileSync("fixtures/astrology/raman-aspect-worked-reference.json","utf8"));
+ const dms=([s,d,m,a])=>30*(s-1)+d+m/60+a/3600;
+ const dm=([d,m])=>d+m/60;
+ let publishedChecks=0,workedChecks=0,negativeChecks=0,boundaryChecks=0,maxPublished=0,maxRamanPlanet=0,maxRamanHouse=0;
+ const verify=(actual,expected,tol)=>{assert.ok(typeof actual==="number"&&Math.abs(actual-expected)<=tol,actual+" vs "+expected);return Math.abs(actual-expected);};
+ const std=R.planetDegreesMinutes.map((x,i)=>point(R.planetOrder[i],dm(x)));
+ for(const [i,g] of R.planetOrder.entries()){maxRamanPlanet=Math.max(maxRamanPlanet,verify(C.calculateRamanDrikCandidate(std,g).virupas,R.planetDrik[i],R.planetTolerance));workedChecks++;}
+ for(const [i,x] of R.midpointDegreesMinutes.entries()){maxRamanHouse=Math.max(maxRamanHouse,verify(C.calculateRamanHouseAspectCandidate(std,dm(x)).virupas,R.houseDrik[i],R.houseTolerance));workedChecks++;}
+ const positions=F.positionsDms.map(dms),p=positions.slice(1).map((l,i)=>point(F.order[i+1],l)),midpoints=F.midpointDms.map(dms);
+ const supplied=Object.fromEntries(F.order.slice(1,8).map((g,i)=>[g,F.strength.total[i]]));
+ const out=C.calculateRamanBhavaCandidate(p,midpoints,{lordConvention:"whole_sign_lagna",lordStrengthVirupas:supplied});
+ for(const [i,g] of F.order.slice(1,8).entries()){maxPublished=Math.max(maxPublished,verify(C.calculateRamanDrikCandidate(p,g).virupas,F.strength.drik[i],.02));publishedChecks++;}
+ for(const [i,h] of out.houses.entries()){
+  for(const [key,value] of Object.entries({lord:h.lordStrengthVirupas,direction:h.directionalVirupas,aspect:h.aspect.virupas,total:h.arithmeticTotalVirupas})){
+   maxPublished=Math.max(maxPublished,verify(value,F.bhava[key][i],.02));publishedChecks++;
+  }
+ }
+ assert.equal(out.verified,false);assert.equal(out.publicEnabled,false);
+ const pure=C.calculateRamanBhavaCandidate(p,midpoints,{lordStrengthVirupas:supplied});
+ assert.notEqual(pure.houses[3].lord,out.houses[3].lord);assert.equal(pure.houses[3].lordConvention,undefined);
+ const unavailable=C.calculateRamanBhavaCandidate(p,midpoints);
+ assert.ok(unavailable.houses.every(h=>h.arithmeticTotalVirupas===null));
+ for(const bad of [p.slice(1),[...p,p[0]],p.map((v,i)=>i?v:{...v,absoluteLongitude:NaN})]){
+  assert.equal(C.calculateRamanDrikCandidate(bad,"Sun"),null);assert.equal(C.calculateRamanHouseAspectCandidate(bad,45),null);
+  assert.ok(C.calculateRamanBhavaCandidate(bad,midpoints,{lordStrengthVirupas:supplied}).houses.every(h=>h.arithmeticTotalVirupas===null));negativeChecks+=3;
+ }
+ assert.throws(()=>C.calculateRamanBhavaCandidate(p,midpoints,{lordConvention:"unknown"}));negativeChecks++;
+ for(const [g,offsets,bonus] of [["Mars",[90,210],15],["Jupiter",[120,240],30],["Saturn",[60,270],45]])for(const start of offsets){
+  for(const [d,v] of [[start-.0001,0],[start,bonus],[start+29.9999,bonus],[start+30,0]]){
+   assert.equal(C.calculateRamanAspectVirupas(g,0,d).special,v);boundaryChecks++;
+  }
+ }
+ for(const [elongation,expected] of [[83.9999,"malefic"],[84,"benefic"],[180,"benefic"],[263.9999,"benefic"],[264,"malefic"]]){
+  const test=R.planetOrder.map((g,i)=>point(g,i===0?0:i===1?elongation:30*i+1));
+  assert.equal(C.calculateRamanPolarityCandidate(test).polarity.Moon,expected);boundaryChecks++;
+ }
+ const actual=B.calculateBirthStrengthEvidence(F.birth);
+ const residuals=[];
+ for(const [i,g] of F.order.slice(1,8).entries()){
+  const row=actual.aspectVariantStrength.rows.find(r=>r.planet===g),c=row?.components;
+  for(const [key,value] of Object.entries({sthana:c?.sthana,dig:c?.dig,kala:typeof c?.kalaBeforeWar==="number"&&typeof row?.warVirupas==="number"?c.kalaBeforeWar+row.warVirupas:null,cheshta:c?.cheshta,naisargika:c?.naisargika,drik:c?.drik,total:row?.total})){
+   const delta=typeof value==="number"?value-F.strength[key][i]:null;residuals.push({scope:"shadbala",point:g,key,value,expected:F.strength[key][i],delta,matched:delta!==null&&Math.abs(delta)<=.25});
+  }
+ }
+ for(const [i,h] of actual.wholeSignLordBhavaCandidate.houses.entries()){
+  for(const [key,value] of Object.entries({lord:h.lordStrengthVirupas,direction:h.directionalVirupas,aspect:h.aspect?.virupas,total:h.arithmeticTotalVirupas})){
+   const delta=typeof value==="number"?value-F.bhava[key][i]:null;residuals.push({scope:"bhava",point:i+1,key,value,expected:F.bhava[key][i],delta,matched:delta!==null&&Math.abs(delta)<=.25});
+  }
+ }
+ assert.equal(residuals.length,97);assert.equal(actual.fullShadbalaVerified,false);assert.equal(actual.fullBhavaBalaVerified,false);
+ console.log("P0_RAMAN_ASPECT_AND_BHAVA_CONDITIONAL_PASS "+JSON.stringify({publishedChecks,workedChecks,negativeChecks,boundaryChecks,maxPublished,maxRamanPlanet,maxRamanHouse,actualBirthMatched:residuals.filter(r=>r.matched).length,actualBirthMismatches:residuals.filter(r=>!r.matched).length,fullParityAccepted:false,residuals}));
+}

@@ -1,0 +1,118 @@
+{
+  "source": "B.V. Raman, Graha and Bhava Balas, arts. 53, 114–120, 125, 132–133, examples 8,55,59; https://studylib.net/doc/28274582/bhava-and-graha-balas-b.v.raman-1996",
+  "scope": "Minute-rounded numerical example only. Historic printed totals exhibit small residuals; no proprietary prose or design copied.",
+  "planetOrder": [
+    "Sun",
+    "Moon",
+    "Mars",
+    "Mercury",
+    "Jupiter",
+    "Venus",
+    "Saturn"
+  ],
+  "planetDegreesMinutes": [
+    [
+      180,
+      54
+    ],
+    [
+      311,
+      17
+    ],
+    [
+      229,
+      31
+    ],
+    [
+      181,
+      32
+    ],
+    [
+      84,
+      1
+    ],
+    [
+      171,
+      10
+    ],
+    [
+      124,
+      23
+    ]
+  ],
+  "midpointDegreesMinutes": [
+    [
+      298,
+      27
+    ],
+    [
+      331,
+      10
+    ],
+    [
+      3,
+      53
+    ],
+    [
+      36,
+      36
+    ],
+    [
+      63,
+      53
+    ],
+    [
+      91,
+      10
+    ],
+    [
+      118,
+      27
+    ],
+    [
+      151,
+      10
+    ],
+    [
+      183,
+      53
+    ],
+    [
+      216,
+      36
+    ],
+    [
+      243,
+      53
+    ],
+    [
+      271,
+      10
+    ]
+  ],
+  "planetDrik": [
+    15.86,
+    -21.73,
+    0.95,
+    15.64,
+    -16.04,
+    18.47,
+    7.21
+  ],
+  "houseDrik": [
+    54.18,
+    36.44,
+    58.99,
+    28.1,
+    11.57,
+    2.92,
+    5.7,
+    32.51,
+    44.8,
+    44.51,
+    33.12,
+    97.55
+  ],
+  "planetTolerance": 0.02,
+  "houseTolerance": 0.25
+}

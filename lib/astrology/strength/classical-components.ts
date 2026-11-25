@@ -192,3 +192,70 @@ export function calculateRamanBhavaDirectionalCandidate(house:number,midpoint:nu
  const delta=Math.abs(house-weakHouse);
  return {house,weakHouse,virupas:10*Math.min(delta,12-delta),method:"raman_whole_bhava_distance" as const,publicEnabled:false as const,verified:false as const};
 }
+
+/** B.V. Raman, Graha and Bhava Balas arts. 114–120, 132–133.
+ * The Sripati ordinary aspect is augmented by the stated constant special
+ * aspect within its sign sector. This is not the BPHS literal piecewise
+ * reading above; do not silently interchange the two methods. */
+export function calculateRamanAspectVirupas(planet:StrengthGraha,source:number,target:number){
+ if(!isGraha(planet)||!angle(source)||!angle(target))throw Error("INVALID_RAMAN_ASPECT_INPUT");
+ const d=norm(target-source);
+ const ordinary=d<30||d>=300?0:d<60?(d-30)/2:d<90?d-45:d<120?(120-d)/2+30:d<150?150-d:d<180?2*(d-150):(300-d)/2;
+ const special=planet==="Mars"&&((d>=90&&d<120)||(d>=210&&d<240))?15:
+  planet==="Jupiter"&&((d>=120&&d<150)||(d>=240&&d<270))?30:
+  planet==="Saturn"&&((d>=60&&d<90)||(d>=270&&d<300))?45:0;
+ return {planet,angle:d,ordinary,special,virupas:ordinary+special,method:"raman_sripati_constant_special" as const};
+}
+/** Explicit tithi-boundary interpretation of Raman art. 53: from beginning
+ * of bright eighth tithi to beginning of dark eighth. Same-sign classical
+ * malefic association for Mercury is a named operational convention. */
+export function calculateRamanPolarityCandidate(planets:CanonicalPlanet[]){
+ const positions=completePositions(planets);if(!positions)return null;
+ const elongation=norm(positions.get("Moon")!-positions.get("Sun")!);
+ const moonBenefic=elongation>=84&&elongation<264;
+ const malefics:StrengthGraha[]=["Sun","Mars","Saturn",...(!moonBenefic?["Moon" as const]:[])];
+ const mercuryMalefic=malefics.some(g=>zodiac(positions.get(g)!)===zodiac(positions.get("Mercury")!));
+ const polarity:Record<StrengthGraha,Polarity>={Sun:"malefic",Moon:moonBenefic?"benefic":"malefic",Mars:"malefic",Mercury:mercuryMalefic?"malefic":"benefic",Jupiter:"benefic",Venus:"benefic",Saturn:"malefic"};
+ return {elongation,polarity,method:"raman_bright_eighth_to_dark_eighth_same_sign_candidate" as const,verified:false as const};
+}
+/** Article 120: planetary Drik = signed quarter of every OTHER graha.
+ * Article 132: for houses only, Mercury and Jupiter contribute fully and
+ * positively. Keep the two operations distinct. */
+export function calculateRamanDrikCandidate(planets:CanonicalPlanet[],planet:StrengthGraha){
+ const positions=completePositions(planets),context=calculateRamanPolarityCandidate(planets);
+ if(!positions||!context||!isGraha(planet))return null;
+ const target=positions.get(planet)!;
+ const rows=STRENGTH_GRAHAS.filter(g=>g!==planet).map(g=>{
+  const a=calculateRamanAspectVirupas(g,positions.get(g)!,target);
+  return {...a,polarity:context.polarity[g],contribution:(context.polarity[g]==="benefic"?1:-1)*a.virupas/4};
+ });
+ return {planet,rows,virupas:rows.reduce((n,r)=>n+r.contribution,0),method:"raman_planet_signed_quarter" as const,publicEnabled:false as const,verified:false as const};
+}
+export function calculateRamanHouseAspectCandidate(planets:CanonicalPlanet[],target:number){
+ const positions=completePositions(planets),context=calculateRamanPolarityCandidate(planets);
+ if(!positions||!context||!angle(target))return null;
+ const rows=STRENGTH_GRAHAS.map(g=>{
+  const a=calculateRamanAspectVirupas(g,positions.get(g)!,target),full=g==="Mercury"||g==="Jupiter";
+  return {...a,polarity:full?"benefic" as const:context.polarity[g],contribution:full?a.virupas:(context.polarity[g]==="benefic"?1:-1)*a.virupas/4};
+ });
+ return {rows,virupas:rows.reduce((n,r)=>n+r.contribution,0),method:"raman_house_full_mercury_jupiter" as const,publicEnabled:false as const,verified:false as const};
+}
+/** Raman art. 125 uses the midpoint sign's lord. The separately labeled
+ * whole-sign lord option reproduces an observed vendor convention; it is
+ * not attributed to Raman. No occupant/time additions in this three-part sum.
+ * Totals require all seven independently supplied strengths. */
+export function calculateRamanBhavaCandidate(planets:CanonicalPlanet[],midpoints:readonly number[],context?:{lordConvention?:"midpoint_sign"|"whole_sign_lagna";lordStrengthVirupas?:Partial<Record<StrengthGraha,number>>}){
+ validateMidpoints(midpoints);
+ const convention=context?.lordConvention??"midpoint_sign";
+ if(convention!=="midpoint_sign"&&convention!=="whole_sign_lagna")throw Error("INVALID_RAMAN_LORD_CONVENTION");
+ const strength=context?.lordStrengthVirupas;
+ const allLords=!!strength&&STRENGTH_GRAHAS.every(g=>typeof strength[g]==="number"&&Number.isFinite(strength[g])&&strength[g]!>=0);
+ const houses=midpoints.map((midpoint,i)=>{
+  const s=convention==="whole_sign_lagna"?(zodiac(midpoints[0])+i)%12:zodiac(midpoint);
+  const lord=LORDS[s],lordStrengthVirupas=allLords?strength![lord]!:null;
+  const direction=calculateRamanBhavaDirectionalCandidate(i+1,midpoint);
+  const aspect=calculateRamanHouseAspectCandidate(planets,midpoint);
+  return {house:i+1,midpoint,midpointSign:SIGNS[zodiac(midpoint)],lordSign:SIGNS[s],lord,lordStrengthVirupas,directionalVirupas:direction.virupas,aspect,arithmeticTotalVirupas:lordStrengthVirupas!==null&&aspect?lordStrengthVirupas+direction.virupas+aspect.virupas:null};
+ });
+ return {method:"raman_three_part_bhava_candidate" as const,lordConvention:convention,houses,publicEnabled:false as const,verified:false as const,missingDependencies:[...(!allLords?["complete lord strengths"]:[]),...(!completePositions(planets)?["unique complete classical positions"]:[]),"independent whole-chart strength certification"]};
+}

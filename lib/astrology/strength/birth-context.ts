@@ -8,7 +8,7 @@ import {calculateClassicalCalendarCandidate} from "./calendar-lords";
 import {evaluateTraditionalPatterns} from "./traditional-patterns";
 import {STAR_GRAHAS,type StarGraha,calculateMotionalEpochCandidate} from "./motional-epoch";
 import {GRAHAS,assembleClassicalStrengthCandidate} from "./strength-total";
-import {calculateAspectStrengthEvidence,calculateExactDirectionalBala} from "./classical-components";
+import {calculateAspectStrengthEvidence,calculateExactDirectionalBala,calculateRamanDrikCandidate,calculateRamanBhavaCandidate} from "./classical-components";
 
 /** Internal named quadrant geometry. Not a change to the approved D1
  * whole-sign chart; do not present these as independently accepted
@@ -73,5 +73,12 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput){
  const classicalStrengthCandidate=assembleClassicalStrengthCandidate(sixComponents,temporalWithCalendarCandidate?.warPairs??null,solar.declinations);
  const candidateLords=classicalStrengthCandidate.completeArithmetic&&classicalStrengthCandidate.rows.every(r=>typeof r.total==="number"&&r.total>=0)?Object.fromEntries(classicalStrengthCandidate.rows.map(r=>[r.planet,r.total!])):undefined;
  const bhavaCandidate=calculateBhavaBalaEvidence(planets,geometry.midpoints,{polarity:temporal.polarity??undefined,aspectReading:"additional_full_mercury_jupiter",birthPhase:solar.birthPhase??undefined,lordStrengthVirupas:candidateLords});
- return {geometry,friendship,traditionalPatterns,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
+ // A controlled one-variable substitution; other components remain the
+ // original named candidates, so this is NOT a full Raman Shadbala implementation.
+ const ramanDrik=GRAHAS.map(planet=>calculateRamanDrikCandidate(planets,planet));
+ const aspectVariantStrength=assembleClassicalStrengthCandidate(sixComponents.map(r=>({...r,components:{...r.components,drik:ramanDrik.find(x=>x?.planet===r.planet)?.virupas??null}})),temporalWithCalendarCandidate?.warPairs??null,solar.declinations);
+ const variantLords=aspectVariantStrength.completeArithmetic&&aspectVariantStrength.rows.every(r=>typeof r.total==="number"&&r.total>=0)?Object.fromEntries(aspectVariantStrength.rows.map(r=>[r.planet,r.total!])):undefined;
+ const ramanBhavaCandidate=calculateRamanBhavaCandidate(planets,geometry.midpoints,{lordStrengthVirupas:variantLords});
+ const wholeSignLordBhavaCandidate=calculateRamanBhavaCandidate(planets,geometry.midpoints,{lordConvention:"whole_sign_lagna",lordStrengthVirupas:variantLords});
+ return {geometry,friendship,traditionalPatterns,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,ramanDrik,aspectVariantStrength,ramanBhavaCandidate,wholeSignLordBhavaCandidate,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
 }
