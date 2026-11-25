@@ -31,6 +31,14 @@ type Props = {
 
 type Errors = Partial<Record<"fullName" | "dateOfBirth" | "timeOfBirth" | "birthPlace" | "concern", string>>;
 
+// Native time controls can include zero seconds. The report contract uses minute precision;
+// never silently discard nonzero seconds or change the selected local birth time.
+function minuteBirthTime(value:string){return value.replace(/^((?:[01]\d|2[0-3]):[0-5]\d):00(?:\.0+)?$/, "$1");}
+function birthField(form:HTMLFormElement,name:string,fallback:string){
+  const field=form.elements.namedItem(name);
+  return field instanceof HTMLInputElement?field.value:fallback;
+}
+
 export function ReportRequestForm({
   userEmail,
   orderId,
@@ -87,16 +95,16 @@ export function ReportRequestForm({
   const nameCorrection=needsSpecialistDetails&&reportSlug==="name-correction-report";
   const babyName=needsSpecialistDetails&&reportSlug==="baby-name-report";
   const numerologyName=needsSpecialistDetails&&reportSlug==="numerology-lo-shu-report";
-  function autoDetails(){return {confirmed,partnerPermission:couple?partnerPermission:undefined,
-    partner:couple&&partnerLocation?{name:partnerName,gender:partnerGender,dateOfBirth:partnerDate,timeOfBirth:partnerTime,birthPlace:partnerLocation.displayName,latitude:partnerLocation.latitude,longitude:partnerLocation.longitude,timezone:partnerOffset.trim()===""?undefined:Number(partnerOffset)}:undefined,
+  function autoDetails(actualPartnerDate=partnerDate,actualPartnerTime=minuteBirthTime(partnerTime)){return {confirmed,partnerPermission:couple?partnerPermission:undefined,
+    partner:couple&&partnerLocation?{name:partnerName,gender:partnerGender,dateOfBirth:actualPartnerDate,timeOfBirth:actualPartnerTime,birthPlace:partnerLocation.displayName,latitude:partnerLocation.latitude,longitude:partnerLocation.longitude,timezone:partnerOffset.trim()===""?undefined:Number(partnerOffset)}:undefined,
     romanName:nameCorrection||numerologyName?romanName:undefined,candidateNames:nameCorrection||babyName?names.split(/[\n,]/).map(s=>s.trim()).filter(Boolean):undefined};}
   function primaryOffset(){return needsSpecialistDetails?(offset.trim()===""?undefined:Number(offset)):location?.timezoneOffset;}
 
-  function validate() {
+  function validate(actualDate:string,actualTime:string) {
     const next: Errors = {};
     if (!fullName.trim()) next.fullName = requiredMessage;
-    if (!dateOfBirth) next.dateOfBirth = requiredMessage;
-    if (!timeOfBirth) next.timeOfBirth = requiredMessage;
+    if (!actualDate) next.dateOfBirth = requiredMessage;
+    if (!actualTime) next.timeOfBirth = requiredMessage;
     if (!birthPlace.trim() || !location) next.birthPlace = birthPlace.trim() ? tr("selectLocationFromSuggestions") : requiredMessage;
     if (!concern.trim()) next.concern = requiredMessage;
     setErrors(next);
@@ -114,12 +122,17 @@ export function ReportRequestForm({
   }
   async function submit(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();
-    if(submissionInFlight.current||loading||!validate())return;
+    if(submissionInFlight.current||loading)return;
+    // Read the submitted native controls, not an older render's date/time state.
+    const form=event.currentTarget;
+    const actualDate=birthField(form,"reportBirthDate",dateOfBirth);
+    const actualTime=minuteBirthTime(birthField(form,"reportBirthTime",timeOfBirth));
+    if(!validate(actualDate,actualTime))return;
     setStatus(null);
-    const birth={name:fullName,gender,dateOfBirth,timeOfBirth,birthPlace:location?.displayName??birthPlace,latitude:location?.latitude,longitude:location?.longitude,timezone:primaryOffset()};
-    const automaticDetails=needsSpecialistDetails?autoDetails():undefined;
+    const birth={name:fullName,gender,dateOfBirth:actualDate,timeOfBirth:actualTime,birthPlace:location?.displayName??birthPlace,latitude:location?.latitude,longitude:location?.longitude,timezone:primaryOffset()};
+    const automaticDetails=needsSpecialistDetails?autoDetails(birthField(form,"reportPartnerDate",partnerDate),minuteBirthTime(birthField(form,"reportPartnerTime",partnerTime))):undefined;
     if(needsSpecialistDetails){const checked=checkAutomaticInputs(reportSlug,birth,automaticDetails);if(!checked.ok){setStatus(checked.reason);return;}}
-    const details={orderId,planType:plan,reportSlug,adminBypass,deliveryEmail:userEmail,fullName,gender,dateOfBirth,timeOfBirth,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,phone,concern,questionOrConcern:concern,language,automaticDetails};
+    const details={orderId,planType:plan,reportSlug,adminBypass,deliveryEmail:userEmail,fullName,gender,dateOfBirth:actualDate,timeOfBirth:actualTime,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,phone,concern,questionOrConcern:concern,language,automaticDetails};
     submissionInFlight.current=true;
     setLoading(true);
     try{
@@ -186,10 +199,10 @@ export function ReportRequestForm({
           </select>
         </Field>
         <Field label={tr("dateOfBirth")} error={errors.dateOfBirth}>
-          <Input data-field="dateOfBirth" type="date" value={dateOfBirth} onChange={(event) => { setDateOfBirth(event.target.value); setErrors((e) => ({ ...e, dateOfBirth: undefined })); }} className={cn(errorClass(Boolean(errors.dateOfBirth)))} />
+          <Input data-field="dateOfBirth" name="reportBirthDate" type="date" value={dateOfBirth} onInput={event=>setDateOfBirth(event.currentTarget.value)} onChange={(event) => { setDateOfBirth(event.target.value); setErrors((e) => ({ ...e, dateOfBirth: undefined })); }} className={cn(errorClass(Boolean(errors.dateOfBirth)))} />
         </Field>
         <Field label={tr("timeOfBirth")} error={errors.timeOfBirth}>
-          <Input data-field="timeOfBirth" type="time" value={timeOfBirth} onChange={(event) => { setTimeOfBirth(event.target.value); setErrors((e) => ({ ...e, timeOfBirth: undefined })); }} className={cn(errorClass(Boolean(errors.timeOfBirth)))} />
+          <Input data-field="timeOfBirth" name="reportBirthTime" type="time" step={60} value={timeOfBirth} onInput={event=>setTimeOfBirth(minuteBirthTime(event.currentTarget.value))} onChange={(event) => { setTimeOfBirth(minuteBirthTime(event.target.value)); setErrors((e) => ({ ...e, timeOfBirth: undefined })); }} className={cn(errorClass(Boolean(errors.timeOfBirth)))} />
         </Field>
         <div className="md:col-span-2">
           <LocationAutocomplete
@@ -228,8 +241,8 @@ export function ReportRequestForm({
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Second person’s full name"><Input required maxLength={100} value={partnerName} onChange={e=>setPartnerName(e.target.value)}/></Field>
           <Field label="Gender (optional)"><select className="cosmic-select" value={partnerGender} onChange={e=>setPartnerGender(e.target.value)}><option value="">Prefer not to say</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></Field>
-          <Field label="Date of birth"><Input required type="date" value={partnerDate} onChange={e=>setPartnerDate(e.target.value)}/></Field>
-          <Field label="Time of birth"><Input required type="time" value={partnerTime} onChange={e=>setPartnerTime(e.target.value)}/></Field>
+          <Field label="Date of birth"><Input required name="reportPartnerDate" type="date" value={partnerDate} onInput={e=>setPartnerDate(e.currentTarget.value)} onChange={e=>setPartnerDate(e.target.value)}/></Field>
+          <Field label="Time of birth"><Input required name="reportPartnerTime" type="time" step={60} value={partnerTime} onInput={e=>setPartnerTime(minuteBirthTime(e.currentTarget.value))} onChange={e=>setPartnerTime(minuteBirthTime(e.target.value))}/></Field>
           <div className="md:col-span-2"><LocationAutocomplete value={partnerPlace} onChange={value=>{setPartnerPlace(value);if(value!==partnerLocation?.displayName){setPartnerLocation(null);setPartnerOffset("")}}} onResolvedLocation={next=>{setPartnerLocation(next);setPartnerOffset(next?.timezoneOffset===undefined?"":String(next.timezoneOffset))}} label="Birth place of second person" required/></div>
           <Field label="Second person’s UTC offset at birth"><Input type="number" required min={-12} max={14} step="any" value={partnerOffset} onChange={e=>setPartnerOffset(e.target.value)}/></Field>
         </div><label className="flex items-start gap-3 text-sm"><input type="checkbox" required checked={partnerPermission} onChange={e=>setPartnerPermission(e.target.checked)}/> I have permission to submit the other person’s birth details for this report.</label>
