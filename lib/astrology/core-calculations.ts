@@ -211,7 +211,7 @@ function getAscendantLongitude(chart: BirthChartData) {
 function absoluteLongitudeFor(planet: PlanetPosition | undefined) {
   if (!planet) return undefined;
   if (typeof planet.absoluteLongitude === "number" && Number.isFinite(planet.absoluteLongitude)) return normalizeDegrees(planet.absoluteLongitude);
-  if (typeof planet.degree !== "number") return undefined;
+  if (typeof planet.degree !== "number" || !Number.isFinite(planet.degree) || planet.degree<0 || planet.degree>=30) return undefined;
   const index = signIndex(planet.sign);
   if (index < 0) return undefined;
   return normalizeDegrees(index * 30 + planet.degree);

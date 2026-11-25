@@ -1,5 +1,5 @@
 import type { VargaChartDefinition, VargaChartKey, VargaChartResult } from "@/lib/astrology/varga/types";
-import { normalizeDegrees } from "@/lib/astrology/own-engine/time";
+import {divisionCoordinates,navamsaCoordinates,roundedDivisionDegree} from "@/lib/astrology/varga/partition";
 import { rashis } from "@/lib/astrology/own-engine/zodiac";
 import type { CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
 
@@ -31,11 +31,9 @@ export function calculateVargaChart(chart: VargaChartKey, planets: CanonicalPlan
   const supported = new Set<VargaChartKey>(["D1", "D2", "D3", "D9", "D10", "D12"]);
   if (!supported.has(chart)) return createBlockedVargaResult(chart);
 
-  return {
-    chart,
-    placements: planets.map((planet) => {
+  const placements=planets.map((planet) => {
       const longitude = planet.absoluteLongitude;
-      if (typeof longitude !== "number") {
+      if (typeof longitude !== "number" || !Number.isFinite(longitude)) {
         return { planet: planet.planet, sourceLongitude: null, sign: null, degree: null, verified: false };
       }
       const placement = vargaPlacement(chart, longitude);
@@ -46,8 +44,10 @@ export function calculateVargaChart(chart: VargaChartKey, planets: CanonicalPlan
         degree: placement.degree,
         verified: true
       };
-    }),
-    verificationLevel: "provider_verified",
+    });
+  return {
+    chart,placements,
+    verificationLevel: placements.length>0&&placements.every(p=>p.verified)?"provider_verified":"needs_external_validation",
     publicEnabled: false,
     limitations: [
       `${chart} is calculated internally from planet sidereal longitudes.`,
@@ -62,60 +62,15 @@ export function calculateSupportedVargaCharts(planets: CanonicalPlanet[]) {
 }
 
 function vargaPlacement(chart: VargaChartKey, longitude: number) {
-  const normalized = normalizeDegrees(longitude);
-  const signIndex = Math.floor(normalized / 30);
-  const degreeInSign = normalized % 30;
-
-  if (chart === "D1") return signPlacement(signIndex, degreeInSign);
-  if (chart === "D2") return horaPlacement(signIndex, degreeInSign);
-  if (chart === "D3") return drekkanaPlacement(signIndex, degreeInSign);
-  if (chart === "D9") return navamsaPlacement(signIndex, degreeInSign);
-  if (chart === "D10") return dashamshaPlacement(signIndex, degreeInSign);
-  if (chart === "D12") return dwadashamshaPlacement(signIndex, degreeInSign);
-  return signPlacement(signIndex, degreeInSign);
-}
-
-function signPlacement(signIndex: number, degree: number) {
-  return { sign: rashis[signIndex], degree: round(degree) };
-}
-
-function horaPlacement(signIndex: number, degree: number) {
-  const oddSign = signIndex % 2 === 0;
-  const sign = oddSign
-    ? degree < 15 ? "Leo" : "Cancer"
-    : degree < 15 ? "Cancer" : "Leo";
-  return { sign, degree: round((degree % 15) * 2) };
-}
-
-function drekkanaPlacement(signIndex: number, degree: number) {
-  const part = Math.min(2, Math.floor(degree / 10));
-  const targetIndex = [signIndex, (signIndex + 4) % 12, (signIndex + 8) % 12][part];
-  return { sign: rashis[targetIndex], degree: round((degree % 10) * 3) };
-}
-
-function navamsaPlacement(signIndex: number, degree: number) {
-  const part = Math.min(8, Math.floor(degree / (30 / 9)));
-  const startIndex = [0, 3, 6, 9].includes(signIndex)
-    ? signIndex
-    : [1, 4, 7, 10].includes(signIndex)
-      ? (signIndex + 8) % 12
-      : (signIndex + 4) % 12;
-  return { sign: rashis[(startIndex + part) % 12], degree: round((degree % (30 / 9)) * 9) };
-}
-
-function dashamshaPlacement(signIndex: number, degree: number) {
-  const part = Math.min(9, Math.floor(degree / 3));
-  const startIndex = signIndex % 2 === 0 ? signIndex : (signIndex + 8) % 12;
-  return { sign: rashis[(startIndex + part) % 12], degree: round((degree % 3) * 10) };
-}
-
-function dwadashamshaPlacement(signIndex: number, degree: number) {
-  const part = Math.min(11, Math.floor(degree / 2.5));
-  return { sign: rashis[(signIndex + part) % 12], degree: round((degree % 2.5) * 12) };
-}
-
-function round(value: number) {
-  return Number(value.toFixed(6));
+  const divisor=Number(chart.slice(1));
+  const {signIndex,part,degree}=divisionCoordinates(longitude,divisor);
+  let target=signIndex;
+  if(chart==="D2")target=signIndex%2===0?(part===0?4:3):(part===0?3:4);
+  else if(chart==="D3")target=(signIndex+4*part)%12;
+  else if(chart==="D9")target=navamsaCoordinates(longitude).signIndex;
+  else if(chart==="D10")target=(signIndex+(signIndex%2?8:0)+part)%12;
+  else if(chart==="D12")target=(signIndex+part)%12;
+  return {sign:rashis[target],degree:roundedDivisionDegree(degree)};
 }
 
 export function createBlockedVargaResult(chart: VargaChartKey): VargaChartResult {

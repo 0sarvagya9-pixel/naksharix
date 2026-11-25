@@ -1,6 +1,7 @@
 import "server-only";
 
 import { format } from "date-fns";
+import {navamsaSignFromLongitude} from "@/lib/astrology/own-engine/charts";
 import { calculateKundli, wholeSignHouse, type SwissKundliPlanet, type SwissKundliResult } from "@/lib/astrology/swiss-kundli";
 import { getPanchang } from "@/lib/astrology/engine";
 import type { AstrologyBirthInput, BirthChartData, HousePosition, PlanetPosition } from "@/lib/astrology/types";
@@ -125,25 +126,6 @@ function toWholeSignChart(ascendantSignNumber: number, planets: PlanetPosition[]
       planets: planets.filter((planet) => planet.house === house).map((planet) => planet.planet)
     };
   });
-}
-
-function navamsaSignFromLongitude(longitude: number) {
-  const normalized = ((longitude % 360) + 360) % 360;
-  const signIndex = Math.floor(normalized / 30);
-  const degreeInSign = normalized % 30;
-  const navamsaIndex = Math.floor(degreeInSign / (30 / 9));
-  const startIndex = [0, 3, 6, 9].includes(signIndex)
-    ? signIndex
-    : [1, 4, 7, 10].includes(signIndex)
-      ? (signIndex + 8) % 12
-      : (signIndex + 4) % 12;
-  const d9SignIndex = (startIndex + navamsaIndex) % 12;
-  const degreeInNavamsa = (degreeInSign % (30 / 9)) * 9;
-  return {
-    rashi: rashis[d9SignIndex],
-    rashiNumber: d9SignIndex + 1,
-    degreeInSign: Number(degreeInNavamsa.toFixed(6))
-  };
 }
 
 function nakshatraFromLongitude(longitude: number) {
