@@ -279,8 +279,13 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByText("15 clearly priced personalized reports")).toBeVisible();
     let orderRequests = 0;
     await page.route("**/api/payments/razorpay/order", async route => { orderRequests++; await route.abort(); });
-    await page.getByRole("button", { name: "Validate details INR 399" }).first().click();
-    await expect(page).toHaveURL(/\/login\?redirectTo=%2Freports/i);
+    const babyCard=page.locator("#report-catalogue > *").filter({has:page.locator('a[href="/reports/baby-name-report"]')});
+    await expect(babyCard).toHaveCount(1);
+    await babyCard.getByRole("button", { name: "Validate details INR 399" }).click();
+    await expect(page).toHaveURL(/\/login\?/);
+    const loginUrl=new URL(page.url());
+    expect(loginUrl.pathname).toBe("/login");
+    expect(loginUrl.searchParams.get("redirectTo")).toBe("/report-request/new?reportSlug=baby-name-report&prepare=1");
     await expect(page.getByRole("heading", { name: "Sign in to Naksharix" })).toBeVisible();
     expect(orderRequests).toBe(0);
   });

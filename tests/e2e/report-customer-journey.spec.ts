@@ -58,10 +58,17 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
    await page.locator('[data-field="dateOfBirth"]').fill("1990-01-15");await page.locator('[data-field="timeOfBirth"]').fill("10:30");
    await page.locator('[data-field="birthPlace"]').fill("Delhi");await page.getByRole("option",{name:/Delhi, India/}).first().click();
    await expect(page.locator("#report-birth-offset")).toHaveValue("5.5");
-   await page.locator('[data-field="concern"]').fill("Synthetic private career reflection for QA only.");
    await page.getByRole("checkbox",{name:/I confirm these birth details/}).check();
    const submit=page.getByRole("button",{name:"Validate details and continue"});
    const form=page.locator("form").filter({has:submit});
+   // Empty concern must still be rejected before any preflight request.
+   await submit.click();
+   await expect(page.locator('[data-field="concern"]')).toHaveAttribute("aria-invalid","true");
+   expect(requests).not.toContain("/api/report-requests/preflight");
+   await page.locator('[data-field="concern"]').fill("Synthetic private career reflection for QA only.");
+   await expect(page.locator('[data-field="fullName"]')).toHaveValue("Synthetic Birth Person");
+   await expect(page.locator('[data-field="concern"]')).toHaveValue("Synthetic private career reflection for QA only.");
+   await expect(page.getByRole("checkbox",{name:/I confirm these birth details/})).toBeChecked();
    // Preserve the real user click and server acceptance. Diagnose native browser
    // validity separately instead of waiting two minutes for a missing POST.
    await expect(page.locator('[data-field="dateOfBirth"]')).toHaveValue("1990-01-15");
@@ -73,11 +80,13 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
     submit.click()
    ]).catch(async error=>{
     const messages=await form.locator('[role="alert"],[aria-live="polite"]').allTextContents().catch(()=>[]);
-    console.error("REPORT_PREFLIGHT_NO_RESPONSE "+JSON.stringify({project:info.project.name,submitted:requests.includes("/api/report-requests/preflight"),messages:messages.map(m=>m.slice(0,240))}));
+    const invalidFields=await form.locator('[aria-invalid="true"]').evaluateAll(els=>els.map(el=>el.getAttribute("data-field")||el.getAttribute("name")||el.tagName)).catch(()=>[]);
+    console.error("REPORT_PREFLIGHT_NO_RESPONSE "+JSON.stringify({project:info.project.name,submitted:requests.includes("/api/report-requests/preflight"),invalidFields,messages:messages.map(m=>m.slice(0,240))}));
     throw error;
    });
    expect(preflight.status()).toBe(200);
    const submitted=preflight.request().postDataJSON();expect(submitted.birth.dateOfBirth).toBe("1990-01-15");expect(submitted.birth.timeOfBirth).toBe("10:30");
+   expect(submitted.birth.name).toBe("Synthetic Birth Person");expect(submitted.concern).toBe("Synthetic private career reflection for QA only.");expect(submitted.birth.timezone).toBe(5.5);expect(submitted.automaticDetails.confirmed).toBe(true);
    const result=await preflight.json();expect(result.data.reportId).toBe("kundli-pro");expect(result.data.price).toBe("INR 799");expect(result.data.expiresInSeconds).toBe(1200);
    const claim=JSON.parse(Buffer.from(result.data.token.split(".")[0],"base64url").toString("utf8"));
    expect(Object.keys(claim).sort()).toEqual(["amountPaise","exp","purpose","reportId","userId","v"]);expect(claim.userId).toBe(account.id);expect(claim.amountPaise).toBe(79900);
