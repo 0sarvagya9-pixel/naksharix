@@ -10,7 +10,7 @@ import { ResilientEditorialImage } from "@/components/puja/resilient-editorial-i
 import type { PublicPujaOffer } from "@/lib/puja/offerings";
 import { KumbhEventCards } from "@/components/puja/kumbh-event-promotion";
 
-export function PujaServicesDirectory({offerings,initialNow}:{offerings:Record<string,PublicPujaOffer>;initialNow:number}) {
+export function PujaServicesDirectory({offerings,initialNow,mode}:{offerings:Record<string,PublicPujaOffer>;initialNow:number;mode:"request-only"|"active"}) {
   const [query,setQuery]=useState("");
   const [hydrated,setHydrated]=useState(false);
   useEffect(()=>setHydrated(true),[]);
@@ -21,7 +21,7 @@ export function PujaServicesDirectory({offerings,initialNow}:{offerings:Record<s
     [p.name,p.deity,p.category,p.description].join(" ").toLowerCase().includes(query.trim().toLowerCase())
   ),[query,category,offerings]);
 
-  return <main className="nx-puja-directory star-field min-h-screen bg-[#fffaf3] pb-20">
+  return <main data-puja-mode={mode} className="nx-puja-directory star-field min-h-screen bg-[#fffaf3] pb-20">
     <section className="relative isolate overflow-hidden border-b border-[#e6be7e]/35 bg-[#301a2c] text-white">
       <Image src="/naksharix/ganesh-hero-light-saffron.jpg" alt="" fill priority sizes="100vw" className="absolute inset-0 -z-20 object-cover object-[76%_42%]" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#261323]/95 via-[#33172a]/88 to-[#31182b]/25" aria-hidden="true" />

@@ -21,9 +21,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export default async function PujasPage() {
   const release = await getPujaLaunchState();
-  if (release.enabled) return <PujaServicesDirectory offerings={release.offers} initialNow={Date.now()} />;
+  if (release.enabled) return <PujaServicesDirectory offerings={release.offers} initialNow={Date.now()} mode={release.requestOnly?"request-only":"active"} />;
   return (
-    <main className="relative isolate flex min-h-[75vh] items-center overflow-hidden bg-[#fffaf4] px-4 py-16 text-[#492d33] sm:px-6 sm:py-24">
+    <main data-puja-mode="paused" className="relative isolate flex min-h-[75vh] items-center overflow-hidden bg-[#fffaf4] px-4 py-16 text-[#492d33] sm:px-6 sm:py-24">
       <div aria-hidden="true" className="pointer-events-none absolute -left-20 top-0 h-80 w-80 rounded-full bg-[#f5d5a6]/35 blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-[#f1ddd1]/60 blur-3xl" />
       <section aria-labelledby="puja-coming-soon-heading" className="relative mx-auto w-full max-w-3xl rounded-[2rem] border border-[#e6cbaa] bg-white/90 p-8 text-center shadow-[0_24px_80px_rgba(97,58,42,0.08)] sm:p-14">
