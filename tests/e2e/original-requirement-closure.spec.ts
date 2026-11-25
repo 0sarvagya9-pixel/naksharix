@@ -18,9 +18,15 @@ test("A08 password visibility and autocomplete preserve input on all credential 
  }
  await page.goto("/reset-password#token="+"a".repeat(43),{waitUntil:"domcontentloaded"});
  const a=page.locator("#new-password"),b=page.locator("#confirm-password"),toggle=page.locator('button[aria-controls="new-password confirm-password"]');
- for(const x of [a,b]){await expect(x).toHaveAttribute("autocomplete","new-password");await expect(x).toHaveAttribute("type","password");await x.fill("Synthetic-reset-QA!");}
- await toggle.click();for(const x of [a,b]){await expect(x).toHaveAttribute("type","text");await expect(x).toHaveValue("Synthetic-reset-QA!");}
- await toggle.click();for(const x of [a,b])await expect(x).toHaveAttribute("type","password");
+ const resetValues=["Synthetic-reset-QA!","Different-synthetic-reset-QA!"];
+ for(const [i,x] of [a,b].entries()){await expect(x).toHaveAttribute("autocomplete","new-password");await expect(x).toHaveAttribute("type","password");await expect(x).toBeEnabled();await x.fill(resetValues[i]);await expect(x).toHaveValue(resetValues[i]);}
+ await toggle.click();for(const [i,x] of [a,b].entries()){await expect(x).toHaveAttribute("type","text");await expect(x).toHaveValue(resetValues[i]);}
+ await a.fill("Updated-synthetic-reset-QA!");
+ resetValues[0]="Updated-synthetic-reset-QA!";
+ await toggle.click();for(const [i,x] of [a,b].entries()){await expect(x).toHaveAttribute("type","password");await expect(x).toHaveValue(resetValues[i]);}
+ await toggle.click();for(const [i,x] of [a,b].entries())await expect(x).toHaveValue(resetValues[i]);
+ await toggle.click();for(const [i,x] of [a,b].entries()){await expect(x).toHaveAttribute("type","password");await expect(x).toHaveValue(resetValues[i]);}
+ console.log("A08_RESET_NATIVE_VALUE_RETENTION_PASS "+JSON.stringify({distinctFields:true,repeatedToggle:true,editedWhileVisible:true}));
 });
 test("A11 explicit professional signup overrides saved user intent and selects the submitted role",async({page})=>{
  await page.goto("/signup?role=user");await expect(page.locator('input[name="role"]')).toHaveValue("USER");
