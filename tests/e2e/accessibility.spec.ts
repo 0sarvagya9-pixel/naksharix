@@ -38,8 +38,9 @@ test("keyboard users can skip repeated navigation", async ({ page, browserName }
   await expect(page.locator("#main-content")).toBeFocused();
 });
 
-test("mobile navigation opens and navigates without leaving the drawer open", async ({ page, isMobile }) => {
-  test.skip(!isMobile, "Mobile viewport only");
+test("mobile navigation opens and navigates without leaving the drawer open", async ({ page }) => {
+  // Exercise the responsive drawer at a real narrow viewport in all engines.
+  await page.setViewportSize({width:390,height:844});
   await page.goto(absolute("/"), { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Open navigation menu" }).click();
   const dialog = page.getByRole("dialog", { name: "Navigation menu" });

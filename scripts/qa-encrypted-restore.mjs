@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync, mkdtempSync } from 'node:fs';
 import { sealBackup, openBackup } from '../lib/ops/backup-crypto.ts';
 import { RESTORE_WORKER } from '../lib/ops/backup-worker.ts';
 import { readRestoreCounts } from '../lib/ops/recovery-receipt.ts';
+import { portableRestoreScript } from './ops/portable-recovery-workers.mjs';
 const url=new URL(process.env.DATABASE_URL||'postgresql://invalid/invalid');
 if(process.env.CI!=='true'||!['postgresql:','postgres:'].includes(url.protocol)||!['localhost','127.0.0.1'].includes(url.hostname)||url.port!=='5432'||url.pathname!=='/naksharix'||url.username!=='postgres')throw new Error('DISPOSABLE_LOCALHOST_ONLY');
 const cleanEnv={...process.env};
@@ -40,6 +41,16 @@ try {
   assert.deepEqual(readRestoreCounts(receipt),readRestoreCounts(expected),'Restore must reproduce exact current schema counts, not a historical fixed table count');
   assert.equal(readFileSync('/tmp/naksh-restore-marker.txt','utf8').trim(),'synthetic-recovery-marker-v1,synthetic-recovery-marker-v2');
   console.log(JSON.stringify({result:'ENCRYPTED_RESTORE_PASS',...receipt,dataFixtureVerified:true,scope:'isolated_synthetic_database_only'}));
+  const root=mkdtempSync('/tmp/naksh-portable-');
+  try{
+    writeFileSync(root+'/roundtrip.dump',recovered,{mode:0o600});
+    writeFileSync(root+'/restore.sh',portableRestoreScript(root)+markerCheck.replace('/tmp/naksh-restore-marker.txt',root+'/marker.txt'),{mode:0o700});
+    run('bash',[root+'/restore.sh']);
+    const portable=JSON.parse(readFileSync(root+'/restore-receipt.json','utf8'));
+    assert.deepEqual(readRestoreCounts(portable),readRestoreCounts(expected));
+    assert.equal(readFileSync(root+'/marker.txt','utf8').trim(),'synthetic-recovery-marker-v1,synthetic-recovery-marker-v2');
+    console.log(JSON.stringify({result:'PORTABLE_SOCKET_RESTORE_PASS',...portable,dataFixtureVerified:true,scope:'isolated synthetic PostgreSQL, private Unix socket'}));
+  } finally { rmSync(root,{recursive:true,force:true}); }
 } finally {
   if(inserted)run('psql',[...psql,'DROP TABLE public.'+fixture]);
   for(const file of ['/tmp/naksh-synthetic.dump','/tmp/naksh-synthetic.dump.aesgcm','/tmp/naksh-roundtrip.dump','/tmp/naksh-rehearsal.sh','/tmp/naksh-restore-receipt.json','/tmp/naksh-restore-marker.txt'])rmSync(file,{force:true});

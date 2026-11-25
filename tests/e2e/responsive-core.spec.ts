@@ -6,7 +6,7 @@ const sizes = [{width:390,height:844},{width:768,height:1024},{width:1440,height
 for (const route of routes) {
   for (const viewport of sizes) {
     test(`responsive ${route} at ${viewport.width}px`, async ({page}, testInfo) => {
-      test.skip(testInfo.project.name !== "chromium-desktop", "Responsive viewport matrix is covered once in Chromium; existing cross-browser suites remain active.");
+      test.skip(testInfo.project.name === "webkit-iphone" && viewport.width === 1440, "Desktop 1440px is not an iPhone viewport; desktop engines are tested independently.");
       await page.setViewportSize(viewport);
       const response = await page.goto(route, {waitUntil:"domcontentloaded"});
       expect(response?.ok(), `HTTP response for ${route}`).toBeTruthy();
