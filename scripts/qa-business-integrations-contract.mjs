@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import {canonicalWidgetOrigin,WIDGET_GRANT_MAX_AGE_SECONDS} from "../lib/business-integrations/widget-origin.ts";
+assert.equal(canonicalWidgetOrigin("https://publisher.example"),"https://publisher.example");
+for(const value of ["http://publisher.example","https://publisher.example/","https://publisher.example/path","https://publisher.example?x=1","https://user@publisher.example","https://publisher.example#x","https://publisher.example.evil/","null","https://*.example"])assert.equal(canonicalWidgetOrigin(value),null,value);
+assert.equal(WIDGET_GRANT_MAX_AGE_SECONDS,300);
 import {readFileSync} from "node:fs";
 import {scopeSubset,scopeUnits,parseBusinessAuthorization,usageFits,usagePeriod,renderPanchangWidget,qualifyBusinessMatchingFactors} from "../lib/business-integrations/contract.ts";
 assert.equal(scopeUnits("matching"),2);assert.equal(scopeUnits("chart"),1);

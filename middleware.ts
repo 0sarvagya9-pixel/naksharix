@@ -44,6 +44,8 @@ function requiresCsrf(request: NextRequest) {
   if (["GET", "HEAD", "OPTIONS"].includes(request.method.toUpperCase())) return false;
   // Exact server-to-server endpoint; its own bearer-key validation is mandatory.
   if(request.nextUrl.pathname==="/api/partner/v1/calculate"&&request.method==="POST")return false;
+  // Exact public publisher endpoint: short-lived signed grant, exact origin, no cookies.
+  if(request.nextUrl.pathname==="/api/partner/v1/widget"&&request.method==="POST")return false;
   return !csrfExemptApiPrefixes.some((prefix) => request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(prefix));
 }
 

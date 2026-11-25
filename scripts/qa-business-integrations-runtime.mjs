@@ -19,6 +19,9 @@ Module._load=function(name,...args){if(name==="server-only")return {};return ori
 require.extensions[".ts"]=function(module,file){module._compile(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,file);};
 const {prisma}=require("@/lib/db"),ledger=require("@/lib/business-integrations/ledger"),{tenantSchema,keySchema,businessCalculationSchema}=require("@/lib/business-integrations/input");
 const {calculateBusinessResult}=require("@/lib/business-integrations/calculate"),{businessScopes,usagePeriod}=require("@/lib/business-integrations/contract");
+const {issueWidgetGrant,readWidgetGrant}=require("@/lib/business-integrations/widget-grant");
+const widgetRoute=require("@/app/api/partner/v1/widget/route");
+const calculateRoute=require("@/app/api/partner/v1/calculate/route");
 const ids=[];const run=randomUUID();
 const verified=new Date(),expires=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
 const birth={date:"1992-05-18",time:"08:15",latitude:28.6139,longitude:77.209,offsetMinutes:330};
@@ -86,6 +89,24 @@ try{
  assert.equal(await ledger.revokeTenant(admin.id,tenant.id),true);
  assert.equal(await issue(owner.id,["panchang"]),null);
  assert.equal((await ledger.claimBusinessCalculation("Bearer "+restricted.key,"panchang",randomUUID())).kind,"unauthorized");
+ const widgetTenant=await ledger.createTenant(admin.id,{...request,contractReference:"widget "+run,monthlyUnitLimit:3,scopes:["panchang-widget"]});assert.ok(widgetTenant);
+ const widgetKey=await ledger.issueBusinessKey(owner.id,keySchema.parse({tenantId:widgetTenant.id,label:"Widget only",scopes:["panchang-widget"]}));assert.ok(widgetKey?.key);
+ const origin="https://publisher.example",wrong="https://other.example";
+ const mint=async()=>{const input={...fixture("panchang-widget"),browserOrigin:origin};const response=await calculateRoute.POST(new Request("http://localhost/api/partner/v1/calculate",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+widgetKey.key},body:JSON.stringify(input)}));assert.equal(response.status,200);const {data}=await response.json();assert.equal(data.status,"RESERVED");assert.ok(data.grant);assert.ok(!JSON.stringify(data).includes(widgetKey.key));return data.grant;};
+ const redeem=(grant,site=origin)=>widgetRoute.POST(new Request("http://localhost/api/partner/v1/widget",{method:"POST",headers:{"Content-Type":"application/json",Origin:site},body:JSON.stringify({grant})}));
+ assert.equal(widgetRoute.OPTIONS(new Request("http://localhost/api/partner/v1/widget",{method:"OPTIONS",headers:{Origin:origin,"Access-Control-Request-Method":"POST","Access-Control-Request-Headers":"content-type"}})).status,204);
+ assert.equal(widgetRoute.OPTIONS(new Request("http://localhost/api/partner/v1/widget",{method:"OPTIONS",headers:{Origin:origin,"Access-Control-Request-Method":"POST","Access-Control-Request-Headers":"authorization"}})).status,403);
+ const grant=await mint();const decoded=readWidgetGrant(grant,origin);assert.ok(decoded);assert.equal(decoded.location.date,location.date);assert.equal(readWidgetGrant(grant,wrong),null);
+ assert.equal(readWidgetGrant(grant,origin,new Date((decoded.exp+1)*1000)),null);
+ assert.equal((await redeem(grant,wrong)).status,401);
+ assert.equal((await redeem(grant.slice(0,-1)+(grant.endsWith("a")?"b":"a"))).status,401);
+ const results=await Promise.all([redeem(grant),redeem(grant)]);
+ assert.deepEqual(results.map(r=>r.status).sort(),[200,409]);
+ const good=results.find(r=>r.status===200);assert.equal(good.headers.get("access-control-allow-origin"),origin);assert.equal(good.headers.get("access-control-allow-credentials"),null);const result=(await good.json()).data.result;assert.equal(result.date,location.date);assert.ok(result.html.includes("Powered by Naksharix"));
+ assert.equal((await redeem(grant)).status,409);
+ const secondGrant=await mint();assert.equal(await ledger.revokeBusinessKey(owner.id,widgetTenant.id,widgetKey.record.id),true);assert.equal((await redeem(secondGrant)).status,409);
+ const widgetMonth=await prisma.businessUsageMonth.findUniqueOrThrow({where:{tenantId_period:{tenantId:widgetTenant.id,period:usagePeriod()}}});assert.equal(widgetMonth.attemptedUnits,2);assert.equal(widgetMonth.completedUnits,1);
+ console.log("B2B_WIDGET_RUNTIME_PASS "+JSON.stringify({signedOrigin:true,originMismatchDenied:true,expiredDenied:true,tamperDenied:true,concurrentReplayDenied:true,revokedKeyDenied:true,completedUnits:1,attemptedUnits:2,scope:"local request handlers and disposable database; external publisher integration not active"}));
  console.log("B2B_RUNTIME_PASS "+JSON.stringify({scopes:4,attemptedUnits:8,completedUnits:6,failedUnits:2,concurrentReservations:5,acceptedReservations:2,tenantIsolation:true,revocation:true,scopeNarrowing:true,privacy:true,syntheticContract:true}));
 }finally{
  for(const id of ids.reverse())await prisma.user.delete({where:{id}});

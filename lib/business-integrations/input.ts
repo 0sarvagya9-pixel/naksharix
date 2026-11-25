@@ -1,15 +1,17 @@
 import {z} from "zod";
 import {businessScopes} from "@/lib/business-integrations/contract";
+import {canonicalWidgetOrigin} from "@/lib/business-integrations/widget-origin";
 const date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{const n=Date.parse(v+"T00:00:00Z");return Number.isFinite(n)&&new Date(n).toISOString().slice(0,10)===v&&v>="1900-01-01"&&v<="2100-12-31";});
 const coordinates={latitude:z.number().finite().min(-89).max(89),longitude:z.number().finite().min(-180).max(180),offsetMinutes:z.number().int().min(-720).max(840)};
 const birth=z.object({date,time:z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/),...coordinates}).strict();
-const panchang=z.object({date,...coordinates}).strict();
+export const businessPanchangLocation=z.object({date,...coordinates}).strict();
+const panchang=businessPanchangLocation;
 const common={requestId:z.string().uuid()};
 export const businessCalculationSchema=z.discriminatedUnion("scope",[
  z.object({...common,scope:z.literal("chart"),subjectPermission:z.literal(true),birth}).strict(),
  z.object({...common,scope:z.literal("matching"),subjectPermission:z.literal(true),first:birth,second:birth}).strict(),
  z.object({...common,scope:z.literal("panchang"),location:panchang}).strict(),
- z.object({...common,scope:z.literal("panchang-widget"),location:panchang}).strict()
+ z.object({...common,scope:z.literal("panchang-widget"),location:panchang,browserOrigin:z.string().max(253).refine(v=>canonicalWidgetOrigin(v)===v).optional()}).strict()
 ]);
 export type BusinessCalculation=z.infer<typeof businessCalculationSchema>;
 export const scopeList=z.array(z.enum(businessScopes)).min(1).max(4).refine(v=>new Set(v).size===v.length);

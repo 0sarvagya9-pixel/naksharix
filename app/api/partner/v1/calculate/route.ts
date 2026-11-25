@@ -2,6 +2,7 @@ import {fail,ok,handleApiError} from "@/lib/api";
 import {businessEnabled,businessSchemaReady,claimBusinessCalculation,finishBusinessCalculation} from "@/lib/business-integrations/ledger";
 import {businessCalculationSchema} from "@/lib/business-integrations/input";
 import {calculateBusinessResult} from "@/lib/business-integrations/calculate";
+import {issueWidgetGrant} from "@/lib/business-integrations/widget-grant";
 import {sharedRateLimitResponse,getRequestIp} from "@/lib/security/rate-limit";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
@@ -18,6 +19,10 @@ export async function POST(request:Request){
  const claim=await claimBusinessCalculation(request.headers.get("authorization"),parsed.data.scope,parsed.data.requestId);
  if(claim.kind!=="claimed")return fail(claim.kind==="unauthorized"?"Invalid or unauthorized API credential.":claim.kind==="limit"?"Monthly contract quota exhausted.":"Request ID already recorded; do not duplicate.",claim.kind==="unauthorized"?401:claim.kind==="limit"?429:409);
  try{
+ if(parsed.data.scope==="panchang-widget"&&parsed.data.browserOrigin){
+  const signed=issueWidgetGrant({tenantId:claim.tenantId,keyId:claim.keyId,requestId:claim.requestId,origin:parsed.data.browserOrigin,location:parsed.data.location});
+  return ok({...signed,requestId:claim.requestId,usageUnits:claim.units,status:"RESERVED",redeemPath:"/api/partner/v1/widget"},{headers:{"Cache-Control":"private, no-store"}});
+ }
  const result=await calculateBusinessResult(parsed.data,claim.brandName);
  if(!await finishBusinessCalculation(claim.tenantId,claim.requestId,true))return fail("Contract or key changed during calculation.",409);
  return ok({requestId:claim.requestId,usageUnits:claim.units,brand:{name:claim.brandName,poweredBy:"Naksharix"},result});

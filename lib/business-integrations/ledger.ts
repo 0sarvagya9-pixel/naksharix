@@ -80,6 +80,16 @@ export async function claimBusinessCalculation(authorization:string|null,scope:B
  return {kind:"claimed" as const,tenantId:t.id,keyId:key.id,requestId,brandName:t.brandName,units};
  });
 }
+/** A signed widget grant cannot elevate scope, switch tenant/key, or revive a reservation. */
+export async function activeWidgetReservation(tenantId:string,keyId:string,requestId:string){
+ return prisma.$transaction(async tx=>{
+ await lockBusinessTenant(tx,tenantId);const now=new Date();
+ const call=await tx.businessUsageCall.findUnique({where:{tenantId_requestId:{tenantId,requestId}},include:{tenant:true}});
+ if(!call||call.keyId!==keyId||call.scope!=="panchang-widget"||call.state!=="RESERVED"||call.tenant.status!=="ACTIVE"||call.tenant.contractExpiresAt<=now||!scopeSubset(["panchang-widget"],call.tenant.scopes))return null;
+ const key=await tx.businessApiKey.findFirst({where:{id:keyId,tenantId,revokedAt:null,expiresAt:{gt:now}},select:{scopes:true}});
+ return key&&scopeSubset(["panchang-widget"],key.scopes)?{brandName:call.tenant.brandName}:null;
+ });
+}
 export async function finishBusinessCalculation(tenantId:string,requestId:string,success:boolean){
  return prisma.$transaction(async tx=>{
  await lockBusinessTenant(tx,tenantId);const call=await tx.businessUsageCall.findUnique({where:{tenantId_requestId:{tenantId,requestId}},include:{tenant:true}});
