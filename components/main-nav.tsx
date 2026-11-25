@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
@@ -284,7 +284,7 @@ export function MainNav() {
 // as well. A navigation or hydration relayout must not depend solely on :hover.
 function useDesktopDisclosure(routeKey: string) {
   const root = useRef<HTMLDivElement>(null);
-  const trigger = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
+  const trigger = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const [pinned, setPinned] = useState(false);
@@ -296,6 +296,14 @@ function useDesktopDisclosure(routeKey: string) {
     setFocus(!!element?.contains(document.activeElement));
     setPinned(false); setDismissed(false); setReady(true);
   },[routeKey]);
+  useEffect(()=>{
+    if(!pinned)return;
+    const outside=(event:globalThis.PointerEvent)=>{
+      if(event.target instanceof Node&&!root.current?.contains(event.target)){setPinned(false);setFocus(false);setDismissed(true);}
+    };
+    document.addEventListener("pointerdown",outside);
+    return()=>document.removeEventListener("pointerdown",outside);
+  },[pinned]);
   const pointer = (event: PointerEvent<HTMLDivElement>) => {
     if(event.pointerType==="touch")return;
     setHover(true); setDismissed(false);
@@ -309,7 +317,7 @@ function useDesktopDisclosure(routeKey: string) {
       setFocus(false);setPinned(false);
     }
   };
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if(event.key==="Escape"){
       event.preventDefault();event.stopPropagation();
       trigger.current?.focus();setPinned(false);setDismissed(true);
@@ -320,10 +328,10 @@ function useDesktopDisclosure(routeKey: string) {
     }
   };
   const open=!dismissed&&(hover||focus||pinned);
-  return {root,trigger,open,toggle:()=>{if(pinned||dismissed===false&&open){setPinned(false);setDismissed(true);}else{setPinned(true);setDismissed(false);}},props:{
+  return {root,trigger,open,toggle:()=>{if(pinned){setPinned(false);setDismissed(true);}else{setPinned(true);setDismissed(false);}},props:{
     "data-menu-ready":ready?"true":"false","data-menu-open":open?"true":"false","data-menu-dismissed":dismissed?"true":"false",
     onPointerEnter:pointer,onPointerMove:(event:PointerEvent<HTMLDivElement>)=>{if(!dismissed&&event.pointerType!=="touch")setHover(true);},
-    onPointerLeave:()=>{setHover(false);setDismissed(false);},
+    onPointerLeave:()=>{setHover(false);},
     onFocusCapture,onBlurCapture,onKeyDown
   }};
 }
