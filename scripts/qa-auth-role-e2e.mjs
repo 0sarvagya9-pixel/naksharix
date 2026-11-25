@@ -20,7 +20,7 @@ const password = "E2e!" + randomUUID() + "abc";
 const testCode = "734928";
 const usersToClean = new Set();
 let csrf, csrfCookie, userCookie, adminCookie, astroCookie;
-let userId, astroId, adminId, astroProfileId, bookingId, reportId;
+let userId, astroId, adminId, astroProfileId, bookingId, reportId, reportPaymentId, reportProviderPaymentId;
 let passed = 0, failed = 0;
 async function req(path, options = {}) {
   const controller = new AbortController();
@@ -1007,6 +1007,11 @@ try {
     // Disposable QA database only. This update is not a real merchant payment
     // and has no effect on production payment records.
     await prisma.reportRequest.update({ where: { id: reportId }, data: { paymentStatus: "PAID" } });
+    const providerId="pay_QA"+unique.replace(/[^a-zA-Z0-9]/g,"");
+    reportProviderPaymentId=providerId;
+    const payment=await prisma.payment.create({data:{userId,provider:"RAZORPAY",purpose:"KUNDLI_REPORT",status:"PAID",amount:799,currency:"INR",providerOrderId:"order_QA"+unique.replace(/[^a-zA-Z0-9]/g,""),providerPaymentId:providerId,metadata:{reportId:"kundli-pro"}}});
+    reportPaymentId=payment.id;
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:payment.id}});
     const endpoint="/api/admin/report-requests";
     const generate="/api/admin/report-requests/" + reportId + "/generate-pdf";
     const withoutReview=await post(generate,{},adminCookie);
@@ -1021,6 +1026,10 @@ try {
       adminNotes:"Reviewed the synthetic birth date, time, location, coordinates and calculation limitations; internal QA only.",
       reviewConfirmed:true},adminCookie,"PATCH");
     assert.equal(reviewed.status,200,await reviewed.text());
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:null}});
+    const orphan=await post(generate,{},adminCookie);
+    assert.equal(orphan.status,409,"Stale request PAID without payment must not generate");
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:reportPaymentId}});
     const pdf = await post(generate, {}, adminCookie);
     const result = await pdf.json();
     assert.equal(pdf.status, 200, JSON.stringify(result).slice(0, 600));
@@ -1038,6 +1047,25 @@ try {
     assert.equal(magic, "%PDF-");
     const anon = await req("/api/report-requests/" + reportId + "/download");
     assert.equal(anon.status, 401);
+    const download=()=>req("/api/report-requests/"+reportId+"/download",{headers:{cookie:userCookie}});
+    await prisma.payment.update({where:{id:reportPaymentId},data:{status:"REFUNDED"}});
+    assert.equal((await download()).status,403,"Current refunded payment denies stale request PAID");
+    await prisma.payment.update({where:{id:reportPaymentId},data:{status:"PAID"}});
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:null}});
+    assert.equal((await download()).status,403,"Missing linked payment denies download");
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:reportPaymentId}});
+    await prisma.payment.update({where:{id:reportPaymentId},data:{metadata:{reportId:"career-report"}}});
+    assert.equal((await download()).status,403,"Different paid product denies download");
+    await prisma.payment.update({where:{id:reportPaymentId},data:{metadata:{reportId:"kundli-pro"}}});
+    await prisma.reportRequest.update({where:{id:reportId},data:{generatedPdfChecksum:"invalid-checksum"}});
+    assert.equal((await download()).status,503,"Malformed declared checksum must deny download");
+    await prisma.reportRequest.update({where:{id:reportId},data:{generatedPdfChecksum:row.generatedPdfChecksum}});
+    const refundReceipt=await prisma.auditLog.create({data:{id:"razorpay-refund:rfnd_QA"+unique.replace(/[^a-zA-Z0-9]/g,""),action:"payment.razorpay_refund_processed_receipt",targetType:"RazorpayPayment",targetId:reportProviderPaymentId,metadata:{amountPaise:100}}});
+    assert.equal((await download()).status,403,"Durable refund receipt denies access before payment reconciliation");
+    assert.equal((await post("/api/admin/report-requests/"+reportId+"/deliver",{},adminCookie)).status,409,"Refund receipt blocks new delivery");
+    await prisma.auditLog.delete({where:{id:refundReceipt.id}});
+    assert.equal((await download()).status,200,"Valid linked purchase still downloads");
+    console.log("REPORT_ENTITLEMENT_HTTP=PASS;ORPHAN_REFUNDED_WRONG_PRODUCT_RECEIPT_AND_CORRUPT_CHECKSUM_DENIED");
   });
 
 } finally {
@@ -1047,6 +1075,7 @@ try {
       await prisma.auditLog.deleteMany({ where: { targetId: reportId } });
       await prisma.reportRequest.delete({ where: { id: reportId } }).catch(() => {});
     }
+    if(reportProviderPaymentId)await prisma.auditLog.deleteMany({where:{targetId:reportProviderPaymentId,targetType:"RazorpayPayment"}});
     for (const id of usersToClean) await prisma.user.delete({ where: { id } }).catch(() => {});
   } finally { await prisma.$disconnect(); }
 }

@@ -10,6 +10,7 @@ import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-au
 import { assemblePremiumReportContent } from "@/lib/reports/premium-report-content-engine";
 import { generatePremiumReportPdf } from "@/lib/reports/premium-report-generation-service";
 import { saveReportPdf } from "@/lib/storage/report-storage";
+import {fixedReportCheckout,hasCurrentPaidReportEntitlement} from "@/lib/reports/paid-entitlement";
 import { rateLimitResponse } from "@/lib/security/rate-limit";
 
 type Params = Promise<{ id: string }>;
@@ -49,6 +50,8 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
       return fail("Verified payment or authorized admin bypass is required before generating a paid report.", 409);
     }
+    const requiresPaidEntitlement=!reportRequest.adminBypass&&Boolean(fixedReportCheckout(reportRequest.reportSlug));
+    if(requiresPaidEntitlement&&!await hasCurrentPaidReportEntitlement(reportRequest))return fail("Current payment evidence requires reconciliation before generating this report.",409);
     if (reportRequest.latitude === null || reportRequest.longitude === null || reportRequest.timezone === null) {
       return fail("Birth latitude, longitude, and timezone are required before PDF generation.", 422);
     }
@@ -97,6 +100,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       return fail("PDF generation did not produce a file.", 500);
     }
 
+    if(requiresPaidEntitlement&&!await hasCurrentPaidReportEntitlement(reportRequest))return fail("Report purchase changed during generation.",409);
     const stored = await saveReportPdf({
       reportRequestId: reportRequest.id,
       reportSlug: reportRequest.reportSlug,
@@ -107,6 +111,10 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       where: {
         id: reportRequest.id,
         status: ReportRequestStatus.READY_FOR_GENERATION,
+        updatedAt:reportRequest.updatedAt,
+        paymentId:reportRequest.paymentId,
+        paymentStatus:reportRequest.paymentStatus,
+        ...(requiresPaidEntitlement?{payment:{is:{status:"PAID" as const}}}:{}),
         generatedPdfSize: null,
         generatedPdfStorageKey: null
       },

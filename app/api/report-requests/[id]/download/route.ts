@@ -6,7 +6,7 @@ import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog } from "@/lib/reports/report-audit";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 import { loadReportPdf } from "@/lib/storage/report-storage";
-import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
+import { fixedReportCheckout,hasCurrentPaidReportEntitlement } from "@/lib/reports/paid-entitlement";
 
 type Params = Promise<{ id: string }>;
 
@@ -31,9 +31,8 @@ export async function GET(request: Request, { params }: { params: Params }) {
   }
   // A refunded fixed-price order cannot retain its paid PDF entitlement.
   // Unpriced manual-review PDFs are a separate operator-delivery contract.
-  if (!isAdmin(user) && !reportRequest.adminBypass &&
-      getManualReportCheckout(reportRequest.reportSlug) &&
-      reportRequest.paymentStatus !== "PAID") {
+  const requiresPaidEntitlement=!isAdmin(user)&&!reportRequest.adminBypass&&Boolean(fixedReportCheckout(reportRequest.reportSlug));
+  if (requiresPaidEntitlement && (reportRequest.paymentStatus !== "PAID" || !await hasCurrentPaidReportEntitlement(reportRequest))) {
     return NextResponse.json({ error: "A verified, non-refunded purchase is required for this report." }, { status: 403 });
   }
   if (!reportRequest.generatedPdfSize || (!reportRequest.generatedPdfBytes && !reportRequest.generatedPdfStorageKey)) {
@@ -53,6 +52,17 @@ export async function GET(request: Request, { params }: { params: Params }) {
     return NextResponse.json({ error: "The generated PDF is temporarily unavailable." }, { status: 503 });
   }
 
+  // Do not return bytes after a revoked purchase or a changed storage snapshot.
+  const latest=await prisma.reportRequest.findUnique({where:{id:reportRequest.id},select:{userId:true,generatedPdfChecksum:true,generatedPdfSize:true,generatedPdfStorageKey:true,generatedPdfStorageDriver:true}});
+  if(!latest||latest.userId!==reportRequest.userId||latest.generatedPdfChecksum!==reportRequest.generatedPdfChecksum||
+    latest.generatedPdfSize!==reportRequest.generatedPdfSize||latest.generatedPdfStorageKey!==reportRequest.generatedPdfStorageKey||
+    latest.generatedPdfStorageDriver!==reportRequest.generatedPdfStorageDriver||
+    (requiresPaidEntitlement&&!await hasCurrentPaidReportEntitlement(reportRequest))){
+    return NextResponse.json({error:"Report access changed. Review your purchase status."},{status:403,headers:{"Cache-Control":"private, no-store"}});
+  }
+  if(bytes.byteLength!==reportRequest.generatedPdfSize||Buffer.from(bytes.subarray(0,5)).toString("ascii")!=="%PDF-"){
+    return NextResponse.json({error:"The generated PDF is temporarily unavailable."},{status:503,headers:{"Cache-Control":"private, no-store"}});
+  }
   await writeAuditLog({
     actor: user,
     action: "report_pdf.downloaded",

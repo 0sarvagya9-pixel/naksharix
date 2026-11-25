@@ -15,6 +15,7 @@ import { cookies } from "next/headers";
 import { env } from "@/lib/env";
 import { decodeAutomaticReportInput,autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
 import { AutomaticReportProgress } from "@/components/report-request/automatic-report-progress";
+import {fixedReportCheckout,hasCurrentPaidReportEntitlement} from "@/lib/reports/paid-entitlement";
 
 type SearchParams = Promise<{ id?: string }>;
 
@@ -31,7 +32,8 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
   const catalogueReport = getManualReport(report.reportSlug);
   const reportName = catalogueReport?.name[locale] ?? report.reportSlug;
   const showAdminBypass = report.adminBypass && isAdmin(user);
-  const paid = report.paymentStatus === ReportPaymentStatus.PAID;
+  const recordedPaid=report.paymentStatus===ReportPaymentStatus.PAID;
+  const paid=recordedPaid&&(!fixedReportCheckout(report.reportSlug)||await hasCurrentPaidReportEntitlement(report));
   const automatic=Boolean(decodeAutomaticReportInput(report.concern));
   const ready=Boolean(report.generatedPdfSize&&(report.generatedPdfBytes||report.generatedPdfStorageKey));
   const sent=report.deliveryStatus==="email_sent"&&Boolean(report.emailSentAt);
@@ -60,7 +62,7 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
             <p className="rounded-lg border border-emerald-300/20 bg-emerald-300/10 p-4 text-emerald-100">
               {sent?"Your report is ready and the email has been accepted by the delivery provider. If it is not in your inbox, use the secure download below.":ready?"Your report PDF is ready. Email delivery is pending; you can download it securely now.":automatic?autoReportDeliveryMessage(report.language):"Payment is verified and linked to this request. The request is in the paid review queue."}
             </p>
-          ) : report.paymentStatus==="REFUNDED" ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">This purchase has been refunded. Paid PDF access is no longer available.</p> : (
+          ) : recordedPaid ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">Payment evidence requires reconciliation. Do not pay again; contact support with your existing request reference.</p> : report.paymentStatus==="REFUNDED" ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">This purchase has been refunded. Paid PDF access is no longer available.</p> : (
             <p className="rounded-lg border border-[#D4AF37]/20 bg-[#D4AF37]/10 p-4">
               This is a manual-review request. No payment has been collected. The team will confirm scope and fee before any checkout is enabled.
             </p>

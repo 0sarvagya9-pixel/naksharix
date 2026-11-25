@@ -115,7 +115,7 @@ if(!dbMode){
   async function make(slug,status="PAID"){
    const product=getManualReportCheckout(slug);
    const n=ids.length;
-   const payment=await prisma.payment.create({data:{userId:user.id,provider:"RAZORPAY",status,purpose:product.purpose,amount:product.amount,currency:"INR",providerPaymentId:"qa_isolated_"+n,metadata:{reportId:product.reportId}}});
+   const payment=await prisma.payment.create({data:{userId:user.id,provider:"RAZORPAY",status,purpose:product.purpose,amount:product.amount,currency:"INR",providerPaymentId:"pay_QAisolated"+n,metadata:{reportId:product.reportId}}});
    const row=await prisma.reportRequest.create({data:{userId:user.id,paymentId:payment.id,planType:"PREMIUM",reportSlug:slug,status:"PAID",paymentStatus:"PAID",deliveryStatus:"auto_queued",deliveryEmail:user.email,fullName:birth.name,gender:birth.gender,dateOfBirth:birth.dateOfBirth,timeOfBirth:birth.timeOfBirth,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,concern:input.encodeAutomaticReportInput(question,extra),language:"en"}});
    ids.push(row.id);return row.id;
   }
@@ -133,7 +133,18 @@ if(!dbMode){
   emailStatus=200;assert.equal(await processAutomaticReport(retry),"delivered");
   failed=await prisma.reportRequest.findUniqueOrThrow({where:{id:retry}});assert.equal(failed.generatedPdfChecksum,checksum);
   const unpaid=await make("love-report","PENDING");assert.equal(await processAutomaticReport(unpaid),"skipped");
-  console.log("PASS disposable DB worker, one-time send, retry without regeneration, unpaid rejection");
+  const refunded=await make("love-report");
+  const refundedRow=await prisma.reportRequest.findUniqueOrThrow({where:{id:refunded},include:{payment:true}});
+  const receipt=await prisma.auditLog.create({data:{id:"razorpay-refund:rfnd_QAisolated"+ids.length,action:"payment.razorpay_refund_processed_receipt",targetType:"RazorpayPayment",targetId:refundedRow.payment.providerPaymentId,metadata:{amountPaise:100}}});
+  try{
+    const before=sent.length;
+    assert.equal(await processAutomaticReport(refunded),"skipped","Signed refund receipt must stop automatic delivery even before status reconciliation");
+    assert.equal(sent.length,before);
+    const unchanged=await prisma.reportRequest.findUniqueOrThrow({where:{id:refunded}});
+    assert.equal(unchanged.generatedPdfSize,null);
+    assert.equal(unchanged.emailSentAt,null);
+  }finally{await prisma.auditLog.delete({where:{id:receipt.id}});}
+  console.log("PASS disposable DB worker, one-time send, retry without regeneration, unpaid rejection and refund-receipt guard");
  }finally{
   await prisma.reportRequest.deleteMany({where:{id:{in:ids}}});
   await prisma.user.delete({where:{id:user.id}});

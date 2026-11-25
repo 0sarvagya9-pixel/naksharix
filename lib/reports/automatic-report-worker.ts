@@ -12,6 +12,7 @@ import { sendReportDeliveryEmail } from "@/lib/reports/report-delivery-service";
 import {notifyAccountUpdate} from "@/lib/notifications/web-push";
 import { writeAuditLog,writeReportStatusHistory } from "@/lib/reports/report-audit";
 import type { ReportRequest } from "@prisma/client";
+import {cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 
 const LEASE_MS=5*60_000;
 const EMAIL_REPLAY_MS=23*3600_000;
@@ -33,19 +34,20 @@ async function loadEntitled(id:string){
   const p=row.payment,meta=p.metadata as Record<string,unknown>|null;
   if(!product||p.status!=="PAID"||!p.providerPaymentId||p.userId!==row.user.id||p.provider!=="RAZORPAY"||p.currency!=="INR"||
       String(p.purpose)!==product.purpose||Number(p.amount)!==product.amount||meta?.reportId!==product.reportId)return null;
+  try{if(await cumulativeSignedRefund(prisma,p.providerPaymentId)>0)return null;}catch{return null;}
   return row;
 }
 async function claim(row:ReportRequest,next:string){
   const lease=new Date();
   const result=await prisma.reportRequest.updateMany({
     where:{id:row.id,updatedAt:row.updatedAt,deliveryStatus:row.deliveryStatus,status:row.status,
-      paymentStatus:"PAID",adminBypass:false},
+      paymentStatus:"PAID",adminBypass:false,paymentId:row.paymentId,payment:{is:{status:"PAID"}}},
     data:{deliveryStatus:next,updatedAt:lease,deliveryError:null,...(next==="auto_generating"?{status:"IN_PROGRESS" as const}:{})}
   });
   return result.count===1?lease:null;
 }
 function leasedWhere(id:string,lease:Date,state:string){
-  return {id,updatedAt:lease,deliveryStatus:state,paymentStatus:"PAID" as const,adminBypass:false,status:{not:"CANCELLED" as const}};
+  return {id,updatedAt:lease,deliveryStatus:state,paymentStatus:"PAID" as const,adminBypass:false,status:{not:"CANCELLED" as const},payment:{is:{status:"PAID" as const}}};
 }
 async function flag(id:string,lease:Date,state:string,next:string,reason:string){
   await prisma.reportRequest.updateMany({where:leasedWhere(id,lease,state),data:{deliveryStatus:next,deliveryError:reason}});
@@ -123,7 +125,7 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
       databaseBytes:row.generatedPdfBytes,expectedChecksum:row.generatedPdfChecksum});
     if(bytes.length!==row.generatedPdfSize||Buffer.from(bytes.subarray(0,5)).toString("ascii")!=="%PDF-")throw new Error("REPORT_FILE_INVALID");
     const current=await loadEntitled(id);
-    if(!current||current.updatedAt.getTime()!==lease.getTime()||current.deliveryStatus!=="auto_sending"||current.user!.email.toLowerCase()!==row.deliveryEmail.toLowerCase())return "skipped";
+    if(!current||current.updatedAt.getTime()!==lease.getTime()||current.deliveryStatus!=="auto_sending"||current.user!.email.toLowerCase()!==row.deliveryEmail.toLowerCase()||(!current.user!.emailVerified&&!current.user!.emailVerifiedAt&&!current.user!.googleId))return "skipped";
     const title=getManualReport(row.reportSlug)?.name[languageFor(row.language)]??"Personalized Astrology Report";
     // Email contains a branded, authenticated PDF link, not personal birth data
     // or a public bearer download link. Refund entitlement is still checked at download.

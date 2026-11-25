@@ -97,7 +97,9 @@ export async function saveReportPdf(input: {
 }
 
 function checksumMatches(bytes: Uint8Array, expected: string | null | undefined) {
-  if (!expected || !/^[a-f0-9]{64}$/i.test(expected)) return true;
+  // Preserve legacy absent checksums, but never accept a malformed declared checksum.
+  if (expected == null) return true;
+  if (!/^[a-f0-9]{64}$/i.test(expected)) return false;
   const actual = createHash("sha256").update(bytes).digest();
   const expectedBytes = Buffer.from(expected, "hex");
   return actual.length === expectedBytes.length && timingSafeEqual(actual, expectedBytes);
