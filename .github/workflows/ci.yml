@@ -171,6 +171,8 @@ jobs:
         run: node scripts/qa-password-reset-runtime.mjs
       - name: Verify deferred service review persistence and retry safety
         run: node scripts/qa-deferred-service-runtime.mjs
+      - name: Exercise all seven deferred-service planning workflows on isolated PostgreSQL
+        run: node scripts/qa-deferred-planning-runtime.mjs
       - name: Run local production HTTP smoke
         shell: bash
         run: |

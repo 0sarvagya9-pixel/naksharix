@@ -1,0 +1,16 @@
+"use client";
+import {useCallback,useEffect,useRef,useState} from "react";
+import {secureFetch} from "@/lib/security/csrf";
+import {PLAN_TERMS} from "@/lib/deferred-services/planning-contract";
+type Allocation={id:string;units:number;completedUnits:number;state:string;version:number;holdUntil:string;plan:{label:string;kind:string;target:string;startsAt:string;endsAt:string};progress:{units:number;occurredAt:string}[]};
+export function DeferredServiceAllocations(){
+ const [rows,setRows]=useState<Allocation[]|null>(null),[status,setStatus]=useState(""),[busy,setBusy]=useState(false);const locked=useRef(false);
+ const refresh=useCallback(async()=>{const r=await secureFetch("/api/deferred-services/allocations",{silent:true,cache:"no-store"});const j=await r.json();if(!r.ok)throw Error(j.error||"Could not load review proposals.");setRows(j.data.allocations)},[]);
+ useEffect(()=>{void refresh().catch(e=>setStatus(e.message));},[refresh]);
+ async function change(a:Allocation,action:"ACCEPT"|"CANCEL"){
+  if(locked.current)return;locked.current=true;setBusy(true);
+  try{const r=await secureFetch("/api/deferred-services/allocations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,allocationId:a.id,version:a.version,...(action==="ACCEPT"?{consent:PLAN_TERMS}:{})}),silent:true});const j=await r.json();if(!r.ok){setStatus(j.error||"Review proposal changed. Refresh the list.");return;}setStatus("Review acknowledgement recorded. No payment or commercial booking.");try{await refresh()}catch{setStatus("Change recorded. Refresh this page for updated status.");}}
+  catch{setStatus("Outcome uncertain. Refresh the list before retrying.");}finally{setBusy(false);locked.current=false;}
+ }
+ return <section className="mt-8 space-y-4"><h2 className="text-xl font-semibold">Private review proposals</h2><p className="text-sm">An acknowledgement records your interest in an unpaid internal plan only. No price, payment, confirmed appointment, actual provider capacity or guaranteed delivery is established.</p><p aria-live="polite" role="status">{status}</p>{rows===null?<p>Loading proposals…</p>:rows.length===0?<p>No review proposals.</p>:rows.map(a=><article key={a.id} className="rounded-lg border p-4"><h3 className="font-semibold">{a.plan.label}</h3><p>{a.state} · {a.completedUnits}/{a.units} units recorded by staff</p><p className="text-sm">{a.plan.target||"No destination"} · {new Date(a.plan.startsAt).toLocaleString()} – {new Date(a.plan.endsAt).toLocaleString()}</p>{a.state==="HELD"?<div><p className="text-sm">Review hold until {new Date(a.holdUntil).toLocaleString()}</p><button type="button" disabled={busy} className="rounded border px-3 py-2" onClick={()=>{if(window.confirm("I understand this is an unpaid internal review acknowledgement, not a booking or purchase."))void change(a,"ACCEPT")}}>Acknowledge unpaid proposal</button></div>:null}{!["COMPLETED","CANCELED"].includes(a.state)?<button type="button" disabled={busy} className="ml-2 rounded border px-3 py-2" onClick={()=>void change(a,"CANCEL")}>Cancel remaining review</button>:null}{a.progress.length>0?<ul className="mt-3 space-y-1 text-sm">{a.progress.map((p,i)=><li key={i}>{p.units} unit(s) — staff-recorded {new Date(p.occurredAt).toLocaleString()}</li>)}</ul>:null}</article>)}</section>
+}

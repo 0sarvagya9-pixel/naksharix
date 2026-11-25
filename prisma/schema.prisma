@@ -186,6 +186,7 @@ model User {
   chatThreads                  ChatThread[]
   appointments                 Appointment[]         @relation("ClientAppointments")
   supportTickets               SupportTicket[]
+  deferredServiceAllocations   DeferredServiceAllocation[]
   learningProgress              LearningProgress[]
   reviews                      Review[]
   affiliate                    Affiliate?
@@ -650,6 +651,7 @@ model Notification {
 }
 
 model SupportTicket {
+  deferredServiceAllocation DeferredServiceAllocation?
   id        String   @id @default(cuid())
   userId    String
   subject   String
@@ -1276,4 +1278,60 @@ model ReferenceReminder {
   @@unique([userId,eventId])
   @@index([status,dueAt])
   @@index([orderId])
+}
+
+model DeferredServicePlan {
+  id              String   @id @default(cuid())
+  kind            String
+  target          String
+  label           String
+  providerRef     String
+  evidenceRef     String
+  termsRef        String
+  capacity        Int
+  startsAt        DateTime
+  endsAt          DateTime
+  state           String   @default("DRAFT")
+  reviewedById    String?
+  reviewedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  allocations     DeferredServiceAllocation[]
+  @@index([kind, state, endsAt])
+}
+
+model DeferredServiceAllocation {
+  id              String   @id @default(cuid())
+  planId          String
+  ticketId        String   @unique
+  userId          String
+  units           Int
+  completedUnits  Int      @default(0)
+  state           String   @default("HELD")
+  version         Int      @default(1)
+  holdUntil       DateTime
+  acceptedAt      DateTime?
+  canceledAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  plan            DeferredServicePlan @relation(fields:[planId],references:[id],onDelete:Restrict)
+  ticket          SupportTicket @relation(fields:[ticketId],references:[id],onDelete:Cascade)
+  user            User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  receipts        DeferredServiceReceipt[]
+  @@index([planId,state,holdUntil])
+  @@index([userId,createdAt])
+}
+
+model DeferredServiceReceipt {
+  id              String   @id @default(cuid())
+  allocationId    String
+  operationId     String   @unique
+  evidenceRef     String
+  units           Int
+  occurredAt      DateTime
+  actorId         String
+  createdAt       DateTime @default(now())
+  allocation      DeferredServiceAllocation @relation(fields:[allocationId],references:[id],onDelete:Cascade)
+  @@unique([allocationId,evidenceRef])
+  @@index([allocationId,occurredAt])
 }
