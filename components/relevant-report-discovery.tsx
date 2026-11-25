@@ -5,7 +5,9 @@ import { OptionalReportNextStep } from "@/components/optional-report-next-step";
 const choices = {
   tarot: ["love-report", "career-report"],
   numerology: ["numerology-lo-shu-report"],
-  love: ["love-report"]
+  love: ["love-report"],
+  kundli: ["premium-kundli"],
+  matching: ["couple-kundli"]
 } as const;
 
 /** Public, voluntary next steps only. No tarot answers, birth data or private reading content

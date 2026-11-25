@@ -1,5 +1,6 @@
 import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
 import { KundliForm } from "@/components/kundli-form";
+import { RelevantReportDiscovery } from "@/components/relevant-report-discovery";
 import { Section } from "@/components/section";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -42,6 +43,7 @@ export default function KundliPage() {
           </aside>
         </div>
       </Section>
+      <RelevantReportDiscovery topic="kundli" />
     </main>
   );
 }

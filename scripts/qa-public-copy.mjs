@@ -81,4 +81,12 @@ assert.ok(relevantDiscovery.includes("hinglish: {") &&
   relevantDiscovery.includes("locale={locale}"),
   "RELEVANT_DISCOVERY_HINGLISH_OR_VOLUNTARY_COPY_REGRESSION");
 
+
+// Both primary free tools expose an optional, catalogue-backed detail link without requiring birth inputs.
+assert.ok(relevantDiscovery.includes('kundli: ["premium-kundli"]') &&
+  relevantDiscovery.includes('matching: ["couple-kundli"]') &&
+  read("app/kundli/page.tsx").includes('<RelevantReportDiscovery topic="kundli" />') &&
+  read("app/matchmaking/page.tsx").includes('<RelevantReportDiscovery topic="matching" />'),
+  "PRIMARY_FREE_TOOL_OPTIONAL_REPORT_DISCOVERY_MISSING");
+
 console.log("PUBLIC_COPY_QA=PASS;PUBLIC_SURFACES="+publicScreens.length+";LICENSE_CREDITS=AVAILABLE;CHECKOUT_LOGIC=PRESERVED");
