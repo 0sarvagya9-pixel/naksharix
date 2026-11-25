@@ -3,7 +3,7 @@ import {createHmac,randomBytes,timingSafeEqual} from "node:crypto";
 import type {Prisma} from "@prisma/client";
 import {env} from "@/lib/env";
 import {prisma} from "@/lib/db";
-import {parseBusinessAuthorization,scopeSubset,scopeUnits,usageFits,usagePeriod,type BusinessScope} from "@/lib/business-integrations/contract";
+import {parseBusinessAuthorization,scopeSubset,scopeUnits,usageFits,usagePeriod,isBusinessScope,type BusinessScope} from "@/lib/business-integrations/contract";
 import type {keySchema,tenantSchema} from "@/lib/business-integrations/input";
 import type {z} from "zod";
 export const businessEnabled=()=>env.B2B_INTEGRATION_ENABLED==="true";
@@ -84,8 +84,10 @@ export async function finishBusinessCalculation(tenantId:string,requestId:string
  return prisma.$transaction(async tx=>{
  await lockBusinessTenant(tx,tenantId);const call=await tx.businessUsageCall.findUnique({where:{tenantId_requestId:{tenantId,requestId}},include:{tenant:true}});
  if(!call||call.state!=="RESERVED")return false;
- const key=await tx.businessApiKey.findFirst({where:{id:call.keyId,tenantId,revokedAt:null,expiresAt:{gt:new Date()}},select:{id:true}});
- const complete=success&&Boolean(key)&&call.tenant.status==="ACTIVE"&&call.tenant.contractExpiresAt>new Date();
+ const now=new Date();
+ const key=await tx.businessApiKey.findFirst({where:{id:call.keyId,tenantId,revokedAt:null,expiresAt:{gt:now}},select:{id:true,scopes:true}});
+ // A calculation must not escape a revoked or narrowed contract while it was running.
+ const complete=success&&!!key&&isBusinessScope(call.scope)&&scopeSubset([call.scope],key.scopes)&&scopeSubset([call.scope],call.tenant.scopes)&&call.tenant.status==="ACTIVE"&&call.tenant.contractExpiresAt>now;
  const changed=await tx.businessUsageCall.updateMany({where:{tenantId,requestId,state:"RESERVED"},data:{state:complete?"COMPLETED":"FAILED",finishedAt:new Date()}});
  if(changed.count!==1)return false;
  await tx.businessUsageMonth.update({where:{tenantId_period:{tenantId,period:call.period}},data:complete?{completedUnits:{increment:call.units}}:{failedUnits:{increment:call.units}}});

@@ -153,6 +153,8 @@ jobs:
           path: ${{ runner.temp }}/package-qa
           retention-days: 3
           if-no-files-found: error
+      - name: Qualify B2B calculations and concurrent tenant quota on disposable PostgreSQL
+        run: node scripts/qa-business-integrations-runtime.mjs
       - name: Run local production HTTP smoke
         shell: bash
         run: |
