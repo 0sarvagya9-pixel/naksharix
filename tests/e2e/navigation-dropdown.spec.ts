@@ -25,6 +25,26 @@ test.describe("NAKSHARIX live menu accessibility and positioning", () => {
   test("Horoscope links remain readable and inside the viewport on ten page families", async ({ page }) => {
     test.setTimeout(180_000);
     await page.setViewportSize({ width: 1440, height: 900 });
+    // Read-only instrumentation: capture actual event/attribute evidence if
+    // stationary hover regresses, without dispatching or replacing events.
+    await page.addInitScript(()=>{
+      const events:Record<string,unknown>[]=[];
+      Object.defineProperty(window,"__nxMenuTrace",{value:events});
+      const push=(entry:Record<string,unknown>)=>{events.push({at:Math.round(performance.now()),...entry});if(events.length>100)events.shift();};
+      const record=(event:Event)=>{
+        const e=event as MouseEvent;
+        const label=(node:EventTarget|null)=>node instanceof Element?node.tagName+":"+((node.closest("[data-nav-parent]")?.getAttribute("data-nav-parent"))??"outside"):null;
+        push({type:event.type,x:e.clientX,y:e.clientY,target:label(event.target),related:label(e.relatedTarget),hit:label(document.elementFromPoint(e.clientX||0,e.clientY||0))});
+      };
+      for(const name of ["pointermove","pointerover","pointerout","mousemove","mouseover","mouseout","pointerleave","mouseleave"])document.addEventListener(name,record,true);
+      window.addEventListener("blur",()=>push({type:"window-blur"}));
+      new MutationObserver(records=>{
+        for(const change of records){
+          const e=change.target;
+          if(e instanceof Element&&e.getAttribute("data-nav-parent")==="horoscope")push({type:"menu",open:e.getAttribute("data-menu-open"),dismissed:e.getAttribute("data-menu-dismissed")});
+        }
+      }).observe(document,{subtree:true,attributes:true,attributeFilter:["data-menu-open","data-menu-dismissed"]});
+    });
     for (const route of routes) {
       const response = await page.goto(route, { waitUntil: "domcontentloaded" });
       expect(response?.status(), route).toBe(200);
@@ -47,7 +67,18 @@ test.describe("NAKSHARIX live menu accessibility and positioning", () => {
       await expect(popup, "Dropdown not accessible on " + route).toBeVisible();
       await expect(trigger).toHaveAttribute("aria-expanded","true");
       const link = popup.getByRole("link", { name: "Weekly Horoscope", exact: true });
-      await expect(link).toBeVisible();
+      try {
+        await expect(link).toBeVisible();
+        // The recorded failure closed in under 100 ms without user movement.
+        // Keep the pointer stationary long enough to cover hydration/layout
+        // events and assert that the menu remains expanded and usable.
+        await page.waitForTimeout(500);
+        await expect(trigger).toHaveAttribute("aria-expanded","true");
+        await expect(link).toBeVisible();
+      } catch(error) {
+        console.log("NAVIGATION_HOVER_DIAGNOSTIC",route,JSON.stringify(await page.evaluate(()=>Reflect.get(window,"__nxMenuTrace"))));
+        throw error;
+      }
       const actual = await popup.evaluate((el) => {
         const link = el.querySelector<HTMLAnchorElement>("a.nx-nav-dropdown-link");
         if (!link) throw Error("Dropdown link missing");

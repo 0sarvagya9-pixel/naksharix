@@ -191,6 +191,9 @@ jobs:
           node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" --version
       - name: Run local production server and browser suite
         shell: bash
+        # Match working full cross-browser CI; Firefox root requires owned HOME.
+        env:
+          HOME: /root
         run: |
           set -euo pipefail
           npm run start -- -p 3000 > /tmp/naksharix.log 2>&1 &
