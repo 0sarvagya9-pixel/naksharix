@@ -19,3 +19,23 @@ const available=(595.28-88)*house/EDITORIAL_HOUSE_TABLE_FRACTIONS.reduce((a,b)=>
 for(const word of ["HOUSE","BHAV"]){assert.ok(bold.widthOfTextAtSize(word,8)<=available,word+" must fit without mid-word wrapping");checks++;}
 assert.ok(Math.abs(EDITORIAL_HOUSE_TABLE_FRACTIONS.reduce((a,b)=>a+b,0)-6.21)<1e-9);checks++;
 console.log("EDITORIAL_DISPLAY_CONTRACT_PASS="+JSON.stringify({checks,terms:EDITORIAL_TERM_COUNT,scope:"display vocabulary and date localization only; not complete human translation acceptance"}));
+
+{
+ const {planEditorialTableFragment:plan,groupEditorialCardBodies:group}=await import("../lib/reports/editorial-layout.ts");
+ let cases=0,fragments=0;
+ assert.deepEqual(plan(7,90,570,12,36),{kind:"page_break"});cases++;
+ assert.deepEqual(plan(7,570,570,12,36),{kind:"draw",lines:7,height:100});cases++;
+ for(const fresh of [320,480,600])for(const line of [9,12,14.5])for(const minimum of [24,30,36,45])for(let rows=1;rows<=100;rows++)for(const remaining of [0,15,35,70,120,200,fresh]){
+  let n=rows,space=remaining,tries=0;
+  while(n){const r=plan(n,space,fresh,line,minimum);assert.ok(++tries<120);
+   if(r.kind==="page_break"){assert.ok(space<fresh);space=fresh;continue;}
+   assert.ok(r.lines>=1&&r.lines<=n&&r.height<=space+1e-8);
+   if(Math.max(minimum,n*line+16)<=fresh)assert.equal(r.lines,n);
+   n-=r.lines;space-=r.height;fragments++;
+  }cases++;
+ }
+ for(const args of [[0,50,500,12,30],[1,50,500,0,30],[1,50,10,12,30],[1,NaN,500,12,30]])assert.throws(()=>plan(...args));
+ const cards=[{label:"A",title:"T1",body:"same text"},{label:"B",title:"T2",body:"same\ntext"},{label:"C",title:"T3",body:"different"}];
+ const grouped=group(cards);assert.equal(grouped.length,2);assert.deepEqual(grouped.flatMap(g=>g.members),cards);assert.equal(group([]).length,0);
+ console.log("P0_ROW_PAGINATION_AND_REPETITION_PASS "+JSON.stringify({cases,fragments,invalidCases:4,groupCases:3}));
+}

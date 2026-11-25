@@ -4,6 +4,7 @@ import type { PremiumReportContentResult } from "@/lib/reports/premium-report-co
 import type { EditorialCard,EditorialInsights } from "@/lib/reports/editorial-insights";
 import type {DepthChapter} from "@/lib/reports/editorial-depth";
 import {editorialTerm,editorialDate,EDITORIAL_HOUSE_TABLE_FRACTIONS} from "@/lib/reports/editorial-display";
+import {planEditorialTableFragment,groupEditorialCardBodies} from "@/lib/reports/editorial-layout";
 
 type R=Record<string,unknown>;
 const obj=(v:unknown):R=>v!==null&&typeof v==="object"&&!Array.isArray(v)?v as R:{};
@@ -100,19 +101,28 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   }
  }
  function table(headers:string[],rows:string[][],fractions:number[],size=9.4,minHeight=30){
+  if(!rows.length)return;
   headers=headers.map(term);
-  const sum=fractions.reduce((a,b)=>a+b,0),widths=fractions.map(f=>CW*f/sum);
-  const header=()=>{const h=Math.max(...headers.map((v,i)=>wrap(v.toUpperCase(),widths[i]-18,8,"bold").length*11))+17;ensure(h+minHeight);rect(M,y,CW,h,wine);let x=M;headers.forEach((v,i)=>{fixed(x+9,y+8,v.toUpperCase(),widths[i]-18,8,"bold",iv,11);x+=widths[i]});y+=h;};
+  const sum=fractions.reduce((a,b)=>a+b,0),widths=fractions.map(f=>CW*f/sum),lineHeight=size*1.45;
+  const headerHeight=Math.max(...headers.map((v,i)=>wrap(v.toUpperCase(),widths[i]-18,8,"bold").length*11))+17;
+  const prepared=rows.map(row=>row.map((v,j)=>wrap(v,widths[j]-18,size,j===0?"bold":"body")));
+  const continuationTop=()=>102+wrap(heading+tr(" (continued)"," (जारी)"),CW,25,"title").length*30+8;
+  const freshHeight=()=>BOTTOM-continuationTop()-headerHeight;
+  const header=()=>{rect(M,y,CW,headerHeight,wine);let x=M;headers.forEach((v,i)=>{fixed(x+9,y+8,v.toUpperCase(),widths[i]-18,8,"bold",iv,11);x+=widths[i]});y+=headerHeight;};
+  const firstLines=Math.max(...prepared[0].map(v=>v.length)),firstHeight=Math.max(minHeight,firstLines*lineHeight+16);
+  const reserve=firstHeight<=freshHeight()?firstHeight:Math.max(minHeight,lineHeight+16);
+  if(y+headerHeight+reserve>BOTTOM)interior(chapter,heading,"",true);
   header();let i=0;
-  for(const row of rows){const columns=row.map((v,j)=>wrap(v,widths[j]-18,size,j===0?"bold":"body"));
+  for(const columns of prepared){
    let consumed=0;const max=Math.max(...columns.map(v=>v.length));
    while(consumed<max){
-    if(y+minHeight>BOTTOM){interior(chapter,heading,"",true);header();}
-    const capacity=Math.max(1,Math.floor((BOTTOM-y-16)/(size*1.45)));
-    const take=Math.min(max-consumed,capacity,30),h=Math.max(minHeight,take*size*1.45+16);
-    if(y+h>BOTTOM){interior(chapter,heading,"",true);header();continue}
+    const fragment=planEditorialTableFragment(max-consumed,BOTTOM-y,freshHeight(),lineHeight,minHeight);
+    if(fragment.kind==="page_break"){
+     interior(chapter,heading,"",true);header();continue;
+    }
+    const take=fragment.lines,h=fragment.height;
     rect(M,y,CW,h,i%2===0?white:C("F7F0E4"));let x=M;
-    columns.forEach((lines,j)=>{lines.slice(consumed,consumed+take).forEach((v,k)=>tx(x+9,y+8+k*size*1.45,v,size,j===0?"bold":"body",j===0?wine:ink));x+=widths[j]});
+    columns.forEach((lines,j)=>{lines.slice(consumed,consumed+take).forEach((v,k)=>tx(x+9,y+8+k*lineHeight,v,size,j===0?"bold":"body",j===0?wine:ink));x+=widths[j]});
     y+=h;consumed+=take;
    }i++;
   }rule(M,y,W-M,y,gold);y+=16;
@@ -314,7 +324,24 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   if(insights.planetNotes.length){specialist("PERSONAL INTERPRETATION",tr("What your placements suggest for reflection","ग्रह स्थितियों से चिंतन के विषय"),145);cardRows(insights.planetNotes,2)}
  }
  const depth=data("editorial-depth") as DepthChapter[]|undefined;
- if(depth){for(const part of depth){interior(tr("DETAILED READING","विस्तृत विवेचन","Detailed reading"),part.title,part.intro);cardRows(part.cards,1);}}
+ if(depth){for(const part of depth){
+  const cards=groupEditorialCardBodies(part.cards).map(group=>group.members.length===1?group.members[0]:{
+   label:tr("Shared explanation","साझा व्याख्या","Shared explanation")+" / "+group.members.length,
+   title:group.members.map(c=>c.label+" — "+c.title).join("\n"),
+   body:group.body
+  });
+  // Keep the existing chapter order and titles; start inline if the
+  // introduction and first card both fit. This avoids sparse carry-over pages.
+  const first=cards[0];
+  if(!first)continue;
+  const introHeight=wrap(part.intro,CW,10.1).length*15.15+12;
+  const firstHeight=12+wrap(first.label,CW-26,8,"bold").length*11+8+wrap(first.title,CW-26,16,"title").length*20+8+wrap(first.body,CW-26,10).length*14.5+14;
+  if(firstHeight+introHeight<=BOTTOM-240){
+   specialist(tr("DETAILED READING","विस्तृत विवेचन","Detailed reading"),part.title,firstHeight+introHeight+14);
+   paragraph(part.intro,10.1,muted,"body",12);
+  }else interior(tr("DETAILED READING","विस्तृत विवेचन","Detailed reading"),part.title,part.intro);
+  cardRows(cards,1);
+ }}
  reflectionPlan();
  {const saved=page;page=contentsPage;rect(0,0,W,H,iv);brand(24);caps(W-M,32,tr("PRIVATE REPORT","निजी रिपोर्ट","NIJI REPORT"),muted,8,"right");rule(M,68,W-M,68,gold,1);caps(M,84,tr("YOUR READING GUIDE","पठन मार्गदर्शिका"));fixed(M,104,tr("Contents","विषय सूची"),CW,29,"title",wine,35);let top=155;
  for(const item of starts){const lines=wrap(item.title,CW-58,10.2,"bold"),height=lines.length*14+10;if(top+height>BOTTOM)throw Error("REPORT_CONTENTS_OVERFLOW");tx(M,top,String(item.page).padStart(2,"0"),10,"bold",gold);fixed(M+38,top,item.title,CW-58,10.2,"bold",ink,14);top+=height;rule(M+38,top-5,W-M,top-5,light);}page=saved;}

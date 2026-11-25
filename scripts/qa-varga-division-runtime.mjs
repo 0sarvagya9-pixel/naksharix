@@ -40,3 +40,29 @@ const explicit=buildD9Chart(0,[{planet:"Sun",sign:"Cancer",absoluteLongitude:100
 assert.deepEqual(derived,explicit);negative++;
 assert.equal(placements,540);
 console.log("VARGA_DIVISION_RUNTIME_PASS="+JSON.stringify({placements,boundaries,negative,scope:"six supported divisions; actual TS runtime using independent Swiss longitudes and explicit arithmetic reference; no new public activation"}));
+
+{
+ const {classicalVargaCoordinates:actual}=require("@/lib/astrology/varga/partition");
+ const published=JSON.parse(fs.readFileSync(new URL("../fixtures/astrology/independent-d7-worked-reference.json",import.meta.url),"utf8"));
+ let arcsecondCases=0,publishedCases=0;
+ // Independent integer rational formulation: sevenfold harmonic.
+ // No production division helpers or vendor-calibrated offsets in expected values.
+ for(let arcsec=0;arcsec<1296000;arcsec++){
+  assert.equal(actual("D7",arcsec/3600).signIndex,Math.floor(7*arcsec/108000)%12);
+  arcsecondCases++;
+ }
+ for(const [planet,s,d,m,a,expected] of published.rows){
+  assert.equal(actual("D7",s*30+d+m/60+a/3600).signIndex,expected,planet);
+  publishedCases++;
+ }
+ const vendor=JSON.parse(fs.readFileSync(new URL("../fixtures/astrology/published-classical-comparison.json",import.meta.url),"utf8"));
+ const sourceConflicts=[];
+ for(const [i,[s,d,m,a]] of vendor.positionsDms.entries()){
+  const arcsec=((s-1)*30+d)*3600+m*60+a,expected=Math.floor(7*arcsec/108000)%12;
+  const computed=actual("D7",arcsec/3600).signIndex;
+  assert.equal(computed,expected);
+  if(computed+1!==vendor.divisions.D7[i])sourceConflicts.push({point:vendor.order[i],computed:computed+1,printed:vendor.divisions.D7[i]});
+ }
+ assert.deepEqual(sourceConflicts,[{point:"Moon",computed:9,printed:8},{point:"Saturn",computed:10,printed:9}]);
+ console.log("P0_D7_INDEPENDENT_FORMULA_PASS "+JSON.stringify({arcsecondCases,publishedCases,sourceConflicts,scope:"exact equal-sevenths Parashari sign mapping; vendor discrepancies retained; no public activation or predictive certification"}));
+}

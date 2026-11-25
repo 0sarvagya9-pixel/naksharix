@@ -397,6 +397,8 @@ if(!dbMode){
  // production load). Render each SKU with an independent synthetic marker.
  // Existing 45 baseline artifact PDFs are not overwritten.
  const concurrentRows=[],concurrentStart=performance.now(),cpuStart=process.cpuUsage(),heapBefore=process.memoryUsage().heapUsed;
+ const {groupEditorialCardBodies}=require("@/lib/reports/editorial-layout");
+ let renderedDuplicateBodies=0,consolidatedBodies=0;
  const normalText=v=>String(v??"").replace(/\s+/g," ").trim();
  let repeatedCardBodies=0,duplicateCards=0;
  for(let offset=0;offset<input.AUTO_REPORT_SLUGS.length;offset+=3){
@@ -416,6 +418,14 @@ if(!dbMode){
    const unique=new Set(cards.map(c=>[c.label,c.title,c.body].map(normalText).join("\u0000"))),bodies=new Set(cards.map(c=>normalText(c.body)));
    assert.equal(unique.size,cards.length,slug+" duplicate complete depth card");
    duplicateCards+=cards.length-unique.size;repeatedCardBodies+=cards.length-bodies.size;
+   for(const chapter of sec.find(s=>s.key==="editorial-depth").data){
+    const grouped=groupEditorialCardBodies(chapter.cards);
+    const original=chapter.cards.map(c=>JSON.stringify(c)).sort(),preserved=grouped.flatMap(g=>g.members.map(c=>JSON.stringify(c))).sort();
+    assert.deepEqual(preserved,original,slug+" grouped references preserved");
+    const normalizedBodies=grouped.map(g=>normalText(g.body));
+    renderedDuplicateBodies+=normalizedBodies.length-new Set(normalizedBodies).size;
+    consolidatedBodies+=chapter.cards.length-grouped.length;
+   }
    const out=await generatePremiumReportPdf({requestId:"concurrent-"+serial,templateId:slug,status:"ready_for_generation",content:assembled.content,automatedInputValidated:true,reportTitle:assembled.title,customerName:marker,language});
    assert.equal(out.generated,true);const parsed=await PDFDocument.load(out.bytes);
    assert.equal(parsed.getAuthor(),"NAKSHARIX");assert.ok(parsed.getTitle().includes(assembled.title));assert.ok(parsed.getPageCount()>=4);
@@ -423,8 +433,8 @@ if(!dbMode){
   }));
   concurrentRows.push(...batch);
  }
- assert.equal(concurrentRows.length,15);assert.equal(duplicateCards,0);
- const cpu=process.cpuUsage(cpuStart),concurrentEvidence={requests:15,maxSimultaneousPromises:3,passed:concurrentRows.length,duplicateCards,repeatedCardBodies,wallMs:Math.round(performance.now()-concurrentStart),cpuUserMicros:cpu.user,cpuSystemMicros:cpu.system,heapBeforeBytes:heapBefore,heapAfterBytes:process.memoryUsage().heapUsed,measurements:concurrentRows,scope:"one isolated Node process, synthetic profiles, actual PDF output; no production capacity, cost or privacy certification"};
+ assert.equal(concurrentRows.length,15);assert.equal(duplicateCards,0);assert.equal(renderedDuplicateBodies,0);
+ const cpu=process.cpuUsage(cpuStart),concurrentEvidence={requests:15,maxSimultaneousPromises:3,passed:concurrentRows.length,duplicateCards,repeatedCardBodies,renderedDuplicateBodies,consolidatedBodies,wallMs:Math.round(performance.now()-concurrentStart),cpuUserMicros:cpu.user,cpuSystemMicros:cpu.system,heapBeforeBytes:heapBefore,heapAfterBytes:process.memoryUsage().heapUsed,measurements:concurrentRows,scope:"one isolated Node process, synthetic profiles, actual PDF output; no production capacity, cost or privacy certification"};
  console.log("P0_CONCURRENT_REPORT_RENDER_PASS "+JSON.stringify(concurrentEvidence));
  if(process.env.REPORT_VISUAL_QA_DIR)fs.writeFileSync(path.join(process.env.REPORT_VISUAL_QA_DIR,"report-concurrent-measurements.json"),JSON.stringify(concurrentEvidence,null,2));
 
