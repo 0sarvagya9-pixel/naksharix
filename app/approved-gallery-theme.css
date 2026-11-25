@@ -550,6 +550,8 @@ body.naksh-page-bg [data-layout="workspace"] header {
    the existing :hover/:focus-within utility rules remain a usable fallback. */
 html body.naksh-page-bg header nav[aria-label="Primary navigation"] [data-nav-parent][data-menu-ready="true"] > .nx-nav-dropdown {
   visibility:hidden; opacity:0; pointer-events:none;
+  /* Visibility must update immediately for keyboard focus; only opacity animates. */
+  transition-property:opacity;
 }
 html body.naksh-page-bg header nav[aria-label="Primary navigation"] [data-nav-parent][data-menu-ready="true"][data-menu-open="true"] > .nx-nav-dropdown {
   visibility:visible; opacity:1; pointer-events:auto;

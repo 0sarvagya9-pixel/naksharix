@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent } from "react";
 import Link from "next/link";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Menu, X, ShoppingCart, UserRound, Search, Heart } from "lucide-react";
 import { AuthProfileMenu } from "@/components/auth-profile-menu";
@@ -323,8 +323,10 @@ function useDesktopDisclosure(routeKey: string) {
       trigger.current?.focus();setPinned(false);setDismissed(true);
     }
     if(event.key==="ArrowDown"&&event.target===trigger.current){
-      event.preventDefault();setDismissed(false);setPinned(true);
-      requestAnimationFrame(()=>root.current?.querySelector<HTMLElement>(".nx-nav-dropdown-link")?.focus());
+      event.preventDefault();
+      // Commit the expanded state before focusing a previously hidden link.
+      flushSync(()=>{setDismissed(false);setPinned(true);});
+      root.current?.querySelector<HTMLElement>(".nx-nav-dropdown-link")?.focus();
     }
   };
   const open=!dismissed&&(hover||focus||pinned);

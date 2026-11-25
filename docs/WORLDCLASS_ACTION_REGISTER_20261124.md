@@ -254,3 +254,7 @@ Read-only first-party Search Console query/page window 26 October–22 November,
 
 ### 25 November — isolated password recovery acceptance (A07)
 - Added actual request and confirmation HTTP handler execution against disposable PostgreSQL. Isolated email and cookie adapters; network disabled. Uniform response to unknown, privileged, OAuth-only and unverified accounts; fragment-only token, HMAC stored, rotation and expiry; concurrent one-time consume; actual bcrypt change, unrelated-session isolation, durable old-session revocation and atomic privacy-preserving quotas. No real mailbox delivery or browser cookie proof. Await exact CI.
+
+### 2026-11-25 — Keyboard reopening regression repair (development hold)
+
+At `2146e4d1`, Gate 5 job `138993887498` returned 98 passes, one skip, one failure: after Escape, ArrowDown did not focus the first Horoscope submenu link. Quality and Android internal APK jobs succeeded. Make the expanded DOM state synchronous before focusing the first link, and animate opacity only (visibility must be immediate). Preserve all existing keyboard and browser assertions. New revision requires exact-head regression readback; no release or production deployment.
