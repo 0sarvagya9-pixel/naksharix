@@ -163,7 +163,8 @@ const boundaries=[
  ["Sun",120,140],["Moon",33,60],["Mars",0,12],["Mercury",165,170],["Jupiter",240,250],["Venus",180,195],["Saturn",300,320]
 ];
 for(const [planet,start,end] of boundaries)for(const [lon,expected] of [[start,true],[end-1e-6,true],[end,false],[start-1e-6,false]]){
- const p=synthetic.map(p=>p.planet===planet?{...point(planet,lon),house:p.house}:p);
+ const canonicalLon=(lon%360+360)%360;
+ const p=synthetic.map(p=>p.planet===planet?{...point(planet,canonicalLon),house:p.house}:p);
  const r=C.calculateSaptavargajaEvidence(p,planet);
  assert.equal(r.rows[0].dignity==="moolatrikona",expected,planet+" moola "+lon);dignityChecks++;
 }
@@ -235,3 +236,40 @@ for(const p of fixed.scores){
  dignityChecks+=2;
 }
 console.log("CLASSICAL_POSITIONAL_BHAVA_EVIDENCE_PASS "+JSON.stringify({friendshipChecks,dignityChecks,angleChecks,aspectChecks,bhavaChecks,strictNegative,scope:"named traditional arithmetic, supplied midpoint/polarity/lord context; independent full Shadbala and Bhava Bala software parity still required"}));
+
+
+const birthGeometry=require("@/lib/astrology/strength/birth-context");
+const midRef=JSON.parse(fs.readFileSync("fixtures/astrology/independent-bhava-midpoints-swiss-reference.json","utf8"));
+let midpointComparisons=0,midpointMaxError=0,actualHouseAssignments=0,geometryNegative=0;
+for(const row of midRef.rows){
+ const [date,time]=row.utc.slice(0,-1).split("T");
+ const input={date,time,timezone:"UTC",latitude:row.latitude,longitude:row.longitude,ayanamsa:"lahiri",houseSystem:"whole_sign",name:"Synthetic independent geometry",language:"en"};
+ const result=birthGeometry.calculateBirthStrengthEvidence(input);
+ const g=result.geometry;
+ assert.equal(g.utc,new Date(row.utc).toISOString());
+ assert.equal(g.publicEnabled,false);assert.equal(result.fullShadbalaVerified,false);assert.equal(result.fullBhavaBalaVerified,false);
+ assert.equal(result.positional.length,7);assert.equal(result.friendship.relationships.length,42);
+ assert.equal(result.bhava.houses.length,12);assert.ok(result.bhava.houses.every(h=>h.arithmeticTotalVirupas===null));
+ for(let i=0;i<12;i++){
+  const e=Math.abs(((g.midpoints[i]-row.midpoints[i]+540)%360)-180);
+  midpointMaxError=Math.max(midpointMaxError,e);assert.ok(e<=midRef.provenance.toleranceDegrees,row.id+" midpoint "+(i+1)+" discrepancy "+e);midpointComparisons++;
+ }
+ for(const planet of g.chart.planets){
+  assert.equal(planet.house,(Math.floor(planet.absoluteLongitude/30)-Math.floor(g.ascendant/30)+12)%12+1,"D1 must remain whole sign");
+  if(traditional.includes(planet.planet)){
+   const house=C.assignMidpointBhava(planet.absoluteLongitude,g.midpoints);
+   const refHouse=C.assignMidpointBhava(planet.absoluteLongitude,row.midpoints);
+   // The separately qualified geometric convention is tested against
+   // independent midpoints; avoid falsely claiming categorical parity
+   // for a point closer than angular tolerance to a boundary.
+   const close=row.midpoints.some((m,i)=>Math.abs(((planet.absoluteLongitude-((m+((row.midpoints[(i+1)%12]-m+360)%360)/2)%360)+540)%360)-180)<=midRef.provenance.toleranceDegrees);
+   if(!close){assert.equal(house,refHouse,row.id+" "+planet.planet+" independent house assignment");actualHouseAssignments++;}
+  }
+ }
+}
+assert.equal(midpointComparisons,144);assert.ok(actualHouseAssignments>=80);
+const basicInput={date:"2000-01-01",time:"12:00",timezone:"UTC",latitude:28,longitude:77};
+for(const patch of [{latitude:66},{latitude:NaN},{longitude:181},{latitude:null},{ayanamsa:"raman"},{houseSystem:"placidus"}]){
+ assert.throws(()=>birthGeometry.calculateBirthBhavaGeometry({...basicInput,...patch}));geometryNegative++;
+}
+console.log("INDEPENDENT_BHAVA_GEOMETRY_PASS "+JSON.stringify({charts:midRef.rows.length,midpointComparisons,midpointMaxError,actualHouseAssignments,geometryNegative,scope:"Swiss Porphyry division points used as named quadrant midpoints, independent astronomical geometry only; full Bhava Bala not certified"}));
