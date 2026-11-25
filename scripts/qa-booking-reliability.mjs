@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { availableBookingActions, consultationIntervalsOverlap } from '../lib/consultations/booking-policy.ts';
 import { consultationDayBounds, parseConsultationLocalDateTime } from '../lib/consultations/slot-time.ts';
+import {validConsultationSlotWindow,isBookableConsultationSlot,verifiedConsultationPractitioner,validOptionalConsultationBirth} from '../lib/consultations/slot-contract.ts';
 let count = 0;
 const check = (name, fn) => { fn(); count++; console.log('BOOKING_RELIABILITY_PASS '+name); };
 check('IST midnight is independent of process timezone', () => {
@@ -48,5 +49,27 @@ check('async controls recover without blind retry and reload confirmed state', (
   assert.ok(text.includes('expectedStatuses.includes(booking.status)'));
   assert.ok(text.includes('mounted.current && !committed'));
   assert.ok(readFileSync('lib/security/csrf.ts','utf8').includes('getCsrfToken(init.signal)'));
+});
+check('slot windows are real civil times and fit a complete session',()=>{
+ const slot={dayOfWeek:2,startTime:"10:00",endTime:"10:30",isActive:true,isHoliday:false,consultationType:"CHAT"};
+ assert.equal(isBookableConsultationSlot(slot),true);
+ for(const patch of [{dayOfWeek:2.5},{startTime:"24:00"},{startTime:"10:60"},{endTime:"10:29"},{endTime:"10:00"},{endTime:"09:59"},{consultationType:"UNKNOWN"}])assert.equal(validConsultationSlotWindow({...slot,...patch}),false);
+ assert.equal(isBookableConsultationSlot({...slot,isActive:false}),false);
+ assert.equal(isBookableConsultationSlot({...slot,isHoliday:true}),false);
+ assert.equal(validOptionalConsultationBirth("1990-02-30","10:00"),false);
+ assert.equal(validOptionalConsultationBirth("1990-02-28","24:00"),false);
+ assert.equal(validOptionalConsultationBirth("1990-02-28","10:00"),true);
+ assert.equal(validOptionalConsultationBirth("",""),true);
+ const profile={status:"APPROVED",user:{role:"ASTROLOGER",emailVerified:new Date(),emailVerifiedAt:null}};
+ assert.equal(verifiedConsultationPractitioner(profile),true);
+ assert.equal(verifiedConsultationPractitioner({...profile,status:"PENDING_REVIEW"}),false);
+ assert.equal(verifiedConsultationPractitioner({...profile,user:{...profile.user,emailVerified:null}}),false);
+ assert.equal(verifiedConsultationPractitioner({...profile,user:{...profile.user,role:"USER"}}),false);
+});
+check('availability mutation and booking admission share calendar locks',()=>{
+ const availability=readFileSync('app/api/astrologer/availability/route.ts','utf8');
+ assert.equal((availability.match(/await lockConsultationCalendar/g)||[]).length,3);
+ const booking=readFileSync('app/api/consultation-bookings/route.ts','utf8');
+ assert.ok(booking.includes('isBookableConsultationSlot(freshSlot)')&&booking.includes('verifiedConsultationPractitioner(fresh)')&&booking.includes('FOR UPDATE'));
 });
 console.log('BOOKING_RELIABILITY='+count+'/'+count+'_PASS');

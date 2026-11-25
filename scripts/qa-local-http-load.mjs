@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {performance} from "node:perf_hooks";
 const db=new URL(process.env.DATABASE_URL||"postgresql://invalid/invalid");
-assert.ok(process.env.CI==="true"&&["localhost","127.0.0.1"].includes(db.hostname)&&db.pathname==="/naksharix"&&db.port==="5432"&&process.env.EMAIL_PROVIDER==="disabled"&&process.env.AI_ASTROLOGER_ENABLED==="false"&&process.env.AI_REPORT_GENERATOR_ENABLED==="false","DISPOSABLE_LOAD_ONLY");
+assert.ok(process.env.CI==="true"&&["localhost","127.0.0.1"].includes(db.hostname)&&db.pathname==="/naksharix"&&db.port==="5432"&&process.env.EMAIL_PROVIDER==="disabled"&&process.env.AI_ASTROLOGER_ENABLED==="false"&&process.env.AI_REPORT_GENERATOR_ENABLED==="false"&&!process.env.VERCEL_ENV,"DISPOSABLE_LOAD_ONLY");
 const origin="http://localhost:3000";
 const paths=["/api/health","/api/ops/readiness","/reports","/free-kundli","/panchang","/api/puja/calendar"];
 const concurrency=12,requests=120;
@@ -19,3 +19,31 @@ const percentile=(arr,q)=>arr.length?Math.round([...arr].sort((a,b)=>a-b)[Math.c
 const report={concurrency,requests,passed:requests-failures.length,failures,elapsedMs:Math.round(performance.now()-begin),routes:[...stats].map(([path,times])=>({path,passed:times.length,p50:percentile(times,.5),p95:percentile(times,.95),max:percentile(times,1)})),scope:"isolated synthetic CI, no production capacity extrapolation",limitP95Ms:8000};
 console.log("ISOLATED_HTTP_LOAD="+JSON.stringify(report));
 assert.equal(failures.length,0);assert.ok(report.routes.every(x=>x.passed===20&&x.p95<=8000),"Per-route p95 8s ceiling");
+
+
+// Keep the prior 120-request baseline intact. A separate mixed public/private
+// profile covers more route families and verifies authorization under load.
+const mixed=[
+ ["/api/health",200],["/api/ops/readiness",200],["/api/puja/calendar",200],["/api/ai/status",200],
+ ["/reports",200],["/reports/premium-kundli",200],["/free-kundli",200],["/panchang",200],
+ ["/shop",200],["/consultation",200],["/login",200],["/api/admin/readiness",404]
+];
+const mixedConcurrency=24,mixedRepeats=20,mixedRequests=mixed.length*mixedRepeats;
+let next=0;const mixedFailures=[],mixedStats=new Map(mixed.map(([path])=>[path,[]]));const started=performance.now();
+await Promise.all(Array.from({length:mixedConcurrency},async()=>{
+ while(next<mixedRequests){
+  const n=next++,[path,status]=mixed[n%mixed.length],t=performance.now();
+  try{
+   const r=await fetch(origin+path,{redirect:"manual",cache:"no-store",signal:AbortSignal.timeout(15000)});
+   const body=await r.text();
+   if(r.status!==status||!body.length)throw Error("HTTP_"+r.status);
+   if(path==="/api/health"){const d=JSON.parse(body).data;if(d.status!=="ok"||d.checks.database!=="ok")throw Error("DEGRADED");}
+   if(path==="/api/ops/readiness"&&JSON.parse(body).data.services.databaseSchema.ready!==true)throw Error("SCHEMA_DEGRADED");
+   if(path==="/api/admin/readiness"&&(JSON.parse(body).data||!JSON.parse(body).error))throw Error("PRIVATE_PAYLOAD");
+   mixedStats.get(path).push(performance.now()-t);
+  }catch(error){mixedFailures.push({path,code:/^HTTP_\d+$|^DEGRADED$|^SCHEMA_DEGRADED$|^PRIVATE_PAYLOAD$/.test(error.message)?error.message:"NETWORK_OR_PAYLOAD"});}
+ }
+}));
+const mixedReport={concurrency:mixedConcurrency,requests:mixedRequests,passed:mixedRequests-mixedFailures.length,failures:mixedFailures,elapsedMs:Math.round(performance.now()-started),routes:[...mixedStats].map(([path,times])=>({path,passed:times.length,p50:percentile(times,.5),p95:percentile(times,.95),max:percentile(times,1)})),limitP95Ms:8000,scope:"isolated mixed read-only HTTP load, 11 public route checks and 1 private route denial; not production capacity"};
+console.log("ISOLATED_MIXED_HTTP_LOAD="+JSON.stringify(mixedReport));
+assert.equal(mixedFailures.length,0);assert.ok(mixedReport.routes.every(x=>x.passed===mixedRepeats&&x.p95<=8000),"Mixed-route p95 8s ceiling");

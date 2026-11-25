@@ -10,6 +10,7 @@ import { hasConsultationConflict, lockConsultationCalendar } from "@/lib/consult
 import { logger } from "@/lib/monitoring/logger";
 import { consultationSlotWeekday, parseConsultationSlotTime } from "@/lib/consultations/slot-time";
 import { CONSULTATION_SESSION_MINUTES, getConsultationSessionPrice } from "@/lib/consultations/pricing";
+import {isBookableConsultationSlot,verifiedConsultationPractitioner,validOptionalConsultationBirth} from "@/lib/consultations/slot-contract";
 
 const schema = z.object({
   astrologerProfileId: z.string().min(1),
@@ -22,7 +23,7 @@ const schema = z.object({
   birthTime: z.string().optional().or(z.literal("")),
   birthPlace: z.string().max(160).optional().or(z.literal("")),
   question: z.string().min(5).max(800)
-});
+}).strict().refine(x=>validOptionalConsultationBirth(x.birthDate,x.birthTime),"Enter a real past birth date and valid optional birth time.");
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,9 +34,10 @@ export async function POST(request: NextRequest) {
       return fail("Consultation confirmation email must match your signed-in account.", 403);
 
     const profile = await prisma.astrologerProfile.findFirst({
-      where: { id: body.astrologerProfileId, status: "APPROVED" }
+      where: { id: body.astrologerProfileId, status: "APPROVED" },
+      include:{user:{select:{role:true,emailVerified:true,emailVerifiedAt:true}}}
     });
-    if (!profile) return fail("Astrologer profile not found", 404);
+    if (!profile||!verifiedConsultationPractitioner(profile)) return fail("Astrologer profile not found", 404);
     const sessionPrice = getConsultationSessionPrice(Number(profile.consultationPrice),
       profile.pricePerSession === null ? null : Number(profile.pricePerSession));
     if (sessionPrice === null) return fail("This astrologer has no verified positive session fee.", 422);
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
         isHoliday: false
       }
     });
-    if (!slot) return fail("Selected slot is invalid or inactive", 422);
+    if (!slot||!isBookableConsultationSlot(slot)) return fail("Selected slot is invalid, inactive or shorter than a full session", 422);
 
     const scheduledAt = parseConsultationSlotTime(body.bookingDate, slot.startTime);
     if (!scheduledAt || scheduledAt < new Date()) {
@@ -64,6 +66,17 @@ export async function POST(request: NextRequest) {
 
     const booking = await prisma.$transaction(async (tx) => {
       await lockConsultationCalendar(tx, profile.id);
+      // Lock authoritative rows against concurrent slot/approval/price edits.
+      // Under Serializable, a changed row after the initial snapshot aborts
+      // rather than creating a booking from stale public information.
+      const lockedProfile=await tx.$queryRaw<Array<{id:string}>>`SELECT id FROM "AstrologerProfile" WHERE id=${profile.id} FOR UPDATE`;
+      const lockedSlot=await tx.$queryRaw<Array<{id:string}>>`SELECT id FROM "AvailabilitySlot" WHERE id=${slot.id} AND "astrologerProfileId"=${profile.id} FOR UPDATE`;
+      if(!lockedProfile.length||!lockedSlot.length)return null;
+      const fresh=await tx.astrologerProfile.findUnique({where:{id:profile.id},include:{user:{select:{role:true,emailVerified:true,emailVerifiedAt:true}}}});
+      const freshSlot=await tx.availabilitySlot.findUnique({where:{id:slot.id}});
+      if(!fresh||!verifiedConsultationPractitioner(fresh)||!freshSlot||!isBookableConsultationSlot(freshSlot)||
+        freshSlot.dayOfWeek!==slot.dayOfWeek||freshSlot.startTime!==slot.startTime||freshSlot.endTime!==slot.endTime||freshSlot.consultationType!==slot.consultationType||
+        scheduledAt.getTime()<=Date.now()||getConsultationSessionPrice(Number(fresh.consultationPrice),fresh.pricePerSession===null?null:Number(fresh.pricePerSession))!==sessionPrice)return null;
       const collision = await hasConsultationConflict(tx, profile.id, scheduledAt, CONSULTATION_SESSION_MINUTES);
       if (collision) return null;
 
@@ -98,7 +111,7 @@ export async function POST(request: NextRequest) {
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     if (!booking) {
-      return fail("This slot has already been booked for this date and time. Please select another slot.", 409);
+      return fail("This slot was booked or its availability or fee changed. Refresh and choose an available slot.", 409);
     }
 
     let emailSent = false;
