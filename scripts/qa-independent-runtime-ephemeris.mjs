@@ -21,7 +21,7 @@ const toMin=s=>{assert.match(s,/^\d{2}:\d{2}$/);const [h,m]=s.split(":").map(Num
 const signs=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
 const nak=["Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra","Punarvasu","Pushya","Ashlesha","Magha","Purva Phalguni","Uttara Phalguni","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha","Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishta","Shatabhisha","Purva Bhadrapada","Uttara Bhadrapada","Revati"];
 const away=(v,step,tol=.02)=>Math.min(v%step,step-v%step)>tol;
-let angular=0,labels=0,riseSet=0,nearBoundary=0,maxDegrees=0,maxMinutes=0;
+let angular=0,labels=0,riseSet=0,nearBoundary=0,maxDegrees=0,maxMinutes=0,muhuratEndpoints=0,maxMuhuratMinutes=0;
 const actualCharts=new Map();
 for(const f of fixtures){
  const chart=calculateInternalChart({...f.input,ayanamsa:"lahiri",houseSystem:"whole_sign"});
@@ -58,10 +58,21 @@ for(const f of fixtures){
    else{assert.ok(p[field],f.id+":"+field+" missing");const delta=Math.abs(toMin(p[field])-toMin(value));assert.ok(delta<=3,f.id+":"+field+" error "+delta+" minutes, actual "+p[field]+" reference "+value);maxMinutes=Math.max(maxMinutes,delta);}
    riseSet++;
   }
+  // Compare with daylight segments derived from independent Swiss reference rise/set values.
+  // Abhijit is interval 8 of 15. The other windows use traditional weekday-dependent eighths.
+  const r=toMin(f.panchangRiseSet.sunrise),s=toMin(f.panchangRiseSet.sunset);
+  const weekday=new Date(f.input.date+"T12:00:00Z").getUTCDay();
+  const segments={rahuKaal:[7,1,6,4,5,3,2][weekday],yamaganda:[4,3,2,1,0,6,5][weekday],gulikaKaal:[6,5,4,3,2,1,0][weekday]};
+  for(const [key,index] of Object.entries({...segments,abhijitMuhurat:7})){
+   const divisor=key==="abhijitMuhurat"?15:8;
+   const actual=p[key]?.split(" - ");assert.equal(actual?.length,2,f.id+":"+key);
+   const expectedBounds=[r+(s-r)*index/divisor,r+(s-r)*(index+1)/divisor];
+   for(let i=0;i<2;i++){const delta=Math.abs(toMin(actual[i])-Math.round(expectedBounds[i]));assert.ok(delta<=3,f.id+":"+key+" endpoint "+i+" error "+delta);maxMuhuratMinutes=Math.max(maxMuhuratMinutes,delta);muhuratEndpoints++;}
+  }
   if(away(expected.Moon,span/4)){assert.equal(p.nakshatra,nak[Math.floor(expected.Moon/span)]);assert.equal(p.nakshatraPada,Math.floor((expected.Moon%span)/(span/4))+1);labels+=2;}
  }
 }
 const observed=distance(actualCharts.get("delhi-noon").ascendant,actualCharts.get("delhi-seconds").ascendant);
 assert.ok(observed>.25,"Same-minute birth seconds were discarded");
-assert.equal(angular,100);assert.equal(riseSet,32);
-console.log("INDEPENDENT_RUNTIME_EPHEMERIS_PASS "+JSON.stringify({charts:fixtures.length,angular,riseSet,labels,nearBoundary,maxDegrees,maxMinutes,sameMinuteAscendantDelta:observed,scope:"actual chart and Panchang runtime; independent synthetic reference; no predictive certification"}));
+assert.equal(angular,100);assert.equal(riseSet,32);assert.equal(muhuratEndpoints,64);
+console.log("INDEPENDENT_RUNTIME_EPHEMERIS_PASS "+JSON.stringify({charts:fixtures.length,angular,riseSet,labels,nearBoundary,maxDegrees,maxMinutes,muhuratEndpoints,maxMuhuratMinutes,sameMinuteAscendantDelta:observed,scope:"actual chart and Panchang runtime; independent synthetic reference; no predictive certification"}));

@@ -10,6 +10,7 @@ import {getReportStorageReadiness} from "@/lib/storage/report-storage";
 import {getPackageDefinition,packagePriceOffers,packagePriceMatches,PACKAGE_TERMS_VERSION,packageEntitled} from "@/lib/digital-packages/catalogue";
 import {preparePackageItems,type PackageDraft} from "@/lib/digital-packages/input";
 import {reminderServiceReady} from "@/lib/calendar/reminder-readiness";
+import {referenceReminderSalesWindowOpen} from "@/lib/calendar/reminder-contract";
 export const packageOrderSelect={id:true,productKey:true,productVersion:true,pricePaise:true,status:true,expiresAt:true,createdAt:true,items:{select:{id:true,kind:true,position:true,status:true,attempts:true,pdfSize:true},orderBy:{position:"asc" as const}}} satisfies Prisma.DigitalPackageOrderSelect;
 export async function packageSchemaReady(){
  try{const [row]=await prisma.$queryRaw<{ready:boolean}[]>`SELECT to_regclass('public."DigitalPackageOrder"') IS NOT NULL AND to_regclass('public."DigitalPackageItem"') IS NOT NULL AND EXISTS(SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname='PaymentPurpose' AND e.enumlabel='DIGITAL_PACKAGE') AS ready`;return row?.ready===true;}catch{return false;}
@@ -20,7 +21,7 @@ export async function availablePackageOffers(){
  if(!allowed)return [];
  const all=packagePriceOffers(env.DIGITAL_PACKAGE_APPROVED_OFFERS,true);
  if(!all.length||!await packageSchemaReady())return [];
- const reminderReady=all.some(p=>p.key==="reference-reminders-2027")?await reminderServiceReady():false;
+ const reminderReady=all.some(p=>p.key==="reference-reminders-2027")&&referenceReminderSalesWindowOpen(new Date())?await reminderServiceReady():false;
  return all.filter(p=>(!p.subjects||getActiveAstrologyProviderName()==="own_engine")&&(p.key!=="reference-reminders-2027"||reminderReady));
 }
 export async function lockPackage(tx:Prisma.TransactionClient,orderId:string){
@@ -45,6 +46,9 @@ export async function preparePackage(userId:string,input:PackageDraft){
    const closed=await tx.digitalPackageOrder.updateMany({where:{id:row.id,userId,status:"DRAFT",paymentId:null},data:{status:"CANCELED"}});
    if(closed.count)await tx.digitalPackageItem.updateMany({where:{orderId:row.id},data:{privateInput:RuntimePrisma.DbNull}});
   }
+  // A calendar-year package confers one per-event entitlement, so a second purchase
+  // while an earlier order remains active has no additional benefit.
+  if(input.productKey==="reference-reminders-2027"&&await tx.digitalPackageOrder.findFirst({where:{userId,productKey:input.productKey,status:{in:["DRAFT","PAYMENT_PENDING","REVIEW","PAID"]}},select:{id:true}}))return {kind:"conflict" as const};
   if(await tx.digitalPackageOrder.count({where:{userId,status:{in:["DRAFT","PAYMENT_PENDING","REVIEW"]}}})>=5)return {kind:"limit" as const};
   const order=await tx.digitalPackageOrder.create({data:{userId,clientIntent:input.clientIntent,productKey:offer.key,productVersion:offer.version,pricePaise:offer.pricePaise,consentVersion:PACKAGE_TERMS_VERSION,inputDigest:digest,expiresAt:new Date(now.getTime()+24*3600000),items:{create:items.map((item,position)=>({position,kind:item.kind,privateInput:JSON.parse(JSON.stringify(item.privateInput)) as Prisma.InputJsonValue}))}},select:packageOrderSelect});
   return {kind:"saved" as const,order};

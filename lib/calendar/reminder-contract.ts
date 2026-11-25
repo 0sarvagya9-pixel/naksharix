@@ -22,4 +22,5 @@ export function reminderDueAt(event:ReferenceEvent,leadDays:1|7){
  due.setUTCDate(due.getUTCDate()-leadDays);
  return due;
 }
+export function referenceReminderSalesWindowOpen(now:Date){return now<REMINDER_END&&referenceReminderEvents().some(event=>reminderDueAt(event,1)>now);}
 export function reminderWindowOpen(due:Date,now:Date){return Number.isFinite(due.getTime())&&Number.isFinite(now.getTime())&&now>=due&&now.getTime()<due.getTime()+86400000;}

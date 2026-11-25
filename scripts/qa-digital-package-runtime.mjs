@@ -115,6 +115,29 @@ try{
    const stranger=await reminder.reminderAccount(other.id,clock);assert.equal(stranger.orders.length,0);assert.equal(stranger.reminders.length,0);
    // A bounded worker must never sell more scheduling slots for the same day than it can process.
    assert.equal(reference.REMINDER_DAILY_CAPACITY,5);
+   assert.equal(reference.referenceReminderSalesWindowOpen(clock),true);
+   assert.equal(reference.referenceReminderSalesWindowOpen(reference.reminderDueAt(events[events.length-1],1)),false);
+   assert.equal((await ledger.preparePackage(user.id,draft(def))).kind,"conflict","No duplicate annual entitlement purchase");
+   // Six independently paid synthetic accounts compete for five slots on one later delivery day.
+   const capacityEvent=options[options.length-1],capacityAccounts=[];
+   for(let i=0;i<6;i++){
+    const customer=await prisma.user.create({data:{email:"reminder-capacity-"+i+"-"+id+"@example.invalid",name:"Synthetic Reminder Capacity",emailVerified:new Date()}});userIds.push(customer.id);
+    const prepared=await ledger.preparePackage(customer.id,draft(def));assert.equal(prepared.kind,"saved");
+    const capacityOrder=prepared.order;
+    const capacityPayment=await prisma.payment.create({data:{userId:customer.id,provider:"RAZORPAY",purpose:"DIGITAL_PACKAGE",status:"PAID",amount:100,currency:"INR",providerPaymentId:"pay_CAP"+id+i,metadata:{...metadata,digitalPackageId:capacityOrder.id}}});
+    await prisma.digitalPackageOrder.update({where:{id:capacityOrder.id},data:{status:"PAID",paymentId:capacityPayment.id}});
+    capacityAccounts.push({userId:customer.id,input:{...inputFor(capacityEvent),orderId:capacityOrder.id}});
+   }
+   const admissions=await Promise.all(capacityAccounts.map(c=>reminder.scheduleReminder(c.userId,c.input,clock)));
+   assert.equal(admissions.filter(Boolean).length,5);assert.equal(admissions.filter(a=>a===null).length,1);
+   const first=admissions.findIndex(Boolean),denied=admissions.findIndex(a=>a===null);
+   assert.equal(await reminder.cancelReminder(capacityAccounts[first].userId,admissions[first].id),true);
+   assert.ok(await reminder.scheduleReminder(capacityAccounts[denied].userId,capacityAccounts[denied].input,clock));
+   const capacityDue=reference.reminderDueAt(capacityEvent,1);
+   assert.equal(await prisma.referenceReminder.count({where:{dueAt:capacityDue,status:"SCHEDULED"}}),5);
+   // Cancel synthetic future capacity records so the original reminder lifecycle stays isolated.
+   for(const c of capacityAccounts){const accountState=await reminder.reminderAccount(c.userId,clock);for(const a of accountState.reminders.filter(r=>r.status==="SCHEDULED"))assert.equal(await reminder.cancelReminder(c.userId,a.id),true);}
+   console.log("REFERENCE_REMINDER_CAPACITY_PASS;SIX_CONCURRENT_ACCOUNTS;FIVE_ADMITTED;ONE_DENIED;CANCELED_SLOT_REUSED;DUPLICATE_ANNUAL_ORDER_DENIED;EXPIRED_OFFER_DENIED");
    const messages=[];const transport=async message=>{messages.push(message);return {sent:true,reason:"Synthetic provider acceptance only",missing:[]};};
    const due=new Date(saved.dueAt.getTime()+7*60000);
    await Promise.all([reminder.runReferenceReminderRecovery(due,transport),reminder.runReferenceReminderRecovery(due,transport)]);

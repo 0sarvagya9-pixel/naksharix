@@ -37,7 +37,7 @@ export default function ShubhMuhuratPage() {
             <h2 className="mt-4 font-cinzel text-2xl font-black">Today&apos;s calculated Abhijit window — Delhi</h2>
             <p className="mt-3 text-lg text-[#FFD700]">{panchang.abhijitMuhurat ?? "Unavailable for this location/date"}</p>
             <p className="mt-2 text-sm naksh-muted-text">{panchang.date} · {panchang.location} · {panchang.timezone} · Nakshatra: {panchang.nakshatra} · Tithi: {panchang.tithi}</p>
-            <p className="mt-3 text-xs leading-6 naksh-muted-text">Calculated sunrise/sunset reference; lunar values are sampled at local noon. This is not a personal wedding or ritual muhurat. Select your city and date in Panchang. Independently cross-check important ceremony timings.</p>
+            <p className="mt-3 text-xs leading-6 naksh-muted-text">The displayed Abhijit interval is the middle one-fifteenth of local daylight, calculated from sunrise and sunset. Lunar values are sampled at local noon. This is not a personal wedding or ritual muhurat. Select your city and date in Panchang. Independently cross-check important ceremony timings.</p>
           </CardContent>
         </Card>
         <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
