@@ -64,10 +64,10 @@ test.describe("NAKSHARIX live menu accessibility and positioning", () => {
       }),{message:"Actual pointer hit target on "+route}).toBe(true);
       await trigger.hover();
       const popup = navigation.getByRole("region", { name: "Horoscope options" });
-      await expect(popup, "Dropdown not accessible on " + route).toBeVisible();
-      await expect(trigger).toHaveAttribute("aria-expanded","true");
       const link = popup.getByRole("link", { name: "Weekly Horoscope", exact: true });
       try {
+        await expect(popup, "Dropdown not accessible on " + route).toBeVisible();
+        await expect(trigger).toHaveAttribute("aria-expanded","true");
         await expect(link).toBeVisible();
         // The recorded failure closed in under 100 ms without user movement.
         // Keep the pointer stationary long enough to cover hydration/layout

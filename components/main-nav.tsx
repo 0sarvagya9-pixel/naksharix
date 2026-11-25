@@ -334,7 +334,17 @@ function useDesktopDisclosure(routeKey: string) {
       // Only leaving the actual document viewport invalidates the last
       // pointer sample. A bubbling mouseout with relatedTarget=null is NOT
       // evidence of a viewport exit (e.g. removing a hydrated child).
-      if(event.target===viewport&&event.relatedTarget===null)reset();
+      if(event.target!==viewport||event.relatedTarget!==null)return;
+      // Actual Firefox trace: the root emits pointerleave and mouseleave
+      // with a null related target at (488,70), while elementFromPoint
+      // still returns the Horoscope link. That is not a physical exit.
+      const x=event.clientX,y=event.clientY;
+      const interior=x>1&&y>1&&x<viewport.clientWidth-1&&y<viewport.clientHeight-1;
+      if(interior&&document.elementFromPoint(x,y)){
+        reconcile();
+        return;
+      }
+      reset();
     };
     const blur=reset;
     setHover(false);setFocus(element.contains(document.activeElement));
