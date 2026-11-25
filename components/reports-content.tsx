@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, ClipboardList, CreditCard, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import { ReportComparison } from "@/components/report-comparison";
 import {reportSurfaceCopy} from "@/lib/reports/public-intake";
 export function ReportsContent({manualOfferings,automaticDelivery=false}:{automaticDelivery?:boolean;manualOfferings:Record<string,{pricePaise:number;deliveryDays:number|null;note:string}>}) {
   const { locale } = useLanguage();
+  const [comparisonHydrated,setComparisonHydrated]=useState(false);
+  useEffect(()=>setComparisonHydrated(true),[]);
   const labels = reportLabels(locale),surface=reportSurfaceCopy[locale];
 
   return (
@@ -30,7 +33,7 @@ export function ReportsContent({manualOfferings,automaticDelivery=false}:{automa
           <span>{surface.priceNote}</span>
           <a href="#report-information">{surface.how}</a>
         </div>
-        <details className="mt-2 rounded-xl border border-[#e7d8be] bg-white px-3 py-2 sm:px-4" id="compare-reports">
+        <details className="mt-2 rounded-xl border border-[#e7d8be] bg-white px-3 py-2 sm:px-4" id="compare-reports" data-hydrated={comparisonHydrated ? "true" : "false"}>
           <summary tabIndex={0} className="min-h-10 cursor-pointer py-2 text-sm font-semibold text-[#70283d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{locale === "hi" ? "अधिकतम तीन रिपोर्ट की तुलना करें" : locale==="hinglish"?"Teen reports tak compare karein":"Compare up to three reports"}</summary>
           <ReportComparison/>
         </details>

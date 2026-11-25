@@ -4,6 +4,7 @@ import {lahiriAyanamsa} from "@/lib/astrology/own-engine/zodiac";
 import {buildQuadrantBhavaMidpoints,assignMidpointBhava,calculateBhavaBalaEvidence,calculateSaptavargajaEvidence,calculateFivefoldFriendship} from "./classical-components";
 import {calculateInternalShadbala,calculateClassicalStrengthBasis} from "./shadbala";
 import {calculateSolarStrengthContext,calculateTemporalStrengthEvidence} from "./temporal-components";
+import {calculateClassicalCalendarCandidate} from "./calendar-lords";
 
 /** Internal named quadrant geometry. Not a change to the approved D1
  * whole-sign chart; do not present these as independently accepted
@@ -45,6 +46,9 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput){
  const engineering=calculateInternalShadbala(planets,{ascendantLongitude:geometry.ascendant,bhavaMidpoints:geometry.midpoints,date:normalizeBirthDate(geometry.chart.normalizedInput.dateOfBirth),localTime:normalizeBirthTime(geometry.chart.normalizedInput.timeOfBirth)});
  const solar=calculateSolarStrengthContext(new Date(geometry.utc),geometry.chart.normalizedInput.latitude,geometry.chart.normalizedInput.longitude);
  const temporal=calculateTemporalStrengthEvidence(planets,solar);
+ const calendarCandidate=calculateClassicalCalendarCandidate(solar.sunriseUtc,geometry.chart.normalizedInput.longitude,solar.solarDayLord);
+ // Preserve the original unqualified path. Evaluate the named calendar convention separately.
+ const temporalWithCalendarCandidate=calendarCandidate?calculateTemporalStrengthEvidence(planets,solar,calendarCandidate):null;
  const bhava=calculateBhavaBalaEvidence(planets,geometry.midpoints,{polarity:temporal.polarity??undefined,aspectReading:"additional_full_mercury_jupiter",birthPhase:solar.birthPhase??undefined});
- return {geometry,friendship,positional,engineering,solar,temporal,bhava,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
+ return {geometry,friendship,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
 }

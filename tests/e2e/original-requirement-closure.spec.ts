@@ -83,6 +83,8 @@ test("A18 keyboard-only comparison respects the three-item cap, preserves focus 
  await page.setViewportSize({width:390,height:844});
  await page.goto("/reports",{waitUntil:"domcontentloaded"});
  const details=page.locator("#compare-reports"),summary=details.locator("summary");
+ // Exercise the native keyboard path after client hydration; do not bypass focus assertions.
+ await expect(details).toHaveAttribute("data-hydrated","true");
  await summary.focus();await expect(summary).toBeFocused();await page.keyboard.press("Enter");
  await expect(details).toHaveAttribute("open","");
  const box=details.locator('section[aria-labelledby="compare-reports-heading"]');
@@ -159,6 +161,7 @@ test("A43 all authentication flows share the approved layout without overflow an
    expect(unlabelled,path+" "+locale+" missing labels").toBe(0);
    if(path.startsWith("/login")||path.startsWith("/signup")||path.startsWith("/auth/")){
     const password=frame.locator("#password"),toggle=frame.locator('button[aria-controls="password"]');
+    await expect(toggle,path+" "+locale+" hydrated password control").toBeEnabled();
     await password.fill("Synthetic-Layout-QA-2026!");await toggle.click();await expect(password).toHaveAttribute("type","text");await expect(password).toHaveValue("Synthetic-Layout-QA-2026!");await toggle.click();await expect(password).toHaveAttribute("type","password");
    }
   }

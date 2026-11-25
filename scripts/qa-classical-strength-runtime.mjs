@@ -336,3 +336,41 @@ assert.throws(()=>T.classicalAyanaBase("Sun",NaN));temporalNegative++;
 const polar=T.calculateSolarStrengthContext(new Date("2025-06-21T12:00:00Z"),89,0);
 assert.equal(polar.solarDayLord,null);assert.equal(polar.thirdLord,null);assert.equal(polar.sunriseUtc,null);temporalNegative++;
 console.log("INDEPENDENT_TEMPORAL_STRENGTH_PASS "+JSON.stringify({declinationChecks,solarTimeChecks,solarEventChecks,temporalChecks,cheshtaChecks,temporalNegative,maxDeclinationError,maxSolarTimeSeconds,maxSolarEventSeconds,scope:"actual astronomy context and named arithmetic; year/month epoch, war transfer, complete motion and full independent strength parity remain open"}));
+
+const CAL=require("@/lib/astrology/strength/calendar-lords");
+const calendarCases=[
+ ["1860-01-01",714404108572,"Sun","Saturn","Jupiter"],
+ ["1827-05-02",714404096640,"Mercury","Mercury","Mercury"],
+ ["1970-01-01",714404148749,"Jupiter","Mercury","Moon"],
+ ["2000-01-01",714404159706,"Saturn","Sun","Mercury"],
+ ["2026-01-07",714404169209,"Mercury","Mars","Jupiter"],
+ ["2026-01-08",714404169210,"Jupiter","Jupiter","Jupiter"],
+ ["2026-01-09",714404169211,"Venus","Jupiter","Jupiter"],
+ ["2026-06-06",714404169359,"Saturn","Venus","Jupiter"],
+ ["2026-06-07",714404169360,"Sun","Sun","Sun"],
+ ["2026-06-08",714404169361,"Moon","Sun","Sun"],
+ ["2026-11-25",714404169531,"Mercury","Mercury","Sun"],
+];
+let calendarChecks=0,calendarIntegrationChecks=0;
+for(const [date,elapsedDays,dayLord,monthLord,yearLord] of calendarCases){
+ const r=CAL.calculateClassicalCalendarCandidate(date+"T06:00:00Z",0,dayLord);
+ assert.deepEqual([r.elapsedDays,r.dayLord,r.monthLord,r.yearLord,r.localSolarDate,r.publicEnabled,r.verified],[elapsedDays,dayLord,monthLord,yearLord,date,false,false]);calendarChecks++;
+}
+assert.equal(CAL.calculateClassicalCalendarCandidate("2026-06-06T18:30:00Z",90,"Sun").localSolarDate,"2026-06-07");calendarChecks++;
+assert.equal(CAL.calculateClassicalCalendarCandidate("2026-06-07T05:00:00Z",-90,"Saturn").localSolarDate,"2026-06-06");calendarChecks++;
+for(const args of [[null,0],["bad",0],["2026-02-30T06:00:00Z",0],["2026-06-07T06:00:00Z",181],["2026-06-07T06:00:00Z",NaN],["2026-06-07T06:00:00Z",0,"Moon"],["2026-06-07T06:00:00Z",0,null]]){
+ assert.equal(CAL.calculateClassicalCalendarCandidate(...args),null);calendarChecks++;
+}
+for(const row of solarRef.rows){
+ const b=midRef.rows.find(x=>x.id===row.id),[date,time]=b.utc.slice(0,-1).split("T");
+ const result=birthGeometry.calculateBirthStrengthEvidence({date,time,timezone:"UTC",latitude:b.latitude,longitude:b.longitude});
+ const c=result.calendarCandidate, candidate=result.temporalWithCalendarCandidate;
+ assert.ok(c&&candidate,b.id+" calendar candidate");assert.equal(c.dayLord,result.solar.solarDayLord);
+ assert.equal(candidate.rows.reduce((s,r)=>s+r.components.year,0),15);
+ assert.equal(candidate.rows.reduce((s,r)=>s+r.components.month,0),30);
+ for(const r of candidate.rows){assert.equal(r.components.year,r.planet===c.yearLord?15:0);assert.equal(r.components.month,r.planet===c.monthLord?30:0);}
+ assert.ok(result.temporal.rows.every(r=>r.components.year===null&&r.components.month===null));
+ assert.equal(result.fullShadbalaVerified,false);assert.equal(candidate.verified,false);assert.equal(candidate.publicEnabled,false);
+ calendarIntegrationChecks++;
+}
+console.log("CLASSICAL_CALENDAR_CANDIDATE_PASS "+JSON.stringify({calendarChecks,calendarIntegrationChecks,scope:"named 30/360 local-mean-sunrise arithmetic; independent expert convention review pending; no public activation"}));
