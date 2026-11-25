@@ -126,7 +126,9 @@ try {
     }
     assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 0);
     const saved = await post(endpoint, selected, userCookie);
-    assert.equal(saved.status, 200, await saved.text());
+    assert.equal(saved.status, 200, await saved.clone().text());
+    const acknowledgement = (await saved.json()).data;
+    assert.equal(acknowledgement.subscribed, true);
     const consentRow = await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } });
     assert.equal(consentRow.emailAtConsent, email);
     assert.equal(consentRow.interest, "kundli");
@@ -135,19 +137,27 @@ try {
     assert.equal(consentRow.source, "website-email-updates");
     assert.equal(consentRow.consentVersion, "email-updates-v1-20261124");
     assert.ok(consentRow.confirmedAt instanceof Date);
+    assert.equal(acknowledgement.confirmedAt, consentRow.confirmedAt.toISOString());
     assert.equal(consentRow.revokedAt, null);
     const repeated = await post(endpoint, selected, userCookie);
     assert.equal(repeated.status, 200, await repeated.text());
     assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 1);
     const active = await req("/email-updates", { headers: { cookie: userCookie } });
     assert.equal(active.status, 200);
-    assert.ok((await active.text()).includes("Your email updates permission is active."));
+    const activeHtml = await active.text();
+    assert.match(activeHtml, /lang="hi"/);
+    assert.ok(activeHtml.includes("वेबसाइट पर ईमेल की आपकी अनुमति दर्ज है।"));
+    assert.ok(!activeHtml.includes("आप वेबसाइट के ईमेल अपडेट के लिए सदस्य नहीं हैं।"));
     const revoked = await post(endpoint, { action: "unsubscribe" }, userCookie);
-    assert.equal(revoked.status, 200, await revoked.text());
+    assert.equal(revoked.status, 200, await revoked.clone().text());
+    assert.equal((await revoked.json()).data.subscribed, false);
     assert.ok((await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } })).revokedAt instanceof Date);
     const inactive = await req("/email-updates", { headers: { cookie: userCookie } });
     assert.equal(inactive.status, 200);
-    assert.ok((await inactive.text()).includes("You are not subscribed to email updates."));
+    const inactiveHtml = await inactive.text();
+    assert.match(inactiveHtml, /lang="hi"/);
+    assert.ok(inactiveHtml.includes("आप वेबसाइट के ईमेल अपडेट के लिए सदस्य नहीं हैं।"));
+    assert.ok(!inactiveHtml.includes("वेबसाइट पर ईमेल की आपकी अनुमति दर्ज है।"));
     // Leave no opted-in fixture even in disposable CI.
   });
   await check("OTP replay rejected", async () => {

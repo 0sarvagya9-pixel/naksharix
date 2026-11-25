@@ -12,8 +12,8 @@ export default async function EmailUpdatesPage() {
   const user = await getCurrentUser();
   const account = user ? await prisma.user.findUnique({ where: { id: user.id }, select: { email: true, emailVerified: true, emailVerifiedAt: true, role: true, marketingConsent: { select: { interest: true, country: true, locale: true, emailAtConsent: true, revokedAt: true, consentVersion: true } } } }) : null;
   const existing = account?.marketingConsent;
-  const active = Boolean(existing && !existing.revokedAt && existing.emailAtConsent === account?.email && existing.consentVersion === marketingConsentVersion);
   const eligible = Boolean(account && account.role === "USER" && !user?.isAdminLogin && (account.emailVerifiedAt || account.emailVerified));
+  const active = Boolean(eligible && existing && !existing.revokedAt && existing.emailAtConsent === account?.email && existing.consentVersion === marketingConsentVersion);
   return <main className="mx-auto max-w-xl px-4 py-10 sm:py-16">
     <h1 className="font-cinzel text-3xl font-bold text-[#725022]">Naksharix email updates</h1>
     <p className="mt-4 leading-7">Choose which optional report offers or service updates you want to receive. There is no charge to subscribe, and your account or purchases do not require marketing consent.</p>
