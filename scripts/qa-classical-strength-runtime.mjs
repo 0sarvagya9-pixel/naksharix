@@ -421,3 +421,30 @@ for(const [date,pairs,winners] of warReference){
  chartChecks++;
 }
 console.log("P0_CLASSICAL_CANDIDATE_ARITHMETIC "+JSON.stringify({motionChecks,totalChecks,chartChecks,maxMean,maxSeeghrocha,maxBala,jupiter1912Error,knownParityFailure:"Raman 1912 Jupiter",publicEnabled:false,certified:false}));
+
+/** Keep the Aiyar mismatch evidence. Resolve the cause by selecting a named
+ * independently published BPHS convention rather than overriding cells. */
+const bphsRef=JSON.parse(fs.readFileSync("fixtures/astrology/independent-bphs-ashtakavarga-reference.json","utf8"));
+let bphsChecks=0,bphsRotationChecks=0;
+const bphsOld=calculateInternalAshtakvarga(positions,sample.referenceSigns.Ascendant,"bphs_66_rekhaprada_raw");
+assert.equal(bphsOld.method,"bphs_66_rekhaprada_raw");
+for(let i=0;i<12;i++){assert.equal(bphsOld.sarva[i],sample.sarva[i],"published SAV "+signs[i]);assert.equal(bphsOld.scores[0].bhinna[i],sample.sun[i]);bphsChecks+=2;}
+const bphsPositions=classical.map(planet=>({planet,sign:bphsRef.referenceSigns[planet],degree:null}));
+const bphsAsc=signs.indexOf(bphsRef.referenceSigns.Ascendant);
+const bphsResult=calculateInternalAshtakvarga(bphsPositions,bphsRef.referenceSigns.Ascendant,"bphs_66_rekhaprada_raw");
+assert.equal(bphsResult.publicEnabled,false);assert.equal(bphsResult.verificationLevel,"needs_external_validation");
+for(const row of bphsResult.scores){assert.equal(row.verified,false);for(let i=0;i<12;i++){assert.equal(row.bhinna[(bphsAsc+i)%12],bphsRef.houseOrderedBAV[row.planet][i],row.planet+" published BAV "+i);bphsChecks++;}}
+for(let i=0;i<12;i++){assert.equal(bphsResult.sarva[(bphsAsc+i)%12],bphsRef.houseOrderedSAV[i],"published SAV "+i);bphsChecks++;}
+for(let rotation=0;rotation<12;rotation++){
+ const shifted=bphsPositions.map(p=>({...p,sign:signs[(signs.indexOf(p.sign)+rotation)%12]}));
+ const asc=(bphsAsc+rotation)%12;
+ const out=calculateInternalAshtakvarga(shifted,signs[asc],"bphs_66_rekhaprada_raw");
+ assert.equal(out.checksums.Sarva,337);
+ for(const row of out.scores)for(let h=0;h<12;h++){assert.equal(row.bhinna[(asc+h)%12],bphsRef.houseOrderedBAV[row.planet][h]);bphsRotationChecks++;}
+ for(let h=0;h<12;h++){assert.equal(out.sarva[(asc+h)%12],bphsRef.houseOrderedSAV[h]);bphsRotationChecks++;}
+}
+assert.throws(()=>calculateInternalAshtakvarga(bphsPositions,"Leo","unknown"),/UNSUPPORTED_ASHTAKAVARGA_TRADITION/);
+assert.equal(calculateInternalAshtakvarga(bphsPositions.slice(1),"Leo","bphs_66_rekhaprada_raw").sarva,undefined);
+assert.equal(calculateInternalAshtakvarga(bphsPositions,"Leo").method,"brihat_jataka_aiyar_raw");
+assert.deepEqual(calculateInternalAshtakvarga(positions,sample.referenceSigns.Ascendant).sarva,raw.sarva);
+console.log("P0_ASHTAKAVARGA_NAMED_PARITY "+JSON.stringify({publishedCells:bphsChecks,rotatedCells:bphsRotationChecks,negativeAndPreservation:4,priorSAVDiscrepanciesExplained:4,publicEnabled:false,expertCertified:false}));

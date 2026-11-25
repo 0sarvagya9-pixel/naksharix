@@ -60,7 +60,7 @@ export type PartialAshtakvargaResult = {
   scores: AshtakvargaScore[];
   sarva?: number[];
   checksums?: Record<string, number>;
-  method?: "brihat_jataka_aiyar_raw";
+  method?: "brihat_jataka_aiyar_raw" | "bphs_66_rekhaprada_raw";
   verificationLevel: "blocked_until_verified_formula" | "needs_external_validation";
   publicEnabled: false;
   missingDependencies: string[];

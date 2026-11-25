@@ -47,6 +47,17 @@ const rules: RuleTable = {
   }
 };
 
+/** BPHS 66.46–48 and 56–58 explicitly differ from Aiyar IX.2/6.
+ * Preserve both traditions; do not alter the established default or imply
+ * predictive verification. These four recipient/contributor rows preserve 337.
+ */
+const parasharaRules: RuleTable = {
+ ...rules,
+ Moon: {...rules.Moon, Moon:[1,3,6,7,9,10,11], Mars:[2,3,5,6,10,11], Jupiter:[1,2,4,7,8,10,11]},
+ Venus: {...rules.Venus, Mars:[3,4,6,9,11,12]}
+};
+export type AshtakavargaTradition="brihat_jataka_aiyar_raw"|"bphs_66_rekhaprada_raw";
+
 const expectedTotals: Record<ClassicalPlanet, number> = {
   Sun: 48,
   Moon: 49,
@@ -102,18 +113,20 @@ function targetSign(referenceSign: number, relativeHouse: number) {
   return (referenceSign + relativeHouse - 1) % 12;
 }
 
-export function calculateInternalAshtakvarga(planets: CanonicalPlanet[], ascendantSign: string): PartialAshtakvargaResult {
+export function calculateInternalAshtakvarga(planets: CanonicalPlanet[], ascendantSign: string, tradition:AshtakavargaTradition="brihat_jataka_aiyar_raw"): PartialAshtakvargaResult {
+  if(tradition!=="brihat_jataka_aiyar_raw"&&tradition!=="bphs_66_rekhaprada_raw")throw Error("UNSUPPORTED_ASHTAKAVARGA_TRADITION");
+  const selectedRules=tradition==="bphs_66_rekhaprada_raw"?parasharaRules:rules;
   const {references,invalid} = buildReferenceSigns(planets, ascendantSign);
   const requiredReferences: Reference[] = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Ascendant"];
   const missing = requiredReferences.filter((reference) => !references.has(reference));
   if(invalid.length||missing.length)return createAshtakvargaDependencyResult(planets,[...invalid,...(missing.length?[`Missing sign placement for: ${missing.join(", ")}`]:[])].join("; "));
 
-  const scores: AshtakvargaScore[] = (Object.keys(rules) as ClassicalPlanet[]).map((planet) => {
+  const scores: AshtakvargaScore[] = (Object.keys(selectedRules) as ClassicalPlanet[]).map((planet) => {
     const bhinna = Array.from({ length: 12 }, () => 0);
     const contributions=requiredReferences.map(reference=>{
       const referenceSign=references.get(reference)!;
       const bindus=Array.from({length:12},()=>0);
-      for(const house of rules[planet][reference])bindus[targetSign(referenceSign,house)]=1;
+      for(const house of selectedRules[planet][reference])bindus[targetSign(referenceSign,house)]=1;
       bindus.forEach((value,i)=>bhinna[i]+=value);
       return {reference,sign:signs[referenceSign],bindus};
     });
@@ -135,7 +148,7 @@ export function calculateInternalAshtakvarga(planets: CanonicalPlanet[], ascenda
     scores,
     sarva,
     checksums,
-    method:"brihat_jataka_aiyar_raw",
+    method:tradition,
     verificationLevel: "needs_external_validation",
     publicEnabled: false,
     missingDependencies: ["Independent reference-software fixtures for sign-by-sign validation."],
