@@ -429,7 +429,53 @@
       449.57,
       457.18,
       370.49
-    ]
+    ],
+    "saptavargaja": [
+      125.63,
+      120,
+      112.5,
+      90,
+      151.88,
+      95.63,
+      63.75
+    ],
+    "ojayugma": [
+      15,
+      15,
+      30,
+      15,
+      0,
+      15,
+      30
+    ],
+    "kendradi": [
+      60,
+      60,
+      30,
+      15,
+      15,
+      60,
+      60
+    ],
+    "drekkanaPrinted": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "drekkanaDerivedFromTotal": [
+      15,
+      0,
+      0,
+      15,
+      0,
+      0,
+      0
+    ],
+    "positionalNote": "AstroSage Brihat sample p.121. Printed Drekkana row is 1 throughout; residual of reported Sthana after other displayed components implies 15 or 0, within rounding. Preserve discrepancy. Saturn D7 differs from equal-sevenths calculation; do not fit the source geometry."
   },
   "bhava": {
     "lord": [

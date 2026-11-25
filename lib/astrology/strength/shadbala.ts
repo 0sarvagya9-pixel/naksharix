@@ -1,6 +1,6 @@
 import type { CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
 import {classicalVargaCoordinates,type ClassicalVargaKey} from "@/lib/astrology/varga/partition";
-import {calculateSaptavargajaEvidence,calculateExactDirectionalBala} from "@/lib/astrology/strength/classical-components";
+import {calculateSaptavargajaEvidence,calculateExactDirectionalBala,calculateRamanSaptavargajaCandidate} from "@/lib/astrology/strength/classical-components";
 import type { PartialShadbalaResult, ShadbalaComponent, ShadbalaPlanetScore, StrengthFoundationStatus } from "@/lib/astrology/strength/types";
 
 const classicalPlanets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"] as const;
@@ -65,7 +65,7 @@ function kendradiBala(house: number | null | undefined) {
 
 function drekkanaBala(planet: ClassicalPlanet, longitude: number) {
   const third = Math.min(2, Math.floor((normalize(longitude) % 30) / 10));
-  const preferred = ["Sun", "Mars", "Jupiter"].includes(planet) ? 0 : ["Moon", "Venus"].includes(planet) ? 1 : 2;
+  const preferred = ["Sun", "Mars", "Jupiter"].includes(planet) ? 0 : ["Mercury", "Saturn"].includes(planet) ? 1 : 2; // Raman arts. 36–39; female grahas receive third-decan strength.
   return third === preferred ? 15 : 0;
 }
 
@@ -286,4 +286,16 @@ export function calculatePartialShadbala(planets: CanonicalPlanet[], context?: P
 
 function round(value: number) {
   return Number(value.toFixed(4));
+}
+
+/** Named whole-sign Kendra and Raman dignity weighting, not a certified
+ * full strength. Recompute the sign-relative house rather than reusing a
+ * quadrant assigned house. */
+export function calculateRamanPositionalCandidate(planets:CanonicalPlanet[],planet:ClassicalPlanet,ascendantLongitude:number){
+ if(!Number.isFinite(ascendantLongitude)||ascendantLongitude<0||ascendantLongitude>=360)return null;
+ const p=planets.find(p=>p.planet===planet),dignity=calculateRamanSaptavargajaCandidate(planets,planet);if(!p||!dignity)return null;
+ const lon=absoluteLongitude(p);if(lon===null)return null;
+ const house=(Math.floor(lon/30)-Math.floor(ascendantLongitude/30)+12)%12+1;
+ const basis=calculateClassicalStrengthBasis({...p,house});if(!basis||basis.kendradiVirupas===null)return null;
+ return {planet,house,basis,dignity,virupas:basis.uchchaVirupas+basis.ojayugmaVirupas+basis.kendradiVirupas+basis.drekkanaVirupas+dignity.totalVirupas,method:"raman_weights_whole_sign_kendra_corrected_decan" as const,publicEnabled:false as const,verified:false as const};
 }

@@ -595,3 +595,36 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  assert.equal(residuals.length,97);assert.equal(actual.fullShadbalaVerified,false);assert.equal(actual.fullBhavaBalaVerified,false);
  console.log("P0_RAMAN_ASPECT_AND_BHAVA_CONDITIONAL_PASS "+JSON.stringify({publishedChecks,workedChecks,negativeChecks,boundaryChecks,maxPublished,maxRamanPlanet,maxRamanHouse,actualBirthMatched:residuals.filter(r=>r.matched).length,actualBirthMismatches:residuals.filter(r=>!r.matched).length,fullParityAccepted:false,residuals}));
 }
+
+{
+ const F=JSON.parse(fs.readFileSync("fixtures/astrology/published-classical-comparison.json","utf8")),S=require("@/lib/astrology/strength/shadbala"),C=require("@/lib/astrology/strength/classical-components"),B=require("@/lib/astrology/strength/birth-context");
+ const dms=([s,d,m,a])=>30*(s-1)+d+m/60+a/3600,positions=F.positionsDms.map(dms),p=positions.slice(1).map((l,i)=>point(F.order[i+1],l));
+ const groups={Sun:0,Mars:0,Jupiter:0,Mercury:1,Saturn:1,Moon:2,Venus:2};
+ let boundaryChecks=0,publishedChecks=0,publishedMismatches=[];
+ for(const [g,group] of Object.entries(groups))for(let s=0;s<12;s++)for(const deg of [0,9.999,10,19.999,20,29.999]){
+  const b=S.calculateClassicalStrengthBasis(point(g,30*s+deg));
+  assert.equal(b.drekkanaVirupas,Math.floor(deg/10)===group?15:0);boundaryChecks++;
+ }
+ for(const [i,g] of F.order.slice(1,8).entries()){
+  const r=S.calculateRamanPositionalCandidate(p,g,positions[0]);assert.ok(r);assert.equal(r.verified,false);assert.equal(r.publicEnabled,false);
+  for(const [key,actual] of Object.entries({uchcha:r.basis.uchchaVirupas,saptavargaja:r.dignity.totalVirupas,ojayugma:r.basis.ojayugmaVirupas,kendradi:r.basis.kendradiVirupas,drekkanaDerivedFromTotal:r.basis.drekkanaVirupas,sthana:r.virupas})){
+   const expected=F.strength[key][i],delta=actual-expected;publishedChecks++;
+   if(Math.abs(delta)>.025)publishedMismatches.push({planet:g,key,actual,expected,delta});
+  }
+ }
+ assert.deepEqual(publishedMismatches.map(x=>[x.planet,x.key]),[["Saturn","saptavargaja"],["Saturn","sthana"]]);
+ assert.ok(publishedMismatches.every(x=>Math.abs(x.delta-15)<.025));
+ assert.equal(C.calculateRamanSaptavargajaCandidate(p.slice(1),"Sun"),null);
+ assert.equal(S.calculateRamanPositionalCandidate(p,"Sun",NaN),null);
+ const moola=p.map(x=>x.planet==="Moon"?point("Moon",34):x);
+ assert.equal(C.calculateRamanSaptavargajaCandidate(moola,"Moon").rows.find(x=>x.chart==="D1").virupas,45);
+ const actual=B.calculateBirthStrengthEvidence(F.birth),residuals=[];
+ function compare(scope,point,key,value,expected){const delta=typeof value==="number"&&Number.isFinite(value)?value-expected:null;residuals.push({scope,point,key,value,expected,delta,matched:delta!==null&&Math.abs(delta)<=.25});}
+ for(const [i,g] of F.order.slice(1,8).entries()){
+  const row=actual.positionalVariantStrength.rows.find(r=>r.planet===g),c=row?.components;
+  for(const [key,value] of Object.entries({sthana:c?.sthana,dig:c?.dig,kala:typeof c?.kalaBeforeWar==="number"&&typeof row?.warVirupas==="number"?c.kalaBeforeWar+row.warVirupas:null,cheshta:c?.cheshta,naisargika:c?.naisargika,drik:c?.drik,total:row?.total}))compare("shadbala",g,key,value,F.strength[key][i]);
+ }
+ for(const [i,h] of actual.positionalVariantBhava.houses.entries())for(const [key,value] of Object.entries({lord:h.lordStrengthVirupas,direction:h.directionalVirupas,aspect:h.aspect?.virupas,total:h.arithmeticTotalVirupas}))compare("bhava",i+1,key,value,F.bhava[key][i]);
+ assert.equal(residuals.length,97);assert.equal(actual.fullShadbalaVerified,false);assert.equal(actual.fullBhavaBalaVerified,false);
+ console.log("P0_POSITIONAL_CONVENTION_PASS "+JSON.stringify({boundaryChecks,publishedChecks,publishedMatches:publishedChecks-publishedMismatches.length,publishedMismatches,actualBirthMatched:residuals.filter(x=>x.matched).length,actualBirthMismatches:residuals.filter(x=>!x.matched).length,fullParityAccepted:false,residuals}));
+}

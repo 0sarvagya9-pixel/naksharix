@@ -259,3 +259,12 @@ export function calculateRamanBhavaCandidate(planets:CanonicalPlanet[],midpoints
  });
  return {method:"raman_three_part_bhava_candidate" as const,lordConvention:convention,houses,publicEnabled:false as const,verified:false as const,missingDependencies:[...(!allLords?["complete lord strengths"]:[]),...(!completePositions(planets)?["unique complete classical positions"]:[]),"independent whole-chart strength certification"]};
 }
+
+/** Raman arts. 30, 32–39: named alternative friendship weights. Retain
+ * the independently tested D7 geometry rather than fitting to a vendor. */
+export function calculateRamanSaptavargajaCandidate(planets:CanonicalPlanet[],planet:StrengthGraha){
+ const base=calculateSaptavargajaEvidence(planets,planet);if(!base)return null;
+ const weights=[1.875,3.75,7.5,15,22.5];
+ const rows=base.rows.map(r=>({...r,virupas:r.dignity==="moolatrikona"?45:r.dignity==="own"?30:weights[r.relationship!.compound+2]}));
+ return {planet,rows,totalVirupas:rows.reduce((sum,r)=>sum+r.virupas,0),method:"raman_45_30_22_5_15_7_5_3_75_1_875" as const,publicEnabled:false as const,verified:false as const};
+}
