@@ -73,7 +73,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     <Section className="max-w-4xl">
       <Card className="glass overflow-visible border-[#D4AF37]/25">
         <CardHeader>
-          <CardTitle className="font-cinzel text-3xl">{safeServerTranslation(locale, "reportRequestDetails")}</CardTitle>
+          <CardTitle as="h1" className="font-cinzel text-3xl">{safeServerTranslation(locale, "reportRequestDetails")}</CardTitle>
           <p className="text-sm naksh-muted-text">
             {preparing?"Complete the required details before payment. Your information will not be added to payment metadata.":paymentVerified
               ? automaticDelivery ? autoReportDeliveryMessage(locale) : "Payment is verified. Submit accurate birth details to create the paid report request."

@@ -82,6 +82,8 @@ export function RazorpayCheckoutButton({
   async function startCheckout(pujaConsent = false) {
     if (busyRef.current || lockedRef.current || (payload.purpose === "PUJA_BOOKING" && !pujaConsent)) return;
     verifiedRef.current = false;
+    const slug="reportId" in payload&&!payload.reportRequestId&&!payload.savedReportId&&!payload.preflightToken?getReportSlugForPaidId(payload.reportId):undefined;
+    const preflightHref=slug?`/report-request/new?reportSlug=${encodeURIComponent(slug)}&prepare=1`:null;
     setBusy(true);
     setStatus(tr("creatingSecureOrder"));
 
@@ -93,8 +95,9 @@ export function RazorpayCheckoutButton({
       siteNotice.warning("Sign in to your account before starting payment.", "Sign in required");
       // Resume the same public report or product after sign-in; never place a
       // charge before authentication, and never trust an external redirect.
-      const resume = window.location.pathname + window.location.search;
-      router.push(`/login?redirectTo=${encodeURIComponent(resume)}`);
+      const resume = preflightHref??(window.location.pathname + window.location.search);
+      if(preflightHref)window.location.assign(`/login?redirectTo=${encodeURIComponent(resume)}`);
+      else router.push(`/login?redirectTo=${encodeURIComponent(resume)}`);
       return;
     }
     if (!userResponse?.ok || !userJson?.data?.user?.id) {
@@ -113,10 +116,7 @@ export function RazorpayCheckoutButton({
       return;
     }
 
-    if("reportId" in payload&&!payload.reportRequestId&&!payload.savedReportId&&!payload.preflightToken){
-      const slug=getReportSlugForPaidId(payload.reportId);
-      if(slug){setBusy(false);router.push(`/report-request/new?reportSlug=${encodeURIComponent(slug)}&prepare=1`);return;}
-    }
+    if(preflightHref){setBusy(false);window.location.assign(preflightHref);return;}
 
     const scriptLoaded = await loadRazorpayScript();
     if (!scriptLoaded || !window.Razorpay) {

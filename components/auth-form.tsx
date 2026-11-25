@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { BriefcaseBusiness, Chrome, UserRound } from "lucide-react";
@@ -29,7 +28,6 @@ function landingPath(effectiveRole?: LoginMode) {
 }
 
 export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", showRoleCards = true, resumePath }: { mode: Mode; googleEnabled?: boolean; loginMode?: LoginMode; showRoleCards?: boolean; resumePath?: string | null }) {
-  const router = useRouter();
   const { tr, apiLocale, requiredMessage } = useLanguage();
   const copy = authFormCopy[apiLocale];
   const [error, setError] = useState<AuthFormErrorKey | null>(null);
@@ -109,7 +107,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
         preserveVerificationDestination();
         siteNotice.warning(copy.verifyRequired, copy.successTitle);
-        router.push("/verify-email");
+        window.location.assign("/verify-email");
         return;
       }
 
@@ -128,16 +126,16 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       );
       preserveVerificationDestination();
       siteNotice.success(copy.signupAccepted, copy.successTitle);
-      router.push("/verify-email");
+      window.location.assign("/verify-email");
       return;
     }
 
     siteNotice.success(copy.loginAccepted, copy.successTitle);
     const redirectTo=resume;
     if (redirectTo) {
-      router.push(redirectTo);
+      window.location.assign(redirectTo);
     } else {
-      router.push(landingPath(result.data?.user?.effectiveRole));
+      window.location.assign(landingPath(result.data?.user?.effectiveRole));
     }
   }
 

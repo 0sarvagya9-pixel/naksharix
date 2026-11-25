@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useRef,useState } from "react";
+import { cloneElement,useEffect,useId,useRef,useState,type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2,Mail,X } from "lucide-react";
 import { autoReportDeliveryMessage,checkAutomaticInputs } from "@/lib/reports/automatic-report-input";
@@ -57,6 +57,7 @@ export function ReportRequestForm({
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const submissionInFlight=useRef(false);
   const [prepared,setPrepared]=useState<{token:string;details:Record<string,unknown>}|null>(null);
   const [capturedId,setCapturedId]=useState<string|null>(null);
   const [offset,setOffset]=useState("");
@@ -113,23 +114,24 @@ export function ReportRequestForm({
   }
   async function submit(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();
-    if(loading||!validate())return;
+    if(submissionInFlight.current||loading||!validate())return;
     setStatus(null);
     const birth={name:fullName,gender,dateOfBirth,timeOfBirth,birthPlace:location?.displayName??birthPlace,latitude:location?.latitude,longitude:location?.longitude,timezone:primaryOffset()};
     const automaticDetails=needsSpecialistDetails?autoDetails():undefined;
     if(needsSpecialistDetails){const checked=checkAutomaticInputs(reportSlug,birth,automaticDetails);if(!checked.ok){setStatus(checked.reason);return;}}
     const details={orderId,planType:plan,reportSlug,adminBypass,deliveryEmail:userEmail,fullName,gender,dateOfBirth,timeOfBirth,birthPlace:birth.birthPlace,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,phone,concern,questionOrConcern:concern,language,automaticDetails};
+    submissionInFlight.current=true;
     setLoading(true);
     try{
       if(preflight){
         const response=await secureFetch("/api/report-requests/preflight",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reportSlug,deliveryEmail:userEmail,birth,automaticDetails,concern})});
         const json=await response.json().catch(()=>null);
-        if(!response.ok||typeof json?.data?.token!=="string"){setStatus(json?.error??"Unable to validate details. No payment was started.");return;}
+        if(!response.ok||typeof json?.data?.token!=="string"||json.data.reportId!==preflight.reportId||json.data.price!==preflight.price||json.data.expiresInSeconds!==1200){setStatus(json?.error??"Unable to validate details. No payment was started.");return;}
         setPrepared({token:json.data.token,details});return;
       }
       await savePaidDetails(details);
     }catch{setStatus(preflight?"Unable to validate details. No payment was started.":"Connection interrupted. Check Payment History; do not pay again.");}
-    finally{setLoading(false);}
+    finally{submissionInFlight.current=false;setLoading(false);}
   }
   if(preflight&&prepared)return (
     <section className="space-y-4 rounded-xl border border-[#D4AF37]/30 p-5">
@@ -154,13 +156,13 @@ export function ReportRequestForm({
         <p className="mt-2 text-xs leading-6">Complete your details below and verify your registered email. Your payment is already recorded; you do not need to pay again.</p>
         <Button className="mt-5 w-full" type="button" onClick={()=>paymentDialog.current?.close()}>Complete report details</Button>
       </dialog>}
-      <div className="rounded-lg border border-[#D4AF37]/25 bg-[#D4AF37]/10 p-4 text-sm text-[#FFFFFF]">
+      <div className="rounded-lg border border-[#d8c0a1] bg-[#fff9ef] p-4 text-sm text-[#372630]">
         <div className="flex items-start gap-2">
           {paymentVerified || adminBypass ? <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" /> : null}
           <div>
-            <p className="font-semibold">{reportName}</p>
+            <p className="font-semibold">{reportName}{preflight?` · ${preflight.price}`:""}</p>
             <p className="mt-1">{tr("reportDeliveryEmailNotice")}: <span className="font-semibold">{userEmail}</span></p>
-            <span className="mt-2 block text-[#CBD5E1]">
+            <span className="mt-2 block text-[#55474b]">
               {paymentVerified
                 ? automaticDelivery ? autoReportDeliveryMessage(language) : "Razorpay payment has been verified. This request will be linked to the paid order."
                 : adminBypass
@@ -215,9 +217,9 @@ export function ReportRequestForm({
           <Input value={`${reportName} · ${plan === "VIP" ? tr("vip") : tr("premium")}`} readOnly />
         </Field>
         <div className="space-y-2 md:col-span-2">
-          <Label>{tr("mainQuestionConcern")}</Label>
-          <textarea data-field="concern" value={concern} onChange={(event) => { setConcern(event.target.value); setErrors((e) => ({ ...e, concern: undefined })); }} maxLength={2000} rows={4} className={cn("cosmic-textarea", errorClass(Boolean(errors.concern)))} />
-          {errors.concern ? <p className="text-sm text-destructive">{errors.concern}</p> : null}
+          <Label htmlFor="report-concern">{tr("mainQuestionConcern")}</Label>
+          <textarea id="report-concern" aria-invalid={Boolean(errors.concern)} aria-describedby={errors.concern?"report-concern-error":undefined} data-field="concern" value={concern} onChange={(event) => { setConcern(event.target.value); setErrors((e) => ({ ...e, concern: undefined })); }} maxLength={2000} rows={4} className={cn("cosmic-textarea", errorClass(Boolean(errors.concern)))} />
+          {errors.concern ? <p id="report-concern-error" role="alert" className="text-sm text-destructive">{errors.concern}</p> : null}
         </div>
       </div>
 
@@ -243,12 +245,6 @@ export function ReportRequestForm({
   );
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
-      {children}
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-    </div>
-  );
+function Field({label,error,children}:{label:string;error?:string;children:ReactElement<{id?:string;"aria-invalid"?:boolean;"aria-describedby"?:string}>}){
+ const id=useId();return <div className="space-y-2"><Label htmlFor={id}>{label}</Label>{cloneElement(children,{id,"aria-invalid":Boolean(error),"aria-describedby":error?id+"-error":undefined})}{error?<p id={id+"-error"} role="alert" className="text-sm text-destructive">{error}</p>:null}</div>;
 }

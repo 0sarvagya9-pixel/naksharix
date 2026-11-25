@@ -1,6 +1,5 @@
 "use client";
 import {useState} from "react";
-import Link from "next/link";
 import {manualReports} from "@/lib/manual-catalogue";
 import {getManualReportCheckout} from "@/lib/reports/checkout-catalogue";
 import {automaticReportPublicPreview} from "@/lib/reports/public-preview";
@@ -18,7 +17,7 @@ export function ReportComparison(){
  <p className="mt-2 text-sm text-[#566575]">{copy.intro}</p>
  <fieldset className="mt-4 flex flex-wrap gap-2"><legend className="sr-only">{copy.select}</legend>{reports.map(r=><label key={r.slug} className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#e7d8be] px-3 py-2 text-sm"><input type="checkbox" checked={selected.includes(r.slug)} disabled={!selected.includes(r.slug)&&selected.length>=3} onChange={()=>toggle(r.slug)}/>{r.name[locale]}</label>)}</fieldset>
  <p className="mt-3 text-sm" role="status">{selected.length}/3</p>
- <div className="mt-4 grid gap-4 md:grid-cols-3">{list.map(r=>{const checkout=getManualReportCheckout(r.slug)!;const preview=automaticReportPublicPreview(r.slug,locale);return <article key={r.slug} className="flex flex-col gap-3 rounded-xl border border-[#e7d8be] p-4"><h3 className="text-lg font-bold">{r.name[locale]}</h3><p className="font-semibold text-[#8b3244]">{checkout.price}</p><p className="text-sm">{preview?.summary??r.description[locale]}</p><ul className="list-disc space-y-1 pl-5 text-sm">{(preview?.features??r.includes[locale]).map(x=><li key={x}>{x}</li>)}</ul><Button asChild variant="outline" className="mt-auto"><Link href={`/reports/${r.slug}`}>{copy.details}</Link></Button></article>})}</div>
+ <div className="mt-4 grid gap-4 md:grid-cols-3">{list.map(r=>{const checkout=getManualReportCheckout(r.slug)!;const preview=automaticReportPublicPreview(r.slug,locale);return <article key={r.slug} className="flex flex-col gap-3 rounded-xl border border-[#e7d8be] p-4"><h3 className="text-lg font-bold">{r.name[locale]}</h3><p className="font-semibold text-[#8b3244]">{checkout.price}</p><p className="text-sm">{preview?.summary??r.description[locale]}</p><ul className="list-disc space-y-1 pl-5 text-sm">{(preview?.features??r.includes[locale]).map(x=><li key={x}>{x}</li>)}</ul><Button asChild variant="outline" className="mt-auto"><a href={`/reports/${r.slug}`}>{copy.details}</a></Button></article>})}</div>
  {!selected.length?<p className="mt-3 text-sm">{copy.empty}</p>:null}
  </section>;
 }

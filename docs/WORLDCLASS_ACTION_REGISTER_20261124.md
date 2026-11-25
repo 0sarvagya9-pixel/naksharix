@@ -327,3 +327,7 @@ Frozen cb100ce6 baseline independently confirmed 8/8 workflows, 290 browser pass
 ### 25 November — provider-independent worldwide birthplace search (A03/A16/A45)
 
 Replaced existing public Nominatim autocomplete, prohibited by the provider policy, with actual licensed pinned GeoNames city directory (33,521 verified input rows, 244 country/territory codes, 0 exclusions, 8 shards, CC BY 4.0 attribution; source blob a5e06c8dc35c6754e370752b094f966224ddd4db). Existing seven local anchors retained. No remote query or guessed IANA timezone. Shared location UI supports confirmed coordinates and birth-time UTC offset for settlements absent from directory; includes region/coordinate disambiguation and cancels stale selection requests. Added real HTTP cases for India, UK, Japan, Australia, US, Brazil and unknown location. Production unchanged; exact head runtime qualification required.
+
+### 25 November — complete report pre-payment customer journey
+
+Prior ff948827: auth contrast tests PASS and broad browser 302 passes/10 skips; final closure found one comparison-link client navigation failure. Native report link and direct selected report intent through login/signup/OTP, fresh server document after secure session, input labels and preflight identity/price checks. Added isolated HTTPS browser registration, OTP, chosen report and preflight flow, synthetic OTP hash only, no merchant requests or charges. Exact revision testing required; no production mutation.

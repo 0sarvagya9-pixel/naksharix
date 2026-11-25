@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { secureFetch } from "@/lib/security/csrf";
@@ -24,7 +23,6 @@ function landingPath(role?: string) {
 }
 
 export function EmailVerificationForm() {
-  const router = useRouter();
   const {locale}=useLanguage();const copy=verificationCopy[locale];
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -111,10 +109,10 @@ export function EmailVerificationForm() {
 
       const resume=safeInternalAuthPath(window.sessionStorage.getItem("naksharix-verification-return"));
       window.sessionStorage.removeItem("naksharix-verification-return");
-      router.push(resume??landingPath(result.data?.user?.effectiveRole));
-      router.refresh();
       confirmed=true;
       setCompleted(true);
+      // Read the newly issued secure session on a fresh server document.
+      window.location.assign(resume??landingPath(result.data?.user?.effectiveRole));
     } catch {
       showError("requestFailed");
     } finally {
