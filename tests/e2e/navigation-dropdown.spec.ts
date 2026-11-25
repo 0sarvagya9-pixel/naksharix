@@ -73,9 +73,23 @@ test.describe("NAKSHARIX live menu accessibility and positioning", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/consultation", { waitUntil: "domcontentloaded" });
     const nav = page.getByRole("navigation", { name: "Primary navigation" });
-    await nav.getByRole("link", { name: "Horoscope", exact: true }).hover();
+    const trigger=nav.getByRole("link", { name: "Horoscope", exact: true });
+    await trigger.hover();
     const region = nav.getByRole("region", { name: "Horoscope options" });
     await expect(region).toBeVisible();
+    // Escape must suppress even the CSS hover fallback until genuine exit.
+    await trigger.focus();
+    await page.keyboard.press("Escape");
+    await expect(trigger).toHaveAttribute("aria-expanded","false");
+    await expect(region).toBeHidden();
+    const box=await trigger.boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.move(box!.x+box!.width/2+1,box!.y+box!.height/2);
+    await expect(region).toBeHidden();
+    await page.mouse.move(2,850);
+    await trigger.hover();
+    await expect(region).toBeVisible();
+    await expect(trigger).toHaveAttribute("aria-expanded","true");
     const target = region.getByRole("link", { name: "Weekly Horoscope", exact: true });
     await target.hover();
     await expect(region).toBeVisible();

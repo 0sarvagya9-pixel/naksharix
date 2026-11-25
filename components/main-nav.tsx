@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import Link from "next/link";
 import { createPortal, flushSync } from "react-dom";
 import { usePathname } from "next/navigation";
@@ -292,9 +292,56 @@ function useDesktopDisclosure(routeKey: string) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const element=root.current;
-    setHover(!!element?.matches(":hover"));
-    setFocus(!!element?.contains(document.activeElement));
-    setPinned(false); setDismissed(false); setReady(true);
+    if(!element)return;
+    // Native document-capture input, independent of React's delegated
+    // pointer-enter bookkeeping. Reconcile real hit targets after hydration
+    // and font/layout changes, including a stationary mouse on navigation.
+    let point:{x:number;y:number}|null=null;
+    let outside=false,inside=false,disposed=false,lastTouch=0;
+    const update=(value:boolean)=>{
+      if(inside===value)return;
+      inside=value;setHover(value);
+      // Escape stays effective until a real exit and re-entry.
+      if(value)setDismissed(false);
+    };
+    const reconcile=()=>{
+      if(disposed||document.visibilityState!=="visible")return;
+      if(outside||!element.isConnected||!element.getClientRects().length){update(false);return;}
+      if(point){
+        const hit=document.elementFromPoint(point.x,point.y);
+        update(!!hit&&element.contains(hit));
+      }else update(element.matches(":hover"));
+    };
+    const move=(event:MouseEvent)=>{
+      if("pointerType" in event&&(event as globalThis.PointerEvent).pointerType==="touch"){
+        lastTouch=Date.now();outside=true;point=null;update(false);return;
+      }
+      if(!("pointerType" in event)&&Date.now()-lastTouch<800)return;
+      outside=false;point={x:event.clientX,y:event.clientY};reconcile();
+    };
+    const leave=(event:MouseEvent)=>{
+      if(event.relatedTarget===null){outside=true;point=null;update(false);}
+    };
+    const blur=()=>{outside=true;point=null;update(false);};
+    setHover(false);setFocus(element.contains(document.activeElement));
+    setPinned(false);setDismissed(false);
+    const movement=["pointerover","pointermove","mouseover","mousemove"] as const;
+    for(const name of movement)document.addEventListener(name,move,true);
+    document.addEventListener("mouseout",leave,true);
+    window.addEventListener("blur",blur);
+    window.addEventListener("resize",reconcile);
+    // Bounded-rate repair of a missed native event / changed hit target;
+    // no hidden-tab polling work or synthetic pointer dispatch.
+    const timer=window.setInterval(reconcile,250);
+    const frame=window.requestAnimationFrame(reconcile);
+    void document.fonts.ready.then(reconcile);
+    reconcile();setReady(true);
+    return()=>{
+      disposed=true;window.clearInterval(timer);window.cancelAnimationFrame(frame);
+      for(const name of movement)document.removeEventListener(name,move,true);
+      document.removeEventListener("mouseout",leave,true);
+      window.removeEventListener("blur",blur);window.removeEventListener("resize",reconcile);
+    };
   },[routeKey]);
   useEffect(()=>{
     if(!pinned)return;
@@ -304,10 +351,6 @@ function useDesktopDisclosure(routeKey: string) {
     document.addEventListener("pointerdown",outside);
     return()=>document.removeEventListener("pointerdown",outside);
   },[pinned]);
-  const pointer = (event: PointerEvent<HTMLDivElement>) => {
-    if(event.pointerType==="touch")return;
-    setHover(true); setDismissed(false);
-  };
   const onFocusCapture = (event: FocusEvent<HTMLDivElement>) => {
     setFocus(true);
     if(!event.currentTarget.contains(event.relatedTarget as Node|null))setDismissed(false);
@@ -332,8 +375,6 @@ function useDesktopDisclosure(routeKey: string) {
   const open=!dismissed&&(hover||focus||pinned);
   return {root,trigger,open,toggle:()=>{if(pinned){setPinned(false);setDismissed(true);}else{setPinned(true);setDismissed(false);}},props:{
     "data-menu-ready":ready?"true":"false","data-menu-open":open?"true":"false","data-menu-dismissed":dismissed?"true":"false",
-    onPointerEnter:pointer,onPointerMove:(event:PointerEvent<HTMLDivElement>)=>{if(!dismissed&&event.pointerType!=="touch")setHover(true);},
-    onPointerLeave:()=>{setHover(false);},
     onFocusCapture,onBlurCapture,onKeyDown
   }};
 }
