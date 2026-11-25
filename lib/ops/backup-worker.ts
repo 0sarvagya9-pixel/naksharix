@@ -14,10 +14,12 @@ try {
       !url.hostname.endsWith('.neon.tech')) throw new Error('host');
   // Validate a server-authenticated, read-only connection before any export.
   // This also wakes an autosuspended Neon compute without changing source rows.
-  const pgEnv = { ...process.env,
+  // Do not inherit libpq connection overrides (PGHOSTADDR, PGSERVICE,
+  // PGSSLROOTCERT), custom trust roots or the complete source URL.
+  const pgEnv = { PATH:process.env.PATH || '/usr/bin:/bin', LC_ALL:'C',
     PGHOST:url.hostname, PGPORT:url.port||'5432', PGUSER:decodeURIComponent(url.username),
     PGPASSWORD:decodeURIComponent(url.password), PGDATABASE:decodeURIComponent(url.pathname.slice(1)),
-    PGSSLMODE:'require', PGGSSENCMODE:'disable', PGCONNECT_TIMEOUT:'12',
+    PGSSLMODE:'verify-full', PGSSLROOTCERT:'system', PGSSLCERTMODE:'disable', PGGSSENCMODE:'disable', PGCONNECT_TIMEOUT:'12',
     PGOPTIONS:'-c default_transaction_read_only=on -c statement_timeout=100000 -c lock_timeout=15000'
   };
   const classify = (result) => {
@@ -38,7 +40,7 @@ try {
   let preflight=false;
   diagnostic='CONNECT_PROBE';
   for (let attempt=0; attempt<2; attempt++) {
-    const probe=spawnSync('psql',['--no-psqlrc','--tuples-only','--no-align','--quiet',
+    const probe=spawnSync('psql',['--no-psqlrc','--no-password','--tuples-only','--no-align','--quiet',
       '--command',"SELECT current_setting('transaction_read_only')"],{
       timeout:18000,maxBuffer:65536,encoding:'utf8',env:pgEnv
     });
@@ -53,7 +55,7 @@ try {
   }
   if(!preflight)throw new Error('source connection unavailable');
   diagnostic='PG_DUMP';
-  const result=spawnSync('pg_dump',['--format=custom','--no-owner','--no-privileges',
+  const result=spawnSync('pg_dump',['--no-password','--format=custom','--no-owner','--no-privileges',
     '--schema=public','--file=/tmp/naksh-source.dump'],{
     timeout:110000,maxBuffer:1024*1024,encoding:'utf8',env:pgEnv
   });
