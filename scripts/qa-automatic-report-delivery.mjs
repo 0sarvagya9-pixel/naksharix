@@ -409,6 +409,7 @@ function verifyPromiseCoverage(slug,language,content){
  const fields=publicReportRequiredDetails(slug,language),scope=reportIntakeScope(slug);
  const insights=sections.get("editorial-insights").data;
  assert.equal(sections.get("your-question").data.focus,insights.question.body,slug+" question receipt and printed answer disagree");
+ assert.doesNotMatch(insights.question.body,/Within that scope,|इस दायरे में,|Is scope mein,|Your question concerns [A-Z]/,slug+" question scope sentence boundary");
  assert.ok(insights.plan.length>0);
  assert.equal(new Set(insights.plan.map(card=>card.body)).size,insights.plan.length);
  if(!scope.dateNameOnly){

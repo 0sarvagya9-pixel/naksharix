@@ -97,12 +97,21 @@ export function buildEditorialInsights(chart:BirthChartData,slug:string,question
  const questionHouses=slug==="yearly-horoscope-report"?YEARLY_PLANNING_HOUSES:focus;
  const within=topic&&questionHouses.includes(topic.n);
  const chosen=within?editorialHouse(chart,topic.n,language):main;
+ const focusTopic=chosen.title.toLowerCase();
  const questionIntro=!query
-  ?pick(language,["No question was submitted. A starting point from this reading is ","आपने कोई प्रश्न नहीं दिया। अध्ययन से चिंतन का एक प्रारंभिक विषय है ","Aapne koi question nahi diya. Is reading se ek reflection topic hai "])+chosen.title+". "
+  ?pick(language,[
+   `No question was submitted. You could begin by reflecting on ${focusTopic}. `,
+   `आपने कोई प्रश्न नहीं दिया। आप इस विषय पर विचार कर सकते हैं: ${chosen.title}। `,
+   `Aapne koi sawaal nahi diya. Shuruaat is vishay se kar sakte hain: ${focusTopic}. `,
+  ])
   :within
    ?pick(language,["Your question connects to house "+chosen.house+" in this report. ","इस रिपोर्ट में आपका प्रश्न भाव "+chosen.house+" से जुड़ता है। ","Aapka sawaal is report mein house "+chosen.house+" se judta hai. "])
    :topic
-    ?pick(language,["Your question concerns "+pick(language,H[topic.n-1])+". This product treats "+main.title+" in detail. Within that scope, ","आपका प्रश्न "+pick(language,H[topic.n-1])+" से संबंधित है। इस रिपोर्ट का विस्तृत विषय "+main.title+" है। इस दायरे में, ","Aapka sawaal "+pick(language,H[topic.n-1])+" se juda hai. Is product ka detailed focus "+main.title+" hai. Is scope mein, "])
+    ?pick(language,[
+      `Your question concerns ${H[topic.n-1][0].toLowerCase()}. This report focuses on ${focusTopic}. `,
+      `आपका प्रश्न ${H[topic.n-1][1]} से जुड़ा है। इस रिपोर्ट का मुख्य विषय ${chosen.title} है। `,
+      `Aapka sawaal ${H[topic.n-1][2].toLowerCase()} se juda hai. Is report ka mukhya vishay ${focusTopic} hai. `,
+     ])
     :pick(language,["The chart cannot identify a single reliable answer to this particular question. A related reflection from this product follows. ","कुंडली से इस विशेष प्रश्न का एक निश्चित उत्तर नहीं निकाला जा सकता। इस रिपोर्ट के दायरे में आगे एक चिंतन-विषय है। ","Is particular sawaal ka exact answer chart se tay nahi hota. Is product ke scope mein ek reflection dekhein. "]);
  const questionBody=questionIntro+chosen.interpretation+" "+pick(language,["Use an observed example from your own experience to test whether this traditional theme fits.","अपने अनुभव का एक वास्तविक उदाहरण लेकर देखें कि यह पारंपरिक विषय आपकी स्थिति से कितना मेल खाता है।","Apne experience ka ek real example lekar dekhein ki yeh traditional theme aapki situation par kitni fit hoti hai."]);
  return {overview,cards,plan,question:{label:pick(language,["YOUR QUESTION / REFLECTION","आपका प्रश्न / चिंतन","YOUR QUESTION / REFLECTION"]),title:chosen.title,body:questionBody},planetNotes:notes};
