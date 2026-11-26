@@ -734,3 +734,15 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  // positional and aspect formula while still disagreeing on motion model.
  console.log("P0_HELDOUT_STRENGTH_REFERENCE "+JSON.stringify({positionalMatches,aspectMatches,motionMatches:residuals.filter(x=>x.matched).length,motionComparisons:residuals.length,residuals,fullParityAccepted:false}));
 }
+
+{
+ const M=require("@/lib/astrology/strength/motional-epoch");
+ const F=JSON.parse(fs.readFileSync("fixtures/astrology/heldout-raman-table-1981.json","utf8"));
+ const out=M.calculateMotionalEpochCandidate(new Date(F.utc),F.trueLongitudes);
+ assert.ok(out);assert.equal(out.rows.length,5);
+ assert.equal(out.publicEnabled,false);assert.equal(out.verified,false);
+ assert.ok(Math.abs(out.epoch.days-F.printedElapsedDays)<.005);
+ const observed=out.rows.map(r=>({planet:r.planet,actual:r.virupas,expected:F.publishedCheshta[r.planet],absoluteError:Math.abs(r.virupas-F.publishedCheshta[r.planet])}));
+ for(const r of observed)assert.ok(r.absoluteError<=F.toleranceVirupas,r.planet+" held-out historical table");
+ console.log("P0_HELDOUT_1981_HISTORICAL_MOTION_PASS "+JSON.stringify({matched:5,compared:5,toleranceVirupas:F.toleranceVirupas,maxAbsoluteError:Math.max(...observed.map(r=>r.absoluteError)),observed,vendorParityAccepted:false,expertCertified:false}));
+}
