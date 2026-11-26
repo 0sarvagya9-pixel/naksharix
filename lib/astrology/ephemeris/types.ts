@@ -16,6 +16,7 @@ export type EphemerisProviderMetadata = {
   precisionLevel: PrecisionLevel;
   verified: boolean;
   limitations: string[];
+  physicalLongitudeMethod?: PhysicalLongitudeMethod;
 };
 
 export type AyanamsaOption = {
@@ -27,12 +28,15 @@ export type AyanamsaOption = {
   notes: string;
 };
 
+export type PhysicalLongitudeMethod = "historical_nonlunar" | "apparent_iae_p03";
+
 export type CanonicalChartInput = Pick<
   AstrologyBirthInput,
   "name" | "gender" | "dateOfBirth" | "timeOfBirth" | "birthPlace" | "latitude" | "longitude" | "timezone" | "language"
 > & {
   ayanamsa?: AyanamsaKey;
   houseSystem?: string;
+  physicalLongitudeMethod?: PhysicalLongitudeMethod;
 };
 
 export type CanonicalPoint = {
@@ -68,6 +72,7 @@ export type CanonicalChartResult = {
     key: AyanamsaKey;
     label: string;
     degree: number | null;
+    physicalMeanDegree?: number;
     verified: boolean;
   };
   ascendant: CanonicalPoint;

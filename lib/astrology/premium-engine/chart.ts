@@ -1,4 +1,5 @@
 import * as Astronomy from "astronomy-engine";
+import { apparentTropicalToMeanLahiri, meanLahiriOfDate, terrestrialTimeForCivilEphemeris } from "@/lib/astrology/own-engine/lahiri-reference";
 import { lahiriMoonLongitude } from "@/lib/astrology/own-engine/lahiri-moon";
 import {estimateSiderealMotion} from "@/lib/astrology/own-engine/motion";
 import { calculateVimshottariDasha } from "@/lib/astrology/premium-engine/dasha";
@@ -14,7 +15,7 @@ import {
   parseTimezoneOffsetToHours
 } from "@/lib/astrology/own-engine/time";
 import { lahiriAyanamsa, longitudeToRashi, tropicalToSidereal, wholeSignHouse, boundedDegreeDisplay } from "@/lib/astrology/own-engine/zodiac";
-import type { CanonicalChartInput, CanonicalChartResult, CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
+import type { CanonicalChartInput, CanonicalChartResult, CanonicalPlanet, PhysicalLongitudeMethod } from "@/lib/astrology/ephemeris/types";
 
 type SupportedBody = "Sun" | "Moon" | "Mars" | "Mercury" | "Jupiter" | "Venus" | "Saturn";
 type PlanetName = CanonicalPlanet["planet"];
@@ -41,8 +42,15 @@ export function calculateInternalChart(input: InternalChartInput): CanonicalChar
   const ayanamsa = lahiriAyanamsa(julianDay);
   const ascendantLongitude = calculateAscendant(julianDay, normalized.latitude, normalized.longitude);
   const ascendantRashi = longitudeToRashi(ascendantLongitude);
-  const longitudes = calculateSiderealLongitudes(time, julianDay);
-  const planets = buildCanonicalPlanets(longitudes, ascendantRashi.rashiNumber, time, julianDay);
+  const physicalMethod = normalized.physicalLongitudeMethod ?? "historical_nonlunar";
+  if (physicalMethod !== "historical_nonlunar" && physicalMethod !== "apparent_iae_p03") {
+    throw new Error("Unsupported physical longitude method.");
+  }
+  if (physicalMethod === "apparent_iae_p03" && normalized.ayanamsa !== "lahiri") {
+    throw new Error("The apparent physical longitude method requires Lahiri ayanamsha.");
+  }
+  const longitudes = calculateSiderealLongitudes(time, julianDay, physicalMethod);
+  const planets = buildCanonicalPlanets(longitudes, ascendantRashi.rashiNumber, time, julianDay, physicalMethod);
   const moon = planets.find((planet) => planet.planet === "Moon");
   const moonNakshatra = moon?.absoluteLongitude != null ? nakshatraFromLongitude(moon.absoluteLongitude) : { name: null, pada: null };
   const dasha = moon?.absoluteLongitude != null
@@ -62,6 +70,7 @@ export function calculateInternalChart(input: InternalChartInput): CanonicalChar
       key: "lahiri",
       label: "Lahiri / Chitra Paksha",
       degree: round(ayanamsa),
+      ...(physicalMethod === "apparent_iae_p03" ? {physicalMeanDegree: round(meanLahiriOfDate(terrestrialTimeForCivilEphemeris(time)))} : {}),
       verified: false
     },
     ascendant: {
@@ -94,10 +103,14 @@ export function calculateInternalChart(input: InternalChartInput): CanonicalChar
       : undefined,
     metadata: {
       provider: "naksharix_astronomy_engine_lahiri_internal",
-      calculationMode: "astronomy_engine_geocentric_sidereal_limited_internal",
+      calculationMode: physicalMethod === "apparent_iae_p03"
+        ? "internal_apparent_planets_iae_lahiri_p03_historical_nodes_houses"
+        : "astronomy_engine_geocentric_sidereal_limited_internal",
+      ...(physicalMethod === "apparent_iae_p03" ? {physicalLongitudeMethod: physicalMethod} : {}),
       precisionLevel: "provider_verified",
       verified: false,
       limitations: [
+        ...(physicalMethod === "apparent_iae_p03" ? ["Physical planets use the IAE J2000/P03 mean Lahiri origin. The ascendant and mean nodes retain the historical origin shown in ayanamsa.degree."] : []),
         "Planet positions are calculated internally with astronomy-engine and Lahiri sidereal conversion.",
         "Ascendant and planet positions are provider-regression-tested but not externally verified.",
         "Rahu uses mean lunar node formula; Ketu is opposite Rahu.",
@@ -136,26 +149,28 @@ function normalizeChartInput(input: InternalChartInput): CanonicalChartInput {
   };
 }
 
-function calculateSiderealLongitudes(time: Astronomy.AstroTime, julianDay: number): Record<PlanetName, number> {
-  const entries: Array<[PlanetName, number]> = physicalBodies.map((body) => [body, siderealLongitude(body, time, julianDay)]);
+function calculateSiderealLongitudes(time: Astronomy.AstroTime, julianDay: number, method: PhysicalLongitudeMethod): Record<PlanetName, number> {
+  const entries: Array<[PlanetName, number]> = physicalBodies.map((body) => [body, siderealLongitude(body, time, julianDay, method)]);
   const rahu = meanRahuLongitude(julianDay);
   entries.push(["Rahu", rahu], ["Ketu", normalizeDegrees(rahu + 180)]);
   return Object.fromEntries(entries) as Record<PlanetName, number>;
 }
 
-function siderealLongitude(body: SupportedBody, time: Astronomy.AstroTime, julianDay: number) {
+function siderealLongitude(body: SupportedBody, time: Astronomy.AstroTime, julianDay: number, method: PhysicalLongitudeMethod) {
   if (body === "Moon") return lahiriMoonLongitude(time);
-  const tropical = Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[body], time, true)).elon;
+  const clock = method === "apparent_iae_p03" ? terrestrialTimeForCivilEphemeris(time) : time;
+  const tropical = Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[body], clock, true)).elon;
+  if (method === "apparent_iae_p03") return apparentTropicalToMeanLahiri(tropical, clock);
   return tropicalToSidereal(tropical, julianDay);
 }
 
-function buildCanonicalPlanets(longitudes: Record<PlanetName, number>, ascendantSignNumber: number, time: Astronomy.AstroTime, julianDay: number): CanonicalPlanet[] {
+function buildCanonicalPlanets(longitudes: Record<PlanetName, number>, ascendantSignNumber: number, time: Astronomy.AstroTime, julianDay: number, method: PhysicalLongitudeMethod): CanonicalPlanet[] {
   const sunLongitude = longitudes.Sun;
 
   return planetOrder.map((planet) => {
     const absoluteLongitude = longitudes[planet];
     const rashi = longitudeToRashi(absoluteLongitude);
-    const motion=estimateSiderealMotion(days=>planet==="Rahu"||planet==="Ketu"?normalizeDegrees(meanRahuLongitude(julianDay+days)+(planet==="Ketu"?180:0)):siderealLongitude(planet,Astronomy.MakeTime(new Date(time.date.getTime()+days*86400000)),julianDay+days));
+    const motion=estimateSiderealMotion(days=>planet==="Rahu"||planet==="Ketu"?normalizeDegrees(meanRahuLongitude(julianDay+days)+(planet==="Ketu"?180:0)):siderealLongitude(planet,Astronomy.MakeTime(new Date(time.date.getTime()+days*86400000)),julianDay+days,method));
 
     return {
       planet,

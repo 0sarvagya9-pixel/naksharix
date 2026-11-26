@@ -1,7 +1,8 @@
 import "server-only";
 
 import * as Astronomy from "astronomy-engine";
-import { lahiriMoonLongitude, meanLahiriForMoon, terrestrialTimeForCivilMoon, LUNAR_FRAME_VERSION } from "@/lib/astrology/own-engine/lahiri-moon";
+import { lahiriMoonLongitude, LUNAR_FRAME_VERSION } from "@/lib/astrology/own-engine/lahiri-moon";
+import { meanLahiriOfDate, terrestrialTimeForCivilEphemeris } from "./lahiri-reference";
 import {estimateSiderealMotion} from "@/lib/astrology/own-engine/motion";
 import { calculatePanchang } from "@/lib/astrology/own-engine/panchang";
 import { buildD1Chart, buildD9Chart } from "@/lib/astrology/own-engine/charts";
@@ -114,7 +115,7 @@ export function calculateOwnEngineBirthChart(input: AstrologyBirthInput): BirthC
       ayanamsaName: "Lahiri / Chitra Paksha",
       ayanamsaDegree: Number(ayanamsa.toFixed(6)),
       lunarFrame: LUNAR_FRAME_VERSION,
-      lunarMeanAyanamsaDegree: meanLahiriForMoon(terrestrialTimeForCivilMoon(astronomyTime)),
+      lunarMeanAyanamsaDegree: meanLahiriOfDate(terrestrialTimeForCivilEphemeris(astronomyTime)),
       houseSystem: "Vedic Whole Sign",
       nodeMode: "Mean lunar node benchmark mode",
       julianDay: Number(julianDay.toFixed(8)),

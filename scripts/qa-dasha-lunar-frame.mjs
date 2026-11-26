@@ -25,7 +25,7 @@ const {calculateOwnEngineBirthChart} = require("@/lib/astrology/own-engine");
 const {calculateInternalChart} = require("@/lib/astrology/premium-engine/chart");
 const {calculateVimshottariDasha,resolveDashaBirthInstant} = require("@/lib/astrology/core-calculations");
 const {lahiriAyanamsa} = require("@/lib/astrology/own-engine/zodiac");
-const {meanLahiriForMoon,terrestrialTimeForCivilMoon} = require("@/lib/astrology/own-engine/lahiri-moon");
+const {meanLahiriOfDate,terrestrialTimeForCivilEphemeris} = require("@/lib/astrology/own-engine/lahiri-reference");
 const fixture = JSON.parse(fs.readFileSync(new URL("../fixtures/astrology/independent-dasha-lunar-frames.json",import.meta.url)));
 const signedDegrees = (a,b) => ((a-b+540)%360)-180;
 const DAY = 86400000;
@@ -50,7 +50,7 @@ for (const test of fixture.reference) {
   assert.equal(canonical.nakshatra.pada,test.pada,test.id+" pada");
   assert.equal(moon.pada,test.pada,test.id+" public pada");
   assert.equal(dasha.mahadashas[0].endsAtUtc,canonical.dasha.transitions[0].endsAt,test.id+" end paths");
-  const currentFrame = terrestrialTimeForCivilMoon(clock);
+  const currentFrame = terrestrialTimeForCivilEphemeris(clock);
   if (test.ttMinusUtc !== null) {
     assert.ok(Math.abs((currentFrame.tt-clock.ut)*86400-test.ttMinusUtc)<0.001,test.id+" TT-UTC");
     assert.ok(Math.abs(signedDegrees(moon.absoluteLongitude,test.civilTtMoon))<=perChartTolerance,test.id+" terrestrial Moon");
@@ -66,7 +66,7 @@ for (const test of fixture.reference) {
     legacyBoundaryDays:-signedDegrees(legacy,test.moon)*27/360*test.durationYears*365.2425,
     signedFixedDegrees:deltaDegrees,fixedBoundaryDays:deltaDays,
     legacyMeanZeroErrorDegrees:lahiriAyanamsa(test.jdu)-test.meanAyanamsa,
-    fixedMeanZeroErrorDegrees:meanLahiriForMoon(currentFrame)-test.meanAyanamsa,
+    fixedMeanZeroErrorDegrees:meanLahiriOfDate(currentFrame)-test.meanAyanamsa,
     fixedTrueTimeTropicalDifference:signedDegrees(Astronomy.EclipticGeoMoon(currentFrame).lon,test.tropical),
     ttMoonErrorDegrees:test.civilTtMoon===null?null:signedDegrees(moon.absoluteLongitude,test.civilTtMoon),
     ttMinusUtcSeconds:test.ttMinusUtc,
@@ -101,3 +101,68 @@ assert.equal(groups.untouched_final.count,36);
 assert.equal(summary.fixedWithinOriginal,123);
 assert.equal(summary.fixedWithinTighterTarget,123);
 assert.ok(Math.abs(results[0].fixedBoundaryDays)<0.25,"Delhi previously differed by 2.3867 days");
+
+const physicalFixture = JSON.parse(fs.readFileSync(new URL("../fixtures/astrology/independent-physical-frame.json", import.meta.url)));
+assert.equal(physicalFixture.originalAngularToleranceDegrees,0.02);
+assert.equal(physicalFixture.originalSpeedToleranceDegreesPerDay,0.02);
+const measurements = [];
+const errors = [];
+// Astronomy Engine may reuse cached Earth orientation at machine precision.
+// Compare the unrounded longitude to 10^-10 degrees and every published field exactly.
+function samePoint(left, right) {
+  const {absoluteLongitude:a, ...first} = left;
+  const {absoluteLongitude:b, ...second} = right;
+  assert.ok(Math.abs(signedDegrees(a,b)) < 1e-10, "Unchanged longitude");
+  assert.deepEqual(first,second);
+}
+for (const test of physicalFixture.reference) {
+  const [dateOfBirth,timeOfBirth] = test.local.split(" ");
+  const input = {dateOfBirth,timeOfBirth,timezone:test.zone,latitude:0,longitude:0,ayanamsa:"lahiri"};
+  const baseline = calculateInternalChart(input);
+  const explicitHistorical = calculateInternalChart({...input,physicalLongitudeMethod:"historical_nonlunar"});
+  const candidate = calculateInternalChart({...input,physicalLongitudeMethod:"apparent_iae_p03"});
+  for (let i=0;i<baseline.planets.length;i++) samePoint(explicitHistorical.planets[i],baseline.planets[i]);
+  assert.deepEqual(explicitHistorical.ayanamsa,baseline.ayanamsa);
+  assert.deepEqual(candidate.ascendant,baseline.ascendant);
+  samePoint(candidate.moon,baseline.moon);
+  assert.deepEqual(candidate.dasha,baseline.dasha);
+  for (const body of ["Moon","Rahu","Ketu"]) {
+    samePoint(baseline.planets.find(p=>p.planet===body),candidate.planets.find(p=>p.planet===body));
+  }
+  assert.equal(candidate.ayanamsa.degree,baseline.ayanamsa.degree);
+  assert.ok(Number.isFinite(candidate.ayanamsa.physicalMeanDegree));
+  assert.equal(candidate.metadata.physicalLongitudeMethod,"apparent_iae_p03");
+  for (const [i,body] of physicalFixture.planets.entries()) {
+    const expected = test.longitudeAndSpeed[i];
+    const comparison = {group:test.group, id:test.id, body};
+    for (const [key, chart] of [["baseline",baseline],["candidate",candidate]]) {
+      const p = chart.planets.find(planet=>planet.planet===body);
+      comparison[key+"Angle"] = Math.abs(signedDegrees(p.absoluteLongitude,expected[0]));
+      comparison[key+"Speed"] = Math.abs(p.speedDegreesPerDay-expected[1]);
+    }
+    measurements.push(comparison);
+    if (comparison.candidateAngle > 0.02 || comparison.candidateSpeed > 0.02) errors.push(comparison);
+  }
+}
+function physicalSummary(rows) {
+  const summary = {count:rows.length};
+  for (const key of ["baselineAngle","candidateAngle","baselineSpeed","candidateSpeed"]) {
+    summary[key] = {max:Math.max(...rows.map(row=>row[key])),
+      rms:Math.sqrt(rows.reduce((total,row)=>total+row[key]**2,0)/rows.length),
+      withinOriginal:rows.filter(row=>row[key]<=0.02).length,
+      within005:rows.filter(row=>row[key]<=0.005).length};
+  }
+  summary.improvedAngle=rows.filter(row=>row.candidateAngle<row.baselineAngle).length;
+  return summary;
+}
+const physicalSummaryBy = key => Object.fromEntries([...new Set(measurements.map(row=>row[key]))]
+  .map(value=>[value,physicalSummary(measurements.filter(row=>row[key]===value))]));
+const guardInput={dateOfBirth:"2000-01-01",timeOfBirth:"12:00",timezone:"UTC",latitude:0,longitude:0};
+assert.throws(()=>calculateInternalChart({...guardInput,physicalLongitudeMethod:"unsupported"}),/Unsupported physical/);
+assert.throws(()=>calculateInternalChart({...guardInput,physicalLongitudeMethod:"apparent_iae_p03",ayanamsa:"raman"}),/requires Lahiri/);
+console.log("OPTIONAL_PHYSICAL_FRAME "+JSON.stringify({charts:physicalFixture.reference.length,
+  summary:physicalSummary(measurements),byPlanet:physicalSummaryBy("body"),bySample:physicalSummaryBy("group"),errors}));
+assert.equal(physicalFixture.reference.length,147);
+assert.equal(measurements.length,882);
+assert.equal(physicalFixture.reference.filter(t=>t.group==="nonlunar_reserve").length,24);
+assert.equal(errors.length,0,"Original physical angle and velocity tolerance");
