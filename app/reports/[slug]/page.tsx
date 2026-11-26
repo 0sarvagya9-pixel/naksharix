@@ -17,6 +17,7 @@ import { ProductShareActions } from "@/components/shop/product-share-actions";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
+import { automaticReportPublicPreview } from "@/lib/reports/public-preview";
 
 
 type Params = Promise<{ slug: string }>;
@@ -30,9 +31,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { slug } = await params;
   const report = getManualReport(slug);
   if (!report) return {};
+  const checkout = getManualReportCheckout(report.slug);
+  const preview = checkout && env.AUTO_REPORT_DELIVERY_ENABLED === "true" ? automaticReportPublicPreview(report.slug, "en") : null;
   return seo({
-    title: `${report.name.en} | Naksharix Premium Astrology Report`,
-    description: env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&getManualReportCheckout(report.slug)?`${report.name.en}. ${autoReportDeliveryMessage("en")}`:report.description.en,
+    title: `${report.name.en} | ${checkout ? checkout.price : "Report enquiry"}`,
+    description: preview && checkout ? `${preview.summary} One-time fee: ${checkout.price}.` : report.description.en,
     path: `/reports/${report.slug}`,
     keywords: [report.name.en, "Premium Astrology Report", "Manual Astrology Report", "Naksharix"]
   });
@@ -47,6 +50,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   const labels = detailLabels(locale);
   const checkout = getManualReportCheckout(report.slug);
   const automaticDelivery=Boolean(checkout)&&env.AUTO_REPORT_DELIVERY_ENABLED==="true";
+  const publicPreview = automaticDelivery ? automaticReportPublicPreview(report.slug, locale) : null;
   const publicReportUrl = new URL(`/reports/${report.slug}`, canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)).toString();
   const ownerApprovedManualFee=!checkout?(await getPublishedManualReportOffers())[report.slug]:undefined;
   const manualFee=ownerApprovedManualFee?new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(ownerApprovedManualFee.pricePaise/100):null;
@@ -61,7 +65,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{report.category}</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{report.name[locale]}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{automaticDelivery?autoReportDeliveryMessage(locale):report.description[locale]}</p>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{publicPreview?.summary ?? report.description[locale]}</p>
             <div className="mt-7 flex flex-wrap gap-3">
               {checkout ? (
                 <div className="min-w-56">
@@ -91,7 +95,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
-          <InfoSection title={labels.included} items={report.includes[locale]} />
+          <InfoSection title={labels.included} items={publicPreview?.features ?? report.includes[locale]} />
           <InfoSection title={labels.whoShouldRequest} items={report.who[locale]} />
           <InfoSection title={labels.requiredDetails} items={report.required[locale]} />
           <InfoSection title={labels.languageOptions} items={labels.languages} />
@@ -185,7 +189,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       requiredDetails: "आवश्यक विवरण",
       languageOptions: "भाषा विकल्प",
       languages: ["English", "Hindi", "Hinglish"],
-      samplePreview: "Sample preview",
+      samplePreview: "Report format",
       deliveryProcess: "Delivery process",
       paidSteps: ["Razorpay पर listed fee का secure payment करें", "Server payment capture और signature verify करेगा", "Accurate birth details secure form में submit करें", "Request paid status के साथ review queue में जाएगी", "Download केवल actual generated PDF पर दिखेगा"],
       manualSteps: ["Secure form में accurate birth details submit करें", "Request pending review status के साथ save होगी", "Admin scope और fee confirm करेगा", "कोई unsupported payment या delivery confirmation नहीं दिखाई जाएगी", "Download केवल actual generated PDF पर दिखेगा"],
@@ -209,7 +213,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
       requiredDetails: "Required details",
       languageOptions: "Language options",
       languages: ["English", "Hindi", "Hinglish"],
-      samplePreview: "Sample preview",
+      samplePreview: "Report format",
       deliveryProcess: "Delivery process",
       paidSteps: ["Razorpay par listed fee ka secure payment karein", "Server payment capture aur signature verify karega", "Accurate birth details secure form me submit karein", "Request paid status ke saath review queue me jayegi", "Download sirf actual generated PDF par dikhega"],
       manualSteps: ["Secure form me accurate birth details submit karein", "Request pending review status ke saath save hogi", "Admin scope aur fee confirm karega", "Koi unsupported payment ya delivery confirmation nahi dikhaya jayega", "Download sirf actual generated PDF par dikhega"],
@@ -232,7 +236,7 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
     requiredDetails: "Required details",
     languageOptions: "Language options",
     languages: ["English", "Hindi", "Hinglish"],
-    samplePreview: "Sample preview",
+    samplePreview: "Report format",
     deliveryProcess: "Delivery process",
     paidSteps: ["Pay the listed fee through secure Razorpay checkout", "The server verifies the payment capture and signature", "Submit accurate birth details through the secure form", "The request enters review with paid status", "Download appears only when an actual generated PDF exists"],
     manualSteps: ["Submit accurate birth details through the secure form", "The request is saved with pending-review status", "An administrator confirms scope and fee", "No unsupported payment or delivery confirmation is displayed", "Download appears only when an actual generated PDF exists"],
