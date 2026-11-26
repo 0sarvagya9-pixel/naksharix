@@ -157,6 +157,35 @@ export function calculateAspectStrengthEvidence(planets:CanonicalPlanet[],target
  return {method:reading,rows,virupas:rows.reduce((s,r)=>s+r.contribution,0),verified:false as const};
 }
 const HEAD_FIRST=[2,4,5,6,7,10],REAR_FIRST=[0,1,3,8,9];
+function occupantStrength(occupants: readonly StrengthGraha[]) {
+  return occupants.reduce((total, graha) => {
+    if (graha === "Mercury" || graha === "Jupiter") return total + 60;
+    if (graha === "Sun" || graha === "Mars" || graha === "Saturn") return total - 60;
+    return total;
+  }, 0);
+}
+
+function phaseStrength(signIndex: number, phase: BirthPhase) {
+  if (phase === "twilight") return signIndex === 11 ? 15 : 0;
+  return (phase === "day" ? HEAD_FIRST : REAR_FIRST).includes(signIndex) ? 15 : 0;
+}
+
+/** BPHS 27.30–31 on whole-sign houses. Some published tables use these two
+ * adjustments in addition to a lord, directional and aspect component.
+ * The caller supplies the observed phase and its convention independently.
+ */
+export function calculateWholeSignBhavaAdjustments(planets: CanonicalPlanet[], ascendant: number, phase: BirthPhase) {
+  const positions = completePositions(planets);
+  if (!positions || !angle(ascendant) || !["day", "night", "twilight"].includes(phase)) return null;
+  const houses = Array.from({length: 12}, (_, i) => {
+    const signIndex = (zodiac(ascendant) + i) % 12;
+    const occupants = STRENGTH_GRAHAS.filter(graha => zodiac(positions.get(graha)!) === signIndex);
+    return {house: i + 1, sign: SIGNS[signIndex], occupants, occupantVirupas: occupantStrength(occupants),
+      birthPhaseVirupas: phaseStrength(signIndex, phase)};
+  });
+  return {method: "bphs_27_30_31_whole_sign" as const, phase, houses};
+}
+
 // Full sum is conditional on explicit polarity, birth phase and an
 // independently established set of lord strengths. The return value is
 // not public/external certification even if all numbers are supplied.
@@ -170,9 +199,9 @@ export function calculateBhavaBalaEvidence(planets:CanonicalPlanet[],midpoints:r
  const houses=midpoints.map((m,i)=>{
   const s=zodiac(m),lord=LORDS[s],classification=classifyBhavaDirection(m),directionalVirupas=distance(m,midpoints[classification.weakHouse-1])/3;
   const occupants=positions?STRENGTH_GRAHAS.filter(g=>assignMidpointBhava(positions.get(g)!,midpoints)===i+1):null;
-  const occupantVirupas=occupants?occupants.reduce((sum,g)=>sum+(g==="Mercury"||g==="Jupiter"?60:g==="Sun"||g==="Mars"||g==="Saturn"?-60:0),0):null;
+  const occupantVirupas=occupants ? occupantStrength(occupants) : null;
   const aspect=fullPolarities(context?.polarity)&&validReading(context?.aspectReading)?calculateAspectStrengthEvidence(planets,m,context!.polarity!,context!.aspectReading!):null;
-  const birthPhaseVirupas=validPhase?((phase==="day"&&HEAD_FIRST.includes(s))||(phase==="night"&&REAR_FIRST.includes(s))||(phase==="twilight"&&s===11)?15:0):null;
+  const birthPhaseVirupas=validPhase ? phaseStrength(s, phase) : null;
   const lordStrength=allLords?lordMap![lord]!:null;
   const conditionalTotal=aspect&&occupantVirupas!==null&&birthPhaseVirupas!==null&&lordStrength!==null?directionalVirupas+aspect.virupas+occupantVirupas+birthPhaseVirupas+lordStrength:null;
   return {house:i+1,midpoint:m,sign:SIGNS[s],lord,...classification,directionalVirupas,occupants,occupantVirupas,aspect,birthPhaseVirupas,lordStrengthVirupas:lordStrength,arithmeticTotalVirupas:conditionalTotal};

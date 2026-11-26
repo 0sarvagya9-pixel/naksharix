@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import {verifyPublishedBhavaAdjustments} from "./verify-published-bhava-adjustments.mjs";
 import {verifyPublishedAshtakavarga} from "./verify-published-ashtakavarga.mjs";
 import fs from "node:fs";
 import path from "node:path";
@@ -889,3 +890,76 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  }
  console.log("P0_RAMAN_AYANA_TABLE "+JSON.stringify({toleranceVirupas:tolerance,fullParityAccepted:false,receipts}));
 }
+
+{
+ const {calculateBirthStrengthEvidence}=require("@/lib/astrology/strength/birth-context");
+ const {horaDivisionIndex}=require("@/lib/astrology/strength/temporal-components");
+ const inputFile=name=>JSON.parse(fs.readFileSync("fixtures/astrology/"+name,"utf8"));
+ const older=inputFile("published-classical-comparison.json"),newer=inputFile("heldout-strength-2025.json");
+ const fixtures=Object.values(inputFile("independent-published-strength-holdouts.json"));
+ fixtures.push({...older,input:older.birth,software:"AstroSage Brihat"},{...newer,software:"OneKundli / Dhruv Astro Software"});
+ const accounts=[];
+ // Use half-open intervals; the last instant of each period must stay in it.
+ const seasonal="seasonal_day_night";
+ for(const [rise,set,next] of [[0,12000,36000],[1000,25000,37000],[0,12000,24000]]){
+  for(let h=0;h<24;h++){
+   const start=h<12?rise:set,end=h<12?set:next;
+   const left=start+(end-start)*(h%12)/12,right=left+(end-start)/12;
+   assert.equal(horaDivisionIndex(left,rise,set,next,seasonal),h);
+   assert.equal(horaDivisionIndex(right-1,rise,set,next,seasonal),h);
+  }
+ }
+ for(const t of [-1,24,NaN])assert.throws(()=>horaDivisionIndex(t,0,12,24,seasonal));
+ assert.throws(()=>horaDivisionIndex(8,0,24,24,seasonal));
+ assert.throws(()=>horaDivisionIndex(8,0,12,24,"unknown"));
+ const {longitudeAyanaCandidate}=require("@/lib/astrology/strength/longitude-temporal");
+ // Writer pp.61–62, May 1 1990, separate worked example from all report fixtures.
+ const worked=[[40+22/60,49.4],[119+55/60,4],[337+32/60,18.5],[45+5/60,51.2],[96+57/60,59.8],[356+28/60,28.2],[295+20/60,57.1]];
+ for(const [i,[lon,printed]] of worked.entries()){
+  const computed=longitudeAyanaCandidate(classical[i],lon,23.44,"longitude_sine");
+  assert.ok(Math.abs(computed.undoubledVirupas-printed)<.06,"Writer worked sine Ayana "+classical[i]);
+ }
+ const policy="raman_15_degree_table",tolerance=.25;
+ function compare(fixture,actual){
+  const rows=[];
+  function add(scope,point,key,value,expected){
+   assert.ok(Number.isFinite(value)&&Number.isFinite(expected));
+   rows.push({scope,point,key,actual:value,expected,delta:value-expected,pass:Math.abs(value-expected)<=tolerance});
+  }
+  for(const [i,p] of classical.entries()){
+   const row=actual.temporalVariantStrength.rows.find(r=>r.planet===p),c=row.components;
+   const fields={sthana:c.sthana,dig:c.dig,kala:c.kalaBeforeWar+row.warVirupas,cheshta:c.cheshta,naisargika:c.naisargika,drik:c.drik,total:row.total};
+   for(const [k,v] of Object.entries(fields))add("planet",p,k,v,fixture.strength[k][i]);
+  }
+  for(const [i,r] of actual.temporalVariantBhava.houses.entries()){
+   for(const [key,value] of Object.entries({lord:r.lordStrengthVirupas,direction:r.directionalVirupas,aspect:r.aspect.virupas,total:r.arithmeticTotalVirupas}))add("house",i+1,key,value,fixture.bhava[key][i]);
+  }
+  assert.equal(rows.length,97);return rows;
+ }
+ for(const f of fixtures){
+  const prior=calculateBirthStrengthEvidence(f.input,policy),candidate=calculateBirthStrengthEvidence(f.input,policy,seasonal);
+  const base=compare(f,prior),now=compare(f,candidate);const publishedLord=classical[f.temporal.hora.indexOf(60)];
+  assert.equal(candidate.solar.horaLord,publishedLord,f.input.date+" printed hour");
+  assert.equal(candidate.publicEnabled,false);assert.equal(candidate.fullShadbalaVerified,false);
+  const hours={previous:prior.solar.horaLord,seasonal:candidate.solar.horaLord,published:publishedLord,index:candidate.solar.horaIndex,sunriseUtc:candidate.solar.sunriseUtc,sunsetUtc:candidate.solar.sunsetUtc,nextSunriseUtc:candidate.solar.nextSunriseUtc};
+  const planetTrace=classical.map((p,i)=>{
+   const position=candidate.ramanPositional.find(v=>v.planet===p);
+   const clock=candidate.longitudeTemporal.rows.find(r=>r.planet===p);
+   const motion=candidate.motionalCandidate.rows.find(r=>r.planet===p);
+   const longitude=candidate.geometry.chart.planets.find(r=>r.planet===p).absoluteLongitude;
+   return {planet:p,longitude,declination:candidate.solar.declinations[p],position:{basis:position.basis,dignities:position.dignity.rows.map(v=>({varga:v.chart,sign:v.sign,lord:v.lord,weight:v.virupas}))},temporal:clock.components,publishedTemporal:Object.fromEntries(Object.entries(f.temporal).filter(([,v])=>Array.isArray(v)&&v.length===7).map(([k,v])=>[k,v[i]])),motion:motion??{method:"luminary_kendra",value:clock.luminaryCheshta},houseLordFor:candidate.temporalVariantBhava.houses.filter(r=>r.lord===p).map(r=>r.house)};
+  });
+  const sine=calculateBirthStrengthEvidence(f.input,"longitude_sine",seasonal,"split_ayana_paksha");
+  const sineRows=compare(f,sine);
+  const sineTemporal=sine.longitudeTemporal.rows.map((r,i)=>({planet:r.planet,computed:r.components,published:Object.fromEntries(Object.entries(f.temporal).map(([k,v])=>[k,v[i]])),luminaryCheshta:r.luminaryCheshta}));
+  if(f.software.includes("Parashara")){
+   for(const row of sineTemporal)assert.ok(Math.abs(row.computed.ayana-row.published.ayana)<=.025,"PL longitude sine Ayana "+f.input.date+" "+row.planet);
+   const luminaries=sineRows.filter(r=>r.scope==="planet"&&r.key==="cheshta"&&["Sun","Moon"].includes(r.point));
+   assert.ok(luminaries.every(r=>r.pass),"PL split luminary Cheshta "+f.input.date);
+  }
+  const summary=rows=>({passed:rows.filter(r=>r.pass).length,tested:rows.length,meanAbsoluteError:rows.reduce((s,r)=>s+Math.abs(r.delta),0)/rows.length,maxAbsoluteError:Math.max(...rows.map(r=>Math.abs(r.delta)))});
+  accounts.push({date:f.input.date,input:f.input,software:f.software,source:f.source,referenceFrame:f.frame??"Lahiri",computedFrame:"Lahiri",additionalPublishedBhavaTerms:f.additionalPublishedBhavaTerms??null,utc:candidate.geometry.utc,epoch:candidate.motionalCandidate.epoch,hours,prior:summary(base),seasonal:summary(now),sineSplit:summary(sineRows),sineSplitRows:sineRows,sineTemporal,rows:now.map((r,i)=>({...r,previousActual:base[i].actual,previousPass:base[i].pass})),planetTrace});
+ }
+ console.log("P0_SEASONAL_HORA_STRENGTH "+JSON.stringify({toleranceVirupas:tolerance,physicalCertifications:0,fullParityAccepted:false,accounts}));
+}
+console.log("PUBLISHED_BHAVA_ADJUSTMENTS", JSON.stringify(verifyPublishedBhavaAdjustments(require("@/lib/astrology/strength/birth-context").calculateBirthStrengthEvidence)));

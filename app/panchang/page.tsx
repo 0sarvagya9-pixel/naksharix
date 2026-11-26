@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { calculatePremiumPanchang } from "@/lib/astrology/premium-engine/panchang";
+import { normalizeBirthDate } from "@/lib/astrology/own-engine/time";
 import { timezoneOffsetForDate, todayInTimezone } from "@/lib/astrology/timezone-offset";
 import { seo } from "@/lib/seo";
 
@@ -264,5 +265,10 @@ function normalizeCity(value?: string): CityKey {
 }
 
 function validDate(value?: string) {
-  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  try {
+    return normalizeBirthDate(value) === value;
+  } catch {
+    return false;
+  }
 }

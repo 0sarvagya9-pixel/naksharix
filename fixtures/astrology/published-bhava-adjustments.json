@@ -1,0 +1,213 @@
+[
+  {
+    "id": "1990-04-23",
+    "input": {
+      "date": "1990-04-23",
+      "time": "06:15:00",
+      "timezone": "5.5",
+      "latitude": 13.083333333333334,
+      "longitude": 80.28333333333333
+    },
+    "source": "https://astrograha.com/Content/AstrologyReports/Pro/Pro%20Sample%20Reports%20-%20North%20Indian.pdf",
+    "sha256": "2bebbbbd3c383279bd06d101dbf9843a28bf05571714b88ab679c33be107be3c",
+    "expected": {
+      "Planets in": [
+        0.0,
+        0.0,
+        60.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -60.0,
+        -60.0,
+        0.0
+      ],
+      "Day-Night": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        15.0
+      ]
+    }
+  },
+  {
+    "id": "2000-11-11",
+    "input": {
+      "date": "2000-11-11",
+      "time": "09:01:20",
+      "timezone": "5.5",
+      "latitude": 28.666666666666668,
+      "longitude": 77.21666666666667
+    },
+    "source": "https://www.astrograha.com/Content/AstrologyReports/Circular-Astrology-Report.pdf",
+    "sha256": "457361b90ca7ae0a7772e4e13dc6d1154329e1732751b9ed7b8d6abbbbe72ec1",
+    "expected": {
+      "Planets in": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -60.0,
+        0.0
+      ],
+      "Day-Night": [
+        15.0,
+        0.0,
+        0.0,
+        15.0,
+        0.0,
+        0.0,
+        0.0,
+        15.0,
+        0.0,
+        15.0,
+        15.0,
+        15.0
+      ]
+    }
+  },
+  {
+    "id": "2020-01-25",
+    "input": {
+      "date": "2020-01-25",
+      "time": "07:00:00",
+      "timezone": "5.5",
+      "latitude": 28.6,
+      "longitude": 77.2
+    },
+    "source": "https://s3.amazonaws.com/kajabi-storefronts-production/sites/67114/themes/1451148/downloads/1gUAatafTVm0rQVQDGX1_Sample_PDF_Report.pdf",
+    "sha256": "7a096f02474fd4aa97859f54fa554d123cbbfd4389e13b3ace2d3d675147b5de",
+    "expected": {
+      "Planets in": [
+        -60.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -60.0,
+        60.0
+      ],
+      "Day-Night": [
+        15.0,
+        0.0,
+        0.0,
+        15.0,
+        15.0,
+        0.0,
+        15.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        15.0
+      ]
+    }
+  },
+  {
+    "id": "1897-01-23",
+    "input": {
+      "date": "1897-01-23",
+      "time": "12:15:41",
+      "latitude": 20.5,
+      "longitude": 85.83333333333333,
+      "timezone": "+05:20"
+    },
+    "source": "https://neelastro.in/image/NETAJI_SUBHAS_CHANDRA_BOSE_1.pdf",
+    "sha256": "7d803ea0cc21e849df2ca0ee87505b30280321e1cb37f8190183a170d360f098",
+    "expected": {
+      "Planets in": [
+        0,
+        -60,
+        0,
+        0,
+        60,
+        0,
+        0,
+        -60,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Day-Night": [
+        0,
+        0,
+        15,
+        0,
+        15,
+        15,
+        15,
+        15,
+        0,
+        0,
+        15,
+        0
+      ]
+    },
+    "sourceNote": "Uses the stated +05:20 civil offset. The printed GMT differs by one minute. Both interpretations yielded the same 24 house adjustments."
+  },
+  {
+    "id": "1927-10-14",
+    "input": {
+      "date": "1927-10-14",
+      "time": "00:45:00",
+      "latitude": 51.5,
+      "longitude": -0.11666666666666667,
+      "timezone": "0"
+    },
+    "source": "https://neelastro.in/resource/image/Roger-Moore.pdf",
+    "sha256": "3eb11cefe54e001bdcaeb0e28e6950d2249087b60708a82e64f74ceb80356149",
+    "expected": {
+      "Planets in": [
+        0,
+        0,
+        -120,
+        60,
+        -60,
+        0,
+        0,
+        0,
+        60,
+        0,
+        0,
+        0
+      ],
+      "Day-Night": [
+        15,
+        0,
+        0,
+        0,
+        0,
+        15,
+        15,
+        0,
+        0,
+        15,
+        15,
+        0
+      ]
+    }
+  }
+]

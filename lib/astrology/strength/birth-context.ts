@@ -1,11 +1,11 @@
 import {calculateInternalChart,type InternalChartInput} from "@/lib/astrology/premium-engine/chart";
 import {normalizeBirthDate,normalizeBirthTime,parseBirthDateTime,parseTimezoneOffsetToHours,localBirthToUtcDate,julianDayFromUtc,localSiderealTimeDegrees,normalizeDegrees} from "@/lib/astrology/own-engine/time";
 import {lahiriAyanamsa} from "@/lib/astrology/own-engine/zodiac";
-import {buildQuadrantBhavaMidpoints,assignMidpointBhava,calculateBhavaBalaEvidence,calculateSaptavargajaEvidence,calculateFivefoldFriendship} from "./classical-components";
+import {buildQuadrantBhavaMidpoints,assignMidpointBhava,calculateBhavaBalaEvidence,calculateWholeSignBhavaAdjustments,calculateSaptavargajaEvidence,calculateFivefoldFriendship} from "./classical-components";
 import {calculateInternalShadbala,calculateClassicalStrengthBasis,calculateRamanPositionalCandidate} from "./shadbala";
-import {calculateSolarStrengthContext,calculateTemporalStrengthEvidence} from "./temporal-components";
+import {calculateSolarStrengthContext,calculateTemporalStrengthEvidence,type HoraConvention} from "./temporal-components";
 import {calculateClassicalCalendarCandidate} from "./calendar-lords";
-import {calculateLongitudeTemporalCandidate,type AyanaConvention} from "./longitude-temporal";
+import {calculateLongitudeTemporalCandidate,type AyanaConvention,type LuminaryAccounting} from "./longitude-temporal";
 import {evaluateTraditionalPatterns,evaluateBphs36NamedPatterns} from "./traditional-patterns";
 import {STAR_GRAHAS,type StarGraha,calculateMotionalEpochCandidate} from "./motional-epoch";
 import {GRAHAS,assembleClassicalStrengthCandidate} from "./strength-total";
@@ -38,7 +38,7 @@ export function calculateBirthBhavaGeometry(input:InternalChartInput){
 /** Uses real natal angles and placements, not fake completed planetary
  * strengths. New internal evidence remains separate from paid reports.
  */
-export function calculateBirthStrengthEvidence(input:InternalChartInput,ayanaConvention:AyanaConvention="longitude_projection"){
+export function calculateBirthStrengthEvidence(input:InternalChartInput,ayanaConvention:AyanaConvention="longitude_projection",horaConvention:HoraConvention="equal_sunrise_cycle",luminaryAccounting:LuminaryAccounting="separate_kendra"){
  const geometry=calculateBirthBhavaGeometry(input);
  const planets=geometry.chart.planets.map(p=>({...p,house:typeof p.absoluteLongitude==="number"?assignMidpointBhava(p.absoluteLongitude,geometry.midpoints):null}));
  const friendship=calculateFivefoldFriendship(planets);
@@ -52,11 +52,13 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput,ayanaCon
   return {basis,dignity};
  }).filter(p=>p!==null);
  const engineering=calculateInternalShadbala(planets,{ascendantLongitude:geometry.ascendant,bhavaMidpoints:geometry.midpoints,date:normalizeBirthDate(geometry.chart.normalizedInput.dateOfBirth),localTime:normalizeBirthTime(geometry.chart.normalizedInput.timeOfBirth)});
- const solar=calculateSolarStrengthContext(new Date(geometry.utc),geometry.chart.normalizedInput.latitude,geometry.chart.normalizedInput.longitude);
+ const solar=calculateSolarStrengthContext(new Date(geometry.utc),geometry.chart.normalizedInput.latitude,geometry.chart.normalizedInput.longitude,horaConvention);
  const temporal=calculateTemporalStrengthEvidence(planets,solar);
  const calendarCandidate=calculateClassicalCalendarCandidate(solar.sunriseUtc,geometry.chart.normalizedInput.longitude,solar.solarDayLord);
  // Preserve the original unqualified path. Evaluate the named calendar convention separately.
  const temporalWithCalendarCandidate=calendarCandidate?calculateTemporalStrengthEvidence(planets,solar,calendarCandidate):null;
+ const wholeSignBhavaAdjustments = solar.birthPhase
+  ? calculateWholeSignBhavaAdjustments(planets, geometry.ascendant, solar.birthPhase) : null;
  const bhava=calculateBhavaBalaEvidence(planets,geometry.midpoints,{polarity:temporal.polarity??undefined,aspectReading:"additional_full_mercury_jupiter",birthPhase:solar.birthPhase??undefined});
  const trueLongitudes:Partial<Record<StarGraha,number>>={};
  for(const g of STAR_GRAHAS){const p=planets.find(p=>p.planet===g);if(typeof p?.absoluteLongitude==="number")trueLongitudes[g]=p.absoluteLongitude;}
@@ -89,7 +91,7 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput,ayanaCon
  const positionalVariantBhava=calculateRamanBhavaCandidate(planets,geometry.midpoints,{lordConvention:"whole_sign_lagna",lordStrengthVirupas:positionalLords});
  const obliquity=23.439291-0.00000036*(julianDayFromUtc(new Date(geometry.utc))-2451545);
  const ayanamsa=geometry.chart.ayanamsa.degree;
- const longitudeTemporal=typeof ayanamsa==="number"?calculateLongitudeTemporalCandidate(planets,solar,calendarCandidate??undefined,ayanamsa,obliquity,"separate_kendra",ayanaConvention):null;
+ const longitudeTemporal=typeof ayanamsa==="number"?calculateLongitudeTemporalCandidate(planets,solar,calendarCandidate??undefined,ayanamsa,obliquity,luminaryAccounting,ayanaConvention):null;
  const doubledTemporal=typeof ayanamsa==="number"?calculateLongitudeTemporalCandidate(planets,solar,calendarCandidate??undefined,ayanamsa,obliquity,"doubled_in_kala",ayanaConvention):null;
  const temporalVariantStrength=assembleClassicalStrengthCandidate(GRAHAS.map(planet=>{
   const base=sixComponents.find(r=>r.planet===planet)!.components,t=longitudeTemporal?.rows.find(r=>r.planet===planet);
@@ -97,5 +99,5 @@ export function calculateBirthStrengthEvidence(input:InternalChartInput,ayanaCon
  }),longitudeTemporal?.warPairs??null,solar.declinations);
  const temporalLords=temporalVariantStrength.completeArithmetic&&temporalVariantStrength.rows.every(r=>typeof r.total==="number"&&r.total>=0)?Object.fromEntries(temporalVariantStrength.rows.map(r=>[r.planet,r.total!])):undefined;
  const temporalVariantBhava=calculateRamanBhavaCandidate(planets,geometry.midpoints,{lordConvention:"whole_sign_lagna",lordStrengthVirupas:temporalLords});
- return {geometry,friendship,traditionalPatterns,namedAdvancedPatterns,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,ramanDrik,aspectVariantStrength,ramanBhavaCandidate,wholeSignLordBhavaCandidate,ramanPositional,positionalVariantStrength,positionalVariantBhava,longitudeTemporal,doubledTemporal,temporalVariantStrength,temporalVariantBhava,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
+ return {geometry,friendship,traditionalPatterns,namedAdvancedPatterns,positional,engineering,solar,temporal,calendarCandidate,temporalWithCalendarCandidate,bhava,wholeSignBhavaAdjustments,motionalCandidate,classicalStrengthCandidate,bhavaCandidate,ramanDrik,aspectVariantStrength,ramanBhavaCandidate,wholeSignLordBhavaCandidate,ramanPositional,positionalVariantStrength,positionalVariantBhava,longitudeTemporal,doubledTemporal,temporalVariantStrength,temporalVariantBhava,publicEnabled:false as const,verified:false as const,fullShadbalaVerified:false as const,fullBhavaBalaVerified:false as const};
 }

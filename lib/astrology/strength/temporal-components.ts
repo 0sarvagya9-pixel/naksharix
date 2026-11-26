@@ -5,10 +5,11 @@ const DAY=86400000;
 const WEEKDAYS:readonly StrengthGraha[]=["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];
 const HORA_ORDER:readonly StrengthGraha[]=["Sun","Venus","Mercury","Moon","Saturn","Jupiter","Mars"];
 type Polarity="benefic"|"malefic";
+export type HoraConvention="equal_sunrise_cycle"|"seasonal_day_night";
 export type ClassicalSolarContext={
  utc:string;apparentSolarHours:number;declinations:Record<StrengthGraha,number>;
  sunriseUtc:string|null;sunsetUtc:string|null;nextSunriseUtc:string|null;
- solarDayLord:StrengthGraha|null;horaLord:StrengthGraha|null;horaIndex:number|null;
+ solarDayLord:StrengthGraha|null;horaLord:StrengthGraha|null;horaIndex:number|null;horaConvention?:HoraConvention;
  dayNight:"day"|"night"|null;birthPhase:"day"|"night"|"twilight"|null;
  thirdLord:StrengthGraha|null;method:"apparent_solar_geocentric_sunrise_cycle";
 };
@@ -40,10 +41,12 @@ function solarEvents(utc:Date,lat:number,longitude:number){
 /** Calculate observed solar-cycle components using the existing astronomy
  * engine, never substitute fixed 06:00/18:00 at high latitudes or night.
  * Local mean solar date of the previous sunrise determines weekday lord.
- * Hora uses 24 equal portions of that actual sunrise-to-sunrise cycle.
+ * Equal-cycle hours divide sunrise to sunrise by 24. Seasonal hours
+ * divide sunrise to sunset by 12 and sunset to next sunrise by 12.
  */
-export function calculateSolarStrengthContext(utc:Date,latitude:number,longitude:number):ClassicalSolarContext{
+export function calculateSolarStrengthContext(utc:Date,latitude:number,longitude:number,horaConvention:HoraConvention="equal_sunrise_cycle"):ClassicalSolarContext{
  if(!Number.isFinite(utc.getTime())||!Number.isFinite(latitude)||Math.abs(latitude)>90||!Number.isFinite(longitude)||Math.abs(longitude)>180)throw Error("INVALID_SOLAR_CONTEXT");
+ if(horaConvention!=="equal_sunrise_cycle"&&horaConvention!=="seasonal_day_night")throw Error("INVALID_HORA_CONVENTION");
  const time=Astronomy.MakeTime(utc),rotation=Astronomy.Rotation_EQJ_EQD(time);
  const equatorial=Object.fromEntries(STRENGTH_GRAHAS.map(g=>{
   const vector=Astronomy.GeoVector(Astronomy.Body[g],time,true);
@@ -54,16 +57,28 @@ export function calculateSolarStrengthContext(utc:Date,latitude:number,longitude
  const apparentSolarHours=mod(Astronomy.SiderealTime(time)+longitude/15-equatorial.Sun.ra+12,24);
  const declinations=Object.fromEntries(STRENGTH_GRAHAS.map(g=>[g,equatorial[g].dec])) as Record<StrengthGraha,number>;
  const events=solarEvents(utc,latitude,longitude);
- const base={utc:utc.toISOString(),apparentSolarHours,declinations,method:"apparent_solar_geocentric_sunrise_cycle" as const};
+ const base={utc:utc.toISOString(),apparentSolarHours,declinations,horaConvention,method:"apparent_solar_geocentric_sunrise_cycle" as const};
  if(!events)return {...base,sunriseUtc:null,sunsetUtc:null,nextSunriseUtc:null,solarDayLord:null,horaLord:null,horaIndex:null,dayNight:null,birthPhase:null,thirdLord:null};
  const t=utc.getTime(),{previous,sunset,next}=events,day=t<sunset;
  const portion=Math.min(2,Math.floor((day?(t-previous)/(sunset-previous):(t-sunset)/(next-sunset))*3));
  const thirdLord=(day?["Mercury","Sun","Saturn"]:["Moon","Venus","Mars"])[portion] as StrengthGraha;
  const solarDayLord=WEEKDAYS[new Date(previous+longitude/15*3600000).getUTCDay()];
- const horaIndex=Math.min(23,Math.floor((t-previous)/(next-previous)*24));
+ const horaIndex=horaDivisionIndex(t,previous,sunset,next,horaConvention);
  const horaLord=HORA_ORDER[(HORA_ORDER.indexOf(solarDayLord)+horaIndex)%7];
  const birthPhase=(!day&&(t-sunset<72*60000||next-t<=72*60000))?"twilight":day?"day":"night";
  return {...base,sunriseUtc:new Date(previous).toISOString(),sunsetUtc:new Date(sunset).toISOString(),nextSunriseUtc:new Date(next).toISOString(),solarDayLord,horaLord,horaIndex,dayNight:day?"day":"night",birthPhase,thirdLord};
+}
+
+/** Sunrise belongs to the first day hour; sunset begins the first night
+ * hour. All four instants are absolute, including across a DST change. */
+export function horaDivisionIndex(birth:number,rise:number,set:number,nextRise:number,convention:HoraConvention){
+ if(![birth,rise,set,nextRise].every(Number.isFinite)||!(rise<set&&set<nextRise&&birth>=rise&&birth<nextRise))throw Error("INVALID_HORA_INTERVAL");
+ if(convention==="equal_sunrise_cycle")return Math.min(23,Math.floor(24*(birth-rise)/(nextRise-rise)));
+ if(convention!=="seasonal_day_night")throw Error("INVALID_HORA_CONVENTION");
+ const day=birth<set;
+ const elapsed=day?birth-rise:birth-set;
+ const interval=day?set-rise:nextRise-set;
+ return (day?0:12)+Math.min(11,Math.floor(12*elapsed/interval));
 }
 export function classicalNatonnata(planet:StrengthGraha,apparentHours:number){
  if(!graha(planet)||!Number.isFinite(apparentHours)||apparentHours<0||apparentHours>=24)throw Error("INVALID_NATONNATA");
