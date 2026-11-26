@@ -98,6 +98,18 @@ await verify("Numerology returns real report", async () => {
 await verify("Numerology rejects short name", async () => {
   assert.equal((await post("/api/numerology", { name: "A", dateOfBirth: "1990-01-15" })).status, 422);
 });
+await verify("Numerology rejects civil date rollover and incomplete Roman names", async () => {
+  for (const details of [{name:"Asha Test",dateOfBirth:"1990-02-30"},{name:"Asha शर्मा",dateOfBirth:"1990-01-15"},{name:"आशा",dateOfBirth:"1990-01-15"}]) {
+    assert.equal((await post("/api/numerology", details)).status, 422);
+  }
+});
+await verify("Numerology keeps empty vowel and consonant groups unavailable", async () => {
+  for (const [name, empty] of [["Rhythm","soulUrge"],["AEIOU","personality"]]) {
+    const data = await expectData(await post("/api/numerology",{name,dateOfBirth:"1992-05-18",locale:"en"}), "numerology empty group");
+    assert.equal(data.report[empty], null);
+    assert.equal(data.report.lifePath.value, 8);
+  }
+});
 await verify("core astrology calculator produces actual data", async () => {
   const d = await expectData(await post("/api/calculators/core", { name: "Sample Person", birthDate: "1990-01-15", birthTime: "10:30", birthPlace:"Delhi", timezone:"Asia/Kolkata", latitude: 28.6139, longitude: 77.209 }), "core calculator");
   assert.ok(d.calculators?.numerology, "core numerology missing");

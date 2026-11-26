@@ -147,6 +147,15 @@ jobs:
         run: node scripts/qa-saved-kundli-access-runtime.mjs
       - name: Exercise paid-report worker with disposable database and isolated email transport
         run: node scripts/qa-automatic-report-delivery.mjs --database
+      - name: Qualify all 45 paid-report delivery variants with isolated transport
+        run: node scripts/qa-report-delivery-matrix.mjs "${{ runner.temp }}/report-delivery-matrix.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paid-report-delivery-matrix-synthetic
+          path: ${{ runner.temp }}/report-delivery-matrix.json
+          retention-days: 3
+          if-no-files-found: warn
       - name: Exercise report correction, versioned delivery and administrator races on disposable PostgreSQL
         run: |
           node scripts/qa-report-delivery-races.mjs
@@ -336,6 +345,11 @@ jobs:
             test -d "/ms-playwright" || { echo "No browser cache"; exit 1; }
           done
           node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" --version
+      - name: Qualify localized consultation recovery and payment acknowledgements
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-consultation-request-ui.mjs | tee consultation-request-ui.log
       - run: npx prisma generate
       - name: Bootstrap isolated browser-test database
         shell: bash
@@ -378,6 +392,7 @@ jobs:
         with:
           name: browser-release-qa
           path: |
+            consultation-request-ui.log
             browser-qa.log
             /tmp/naksharix-browser-server.log
             test-results

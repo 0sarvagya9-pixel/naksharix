@@ -194,7 +194,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   }
  }
  function motionLabel(r:R){return r.motionState==="near_station"?term("Near station"):r.retrograde===true?term("Retrograde"):r.retrograde===false?term("Direct"):tr("Unavailable","उपलब्ध नहीं","Available nahi")}
- function planetTable(rows:R[]){if(!rows.length)return;table(["Graha",tr("Sign","राशि"),tr("House","भाव"),tr("Degree","अंश"),tr("Nakshatra","नक्षत्र"),tr("Motion","गति")],rows.map(r=>[display(r.planet),display(r.sign),shown(r.house),deg(r.degree),display(r.nakshatra),motionLabel(r)]),[1,1.05,.55,.8,1.4,1.05],9.2,33)}
+ function planetTable(rows:R[],minRowHeight=33){if(!rows.length)return;table(["Graha",tr("Sign","राशि"),tr("House","भाव"),tr("Degree","अंश"),tr("Nakshatra","नक्षत्र"),tr("Motion","गति")],rows.map(r=>[display(r.planet),display(r.sign),shown(r.house),deg(r.degree),display(r.nakshatra),motionLabel(r)]),[1,1.05,.55,.8,1.4,1.05],9.2,minRowHeight)}
  function houseTable(rows:R[]){if(!rows.length)return;table([tr("House","भाव"),tr("Sign","राशि"),tr("Planets","ग्रह"),tr("Reflection theme","चिंतन विषय")],rows.map(r=>[shown(r.house),display(r.sign),list(r.planets).map(p=>term(typeof p==="string"?p:s(obj(p).planet))).join(", ")||"-",s(r.title)+"\n"+s(r.compact??r.interpretation)]),[...EDITORIAL_HOUSE_TABLE_FRACTIONS],8.5,36)}
  function chart(x:number,top:number,size:number,houses:R[]){
   rect(x,top,size,size,white,gold);
@@ -286,9 +286,25 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
    caps(M+17,y+9,p.label,goldText,8);fixed(M+17,y+24,p.title,CW-35,16,"title",wine,19);
    fixed(M+17,y+24+titleLines.length*19+4,p.body,CW-35,10,"body",ink,14);y+=height+10;
   }
-  const q=obj(data("your-question"));if(s(q.submittedQuestion)){subhead(tr("Your submitted question","आपका प्रश्न","Aapka bheja hua sawaal"));paragraph(s(q.submittedQuestion),10,muted,"body",5)}
+  const q=obj(data("your-question")),submitted=s(q.submittedQuestion),disclaimer=s(data("trust"));
+  const paragraphHeight=(text:string,size:number,kind:FontKind,after:number)=>wrap(text,CW,size,kind).length*size*1.58+after;
+  const noticeHeight=disclaimer?wrap(disclaimer,CW-24,9.1).length*13+22:0;
+  const noticeReserve=noticeHeight>290?paragraphHeight(disclaimer,9.1,"body",10):noticeHeight?noticeHeight+12:0;
+  const titleHeight=paragraphHeight(insights.question.title,14,"title",5);
+  const answerHeight=22+titleHeight+paragraphHeight(insights.question.body,10,"body",8)+noticeReserve;
+  const submittedHeight=submitted?22+paragraphHeight(submitted,10,"body",5):0;
+  const reserveLimit=Math.min(BOTTOM-160,BOTTOM-(102+wrap(heading+tr(" (continued)"," (जारी)"," (aage)"),CW,25,"title").length*30+8));
+  const keepTogether=submittedHeight+answerHeight<=reserveLimit;
+  // Short answers should not leave their closing sentence or disclaimer alone
+  // on another page. Oversized customer questions retain normal line pagination.
+  if(keepTogether)ensure(submittedHeight+answerHeight);
+  if(submitted){
+   if(!keepTogether)ensure(22+Math.min(wrap(submitted,CW,10).length,2)*15.8+5);
+   subhead(tr("Your submitted question","आपका प्रश्न","Aapka bheja hua sawaal"));paragraph(submitted,10,muted,"body",5);
+  }
+  if(!keepTogether)ensure(answerHeight<=reserveLimit?answerHeight:22+titleHeight+Math.min(wrap(insights.question.body,CW,10).length,2)*15.8);
   subhead(insights.question.label);paragraph(insights.question.title,14,wine,"title",5);paragraph(insights.question.body,10,ink,"body",8);
-  note(s(data("trust")));
+  note(disclaimer);
  }
  // The approved ornament, celestial lotus and wheel contain no text or customer data.
  page=pdf.addPage([W,H]);page.drawPage(art.cover,{x:0,y:0,width:W,height:H});
@@ -369,7 +385,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
    starts.push({title:navamsaExample.title,page:pdf.getPageCount(),top:y});
    for(const line of lines)paragraph(line.text,line.size,line.color,line.face,line.after);
   }
-  kundliChapter("03 / PLANETARY PLACEMENTS",tr("The nine grahas","नौ ग्रह","Nau grah"),tr("Degrees rounded to four decimal places.","अंश चार दशमलव स्थान तक।","Har sthiti degree mein di gayi hai, dashamlav ke baad chaar ankon tak."));planetTable(records(data("planets")));subhead(tr("Traditional interpretation","पारंपरिक व्याख्या","Paramparik vyakhya"));cardRows(insights.planetNotes.slice(0,2),2);
+  kundliChapter("03 / PLANETARY PLACEMENTS",tr("The nine grahas","नौ ग्रह","Nau grah"),tr("Degrees rounded to four decimal places.","अंश चार दशमलव स्थान तक।","Har sthiti degree mein di gayi hai, dashamlav ke baad chaar ankon tak."));planetTable(records(data("planets")),31);subhead(tr("Traditional interpretation","पारंपरिक व्याख्या","Paramparik vyakhya"));cardRows(insights.planetNotes.slice(0,2),2);
   kundliChapter("04 / LIFE AREAS",tr("Twelve houses, twelve lenses","बारह भाव, बारह दृष्टिकोण","Barah bhav aur unke jeevan-vishay"),tr("Empty houses remain meaningful; traditional sign rulership provides context.","रिक्त भाव भी महत्वपूर्ण हैं; पारंपरिक राशि स्वामित्व संदर्भ देता है।","Jis bhav mein koi grah nahi hai, uska bhi arth hota hai. Us bhav ki rashi aur uske paramparik swami ko saath dekhkar sandarbh samjhein."));houseTable(d1);
   kundliChapter("05 / TIMING FRAMEWORK",tr("Your current Dasha cycle","आपका वर्तमान दशा चक्र","Aapki vartaman dasha"),tr("Vimshottari periods are calculated timing frameworks, not promises of events.","विंशोत्तरी दशा गणना का समय-संदर्भ है, घटनाओं की गारंटी नहीं।","Vimshottari dasha mein samay ko ganit se nikaali gayi avadhiyon mein padha jata hai. Kisi avadhi ka hona kisi ghatna ka vaada nahi hai."));periodCards(obj(data("dasha")));note(tr("Use timing as a reflection framework. Actual decisions depend on evidence and circumstances.","समय को चिंतन के संदर्भ में लें। निर्णय वास्तविक परिस्थितियों पर निर्भर हैं।","Dasha ki tareekhon ko apni sthiti par gaur karne ka ek sandarbh maanein. Faisle apne saamne maujood tathyon aur paristhitiyon ke aadhaar par lein."));
   kundliChapter("06 / TRADITIONAL INDICATORS",tr("Yogas, doshas & Panchang","योग, दोष और पंचांग","Yog, dosh aur Panchang"),tr("Rule-based indicators and birth Panchang; no prediction of misfortune.","नियम आधारित संकेत और जन्म पंचांग; दुर्भाग्य की भविष्यवाणी नहीं।","Yahan janm Panchang aur paramparik niyamon se mile sanket diye hain. Inse durbhagya ki bhavishyavaani nahi ki jaati."));const yd=obj(data("yoga-dosha")),yo=obj(yd.yoga),ds=obj(yd.dosha);const detected=records(yo.detected);if(detected.length)table([tr("Detected yoga","पाया गया योग","Ganana mein mila yog"),tr("Rule basis & interpretation","नियम और व्याख्या","Niyam aur uska arth")],detected.map(r=>[display(r.name),[s(r.basis).replace(/\b(?:Sun|Moon|Mars|Mercury|Jupiter|Venus|Saturn|Rahu|Ketu)\b/g,term),s(r.interpretation),term(s(r.caveat))].filter(Boolean).join("\n")]),[1,3.6],8.7,39);else paragraph(tr("No evaluated yoga is marked detected by the current rules.","वर्तमान नियमों में कोई योग पाया नहीं गया।","Jin yogon ki jaanch ki gayi, unmein se koi bhi in niyamon ke anusaar nahi mila."));subhead(tr("Dosha assessment","दोष का आकलन","Dosh ki jaanch"));cardRows([doshaCard(obj(ds.manglik),"Manglik"),doshaCard(obj(ds.kaalSarp),"Kaal Sarp")],2);subhead(tr("Birth Panchang","जन्म पंचांग","Janm Panchang"));panchangGrid(obj(data("panchang")));note(s(yo.note)+" "+s(ds.notes));

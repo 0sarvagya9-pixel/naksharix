@@ -76,6 +76,11 @@ for (const [index, profile] of profiles.entries()) {
           ? {en:"Which proposed name matches the traditional birth syllable?",hi:"कौन सा प्रस्तावित नाम पारंपरिक जन्म ध्वनि से मेल खाता है?",hinglish:"Kaunsa proposed naam traditional janm sound se match karta hai?"}[language]
           : questions[index][language];
         const {content,title} = await assembleAutomaticPaidReport({slug,birth,extra,question,language,now});
+        row.readerQuestion = {
+          submittedQuestion: content.sections.find(section=>section.key==="your-question").data.submittedQuestion,
+          ...content.sections.find(section=>section.key==="editorial-insights").data.question,
+          disclaimer: content.sections.find(section=>section.key==="trust").data,
+        };
         if (!scope.dateNameOnly) {
           const calculated = content.sections.find(section=>section.key==="birth").data;
           row.profileCards = [
@@ -87,7 +92,8 @@ for (const [index, profile] of profiles.entries()) {
         const rendered = await generatePremiumReportPdf({requestId,templateId:slug,status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:title,customerName:profile.name,language});
         assert.equal(rendered.generated,true);
         const pdf = await PDFDocument.load(rendered.bytes);
-        assert.ok(pdf.getPageCount() >= 3);
+        assert.ok(pdf.getPageCount() >= 4 && pdf.getPageCount() <= 30,
+          `Editorial pagination for profile ${index + 1}, ${slug}, ${language}: ${pdf.getPageCount()}`);
         assert.ok(pdf.getTitle().endsWith(requestId));
         const filename = slug+"-"+language+".pdf";
         await fs.writeFile(path.join(output,filename),rendered.bytes);

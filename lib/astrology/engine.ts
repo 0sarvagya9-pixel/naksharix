@@ -1,3 +1,4 @@
+import {calculateNumerologyReport} from "@/lib/numerology";
 import { addDays, format } from "date-fns";
 import { planets, tarotDeck, zodiacSigns } from "@/lib/astrology/constants";
 
@@ -193,20 +194,19 @@ export function calculateCoreAstrology(details: Pick<BirthDetails, "name" | "bir
 }
 
 export function calculateNumerology(name: string, dateOfBirth: Date) {
-  const digits = format(dateOfBirth, "yyyyMMdd").split("").map(Number);
-  const reduce = (n: number): number => (n > 9 && ![11, 22, 33].includes(n) ? reduce(String(n).split("").reduce((a, b) => a + Number(b), 0)) : n);
-  const letters = name.toUpperCase().replace(/[^A-Z]/g, "");
-  const value = [...letters].reduce((sum, char) => sum + ((char.charCodeAt(0) - 64 - 1) % 9) + 1, 0);
-  const vowels = [...letters].filter((c) => "AEIOU".includes(c)).reduce((sum, char) => sum + ((char.charCodeAt(0) - 64 - 1) % 9) + 1, 0);
+  const result = calculateNumerologyReport({name, dateOfBirth});
+  const value = result.nameNumber?.value ?? null;
   return {
-    lifePathNumber: reduce(digits.reduce((a, b) => a + b, 0)),
-    destinyNumber: reduce(value),
-    soulUrgeNumber: reduce(vowels || value),
-    personalityNumber: reduce(Math.max(1, value - vowels)),
+    lifePathNumber: result.lifePath.value,
+    destinyNumber: value,
+    soulUrgeNumber: result.soulUrge?.value ?? null,
+    personalityNumber: result.personality?.value ?? null,
+    nameMethod: result.nameMethod,
+    nameUnavailableReason: result.nameUnavailableReason,
     report: {
       summary: "Your numbers emphasize timing, intention, and practical follow-through.",
       dailyPrediction: "Prioritize one meaningful conversation and keep spending deliberate.",
-      nameVibration: reduce(value) >= 5 ? "Dynamic and opportunity-seeking" : "Stable and methodical"
+      nameVibration: value === null ? null : value >= 5 ? "Dynamic and opportunity-seeking" : "Stable and methodical"
     }
   };
 }

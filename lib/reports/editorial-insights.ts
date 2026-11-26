@@ -92,7 +92,7 @@ export function buildEditorialInsights(chart:BirthChartData,slug:string,question
    body:context+" "+(reportPractice(slug,i,language)??pick(language,PRACTICE[n-1]))};
  });
  const query=question.trim().toLowerCase();
- const topics=[{re:/career|jobs?\b|work|business|promotion|naukri|karier|karobar|करियर|नौकरी|व्यवसाय/,n:10},{re:/wealth|money|loan|finance|salary|budget|paisa|paise|aamdani|धन|पैसा|आय|बजट/,n:2},{re:/love|marriage|relationship|partner|shaadi|rishta|pyaar|विवाह|प्रेम|रिश्ता|शादी/,n:7},{re:/stud(?:y|ies)|education|exam|padhai|seekhn|पढ़ाई|शिक्षा|अध्ययन/,n:5},{re:/home|family|property|parivaar|parivar|ghar|घर|परिवार|पारिवारिक/,n:4}];
+ const topics=[{re:/career|jobs?\b|\bwork(?:ing)?\b|business|promotion|naukri|karier|karobar|करियर|नौकरी|व्यवसाय/,n:10},{re:/wealth|money|loan|finance|salary|budget|paisa|paise|aamdani|धन|पैसा|आय|बजट/,n:2},{re:/love|marriage|relationship|partner|shaadi|rishta|pyaar|विवाह|प्रेम|रिश्ता|शादी/,n:7},{re:/stud(?:y|ies)|\b(?:homework|coursework)\b|education|exam|padhai|seekhn|पढ़ाई|शिक्षा|अध्ययन|गृहकार्य|होमवर्क/,n:5},{re:/home|family|property|parivaar|parivar|ghar|घर|परिवार|पारिवारिक/,n:4}];
  const topic=topics.find(t=>t.re.test(query));
  const questionHouses=slug==="yearly-horoscope-report"?YEARLY_PLANNING_HOUSES:focus;
  const within=topic&&questionHouses.includes(topic.n);

@@ -30,3 +30,5 @@ for(const patch of [{koot:undefined},{available:false},{score:NaN},{score:2},{ma
 }
 assert.equal(qualifyBusinessMatchingFactors(factors,35),null);
 console.log("MATCHING_PROVIDER_BOUNDARY_FIXTURES_PASS");
+
+await import("./qa-partner-request-boundaries.mjs");

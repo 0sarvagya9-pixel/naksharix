@@ -43,6 +43,48 @@ const birth={name:"Asha Test",gender:"female",dateOfBirth:"1992-05-18",timeOfBir
 const partner={...birth,name:"Ravi Test",gender:"male",dateOfBirth:"1991-11-23",timeOfBirth:"17:20",birthPlace:"Mumbai, India",latitude:19.076,longitude:72.8777};
 const extra={confirmed:true,partner,partnerPermission:true,guardianPermission:true,romanName:"Asha Test",candidateNames:["Aasha Test","Asha T"]};
 const question="Test fixture: reflective personal planning.";
+async function checkEditorialQuestionRouting(){
+ const cases=[
+  ["en","How can I organize my homework?","Study and creativity","Your question connects to house 5"],
+  ["hi","अपने गृहकार्य को व्यवस्थित कैसे करूँ?","अध्ययन और रचनात्मकता","इस रिपोर्ट में आपका प्रश्न भाव 5"],
+  ["hinglish","Apna homework kaise organize karoon?","Study aur creativity","Aapka sawaal is report mein house 5"],
+  ["en","Which habits can help me at work?","Career and purpose","Your question connects to house 10"],
+  ["hi","करियर में कौन सी आदतें मदद कर सकती हैं?","करियर और उद्देश्य","इस रिपोर्ट में आपका प्रश्न भाव 10"],
+  ["hinglish","Career mein kaunsi habits madad kar sakti hain?","Career aur purpose","Aapka sawaal is report mein house 10"],
+  ["en","What should I consider about networking?","Values and mentors","The chart cannot identify a single reliable answer"],
+  ["en","How can I balance family responsibilities?","Values and mentors","Your question concerns home and foundations."],
+  ["hi","पारिवारिक जिम्मेदारियों में संतुलन कैसे रखूँ?","मूल्य और मार्गदर्शन","आपका प्रश्न घर और आधार से जुड़ा है।"],
+  ["hinglish","Parivaar ki zimmedariyan kaise sambhalun?","Values aur mentors","Aapka sawaal home aur foundations se juda hai."],
+ ];
+ for(const [language,prompt,title,intro] of cases){
+  const result=await assembleAutomaticPaidReport({slug:"fortune-report",birth,extra,question:prompt,language,now:new Date("2026-11-26T12:00:00Z")});
+  const response=result.content.sections.find(section=>section.key==="editorial-insights").data.question;
+  assert.equal(response.title,title,prompt);
+  assert.ok(response.body.startsWith(intro),prompt);
+  assert.equal(result.content.sections.find(section=>section.key==="your-question").data.focus,response.body);
+ }
+ console.log("EDITORIAL_QUESTION_ROUTING_PASS 10 semantic routing and printed-answer binding cases");
+}
+if(!process.argv.includes("--numerology-narrative"))await checkEditorialQuestionRouting();
+if(process.argv.includes("--question-routing"))process.exit(0);
+// Exercise every number profile, including master numbers that the three birth
+// fixtures may never select. Hindi narrative must not contain untranslated prose.
+function checkHindiNumerologyNarrative(){
+ const {calculateNumerologyReport}=require("@/lib/numerology");
+ const numbers=[1,2,3,4,5,6,7,8,9,11,22,33];
+ for(const value of numbers){
+  const report=calculateNumerologyReport({name:"A".repeat(value),dateOfBirth:"1992-05-18",asOf:new Date("2026-11-26T12:00:00Z"),locale:"hi"});
+  const number=report.nameNumber;
+  assert.ok(number,"complete Roman spelling must produce a name number");
+  assert.equal(number.value,value);
+  for(const [field,text] of Object.entries({meaning:number.meaning,guidance:number.guidance,strengths:number.strengths.join(" "),growthAreas:number.growthAreas.join(" ")})){
+   assert.doesNotMatch(text,/[A-Za-z]{2,}/,`Untranslated Hindi numerology ${value}: ${field}`);
+  }
+ }
+ console.log("HINDI_NUMEROLOGY_NARRATIVE_PASS 12 number profiles and 48 narrative fields");
+}
+checkHindiNumerologyNarrative();
+if(process.argv.includes("--numerology-narrative"))process.exit(0);
 // Compare the response with the actual report table, including when only illustrative names match.
 async function checkBabyNameQuestions(){
  const assemble=(language,question,candidateNames)=>assembleAutomaticPaidReport({slug:"baby-name-report",birth,extra:{confirmed:true,guardianPermission:true,candidateNames},question,language,now:new Date("2026-11-26T12:00:00Z")});
@@ -439,6 +481,34 @@ globalThis.fetch=async(url,options)=>{
  sent.push({payload:JSON.parse(options.body),key:options.headers["Idempotency-Key"]});
  return new Response(JSON.stringify({id:"isolated-test"}),{status:emailStatus});
 };
+async function verifyLocalizedDeliveryEmails(){
+ const {reportDeliveryMessage,sendReportDeliveryEmail}=require("@/lib/reports/report-delivery-service");
+ const before=sent.length;
+ for(const language of ["en","hi","hinglish"]){
+  const row={id:"localized-fixture-"+language,reportSlug:"premium-kundli",language,fullName:"Asha <Test>"};
+  const message=reportDeliveryMessage(row,"test@example.invalid");
+  const result=await sendReportDeliveryEmail(message);
+  assert.equal(result.sent,true);
+  const first=sent.at(-1);
+  assert.equal(first.payload.to[0],"test@example.invalid");
+  assert.match(first.payload.html,/Asha &lt;Test&gt;/);
+  assert.doesNotMatch(first.payload.html,/Asha <Test>/);
+  assert.ok(first.payload.text.includes(message.downloadUrl));
+  assert.ok(first.payload.html.includes(message.downloadUrl));
+  assert.ok(first.payload.text.includes("care@naksharix.com"));
+  if(language!=="en"){
+   assert.doesNotMatch(first.payload.text,/Your private PDF|Request reference:|Support:|Guidance on Naksharix|should not replace/);
+   assert.doesNotMatch(first.payload.html,/For privacy, this report|Personalized reports · Private|Request reference:|Support:|not guaranteed outcomes/);
+  }
+  if(language==="hi")assert.match(first.payload.html,/lang="hi"/);
+  await sendReportDeliveryEmail(message);
+  assert.deepEqual(sent.at(-1),first,"Identical retries must retain provider idempotency key and exact localized body");
+ }
+ assert.equal(sent.length-before,6);
+ sent.splice(before);
+ console.log("REPORT_DELIVERY_LOCALES_PASS=3; exact retry bodies, escaped name, secure links; intercepted transport only");
+}
+if(process.argv.includes("--delivery-email")){await verifyLocalizedDeliveryEmails();process.exit(0);}
 if(!dbMode){
  assert.equal(input.AUTO_REPORT_SLUGS.length,15);
  assert.equal(new Set(input.AUTO_REPORT_SLUGS).size,15);
@@ -745,6 +815,7 @@ if(!dbMode){
  const result=await mail.sendReportDeliveryEmail({to:"test@example.invalid",fullName:"Asha <Test>",reportName:"Test Kundli",reportRequestId:"test-fixture",downloadUrl:"http://localhost:3000/report-request/success?id=test-fixture"});
  assert.equal(result.sent,true);assert.equal(sent.length,1);
  assert.equal(sent[0].payload.to[0],"test@example.invalid");assert.match(sent[0].payload.html,/NAKSHARIX/);assert.match(sent[0].payload.html,/Asha &lt;Test&gt;/);assert.equal(sent[0].key,"naksharix/report-delivery/test-fixture");
+ await verifyLocalizedDeliveryEmails();
  console.log("PASS 15/15 distinct reports, localized PDFs, isolated branded email");
 }else{
  const {prisma}=require("@/lib/db");

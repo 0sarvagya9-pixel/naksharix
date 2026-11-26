@@ -22,6 +22,8 @@ export function buildDateNameReport(
   const report=getManualReport(slug);
   if(!report)throw Error("REPORT_UNKNOWN");
   const num=calculateNumerologyReport({name,dateOfBirth:birth.dateOfBirth,locale:l,asOf:now});
+  if(!num.nameNumber)throw Error("REPORT_NAME_ARITHMETIC_INVALID");
+  const confirmedNameNumber=num.nameNumber;
   const sections:PremiumReportContentSection[]=[];
   const section=(key:string,title:LocalText,data:unknown,limitations:string[]=[])=>{
     sections.push({key,title:t(title),data,limitations,status:"available_unverified"});
@@ -64,7 +66,7 @@ export function buildDateNameReport(
   depth.push(...buildCalendarDepth(num,l));
   section("editorial-depth",["Your calculation record","आपका गणना विवरण","Aapki calculation ka record"],depth);
   const profileCard=(value:typeof num.moolank):EditorialCard=>({label:value.label,title:String(value.value),body:value.meaning+" "+value.guidance});
-  const nameCard=profileCard(num.nameNumber);
+  const nameCard=profileCard(confirmedNameNumber);
   const planLabel=t(["Practice","अभ्यास","Abhyas"]);
   const focus=slug==="name-correction-report"?nameCard:profileCard(num.lifePath);
   const cycleLabel=t(["Personal month","व्यक्तिगत माह","Personal month"])+" "+num.calendar.personalMonth+" ("+num.calendar.asOf.slice(0,7)+").";
@@ -93,7 +95,7 @@ export function buildDateNameReport(
       return card(t(["Work and professional choices","काम और पेशेवर विकल्प","Kaam aur career"]),num.lifePath.label+" "+num.lifePath.value+" · "+num.lifePath.meaning+" "+t(["Test this theme against two recent pieces of work. Ask a colleague for an example of when it helped and when a different approach was needed.","अपने हाल के दो कार्यों में इस संकेत को परखें। किसी सहकर्मी से पूछें कि यह कब सहायक रहा और कब अलग तरीका जरूरी था।","Is theme ko apne do recent projects se compare karein. Colleague se poochhein kab yeh approach helpful thi aur kab doosra tareeka chahiye tha."]));
     }
     if(/relationship|marry|marriage|partner|family|shaadi|risht|shadi|रिश्त|शादी|विवाह|परिवार|पारिवारिक/.test(q)){
-      const indicator=nameEvidence.vowels?num.soulUrge:num.moolank;
+      const indicator=num.soulUrge??num.moolank;
       return card(t(["Relationships and communication","संबंध और संवाद","Rishte aur baatcheet"]),indicator.label+" "+indicator.value+" · "+indicator.meaning+" "+t(["Identify one preference you want to communicate. Ask the other person about theirs without inferring it from your own number.","अपनी एक प्राथमिकता पहचानें जिसे आप साझा करना चाहते हैं। दूसरे व्यक्ति की प्राथमिकता उनसे पूछें, अपने अंक से उसका अनुमान न लगाएँ।","Apni ek preference choose karein jo aap share karna chahte hain. Doosre vyakti ki preference unse poochhein; apne number se assume na karein."]));
     }
     if(slug==="name-correction-report"&&/name|spell|naam|नाम|वर्तनी/.test(q)){
@@ -105,7 +107,7 @@ export function buildDateNameReport(
         return card(t(["Compare the two spellings","दो वर्तनियों की तुलना","Dono spellings ka comparison"]),terms+t(["These are letter sums under the same method. Say each spelling aloud and check how it will appear on documents before choosing.","ये एक ही विधि से निकले अक्षर-योग हैं। चयन से पहले दोनों नाम बोलकर देखें और जाँचें कि वे दस्तावेजों पर कैसे लिखे जाएँगे।","Yeh ek hi method ke letter totals hain. Choose karne se pehle dono names bolkar dekhein aur documents par spelling check karein."]));
       }
     }
-    return card(t(["Applying this reading to your question","अपने प्रश्न के संदर्भ में पठन","Apne sawaal ke sandarbh mein"]),num.nameNumber.label+" "+num.nameNumber.value+" · "+num.nameNumber.meaning+" "+t(["Name one assumption in your question. Find an example from your experience that supports it and one that challenges it before deciding what to do.","अपने प्रश्न में एक धारणा पहचानें। आगे का कदम चुनने से पहले अपने अनुभव से उसके पक्ष और विपक्ष का एक-एक उदाहरण खोजें।","Apne question ka ek assumption pehchanein. Decision se pehle apne experience se uske favour aur against ek-ek example dhoondhein."]));
+    return card(t(["Applying this reading to your question","अपने प्रश्न के संदर्भ में पठन","Apne sawaal ke sandarbh mein"]),confirmedNameNumber.label+" "+confirmedNameNumber.value+" · "+confirmedNameNumber.meaning+" "+t(["Name one assumption in your question. Find an example from your experience that supports it and one that challenges it before deciding what to do.","अपने प्रश्न में एक धारणा पहचानें। आगे का कदम चुनने से पहले अपने अनुभव से उसके पक्ष और विपक्ष का एक-एक उदाहरण खोजें।","Apne question ka ek assumption pehchanein. Decision se pehle apne experience se uske favour aur against ek-ek example dhoondhein."]));
   };
   const response=questionCard();
   const exercise=(title:LocalText,body:LocalText):EditorialCard=>({label:planLabel,title:t(title),body:t(body)});
@@ -136,9 +138,9 @@ export function buildDateNameReport(
       `Is tithi mein ye ank nahi aaye: ${missing}. Apni likhi tareekh se inhein milaayein. Khaali khaana bas shunya ginti dikhaata hai. Isse kisi ki kshamata tay nahi hoti.`,
     ]));
     dailyPlan.push(exercise(["Compare two different inputs","दो अलग गणनाएँ मिलाएँ","Do alag gananaayein milaayein"],[
-      `The birth-date digits give life path ${num.lifePath.value}. The confirmed spelling ${name} gives name number ${num.nameNumber.value}. Circle the inputs that would change if the spelling changed.`,
-      `जन्मतिथि के अंकों से जीवन पथ अंक ${num.lifePath.value} और पुष्ट वर्तनी ${name} से नामांक ${num.nameNumber.value} है। पहचानें कि वर्तनी बदलने पर किस गणना के इनपुट बदलेंगे।`,
-      `Janm tithi ke ankon se jeevan path ank ${num.lifePath.value} hai. Pusht spelling ${name} se naamank ${num.nameNumber.value} hai. Dekhein ki spelling badalne par kis ganana ke akshar badlenge.`,
+      `The birth-date digits give life path ${num.lifePath.value}. The confirmed spelling ${name} gives name number ${confirmedNameNumber.value}. Circle the inputs that would change if the spelling changed.`,
+      `जन्मतिथि के अंकों से जीवन पथ अंक ${num.lifePath.value} और पुष्ट वर्तनी ${name} से नामांक ${confirmedNameNumber.value} है। पहचानें कि वर्तनी बदलने पर किस गणना के इनपुट बदलेंगे।`,
+      `Janm tithi ke ankon se jeevan path ank ${num.lifePath.value} hai. Pusht spelling ${name} se naamank ${confirmedNameNumber.value} hai. Dekhein ki spelling badalne par kis ganana ke akshar badlenge.`,
     ]));
   }
   const insights:EditorialInsights={

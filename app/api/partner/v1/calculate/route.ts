@@ -4,15 +4,17 @@ import {businessCalculationSchema} from "@/lib/business-integrations/input";
 import {calculateBusinessResult} from "@/lib/business-integrations/calculate";
 import {issueWidgetGrant} from "@/lib/business-integrations/widget-grant";
 import {sharedRateLimitResponse,getRequestIp} from "@/lib/security/rate-limit";
+import {readBoundedUtf8Body} from "@/lib/security/request-body";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export async function POST(request:Request){
  try{
  if(!businessEnabled())return fail("Partner API not available.",503);
  const limited=await sharedRateLimitResponse("partner-api",getRequestIp(request),120,60000);if(limited)return limited;
- if(!(request.headers.get("content-type")??"").includes("application/json")||Number(request.headers.get("content-length")??0)>8192)return fail("Use bounded JSON.",422);
- const raw=await request.text();if(raw.length>8192)return fail("Payload too large.",413);
- let body:unknown;try{body=JSON.parse(raw);}catch{return fail("Invalid JSON.",422);}
+ if(!(request.headers.get("content-type")??"").includes("application/json"))return fail("Use bounded JSON.",422);
+ const raw=await readBoundedUtf8Body(request,8192);
+ if(!raw.ok)return fail(raw.reason==="too_large"?"Payload too large.":"Invalid request body.",raw.reason==="too_large"?413:422);
+ let body:unknown;try{body=JSON.parse(raw.text);}catch{return fail("Invalid JSON.",422);}
  const parsed=businessCalculationSchema.safeParse(body);if(!parsed.success)return fail("Invalid request or missing subject permission.",422);
  if(parsed.data.scope==="chart-pdf"&&!businessPdfEnabled())return fail("Partner chart PDF unavailable.",503);
  if(!await businessSchemaReady())return fail("Partner API registry unavailable.",503);

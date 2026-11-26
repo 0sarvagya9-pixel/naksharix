@@ -5,6 +5,7 @@ import { calculatePartialShadbala } from "@/lib/astrology/strength/shadbala";
 import { createAshtakvargaDependencyResult } from "@/lib/astrology/strength/ashtakvarga";
 import { calculateSupportedVargaCharts } from "@/lib/astrology/varga/engine";
 import { calculateNumerologyReport } from "@/lib/numerology";
+import { numerologyNameNotice } from "@/lib/numerology/name";
 import type { CanonicalChartResult } from "@/lib/astrology/ephemeris/types";
 
 export type PremiumReportContentSection = {
@@ -41,7 +42,7 @@ export function assemblePremiumReportContent(input: {
 }): PremiumReportContentResult {
   const chart = input.chart;
   const numerology = calculateNumerologyReport({
-    name: chart.normalizedInput.name ?? "Naksharix Native",
+    name: chart.normalizedInput.name ?? "",
     dateOfBirth: chart.normalizedInput.dateOfBirth,
     gender: chart.normalizedInput.gender,
     locale: "en"
@@ -136,15 +137,21 @@ export function assemblePremiumReportContent(input: {
     {
       key: "numerology-section",
       title: "Numerology Section",
-      status: "provider_verified",
+      status: numerology.nameNumber && numerology.soulUrge && numerology.personality ? "provider_verified" : "partial_internal",
       data: {
         moolank: numerology.moolank,
         bhagyank: numerology.lifePath,
         nameNumber: numerology.nameNumber,
         soulUrge: numerology.soulUrge,
-        personality: numerology.personality
+        personality: numerology.personality,
+        nameMethod: numerology.nameMethod,
+        nameUnavailableReason: numerology.nameUnavailableReason ? numerologyNameNotice("en") : null
       },
-      limitations: [numerology.disclaimer]
+      limitations: [numerology.disclaimer,
+        ...(!numerology.nameNumber ? [numerologyNameNotice("en")] : [
+          ...(!numerology.soulUrge ? [numerologyNameNotice("en", "vowels")] : []),
+          ...(!numerology.personality ? [numerologyNameNotice("en", "consonants")] : [])
+        ])]
     },
     {
       key: "lo-shu-section",

@@ -9,6 +9,7 @@ from pathlib import Path
 import fitz
 import numpy as np
 from qa_royal_profile_cards import profile_card_errors
+from qa_royal_question_blocks import question_block_errors
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("matrix", type=Path)
@@ -51,7 +52,10 @@ for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
         file = manifest.parent / record["filename"]
         digest = hashlib.sha256(file.read_bytes()).hexdigest()
         issues(digest != record["sha256"], "generation checksum mismatch")
+        problems.extend(question_block_errors(file, record.get("readerQuestion")))
         with fitz.open(file) as doc:
+            issues(len(doc) != record["pages"], "generation manifest page count mismatch")
+            issues(not 4 <= len(doc) <= 30, "reference matrix pagination outside the 4-30 page regression range")
             cover = doc[0].get_text()
             issues(record["name"] not in cover, "incorrect cover identity")
             issues(record["requestId"] not in cover, "request ID missing")
@@ -134,7 +138,7 @@ complete=len(rows)==len(cells)==135 and all(sum(r["profile"]==n for r in rows)==
 passed=sum(r["pass"] for r in rows)
 report = {"complete135":complete,"pdfs":len(rows),"passed":passed,"failed":len(rows)-passed,
           "pages":sum(r["pages"] for r in rows),"referenceSha256":reference_hash,
-          "tests":"Every page rasterized at 72 dpi, page geometry and font glyphs, running pagination, content presence and selectable text, detached units, checksum, cover identity/locale, cross-profile isolation, approved lotus/wheel/border pixel comparisons, date/name-only data exclusion. The four printed birth-chart cards are compared with the calculated words, outlined rectangles and 13 pt minimum value size. Couple partner names are intentionally allowed.",
+          "tests":"Every page rasterized at 72 dpi, physical page count against its manifest and the declared 4-30 page range for this reference matrix, page geometry and font glyphs, running pagination, content presence and selectable text, detached units, checksum, cover identity/locale, cross-profile isolation, approved lotus/wheel/border pixel comparisons, date/name-only data exclusion. The four printed birth-chart cards are compared with the calculated words, outlined rectangles and 13 pt minimum value size. Couple partner names are intentionally allowed.",
           "limitations":"These checks do not certify every interpretation, native-language quality, print fidelity, real email delivery or independent professional acceptance.",
           "rows":rows}
 args.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")

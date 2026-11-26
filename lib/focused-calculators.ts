@@ -1,4 +1,6 @@
 import { calculateNumerologyReport } from "@/lib/numerology";
+import {calculateRomanNameEvidence} from "@/lib/numerology/name";
+import {normalizeNumerologyBirthDate} from "@/lib/numerology/input";
 import type { Locale } from "@/lib/i18n";
 
 export type FocusedCalculatorKind =
@@ -91,6 +93,7 @@ export function calculateFocusedNumerology(input: FocusedNumerologyInput): Focus
     vehicle: input.kind === "vehicle" ? input.targetNumber : undefined,
     locale: "en"
   });
+  if (!report.nameNumber) throw new Error("Complete Roman name spelling required");
   const rawTotal = input.kind === "mobile" ? digitTotal(input.targetNumber) : alphaNumericTotal(input.targetNumber);
   const reducedNumber = reduceNumber(rawTotal);
   const targetDigits = digitsFromString(input.targetNumber);
@@ -133,11 +136,11 @@ export function calculateFocusedNumerology(input: FocusedNumerologyInput): Focus
 }
 
 export function calculateNameNumberValue(name: string) {
-  return reduceNumber(nameTotals(name).total || 1);
+  return calculateRomanNameEvidence(name)?.all.number ?? null;
 }
 
 export function calculatePersonalityNumberValue(name: string) {
-  return reduceNumber(Math.max(1, nameTotals(name).consonants || nameTotals(name).total || 1));
+  return calculateRomanNameEvidence(name)?.consonants?.number ?? null;
 }
 
 export function reduceNumerologyNumber(value: number) {
@@ -145,8 +148,7 @@ export function reduceNumerologyNumber(value: number) {
 }
 
 export function dateDigitCounts(dateOfBirth: string | Date) {
-  const date = dateOfBirth instanceof Date ? dateOfBirth : new Date(`${String(dateOfBirth).slice(0, 10)}T00:00:00.000Z`);
-  if (Number.isNaN(date.getTime())) return {};
+  const date = normalizeNumerologyBirthDate(dateOfBirth);
   const text = `${String(date.getUTCDate()).padStart(2, "0")}${String(date.getUTCMonth() + 1).padStart(2, "0")}${date.getUTCFullYear()}`;
   return text.split("").map(Number).reduce<Record<number, number>>((acc, digit) => {
     if (digit >= 1 && digit <= 9) acc[digit] = (acc[digit] ?? 0) + 1;
@@ -192,20 +194,6 @@ function alphaNumericTotal(value: string) {
     if (/\d/.test(char)) return sum + Number(char);
     return sum + ((char.charCodeAt(0) - 65) % 9) + 1;
   }, 0);
-}
-
-function nameTotals(name: string) {
-  const letters = name.toUpperCase().replace(/[^A-Z]/g, "");
-  return [...letters].reduce(
-    (acc, letter) => {
-      const value = ((letter.charCodeAt(0) - 65) % 9) + 1;
-      acc.total += value;
-      if (["A", "E", "I", "O", "U"].includes(letter)) acc.vowels += value;
-      else acc.consonants += value;
-      return acc;
-    },
-    { total: 0, vowels: 0, consonants: 0 }
-  );
 }
 
 function unique(values: number[]) {

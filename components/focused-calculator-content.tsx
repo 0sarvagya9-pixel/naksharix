@@ -1,5 +1,8 @@
 "use client";
 
+import {isFullRomanNumerologyName, numerologyNameNotice} from "@/lib/numerology/name";
+import {isNumerologyBirthDate, isNumerologyMobile, isNumerologyVehicle} from "@/lib/numerology/input";
+
 import { useRef, useState } from "react";
 import type React from "react";
 import Link from "next/link";
@@ -11,7 +14,7 @@ import { Section } from "@/components/section";
 import { LocationAutocomplete, type ResolvedLocation } from "@/components/location-autocomplete";
 import { useLanguage } from "@/components/language-provider";
 import { secureFetch } from "@/lib/security/csrf";
-import { calculateFocusedNumerology, calculatePersonalityNumberValue, calculationFailed, dateDigitCounts, localizedError, type FocusedCalculatorKind, type FocusedNumerologyResult } from "@/lib/focused-calculators";
+import { calculateFocusedNumerology, calculationFailed, localizedError, type FocusedCalculatorKind, type FocusedNumerologyResult } from "@/lib/focused-calculators";
 import { calculateNumerologyReport, type NumerologyReport } from "@/lib/numerology";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n";
@@ -112,12 +115,16 @@ export function FocusedCalculatorContent({ kind }: { kind: FocusedCalculatorKind
   function submitNumber(nextKind: NumberKind) {
     const required: (keyof NumberForm)[] = nextKind === "personality" ? ["name"] : nextKind === "destiny" || nextKind === "lo-shu" ? ["dateOfBirth"] : nextKind === "name-number" ? ["name", "dateOfBirth"] : ["name", "dateOfBirth", "targetNumber"];
     const nextErrors = requireFields(number, required, locale);
+    if (required.includes("name") && number.name && !isFullRomanNumerologyName(number.name)) nextErrors.name = numerologyNameNotice(locale);
+    if (required.includes("dateOfBirth") && number.dateOfBirth && !isNumerologyBirthDate(number.dateOfBirth)) nextErrors.dateOfBirth = calculationFailed(locale);
+    if (nextKind === "mobile" && number.targetNumber && !isNumerologyMobile(number.targetNumber)) nextErrors.targetNumber = calculationFailed(locale);
+    if (nextKind === "vehicle" && number.targetNumber && !isNumerologyVehicle(number.targetNumber)) nextErrors.targetNumber = calculationFailed(locale);
     if (blockIfErrors(nextErrors)) return;
     try {
       if (nextKind === "mobile" || nextKind === "vehicle") {
         setNumberResult(calculateFocusedNumerology({ kind: nextKind, name: number.name, dateOfBirth: number.dateOfBirth, targetNumber: number.targetNumber, purpose: number.purpose }));
       } else {
-        setNumberResult(calculateNumerologyReport({ name: number.name || "Native", dateOfBirth: number.dateOfBirth || "2000-01-01", locale: "en" }));
+        setNumberResult(calculateNumerologyReport({ name: number.name, dateOfBirth: number.dateOfBirth || "2000-01-01", locale }));
       }
       setAstroResult(null);
       setMatchResult(null);
@@ -208,7 +215,7 @@ export function FocusedCalculatorContent({ kind }: { kind: FocusedCalculatorKind
 
         <div className="mt-8">
           {astroResult ? <AstroResultView kind={kind as AstroKind} result={astroResult} locale={locale} /> : null}
-          {numberResult ? <NumberResultView kind={kind as NumberKind} result={numberResult} form={number} locale={locale} /> : null}
+          {numberResult ? <NumberResultView kind={kind as NumberKind} result={numberResult} locale={locale} /> : null}
           {matchResult ? <MatchResultView kind={kind as MatchKind} result={matchResult} locale={locale} /> : null}
         </div>
         {(astroResult || numberResult || matchResult) ? <ReportCta kind={kind} locale={locale} /> : null}
@@ -267,20 +274,21 @@ function AstroResultView({ kind, result, locale }: { kind: AstroKind; result: As
   return <ResultShell title={l.yogaResult}><MetricGrid items={[[l.yogasFound, yogas.length], [l.strongestYoga, yogas[0]?.name || l.none], [l.overallTheme, yogas.length ? l.supportiveThemes : l.needsFullReview]]} />{yogas.length ? <div className="grid gap-4 md:grid-cols-2">{yogas.map((yoga) => <InfoBlock key={yoga.name} title={yoga.name} items={[yoga.interpretation, yoga.basis, yoga.caveat]} />)}</div> : <InfoBlock title={l.yogaList} items={[l.noYoga]} />}</ResultShell>;
 }
 
-function NumberResultView({ kind, result, form, locale }: { kind: NumberKind; result: FocusedNumerologyResult | NumerologyReport; form: NumberForm; locale: Locale }) {
+function NumberResultView({ kind, result, locale }: { kind: NumberKind; result: FocusedNumerologyResult | NumerologyReport; locale: Locale }) {
   const l = resultCopy(locale);
   if (kind === "mobile" || kind === "vehicle") {
     const r = result as FocusedNumerologyResult;
     return <ResultShell title={kind === "mobile" ? l.mobileResult : l.vehicleResult}><MetricGrid items={[[kind === "mobile" ? l.mobileNumber : l.vehicleNumber, r.targetNumber], [l.numberTotal, r.rawTotal], [l.reducedNumber, r.reducedNumber], [l.verdict, verdict(r.verdict, locale)]]} /><InfoBlock title={l.personalCompatibility} items={[`${l.moolank}: ${r.moolank}`, `${l.bhagyank}: ${r.bhagyank}`, `${l.naamank}: ${r.naamank}`, `${l.supportiveNumbers}: ${r.supportiveNumbers.join(", ")}`]} /><InfoBlock title={l.cautions} items={numberGuidance(locale)} /></ResultShell>;
   }
   const r = result as NumerologyReport;
-  if (kind === "name-number") return <ResultShell title={l.nameNumberResult}><MetricGrid items={[[l.naamank, r.nameNumber.value], [l.moolank, r.moolank.value], [l.bhagyank, r.lifePath.value], [l.verdict, verdict(compatVerdict(r.nameNumber.value, [r.moolank.value, r.lifePath.value]), locale)]]} /><InfoBlock title={l.nameEnergy} items={[r.nameNumber.meaning, r.nameNumber.guidance, ...r.nameNumber.strengths]} /></ResultShell>;
+  if (kind === "name-number" && !r.nameNumber) return <ResultShell title={l.nameNumberResult}><InfoBlock title={l.calculationBasis} items={[numerologyNameNotice(locale)]} /></ResultShell>;
+  if (kind === "name-number" && r.nameNumber) return <ResultShell title={l.nameNumberResult}><MetricGrid items={[[l.naamank, r.nameNumber.value], [l.moolank, r.moolank.value], [l.bhagyank, r.lifePath.value], [l.verdict, verdict(compatVerdict(r.nameNumber.value, [r.moolank.value, r.lifePath.value]), locale)]]} /><InfoBlock title={l.nameEnergy} items={[r.nameNumber.meaning, r.nameNumber.guidance, ...r.nameNumber.strengths]} /></ResultShell>;
   if (kind === "destiny") return <ResultShell title={l.destinyResult}><MetricGrid items={[[l.bhagyank, r.lifePath.value], [l.calculationBasis, l.dobDigits], [l.coreTheme, r.lifePath.meaning]]} /><InfoBlock title={l.practicalGuidance} items={[r.lifePath.guidance, ...r.lifePath.strengths, ...r.lifePath.growthAreas]} /></ResultShell>;
   if (kind === "personality") {
-    const value = calculatePersonalityNumberValue(form.name);
-    return <ResultShell title={l.personalityResult}><MetricGrid items={[[l.personalityNumber, value], [l.outerExpression, personalityTheme(value, locale)]]} /><InfoBlock title={l.practicalGuidance} items={numberGuidance(locale)} /></ResultShell>;
+    const value = r.personality?.value ?? null;
+    return <ResultShell title={l.personalityResult}><MetricGrid items={[[l.personalityNumber, value], [l.outerExpression, value === null ? numerologyNameNotice(locale, "consonants") : personalityTheme(value, locale)]]} /><InfoBlock title={l.practicalGuidance} items={numberGuidance(locale)} /></ResultShell>;
   }
-  const counts = dateDigitCounts(form.dateOfBirth);
+  const counts = Object.fromEntries(r.loShuGrid.map(cell => [cell.number, cell.count]));
   const order = [4, 9, 2, 3, 5, 7, 8, 1, 6];
   const missing = order.filter((n) => !counts[n]);
   const repeated = order.filter((n) => (counts[n] ?? 0) > 1);
