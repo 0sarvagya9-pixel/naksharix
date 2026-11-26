@@ -343,9 +343,29 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  note(tr("Approximate birth times may alter house and divisional chart results. The supplied birth offset is used for the birth instant.","अनुमानित जन्म समय से भाव और वर्ग कुंडली बदल सकती है। दिए गए UTC अंतर से जन्म समय की गणना होती है।","Approximate birth time se bhav aur varga change ho sakte hain. Supplied UTC offset birth instant ke liye use hota hai."));
  }
  const slug=request.templateId;
+ const depth=data("editorial-depth") as DepthChapter[]|undefined;
+ const navamsaExample=slug==="premium-kundli"?depth?.find(part=>part.key==="navamsa-ascendant"):undefined;
  if(slug==="premium-kundli"){
   const h=obj(data("houses")),d1=records(h.lagna),d9=records(h.navamsa);
   interior("02 / NATAL ARCHITECTURE",tr("Your birth charts","आपकी जन्म कुंडली","Aapki janm kundliyan"),tr("North Indian house-fixed D1 and D9 diagrams. House numbers stay fixed; signs and planets vary with the input.","उत्तर भारतीय भाव-स्थिर D1 और D9 चित्र। भाव स्थिर हैं; राशियाँ और ग्रह जन्म विवरण पर निर्भर हैं।","In D1 aur D9 kundliyon ko Uttar Bharatiya shaili mein padhein. Bhavon ki jagah aur sankhya wahi rehti hai. Janm vivaran ke anusaar har bhav ki rashi aur usmein dikhne wale grah badalte hain."));charts(d1,d9,"D1 / RASHI","D9 / NAVAMSA");note(tr("Diagrams are calculated from the internal Lahiri, whole-sign engine. No independent ephemeris certification is claimed.","चित्र आंतरिक लाहिड़ी गणना पर आधारित हैं। स्वतंत्र प्रमाणीकरण का दावा नहीं है।","Yeh kundliyan Naksharix ki ganana se bani hain. Ismein Lahiri ayanamsha aur poorn-rashi bhav liye gaye hain. In chitron ke liye swatantra ephemeris pramanikaran ka daava nahi hai."));
+  if(navamsaExample){
+   // Keep the worked example with the two charts it explains. Reserve the
+   // entire block before recording its destination in the printed contents.
+   type ExampleLine={text:string;size:number;face:FontKind;color:RGB;after:number};
+   const lines:ExampleLine[]=[
+    {text:navamsaExample.title,size:15,face:"title",color:wine,after:4},
+    {text:navamsaExample.intro,size:10.1,face:"body",color:muted,after:5}
+   ];
+   for(const card of navamsaExample.cards)lines.push(
+    {text:card.label.toUpperCase(),size:8,face:"bold",color:goldText,after:2},
+    {text:card.title,size:12.5,face:"title",color:wine,after:3},
+    {text:card.body,size:11,face:"body",color:ink,after:4}
+   );
+   const blockHeight=lines.reduce((total,line)=>total+wrap(line.text,CW,line.size,line.face).length*line.size*1.58+line.after,0);
+   ensure(blockHeight);
+   starts.push({title:navamsaExample.title,page:pdf.getPageCount()});
+   for(const line of lines)paragraph(line.text,line.size,line.color,line.face,line.after);
+  }
   kundliChapter("03 / PLANETARY PLACEMENTS",tr("The nine grahas","नौ ग्रह","Nau grah"),tr("Degrees rounded to four decimal places.","अंश चार दशमलव स्थान तक।","Har sthiti degree mein di gayi hai, dashamlav ke baad chaar ankon tak."));planetTable(records(data("planets")));subhead(tr("Traditional interpretation","पारंपरिक व्याख्या","Paramparik vyakhya"));cardRows(insights.planetNotes.slice(0,2),2);
   kundliChapter("04 / LIFE AREAS",tr("Twelve houses, twelve lenses","बारह भाव, बारह दृष्टिकोण","Barah bhav aur unke jeevan-vishay"),tr("Empty houses remain meaningful; traditional sign rulership provides context.","रिक्त भाव भी महत्वपूर्ण हैं; पारंपरिक राशि स्वामित्व संदर्भ देता है।","Jis bhav mein koi grah nahi hai, uska bhi arth hota hai. Us bhav ki rashi aur uske paramparik swami ko saath dekhkar sandarbh samjhein."));houseTable(d1);
   kundliChapter("05 / TIMING FRAMEWORK",tr("Your current Dasha cycle","आपका वर्तमान दशा चक्र","Aapki vartaman dasha"),tr("Vimshottari periods are calculated timing frameworks, not promises of events.","विंशोत्तरी दशा गणना का समय-संदर्भ है, घटनाओं की गारंटी नहीं।","Vimshottari dasha mein samay ko ganit se nikaali gayi avadhiyon mein padha jata hai. Kisi avadhi ka hona kisi ghatna ka vaada nahi hai."));periodCards(obj(data("dasha")));note(tr("Use timing as a reflection framework. Actual decisions depend on evidence and circumstances.","समय को चिंतन के संदर्भ में लें। निर्णय वास्तविक परिस्थितियों पर निर्भर हैं।","Dasha ki tareekhon ko apni sthiti par gaur karne ka ek sandarbh maanein. Faisle apne saamne maujood tathyon aur paristhitiyon ke aadhaar par lein."));
@@ -395,8 +415,8 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   }
   if(insights.planetNotes.length){specialist("PERSONAL INTERPRETATION",tr("What your placements suggest for reflection","ग्रह स्थितियों से चिंतन के विषय","Grahon ki sthiti par gaur karne ke vishay"),145);cardRows(insights.planetNotes,2)}
  }
- const depth=data("editorial-depth") as DepthChapter[]|undefined;
  if(depth){for(const part of depth){
+  if(part===navamsaExample)continue;
   const cards=groupEditorialCardBodies(part.cards).map(group=>group.members.length===1?group.members[0]:{
    label:tr("Shared explanation","साझा व्याख्या","Shared explanation")+" / "+group.members.length,
    title:group.members.map(c=>c.label+" — "+c.title).join("\n"),

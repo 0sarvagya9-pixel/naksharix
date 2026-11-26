@@ -828,3 +828,60 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  assert.equal(trace[0].motion.length+trace[1].motion.length,10);
  console.log("P0_STRENGTH_CONVENTION_ATTRIBUTION "+JSON.stringify({toleranceVirupas:.25,trace,fullParityAccepted:false}));
 }
+
+{
+ const {calculateBirthStrengthEvidence}=require("@/lib/astrology/strength/birth-context");
+ const {longitudeAyanaCandidate}=require("@/lib/astrology/strength/longitude-temporal");
+ const primary=JSON.parse(fs.readFileSync("fixtures/astrology/published-classical-comparison.json","utf8"));
+ const holdout=JSON.parse(fs.readFileSync("fixtures/astrology/heldout-strength-2025.json","utf8"));
+ const table="raman_15_degree_table",tolerance=.25;
+ // Table endpoints and halfway interpolation, including all quadrants.
+ for(const [longitude,minutes] of [[0,0],[7.5,181],[15,362],[30,703],[45,1002],[60,1238],[75,1388],[90,1440],[165,362],[180,0],[270,-1440],[345,-362]]){
+  assert.ok(Math.abs(longitudeAyanaCandidate("Mars",longitude,23.4,table).declination-minutes/60)<1e-10);
+ }
+ assert.throws(()=>longitudeAyanaCandidate("Mars",45,23.4,"unrecognized"),/CONVENTION/);
+ assert.throws(()=>longitudeAyanaCandidate("Mars",360,23.4,table),/LONGITUDE/);
+ const receipts=[];
+ const examples=[
+  {birth:{...primary.birth,date:"1978-08-23"},ayana:[89.04,11.22,23.85,48.04,56.32,21.87,17.02]},
+  {birth:primary.birth,ayana:primary.temporal.ayana,chart:primary},
+  {birth:holdout.input,ayana:holdout.temporal.ayana,chart:holdout}
+ ];
+ function whole(actual,fixture){
+  const records=[];
+  for(const [i,g] of classical.entries()){
+   const r=actual.temporalVariantStrength.rows.find(v=>v.planet===g),c=r.components;
+   const values={sthana:c.sthana,dig:c.dig,kala:c.kalaBeforeWar+r.warVirupas,cheshta:c.cheshta,naisargika:c.naisargika,drik:c.drik,total:r.total};
+   for(const [key,value] of Object.entries(values)){
+    assert.ok(Number.isFinite(value));records.push({scope:"planet",point:g,key,delta:value-fixture.strength[key][i]});
+   }
+  }
+  for(const [i,h] of actual.temporalVariantBhava.houses.entries()){
+   const values={lord:h.lordStrengthVirupas,direction:h.directionalVirupas,aspect:h.aspect.virupas,total:h.arithmeticTotalVirupas};
+   for(const [key,value] of Object.entries(values)){
+    assert.ok(Number.isFinite(value));records.push({scope:"house",point:i+1,key,delta:value-fixture.bhava[key][i]});
+   }
+  }
+  assert.equal(records.length,97);return {passed:records.filter(r=>Math.abs(r.delta)<=tolerance).length,records};
+ }
+ for(const e of examples){
+  const baseline=calculateBirthStrengthEvidence(e.birth),selected=calculateBirthStrengthEvidence(e.birth,table);
+  assert.equal(selected.longitudeTemporal.method,"raman_kranti_table_named_luminary_accounting");
+  assert.equal(baseline.longitudeTemporal.method,"longitude_projection_raman_polarity_named_luminary_accounting");
+  assert.equal(selected.fullShadbalaVerified,false);assert.equal(selected.fullBhavaBalaVerified,false);
+  const delta=selected.longitudeTemporal.rows.map((r,i)=>r.components.ayana-e.ayana[i]);
+  assert.ok(delta.every(d=>Math.abs(d)<=.02),"three charts independently reproduce printed Ayana rows");
+  const receipt={date:e.birth.date,ayanaResiduals:delta};
+  if(e.chart){
+   receipt.baseline=whole(baseline,e.chart);receipt.raman=whole(selected,e.chart);
+   assert.equal(receipt.baseline.passed,e.birth===primary.birth?71:63);
+   assert.ok(receipt.raman.passed>=(e.birth===primary.birth?72:70));
+   if(e.birth===primary.birth){
+    const mars=receipt.raman.records.find(r=>r.point==="Mars"&&r.key==="kala");
+    assert.ok(Math.abs(mars.delta)<.012);
+   }
+  }
+  receipts.push(receipt);
+ }
+ console.log("P0_RAMAN_AYANA_TABLE "+JSON.stringify({toleranceVirupas:tolerance,fullParityAccepted:false,receipts}));
+}

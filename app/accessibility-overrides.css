@@ -19,7 +19,8 @@
   outline-offset: 3px;
 }
 
-/* Keep the report form still while focus moves between review, fields and submit. */
+/* Keep credential and report controls still as focus moves through their forms. */
+html:has([data-auth-frame]),
 html:has(form [name="reportConfirmed"]) {
   scroll-behavior: auto;
 }

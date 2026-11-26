@@ -12,11 +12,31 @@ export function projectLongitudeDeclination(tropicalLongitude:number,obliquity:n
  const r=Math.PI/180;
  return Math.asin(Math.sin(obliquity*r)*Math.sin(tropicalLongitude*r))/r;
 }
-export function longitudeAyanaCandidate(planet:StrengthGraha,tropicalLongitude:number,obliquity:number){
+export type AyanaConvention = "longitude_projection" | "raman_15_degree_table";
+
+/** Raman, Graha and Bhava Balas §§73–75. Each 15-degree step adds
+ * the tabulated arcminutes. Interpolate the final partial step. */
+function ramanTableDeclination(longitude:number){
+ if(!validAngle(longitude))throw Error("INVALID_TROPICAL_LONGITUDE");
+ const halfCircle=longitude%180;
+ const distance=Math.min(halfCircle,180-halfCircle);
+ const increments=[362,341,299,236,150,52];
+ let arcminutes=0;
+ for(const [i,increment] of increments.entries()){
+  const fraction=Math.max(0,Math.min(1,distance/15-i));
+  arcminutes+=increment*fraction;
+ }
+ return (longitude<180?1:-1)*arcminutes/60;
+}
+
+export function longitudeAyanaCandidate(planet:StrengthGraha,tropicalLongitude:number,obliquity:number,convention:AyanaConvention="longitude_projection"){
  if(!STRENGTH_GRAHAS.includes(planet))throw Error("INVALID_AYANA_PLANET");
- const declination=projectLongitudeDeclination(tropicalLongitude,obliquity);
+ if(convention!=="longitude_projection"&&convention!=="raman_15_degree_table")throw Error("UNKNOWN_AYANA_CONVENTION");
+ const useTable=convention==="raman_15_degree_table";
+ const declination=useTable?ramanTableDeclination(tropicalLongitude):projectLongitudeDeclination(tropicalLongitude,obliquity);
  const favored=planet==="Mercury"?Math.abs(declination):planet==="Moon"||planet==="Saturn"?-declination:declination;
- const undoubledVirupas=Math.min(60,Math.max(0,30+30*favored/obliquity));
+ const maximum=useTable?24:obliquity;
+ const undoubledVirupas=Math.min(60,Math.max(0,30+30*favored/maximum));
  return {declination,undoubledVirupas,virupas:planet==="Sun"?2*undoubledVirupas:undoubledVirupas};
 }
 /** Raman, ch. X arts. 136–137: these angular measures are used for
@@ -31,7 +51,7 @@ export type LuminaryAccounting="doubled_in_kala"|"separate_kendra";
  * and separate luminary motional rows, not a claim that all texts agree.
  * The doubled option retains the historical doubled Moon in Kala and no
  * extra luminary motional amount. All inputs must be from the same chart. */
-export function calculateLongitudeTemporalCandidate(planets:CanonicalPlanet[],solar:ClassicalSolarContext,calendar:CalendarLords|undefined,ayanamsa:number,obliquity:number,accounting:LuminaryAccounting){
+export function calculateLongitudeTemporalCandidate(planets:CanonicalPlanet[],solar:ClassicalSolarContext,calendar:CalendarLords|undefined,ayanamsa:number,obliquity:number,accounting:LuminaryAccounting,convention:AyanaConvention="longitude_projection"){
  if(accounting!=="doubled_in_kala"&&accounting!=="separate_kendra")throw Error("INVALID_LUMINARY_ACCOUNTING");
  if(!validAngle(ayanamsa)||!Number.isFinite(obliquity)||obliquity<=0||obliquity>=90)return null;
  const polarity=calculateRamanPolarityCandidate(planets);if(!polarity)return null;
@@ -42,7 +62,7 @@ export function calculateLongitudeTemporalCandidate(planets:CanonicalPlanet[],so
  const kendra=luminaryKendraCandidate(tropical("Sun"),tropical("Moon"));
  const base=calculateTemporalStrengthEvidence(planets,solar,calendar);
  const rows=base.rows.map(r=>{
-  const planet=r.planet,aya=longitudeAyanaCandidate(planet,tropical(planet),obliquity);
+  const planet=r.planet,aya=longitudeAyanaCandidate(planet,tropical(planet),obliquity,convention);
   const paksha=classicalPaksha(planet,sun,moon,polarity.polarity[planet]);
   const components={...r.components,ayana:aya.virupas,paksha:accounting==="doubled_in_kala"?paksha.virupas:paksha.undoubledVirupas};
   const beforeWar=Object.entries(components).filter(([k])=>k!=="yuddha").map(([,v])=>v);
@@ -50,5 +70,6 @@ export function calculateLongitudeTemporalCandidate(planets:CanonicalPlanet[],so
   const luminaryCheshta=planet==="Sun"||planet==="Moon"?(accounting==="separate_kendra"?kendra[planet]:0):null;
   return {planet,components,kalaBeforeWar,luminaryCheshta,projectedDeclination:aya.declination};
  });
- return {method:"longitude_projection_raman_polarity_named_luminary_accounting" as const,accounting,rows,warPairs:base.warPairs,publicEnabled:false as const,verified:false as const};
+ const method=convention==="raman_15_degree_table"?"raman_kranti_table_named_luminary_accounting" as const:"longitude_projection_raman_polarity_named_luminary_accounting" as const;
+ return {method,accounting,rows,warPairs:base.warPairs,publicEnabled:false as const,verified:false as const};
 }

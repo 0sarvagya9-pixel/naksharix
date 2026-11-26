@@ -39,6 +39,7 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
    const resume=new URL(page.url()).searchParams.get("redirectTo");expect(resume).toBe("/report-request/new?reportSlug=premium-kundli&prepare=1");
    await page.getByRole("link",{name:"Create an account"}).click();
    await expect(page).toHaveURL(/\/signup\?/);expect(new URL(page.url()).searchParams.get("redirectTo")).toBe(resume);
+   await expect(page.locator("html")).toHaveCSS("scroll-behavior","auto");
    await page.locator("#name").fill("Synthetic Report Customer");await page.locator("#email").fill(email);await page.locator("#password").fill(password);
    await page.locator("form").getByRole("button",{name:/create|sign up|register/i}).click();
    await expect(page).toHaveURL(/\/verify-email$/);await expect(page.locator("#verification-email")).toHaveValue(email);

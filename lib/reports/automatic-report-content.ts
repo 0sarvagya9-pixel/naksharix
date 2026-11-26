@@ -4,6 +4,7 @@ import {calculateVimshottariDasha,resolveDashaBirthInstant} from "@/lib/astrolog
 import {calculateVimshottariPratyantarWindow} from "@/lib/astrology/premium-engine/dasha";
 import { buildEditorialInsights,editorialHouse,YEARLY_PLANNING_HOUSES } from "@/lib/reports/editorial-insights";
 import {buildReportDepth} from "@/lib/reports/editorial-depth";
+import { getNamingSounds } from "./naming-sounds";
 import { buildDateNameReport } from "./date-name-report";
 import {buildCalendarDepth} from "./numerology-calendar-depth";
 import {isFullRomanNumerologyName,calculateRomanNameEvidence} from "@/lib/reports/roman-name";
@@ -18,17 +19,6 @@ import type { PremiumReportContentResult,PremiumReportContentSection } from "@/l
 
 const SIGNS=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
 const BOUNDARY="Calculated by the Naksharix internal Lahiri/whole-sign engine. Not independently ephemeris-certified. Astrology and numerology are traditional reflective frameworks, not scientifically established predictions or a substitute for professional advice.";
-const SEEDS:Record<string,string[]>={
- Ashwini:["Chu","Che","Cho","La"],Bharani:["Li","Lu","Le","Lo"],Krittika:["A","I","U","E"],
- Rohini:["O","Va","Vi","Vu"],Mrigashira:["Ve","Vo","Ka","Ki"],Ardra:["Ku","Gha","Na","Cha"],
- Punarvasu:["Ke","Ko","Ha","Hi"],Pushya:["Hu","He","Ho","Da"],Ashlesha:["Di","Du","De","Do"],
- Magha:["Ma","Mi","Mu","Me"],"Purva Phalguni":["Mo","Ta","Ti","Tu"],"Uttara Phalguni":["Te","To","Pa","Pi"],
- Hasta:["Pu","Sha","Na","Tha"],Chitra:["Pe","Po","Ra","Ri"],Swati:["Ru","Re","Ro","Ta"],
- Vishakha:["Ti","Tu","Te","To"],Anuradha:["Na","Ni","Nu","Ne"],Jyeshtha:["No","Ya","Yi","Yu"],
- Mula:["Ye","Yo","Bha","Bhi"],"Purva Ashadha":["Bhu","Dha","Pha","Dha"],"Uttara Ashadha":["Bhe","Bho","Ja","Ji"],
- Shravana:["Ju","Je","Jo","Khi"],Dhanishta:["Ga","Gi","Gu","Ge"],Shatabhisha:["Go","Sa","Si","Su"],
- "Purva Bhadrapada":["Se","So","Da","Di"],"Uttara Bhadrapada":["Du","Tha","Jha","Na"],Revati:["De","Do","Cha","Chi"]
-};
 // Common example spellings, not guaranteed meanings, legal name changes or
 // priest-certified naming prescriptions.
 const NAME_EXAMPLES:Record<string,string[]>={
@@ -180,12 +170,18 @@ export async function assembleAutomaticPaidReport(input:{
       reflection("relationship-plan",["Communication and shared values","संवाद और साझा मूल्य","Communication aur shared values"],[["Discuss expectations, boundaries and how each person wants to receive support.","अपेक्षाओं, सीमाओं और सहयोग के तरीके पर खुलकर चर्चा करें।","Expectations, boundaries aur support ke tareeke par khulkar baat karein."],["Judge compatibility by consent, safety, behavior and mutual respect; this one-person report cannot assess another person's feelings.","सहमति, सुरक्षा, व्यवहार और सम्मान को प्राथमिकता दें; यह रिपोर्ट दूसरे व्यक्ति की भावनाएँ नहीं बता सकती।","Consent, safety, behavior aur respect ko priority dein; yeh report kisi aur ke feelings nahi bata sakti."]]);
       break;
     case "baby-name-report":{
-      const moon=planet("Moon");const sounds=SEEDS[chart.avakhada.nakshatra];
-      if(!sounds||!moon?.pada)throw new Error("REPORT_NAME_BASIS_MISSING");
-      const syllable=sounds[moon.pada-1];
-      if(!syllable)throw new Error("REPORT_NAME_BASIS_MISSING");
+      const moon = planet("Moon");
+      const quarters = getNamingSounds(chart.avakhada.nakshatra);
+      const selectedSound = moon?.pada && quarters?.[moon.pada - 1];
+      if (!selectedSound || !quarters) throw new Error("REPORT_NAME_BASIS_MISSING");
+      const { spelling: syllable, akshara } = selectedSound;
+      const sounds = quarters.map(quarter => quarter.spelling);
       const candidates=[...new Set([...(checked.extra.candidateNames??[]),...(NAME_EXAMPLES[syllable]??[]),...sounds.flatMap(s=>NAME_EXAMPLES[s]??[])])].slice(0,12);
-      section("naming",["Nakshatra naming tradition","नक्षत्र नामकरण परंपरा","Nakshatra naming tradition"],{nakshatra:chart.avakhada.nakshatra,pada:moon.pada,traditionalSound:syllable,otherSounds:sounds},["Transliterations and naming traditions vary; confirm the pronunciation with your family or a qualified priest."]);
+      section("naming",["Nakshatra naming tradition","नक्षत्र नामकरण परंपरा","Nakshatra naming tradition"],{nakshatra:chart.avakhada.nakshatra,pada:moon.pada,traditionalSound:syllable,akshara,otherSounds:sounds},[tr(l,[
+        `Drik Panchang’s Swar Siddhanta gives ${akshara} for this quarter. Roman spellings are approximate. Say the name aloud with your family and follow your naming tradition.`,
+        `दृक् पंचांग की स्वर सिद्धांत तालिका में इस चरण का अक्षर ${akshara} है। रोमन वर्तनी उच्चारण का संकेत देती है। अपने परिवार के साथ नाम बोलकर देखें और अपनी नामकरण परंपरा के अनुसार चुनें।`,
+        `Drik Panchang ki Swar Siddhanta talika mein is charan ka akshar ${akshara} hai. Roman spelling se uchcharan ka andaaza milta hai. Parivaar ke saath naam bolkar apni parampara ke anusaar chunein.`
+      ])]);
       const options=candidates.map(name=>({name,startsWithTraditionalSound:name.toLowerCase().startsWith(syllable.toLowerCase()),nameNumber:calculateNumerologyReport({name,dateOfBirth:birth.dateOfBirth,locale:l}).nameNumber}));
       section("name-options",["Candidate name comparison","संभावित नामों की तुलना","Candidate name comparison"],options,["Illustrative spellings, not verified meanings or guarantees; no name determines a child's future."]);
       if(/syllable|starting sound|birth sound|janm sound|naam.*(?:akshar|dhwani)|जन्म ध्वनि|ध्वनि से|नाम का पहला अक्षर/i.test(question)){

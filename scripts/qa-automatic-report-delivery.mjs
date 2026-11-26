@@ -48,6 +48,14 @@ async function checkBabyNameQuestions(){
  const assemble=(language,question,candidateNames)=>assembleAutomaticPaidReport({slug:"baby-name-report",birth,extra:{confirmed:true,guardianPermission:true,candidateNames},question,language,now:new Date("2026-11-26T12:00:00Z")});
  const questions={en:"Which proposed name matches the traditional birth syllable?",hi:"कौन सा प्रस्तावित नाम पारंपरिक जन्म ध्वनि से मेल खाता है?",hinglish:"Kaunsa proposed naam traditional janm sound se match karta hai?"};
  const read=(report,key)=>report.content.sections.find(s=>s.key===key).data;
+ const {getNamingSounds}=require("@/lib/reports/naming-sounds");
+ for(const [star,pada,spelling,akshara] of [
+   ["Ardra",3,"Nga","ङ"],["Ardra",4,"Chha","छ"],
+   ["Shravana",1,"Khi","खी"],["Shravana",2,"Khu","खू"],["Shravana",3,"Khe","खे"],["Shravana",4,"Kho","खो"],
+   ["Uttara Bhadrapada",4,"Nya","ञ"],["Purva Ashadha",2,"Dha","धा"],["Purva Ashadha",4,"Dha","ढ"]
+ ]){
+   assert.deepEqual(getNamingSounds(star)[pada-1],{spelling,akshara});
+ }
  const seed=await assemble("en",questions.en,[]);
  const {traditionalSound:sound}=read(seed,"naming");
  const matching=sound+"vani", other=sound.startsWith("Z")?"Anika":"Zenia";
@@ -59,6 +67,8 @@ async function checkBabyNameQuestions(){
    ]){
      const report=await assemble(language,prompt,names), table=read(report,"name-options"), answer=read(report,"editorial-insights").question;
      assert.ok(answer.body.includes(sound)&&answer.body.includes(phrase),language+" candidate answer");
+     const naming=report.content.sections.find(section=>section.key==="naming");
+     assert.ok(naming.limitations.some(note=>note.includes(naming.data.akshara)&&note.includes(language==="hi"?"पंचांग":"Drik Panchang")));
      assert.deepEqual(table.filter(item=>names.includes(item.name)&&item.startsWithTraditionalSound).map(item=>item.name),names.includes(matching)?[matching]:[]);
      assert.ok(!answer.body.includes(other));
    }

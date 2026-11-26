@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 
 import fitz
@@ -57,6 +58,18 @@ for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
             issues(record["name"] != profiles[record["profile"]], "unknown profile")
             issues(record["requestId"] not in doc.metadata["title"], "request metadata mismatch")
             issues("रॉयल संस्करण" not in cover if record["language"]=="hi" else "Royal Edition" not in cover,"cover locale")
+            if record["slug"]=="premium-kundli":
+                title,worked={
+                    "en":("Reproduce your D9 ascendant","Your ascendant is"),
+                    "hi":("अपने नवांश लग्न की गणना","जन्म लग्न"),
+                    "hinglish":("Apna D9 lagna kaise nikaalein","Janm lagna"),
+                }[record["language"]]
+                printed=subprocess.check_output(["pdftotext","-raw",str(file),"-"],text=True,encoding="utf-8")
+                pdf_pages=[" ".join(page.split()) for page in printed.split("\f")]
+                issues(title not in pdf_pages[4] or worked not in pdf_pages[4],
+                       "worked D9 example missing beside the birth charts")
+                issues(sum(title in page for page in pdf_pages[2:])!=1,
+                       "worked D9 example chapter repeated or missing")
             if record["slug"] not in ("name-correction-report", "numerology-lo-shu-report"):
                 if record.get("profileCards"):
                     problems.extend(profile_card_errors(file, doc[2], record["profileCards"]))
