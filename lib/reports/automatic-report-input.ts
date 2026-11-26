@@ -83,7 +83,7 @@ export function checkDateNameReportInputs(slug:string,birth:unknown,extra:unknow
 
 // A supplied offset must convert to the same civil clock in its recorded
 // zone. This rejects DST gaps and lets a recorded offset select either fold.
-function matchesBirthZone(birth:ReportBirthDetails,zone:string){
+export function matchesBirthZone(birth:ReportBirthDetails,zone:string){
   try{
     const utc=Date.parse(birth.dateOfBirth+"T"+birth.timeOfBirth+":00Z")-Math.round(birth.timezone*3600000);
     const parts=new Intl.DateTimeFormat("en-GB",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(utc);

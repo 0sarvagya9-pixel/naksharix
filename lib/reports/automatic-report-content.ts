@@ -2,7 +2,7 @@ import "server-only";
 import { buildReportBinding } from "./report-quality";
 import {calculateVimshottariDasha,resolveDashaBirthInstant} from "@/lib/astrology/core-calculations";
 import {calculateVimshottariPratyantarWindow} from "@/lib/astrology/premium-engine/dasha";
-import { buildEditorialInsights,editorialHouse } from "@/lib/reports/editorial-insights";
+import { buildEditorialInsights,editorialHouse,YEARLY_PLANNING_HOUSES } from "@/lib/reports/editorial-insights";
 import {buildReportDepth} from "@/lib/reports/editorial-depth";
 import { buildDateNameReport } from "./date-name-report";
 import {buildCalendarDepth} from "./numerology-calendar-depth";
@@ -12,7 +12,7 @@ import { calculateInternalTransitSnapshot } from "@/lib/astrology/transit/engine
 import { buildPremiumCompatibilityReport } from "@/lib/matching/kundli-matching";
 import { calculateNumerologyReport } from "@/lib/numerology";
 import { getManualReport } from "@/lib/manual-catalogue";
-import { checkAutomaticInputs, checkDateNameReportInputs, type ReportBirthDetails,type AutomaticReportExtra } from "@/lib/reports/automatic-report-input";
+import { checkAutomaticInputs, checkDateNameReportInputs, matchesBirthZone, type ReportBirthDetails,type AutomaticReportExtra } from "@/lib/reports/automatic-report-input";
 import type { AstrologyBirthInput,AstrologyLanguage,BirthChartData } from "@/lib/astrology/types";
 import type { PremiumReportContentResult,PremiumReportContentSection } from "@/lib/reports/premium-report-content-engine";
 
@@ -104,7 +104,12 @@ export async function assembleAutomaticPaidReport(input:{
   // A non-Roman-only name does not establish a Pythagorean name number.
   const nameNumberAvailable=isFullRomanNumerologyName(suppliedRoman);
   const num=calculateNumerologyReport({name:suppliedRoman,dateOfBirth:birth.dateOfBirth,gender:birth.gender,asOf:now,locale:l});
-  const transitInput={latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,place:birth.birthPlace,ayanamsa:"lahiri" as const};
+  const includesTransits = ["sade-sati-report","yearly-horoscope-report","transit-report","rahu-ketu-report","jupiter-transit-report"].includes(input.slug);
+  const savedZone = checked.extra.birthZone;
+  // A historical request may only have a recorded birth offset. Never infer a zone from its place label.
+  const transitZone = includesTransits && savedZone && !/^[+-]/.test(savedZone) && matchesBirthZone(checked.birth,savedZone)
+    ? savedZone : undefined;
+  const transitInput={latitude:birth.latitude,longitude:birth.longitude,timezone:transitZone ?? birth.timezone,place:birth.birthPlace,ayanamsa:"lahiri" as const};
   const snapshot=(on:string,names?:string[])=>{
     const data=calculateInternalTransitSnapshot({...transitInput,date:on});
     const rows=data.positions.filter(p=>!names||names.includes(p.planet)).map(p=>({planet:p.planet,sign:p.sign,degree:p.degree,retrograde:p.retrograde,speedDegreesPerDay:p.speedDegreesPerDay,motionState:p.motionState,houseFromAscendant:relativeHouse(p.sign,chart.avakhada.ascendant),houseFromMoon:relativeHouse(p.sign,chart.avakhada.moonSign)}));
@@ -112,10 +117,12 @@ export async function assembleAutomaticPaidReport(input:{
     return {date:on,positions:rows};
   };
   section("birth",["Your birth details and calculation basis","आपके जन्म विवरण और गणना का आधार","Aapki birth details aur calculation basis"],{
+    ...(includesTransits ? {transitTimeBasis:transitZone ? "civil_noon" : "fixed_offset_noon",transitTimezone:transitZone ?? birth.timezone} : {}),
     name:birth.name,dateOfBirth:birth.dateOfBirth,timeOfBirth:birth.timeOfBirth,birthPlace:birth.birthPlace,
     latitude:birth.latitude,longitude:birth.longitude,utcOffsetAtBirth:birth.timezone,utcBirthInstant:resolveDashaBirthInstant(birth).toISOString(),ayanamsaDegree:chart.calculationMeta.ayanamsaDegree,ascendantLongitude:chart.calculationMeta.ascendantLongitude,nodeMode:chart.calculationMeta.nodeMode,ascendant:chart.avakhada.ascendant,moonSign:chart.avakhada.moonSign,sunSign:chart.avakhada.sunSign,nakshatra:chart.avakhada.nakshatra,pada:planet("Moon")?.pada,ayanamsa:"Lahiri",houseSystem:"Whole sign",generatedOn:date
   },[BOUNDARY],"provider_verified");
   const question=input.question.trim();
+  const insights=buildEditorialInsights(chart,input.slug,question,l);
   const reflection=(key:string,title:LocalText,notes:LocalText[])=>section(key,title,notes.map(n=>tr(l,n)));
   switch(input.slug){
     case "premium-kundli":
@@ -133,7 +140,24 @@ export async function assembleAutomaticPaidReport(input:{
       const match=buildPremiumCompatibilityReport(birth,other,chart,otherChart,l,"private-paid-report");
       if(match.gunaMilan.ashtakoot.length!==8||match.gunaMilan.ashtakoot.some(f=>f.available===false))throw new Error("REPORT_MATCH_FACTORS_INCOMPLETE");
       section("partner",["Second person's birth chart","दूसरे व्यक्ति की जन्म कुंडली","Second person ki birth chart"],{name:other.name,birth:otherChart.birthDetails,moon:otherChart.avakhada,positions:otherChart.planetPositions.map(compactPlanet),houses:otherChart.charts.lagna,primaryHouses:chart.charts.lagna});
-      section("guna",["Ashtakoot / 36-point Guna Milan","अष्टकूट / 36 गुण मिलान","Ashtakoot / 36-point Guna Milan"],match.gunaMilan,["Traditional compatibility scoring is not a prediction of marriage success."]);
+      // The paid intake specifies Person 1 and Person 2. Preserve the matching engine's slot order.
+      const orderedFactors=match.gunaMilan.ashtakoot.map(factor=>{
+        if(factor.kootKey==="tara" && factor.details){
+          const forward=factor.details.brideToGroom, reverse=factor.details.groomToBride;
+          const explanation=tr(l,[
+            `Tara count from Person 1 to Person 2 is ${forward}. The return count is ${reverse}.`,
+            `पहले व्यक्ति से दूसरे तक तारा गिनती ${forward} है। दूसरे से पहले तक गिनती ${reverse} है।`,
+            `Person 1 se Person 2 tak Tara count ${forward} hai. Vaapas ka count ${reverse} hai.`
+          ]);
+          return {...factor,explanation,meaning:explanation};
+        }
+        if(factor.kootKey==="varna"){
+          const basis=tr(l,["This traditional rule compares Person 2’s Moon-sign class with Person 1’s.","इस पारंपरिक नियम में दूसरे व्यक्ति की चंद्र-राशि की श्रेणी की तुलना पहले व्यक्ति की श्रेणी से होती है।","Is paramparik rule mein Person 2 ki Chandra rashi ki shreni Person 1 ki shreni se compare hoti hai."]);
+          return {...factor,basis,explanation:basis,meaning:basis};
+        }
+        return factor;
+      });
+      section("guna",["Ashtakoot / 36-point Guna Milan","अष्टकूट / 36 गुण मिलान","Ashtakoot / 36-point Guna Milan"],{...match.gunaMilan,ashtakoot:orderedFactors},["Traditional compatibility scoring is not a prediction of marriage success."]);
       section("match-dosha",["Manglik, Nadi and Bhakoot context","मांगलिक, नाड़ी और भकूट संदर्भ","Manglik, Nadi aur Bhakoot context"],match.doshaAnalysis);
       section("compatibility-guidance",["Relationship discussion guide","संबंध संवाद मार्गदर्शिका","Relationship discussion guide"],{moon:match.moonCompatibility,nakshatra:match.nakshatraCompatibility,practicalGuidance:match.practicalGuidance,limitations:match.limitationNotes});
       break;}
@@ -162,7 +186,31 @@ export async function assembleAutomaticPaidReport(input:{
       if(!syllable)throw new Error("REPORT_NAME_BASIS_MISSING");
       const candidates=[...new Set([...(checked.extra.candidateNames??[]),...(NAME_EXAMPLES[syllable]??[]),...sounds.flatMap(s=>NAME_EXAMPLES[s]??[])])].slice(0,12);
       section("naming",["Nakshatra naming tradition","नक्षत्र नामकरण परंपरा","Nakshatra naming tradition"],{nakshatra:chart.avakhada.nakshatra,pada:moon.pada,traditionalSound:syllable,otherSounds:sounds},["Transliterations and naming traditions vary; confirm the pronunciation with your family or a qualified priest."]);
-      section("name-options",["Candidate name comparison","संभावित नामों की तुलना","Candidate name comparison"],candidates.map(name=>({name,startsWithTraditionalSound:name.toLowerCase().startsWith(syllable.toLowerCase()),nameNumber:calculateNumerologyReport({name,dateOfBirth:birth.dateOfBirth,locale:l}).nameNumber})),["Illustrative spellings, not verified meanings or guarantees; no name determines a child's future."]);
+      const options=candidates.map(name=>({name,startsWithTraditionalSound:name.toLowerCase().startsWith(syllable.toLowerCase()),nameNumber:calculateNumerologyReport({name,dateOfBirth:birth.dateOfBirth,locale:l}).nameNumber}));
+      section("name-options",["Candidate name comparison","संभावित नामों की तुलना","Candidate name comparison"],options,["Illustrative spellings, not verified meanings or guarantees; no name determines a child's future."]);
+      if(/syllable|starting sound|birth sound|janm sound|naam.*(?:akshar|dhwani)|जन्म ध्वनि|ध्वनि से|नाम का पहला अक्षर/i.test(question)){
+        const submitted=checked.extra.candidateNames??[];
+        const matches=options.filter(item=>submitted.includes(item.name)&&item.startsWithTraditionalSound).map(item=>item.name);
+        const comparison=matches.length?tr(l,[
+          `Your proposed spellings beginning with ${syllable}: ${matches.join(", ")}.`,
+          `आपके सुझाए नामों में ${syllable} से शुरू होने वाली वर्तनी: ${matches.join(", ")}।`,
+          `Aapke diye hue naamon mein ${syllable} se shuru hone wali spellings: ${matches.join(", ")}.`
+        ]):submitted.length?tr(l,[
+          `None of your proposed spellings begins with ${syllable}.`,
+          `आपके सुझाए नामों में से किसी की वर्तनी ${syllable} से शुरू नहीं होती।`,
+          `Aapke diye hue naamon mein kisi ki spelling ${syllable} se shuru nahi hoti.`
+        ]):tr(l,[
+          `No candidate spelling was supplied. Compare the first letters of your shortlist with ${syllable}.`,
+          `आपने कोई नाम नहीं सुझाया है। अपनी सूची के नामों की शुरुआत ${syllable} से मिलाएँ।`,
+          `Aapne koi naam nahi diya. Apni shortlist ki shuruaat ${syllable} se milaakar dekhein.`
+        ]);
+        insights.question.title=tr(l,["Traditional starting sound","नाम की पारंपरिक आरंभिक ध्वनि","Naam ki traditional shuruaati dhwani"]);
+        insights.question.body=tr(l,[
+          `The naming table gives ${syllable} for lunar quarter ${moon.pada}. ${comparison} Say each name aloud with your family to check the pronunciation.`,
+          `नामकरण तालिका में चंद्र नक्षत्र के चरण ${moon.pada} की ध्वनि ${syllable} है। ${comparison} परिवार के साथ नाम बोलकर उच्चारण की पुष्टि करें।`,
+          `Naamkaran table mein Chandra nakshatra ke charan ${moon.pada} ki dhwani ${syllable} hai. ${comparison} Family ke saath naam bolkar pronunciation check karein.`
+        ]);
+      }
       section("birth-numerology",["Birth-number context","जन्मांक संदर्भ","Birth-number context"],{moolank:num.moolank,lifePath:num.lifePath});
       break;}
     case "sade-sati-report":{
@@ -185,7 +233,7 @@ export async function assembleAutomaticPaidReport(input:{
     case "yearly-horoscope-report":
       section("yearly-dasha",["Dasha framework for the next 12 months","अगले 12 माह का दशा संदर्भ","Next 12 months ka Dasha framework"],{...dasha,pratyantarWindow});
       section("yearly-months",["Twelve monthly planetary snapshots","बारह मासिक ग्रह स्थितियाँ","12 monthly planetary snapshots"],monthDates(now,12).map(d=>snapshot(d,["Sun","Jupiter","Saturn","Rahu","Ketu"])),["First-day snapshots, not a date-specific forecast."]);
-      section("yearly-houses",["Yearly planning themes by house","भाव अनुसार वार्षिक योजना विषय","Yearly planning themes by house"],houseReview([1,2,4,5,6,7,9,10,11,12]));
+      section("yearly-houses",["Yearly planning themes by house","भाव अनुसार वार्षिक योजना विषय","Yearly planning themes by house"],houseReview(YEARLY_PLANNING_HOUSES));
       reflection("yearly-plan",["Quarterly reflection plan","त्रैमासिक आत्मचिंतन योजना","Quarterly reflection plan"],[["Quarter 1 (months 1–3): Set a realistic baseline for priorities, learning, relationships and finances.","पहली तिमाही (माह 1–3): प्राथमिकताओं, शिक्षा, संबंधों और वित्त का वास्तविक शुरुआती स्तर तय करें।","Quarter 1 (months 1–3): Priorities, learning, relationships aur finances ka realistic baseline banayein."],["Quarter 2 (months 4–6): Review progress, seek feedback and adjust commitments to available resources.","दूसरी तिमाही (माह 4–6): प्रगति देखें, प्रतिक्रिया लें और संसाधनों के अनुसार प्रतिबद्धताएँ बदलें।","Quarter 2 (months 4–6): Progress review karein, feedback lein aur resources ke hisaab se commitments adjust karein."],["Quarter 3 (months 7–9): Reassess workload, relationships and spending against actual outcomes.","तीसरी तिमाही (माह 7–9): वास्तविक परिणामों के आधार पर कार्यभार, संबंध और खर्च की समीक्षा करें।","Quarter 3 (months 7–9): Actual outcomes ke hisaab se workload, relationships aur spending review karein."],["Quarter 4 (months 10–12): Record what worked, revise goals and plan the next year using evidence and personal judgment.","चौथी तिमाही (माह 10–12): सफल प्रयास दर्ज करें, लक्ष्य सुधारें और वास्तविक प्रमाण के आधार पर अगला वर्ष तय करें।","Quarter 4 (months 10–12): Jo kaam hua note karein, goals revise karein aur evidence aur personal judgment se agla saal plan karein."]]);
       break;
     case "transit-report":
@@ -230,11 +278,11 @@ export async function assembleAutomaticPaidReport(input:{
   const depth=buildReportDepth(chart,input.slug,sections,l,suppliedRoman);
   if(input.slug==="fortune-report")depth.push(...buildCalendarDepth(num,l));
   section("editorial-depth",["Calculation-led detailed reading","गणना आधारित विस्तृत विवेचन","Calculation-led detailed reading"],depth,["Traditional interpretations are not causal or predictive certification."]);
-  section("editorial-insights",["Personal interpretation and reflection plan","व्यक्तिगत व्याख्या और चिंतन योजना","Personal interpretation aur reflection plan"],buildEditorialInsights(chart,input.slug,question,l),["Traditional interpretations are not scientific predictions; no outcome is guaranteed."]);
+  section("editorial-insights",["Personal interpretation and reflection plan","व्यक्तिगत व्याख्या और चिंतन योजना","Personal interpretation aur reflection plan"],insights,["Traditional interpretations are not scientific predictions; no outcome is guaranteed."]);
   section("your-question",["Your submitted question and reflection","आपका प्रश्न और आत्मचिंतन","Aapka question aur reflection"],{
     submittedQuestion:question,focus:tr(l,["Use the report's specific calculated indicators and practical checklist to reflect on your question. No exact event or outcome is predicted.","अपने प्रश्न पर विचार करने के लिए रिपोर्ट के गणना आधारित संकेत और व्यावहारिक सूची देखें। निश्चित घटना या परिणाम की भविष्यवाणी नहीं की गई है।","Apne question par report ke calculated indicators aur practical checklist se reflect karein. Exact outcome predict nahi kiya gaya hai."])
   });
   section("trust",["Important notes and support","महत्वपूर्ण सूचना और सहायता","Important notes aur support"],tr(l,[BOUNDARY,"यह रिपोर्ट नक्षरिक्ष की आंतरिक लाहिड़ी गणना और पारंपरिक नियमों पर आधारित आत्मचिंतन सामग्री है। बाहरी स्वतंत्र प्रमाणीकरण नहीं हुआ है। यह पेशेवर सलाह या निश्चित भविष्यवाणी नहीं है।","Yeh Naksharix internal Lahiri calculation aur traditional rules par based reflection report hai. Independent certification nahi hai; yeh professional advice ya guaranteed prediction nahi."]),["Care: care@naksharix.com | www.naksharix.com"]);
   if(sections.length<5||sections.some(s=>s.data==null))throw new Error("REPORT_CONTENT_INCOMPLETE");
-  return {title:report.name[l],content:{sections,metadata:{binding:buildReportBinding({...input,birth:checked.birth,extra:checked.extra},sections,now,"naksharix-own-lahiri-whole-sign-v1"),reportCompleteness:"partial_internal",verified:false,premiumComplete:false,providerVerifiedSections:sections.filter(s=>s.status==="provider_verified").map(s=>s.key),unavailableSections:[],limitations:[BOUNDARY]}}};
+  return {title:report.name[l],content:{sections,metadata:{binding:buildReportBinding({...input,birth:checked.birth,extra:checked.extra},sections,now,includesTransits ? "naksharix-own-lahiri-transit-noon-v2" : "naksharix-own-lahiri-whole-sign-v1"),reportCompleteness:"partial_internal",verified:false,premiumComplete:false,providerVerifiedSections:sections.filter(s=>s.status==="provider_verified").map(s=>s.key),unavailableSections:[],limitations:[BOUNDARY]}}};
 }

@@ -43,6 +43,75 @@ const birth={name:"Asha Test",gender:"female",dateOfBirth:"1992-05-18",timeOfBir
 const partner={...birth,name:"Ravi Test",gender:"male",dateOfBirth:"1991-11-23",timeOfBirth:"17:20",birthPlace:"Mumbai, India",latitude:19.076,longitude:72.8777};
 const extra={confirmed:true,partner,partnerPermission:true,romanName:"Asha Test",candidateNames:["Aasha Test","Asha T"]};
 const question="Test fixture: reflective personal planning.";
+// Compare the response with the actual report table, including when only illustrative names match.
+async function checkBabyNameQuestions(){
+ const assemble=(language,question,candidateNames)=>assembleAutomaticPaidReport({slug:"baby-name-report",birth,extra:{confirmed:true,guardianPermission:true,candidateNames},question,language,now:new Date("2026-11-26T12:00:00Z")});
+ const questions={en:"Which proposed name matches the traditional birth syllable?",hi:"कौन सा प्रस्तावित नाम पारंपरिक जन्म ध्वनि से मेल खाता है?",hinglish:"Kaunsa proposed naam traditional janm sound se match karta hai?"};
+ const read=(report,key)=>report.content.sections.find(s=>s.key===key).data;
+ const seed=await assemble("en",questions.en,[]);
+ const {traditionalSound:sound}=read(seed,"naming");
+ const matching=sound+"vani", other=sound.startsWith("Z")?"Anika":"Zenia";
+ for(const [language,prompt] of Object.entries(questions)){
+   for(const [names,phrase] of [
+     [[matching,other],matching],
+     [[other],{en:"None of your proposed",hi:"किसी की वर्तनी",hinglish:"kisi ki spelling"}[language]],
+     [[],{en:"No candidate spelling",hi:"आपने कोई नाम",hinglish:"Aapne koi naam"}[language]]
+   ]){
+     const report=await assemble(language,prompt,names), table=read(report,"name-options"), answer=read(report,"editorial-insights").question;
+     assert.ok(answer.body.includes(sound)&&answer.body.includes(phrase),language+" candidate answer");
+     assert.deepEqual(table.filter(item=>names.includes(item.name)&&item.startsWithTraditionalSound).map(item=>item.name),names.includes(matching)?[matching]:[]);
+     assert.ok(!answer.body.includes(other));
+   }
+ }
+ const unrelated=await assemble("en","What routines help my family?",[matching]);
+ assert.notEqual(read(unrelated,"editorial-insights").question.title,"Traditional starting sound");
+ console.log("BABY_NAME_QUESTION_PASS 9 localized answers and 1 unrelated routing case");
+}
+await checkBabyNameQuestions();
+if(process.argv.includes("--baby-name-question"))process.exit(0);
+if(process.argv.includes("--couple-order")){
+ const p1={...birth,name:"Robin Ellis",gender:"male",dateOfBirth:"1987-07-05",timeOfBirth:"14:40",birthPlace:"London",latitude:51.5074,longitude:-0.1278,timezone:1};
+ const p2={...birth,name:"Meera Shah",gender:"female",dateOfBirth:"1998-12-21",timeOfBirth:"22:55",birthPlace:"Kathmandu",latitude:27.7172,longitude:85.324,timezone:5.75};
+ let cases=0;
+ for(const language of ["en","hi","hinglish"])for(const swapped of [false,true]){
+  const primary=swapped?p2:p1,partner=swapped?p1:p2;
+  const result=await assembleAutomaticPaidReport({slug:"couple-kundli",birth:primary,extra:{confirmed:true,partner,partnerPermission:true},question,language,now:new Date("2026-11-26T12:00:00Z")});
+  const guna=result.content.sections.find(s=>s.key==="guna").data;
+  const tara=guna.ashtakoot.find(f=>f.kootKey==="tara");
+  const expected=swapped?[21,8]:[8,21];
+  assert.deepEqual(tara.explanation.match(/(?<!Person )\b\d+\b/g).map(Number),expected);
+  assert.equal(tara.score,1.5);
+  assert.equal(guna.totalScore,guna.ashtakoot.reduce((n,f)=>n+f.score,0));
+  assert.ok(!guna.ashtakoot.some(f=>/bride|groom|वधू|वर का वर्ण/i.test(f.explanation)));
+  assert.equal(guna.ashtakoot.length,8);
+  cases++;
+ }
+ console.log("COUPLE_ORDER_PASS",{localizedOrderedPairs:cases});process.exit(0);
+}
+if(process.argv.includes("--transit-civil-noon")){
+ const london={...birth,dateOfBirth:"1987-07-05",timeOfBirth:"14:40",birthPlace:"London",latitude:51.5074,longitude:-0.1278,timezone:1};
+ const chart=async(zone,when,localBirth=london)=>{
+  const result=await assembleAutomaticPaidReport({slug:"transit-report",birth:localBirth,extra:{confirmed:true,...(zone?{birthZone:zone}:{})},question,language:"en",now:new Date(when+"T12:00:00Z")});
+  const section=key=>result.content.sections.find(s=>s.key===key).data;
+  const moon=section("current-transit").positions.find(p=>p.planet==="Moon");
+  const sign=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"].indexOf(moon.sign);
+  return {longitude:sign*30+moon.degree,basis:section("birth").transitTimeBasis,zone:section("birth").transitTimezone};
+ };
+ // Sidereal geocentric lunar longitudes from standalone Swiss Ephemeris 2.10.03 Moshier/Lahiri.
+ for(const [zone,day,wanted,basis] of [
+  ["Europe/London","2026-11-26",66.48522479,"civil_noon"],
+  ["Europe/London","2027-07-01",38.18574756,"civil_noon"],
+  [undefined,"2026-11-26",65.85731115,"fixed_offset_noon"],
+  ["Europe/Moscow","2026-11-26",65.85731115,"fixed_offset_noon"]]){
+  const result=await chart(zone,day);
+  assert.equal(result.basis,basis);assert.equal(result.zone,basis==="civil_noon"?zone:"1");
+  assert.ok(Math.abs(result.longitude-wanted)<0.02,JSON.stringify({zone,day,result,wanted}));
+ }
+ const apia={...london,dateOfBirth:"2000-01-15",timeOfBirth:"10:00",birthPlace:"Apia",latitude:-13.84,longitude:-171.75,timezone:-11};
+ await assert.rejects(chart("Pacific/Apia","2011-12-30",apia),/ambiguous or nonexistent/);
+ console.log("TRANSIT_CIVIL_NOON_PASS",{datedLunarComparisons:4,skippedCivilDateRejections:1});
+ process.exit(0);
+}
 const sections={
  "premium-kundli":"planets","couple-kundli":"guna","career-report":"career-houses","wealth-report":"wealth-houses","love-report":"relationship-houses","baby-name-report":"name-options","sade-sati-report":"sade-sati-months","manglik-kaal-sarp-report":"manglik","numerology-lo-shu-report":"lo-shu","name-correction-report":"name-comparison","yearly-horoscope-report":"yearly-months","transit-report":"transit-months","rahu-ketu-report":"node-transits","jupiter-transit-report":"jupiter-transits","fortune-report":"fortune-houses"
 };
@@ -253,7 +322,8 @@ function verifyPromiseCoverage(slug,language,content){
  if(slug==="jupiter-transit-report")assert.equal(sections.get("jupiter-transits").data.length,13);
  if(slug==="name-correction-report")assert.ok(sections.get("name-comparison").data.length>=2);
  const fields=publicReportRequiredDetails(slug,language),scope=reportIntakeScope(slug);
- assert.equal(fields.length,(scope.dateNameOnly?2:5)+(scope.couple?2:0)+(scope.numerologyName?1:0)+(scope.nameCorrection?2:0)+(scope.babyName?1:0));
+ assert.equal(fields.length,(scope.dateNameOnly?2:5)+(scope.couple?2:0)+(scope.numerologyName?1:0)+(scope.nameCorrection?2:0)+(scope.babyName?2:0));
+ if(scope.babyName)assert.ok(fields.includes(require("@/lib/reports/report-request-copy").reportRequestCopy[language].guardianPermission));
  assert.ok(fields.every(x=>x.trim().length>0));assert.equal(new Set(fields).size,fields.length);
  requiredDisclosureChecks++;
 }
@@ -274,6 +344,7 @@ if(!dbMode){
  for (const locale of ["en", "hi", "hinglish"]) {
    const previews = input.AUTO_REPORT_SLUGS.map(slug => automaticReportPublicPreview(slug, locale));
    assert.equal(new Set(previews.map(p=>p.summary)).size,15,"Each report must have distinct public product copy");
+   assert.equal(new Set(previews.map(p=>p.audience)).size,15,"Each report identifies its intended reader");
    for(const p of previews){assert.ok(p.summary.length>20);assert.equal(p.features.length,3);assert.ok(p.features.every(x=>x.length>5));}
  }
  assert.equal(automaticReportPublicPreview("unknown-slug","en"),null);
@@ -326,6 +397,24 @@ if(!dbMode){
  // Date/name products must run without birth time, coordinates or a chart.
  const {calculateCalendarNumbers}=require("@/lib/numerology/calendar");
  const reference=new Date("2026-11-23T00:00:00Z");
+ for(const [language,questions] of Object.entries({
+   en:["What can I learn about balancing family responsibilities?","How can I track progress in my studies?"],
+   hi:["पारिवारिक जिम्मेदारियों में संतुलन कैसे रखूँ?","अपनी पढ़ाई की प्रगति कैसे देखूँ?"],
+   hinglish:["Parivaar ki responsibilities mein balance kaise rakhoon?","Apni padhai ki progress kaise track karoon?"]
+ })){
+   for(const [index,question] of questions.entries()){
+     const report=await assembleAutomaticPaidReport({slug:"yearly-horoscope-report",birth,extra:{confirmed:true},question,language,now:reference});
+     const expectedHouse=index===0?4:5;
+     const houses=report.content.sections.find(s=>s.key==="yearly-houses").data;
+     const printedHouse=houses.find(h=>h.house===expectedHouse);
+     const answer=report.content.sections.find(s=>s.key==="editorial-insights").data.question;
+     assert.ok(printedHouse);
+     assert.equal(answer.title,printedHouse.title);
+     assert.ok(answer.body.includes(printedHouse.interpretation));
+     assert.match(answer.body,new RegExp("(?:house |भाव )"+expectedHouse+"(?: |\\.)"));
+   }
+ }
+ console.log("YEARLY_QUESTION_HOUSE_PASS 6/6 across English, Hindi and Hinglish");
  const bounded=(date,at=reference)=>calculateCalendarNumbers(new Date(date+"T00:00:00Z"),at);
  const published=bounded("1980-05-05");
  assert.deepEqual([published.personalYear,published.personalMonth,published.personalDay],[2,4,9]);

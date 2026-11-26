@@ -18,7 +18,7 @@ import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
 import { automaticReportPublicPreview } from "@/lib/reports/public-preview";
-import {publicReportRequiredDetails,reportSurfaceCopy} from "@/lib/reports/public-intake";
+import {publicReportRequiredDetails,publicReportSampleAvailable,reportSurfaceCopy} from "@/lib/reports/public-intake";
 import { autoReportSlugSet } from "@/lib/reports/automatic-report-input";
 import { getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 
@@ -35,12 +35,14 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const report = getManualReport(slug);
   if (!report) return {};
   const checkout = getManualReportCheckout(report.slug);
-  const preview = checkout ? automaticReportPublicPreview(report.slug, "en") : null;
+  const locale=normalizeLocale((await cookies()).get("naksharix-language")?.value);
+  const preview = checkout ? automaticReportPublicPreview(report.slug, locale) : null;
+  const feeLabel=locale==="hi"?"एक बार का शुल्क":locale==="hinglish"?"Ek baar ki fee":"One-time fee";
   return seo({
-    title: `${report.name.en} | ${checkout ? checkout.price : "Report enquiry"}`,
-    description: preview && checkout ? `${preview.summary} One-time fee: ${checkout.price}.` : report.description.en,
+    title: `${report.name[locale]} | ${checkout ? checkout.price : "Report enquiry"}`,
+    description: preview && checkout ? `${preview.summary} ${feeLabel} ${checkout.price}.` : report.description[locale],
     path: `/reports/${report.slug}`,
-    keywords: [report.name.en, "Premium Astrology Report", "Manual Astrology Report", "Naksharix"]
+    keywords: [report.name[locale], "Naksharix"]
   });
 }
 
@@ -99,7 +101,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
           <InfoSection title={labels.included} items={publicPreview?.features ?? report.includes[locale]} />
-          <InfoSection title={labels.whoShouldRequest} items={report.who[locale]} />
+          <InfoSection title={labels.whoShouldRequest} items={publicPreview?[publicPreview.audience]:report.who[locale]} />
           <InfoSection title={labels.requiredDetails} items={checkout?publicReportRequiredDetails(report.slug,locale):report.required[locale]} />
           <InfoSection title={labels.languageOptions} items={labels.languages} />
         </div>
@@ -110,7 +112,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
               <Sparkles className="h-6 w-6 text-[#dca956]" />
               <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.samplePreview}</h2>
               <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{checkout?surface.sampleDescription:report.preview[locale]}</p>
-              {autoReportSlugSet.has(report.slug)&&getActiveAstrologyProviderName()==="own_engine"?<div className="mt-4 space-y-2"><Button asChild variant="outline"><Link href={`/reports/${report.slug}/sample`} target="_blank" rel="noopener noreferrer">{surface.sample} ({surface.sampleLanguage})</Link></Button><p className="text-xs text-[#a8b3c7]">{surface.sampleNote}</p></div>:null}
+              {autoReportSlugSet.has(report.slug)&&publicReportSampleAvailable(report.slug,getActiveAstrologyProviderName())?<div className="mt-4 space-y-2"><Button asChild variant="outline"><Link href={`/reports/${report.slug}/sample`} target="_blank" rel="noopener noreferrer">{surface.sample} ({surface.sampleLanguage})</Link></Button><p className="text-xs text-[#a8b3c7]">{surface.sampleNote}</p></div>:null}
             </CardContent>
           </Card>
           <Card className="inner-card">

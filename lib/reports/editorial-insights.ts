@@ -32,6 +32,7 @@ const P:Record<string,Text>={
  Ketu:["simplicity and reflection","सादगी और आत्मचिंतन","simplicity aur reflection"]
 };
 const RULER:Record<string,string>={Aries:"Mars",Taurus:"Venus",Gemini:"Mercury",Cancer:"Moon",Leo:"Sun",Virgo:"Mercury",Libra:"Venus",Scorpio:"Mars",Sagittarius:"Jupiter",Capricorn:"Saturn",Aquarius:"Saturn",Pisces:"Jupiter"};
+export const YEARLY_PLANNING_HOUSES = [1,2,4,5,6,7,9,10,11,12];
 const FOCUS:Record<string,number[]>={"premium-kundli":[1,2,4,5,7,10,11],"career-report":[10,6,2,3,11],"wealth-report":[2,11,12,5,8],"love-report":[7,5,4,8,11],"couple-kundli":[7,4,5],"fortune-report":[9,5,10,11],"yearly-horoscope-report":[10,2,7,6,9],"transit-report":[1,4,7,10],"jupiter-transit-report":[9,5,11],"rahu-ketu-report":[4,10,8],"sade-sati-report":[6,10,12],"manglik-kaal-sarp-report":[7,8,4],"baby-name-report":[5,2],"name-correction-report":[2,3],"numerology-lo-shu-report":[1,5,3]};
 export type EditorialCard={label:string;title:string;body:string};
 export type EditorialInsights={overview:EditorialCard;cards:EditorialCard[];plan:EditorialCard[];question:EditorialCard;planetNotes:EditorialCard[]};
@@ -61,9 +62,10 @@ export function buildEditorialInsights(chart:BirthChartData,slug:string,question
  const notes=(selected.length?selected:chart.planetPositions).map(p=>planetNote(p,language));
  const plan=rank.slice(0,3).map((n,i)=>({label:pick(language,["DAYS "+(i*30+1)+"-"+(i+1)*30,"दिन "+(i*30+1)+"-"+(i+1)*30,"DAYS "+(i*30+1)+"-"+(i+1)*30]),title:editorialHouse(chart,n,language).title,body:pick(language,["Chart reference: house "+n+". ","कुंडली संदर्भ: भाव "+n+"। ","Chart reference: house "+n+". "])+pick(language,PRACTICE[n-1])+" "+pick(language,["Keep a written progress record; review observable results at the end of this period.","लिखित प्रगति रखें और अवधि के अंत में वास्तविक परिणाम देखें।","Written progress record rakhein aur period ke end mein real results review karein."])}));
  const query=question.trim().toLowerCase();
- const topics=[{re:/career|jobs?\b|work|business|promotion|naukri|karier|karobar|करियर|नौकरी|व्यवसाय/,n:10},{re:/wealth|money|loan|finance|salary|budget|paisa|paise|aamdani|धन|पैसा|आय|बजट/,n:2},{re:/love|marriage|relationship|partner|shaadi|rishta|pyaar|विवाह|प्रेम|रिश्ता|शादी/,n:7},{re:/stud(?:y|ies)|education|exam|padhai|seekhn|पढ़ाई|शिक्षा|अध्ययन/,n:5},{re:/home|family|property|parivar|ghar|घर|परिवार/,n:4}];
+ const topics=[{re:/career|jobs?\b|work|business|promotion|naukri|karier|karobar|करियर|नौकरी|व्यवसाय/,n:10},{re:/wealth|money|loan|finance|salary|budget|paisa|paise|aamdani|धन|पैसा|आय|बजट/,n:2},{re:/love|marriage|relationship|partner|shaadi|rishta|pyaar|विवाह|प्रेम|रिश्ता|शादी/,n:7},{re:/stud(?:y|ies)|education|exam|padhai|seekhn|पढ़ाई|शिक्षा|अध्ययन/,n:5},{re:/home|family|property|parivaar|parivar|ghar|घर|परिवार|पारिवारिक/,n:4}];
  const topic=topics.find(t=>t.re.test(query));
- const within=topic&&focus.includes(topic.n);
+ const questionHouses=slug==="yearly-horoscope-report"?YEARLY_PLANNING_HOUSES:focus;
+ const within=topic&&questionHouses.includes(topic.n);
  const chosen=within?editorialHouse(chart,topic.n,language):main;
  const questionIntro=!query
   ?pick(language,["No question was submitted. A starting point from this reading is ","आपने कोई प्रश्न नहीं दिया। अध्ययन से चिंतन का एक प्रारंभिक विषय है ","Aapne koi question nahi diya. Is reading se ek reflection topic hai "])+chosen.title+". "

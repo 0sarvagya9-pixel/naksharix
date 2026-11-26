@@ -344,9 +344,9 @@ const previews = {
   ],
   "fortune-report": [
     [
-      "Review traditional opportunity-related houses, planetary themes, current Dasha and life-path context for personal reflection.",
-      "अवसर से जुड़े पारंपरिक भाव, ग्रह संकेत, वर्तमान दशा और जीवन पथ पर चिंतन करें।",
-      "Traditional opportunity houses, grah themes, current Dasha aur life-path context par reflect karein."
+      "Explore opportunity-related houses and current Dasha alongside your birth-date and confirmed name calculations, with twelve personal-month numbers for reflection.",
+      "अवसर से जुड़े भाव और वर्तमान दशा के साथ अपनी जन्म तिथि, पुष्टि की गई नाम-वर्तनी और बारह व्यक्तिगत माह-अंकों की गणना देखें।",
+      "Avsar se jude bhaav aur current dasha ke saath apni janm tithi, confirmed name spelling aur baarah personal-month numbers ki ganana dekhein."
     ],
     [
       [
@@ -368,9 +368,27 @@ const previews = {
   ]
 } as const satisfies Record<AutoReportSlug, Preview>;
 
+const audience = {
+  "premium-kundli": ["Readers who want to study how planets, houses and timing periods are arranged in their own chart.", "जो अपनी कुंडली में ग्रहों, भावों और दशाओं का क्रम समझना चाहते हैं।", "Apni kundli mein grah, bhaav aur dasha ka kram samajhne ke liye."],
+  "couple-kundli": ["Two people who have agreed to compare their charts and discuss their relationship.", "दो लोग जो अपनी सहमति से कुंडलियों की तुलना करना और अपने संबंध पर बात करना चाहते हैं।", "Dono ki sahmati se kundli milakar apne rishte par baat karne ke liye."],
+  "career-report": ["People choosing a skill to practise or a work habit to review over the next 90 days.", "जो अगले 90 दिनों के लिए किसी कौशल का अभ्यास या काम की आदत की समीक्षा करना चाहते हैं।", "Agle 90 din ke liye koi skill ya kaam ki aadat chunne ke liye."],
+  "wealth-report": ["Readers who want traditional chart themes alongside questions about budgeting and spending.", "जो बजट और खर्च पर विचार करते समय कुंडली के पारंपरिक संकेत भी समझना चाहते हैं।", "Budget aur kharch par sochte waqt kundli ke paramparik sanket samajhne ke liye."],
+  "love-report": ["Individuals reflecting on their own emotional needs and communication in a relationship.", "जो रिश्ते में अपनी भावनात्मक ज़रूरतों और संवाद पर विचार करना चाहते हैं।", "Rishte mein apni emotional zarooratein aur baatcheet samajhne ke liye."],
+  "baby-name-report": ["Parents and guardians exploring naming sounds or comparing spellings for their child.", "माता-पिता या अभिभावक जो बच्चे के लिए नाम का आरंभिक स्वर या अलग-अलग वर्तनी देखना चाहते हैं।", "Parents ya guardians jo bachche ke naam ki dhwani ya spellings dekhna chahte hain."],
+  "sade-sati-report": ["Readers comparing Saturn’s current position with their birth Moon to understand the traditional phase.", "जो जन्मकालीन चंद्रमा के सापेक्ष शनि की स्थिति और साढ़ेसाती का पारंपरिक चरण समझना चाहते हैं।", "Janm ke Chandra se Shani ki sthiti aur Sade Sati ka paramparik charan samajhne ke liye."],
+  "manglik-kaal-sarp-report": ["Readers checking how specific traditional rules apply to Mars and the lunar nodes in their chart.", "जो कुंडली में मंगल और राहु-केतु पर लागू पारंपरिक नियम समझना चाहते हैं।", "Apni kundli mein Mangal aur Rahu-Ketu par lagu paramparik niyam dekhne ke liye."],
+  "numerology-lo-shu-report": ["Readers with a birth date and confirmed Roman-letter name who want to follow the arithmetic themselves.", "जो अपनी जन्म तिथि और रोमन वर्तनी से अंक गणना स्वयं देखना चाहते हैं।", "Janm tithi aur confirmed Roman spelling se ank ganana khud dekhne ke liye."],
+  "name-correction-report": ["People comparing their current spelling with one or more proposed spellings.", "जो अपने वर्तमान नाम की वर्तनी की तुलना एक या अधिक प्रस्तावित वर्तनियों से करना चाहते हैं।", "Apne naam ki current spelling ki proposed spellings se tulna karne ke liye."],
+  "yearly-horoscope-report": ["Readers who want a twelve-month reference and quarterly planning prompts based on their birth chart.", "जो जन्म कुंडली के आधार पर अगले बारह महीनों के संकेत और तिमाही योजना के प्रश्न चाहते हैं।", "Apni janm kundli se agle 12 mahine samajhne aur quarterly planning par sochne ke liye."],
+  "transit-report": ["Readers following several planets through six monthly checkpoints against their natal houses.", "जो छह मासिक पड़ावों पर कई ग्रहों की स्थिति अपने जन्म भावों के संदर्भ में देखना चाहते हैं।", "Chhah maasik padaav par alag grahon ki sthiti apne janm bhaavon ke saath dekhne ke liye."],
+  "rahu-ketu-report": ["Readers interested in the natal Rahu–Ketu axis and how the nodes change position over time.", "जो जन्मकालीन राहु-केतु अक्ष और समय के साथ उनके गोचर को समझना चाहते हैं।", "Janm ke Rahu-Ketu aksh aur samay ke saath unke gochar ko samajhne ke liye."],
+  "jupiter-transit-report": ["Readers who want to follow Jupiter specifically through the next twelve monthly checkpoints.", "जो अगले बारह मासिक पड़ावों पर विशेष रूप से गुरु की स्थिति देखना चाहते हैं।", "Agle 12 maasik padaav par khaas taur par Guru ki sthiti dekhne ke liye."],
+  "fortune-report": ["Readers who want to compare traditional opportunity houses, timing periods and name-based numerology in one report.", "जो एक रिपोर्ट में अवसर से जुड़े भाव, दशा और नाम की अंक गणना देखना चाहते हैं।", "Ek report mein avsar se jude bhaav, dasha aur naam ki ank ganana dekhne ke liye."],
+} as const satisfies Record<AutoReportSlug, LocalText>;
+
 export function automaticReportPublicPreview(slug: string, locale: Locale) {
   if (!Object.prototype.hasOwnProperty.call(previews, slug)) return null;
   const [summary, features] = previews[slug as AutoReportSlug];
   const index = locale === "hi" ? 1 : locale === "hinglish" ? 2 : 0;
-  return { summary: summary[index], features: features.map(feature => feature[index]) };
+  return { summary: summary[index], audience: audience[slug as AutoReportSlug][index], features: features.map(feature => feature[index]) };
 }

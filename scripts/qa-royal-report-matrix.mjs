@@ -33,6 +33,7 @@ const profiles = [
   {name:"Robin Ellis",gender:"male",dateOfBirth:"1987-07-05",timeOfBirth:"14:40",birthPlace:"London, United Kingdom",latitude:51.5074,longitude:-0.1278,timezone:1},
   {name:"Meera Shah",gender:"female",dateOfBirth:"1998-12-21",timeOfBirth:"22:55",birthPlace:"Kathmandu, Nepal",latitude:27.7172,longitude:85.324,timezone:5.75}
 ];
+const zones = ["Asia/Kolkata","Europe/London","Asia/Kathmandu"];
 const questions = [
   {en:"What can I learn about balancing family responsibilities?",hi:"पारिवारिक जिम्मेदारियों में संतुलन कैसे रखूँ?",hinglish:"Family responsibilities mein balance kaise rakhoon?"},
   {en:"Which habits can help me reflect on my career?",hi:"अपने करियर पर विचार करने के लिए कौन सी आदतें अपनाऊँ?",hinglish:"Career par sochne ke liye kaunsi habits apnaoon?"},
@@ -60,12 +61,14 @@ for (const [index, profile] of profiles.entries()) {
         const birth = scope.dateNameOnly ? {name:profile.name,dateOfBirth:profile.dateOfBirth}
           : scope.babyName ? {...profile,dateOfBirth:["2026-11-03","2026-09-14","2026-08-22"][index]} : profile;
         const extra = {confirmed:true};
+        if (!scope.dateNameOnly) extra.birthZone = zones[index];
         if (scope.babyName) extra.guardianPermission = true;
         if (scope.romanName) extra.romanName = profile.name;
         if (scope.candidateNames) extra.candidateNames = [["Aasha Mehra","Asha Mira"],["Robyn Ellis","Robin Ellise"],["Mira Shah","Meera Shaah"]][index];
         if (scope.couple) {
           extra.partner = profiles[(index+1)%profiles.length];
           extra.partnerPermission = true;
+          extra.partnerZone = zones[(index+1)%profiles.length];
         }
         assert.equal(checkNewReportInputs(slug,birth,extra).ok,true,"new intake rejected fixture");
         const question = scope.babyName

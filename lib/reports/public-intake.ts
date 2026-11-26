@@ -22,7 +22,7 @@ export function publicReportRequiredDetails(slug:string,locale:Locale):string[]{
  if(scope.couple)list.push(...partner[locale]);
  if(scope.numerologyName)list.push(copy.romanFullName);
  if(scope.nameCorrection)list.push(copy.romanCurrent,copy.alternatives);
- if(scope.babyName)list.push(copy.preferredNames);
+ if(scope.babyName)list.push(copy.preferredNames,copy.guardianPermission);
  return list;
 }
 export const reportSurfaceCopy={
@@ -30,3 +30,7 @@ export const reportSurfaceCopy={
  hi:{eyebrow:"चयनित डिजिटल रिपोर्ट",intro:"व्यक्तिगत रिपोर्ट देखें",priceNote:"स्पष्ट रिपोर्ट प्रारूप और आपके खाते के लिए प्रकाशित वास्तविक कीमतें।",how:"रिपोर्ट कैसे मिलती हैं",sample:"काल्पनिक नमूना PDF देखें",sampleLanguage:"अंग्रेज़ी",sampleNote:"वास्तविक रिपोर्ट प्रारूप के चुनिंदा पृष्ठ। इसमें किसी ग्राहक का डेटा नहीं है।",sampleDescription:"काल्पनिक जन्म विवरण से रिपोर्ट की संरचना और पृष्ठों का प्रारूप देखें। पूरी सशुल्क रिपोर्ट में ऊपर सूचीबद्ध भाग शामिल हैं।",buying:"खरीदने से पहले",buyingDescription:"भुगतान से पहले शामिल भाग, रिपोर्ट प्राप्त करने का तरीका और लागू धनवापसी नीति देखें। आपकी व्यक्तिगत रिपोर्ट निजी है।",deliveryGuide:"रिपोर्ट डिलीवरी मार्गदर्शिका",refund:"धनवापसी नीति",compare:"सभी रिपोर्ट की तुलना करें",guidance:"रिपोर्ट खरीद मार्गदर्शन",track:"रिपोर्ट की स्थिति अपने खाते में देखें और निजी PDF डाउनलोड करें।"},
  hinglish:{eyebrow:"CURATED DIGITAL REPORTS",intro:"Personal insights explore karein",priceNote:"Report formats aur account ke liye actual published prices dekhein.",how:"Reports kaise milti hain",sample:"Fictional sample PDF dekhein",sampleLanguage:"English",sampleNote:"Actual report format ke selected pages. Yeh fictional demo hai, customer report nahi.",sampleDescription:"Fictional birth details se report structure aur page layout dekhein. Complete paid report mein upar listed sections milte hain.",buying:"Kharidne se pehle",buyingDescription:"Pay karne se pehle included sections, report delivery aur applicable refund policy dekhein. Aapki personal report private hai.",deliveryGuide:"Report delivery guide",refund:"Refund policy",compare:"Sabhi reports compare karein",guidance:"Report purchase guidance",track:"Account mein report status dekhein aur private PDF download karein."}
 } as const satisfies Record<Locale,Record<string,string>>;
+
+export function publicReportSampleAvailable(slug:string,provider:string){
+ return reportIntakeScope(slug).dateNameOnly||provider==="own_engine";
+}

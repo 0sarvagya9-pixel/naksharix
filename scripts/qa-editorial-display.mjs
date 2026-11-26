@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import {editorialTerm,editorialDate,EDITORIAL_TERM_COUNT,EDITORIAL_HOUSE_TABLE_FRACTIONS} from "../lib/reports/editorial-display.ts";
 import {PDFDocument,StandardFonts} from "pdf-lib";
 const samples=[
+ ["Needs full chart, strength, aspects, and dasha review before final judgment.","निष्कर्ष निकालने से पहले पूरी कुंडली, ग्रह बल, दृष्टियों और दशा की समीक्षा करें।","Nateeja nikalne se pehle poori kundli, grah bal, drishti aur dasha ki samiksha karein."],
+ ["Whole sign","पूर्ण राशि भाव","Poorn rashi bhav"],
+ ["Mean lunar node benchmark mode","चंद्रमा के माध्य पातों की संदर्भ पद्धति","Chandra ke mean nodes ki reference paddhati"],
+ ["Outside three-sign Sade Sati","साढ़ेसाती की तीन राशियों से बाहर","Sade Sati ki teen rashiyon se baahar"],
+ ["Gaja Kesari Yoga","गजकेसरी योग","Gajakesari Yog"],
  ["Graha","ग्रह","Graha"],["Koot","कूट","Koot"],["Traditional rule","पारंपरिक नियम","Traditional niyam"],["Lagna","लग्न","Lagna"],["Aries","मेष","Mesh"],["Mercury","बुध","Budh"],["Jyeshtha","ज्येष्ठा","Jyeshtha"],["Current","वर्तमान","Current"],["NAME COMPARISON","नाम तुलना","Naam comparison"],["TIMING FRAMEWORK","दशा समयरेखा","Dasha timeline"],["Not available","उपलब्ध नहीं","Available nahi"],["Mild","हल्का","Halka"],["Moderate","मध्यम","Madhyam"],["Severe","गंभीर","Gambhir"],["High","उच्च","Zyada"],["Low","कम","Kam"],["Near station","स्थिरता के निकट","Station ke paas"],["Not clearly detected","स्पष्ट रूप से नहीं पाया गया","Spasht roop se nahi mila"],["Current Mahadasha","वर्तमान महादशा","Vartaman Mahadasha"],["Current Antardasha","वर्तमान अंतर्दशा","Vartaman Antardasha"]
 ];let checks=0;
 for(const [key,hi,hg] of samples){
