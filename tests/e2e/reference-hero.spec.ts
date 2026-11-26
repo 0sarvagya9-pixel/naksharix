@@ -99,7 +99,11 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
 
   test("paused Puja service shows its honest, accessible Coming Soon notice", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/pujas", { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const availability=page.getByRole("navigation",{name:"Explore personal services"}).getByRole("link",{name:"Puja services · Coming Soon"});
+    await expect(availability).toHaveAttribute("href","/pujas");
+    await availability.click();
+    await expect(page).toHaveURL(/\/pujas$/);
     await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
     await expect(page.getByText("Coming Soon", { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: /पुरानी बुकिंग देखें/i })).toHaveAttribute("href", "/puja-bookings");

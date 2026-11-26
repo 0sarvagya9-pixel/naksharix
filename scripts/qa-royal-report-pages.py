@@ -7,6 +7,7 @@ from pathlib import Path
 
 import fitz
 import numpy as np
+from qa_royal_profile_cards import profile_card_errors
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("matrix", type=Path)
@@ -56,6 +57,11 @@ for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
             issues(record["name"] != profiles[record["profile"]], "unknown profile")
             issues(record["requestId"] not in doc.metadata["title"], "request metadata mismatch")
             issues("रॉयल संस्करण" not in cover if record["language"]=="hi" else "Royal Edition" not in cover,"cover locale")
+            if record["slug"] not in ("name-correction-report", "numerology-lo-shu-report"):
+                if record.get("profileCards"):
+                    problems.extend(profile_card_errors(file, doc[2], record["profileCards"]))
+                else:
+                    problems.append("missing expected profile cards in generation manifest")
             region_errors = {key:float(np.abs(pixels(doc[0],box)-references[key]).mean()) for key,box in overlays.items()}
             issues(max(region_errors.values())>0.5,"approved cover artwork difference")
             for idx,page in enumerate(doc):
@@ -67,6 +73,8 @@ for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
                 ink = image[80:770,36:-36].min(axis=2)
                 issues(np.count_nonzero(ink<120)<140,f"blank raster body p{page_no}")
                 issues(len(text.strip())<60,f"no selectable content p{page_no}")
+                issues(any(line.strip() in {"°","%"} for line in text.splitlines()),
+                       f"unit wrapped away from its value p{page_no}")
                 if idx:
                     issues(f"{page_no:02} / {len(doc):02}" not in text,f"pagination p{page_no}")
                     issues(tuple(image[75,15])!=(255,253,247),f"Royal ivory background p{page_no}")
@@ -82,8 +90,6 @@ for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
                         issues(fragment in logical_text,f"English-only explanatory passage p{page_no}: {fragment}")
                     if page_no==2: issues("vishay suchi" not in logical_text,"Hinglish contents page missing")
                 if record["slug"]=="transit-report" and page_no==5:
-                    lines={line.strip() for line in text.splitlines()}
-                    issues("°" in lines,"transit degree unit wrapped away from its value")
                     headers={
                         "en":["DATE","SUN","MOON","MARS","MERCURY","JUPITER","VENUS","SATURN","RAHU","KETU"],
                         "hi":["तिथि","सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि","राहु","केतु"],
@@ -104,7 +110,7 @@ complete=len(rows)==len(cells)==135 and all(sum(r["profile"]==n for r in rows)==
 passed=sum(r["pass"] for r in rows)
 report = {"complete135":complete,"pdfs":len(rows),"passed":passed,"failed":len(rows)-passed,
           "pages":sum(r["pages"] for r in rows),"referenceSha256":reference_hash,
-          "tests":"Every page rasterized at 72 dpi, page geometry and font glyphs, running pagination, content presence and selectable text, checksum, cover identity/locale, cross-profile isolation, approved lotus/wheel/border pixel comparisons, date/name-only data exclusion. Couple partner names are intentionally allowed.",
+          "tests":"Every page rasterized at 72 dpi, page geometry and font glyphs, running pagination, content presence and selectable text, detached units, checksum, cover identity/locale, cross-profile isolation, approved lotus/wheel/border pixel comparisons, date/name-only data exclusion. The four printed birth-chart cards are compared with the calculated words, outlined rectangles and 13 pt minimum value size. Couple partner names are intentionally allowed.",
           "limitations":"These checks do not certify every interpretation, native-language quality, print fidelity, real email delivery or independent professional acceptance.",
           "rows":rows}
 args.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")

@@ -1,10 +1,11 @@
+import { localizedAuthMetadata } from "@/lib/auth/page-metadata";
 import type { Metadata } from "next";
 import {AuthPageShell} from "@/components/auth/auth-page-shell";
 import {safeInternalAuthPath} from "@/lib/auth/safe-redirect";
 import {env} from "@/lib/env";
 import {seo} from "@/lib/seo";
 
-export const metadata: Metadata = {
+const englishMetadata: Metadata = {
   ...seo({
     title: "Login to Naksharix",
     description: "Login to Naksharix with Google or email to access saved Kundli reports, readings, bookings, and your account dashboard.",
@@ -12,6 +13,10 @@ export const metadata: Metadata = {
   }),
   robots: { index: false, follow: true }
 };
+
+export function generateMetadata() {
+  return localizedAuthMetadata("login", englishMetadata);
+}
 
 type Params=Promise<{error?:string|string[];redirectTo?:string|string[];next?:string|string[]}>;
 export default async function AuthPage({searchParams}:{searchParams:Params}){

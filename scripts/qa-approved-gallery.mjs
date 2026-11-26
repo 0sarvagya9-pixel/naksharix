@@ -50,7 +50,7 @@ for (const page of ["/kundli","/matchmaking","/panchang","/horoscope","/numerolo
 }
 if (!home.includes("Discover your") || !home.includes("Our key services") || !home.includes("nx-a-extra-grid")) throw Error("Owner-approved home structure missing");
 if (!layout.includes("approved-gallery-theme.css") || !layout.includes("approved-gallery-inner.css")) throw Error("Gallery CSS not loaded");
-if (!homePage.includes("<ApprovedGalleryHome />")) throw Error("Homepage not mounted");
+if (!homePage.includes("<ApprovedGalleryHome pujaEnabled={puja.enabled} />")) throw Error("Approved homepage must use actual Puja availability");
 if (!families.includes("data-page-kind={approvedGalleryFamily(pathname)}")) throw Error("Family-aware route styling missing");
 for (const path of ["app/kundli/page.tsx","app/shop/page.tsx","app/reports/page.tsx","app/panchang/page.tsx","app/pujas/page.tsx","app/consultation/page.tsx","app/admin/page.tsx","app/astrologer/dashboard/page.tsx"]) {
   if (!existsSync(join(root,path))) throw Error("Original real production page missing: "+path);

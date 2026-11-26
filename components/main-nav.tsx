@@ -107,7 +107,7 @@ export function MainNav() {
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (open && event.key === "Escape") {
         setOpen(false);
         menuButtonRef.current?.focus();
       }

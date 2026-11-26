@@ -26,6 +26,7 @@ process.env.ASTROLOGY_PROVIDER = "own_engine";
 const { AUTO_REPORT_SLUGS, checkNewReportInputs } = require("@/lib/reports/automatic-report-input");
 const { reportIntakeScope } = require("@/lib/reports/public-intake");
 const { assembleAutomaticPaidReport } = require("@/lib/reports/automatic-report-content");
+const { editorialTerm } = require("@/lib/reports/editorial-display");
 const { generatePremiumReportPdf } = require("@/lib/reports/premium-report-generation-service");
 const { PDFDocument } = require("pdf-lib");
 const profiles = [
@@ -75,6 +76,13 @@ for (const [index, profile] of profiles.entries()) {
           ? {en:"Which proposed name matches the traditional birth syllable?",hi:"कौन सा प्रस्तावित नाम पारंपरिक जन्म ध्वनि से मेल खाता है?",hinglish:"Kaunsa proposed naam traditional janm sound se match karta hai?"}[language]
           : questions[index][language];
         const {content,title} = await assembleAutomaticPaidReport({slug,birth,extra,question,language,now});
+        if (!scope.dateNameOnly) {
+          const calculated = content.sections.find(section=>section.key==="birth").data;
+          row.profileCards = [
+            ["Lagna",calculated.ascendant],["Moon sign",calculated.moonSign],
+            ["Nakshatra",calculated.nakshatra],["Sun sign",calculated.sunSign],
+          ].map(([label,value])=>({label:editorialTerm(label,language).toUpperCase(),value:editorialTerm(value,language)}));
+        }
         const requestId = ["royal",index+1,slug,language].join("-");
         const rendered = await generatePremiumReportPdf({requestId,templateId:slug,status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:title,customerName:profile.name,language});
         assert.equal(rendered.generated,true);

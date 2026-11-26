@@ -1,3 +1,5 @@
+import {divisionCoordinates, navamsaCoordinates} from "@/lib/astrology/varga/partition";
+import {rashis} from "@/lib/astrology/own-engine/zodiac";
 import {transitClockNote} from "./transit-clock-note";
 import type {AstrologyLanguage,BirthChartData} from "@/lib/astrology/types";
 import type {PremiumReportContentSection} from "./premium-report-content-engine";
@@ -96,7 +98,7 @@ export function buildReportDepth(chart:BirthChartData,slug:string,sections:Premi
  // Link actual calculated period lords with natal houses, without predicting events.
  const timingKey:Record<string,string>={"premium-kundli":"dasha","career-report":"career-dasha","wealth-report":"wealth-dasha","love-report":"relationship-timing","yearly-horoscope-report":"yearly-dasha","fortune-report":"fortune-dasha"};
  const upcoming=rows(object(data(timingKey[slug]??"")).nextTwelveMonths);
- if(upcoming.length)add("period-lord-context",["Upcoming period lords and natal context","आगामी दशा स्वामी और जन्म भाव","Upcoming dasha lords aur natal context"],["Each interval uses calculated UTC boundaries and actual natal placements. Interpretations are reflection prompts, not forecasts.","हर अवधि की गणना सीमाएँ और जन्म ग्रह स्थितियाँ दी गई हैं। व्याख्याएँ चिंतन के लिए हैं, भविष्यवाणी नहीं।","Har interval calculated UTC boundaries aur natal placements use karta hai. Vyakhya reflection ke liye hai, forecast nahi."],upcoming.map(r=>{
+ if(upcoming.length)add("period-lord-context",["Upcoming period lords and natal context","आगामी दशा स्वामी और जन्म भाव","Upcoming dasha lords aur natal context"],["The UTC dates follow this model. A change in the calculated birth Moon can shift them by days. Use the natal placements as prompts for reflection.","UTC तिथियाँ इसी पद्धति से निकली हैं। जन्म के चंद्रमा की गणितीय स्थिति बदलने पर ये तिथियाँ कई दिन खिसक सकती हैं। जन्म ग्रह स्थितियों का उपयोग चिंतन के लिए करें।","UTC tareekhein isi paddhati ki hain. Janm ke Chandra ki ganana badalne par ye tareekhein kai din khisak sakti hain. Janm ke grahon ki sthiti par gaur karein."],upcoming.map(r=>{
   const major=chart.planetPositions.find(p=>p.planet===str(r.major)),sub=chart.planetPositions.find(p=>p.planet===str(r.planet));
   const start=str(r.startsAtUtc),end=str(r.endsAtUtc);
   if(!major?.house||!sub?.house||major.house<1||major.house>12||sub.house<1||sub.house>12||!Number.isFinite(Date.parse(start))||!(Date.parse(end)>Date.parse(start)))throw Error("REPORT_PERIOD_CONTEXT_INVALID");
@@ -153,6 +155,33 @@ export function buildReportDepth(chart:BirthChartData,slug:string,sections:Premi
   }));
  }
  if(!result.length)throw Error("REPORT_DEPTH_EMPTY");
+ if(slug==="premium-kundli"){
+  const longitude=chart.calculationMeta?.ascendantLongitude;
+  if(typeof longitude!=="number"||!Number.isFinite(longitude)||longitude<0||longitude>=360)throw Error("REPORT_NAVAMSA_ASCENDANT_UNAVAILABLE");
+  const {signIndex,part}=divisionCoordinates(longitude,9);
+  const first=navamsaCoordinates(signIndex*30).signIndex;
+  const sequence=Array.from({length:part+1},(_,index)=>rashis[(first+index)%12]);
+  const target=sequence[part];
+  if(chart.charts.navamsa.find(h=>h.house===1)?.sign!==target)throw Error("REPORT_NAVAMSA_ASCENDANT_MISMATCH");
+  const within=longitude-signIndex*30;
+  const rounded=Number(within.toFixed(4));
+  const roundedPlacement=divisionCoordinates(signIndex*30+rounded,9);
+  // At a boundary, retain enough digits to reproduce the displayed placement.
+  const degree=roundedPlacement.signIndex===signIndex&&roundedPlacement.part===part?String(rounded):String(within);
+  const natal=term(rashis[signIndex]),start=term(sequence[0]),end=term(target);
+  const modalities:L[]=[["movable","चर","chal"],["fixed","स्थिर","sthir"],["dual","द्विस्वभाव","dohre swabhav ki"]];
+  const modality=t(modalities[signIndex%3]);
+  const route=sequence.map(term).join(", ");
+  add("navamsa-ascendant",["Reproduce your D9 ascendant","अपने नवांश लग्न की गणना","Apna D9 lagna kaise nikaalein"],[
+   "Divide each 30° natal sign into nine equal parts of 3°20'. For a movable sign begin with the natal sign, for a fixed sign begin with the ninth and for a dual sign with the fifth. Count the natal sign as one when finding the starting sign.",
+   "जन्म राशि के 30° को 3°20' के नौ बराबर भागों में बाँटें। चर राशि में उसी राशि से, स्थिर में नौवीं और द्विस्वभाव में पाँचवीं राशि से नवांश क्रम शुरू होता है। शुरुआत की राशि खोजते समय जन्म राशि को पहली गिनें।",
+   "Janm rashi ke 30° ko 3°20' ke nau barabar hisson mein baantein. Chal rashi mein usi rashi se, sthir mein nauvi aur dohre swabhav ki rashi mein paanchvi rashi se Navamsha ka kram shuru hota hai. Shuruaati rashi dhoondhte waqt janm rashi ko pehla ginen."
+  ],[{label:t(["Ascendant calculation","लग्न की गणना","Lagna ki ganana"]),title:`D1 ${natal} / D9 ${end}`,body:t([
+   `Your ascendant is ${degree}° into ${natal}, in part ${part+1} of 9. ${natal} is a ${modality} sign. Count from ${start} as part 1. The sequence is ${route}. This places the D9 ascendant in ${end}.`,
+   `जन्म लग्न ${natal} राशि में ${degree}° पर है। यह नौ में से भाग ${part+1} है। यह ${modality} राशि है। ${start} को भाग 1 मानकर गिनें। क्रम है ${route}। इस गणना से नवांश लग्न ${end} आता है।`,
+   `Janm lagna ${natal} mein ${degree}° par hai. Yeh nau mein se hissa ${part+1} hai. Yeh ${modality} rashi hai. ${start} ko hissa 1 maankar ginen. Kram hai ${route}. Is ganana se D9 lagna ${end} aata hai.`
+  ])}]);
+ }
  return result;
 }
 

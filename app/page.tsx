@@ -34,7 +34,7 @@ export default async function HomePage() {
   const puja = await getPujaLaunchState();
   return (
     <main className="overflow-hidden bg-[var(--nx-bg)] text-[var(--nx-text)]">
-      <ApprovedGalleryHome />
+      <ApprovedGalleryHome pujaEnabled={puja.enabled} />
       {puja.enabled && <KumbhHomePromotion availableIds={Object.keys(puja.offers)} initialNow={Date.now()}/>}
       <div className="nx-approved-retained">
         <EditorialHome featuredShopPrices={featuredShopPrices} pujaEnabled={puja.enabled} availablePujaIds={Object.keys(puja.offers)} />

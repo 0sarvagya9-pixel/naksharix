@@ -173,12 +173,25 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  }
  function tiles(values:{label:string;value:string;sub?:string}[]){
   values=values.map(v=>({...v,label:term(v.label),value:term(v.value)}));
-  const n=values.length,w=(CW-(n-1)*10)/n;
-  const sizes=values.map(v=>v.value.length>18?13:v.value.length>12?16:21);
-  const height=Math.max(89,...values.map((v,i)=>wrap(v.label.toUpperCase(),w-20,8,"bold").length*11+wrap(v.value,w-20,sizes[i],"title").length*(sizes[i]+4)+wrap(v.sub??"",w-20,8.5).length*12+30));
-  ensure(height+13);
-  values.forEach((v,i)=>{const x=M+i*(w+10);rect(x,y,w,height,white,light);let t=y+11;t+=fixed(x+10,t,v.label.toUpperCase(),w-20,8,"bold",goldText,11)+9;t+=fixed(x+10,t,v.value,w-20,sizes[i],"title",wine,sizes[i]+4)+8;if(v.sub)fixed(x+10,t,v.sub,w-20,8.5,"body",muted,12)});
-  y+=height+16;
+  if(!values.length)return;
+  const gap=10,minSize=13;
+  const cards=values.map(v=>({...v,wordWidth:Math.max(0,...v.value.split(/\s+/u).map(word=>measure(word,1,"title")))}));
+  const widest=Math.max(...cards.map(card=>card.wordWidth));
+  const columnWidth=(count:number)=>(CW-(count-1)*gap)/count;
+  if(widest*minSize>CW-21)throw new ReportQualityError("REPORT_CARD_VALUE_TOO_WIDE");
+  let columns=cards.length;
+  while(columns>1 && widest*minSize>columnWidth(columns)-21)columns--;
+  for(let first=0;first<cards.length;first+=columns){
+   const row=cards.slice(first,first+columns),w=columnWidth(row.length),inner=w-20;
+   const sizes=row.map(card=>{
+    const nominal=card.value.length>18?13:card.value.length>12?16:21;
+    return card.wordWidth?Math.min(nominal,(inner-1)/card.wordWidth):nominal;
+   });
+   const height=Math.max(89,...row.map((v,i)=>wrap(v.label.toUpperCase(),inner,8,"bold").length*11+wrap(v.value,inner,sizes[i],"title").length*(sizes[i]+4)+wrap(v.sub??"",inner,8.5).length*12+30));
+   ensure(height+13);
+   row.forEach((v,i)=>{const x=M+i*(w+gap);rect(x,y,w,height,white,light);let t=y+11;t+=fixed(x+10,t,v.label.toUpperCase(),inner,8,"bold",goldText,11)+9;t+=fixed(x+10,t,v.value,inner,sizes[i],"title",wine,sizes[i]+4)+8;if(v.sub)fixed(x+10,t,v.sub,inner,8.5,"body",muted,12)});
+   y+=height+16;
+  }
  }
  function motionLabel(r:R){return r.motionState==="near_station"?term("Near station"):r.retrograde===true?term("Retrograde"):r.retrograde===false?term("Direct"):tr("Unavailable","उपलब्ध नहीं","Available nahi")}
  function planetTable(rows:R[]){if(!rows.length)return;table(["Graha",tr("Sign","राशि"),tr("House","भाव"),tr("Degree","अंश"),tr("Nakshatra","नक्षत्र"),tr("Motion","गति")],rows.map(r=>[display(r.planet),display(r.sign),shown(r.house),deg(r.degree),display(r.nakshatra),motionLabel(r)]),[1,1.05,.55,.8,1.4,1.05],9.2,33)}
@@ -193,6 +206,9 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  function charts(a:R[],b:R[],aLabel:string,bLabel:string){if(a.length!==12||b.length!==12)throw new ReportQualityError("REPORT_CHART_HOUSES_INCOMPLETE");const size=(CW-22)/2-6;ensure(size+94);caps(M,y,term(aLabel));caps(M+CW/2+11,y,term(bLabel));y+=18;tx(M,y,display(a.find(r=>number(r.house)===1)?.sign)+" "+tr("ascendant","लग्न","lagna"),14,"title",wine);tx(M+CW/2+11,y,display(b.find(r=>number(r.house)===1)?.sign)+" "+tr("ascendant","लग्न","lagna"),14,"title",wine);y+=23;chart(M+3,y,size,a);chart(M+CW/2+14,y,size,b);y+=size+15;paragraph(Object.entries(shortPlanets).map(([planet,code])=>code+" "+term(planet)).join(" · ")+".",9,muted)}
  function periodCards(d:R){
   const a=obj(d.currentMajor??d.major),b=obj(d.currentSubPeriod??d.sub);
+  note(tr("These Dasha dates use the calculated birth Moon and a 365.2425-day year. A different lunar ephemeris or a change in the recorded birth time can move a period boundary by days. The UTC timestamps show how to reproduce this model.",
+   "दशा तिथियाँ जन्म के समय चंद्रमा की गणितीय स्थिति और 365.2425 दिन के वर्ष पर आधारित हैं। चंद्रमा की स्थिति की दूसरी गणना-सारणी या दर्ज जन्म समय में बदलाव से अवधि की सीमा कई दिन खिसक सकती है। UTC समय इसी गणना को दोहराने के लिए दिए गए हैं।",
+   "Dasha ki tareekhein janm ke Chandra ki ganana aur 365.2425 din ke saal par aadharit hain. Chandra ki sthiti ki doosri ganana ya darj janm samay badalne se avadhi ki seema kai din khisak sakti hai. UTC samay isi ganana ko dohraane ke liye diye gaye hain."));
   const make=(r:R,k:string)=>({label:term(k),title:display(r.planet),body:r.planet?date(r.startsAt)+" - "+date(r.endsAt):tr("No active period available.","वर्तमान दशा उपलब्ध नहीं।","Is tareekh ke liye koi sakriya dasha uplabdh nahi hai.")});
   cardRows([make(a,tr("Current Mahadasha","वर्तमान महादशा")),make(b,tr("Current Antardasha","वर्तमान अंतर्दशा"))],2,true);
   const boundary=(r:R,field:"startsAt"|"endsAt")=>Date.parse(s(r[field+"Utc"])||s(r[field]));
@@ -212,20 +228,20 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   const upcoming=records(d.nextTwelveMonths);
   if(upcoming.length){
    subhead(tr("Antardasha intervals overlapping the next 12 months","अगले 12 माह से जुड़ी अंतर्दशा अवधियाँ","Next 12 months se judi Antardasha intervals"));
-   table([tr("Major / sub","महादशा / अंतर्दशा"),tr("Start UTC","आरंभ UTC"),tr("End UTC","समाप्ति UTC")],upcoming.map(r=>[display(r.major)+" / "+display(r.planet),shown(r.startsAtUtc),shown(r.endsAtUtc)]),[1.1,1.55,1.55],8.9,30);
-   paragraph(tr("Intervals retain their actual calculated boundaries, even when they start before today or extend beyond the 12-month horizon. They are not predicted life events.","अवधियों की वास्तविक गणना सीमाएँ बनी रहती हैं, भले ही आरंभ आज से पहले हो या अंत 12 माह के बाद हो। ये जीवन घटनाओं की भविष्यवाणियाँ नहीं हैं।","Actual calculated boundaries retain hoti hain, chahe start aaj se pehle ya end 12 months se baad ho. Yeh life event predictions nahi hain."),9,muted);
+   table([tr("Major / sub","महादशा / अंतर्दशा"),tr("Model start (UTC)","गणितीय आरंभ (UTC)","Ganit se aarambh (UTC)"),tr("Model end (UTC)","गणितीय अंत (UTC)","Ganit se ant (UTC)")],upcoming.map(r=>[display(r.major)+" / "+display(r.planet),shown(r.startsAtUtc),shown(r.endsAtUtc)]),[1.1,1.55,1.55],8.9,30);
+   paragraph(tr("A listed interval can begin before or end after the 12-month window.","सूची की कोई अवधि इस 12 माह की समय-सीमा से पहले शुरू या बाद में समाप्त हो सकती है।","Koi avadhi in 12 mahino se pehle shuru ya baad mein samaapt ho sakti hai."),9,muted);
   }
   const pratyantar=records(d.pratyantarWindow);
   if(pratyantar.length){
    subhead(tr("Pratyantar periods overlapping the next 12 months","अगले 12 माह की प्रत्यंतर दशाएँ","Next 12 months ki pratyantar dasha"));
-   table([tr("Major / sub / third","महा / अंतर / प्रत्यंतर","Maha / antar / pratyantar"),tr("Start UTC","आरंभ UTC"),tr("End UTC","समाप्ति UTC")],pratyantar.map(r=>[display(r.mahadashaLord)+" / "+display(r.antardashaLord)+" / "+display(r.lord),shown(r.startsAt),shown(r.endsAt)]),[1.35,1.35,1.35],8.6,28);
-   paragraph(tr("Exact calculated third-level boundaries are shown for the named fixed-year convention. Selection does not reset a parent period; these intervals do not predict events.","निर्धारित वर्ष पद्धति की गणना से प्रत्यंतर की सीमाएँ दी गई हैं। अवधि चुनने से मूल दशा दोबारा आरंभ नहीं होती। ये घटनाओं की भविष्यवाणी नहीं हैं।","Named fixed-year method ki calculated boundaries hain; window selection parent dasha ko restart nahi karta. Yeh event predictions nahi hain."),9,muted);
+   table([tr("Major / sub / third","महा / अंतर / प्रत्यंतर","Maha / antar / pratyantar"),tr("Model start (UTC)","गणितीय आरंभ (UTC)","Ganit se aarambh (UTC)"),tr("Model end (UTC)","गणितीय अंत (UTC)","Ganit se ant (UTC)")],pratyantar.map(r=>[display(r.mahadashaLord)+" / "+display(r.antardashaLord)+" / "+display(r.lord),shown(r.startsAt),shown(r.endsAt)]),[1.35,1.35,1.35],8.6,28);
+   paragraph(tr("The third-level periods use the same fixed-year model. A period can extend beyond the dates covered here.","प्रत्यंतर अवधियाँ भी इसी निर्धारित वर्ष पद्धति से निकाली गई हैं। किसी अवधि का अंत यहाँ दिखाई गई तिथियों के बाद हो सकता है।","Pratyantar avadhiyan bhi isi nirdharit saal ki paddhati se nikalti hain. Koi avadhi yahan dikhayi gayi tareekhon ke baad tak chal sakti hai."),9,muted);
   }
   const allSub=records(d.allAntardashas);
   if(allSub.length){
    subhead(tr("Full modeled Antardasha chronology","संपूर्ण गणितीय अंतर्दशा क्रम","Full modeled Antardasha sequence"));
    paragraph(tr("These are mathematical periods beginning at birth, not a lifespan estimate. The first elapsed parent is not restarted.","ये जन्म से आरंभ गणितीय अवधियाँ हैं, आयु का अनुमान नहीं। पहली बीती मूल दशा फिर से शुरू नहीं होती।","Yeh birth se modeled periods hain, lifespan estimate nahi. Pehli elapsed dasha reset nahi hoti."),9,muted);
-   table([tr("Major / sub","महा / अंतर","Maha / antar"),tr("Start UTC","आरंभ UTC"),tr("End UTC","समाप्ति UTC")],allSub.map(r=>[display(r.major)+" / "+display(r.planet),shown(r.startsAtUtc),shown(r.endsAtUtc)]),[1.25,1.4,1.4],8.5,23);
+   table([tr("Major / sub","महा / अंतर","Maha / antar"),tr("Model start (UTC)","गणितीय आरंभ (UTC)","Ganit se aarambh (UTC)"),tr("Model end (UTC)","गणितीय अंत (UTC)","Ganit se ant (UTC)")],allSub.map(r=>[display(r.major)+" / "+display(r.planet),shown(r.startsAtUtc),shown(r.endsAtUtc)]),[1.25,1.4,1.4],8.5,23);
   }
  }
  function numCard(r:R,k:string){return {label:term(s(r.label)||k),title:shown(r.value)+" / "+s(r.meaning),body:[s(r.guidance),s(r.strengths)?tr("Strength themes: ","गुण विषय: ","Majboot paksh: ")+s(r.strengths):"",s(r.growthAreas)?tr("Reflection areas: ","चिंतन क्षेत्र: ","Sochne ke vishay: ")+s(r.growthAreas):""].filter(Boolean).join("\n")}}

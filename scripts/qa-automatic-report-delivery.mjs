@@ -69,6 +69,42 @@ async function checkBabyNameQuestions(){
 }
 await checkBabyNameQuestions();
 if(process.argv.includes("--baby-name-question"))process.exit(0);
+if(process.argv.includes("--premium-d9")){
+ const {buildReportDepth}=require("@/lib/reports/editorial-depth");
+ const {calculateOwnEngineBirthChart}=require("@/lib/astrology/own-engine");
+ const {editorialTerm}=require("@/lib/reports/editorial-display");
+ const profileRows=[
+  [birth,"Gemini","Libra","Aquarius",5,13.6361],
+  [{...birth,dateOfBirth:"1987-07-05",timeOfBirth:"14:40",birthPlace:"London",latitude:51.5074,longitude:-0.1278,timezone:1},"Libra","Libra","Libra",1,2.9595],
+  [{...birth,dateOfBirth:"1998-12-21",timeOfBirth:"22:55",birthPlace:"Kathmandu",latitude:27.7172,longitude:85.324,timezone:5.75},"Leo","Aries","Libra",7,21.001]
+ ];
+ for(const [profile,natal,start,target,part,within] of profileRows){
+  for(const language of ["en","hi","hinglish"]){
+   const {content}=await assembleAutomaticPaidReport({slug:"premium-kundli",birth:profile,extra,question,language,now:new Date("2026-11-26T12:00:00Z")});
+   const chapters=content.sections.find(s=>s.key==="editorial-depth").data;
+   const worked=chapters.find(c=>c.key==="navamsa-ascendant"),card=worked.cards[0];
+   assert.equal(card.title,`D1 ${editorialTerm(natal,language)} / D9 ${editorialTerm(target,language)}`);
+   assert.ok(card.body.includes(String(within)+"°")&&card.body.includes(editorialTerm(start,language)));
+   assert.match(card.body,new RegExp((language==="en"?"part ":language==="hi"?"भाग ":"hissa ")+part+"(?: |\\.)"));
+   assert.ok(worked.intro.includes("3°20'"));
+   assert.equal(content.sections.find(s=>s.key==="houses").data.navamsa.find(h=>h.house===1).sign,target);
+  }
+ }
+ // The degree shown to the reader must round-trip to the prescribed half-open part even near a boundary.
+ const reference=await assembleAutomaticPaidReport({slug:"premium-kundli",birth,extra,question,language:"en"});
+ const base=calculateOwnEngineBirthChart({...birth,timezone:String(birth.timezone),language:"en"});
+ const show=(longitude,target)=>{
+  const chart=structuredClone(base);chart.calculationMeta.ascendantLongitude=longitude;
+  chart.charts.navamsa.find(h=>h.house===1).sign=target;
+  return buildReportDepth(chart,"premium-kundli",reference.content.sections,"en","Asha Test").find(c=>c.key==="navamsa-ascendant").cards[0].body;
+ };
+ for(const [longitude,target,part] of [[73.3333329,"Capricorn",4],[73.333334,"Aquarius",5],[89.9999999,"Gemini",9]]){
+  const body=show(longitude,target),printed=Number(body.match(/Your ascendant is ([\d.]+)°/)[1]);
+  assert.equal(Math.floor(printed*9/30)+1,part);assert.ok(body.includes("in part "+part+" of 9"));
+ }
+ assert.throws(()=>show(73.6361,"Aries"),/REPORT_NAVAMSA_ASCENDANT_MISMATCH/);
+ console.log("PREMIUM_D9_WORKED_EXAMPLE_PASS 9 localized chart/readings, 3 displayed boundary cases, 1 chart mismatch held");process.exit(0);
+}
 if(process.argv.includes("--couple-order")){
  const p1={...birth,name:"Robin Ellis",gender:"male",dateOfBirth:"1987-07-05",timeOfBirth:"14:40",birthPlace:"London",latitude:51.5074,longitude:-0.1278,timezone:1};
  const p2={...birth,name:"Meera Shah",gender:"female",dateOfBirth:"1998-12-21",timeOfBirth:"22:55",birthPlace:"Kathmandu",latitude:27.7172,longitude:85.324,timezone:5.75};
@@ -367,7 +403,7 @@ function verifyPromiseCoverage(slug,language,content){
  requiredDisclosureChecks++;
 }
 let depthChecks=0;const measurements=[];
-function verifyDepth(slug,content){const depth=content.sections.find(s=>s.key==="editorial-depth")?.data;assert.ok(Array.isArray(depth)&&depth.length&&depth.every(x=>x.cards.length&&x.cards.every(c=>c.label&&c.title&&c.body.length>30)),slug+" missing depth");depthChecks++;return depth.flatMap(x=>x.cards).length;}
+function verifyDepth(slug,content){const depth=content.sections.find(s=>s.key==="editorial-depth")?.data;if(slug==="premium-kundli")assert.ok(depth.some(chapter=>chapter.key==="navamsa-ascendant"&&chapter.cards[0].title.includes("D9")),"Missing worked D9 ascendant calculation");assert.ok(Array.isArray(depth)&&depth.length&&depth.every(x=>x.cards.length&&x.cards.every(c=>c.label&&c.title&&c.body.length>30)),slug+" missing depth");depthChecks++;return depth.flatMap(x=>x.cards).length;}
 let sent=[];
 let emailStatus=200;
 globalThis.fetch=async(url,options)=>{
