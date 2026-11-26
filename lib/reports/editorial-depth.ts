@@ -1,3 +1,4 @@
+import {transitClockNote} from "./transit-clock-note";
 import type {AstrologyLanguage,BirthChartData} from "@/lib/astrology/types";
 import type {PremiumReportContentSection} from "./premium-report-content-engine";
 import type {EditorialCard} from "./editorial-insights";
@@ -136,7 +137,15 @@ export function buildReportDepth(chart:BirthChartData,slug:string,sections:Premi
    add("sampled_transition_windows",["Observed changes between checkpoints","नमूना तिथियों के बीच परिवर्तन","Sampled checkpoints ke beech changes"],["Only actual changes between published report samples are listed; no unsupported exact event timing.","केवल वास्तविक नमूना परिवर्तनों का विवरण है; बिना आधार सटीक घटना समय नहीं।","Sirf actual sample changes list hain; unsupported exact event timing nahi."],cards);
   }
 
-  add("transit-context",["Observed monthly positions: two natal lenses","मासिक स्थितियाँ: दो जन्म संदर्भ","Monthly observations: two natal lenses"],["First and last sampled positions are compared. Intermediate samples are in the preceding tables. Noon is at the supplied birth UTC offset, not the future local DST offset. These are not exact ingress or station dates.","पहली और अंतिम नमूना स्थितियाँ तुलना में हैं। बीच की गणनाएँ पिछली तालिका में हैं। दोपहर जन्म के UTC अंतर पर है, भविष्य के डेलाइट सेविंग पर नहीं। ये सटीक गोचर तिथियाँ नहीं हैं।","First aur last sampled positions compare hote hain. Beech ki readings tables mein hain. Noon birth UTC offset par hai, future DST par nahi. Exact ingress ya station dates nahi."],[...byPlanet].map(([p,items])=>{
+  const clock=object(data("birth"));
+  const clockNote=transitClockNote(clock.transitTimeBasis,clock.transitTimezone);
+  const contextIntro:[string,string,string]=[
+   "The tables show the positions between the first and last samples. Exact ingress and station times require a separate calculation.",
+   "तालिकाएँ पहले और अंतिम नमूने के बीच की स्थितियाँ दिखाती हैं। सटीक राशि प्रवेश और वक्री गति परिवर्तन समय के लिए अलग गणना चाहिए।",
+   "Tables mein pehle aur aakhri sample ke beech ki grah sthitiyan hain. Rashi badalne ya gati palatne ka sahi samay alag ganana se milta hai."
+  ];
+  if(clockNote)for(const i of [0,1,2])contextIntro[i]+=" "+clockNote[i];
+  add("transit-context",["Observed monthly positions: two natal lenses","मासिक स्थितियाँ: दो जन्म संदर्भ","Monthly observations: two natal lenses"],contextIntro,[...byPlanet].map(([p,items])=>{
    const first=items[0],last=items[items.length-1],moon=Number(last.houseFromMoon),asc=Number(last.houseFromAscendant);
    if(!Number.isInteger(moon)||moon<1||moon>12||!Number.isInteger(asc)||asc<1||asc>12)throw Error("REPORT_TRANSIT_HOUSE_INVALID");
    const observed=items.map(x=>str(x.sign)).filter((x,i,a)=>i===0||a[i-1]!==x).map(term).join(" -> ");

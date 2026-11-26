@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth/jwt";
 import { isAdmin } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db";
 import { hasCurrentPaidReportEntitlement } from "@/lib/reports/paid-entitlement";
-import { revisionRequestSelection } from "@/lib/reports/report-revisions";
+import { revisionRequestSelection,normalizedCorrection } from "@/lib/reports/report-revisions";
 import { sharedRateLimitResponse } from "@/lib/security/rate-limit";
 import { loadReportPdf } from "@/lib/storage/report-storage";
 
@@ -19,8 +19,9 @@ export async function GET(_request:Request, {params}:{params:Promise<{id:string;
     if (!parent || (parent.userId!==user.id && !isAdmin(user))) return fail("Unknown report",404);
     if (!await hasCurrentPaidReportEntitlement(parent)) return fail("Current purchase required.",403);
     const revision = await prisma.reportRevision.findUnique({where:{reportRequestId_version:{reportRequestId:id,version:Number(version)}},
-      select:{status:true,bytes:true,storageKey:true,storageDriver:true,checksum:true,size:true}});
+      select:{status:true,input:true,bytes:true,storageKey:true,storageDriver:true,checksum:true,size:true}});
     if (revision?.status!=="READY"||!revision.checksum||!revision.size) return fail("Version unavailable",404);
+    if(parent.reportSlug==="baby-name-report"&&!normalizedCorrection(parent.reportSlug,revision.input).ok) return fail("Guardian confirmation is required through the private correction form.",409);
     const bytes = await loadReportPdf({databaseBytes:revision.bytes,storageKey:revision.storageKey,storageDriver:revision.storageDriver,expectedChecksum:revision.checksum});
     if (bytes.length!==revision.size || Buffer.from(bytes.subarray(0,5)).toString("ascii")!=="%PDF-") return fail("PDF integrity check failed.",503);
     if (!await hasCurrentPaidReportEntitlement(parent)) return fail("Purchase changed.",403);

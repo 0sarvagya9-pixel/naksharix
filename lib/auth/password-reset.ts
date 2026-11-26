@@ -1,12 +1,13 @@
 import "server-only";
 import {prisma} from "@/lib/db";
 import {env} from "@/lib/env";
+import {passwordResetEmailMessage} from "@/lib/auth/transactional-email-copy";
 import {sendEmail} from "@/lib/email/email-service";
 import {hashPassword} from "@/lib/auth/password";
 import {createResetToken,passwordResetDigest,PASSWORD_RESET_PURPOSE,PASSWORD_RESET_TTL_MS,resetRoleEligible} from "@/lib/auth/password-reset-contract";
 
 export async function requestPasswordReset(email:string){
-  const user=await prisma.user.findFirst({where:{email:{equals:email,mode:"insensitive"}},select:{id:true,email:true,name:true,role:true,passwordHash:true,emailVerified:true,emailVerifiedAt:true}});
+  const user=await prisma.user.findFirst({where:{email:{equals:email,mode:"insensitive"}},select:{id:true,email:true,name:true,locale:true,role:true,passwordHash:true,emailVerified:true,emailVerifiedAt:true}});
   if(!user||!user.passwordHash||!resetRoleEligible(user.role)||(!user.emailVerified&&!user.emailVerifiedAt)||user.email.toLowerCase()===env.ADMIN_EMAIL?.toLowerCase())return;
   const token=createResetToken(),digest=passwordResetDigest(token,env.JWT_SECRET);
   const issued=await prisma.$transaction(async tx=>{
@@ -21,7 +22,7 @@ export async function requestPasswordReset(email:string){
   // A fragment avoids sending the secret to the HTTP server or ordinary referrer.
   const link=new URL("/reset-password",env.NEXT_PUBLIC_APP_URL);
   link.hash="token="+token;
-  await sendEmail({to:user.email,subject:"Reset your Naksharix password",text:"Hello "+user.name+",\n\nA password reset was requested for your Naksharix account. Open this private one-time link within 20 minutes:\n"+link.toString()+"\n\nDo not forward this link. If you did not request a reset, ignore this email. No password has changed."});
+  await sendEmail({to:user.email,...passwordResetEmailMessage(user.locale,user.name,link,PASSWORD_RESET_TTL_MS/60000)});
 }
 export async function completePasswordReset(token:string,password:string){
   const digest=passwordResetDigest(token,env.JWT_SECRET);

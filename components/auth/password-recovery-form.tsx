@@ -11,12 +11,12 @@ import {passwordRecoveryCopy,recoveryErrorKey,recoveryPasswordLengthValid,type R
 export function PasswordRecoveryForm({mode}:{mode:"request"|"confirm"}){
  const {apiLocale}=useLanguage(),copy=passwordRecoveryCopy[apiLocale];
  const [email,setEmail]=useState(""),[token,setToken]=useState(""),[show,setShow]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState<RecoveryKey|null>(null),[error,setError]=useState<RecoveryKey|null>(null),[done,setDone]=useState(false);
- const [ready,setReady]=useState(mode==="request");
+ const [ready,setReady]=useState(false);
  const passwordInput=useRef<HTMLInputElement>(null),confirmInput=useRef<HTMLInputElement>(null);
  const visibilitySnapshot=useRef<{password:string;confirm:string}|null>(null);
  const lock=useRef(false);
  useEffect(()=>{
-  if(mode!=="confirm")return;
+  if(mode==="request"){setReady(true);return;}
   const raw=new URLSearchParams(window.location.hash.slice(1)).get("token");
   if(raw&&/^[A-Za-z0-9_-]{43}$/.test(raw))setToken(raw);
   window.history.replaceState(null,"",window.location.pathname);
@@ -59,8 +59,8 @@ export function PasswordRecoveryForm({mode}:{mode:"request"|"confirm"}){
   }catch{setError("failed");}finally{clearTimeout(timer);lock.current=false;setBusy(false);}
  }
  return <div className="space-y-5"><h1 className="font-cinzel text-2xl font-bold">{copy[mode==="request"?"requestTitle":"confirmTitle"]}</h1>
- {!done&&<form className="space-y-4" onSubmit={submit} aria-busy={busy}>
- {mode==="request"?<div><Label htmlFor="reset-email">{copy.email}</Label><Input id="reset-email" type="email" autoComplete="email" required maxLength={254} value={email} disabled={busy} aria-describedby={error?"recovery-error":undefined} onChange={e=>setEmail(e.target.value)}/></div>:<>
+ {!done&&<form className="space-y-4" onSubmit={submit} aria-busy={busy||!ready}>
+ {mode==="request"?<div><Label htmlFor="reset-email">{copy.email}</Label><Input id="reset-email" type="email" autoComplete="email" required maxLength={254} value={email} disabled={busy||!ready} aria-describedby={error?"recovery-error":undefined} onChange={e=>setEmail(e.target.value)}/></div>:<>
  {ready&&!token&&<p role="alert">{copy.missingToken}</p>}
  <div><Label htmlFor="new-password">{copy.password}</Label><Input id="new-password" type={show?"text":"password"} autoComplete="new-password" minLength={8} maxLength={72} required name="newPassword" ref={passwordInput} disabled={busy||!ready||!token} aria-describedby={error?"recovery-length recovery-error":"recovery-length"}/><p id="recovery-length" className="text-xs text-muted-foreground">{copy.length}</p></div>
  <div><Label htmlFor="confirm-password">{copy.confirm}</Label><Input id="confirm-password" type={show?"text":"password"} autoComplete="new-password" minLength={8} maxLength={72} required name="confirmPassword" ref={confirmInput} disabled={busy||!ready||!token} aria-invalid={error==="mismatch"||undefined} aria-describedby={error?"recovery-error":undefined}/></div>

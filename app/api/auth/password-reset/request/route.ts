@@ -1,11 +1,13 @@
+import { authErrorResponses } from "@/lib/auth/api-error-language";
 import {z} from "zod";
-import {fail,ok,validateJson,handleApiError} from "@/lib/api";
+import {ok,validateJson} from "@/lib/api";
 import {getEmailReadiness} from "@/lib/email/email-service";
 import {claimPublicAuthQuota,trustedPublicClientIp} from "@/lib/auth/public-quota";
 import {requestPasswordReset} from "@/lib/auth/password-reset";
 import {logger} from "@/lib/monitoring/logger";
 const schema=z.object({email:z.string().trim().max(254).email()});
 export async function POST(request:Request){
+  const { fail, handleApiError } = authErrorResponses(request);
  try{
    const {email:raw}=await validateJson(request,schema);const email=raw.toLowerCase();
    if(!await claimPublicAuthQuota({scope:"password-reset-request-ip",key:trustedPublicClientIp(request),limit:6,windowSeconds:900})||

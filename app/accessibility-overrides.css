@@ -18,3 +18,8 @@
   outline: 2px solid #f2c56b;
   outline-offset: 3px;
 }
+
+/* Keep the report form still while focus moves between review, fields and submit. */
+html:has(form [name="reportConfirmed"]) {
+  scroll-behavior: auto;
+}

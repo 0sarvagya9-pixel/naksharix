@@ -1,3 +1,4 @@
+import { needsOriginalGuardianConfirmation } from "@/lib/reports/automatic-report-input";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { isAdmin } from "@/lib/auth/permissions";
@@ -35,6 +36,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
   if (requiresPaidEntitlement && (reportRequest.paymentStatus !== "PAID" || !await hasCurrentPaidReportEntitlement(reportRequest))) {
     return NextResponse.json({ error: "A verified, non-refunded purchase is required for this report." }, { status: 403 });
   }
+  if (needsOriginalGuardianConfirmation(reportRequest)) return NextResponse.json({error:"Guardian confirmation is required through the private correction form."},{status:409,headers:{"Cache-Control":"private, no-store"}});
   if (!reportRequest.generatedPdfSize || (!reportRequest.generatedPdfBytes && !reportRequest.generatedPdfStorageKey)) {
     return NextResponse.json({ error: "No generated PDF is available for this request." }, { status: 404 });
   }
@@ -53,8 +55,8 @@ export async function GET(request: Request, { params }: { params: Params }) {
   }
 
   // Do not return bytes after a revoked purchase or a changed storage snapshot.
-  const latest=await prisma.reportRequest.findUnique({where:{id:reportRequest.id},select:{userId:true,generatedPdfChecksum:true,generatedPdfSize:true,generatedPdfStorageKey:true,generatedPdfStorageDriver:true}});
-  if(!latest||latest.userId!==reportRequest.userId||latest.generatedPdfChecksum!==reportRequest.generatedPdfChecksum||
+  const latest=await prisma.reportRequest.findUnique({where:{id:reportRequest.id},select:{userId:true,reportSlug:true,concern:true,generatedPdfChecksum:true,generatedPdfSize:true,generatedPdfStorageKey:true,generatedPdfStorageDriver:true}});
+  if(!latest||needsOriginalGuardianConfirmation(latest)||latest.userId!==reportRequest.userId||latest.generatedPdfChecksum!==reportRequest.generatedPdfChecksum||
     latest.generatedPdfSize!==reportRequest.generatedPdfSize||latest.generatedPdfStorageKey!==reportRequest.generatedPdfStorageKey||
     latest.generatedPdfStorageDriver!==reportRequest.generatedPdfStorageDriver||
     (requiresPaidEntitlement&&!await hasCurrentPaidReportEntitlement(reportRequest))){

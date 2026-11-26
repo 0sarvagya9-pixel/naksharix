@@ -9,7 +9,7 @@ export async function buildFictionalReportSample(slug:string):Promise<Uint8Array
  if(!autoReportSlugSet.has(slug)||!getManualReportCheckout(slug))throw Error("UNKNOWN_SAMPLE");
  const birth={name:"Fictional Sample A",gender:"female",dateOfBirth:"1992-05-18",timeOfBirth:"08:15",birthPlace:"Delhi, India (example)",latitude:28.6139,longitude:77.209,timezone:5.5};
  const partner={...birth,name:"Fictional Sample B",gender:"male",dateOfBirth:"1991-11-23",timeOfBirth:"17:20",birthPlace:"Mumbai, India (example)",latitude:19.076,longitude:72.8777};
- const extra={confirmed:true as const,partner,partnerPermission:true,romanName:"Fictional Sample A",candidateNames:["Sample Asha","Sample Anya"]};
+ const extra={confirmed:true as const,partner,partnerPermission:true,...(slug==="baby-name-report"?{guardianPermission:true}:{}),romanName:"Fictional Sample A",candidateNames:["Sample Asha","Sample Anya"]};
  const {title,content}=await assembleAutomaticPaidReport({slug,birth,extra,question:"Fictional demonstration only. No actual customer's birth details.",language:"en",now:new Date("2026-11-24T12:00:00Z")});
  const result=await generatePremiumReportPdf({requestId:"public-sample-"+slug,templateId:slug,status:"ready_for_generation",content,automatedInputValidated:true,reportTitle:"FICTIONAL SAMPLE | "+title,customerName:birth.name,language:"en"});
  if(!result.generated)throw Error("SAMPLE_RENDER_UNAVAILABLE");

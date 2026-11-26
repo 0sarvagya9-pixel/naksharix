@@ -1,6 +1,7 @@
+import { authErrorResponses } from "@/lib/auth/api-error-language";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { ok, fail, handleApiError, validateJson } from "@/lib/api";
+import { ok, validateJson } from "@/lib/api";
 import { signupSchema } from "@/lib/validations/auth";
 import { hashPassword } from "@/lib/auth/password";
 import { slugify } from "@/lib/utils";
@@ -13,6 +14,7 @@ import {
 import { claimPublicAuthQuota, trustedPublicClientIp } from "@/lib/auth/public-quota";
 
 export async function POST(request: NextRequest) {
+  const { fail, handleApiError } = authErrorResponses(request);
   try {
     const signupAllowed = await claimPublicAuthQuota({
       scope: "signup-ip",
@@ -107,6 +109,7 @@ export async function POST(request: NextRequest) {
     const delivery = await deliverEmailVerificationOtp({
       email: user.email,
       name: user.name,
+      locale: user.locale,
       code: preparedOtp.code
     });
 

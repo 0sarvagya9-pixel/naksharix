@@ -59,9 +59,10 @@ const bytes = Buffer.from("%PDF-1.7\nsynthetic private test\n%%EOF");
 const checksum = createHash("sha256").update(bytes).digest("hex");
 const ids = [];
 async function fixture(overrides = {}) {
+  const product=require("@/lib/reports/checkout-catalogue").getManualReportCheckout(overrides.reportSlug??"premium-kundli");
   const payment = await prisma.payment.create({data: {
-    userId: user.id, provider: "RAZORPAY", status: "PAID", purpose: "KUNDLI_REPORT", amount: 799,
-    currency: "INR", providerPaymentId: "pay_" + randomUUID().replaceAll("-", ""), metadata: { reportId: "kundli-pro" }
+    userId: user.id, provider: "RAZORPAY", status: "PAID", purpose: product.purpose, amount: product.amount,
+    currency: "INR", providerPaymentId: "pay_" + randomUUID().replaceAll("-", ""), metadata: { reportId: product.reportId }
   }});
   const row = await prisma.reportRequest.create({data: {
     userId: user.id, paymentId: payment.id, planType: "PREMIUM", reportSlug: "premium-kundli",
@@ -154,6 +155,50 @@ try {
       assert.equal(row.emailSentAt,null);
       assert.equal(row.deliveryStatus,"admin_email_uncertain");
     } finally { providerBody={id:"local-only"}; }
+  });
+  await check("legacy Baby Name permission hold, explicit original, private correction and immutability", async () => {
+    const {encodeAutomaticReportInput,checkNewReportInputs,checkAutomaticInputs}=require("@/lib/reports/automatic-report-input");
+    const {prepareReviewedSpecialistInput}=require("@/lib/reports/reviewed-report-input");
+    const originalDownload=require("@/app/api/report-requests/[id]/download/route").GET;
+    const slug="baby-name-report", birth={name:"Child Fixture",dateOfBirth:"2026-08-05",timeOfBirth:"10:30",birthPlace:"Delhi",latitude:28.61,longitude:77.21,timezone:5.5};
+    const envelope=extra=>encodeAutomaticReportInput("",{confirmed:true,...extra});
+    const request=data=>new Request("http://localhost/synthetic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+    const params=id=>({params:Promise.resolve({id})});
+    const queued={reportSlug:slug,fullName:birth.name,dateOfBirth:birth.dateOfBirth,latitude:birth.latitude,longitude:birth.longitude,timezone:birth.timezone,status:"PAID",deliveryStatus:"auto_queued",generatedPdfSize:null,generatedPdfBytes:null,generatedPdfChecksum:null,generatedAt:null};
+    for(const flag of [undefined,false]){
+      assert.equal(checkAutomaticInputs(slug,birth,{confirmed:true,guardianPermission:flag}).ok,false);
+      assert.equal(checkNewReportInputs(slug,birth,{confirmed:true,birthZone:"Asia/Kolkata",guardianPermission:flag}).ok,false);
+    }
+    assert.equal(checkNewReportInputs(slug,birth,{confirmed:true,birthZone:"Asia/Kolkata",guardianPermission:true}).ok,true);
+    currentUser=user;
+    for(const input of ["Plain historical concern",envelope({}),envelope({guardianPermission:false})]){
+      const id=await fixture({...queued,concern:input});const before=requests.length;
+      assert.equal(await processAutomaticReport(id),"pending");
+      const row=await prisma.reportRequest.findUniqueOrThrow({where:{id}});
+      assert.equal(row.status,"NEEDS_INFO");assert.equal(row.deliveryStatus,"auto_input_review");assert.equal(row.paymentStatus,"PAID");
+      assert.equal(row.concern,input);assert.equal(row.generatedPdfSize,null);assert.equal(requests.length,before);
+      assert.equal(prepareReviewedSpecialistInput(row).kind,"invalid");assert.equal(await processAutomaticReport(id),"skipped");
+    }
+    const confirmed=await fixture({...queued,concern:envelope({guardianPermission:true})});
+    assert.equal(prepareReviewedSpecialistInput(await prisma.reportRequest.findUniqueOrThrow({where:{id:confirmed}})).kind,"specialist");
+    assert.equal(await processAutomaticReport(confirmed),"delivered");
+    assert.equal((await originalDownload(request({}),params(confirmed))).status,200);
+    const original=await fixture({reportSlug:slug,concern:envelope({})});const latest=await prisma.reportRequest.findUniqueOrThrow({where:{id:original}});
+    const count=requests.length;assert.equal((await post(original)).status,409);assert.equal((await originalDownload(request({}),params(original))).status,409);
+    assert.equal(await processAutomaticReport(original),"pending");assert.equal(requests.length,count);
+    const data={birth,extra:{confirmed:true,birthZone:"Asia/Kolkata"},question:"Which starting sound?",language:"en"};
+    currentUser={id:"other-account",role:"USER"};assert.equal((await propose(request(data),params(original))).status,404);currentUser=user;
+    assert.equal((await propose(request(data),params(original))).status,422);
+    data.extra.guardianPermission=true;assert.equal((await propose(request(data),params(original))).status,200);
+    const version={params:Promise.resolve({id:original,version:"2"})};
+    const approved=await review(request({action:"approve",note:"Reviewed the explicit guardian confirmation and corrected child details."}),version);
+    assert.equal(approved.status,200,await approved.text());
+    const revised=await prisma.reportRevision.findFirstOrThrow({where:{reportRequestId:original}});assert.equal(revised.input.extra.guardianPermission,true);
+    assert.equal((await download(request({}),version)).status,200);assert.equal((await originalDownload(request({}),params(original))).status,409);
+    const preserved=await prisma.reportRequest.findUniqueOrThrow({where:{id:original}}); assert.equal(preserved.concern,latest.concern);assert.equal(preserved.paymentId,latest.paymentId);assert.equal(preserved.generatedPdfChecksum,latest.generatedPdfChecksum);assert.deepEqual(preserved.generatedPdfBytes,latest.generatedPdfBytes);
+    // An already-stored legacy revision with an unconfirmed snapshot is held too.
+    await prisma.reportRevision.update({where:{id:revised.id},data:{input:{...data,extra:{confirmed:true,birthZone:"Asia/Kolkata"}}}});
+    assert.equal((await download(request({}),version)).status,409);
   });
   await check("validated correction, duplicate suppression, reviewed version, private download, revocation", async () => {
     const id = await fixture();

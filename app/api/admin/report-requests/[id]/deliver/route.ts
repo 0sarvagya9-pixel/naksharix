@@ -1,3 +1,4 @@
+import { needsOriginalGuardianConfirmation } from "@/lib/reports/automatic-report-input";
 import { ReportRequestStatus } from "@prisma/client";
 import { fail, handleApiError, ok } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
@@ -23,6 +24,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     if (reportRequest.status === ReportRequestStatus.DELIVERED && reportRequest.deliveryStatus === "email_sent") {
       return ok({ reportRequest, delivery: { sent: false, skipped: true, reason: "Already recorded as sent; no duplicate email attempted." } });
     }
+    if (needsOriginalGuardianConfirmation(reportRequest)) return fail("Guardian confirmation is required through the private correction form.",409);
     if (requiresEmailReconciliation(reportRequest)) return fail("The earlier email attempt requires provider reconciliation before another send.", 409);
     if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
       return fail("Verified payment or authorized admin bypass is required before delivering a paid report.", 409);

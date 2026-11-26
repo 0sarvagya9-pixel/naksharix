@@ -41,7 +41,7 @@ const {getManualReportCheckout}=require("@/lib/reports/checkout-catalogue");
 const {PDFDocument}=require("pdf-lib");
 const birth={name:"Asha Test",gender:"female",dateOfBirth:"1992-05-18",timeOfBirth:"08:15",birthPlace:"Delhi, India",latitude:28.6139,longitude:77.209,timezone:5.5};
 const partner={...birth,name:"Ravi Test",gender:"male",dateOfBirth:"1991-11-23",timeOfBirth:"17:20",birthPlace:"Mumbai, India",latitude:19.076,longitude:72.8777};
-const extra={confirmed:true,partner,partnerPermission:true,romanName:"Asha Test",candidateNames:["Aasha Test","Asha T"]};
+const extra={confirmed:true,partner,partnerPermission:true,guardianPermission:true,romanName:"Asha Test",candidateNames:["Aasha Test","Asha T"]};
 const question="Test fixture: reflective personal planning.";
 // Compare the response with the actual report table, including when only illustrative names match.
 async function checkBabyNameQuestions(){
@@ -132,9 +132,23 @@ if(process.argv.includes("--transit-civil-noon")){
   assert.equal(result.basis,basis);assert.equal(result.zone,basis==="civil_noon"?zone:"1");
   assert.ok(Math.abs(result.longitude-wanted)<0.02,JSON.stringify({zone,day,result,wanted}));
  }
+ let disclosureCases=0;
+ for(const slug of ["sade-sati-report","yearly-horoscope-report","transit-report","rahu-ketu-report","jupiter-transit-report"]){
+  for(const language of ["en","hi","hinglish"])for(const birthZone of ["Europe/London",undefined]){
+   const result=await assembleAutomaticPaidReport({slug,birth:london,extra:{confirmed:true,birthZone},question,language,now:new Date("2026-11-26T12:00:00Z")});
+   const section=key=>result.content.sections.find(s=>s.key===key).data;
+   const chapter=section("editorial-depth").find(c=>c.key==="transit-context");
+   assert.ok(chapter,slug+" missing transit context");
+   const topic=chapter.intro;
+   assert.ok(topic.includes("12:00") && topic.includes(birthZone??"UTC+1"),slug+" "+language+" "+birthZone);
+   assert.equal(section("birth").transitTimeBasis,birthZone?"civil_noon":"fixed_offset_noon");
+   assert.ok(!/Noon is at the supplied birth|Noon birth UTC|दोपहर जन्म के UTC/.test(topic));
+   disclosureCases++;
+  }
+ }
  const apia={...london,dateOfBirth:"2000-01-15",timeOfBirth:"10:00",birthPlace:"Apia",latitude:-13.84,longitude:-171.75,timezone:-11};
  await assert.rejects(chart("Pacific/Apia","2011-12-30",apia),/ambiguous or nonexistent/);
- console.log("TRANSIT_CIVIL_NOON_PASS",{datedLunarComparisons:4,skippedCivilDateRejections:1});
+ console.log("TRANSIT_CIVIL_NOON_PASS",{datedLunarComparisons:4,skippedCivilDateRejections:1,disclosureCases});
  process.exit(0);
 }
 const sections={

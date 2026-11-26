@@ -13,7 +13,7 @@ import { safeServerTranslation } from "@/lib/i18n-server";
 import { getManualReport } from "@/lib/manual-catalogue";
 import { cookies } from "next/headers";
 import { env } from "@/lib/env";
-import { decodeAutomaticReportInput,autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
+import { decodeAutomaticReportInput,autoReportDeliveryMessage,needsOriginalGuardianConfirmation } from "@/lib/reports/automatic-report-input";
 import { AutomaticReportProgress } from "@/components/report-request/automatic-report-progress";
 import {correctionCopy} from "@/lib/reports/report-correction-copy";
 import {fixedReportCheckout,hasCurrentPaidReportEntitlement} from "@/lib/reports/paid-entitlement";
@@ -36,15 +36,16 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
   const recordedPaid=report.paymentStatus===ReportPaymentStatus.PAID;
   const paid=recordedPaid&&(!fixedReportCheckout(report.reportSlug)||await hasCurrentPaidReportEntitlement(report));
   const automatic=Boolean(decodeAutomaticReportInput(report.concern));
-  const ready=Boolean(report.generatedPdfSize&&(report.generatedPdfBytes||report.generatedPdfStorageKey));
+  const guardianNeeded=needsOriginalGuardianConfirmation(report);
+  const ready=!guardianNeeded&&Boolean(report.generatedPdfSize&&(report.generatedPdfBytes||report.generatedPdfStorageKey));
   const revisions = paid && report.userId===user.id ? await prisma.reportRevision.findMany({where:{reportRequestId:report.id},
     select:{version:true,status:true},orderBy:{version:"desc"}}) : [];
   const revisedReady = revisions.some(v=>v.status==="READY");
   const revisionCopy = correctionCopy[locale];
-  const canCorrect = paid && report.userId===user.id && !report.adminBypass && (ready||report.status==="NEEDS_INFO") &&
+  const canCorrect = paid && report.userId===user.id && !report.adminBypass && (ready||report.status==="NEEDS_INFO"||guardianNeeded) &&
     !revisions.some(v=>v.status==="PENDING"||v.status==="GENERATING");
   const sent=report.deliveryStatus==="email_sent"&&Boolean(report.emailSentAt);
-  const pending=automatic&&paid&&!sent&&["auto_queued","auto_generating","auto_generation_retry","auto_email_ready","auto_email_retry","auto_email_uncertain","auto_sending"].includes(report.deliveryStatus);
+  const pending=!guardianNeeded&&automatic&&paid&&!sent&&["auto_queued","auto_generating","auto_generation_retry","auto_email_ready","auto_email_retry","auto_email_uncertain","auto_sending"].includes(report.deliveryStatus);
   const canRetry=pending&&env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&report.userId===user.id;
 
   return (
@@ -67,7 +68,7 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
 
           {paid ? (
             <p className="rounded-lg border border-emerald-300/20 bg-emerald-300/10 p-4 text-emerald-100">
-              {revisedReady?revisionCopy.revisedReady:sent?"Your report is ready and the email has been accepted by the delivery provider. If it is not in your inbox, use the secure download below.":ready?"Your report PDF is ready. Email delivery is pending; you can download it securely now.":automatic?autoReportDeliveryMessage(report.language):"Payment is verified and linked to this request. The request is in the paid review queue."}
+              {revisedReady?revisionCopy.revisedReady:guardianNeeded?revisionCopy.guardianRequired:sent?"Your report is ready and the email has been accepted by the delivery provider. If it is not in your inbox, use the secure download below.":ready?"Your report PDF is ready. Email delivery is pending; you can download it securely now.":automatic?autoReportDeliveryMessage(report.language):"Payment is verified and linked to this request. The request is in the paid review queue."}
             </p>
           ) : recordedPaid ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">Payment evidence requires reconciliation. Do not pay again; contact support with your existing request reference.</p> : report.paymentStatus==="REFUNDED" ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">This purchase has been refunded. Paid PDF access is no longer available.</p> : (
             <p className="rounded-lg border border-[#D4AF37]/20 bg-[#D4AF37]/10 p-4">

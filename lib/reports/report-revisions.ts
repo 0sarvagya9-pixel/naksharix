@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { lockProviderPayment } from "@/lib/payments/refund-evidence";
 import { hasCurrentPaidReportEntitlement } from "@/lib/reports/paid-entitlement";
-import { checkNewReportInputs } from "@/lib/reports/automatic-report-input";
+import { checkNewReportInputs, needsOriginalGuardianConfirmation } from "@/lib/reports/automatic-report-input";
 
 export const correctionSchema = z.object({
   birth: z.unknown(), extra: z.unknown(), question: z.string().trim().max(2000),
@@ -23,13 +23,13 @@ export function normalizedCorrection(slug: string, input: unknown) {
 
 export const revisionRequestSelection = {
   id:true, userId:true, paymentId:true, paymentStatus:true, status:true, reportSlug:true,
-  adminBypass:true, generatedPdfSize:true, payment:{select:{providerPaymentId:true}}
+  adminBypass:true, generatedPdfSize:true, concern:true, payment:{select:{providerPaymentId:true}}
 } satisfies Prisma.ReportRequestSelect;
 
 export type RevisionParent = Prisma.ReportRequestGetPayload<{select:typeof revisionRequestSelection}>;
 
 export function correctionAvailable(parent: RevisionParent) {
-  return !parent.adminBypass && Boolean(parent.generatedPdfSize || parent.status === "NEEDS_INFO");
+  return !parent.adminBypass && Boolean(parent.generatedPdfSize || parent.status === "NEEDS_INFO" || needsOriginalGuardianConfirmation(parent));
 }
 
 // Match the original capture/refund lock order. Serialize version numbers on the

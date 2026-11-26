@@ -64,6 +64,7 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
    await page.getByRole("checkbox",{name:/I confirm these birth details/}).check();
    const submit=page.getByRole("button",{name:"Validate details and continue"});
    const form=page.locator("form").filter({has:submit});
+   await expect(page.locator("html")).toHaveCSS("scroll-behavior","auto");
    // A question is optional. Edit the confirmed details before the checkout
    // control is invoked, then verify the original inputs were preserved.
    const [withoutQuestion]=await Promise.all([page.waitForResponse(r=>new URL(r.url()).pathname==="/api/report-requests/preflight"),submit.click()]);
@@ -80,13 +81,15 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
    await expect(page.locator('[data-field="timeOfBirth"]')).toHaveValue(/^10:30(?::00(?:\.0+)?)?$/);
    const nativeInvalid=await form.evaluate(node=>Array.from(node.querySelectorAll<HTMLInputElement>("input:invalid, textarea:invalid, select:invalid")).map(el=>({field:el.dataset.field||el.name||el.type,valueMissing:el.validity.valueMissing,badInput:el.validity.badInput,stepMismatch:el.validity.stepMismatch})));
    expect(nativeInvalid,"Native form constraints must allow valid synthetic inputs").toEqual([]);
+   const previousPreflights=requests.filter(path=>path==="/api/report-requests/preflight").length;
    const [preflight]=await Promise.all([
     page.waitForResponse(res=>new URL(res.url()).pathname==="/api/report-requests/preflight"&&res.request().method()==="POST",{timeout:15000}),
     submit.click()
    ]).catch(async error=>{
     const messages=await form.locator('[role="alert"],[aria-live="polite"]').allTextContents().catch(()=>[]);
     const invalidFields=await form.locator('[aria-invalid="true"]').evaluateAll(els=>els.map(el=>el.getAttribute("data-field")||el.getAttribute("name")||el.tagName)).catch(()=>[]);
-    console.error("REPORT_PREFLIGHT_NO_RESPONSE "+JSON.stringify({project:info.project.name,submitted:requests.includes("/api/report-requests/preflight"),invalidFields,messages:messages.map(m=>m.slice(0,240))}));
+    const attemptPosts=requests.filter(path=>path==="/api/report-requests/preflight").length-previousPreflights;
+    console.error("REPORT_PREFLIGHT_NO_RESPONSE "+JSON.stringify({project:info.project.name,attemptPosts,invalidFields,messages:messages.map(m=>m.slice(0,240))}));
     throw error;
    });
    expect(preflight.status()).toBe(200);

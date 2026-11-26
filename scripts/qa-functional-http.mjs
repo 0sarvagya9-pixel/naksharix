@@ -52,6 +52,14 @@ async function expectData(response, name) {
   return body.data;
 }
 
+await verify("Panchang rejects impossible calendar dates and out-of-range civil offsets",async()=>{
+  const parameters={date:"2024-02-29",latitude:"28.6139",longitude:"77.209",timezone:"+05:30"};
+  const get=overrides=>request("/api/panchang?"+new URLSearchParams({...parameters,...overrides}));
+  assert.equal((await get({})).status,200);
+  for(const invalid of [{date:"2026-02-30"},{date:"2025-02-29"},{timezone:"+29:00"},{timezone:"+05:60"},{timezone:"-14:01"}]){
+    assert.equal((await get(invalid)).status,422,JSON.stringify(invalid));
+  }
+});
 await verify("public operational endpoints", async () => {
   for (const pathname of ["/api/health", "/api/release", "/api/ops/readiness", "/api/ai/status"]) {
     const response = await request(pathname);

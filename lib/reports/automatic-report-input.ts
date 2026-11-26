@@ -50,6 +50,9 @@ export function decodeAutomaticReportInput(value:string|null|undefined) {
   if(!value||!value.startsWith("{"))return null;
   try{const result=envelopeSchema.safeParse(JSON.parse(value));return result.success?result.data:null;}catch{return null;}
 }
+export function needsOriginalGuardianConfirmation(row:{reportSlug:string;concern:string|null}) {
+  return row.reportSlug==="baby-name-report" && decodeAutomaticReportInput(row.concern)?.extra.guardianPermission!==true;
+}
 export function reportConcernText(value:string|null|undefined) {
   return decodeAutomaticReportInput(value)?.question??value??"";
 }
@@ -59,6 +62,7 @@ export function checkAutomaticInputs(slug:string,birth:unknown,extra:unknown) {
   if(!b.success||!e.success)return {ok:false as const,reason:"Confirm complete birth details, including a valid date, time, location and birth-time UTC offset."};
   if(slug==="couple-kundli"&&(!e.data.partner||e.data.partnerPermission!==true))
     return {ok:false as const,reason:"Both people's complete birth details and permission to use the other person's details are required for matching."};
+  if(slug==="baby-name-report"&&e.data.guardianPermission!==true)return {ok:false as const,reason:reportRequestCopy.en.guardianPermission};
   const nameError=checkReportSpellings(slug,e.data);
   if(nameError)return {ok:false as const,reason:nameError};
   return {ok:true as const,birth:b.data,extra:e.data};
@@ -108,7 +112,6 @@ export function checkNewReportInputs(slug:string,birth:unknown,extra:unknown) {
   if((details.birthZone&&scope.dateNameOnly)||(!scope.couple&&details.partnerZone))return {ok:false as const,reason:reportRequestCopy.en.invalidExtra};
   if((details.birthZone&&"timeOfBirth" in checked.birth&&!matchesBirthZone(checked.birth as ReportBirthDetails,details.birthZone))||
      (details.partnerZone&&details.partner&&!matchesBirthZone(details.partner,details.partnerZone)))return {ok:false as const,reason:reportRequestCopy.en.invalidZone};
-  if(scope.babyName&&details.guardianPermission!==true)return {ok:false as const,reason:reportRequestCopy.en.guardianPermission};
   if(!scope.babyName&&details.guardianPermission!==undefined)return {ok:false as const,reason:reportRequestCopy.en.invalidExtra};
   const allowedPartner=scope.couple,allowedRoman=scope.romanName,allowedCandidates=scope.candidateNames;
   if((!allowedPartner&&(details.partner!==undefined||details.partnerPermission!==undefined))||

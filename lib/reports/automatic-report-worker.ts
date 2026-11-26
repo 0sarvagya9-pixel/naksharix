@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { personalizedPaymentContext } from "@/lib/reports/checkout-context";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
-import { checkAutomaticInputs,checkDateNameReportInputs,decodeAutomaticReportInput } from "@/lib/reports/automatic-report-input";
+import { checkAutomaticInputs,checkDateNameReportInputs,decodeAutomaticReportInput,needsOriginalGuardianConfirmation } from "@/lib/reports/automatic-report-input";
 import {reportIntakeScope} from "./public-intake";
 import { assembleAutomaticPaidReport } from "@/lib/reports/automatic-report-content";
 import { generatePremiumReportPdf } from "@/lib/reports/premium-report-generation-service";
@@ -61,6 +61,12 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
   if(env.AUTO_REPORT_DELIVERY_ENABLED!=="true")return "skipped";
   let row=await loadEntitled(id);
   if(!row||!claimable(row)||row.status==="DELIVERED")return "skipped";
+  if(needsOriginalGuardianConfirmation(row)){
+    // Preserve any original bytes and paid record. The owner can submit a permission-bearing, private correction.
+    await prisma.reportRequest.updateMany({where:{id,updatedAt:row.updatedAt,status:row.status,deliveryStatus:row.deliveryStatus,paymentStatus:"PAID",adminBypass:false,payment:{is:{status:"PAID"}}},
+      data:{status:"NEEDS_INFO",deliveryStatus:"auto_input_review",deliveryError:"Guardian confirmation is required through the private correction form."}});
+    return "pending";
+  }
   const envelope=decodeAutomaticReportInput(row.concern);
   if(!envelope)return "skipped";
   if(GEN_STATES.includes(row.deliveryStatus)){

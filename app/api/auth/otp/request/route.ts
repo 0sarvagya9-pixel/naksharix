@@ -1,5 +1,6 @@
+import { authErrorResponses } from "@/lib/auth/api-error-language";
 import { z } from "zod";
-import { fail, handleApiError, ok, validateJson } from "@/lib/api";
+import { ok, validateJson } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import {
   issueEmailVerificationOtp,
@@ -13,6 +14,7 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const { fail, handleApiError } = authErrorResponses(request);
   try {
     const body = await validateJson(request, requestSchema);
     const email = normalizeAuthEmail(body.email);
@@ -64,6 +66,7 @@ export async function POST(request: Request) {
         id: true,
         email: true,
         name: true,
+        locale: true,
         emailVerified: true,
         emailVerifiedAt: true
       }
@@ -78,7 +81,8 @@ export async function POST(request: Request) {
     await issueEmailVerificationOtp({
       userId: user.id,
       email: user.email,
-      name: user.name
+      name: user.name,
+      locale: user.locale
     });
 
     return ok({

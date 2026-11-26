@@ -1,3 +1,4 @@
+import { needsOriginalGuardianConfirmation } from "@/lib/reports/automatic-report-input";
 import Link from "next/link";
 import { Section } from "@/components/section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,7 +45,7 @@ export default async function ProfilePage() {
               </div>
               <div className="flex flex-wrap gap-3">
                 <Link className="text-[#FFD700] hover:underline" href={`/report-request/success?id=${request.id}`}>View</Link>
-                {request.generatedPdfSize && request.paymentStatus!=="REFUNDED" ? <Link className="text-[#00f5a0] hover:underline" href={`/api/report-requests/${request.id}/download`}>Download PDF</Link> : null}
+                {request.generatedPdfSize && !needsOriginalGuardianConfirmation(request) && request.paymentStatus!=="REFUNDED" ? <Link className="text-[#00f5a0] hover:underline" href={`/api/report-requests/${request.id}/download`}>Download PDF</Link> : null}
               </div>
             </div>
           ))}

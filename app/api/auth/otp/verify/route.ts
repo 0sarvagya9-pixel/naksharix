@@ -1,5 +1,6 @@
+import { authErrorResponses } from "@/lib/auth/api-error-language";
 import { z } from "zod";
-import { fail, handleApiError, ok, validateJson } from "@/lib/api";
+import { ok, validateJson } from "@/lib/api";
 import { verifyEmailVerificationOtp } from "@/lib/auth/otp-service";
 import { createSession } from "@/lib/auth/session";
 import { setAuthCookie } from "@/lib/auth/jwt";
@@ -12,6 +13,7 @@ const verifySchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const { fail, handleApiError } = authErrorResponses(request);
   try {
     const body = await validateJson(request, verifySchema);
     const email = body.email.trim().toLowerCase();

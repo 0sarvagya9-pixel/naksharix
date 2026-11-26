@@ -1,14 +1,19 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { fail, handleApiError, ok } from "@/lib/api";
+import { normalizeBirthDate, parseTimezoneOffsetToHours } from "@/lib/astrology/own-engine/time";
 import { calculatePremiumPanchang } from "@/lib/astrology/premium-engine/panchang";
 import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
 
 const querySchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(date => {
+    try { return normalizeBirthDate(date) === date; } catch { return false; }
+  }, "Use a supported calendar date."),
   latitude: z.coerce.number().min(-90).max(90),
   longitude: z.coerce.number().min(-180).max(180),
-  timezone: z.string().regex(/^[+-]\d{2}:\d{2}$/),
+  timezone: z.string().regex(/^[+-]\d{2}:\d{2}$/).refine(offset => {
+    try { parseTimezoneOffsetToHours(offset, "2000-01-01", "12:00"); return true; } catch { return false; }
+  }, "Use a valid UTC offset."),
   place: z.string().min(2).max(120).optional()
 });
 

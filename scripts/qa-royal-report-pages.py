@@ -26,6 +26,16 @@ def pixels(page, bounds):
 with fitz.open(args.reference) as baseline:
     references = {k: pixels(baseline[0], box) for k, box in overlays.items()}
 
+# English intentional technical labels can occur in Hinglish. These fragments
+# are full editorial phrases that had leaked verbatim from the English report.
+english_only_phrases = [
+    "north indian house-fixed d1 and d9 diagrams", "diagrams are calculated from the internal lahiri",
+    "degrees rounded to four decimal places", "empty houses remain meaningful",
+    "vimshottari periods are calculated timing frameworks", "use timing as a reflection framework",
+    "rule-based indicators and birth panchang", "no evaluated yoga is marked detected",
+    "symbolic birth-date and name numbers", "a traditional compatibility score is not a decision",
+    "absent digits are not deficiencies", "motion is estimated at the snapshot",
+]
 profiles = {1: "Asha Mehra", 2: "Robin Ellis", 3: "Meera Shah"}
 rows = []
 for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
@@ -66,12 +76,22 @@ for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
                         if glyph_id==0: problems.append(f"missing glyph U+{unicode_value:04X} p{page_no}");break
                         if not (box[0]>=-0.5 and box[1]>=-0.5 and box[2]<=page.rect.width+.5 and box[3]<=page.rect.height+.5):
                             problems.append(f"glyph outside page p{page_no}");break
+                if record["language"]=="hinglish":
+                    logical_text=" ".join(text.lower().split())
+                    for fragment in english_only_phrases:
+                        issues(fragment in logical_text,f"English-only explanatory passage p{page_no}: {fragment}")
+                    if page_no==2: issues("vishay suchi" not in logical_text,"Hinglish contents page missing")
                 if record["slug"]=="transit-report" and page_no==5:
                     lines={line.strip() for line in text.splitlines()}
                     issues("°" in lines,"transit degree unit wrapped away from its value")
-                    if record["language"]=="en":
-                        planet_headers={"SUN","MOON","MARS","MERCURY","JUPITER","VENUS","SATURN","RAHU","KETU"}
-                        issues(not planet_headers.issubset(lines),"transit planet header split inside a word")
+                    headers={
+                        "en":["DATE","SUN","MOON","MARS","MERCURY","JUPITER","VENUS","SATURN","RAHU","KETU"],
+                        "hi":["तिथि","सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि","राहु","केतु"],
+                        "hinglish":["DATE","SURYA","CHANDRA","MANGAL","BUDH","GURU","SHUKRA","SHANI","RAHU","KETU"],
+                    }[record["language"]]
+                    ordered=[line.strip() for line in text.splitlines()]
+                    start=ordered.index(headers[0]) if headers[0] in ordered else -1
+                    issues(start<0 or ordered[start:start+len(headers)]!=headers,"transit planet header split inside a word")
                 if record["slug"]!="couple-kundli":
                     issues(any(other in text for other in set(profiles.values())-{record["name"]}),f"foreign identity p{page_no}")
                 if record["slug"] in ("name-correction-report","numerology-lo-shu-report"):
