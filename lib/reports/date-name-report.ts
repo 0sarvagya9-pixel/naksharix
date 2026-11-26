@@ -82,10 +82,17 @@ export function buildDateNameReport(
     if(/financial|money|invest|loan|income|salary|paisa|paise|निवेश|धन|पैस|आय|वेतन|ऋण/.test(q)){
       return card(t(["Resources and planning","संसाधन और योजना","Resources aur planning"]),cycleLabel+" "+t(["Use this month's review to write down actual income, obligations and available savings. The cycle cannot estimate return, affordability or the chance of a gain.","इस माह की समीक्षा में वास्तविक आय, देनदारियाँ और उपलब्ध बचत लिखें। इस चक्र से लाभ, वहन क्षमता या प्रतिफल का अनुमान नहीं लगाया जा सकता।","Is month ke review mein actual income, obligations aur savings likhein. Cycle se return ya affordability ka andaaza nahi lagta."]));
     }
+    if(/\b(?:study|studies|studying|homework|school|exam|exams|padhai|padhaai|pariksha)\b|पढ़ाई|पढाई|अध्ययन|परीक्षा|गृहकार्य/.test(q)){
+      return card(t(["Tracking your studies","पढ़ाई की प्रगति","Padhai ki progress"]),cycleLabel+" "+t([
+        "Use the calendar month as a reminder to review one learning goal. Try two comparable practice tasks a week apart and record the kinds of errors you made. Date and name numbers cannot measure learning ability or predict exam results.",
+        "इस माह पढ़ाई का एक लक्ष्य चुनें। एक सप्ताह के अंतर पर समान कठिनाई वाले दो अभ्यास करें और दोनों में हुई गलतियों के प्रकार लिखें। जन्म तिथि और नाम के अंकों से सीखने की क्षमता या परीक्षा का परिणाम तय नहीं होता।",
+        "Is mahine padhai ka ek goal chunein. Ek hafte ke fark par barabar mushkil wale do practice tasks karein aur dono mein hui galtiyan likhein. Date aur naam ke numbers learning ability ya exam results nahi bata sakte."
+      ]));
+    }
     if(/career|work|job|business|profession|naukri|kaam|करियर|व्यवसाय|नौकरी|काम|पेशा/.test(q)){
       return card(t(["Work and professional choices","काम और पेशेवर विकल्प","Kaam aur career"]),num.lifePath.label+" "+num.lifePath.value+" · "+num.lifePath.meaning+" "+t(["Test this theme against two recent pieces of work. Ask a colleague for an example of when it helped and when a different approach was needed.","अपने हाल के दो कार्यों में इस संकेत को परखें। किसी सहकर्मी से पूछें कि यह कब सहायक रहा और कब अलग तरीका जरूरी था।","Is theme ko apne do recent projects se compare karein. Colleague se poochhein kab yeh approach helpful thi aur kab doosra tareeka chahiye tha."]));
     }
-    if(/relationship|marry|marriage|partner|family|shaadi|risht|shadi|रिश्त|शादी|विवाह|परिवार/.test(q)){
+    if(/relationship|marry|marriage|partner|family|shaadi|risht|shadi|रिश्त|शादी|विवाह|परिवार|पारिवारिक/.test(q)){
       const indicator=nameEvidence.vowels?num.soulUrge:num.moolank;
       return card(t(["Relationships and communication","संबंध और संवाद","Rishte aur baatcheet"]),indicator.label+" "+indicator.value+" · "+indicator.meaning+" "+t(["Identify one preference you want to communicate. Ask the other person about theirs without inferring it from your own number.","अपनी एक प्राथमिकता पहचानें जिसे आप साझा करना चाहते हैं। दूसरे व्यक्ति की प्राथमिकता उनसे पूछें, अपने अंक से उसका अनुमान न लगाएँ।","Apni ek preference choose karein jo aap share karna chahte hain. Doosre vyakti ki preference unse poochhein; apne number se assume na karein."]));
     }

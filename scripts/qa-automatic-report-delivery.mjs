@@ -88,6 +88,31 @@ if(process.argv.includes("--couple-order")){
  }
  console.log("COUPLE_ORDER_PASS",{localizedOrderedPairs:cases});process.exit(0);
 }
+async function checkDateNameStudyQuestions(){
+ const messages={
+  en:["How can I track progress in my studies?","Tracking your studies","a week apart","cannot measure learning ability"],
+  hi:["अपनी पढ़ाई की प्रगति कैसे देखूँ?","पढ़ाई की प्रगति","एक सप्ताह के अंतर","सीखने की क्षमता या परीक्षा का परिणाम तय नहीं होता"],
+  hinglish:["Apni padhai ki progress kaise track karoon?","Padhai ki progress","Ek hafte ke fark","learning ability ya exam results nahi bata sakte"]
+ };
+ const asOf=new Date("2026-11-26T12:00:00Z");
+ const {calculateCalendarNumbers}=require("@/lib/numerology/calendar");
+ const expectedMonth=calculateCalendarNumbers(new Date("1992-05-18T00:00:00Z"),asOf).personalMonth;
+ for(const slug of ["numerology-lo-shu-report","name-correction-report"]){
+  for(const [language,[question,title,practice,limit]] of Object.entries(messages)){
+   const result=await assembleAutomaticPaidReport({slug,birth:{name:"Asha Test",dateOfBirth:"1992-05-18"},extra,question,language,now:asOf});
+   const answer=result.content.sections.find(s=>s.key==="editorial-insights").data.question;
+   assert.equal(answer.title,title);
+   assert.ok(answer.body.includes(`${expectedMonth} (2026-11)`));
+   assert.ok(answer.body.includes(practice)&&answer.body.includes(limit));
+   assert.equal(result.content.sections.find(s=>s.key==="your-question").data.focus,answer.body);
+  }
+  const family=await assembleAutomaticPaidReport({slug,birth:{name:"Asha Test",dateOfBirth:"1992-05-18"},extra,question:"पारिवारिक जिम्मेदारियों में संतुलन कैसे रखूँ?",language:"hi",now:asOf});
+  assert.equal(family.content.sections.find(s=>s.key==="editorial-insights").data.question.title,"संबंध और संवाद");
+ }
+ console.log("DATE_NAME_STUDY_QUESTION_PASS 2 products × 3 locales, checked month, practical comparison, study-outcome limit and customer answer; 2 Hindi family adjective cases");
+}
+await checkDateNameStudyQuestions();
+if(process.argv.includes("--date-name-study"))process.exit(0);
 if(process.argv.includes("--transit-civil-noon")){
  const london={...birth,dateOfBirth:"1987-07-05",timeOfBirth:"14:40",birthPlace:"London",latitude:51.5074,longitude:-0.1278,timezone:1};
  const chart=async(zone,when,localBirth=london)=>{

@@ -143,15 +143,15 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
    y+=h+13;
   }
  }
- function table(headers:string[],rows:string[][],fractions:number[],size=9.4,minHeight=30){
+ function table(headers:string[],rows:string[][],fractions:number[],size=9.4,minHeight=30,cellPadding=9){
   if(!rows.length)return;
   headers=headers.map(term);
   const sum=fractions.reduce((a,b)=>a+b,0),widths=fractions.map(f=>CW*f/sum),lineHeight=size*1.45;
-  const headerHeight=Math.max(...headers.map((v,i)=>wrap(v.toUpperCase(),widths[i]-18,8,"bold").length*11))+17;
-  const prepared=rows.map(row=>row.map((v,j)=>wrap(v,widths[j]-18,size,j===0?"bold":"body")));
+  const headerHeight=Math.max(...headers.map((v,i)=>wrap(v.toUpperCase(),widths[i]-2*cellPadding,8,"bold").length*11))+17;
+  const prepared=rows.map(row=>row.map((v,j)=>wrap(v,widths[j]-2*cellPadding,size,j===0?"bold":"body")));
   const continuationTop=()=>102+wrap(heading+tr(" (continued)"," (जारी)"),CW,25,"title").length*30+8;
   const freshHeight=()=>BOTTOM-continuationTop()-headerHeight;
-  const header=()=>{rect(M,y,CW,headerHeight,accentPurple);let x=M;headers.forEach((v,i)=>{fixed(x+9,y+8,v.toUpperCase(),widths[i]-18,8,"bold",iv,11);x+=widths[i]});y+=headerHeight;};
+  const header=()=>{rect(M,y,CW,headerHeight,accentPurple);let x=M;headers.forEach((v,i)=>{fixed(x+cellPadding,y+8,v.toUpperCase(),widths[i]-2*cellPadding,8,"bold",iv,11);x+=widths[i]});y+=headerHeight;};
   const firstLines=Math.max(...prepared[0].map(v=>v.length)),firstHeight=Math.max(minHeight,firstLines*lineHeight+16);
   const reserve=firstHeight<=freshHeight()?firstHeight:Math.max(minHeight,lineHeight+16);
   if(y+headerHeight+reserve>BOTTOM)interior(chapter,heading,"",true);
@@ -165,7 +165,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
     }
     const take=fragment.lines,h=fragment.height;
     rect(M,y,CW,h,i%2===0?white:C("F7F0E4"));let x=M;
-    columns.forEach((lines,j)=>{lines.slice(consumed,consumed+take).forEach((v,k)=>tx(x+9,y+8+k*lineHeight,v,size,j===0?"bold":"body",j===0?wine:ink));x+=widths[j]});
+    columns.forEach((lines,j)=>{lines.slice(consumed,consumed+take).forEach((v,k)=>tx(x+cellPadding,y+8+k*lineHeight,v,size,j===0?"bold":"body",j===0?wine:ink));x+=widths[j]});
     y+=h;consumed+=take;
    }i++;
   }rule(M,y,W-M,y,gold);y+=16;
@@ -245,7 +245,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   if(!flat.length)return;
   const planets=[...new Set(flat.map(r=>s(r.planet)))];
   if(planets.length>1&&rows.some(r=>Array.isArray(r.positions))){
-   table([tr("Date","तिथि"),...planets.map(term)],rows.map(r=>[date(r.date),...planets.map(p=>{const a=records(r.positions).find(t=>t.planet===p);return a?(lang==="hi"?display(a.sign):s(a.sign).slice(0,3))+" / "+deg(a.degree)+"\nH"+s(a.houseFromMoon)+(a.motionState==="near_station"?" S":a.retrograde===true?" R":a.retrograde===false?"":" ?"):"-"})]),[1.15,...planets.map(()=>1)],8.2,32);
+   table([tr("Date","तिथि"),...planets.map(term)],rows.map(r=>[date(r.date),...planets.map(p=>{const a=records(r.positions).find(t=>t.planet===p);return a?(lang==="hi"?display(a.sign):s(a.sign).slice(0,3))+" / "+deg(a.degree)+"\nH"+s(a.houseFromMoon)+(a.motionState==="near_station"?" S":a.retrograde===true?" R":a.retrograde===false?"":" ?"):"-"})]),[1.15,...planets.map(()=>1)],8.2,32,4);
    paragraph(tr("H = house from natal Moon; R = retrograde; S = near station; ? = unavailable. Motion is estimated at the snapshot, not an exact station prediction.","H = जन्म चंद्र से भाव; R = वक्री; S = स्थिरता के निकट; ? = अनुपलब्ध। गति उस समय का अनुमान है, सटीक स्थिरता की भविष्यवाणी नहीं।"),9,muted);
   }else table([tr("Date","तिथि"),"Graha / sign","Degree",tr("From Moon","चंद्र से"),tr("From Lagna","लग्न से"),tr("Phase / motion","चरण / गति")],flat.map(r=>[date(r.date),display(r.planet)+" / "+display(r.sign),deg(r.degree),shown(r.houseFromMoon),shown(r.houseFromAscendant),s(r.traditionalPhase)?term(s(r.traditionalPhase)):motionLabel(r)]),[1.05,1.15,.85,.75,.75,1.6],8.7,30);
  }

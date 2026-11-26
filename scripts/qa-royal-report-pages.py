@@ -66,6 +66,12 @@ for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
                         if glyph_id==0: problems.append(f"missing glyph U+{unicode_value:04X} p{page_no}");break
                         if not (box[0]>=-0.5 and box[1]>=-0.5 and box[2]<=page.rect.width+.5 and box[3]<=page.rect.height+.5):
                             problems.append(f"glyph outside page p{page_no}");break
+                if record["slug"]=="transit-report" and page_no==5:
+                    lines={line.strip() for line in text.splitlines()}
+                    issues("°" in lines,"transit degree unit wrapped away from its value")
+                    if record["language"]=="en":
+                        planet_headers={"SUN","MOON","MARS","MERCURY","JUPITER","VENUS","SATURN","RAHU","KETU"}
+                        issues(not planet_headers.issubset(lines),"transit planet header split inside a word")
                 if record["slug"]!="couple-kundli":
                     issues(any(other in text for other in set(profiles.values())-{record["name"]}),f"foreign identity p{page_no}")
                 if record["slug"] in ("name-correction-report","numerology-lo-shu-report"):
