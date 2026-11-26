@@ -1,10 +1,26 @@
 import assert from "node:assert/strict";
 import {createHash, randomUUID} from "node:crypto";
+import {appendFileSync} from "node:fs";
 import {pathToFileURL} from "node:url";
 
 // This utility is deliberately independent of the application database,
 // production configuration, SDK checkout, customer data and webhook handlers.
 // Test provider mode must receive separate, securely injected credentials.
+export function sandboxAvailability(e) {
+  const keyId = e.NAKSHARIX_RAZORPAY_TEST_KEY_ID || "";
+  const keySecret = e.NAKSHARIX_RAZORPAY_TEST_KEY_SECRET || "";
+  const confirmation = e.NAKSHARIX_RAZORPAY_TEST_CONFIRM || "";
+  let ready = true;
+  try { sandboxCredentials(e); } catch { ready = false; }
+  return {
+    keyIdPresent: Boolean(keyId),
+    keyIdIsTest: /^rzp_test_[A-Za-z0-9]+$/.test(keyId),
+    keySecretPresent: Boolean(keySecret),
+    confirmationPresent: Boolean(confirmation),
+    confirmedTestOnly: confirmation === "test-mode-only",
+    ready
+  };
+}
 export function sandboxCredentials(e){
   const id=e.NAKSHARIX_RAZORPAY_TEST_KEY_ID;
   const secret=e.NAKSHARIX_RAZORPAY_TEST_KEY_SECRET;
@@ -68,7 +84,12 @@ export async function selfTest(){
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   try{
     const args=process.argv.slice(2);
-    if(args.length===1&&args[0]==="--provider-test-order")console.log("RAZORPAY_SANDBOX_ORDER_PROBE="+JSON.stringify(await sandboxOrderProbe(process.env)));
+    if (args.length === 1 && args[0] === "--check-availability") {
+      const availability = sandboxAvailability(process.env);
+      console.log("RAZORPAY_TEST_RUNTIME=" + JSON.stringify(availability));
+      if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, "ready=" + availability.ready + "\n");
+    }
+    else if(args.length===1&&args[0]==="--provider-test-order")console.log("RAZORPAY_SANDBOX_ORDER_PROBE="+JSON.stringify(await sandboxOrderProbe(process.env)));
     else if(args.length===0||(args.length===1&&args[0]==="--self-test"))console.log("RAZORPAY_SANDBOX_CONTRACT_PASS="+JSON.stringify(await selfTest()));
     else throw Error("SANDBOX_UNKNOWN_ARGUMENT");
   }catch(error){

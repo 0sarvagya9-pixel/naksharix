@@ -58,6 +58,17 @@ for manifest in sorted(args.matrix.glob("profile-*/generation.json")):
             issues(record["name"] != profiles[record["profile"]], "unknown profile")
             issues(record["requestId"] not in doc.metadata["title"], "request metadata mismatch")
             issues("रॉयल संस्करण" not in cover if record["language"]=="hi" else "Royal Edition" not in cover,"cover locale")
+            toc = doc[1]
+            rows_on_page = [b for b in toc.get_text("blocks") if re.match(r"^\d{2,3}\n",b[4])]
+            links = sorted(toc.get_links(),key=lambda item: item["from"].y0)
+            issues(len(links)!=len(rows_on_page) or not links,"contents rows and links differ")
+            for block,link in zip(rows_on_page,links):
+                dest = int(block[4].splitlines()[0]) - 1
+                bounds = fitz.Rect(block[:4])
+                issues(link["kind"]!=fitz.LINK_GOTO or link.get("page")!=dest,"incorrect contents link destination")
+                issues(not link["from"].contains((bounds.tl+bounds.br)/2),"contents link misses printed title")
+                point=link.get("to")
+                issues(not point or not (0<=point.y<doc[dest].rect.height),"contents link misses page bounds")
             if record["slug"]=="premium-kundli":
                 title,worked={
                     "en":("Reproduce your D9 ascendant","Your ascendant is"),

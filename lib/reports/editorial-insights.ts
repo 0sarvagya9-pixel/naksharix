@@ -1,4 +1,5 @@
 import { editorialTerm } from "./editorial-display";
+import { reportPractice } from "./editorial-practice";
 import type { AstrologyLanguage, BirthChartData, PlanetPosition } from "@/lib/astrology/types";
 
 type Text = readonly [string,string,string];
@@ -39,15 +40,25 @@ export type EditorialInsights={overview:EditorialCard;cards:EditorialCard[];plan
 export function editorialHouse(chart:BirthChartData,n:number,language:AstrologyLanguage){
  const h=chart.housePositions.find(v=>v.house===n);const ps=chart.planetPositions.filter(p=>p.house===n);
  const title=pick(language,H[n-1]??H[0]),ruler=RULER[h?.sign??""],rp=chart.planetPositions.find(p=>p.planet===ruler);
- const placement=ps.length?pick(language,[ps.map(p=>p.planet).join(", ")+" in "+h?.sign+"; traditional themes include "+ps.map(p=>pick(language,P[p.planet]??P.Moon)).join(", ")+".",ps.map(p=>editorialTerm(p.planet,language)).join(", ")+" की "+editorialTerm(h?.sign??"",language)+" में स्थिति; पारंपरिक विषय: "+ps.map(p=>pick(language,P[p.planet]??P.Moon)).join(", ")+"।",ps.map(p=>p.planet).join(", ")+" in "+h?.sign+"; traditional themes: "+ps.map(p=>pick(language,P[p.planet]??P.Moon)).join(", ")+"."]):
- rp?pick(language,["No natal planet here; traditional ruler "+ruler+" is in house "+rp.house+".","यहाँ जन्म ग्रह नहीं है; पारंपरिक स्वामी "+editorialTerm(ruler,language)+" भाव "+rp.house+" में है।","Is house mein koi natal planet nahi; traditional ruler "+ruler+" house "+rp.house+" mein hai."]):pick(language,["No natal planet recorded; the house remains relevant.","यहाँ जन्म ग्रह दर्ज नहीं है; भाव का महत्व बना रहता है।","Natal planet recorded nahi; house relevant hai."]);
+ const names=ps.map(p=>editorialTerm(p.planet,language)).join(", ");
+ const sign=editorialTerm(h?.sign??"",language);
+ const themes=ps.map(p=>pick(language,P[p.planet]??P.Moon)).join(", ");
+ const placement=ps.length?pick(language,[
+  `Natal placements in ${sign}: ${names}. Traditional themes include ${themes}.`,
+  `${sign} राशि के इस भाव में जन्मकालीन ग्रह: ${names}। पारंपरिक विषय: ${themes}।`,
+  `Janm ke samay ${sign} rashi ke is bhav mein ${names} ki sthiti hai. Paramparik vishay: ${themes}.`,
+ ]):rp?pick(language,[
+  `No natal planet occupies this house. Its traditional ruler, ${ruler}, occupies house ${rp.house}.`,
+  `इस भाव में कोई जन्मकालीन ग्रह नहीं है। इसका पारंपरिक स्वामी ${editorialTerm(ruler,language)} भाव ${rp.house} में है।`,
+  `Is bhav mein koi janmkaaleen grah nahi hai. Iska paramparik swami ${editorialTerm(ruler,language)} bhav ${rp.house} mein hai.`,
+ ]):pick(language,["No natal planet recorded; the house remains relevant.","यहाँ जन्म ग्रह दर्ज नहीं है; भाव का महत्व बना रहता है।","Is bhav mein janmkaaleen grah darj nahi hai. Phir bhi bhav ka sandarbh bana rehta hai."]);
  const compact=ps.length?pick(language,PRACTICE[n-1]??PRACTICE[0]):rp?pick(language,["Ruler "+ruler+" in H"+rp.house+". ","स्वामी "+editorialTerm(ruler,language)+" भाव "+rp.house+" में। ","Ruler "+ruler+" H"+rp.house+" mein. "])+pick(language,PRACTICE[n-1]??PRACTICE[0]):pick(language,PRACTICE[n-1]??PRACTICE[0]);
  return {house:n,sign:h?.sign??"",planets:ps.map(p=>p.planet),title,compact,interpretation:placement+" "+pick(language,PRACTICE[n-1]??PRACTICE[0])};
 }
 function planetNote(p:PlanetPosition,language:AstrologyLanguage):EditorialCard{
  const house=p.house??1;
  return {label:editorialTerm(p.planet,language)+" / "+editorialTerm(p.sign,language)+" / "+editorialTerm("House",language)+" "+house,title:pick(language,P[p.planet]??P.Moon),
- body:pick(language,["The natal "+p.planet+" is in "+p.sign+", house "+house+". Traditionally this brings "+pick(language,P[p.planet]??P.Moon)+" into the theme of "+pick(language,H[house-1]??H[0])+". ","जन्म कुंडली में "+editorialTerm(p.planet,language)+" "+editorialTerm(p.sign,language)+" राशि में भाव "+house+" में है। पारंपरिक संकेत: "+pick(language,P[p.planet]??P.Moon)+"; विषय: "+pick(language,H[house-1]??H[0])+"। ",p.planet+" "+p.sign+" house "+house+" mein hai. Traditional theme: "+pick(language,P[p.planet]??P.Moon)+" aur "+pick(language,H[house-1]??H[0])+". "])+pick(language,PRACTICE[house-1]??PRACTICE[0])};
+ body:pick(language,["The natal "+p.planet+" is in "+p.sign+", house "+house+". Traditionally this brings "+pick(language,P[p.planet]??P.Moon)+" into the theme of "+pick(language,H[house-1]??H[0])+". ","जन्म कुंडली में "+editorialTerm(p.planet,language)+" "+editorialTerm(p.sign,language)+" राशि में भाव "+house+" में है। पारंपरिक संकेत: "+pick(language,P[p.planet]??P.Moon)+"; विषय: "+pick(language,H[house-1]??H[0])+"। ",editorialTerm(p.planet,language)+" ki sthiti "+editorialTerm(p.sign,language)+" rashi ke bhav "+house+" mein hai. Is parampara mein "+pick(language,P[p.planet]??P.Moon)+" ko "+pick(language,H[house-1]??H[0])+" se jodkar padha jaata hai. "])+pick(language,PRACTICE[house-1]??PRACTICE[0])};
 }
 export function buildEditorialInsights(chart:BirthChartData,slug:string,question:string,language:AstrologyLanguage):EditorialInsights{
  const focus=FOCUS[slug]??FOCUS["premium-kundli"];
@@ -55,12 +66,31 @@ export function buildEditorialInsights(chart:BirthChartData,slug:string,question
  const first=editorialHouse(chart,rank[0],language),second=editorialHouse(chart,rank[1],language);
  const main=editorialHouse(chart,focus[0],language);
  const ruler=RULER[main.sign],rulerPos=chart.planetPositions.find(p=>p.planet===ruler);
- const rulerText=rulerPos?pick(language,["The traditional ruler of "+main.sign+", "+ruler+", is in house "+rulerPos.house+" ("+rulerPos.sign+").","राशि "+editorialTerm(main.sign,language)+" का पारंपरिक स्वामी "+editorialTerm(ruler,language)+" भाव "+rulerPos.house+" ("+editorialTerm(rulerPos.sign,language)+") में है।",main.sign+" ka traditional ruler "+ruler+" house "+rulerPos.house+" ("+rulerPos.sign+") mein hai."]):"";
+ const rulerText=rulerPos?pick(language,["The traditional ruler of "+main.sign+", "+ruler+", is in house "+rulerPos.house+" ("+rulerPos.sign+").","राशि "+editorialTerm(main.sign,language)+" का पारंपरिक स्वामी "+editorialTerm(ruler,language)+" भाव "+rulerPos.house+" ("+editorialTerm(rulerPos.sign,language)+") में है।",editorialTerm(main.sign,language)+" rashi ka swami "+editorialTerm(ruler,language)+" bhav "+rulerPos.house+" ("+editorialTerm(rulerPos.sign,language)+") mein hai."]):"";
  const overview={label:pick(language,["THE CENTRAL THEME","मुख्य विषय","CENTRAL THEME"]),title:main.title===first.title?main.title:main.title+" / "+first.title,body:pick(language,["This reading begins with house "+main.house+", "+main.title.toLowerCase()+". ","यह अध्ययन भाव "+main.house+" के विषय, "+main.title+", से आरंभ होता है। ","Is reading ka aarambh house "+main.house+" ke topic "+main.title+" se hota hai. "])+rulerText};
  const cards=[{label:pick(language,["01 / PRIMARY FOCUS","01 / मुख्य ध्यान","01 / PRIMARY FOCUS"]),title:first.title,body:first.interpretation},{label:pick(language,["02 / BALANCING THEME","02 / संतुलन","02 / BALANCING THEME"]),title:second.title,body:second.interpretation}];
  const selected=chart.planetPositions.filter(p=>focus.includes(p.house??0));
  const notes=(selected.length?selected:chart.planetPositions).map(p=>planetNote(p,language));
- const plan=rank.slice(0,3).map((n,i)=>({label:pick(language,["DAYS "+(i*30+1)+"-"+(i+1)*30,"दिन "+(i*30+1)+"-"+(i+1)*30,"DAYS "+(i*30+1)+"-"+(i+1)*30]),title:editorialHouse(chart,n,language).title,body:pick(language,["Chart reference: house "+n+". ","कुंडली संदर्भ: भाव "+n+"। ","Chart reference: house "+n+". "])+pick(language,PRACTICE[n-1])+" "+pick(language,["Keep a written progress record; review observable results at the end of this period.","लिखित प्रगति रखें और अवधि के अंत में वास्तविक परिणाम देखें।","Written progress record rakhein aur period ke end mein real results review karein."])}));
+ const plan=rank.slice(0,3).map((n,i)=>{
+  const house=editorialHouse(chart,n,language);
+  const sign=editorialTerm(house.sign,language);
+  const occupants=house.planets.map(p=>editorialTerm(p,language)).join(", ");
+  const owner=RULER[house.sign];
+  const ownerHouse=chart.planetPositions.find(p=>p.planet===owner)?.house;
+  const ruler=editorialTerm(owner??"",language);
+  const context=occupants?pick(language,[
+   `House ${n}, ${sign}: ${occupants}.`,
+   `भाव ${n}, ${sign} राशि। जन्मकालीन ग्रह: ${occupants}।`,
+   `Bhav ${n}, ${sign} rashi. Janmkaaleen grah: ${occupants}.`,
+  ]):ownerHouse?pick(language,[
+   `House ${n}, ${sign}: its ruler ${ruler} occupies house ${ownerHouse}.`,
+   `भाव ${n} में ${sign} राशि है। इसका स्वामी ${ruler} भाव ${ownerHouse} में है।`,
+   `Bhav ${n} mein ${sign} rashi hai. Iska swami ${ruler} bhav ${ownerHouse} mein hai.`,
+  ]):pick(language,[`House ${n}: ${sign}.`,`भाव ${n}: ${sign}।`,`Bhav ${n}: ${sign}.`]);
+  const days=`${i*30+1}-${(i+1)*30}`;
+  return {label:pick(language,[`DAYS ${days}`,`दिन ${days}`,`DIN ${days}`]),title:house.title,
+   body:context+" "+(reportPractice(slug,i,language)??pick(language,PRACTICE[n-1]))};
+ });
  const query=question.trim().toLowerCase();
  const topics=[{re:/career|jobs?\b|work|business|promotion|naukri|karier|karobar|करियर|नौकरी|व्यवसाय/,n:10},{re:/wealth|money|loan|finance|salary|budget|paisa|paise|aamdani|धन|पैसा|आय|बजट/,n:2},{re:/love|marriage|relationship|partner|shaadi|rishta|pyaar|विवाह|प्रेम|रिश्ता|शादी/,n:7},{re:/stud(?:y|ies)|education|exam|padhai|seekhn|पढ़ाई|शिक्षा|अध्ययन/,n:5},{re:/home|family|property|parivaar|parivar|ghar|घर|परिवार|पारिवारिक/,n:4}];
  const topic=topics.find(t=>t.re.test(query));

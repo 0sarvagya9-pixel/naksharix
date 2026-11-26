@@ -75,9 +75,8 @@ export function getAshtakvargaFoundationStatus(): StrengthFoundationStatus {
     publicEnabled: false,
     verified: false,
     requiredBeforeActivation: [
-      "Independent reference fixtures for all seven Bhinna Ashtakavarga tables.",
-      "Sarva Ashtakavarga sign-by-sign comparison against trusted software.",
-      "Reviewed Trikona/Ekadhipatya reduction rules before reduced-score features.",
+      "Specialist sign-off on the supported calculation traditions and their presentation.",
+      "Independent specialist interpretation review before publishing reduced scores.",
       "Transit interpretation rules only after base bindu scores are externally verified."
     ]
   };
@@ -151,11 +150,11 @@ export function calculateInternalAshtakvarga(planets: CanonicalPlanet[], ascenda
     method:tradition,
     verificationLevel: "needs_external_validation",
     publicEnabled: false,
-    missingDependencies: ["Independent reference-software fixtures for sign-by-sign validation."],
+    missingDependencies: ["Independent specialist acceptance of the named tradition and its public interpretation."],
     limitations: [
       "Bhinna and Sarva bindu distributions are calculated from the internal classical rule table.",
       "Fixed Bhinna totals and the 337-point Sarva checksum are enforced at runtime.",
-      "Results remain non-public until independent chart fixtures agree sign by sign.",
+      "External sign-by-sign chart comparisons cover the named traditions. Public activation remains gated.",
       "Raw BAV/SAV are unreduced and preserve the 337 checksum. The separate named Aiyar reduction function must not be added to raw SAV."
     ]
   };

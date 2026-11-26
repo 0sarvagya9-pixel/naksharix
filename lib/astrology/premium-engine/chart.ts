@@ -1,4 +1,5 @@
 import * as Astronomy from "astronomy-engine";
+import { lahiriMoonLongitude } from "@/lib/astrology/own-engine/lahiri-moon";
 import {estimateSiderealMotion} from "@/lib/astrology/own-engine/motion";
 import { calculateVimshottariDasha } from "@/lib/astrology/premium-engine/dasha";
 import { nakshatraFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
@@ -143,9 +144,8 @@ function calculateSiderealLongitudes(time: Astronomy.AstroTime, julianDay: numbe
 }
 
 function siderealLongitude(body: SupportedBody, time: Astronomy.AstroTime, julianDay: number) {
-  const tropical = body === "Moon"
-    ? Astronomy.EclipticGeoMoon(time).lon
-    : Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[body], time, true)).elon;
+  if (body === "Moon") return lahiriMoonLongitude(time);
+  const tropical = Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[body], time, true)).elon;
   return tropicalToSidereal(tropical, julianDay);
 }
 

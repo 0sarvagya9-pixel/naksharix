@@ -40,7 +40,7 @@ export default async function PanchangPage({
     date: selectedDate,
     latitude: city.latitude,
     longitude: city.longitude,
-    timezone: resolvedOffset,
+    timezone: city.timezone,
     place: city.label,
   });
 

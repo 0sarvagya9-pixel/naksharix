@@ -182,3 +182,35 @@ for(const input of [{date:"2025-02-30"},{date:"bad"},{date:"2025-01-01",ayanamsa
 for(const days of [0,181,1.5,NaN])assert.throws(()=>calculateRefinedTransitTimeline({...baseTransit,date:"2025-01-01"},days));
 assert.equal(ingressChecks,9);assert.equal(eventStationChecks,10);
 console.log("INDEPENDENT_TRANSIT_EVENTS_PASS "+JSON.stringify({ingressChecks,eventStationChecks,residuals,maximumIngressErrorMinutes:Math.max(...residuals.filter(r=>r.eventType==="sign_ingress").map(r=>r.errorMinutes)),maximumStationErrorMinutes:Math.max(...residuals.filter(r=>r.eventType!=="sign_ingress").map(r=>r.errorMinutes)),scope:"19 bounded numerical event references, no public exact event or prediction certification"}));
+
+// Published IANA rules include transitions at midnight and an entire skipped local date.
+// Swiss rise/set references below were generated with Python zoneinfo, independently of Intl.
+const civilReference = JSON.parse(fs.readFileSync("fixtures/astrology/heldout-civil-day-panchang.json", "utf8"));
+let civilEndpoints = 0, absentEvents = 0, invalidDates = 0, maxCivilMinutes = 0, sumCivilMinutes = 0;
+for (const {id, input, nonexistent, expected} of civilReference.cases) {
+  if (nonexistent) {
+    assert.throws(() => calculatePremiumPanchang(input), /ambiguous or nonexistent/, id);
+    invalidDates++;
+    continue;
+  }
+  const daily = calculatePremiumPanchang(input);
+  for (const [field, target] of Object.entries(expected)) {
+    if (target === null) {
+      assert.equal(daily[field], null, id + " / " + field);
+      absentEvents++;
+      continue;
+    }
+    const times = daily[field]?.split(" - ");
+    const referenceTimes = target.split(" - ");
+    assert.equal(times?.length, referenceTimes.length, id + " / " + field);
+    for (const [index, referenceTime] of referenceTimes.entries()) {
+      const difference = Math.abs(toMin(times[index]) - toMin(referenceTime));
+      assert.ok(difference <= provenance.riseSetToleranceMinutes, id + " / " + field + ": " + difference);
+      civilEndpoints++;
+      sumCivilMinutes += difference;
+      maxCivilMinutes = Math.max(maxCivilMinutes, difference);
+    }
+  }
+}
+console.log("CIVIL_PANCHANG", JSON.stringify({cases: civilReference.cases.length, civilEndpoints, absentEvents, invalidDates,
+  toleranceMinutes: provenance.riseSetToleranceMinutes, maxCivilMinutes, meanCivilMinutes: sumCivilMinutes / civilEndpoints}));

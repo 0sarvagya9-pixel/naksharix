@@ -1,6 +1,7 @@
 import * as Astronomy from "astronomy-engine";
+import { lahiriMoonLongitude } from "@/lib/astrology/own-engine/lahiri-moon";
 import { nakshatraFromLongitude, nakshatraIndexFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
-import { julianDayFromUtc, normalizeDegrees, parseTimezoneOffsetToHours,parseBirthDateTime,localBirthToUtcDate } from "@/lib/astrology/own-engine/time";
+import { julianDayFromUtc, normalizeDegrees, parseTimezoneOffsetToHours } from "@/lib/astrology/own-engine/time";
 import { tropicalToSidereal } from "@/lib/astrology/own-engine/zodiac";
 
 export type PremiumPanchangInput = {
@@ -59,14 +60,22 @@ export function calculatePremiumPanchang(input: PremiumPanchangInput): PremiumPa
   const time = Astronomy.MakeTime(localNoonUtc);
   const julianDay = julianDayFromUtc(localNoonUtc);
   const sunLongitude = siderealSunLongitude(time, julianDay);
-  const moonLongitude = siderealMoonLongitude(time, julianDay);
+  const moonLongitude = siderealMoonLongitude(time);
   const elongation = normalizeDegrees(moonLongitude - sunLongitude);
   const nakshatra = nakshatraFromLongitude(moonLongitude);
   const yogaLongitude = normalizeDegrees(sunLongitude + moonLongitude);
-  const sunTimes = riseSet(Astronomy.Body.Sun, dateText, latitude, longitude, timezoneText,timezoneOffset);
-  const moonTimes = riseSet(Astronomy.Body.Moon, dateText, latitude, longitude, timezoneText,timezoneOffset);
+  const fixedOffset = /^[+-]?(?:\d{1,2}(?:\.\d+)?|\d{1,2}:?\d{2})$/.test(timezoneText);
+  const zone = fixedOffset ? undefined : timezoneText;
+  const dayFormatter = zone && new Intl.DateTimeFormat("en-CA", {timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit"});
+  const clockFormatter = zone && new Intl.DateTimeFormat("en-GB", {timeZone: zone, hour: "2-digit", minute: "2-digit", hourCycle: "h23"});
+  const eventLabel = (event: Date) => clockFormatter ? clockFormatter.format(event) : formatTimeWithOffset(event, timezoneOffset);
+  const clock = (event: Date | null) => event && eventLabel(event);
+  const observer = new Astronomy.Observer(latitude, longitude, 0);
+  const sunTimes = riseSet(Astronomy.Body.Sun, observer, localNoonUtc, dayFormatter || undefined);
+  const moonTimes = riseSet(Astronomy.Body.Moon, observer, localNoonUtc, dayFormatter || undefined);
   const weekday = weekdayName(localNoonUtc, timezoneOffset);
-  const dayWindow = sunTimes.rise && sunTimes.set && parseClock(sunTimes.set)>parseClock(sunTimes.rise) ? daySegmentWindows(sunTimes.rise, sunTimes.set, weekday) : null;
+  const dayWindow = sunTimes.rise && sunTimes.set && sunTimes.set > sunTimes.rise
+    ? daySegmentWindows(sunTimes.rise, sunTimes.set, weekday, eventLabel) : null;
   const missingFields = [
     sunTimes.rise ? null : "Sunrise",
     sunTimes.set ? null : "Sunset",
@@ -77,10 +86,10 @@ export function calculatePremiumPanchang(input: PremiumPanchangInput): PremiumPa
     date: dateText,
     location: input.place ?? `${latitude}, ${longitude}`,
     timezone: timezoneText,
-    sunrise: sunTimes.rise,
-    sunset: sunTimes.set,
-    moonrise: moonTimes.rise,
-    moonset: moonTimes.set,
+    sunrise: clock(sunTimes.rise),
+    sunset: clock(sunTimes.set),
+    moonrise: clock(moonTimes.rise),
+    moonset: clock(moonTimes.set),
     tithi: tithis[Math.min(29, Math.floor(elongation / 12))],
     paksha: Math.floor(elongation / 12) < 15 ? "Shukla Paksha" : "Krishna Paksha",
     nakshatra: nakshatra.name,
@@ -112,48 +121,45 @@ function siderealSunLongitude(time: Astronomy.AstroTime, julianDay: number) {
   return tropicalToSidereal(Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body.Sun, time, true)).elon, julianDay);
 }
 
-function siderealMoonLongitude(time: Astronomy.AstroTime, julianDay: number) {
-  return tropicalToSidereal(Astronomy.EclipticGeoMoon(time).lon, julianDay);
+function siderealMoonLongitude(time: Astronomy.AstroTime) {
+  return lahiriMoonLongitude(time);
 }
 
-function riseSet(body:Astronomy.Body,dateText:string,latitude:number,longitude:number,timezoneText:string,noonOffset:number){
-  const observer=new Astronomy.Observer(latitude,longitude,0);
-  const midnight=parseBirthDateTime(dateText,"00:00");
-  const nextDate=new Date(Date.UTC(midnight.year,midnight.month-1,midnight.day+1)).toISOString().slice(0,10);
-  // Resolve both local-midnight boundaries independently: a civil day may
-  // last 23 or 25 hours. Ambiguous/nonexistent midnight fails closed.
-  const startUtc=localBirthToUtcDate(midnight,parseTimezoneOffsetToHours(timezoneText,dateText,"00:00"));
-  const endUtc=localBirthToUtcDate(parseBirthDateTime(nextDate,"00:00"),parseTimezoneOffsetToHours(timezoneText,nextDate,"00:00"));
-  const limitDays=(endUtc.getTime()-startUtc.getTime())/86400000;
-  if(!Number.isFinite(limitDays)||limitDays<=0||limitDays>2)throw Error("Invalid civil day boundary.");
-  const fixedOffset=/^[+-]?\d{1,2}(?:\.\d+)?$/.test(timezoneText)||/^[+-]\d{1,2}:?\d{2}$/.test(timezoneText);
-  const formatter=fixedOffset?null:new Intl.DateTimeFormat("en-GB",{timeZone:timezoneText,hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
-  const find=(direction:1|-1)=>{
-    const event=Astronomy.SearchRiseSet(body,observer,direction,startUtc,limitDays);
-    if(!event||event.date.getTime()<startUtc.getTime()||event.date.getTime()>=endUtc.getTime())return null;
-    // Use the timezone at the event instant, not the offset sampled at noon.
-    return formatter?formatter.format(event.date):formatTimeWithOffset(event.date,noonOffset);
-  };
-  return {rise:find(1),set:find(-1)};
+function riseSet(body: Astronomy.Body, observer: Astronomy.Observer, localNoon: Date, localDay?: Intl.DateTimeFormat) {
+  const hour = 3600_000;
+  // Fixed offsets have a 24-hour day. A named-zone date may begin with a gap or fold,
+  // or precede a skipped date. Filter actual event instants by their civil date.
+  const radius = localDay ? 39 : 12;
+  const start = localNoon.getTime() - radius * hour;
+  const end = localNoon.getTime() + radius * hour;
+  const wanted = localDay?.format(localNoon);
+  function find(direction: 1 | -1) {
+    let cursor = start;
+    while (cursor < end) {
+      const event = Astronomy.SearchRiseSet(body, observer, direction, new Date(cursor), (end - cursor) / 86400_000);
+      if (!event || event.date.getTime() >= end) return null;
+      if (!localDay || localDay.format(event.date) === wanted) return event.date;
+      // A small advance excludes the previous crossing even if its root rounds to the same millisecond.
+      cursor = Math.max(cursor + 1000, event.date.getTime() + 1000);
+    }
+    return null;
+  }
+  return {rise: find(1), set: find(-1)};
 }
 
-function daySegmentWindows(sunrise: string, sunset: string, weekday: string) {
-  const riseMinutes = parseClock(sunrise);
-  const setMinutes = parseClock(sunset);
-  const segment = (setMinutes - riseMinutes) / 8;
+function daySegmentWindows(sunrise: Date, sunset: Date, weekday: string, label: (d: Date) => string) {
+  const start = sunrise.getTime();
+  const duration = sunset.getTime() - start;
   const weekdayIndex = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(weekday);
-  const rahuSegments = [8, 2, 7, 5, 6, 4, 3];
-  const yamagandaSegments = [5, 4, 3, 2, 1, 7, 6];
-  const gulikaSegments = [7, 6, 5, 4, 3, 2, 1];
-  const segmentRange = (oneBased: number) => `${formatClock(riseMinutes + (oneBased - 1) * segment)} - ${formatClock(riseMinutes + oneBased * segment)}`;
-  const solarNoon = (riseMinutes + setMinutes) / 2;
-  // Abhijit is the central (eighth) fifteenth of daylight, not a fixed 48-minute interval.
-  const abhijitHalf = (setMinutes - riseMinutes) / 30;
+  const window = (oneBased: number, divisions: number) => {
+    const at = (edge: number) => label(new Date(Math.round((start + duration * edge / divisions) / 60_000) * 60_000));
+    return `${at(oneBased - 1)} - ${at(oneBased)}`;
+  };
   return {
-    rahuKaal: segmentRange(rahuSegments[weekdayIndex] ?? 8),
-    yamaganda: segmentRange(yamagandaSegments[weekdayIndex] ?? 5),
-    gulikaKaal: segmentRange(gulikaSegments[weekdayIndex] ?? 7),
-    abhijitMuhurat: `${formatClock(solarNoon - abhijitHalf)} - ${formatClock(solarNoon + abhijitHalf)}`
+    rahuKaal: window([8, 2, 7, 5, 6, 4, 3][weekdayIndex], 8),
+    yamaganda: window([5, 4, 3, 2, 1, 7, 6][weekdayIndex], 8),
+    gulikaKaal: window([7, 6, 5, 4, 3, 2, 1][weekdayIndex], 8),
+    abhijitMuhurat: window(8, 15)
   };
 }
 
@@ -183,17 +189,6 @@ function localDateText(date: string | Date) {
 
 function weekdayName(date: Date, timezoneOffset: number) {
   return new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: "UTC" }).format(new Date(date.getTime() + timezoneOffset * 60 * 60 * 1000));
-}
-
-function parseClock(value: string) {
-  const [hour, minute] = value.split(":").map(Number);
-  return hour * 60 + minute;
-}
-
-function formatClock(value: number) {
-  const minutes = Math.round(value);
-  const normalized = ((minutes % 1440) + 1440) % 1440;
-  return `${String(Math.floor(normalized / 60)).padStart(2, "0")}:${String(normalized % 60).padStart(2, "0")}`;
 }
 
 function formatTimeWithOffset(date: Date, timezoneOffset: number) {

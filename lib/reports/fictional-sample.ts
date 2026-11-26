@@ -1,5 +1,5 @@
 import "server-only";
-import {PDFDocument,StandardFonts,rgb} from "pdf-lib";
+import {PDFArray,PDFDict,PDFDocument,PDFHexString,PDFName,PDFNumber,StandardFonts,rgb} from "pdf-lib";
 import {assembleAutomaticPaidReport} from "@/lib/reports/automatic-report-content";
 import {autoReportSlugSet} from "@/lib/reports/automatic-report-input";
 import {generatePremiumReportPdf} from "@/lib/reports/premium-report-generation-service";
@@ -16,8 +16,33 @@ export async function buildFictionalReportSample(slug:string):Promise<Uint8Array
  const source=await PDFDocument.load(result.bytes);
  if(source.getPageCount()<1)throw Error("EMPTY_SAMPLE");
  const sample=await PDFDocument.create();
- // Include the cover and first interior pages of the actual renderer.
- const pages=await sample.copyPages(source,Array.from({length:Math.min(3,source.getPageCount())},(_,i)=>i));
+ // Remove cross-page references before copying the excerpt. Otherwise copying a
+ // contents annotation can pull unselected chapter objects into the sample.
+ const indices=Array.from({length:Math.min(3,source.getPageCount())},(_,i)=>i);
+ const selected=new Map(indices.map(i=>[source.getPage(i).ref.toString(),i]));
+ const availableLinks:{from:number;to:number;rect:number[];top:number;title:string}[]=[];
+ for(const i of indices){
+  const node=source.getPage(i).node;
+  for(const ref of node.Annots()?.asArray()??[]){
+   const annotation=source.context.lookup(ref,PDFDict);
+   const dest=annotation.lookupMaybe(PDFName.of("Dest"),PDFArray);
+   if(!dest||dest.size()<4)continue;
+   const to=selected.get(dest.get(0).toString());
+   if(to===undefined)continue;
+   const bounds=annotation.lookup(PDFName.of("Rect"),PDFArray);
+   const rect=[0,1,2,3].map(index=>bounds.lookup(index,PDFNumber).asNumber());
+   const title=annotation.lookupMaybe(PDFName.of("Contents"),PDFHexString)?.decodeText()??"";
+   availableLinks.push({from:i,to,rect,top:dest.lookup(3,PDFNumber).asNumber(),title});
+  }
+  node.delete(PDFName.of("Annots"));
+ }
+ const pages=await sample.copyPages(source,indices);
+ for(const link of availableLinks){
+  const dict=sample.context.obj({Type:"Annot",Subtype:"Link",Rect:link.rect,Border:[0,0,0],
+    Dest:[pages[link.to].ref,"XYZ",0,link.top,0]});
+  if(link.title)dict.set(PDFName.of("Contents"),PDFHexString.fromText(link.title));
+  pages[link.from].node.addAnnot(sample.context.register(dict));
+ }
  const font=await sample.embedFont(StandardFonts.HelveticaBold);
  const royalPurple=rgb(0x24/255,0x0d/255,0x3d/255);
  for(const [index,page] of pages.entries()){

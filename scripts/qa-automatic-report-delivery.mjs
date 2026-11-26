@@ -407,6 +407,22 @@ function verifyPromiseCoverage(slug,language,content){
  if(slug==="jupiter-transit-report")assert.equal(sections.get("jupiter-transits").data.length,13);
  if(slug==="name-correction-report")assert.ok(sections.get("name-comparison").data.length>=2);
  const fields=publicReportRequiredDetails(slug,language),scope=reportIntakeScope(slug);
+ const insights=sections.get("editorial-insights").data;
+ assert.equal(sections.get("your-question").data.focus,insights.question.body,slug+" question receipt and printed answer disagree");
+ assert.ok(insights.plan.length>0);
+ assert.equal(new Set(insights.plan.map(card=>card.body)).size,insights.plan.length);
+ if(!scope.dateNameOnly){
+   const prefix={en:"House ",hi:"भाव ",hinglish:"Bhav "}[language];
+   for(const card of insights.plan){
+     assert.ok(card.body.startsWith(prefix),slug+" missing chart fact in a practice");
+     assert.doesNotMatch(card.body,/Keep a written progress record|लिखित प्रगति रखें|Written progress record rakhein/);
+   }
+ }else if(slug==="name-correction-report"){
+   const names=sections.get("name-comparison").data;
+   assert.deepEqual(insights.plan.map(card=>card.title),names.map(row=>row.name));
+ }else{
+   assert.ok(insights.plan.some(card=>card.body.includes(sections.get("birth").data.dateOfBirth)));
+ }
  assert.equal(fields.length,(scope.dateNameOnly?2:5)+(scope.couple?2:0)+(scope.numerologyName?1:0)+(scope.nameCorrection?2:0)+(scope.babyName?2:0));
  if(scope.babyName)assert.ok(fields.includes(require("@/lib/reports/report-request-copy").reportRequestCopy[language].guardianPermission));
  assert.ok(fields.every(x=>x.trim().length>0));assert.equal(new Set(fields).size,fields.length);

@@ -1,0 +1,143 @@
+{
+  "title": "OneKundli, Dhruv Astro Software, Delhi 1 January 2025 00:00 IST",
+  "sourceUrl": "https://onekundli.com/wp-content/uploads/2025/02/OneKundli-Sample-Report.pdf",
+  "sourceSha256": "2060490e9231446d5e28ce15e00a85f44a0d9eeed70ef515143d31cb896b5d6d",
+  "pages": {
+    "rawAndSarva": 144,
+    "contributions": [
+      145,
+      151
+    ]
+  },
+  "signOrder": [
+    "Aries",
+    "Taurus",
+    "Gemini",
+    "Cancer",
+    "Leo",
+    "Virgo",
+    "Libra",
+    "Scorpio",
+    "Sagittarius",
+    "Capricorn",
+    "Aquarius",
+    "Pisces"
+  ],
+  "referenceSigns": {
+    "Sun": "Sagittarius",
+    "Moon": "Sagittarius",
+    "Mars": "Cancer",
+    "Mercury": "Scorpio",
+    "Jupiter": "Taurus",
+    "Venus": "Aquarius",
+    "Saturn": "Aquarius",
+    "Ascendant": "Virgo"
+  },
+  "grahas": {
+    "Sun": {
+      "contributions": {
+        "Sun": "001111101101",
+        "Moon": "010001100010",
+        "Mars": "110110100111",
+        "Mercury": "100111100101",
+        "Jupiter": "000001100101",
+        "Venus": "000110000100",
+        "Saturn": "010011111011",
+        "Ascendant": "001110011010"
+      },
+      "raw": "232565623545"
+    },
+    "Moon": {
+      "contributions": {
+        "Sun": "011101100010",
+        "Moon": "011001101010",
+        "Mars": "110011011001",
+        "Mercury": "011011010111",
+        "Jupiter": "110010011011",
+        "Venus": "111010111000",
+        "Saturn": "101100001000",
+        "Ascendant": "001100010010"
+      },
+      "raw": "466344355153"
+    },
+    "Mars": {
+      "contributions": {
+        "Sun": "110001100010",
+        "Moon": "010000100010",
+        "Mars": "110110100110",
+        "Mercury": "100001000101",
+        "Jupiter": "100000100011",
+        "Venus": "000101001100",
+        "Saturn": "010011111010",
+        "Ascendant": "001101010010"
+      },
+      "raw": "441325522362"
+    },
+    "Mercury": {
+      "contributions": {
+        "Sun": "110010110000",
+        "Moon": "010101100101",
+        "Mars": "110110100111",
+        "Mercury": "100111110101",
+        "Jupiter": "100000101001",
+        "Venus": "111001101011",
+        "Saturn": "010011111011",
+        "Ascendant": "101101101010"
+      },
+      "raw": "652445834346"
+    },
+    "Jupiter": {
+      "contributions": {
+        "Sun": "001111101111",
+        "Moon": "101010100100",
+        "Mars": "110110100110",
+        "Mercury": "100111011011",
+        "Jupiter": "011110011011",
+        "Venus": "001100111001",
+        "Saturn": "101100000100",
+        "Ascendant": "011101101111"
+      },
+      "raw": "436753535555"
+    },
+    "Venus": {
+      "contributions": {
+        "Sun": "000100110000",
+        "Moon": "100110111111",
+        "Mars": "011001011001",
+        "Mercury": "100101000101",
+        "Jupiter": "000001001111",
+        "Venus": "111001111011",
+        "Saturn": "111001111000",
+        "Ascendant": "110101111100"
+      },
+      "raw": "543416566435"
+    },
+    "Saturn": {
+      "contributions": {
+        "Sun": "001101101101",
+        "Moon": "010000100010",
+        "Mars": "111001011000",
+        "Mercury": "101111100000",
+        "Jupiter": "100001100001",
+        "Venus": "000100001100",
+        "Saturn": "101100001000",
+        "Ascendant": "001101011010"
+      },
+      "raw": "425515425222"
+    }
+  },
+  "sarva": [
+    29,
+    27,
+    25,
+    31,
+    23,
+    33,
+    36,
+    23,
+    30,
+    23,
+    29,
+    28
+  ]
+}

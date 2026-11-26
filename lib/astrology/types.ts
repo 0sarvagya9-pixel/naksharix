@@ -177,6 +177,8 @@ export type BirthChartData = {
     provider: string;
     ayanamsaName: string;
     ayanamsaDegree: number;
+    lunarFrame?: string;
+    lunarMeanAyanamsaDegree?: number;
     houseSystem: string;
     nodeMode: string;
     julianDay: number;

@@ -1,0 +1,162 @@
+{
+  "title": "Pramanik Astrology, Parashara's Light 9.0, New Delhi 25 January 2020 07:00 IST",
+  "sourceUrl": "https://s3.amazonaws.com/kajabi-storefronts-production/sites/67114/themes/1451148/downloads/1gUAatafTVm0rQVQDGX1_Sample_PDF_Report.pdf",
+  "sourceSha256": "7a096f02474fd4aa97859f54fa554d123cbbfd4389e13b3ace2d3d675147b5de",
+  "pages": {
+    "inputs": [
+      2,
+      3
+    ],
+    "contributions": [
+      23,
+      24
+    ],
+    "rawAndSarva": 25,
+    "reductions": 26
+  },
+  "signOrder": [
+    "Aries",
+    "Taurus",
+    "Gemini",
+    "Cancer",
+    "Leo",
+    "Virgo",
+    "Libra",
+    "Scorpio",
+    "Sagittarius",
+    "Capricorn",
+    "Aquarius",
+    "Pisces"
+  ],
+  "referenceSigns": {
+    "Sun": "Capricorn",
+    "Moon": "Capricorn",
+    "Mars": "Scorpio",
+    "Mercury": "Capricorn",
+    "Jupiter": "Sagittarius",
+    "Venus": "Aquarius",
+    "Saturn": "Capricorn",
+    "Ascendant": "Capricorn"
+  },
+  "grahas": {
+    "Sun": {
+      "contributions": {
+        "Saturn": "100111110110",
+        "Jupiter": "110010100000",
+        "Mars": "011111011010",
+        "Sun": "100111110110",
+        "Venus": "000110000100",
+        "Mercury": "011001111001",
+        "Moon": "001000110001",
+        "Ascendant": "101000111001"
+      },
+      "raw": "434454663333",
+      "trikona": "101121330000",
+      "ekadhipatya": "000120330000"
+    },
+    "Moon": {
+      "contributions": {
+        "Saturn": "011000010001",
+        "Jupiter": "001101111001",
+        "Mars": "100111001101",
+        "Sun": "001110110001",
+        "Venus": "111010111000",
+        "Mercury": "110110110101",
+        "Moon": "001100110101",
+        "Ascendant": "001000110001"
+      },
+      "raw": "336542673307",
+      "trikona": "016010620102",
+      "ekadhipatya": "016010120102"
+    },
+    "Mars": {
+      "contributions": {
+        "Saturn": "100111110100",
+        "Jupiter": "010001110000",
+        "Mars": "011011011010",
+        "Sun": "011000110001",
+        "Venus": "000101001100",
+        "Mercury": "011000010001",
+        "Moon": "001000010001",
+        "Ascendant": "001000110101"
+      },
+      "raw": "145224472314",
+      "trikona": "014011351002",
+      "ekadhipatya": "011011151001"
+    },
+    "Mercury": {
+      "contributions": {
+        "Saturn": "100111110110",
+        "Jupiter": "010100110000",
+        "Mars": "011111011010",
+        "Sun": "011001011000",
+        "Venus": "111001101011",
+        "Mercury": "011001111101",
+        "Moon": "101010110010",
+        "Ascendant": "101010110110"
+      },
+      "raw": "456345674352",
+      "trikona": "021102150000",
+      "ekadhipatya": "011101150000"
+    },
+    "Jupiter": {
+      "contributions": {
+        "Saturn": "011000001001",
+        "Jupiter": "001101101111",
+        "Mars": "011011011010",
+        "Sun": "100111110111",
+        "Venus": "001100111001",
+        "Mercury": "111001110110",
+        "Moon": "010101010010",
+        "Ascendant": "111101110110"
+      },
+      "raw": "356526564464",
+      "trikona": "111102022010",
+      "ekadhipatya": "011101022010"
+    },
+    "Venus": {
+      "contributions": {
+        "Saturn": "110011110001",
+        "Jupiter": "100111100000",
+        "Mars": "100101100101",
+        "Sun": "000010011000",
+        "Venus": "111001111011",
+        "Mercury": "011001010001",
+        "Moon": "110011011111",
+        "Ascendant": "110011010111"
+      },
+      "raw": "652257463336",
+      "trikona": "320024240014",
+      "ekadhipatya": "000024040014"
+    },
+    "Saturn": {
+      "contributions": {
+        "Saturn": "011000010001",
+        "Jupiter": "110000110000",
+        "Mars": "100011100101",
+        "Sun": "100110110110",
+        "Venus": "000100001100",
+        "Mercury": "001011111000",
+        "Moon": "001000010001",
+        "Ascendant": "101000110101"
+      },
+      "raw": "424232562414",
+      "trikona": "203010440202",
+      "ekadhipatya": "003010440202"
+    }
+  },
+  "sarva": [
+    25,
+    27,
+    33,
+    23,
+    25,
+    30,
+    36,
+    45,
+    21,
+    23,
+    19,
+    30
+  ]
+}

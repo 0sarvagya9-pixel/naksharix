@@ -11,10 +11,14 @@ const querySchema = z.object({
   }, "Use a supported calendar date."),
   latitude: z.coerce.number().min(-90).max(90),
   longitude: z.coerce.number().min(-180).max(180),
-  timezone: z.string().regex(/^[+-]\d{2}:\d{2}$/).refine(offset => {
-    try { parseTimezoneOffsetToHours(offset, "2000-01-01", "12:00"); return true; } catch { return false; }
-  }, "Use a valid UTC offset."),
+  timezone: z.string().min(1).max(100).regex(/^(?:[+-]\d{2}:\d{2}|[A-Za-z][A-Za-z0-9_+./-]*)$/, "Use a UTC offset or IANA timezone."),
   place: z.string().min(2).max(120).optional()
+}).superRefine(({date, timezone}, ctx) => {
+  try {
+    parseTimezoneOffsetToHours(timezone, date, "12:00");
+  } catch {
+    ctx.addIssue({code: "custom", path: ["timezone"], message: "Use a valid timezone for this calendar date."});
+  }
 });
 
 export async function GET(request: NextRequest) {

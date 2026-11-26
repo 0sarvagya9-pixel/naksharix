@@ -1,6 +1,7 @@
 import "server-only";
 
 import * as Astronomy from "astronomy-engine";
+import { lahiriMoonLongitude, meanLahiriForMoon, terrestrialTimeForCivilMoon, LUNAR_FRAME_VERSION } from "@/lib/astrology/own-engine/lahiri-moon";
 import {estimateSiderealMotion} from "@/lib/astrology/own-engine/motion";
 import { calculatePanchang } from "@/lib/astrology/own-engine/panchang";
 import { buildD1Chart, buildD9Chart } from "@/lib/astrology/own-engine/charts";
@@ -112,6 +113,8 @@ export function calculateOwnEngineBirthChart(input: AstrologyBirthInput): BirthC
       provider: "own_engine",
       ayanamsaName: "Lahiri / Chitra Paksha",
       ayanamsaDegree: Number(ayanamsa.toFixed(6)),
+      lunarFrame: LUNAR_FRAME_VERSION,
+      lunarMeanAyanamsaDegree: meanLahiriForMoon(terrestrialTimeForCivilMoon(astronomyTime)),
       houseSystem: "Vedic Whole Sign",
       nodeMode: "Mean lunar node benchmark mode",
       julianDay: Number(julianDay.toFixed(8)),
@@ -129,9 +132,8 @@ function calculateSiderealLongitudes(time: Astronomy.AstroTime, julianDay: numbe
 }
 
 function siderealLongitude(body: SupportedBody, time: Astronomy.AstroTime, julianDay: number) {
-  const tropical = body === "Moon"
-    ? Astronomy.EclipticGeoMoon(time).lon
-    : Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[body], time, true)).elon;
+  if (body === "Moon") return lahiriMoonLongitude(time);
+  const tropical = Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[body], time, true)).elon;
   return tropicalToSidereal(tropical, julianDay);
 }
 

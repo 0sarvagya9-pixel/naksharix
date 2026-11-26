@@ -99,7 +99,7 @@
     "qa:ai-credit-contract": "node --experimental-strip-types scripts/qa-ai-credit-contract.mjs",
     "qa:durable-ops": "node --experimental-strip-types scripts/qa-durable-ops.mjs",
     "qa:web-push-contract": "node --experimental-strip-types scripts/qa-web-push-contract.mjs",
-    "qa:independent-ephemeris": "node scripts/qa-independent-ephemeris.mjs",
+    "qa:independent-ephemeris": "node scripts/qa-independent-ephemeris.mjs && node scripts/qa-dasha-lunar-frame.mjs",
     "qa:digital-package-contract": "node --experimental-strip-types scripts/qa-digital-package-contract.mjs",
     "qa:business-integrations-contract": "node --experimental-strip-types scripts/qa-business-integrations-contract.mjs",
     "qa:paid-course-contract": "node --experimental-strip-types scripts/qa-paid-course-contract.mjs",

@@ -60,7 +60,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   }return out.length?out:[""];
  }
  let page:PDFPage,y=0,chapter="",heading="";
- const starts:{title:string;page:number}[]=[];
+ const starts:{title:string;page:number;top:number}[]=[];
  const section=(key:string)=>content.sections.find(x=>x.key===key);
  const data=(key:string)=>section(key)?.data;
  const birth=obj(data("birth"));
@@ -107,7 +107,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  function interior(kicker:string,title:string,sub="",continuation=false){
   kicker=term(kicker);chapter=kicker;heading=title;page=pdf.addPage([W,H]);rect(0,0,W,H,iv);brand(24);
   caps(W-M,32,tr("PRIVATE REPORT","निजी रिपोर्ट","NIJI REPORT"),muted,8,"right");rule(M,68,W-M,68,gold,1);
-  if(!continuation)starts.push({title,page:pdf.getPageCount()});
+  if(!continuation)starts.push({title,page:pdf.getPageCount(),top:78});
   caps(M,84,kicker);y=102+fixed(M,102,title+(continuation?tr(" (continued)"," (जारी)"," (aage)"):""),CW,25,"title",wine,30)+8;
   if(sub)y+=fixed(M,y,sub,CW,10.1,"body",muted,14.7)+15;
  }
@@ -116,7 +116,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
   kicker=term(kicker);
   const headingHeight=wrap(title,CW,18,"title").length*22+43;
   if(firstSpecialist||y+headingHeight+minBody>BOTTOM){firstSpecialist=false;interior(kicker,title);return}
-  chapter=kicker;heading=title;starts.push({title,page:pdf.getPageCount()});rule(M,y+2,W-M,y+2,gold,.65);y+=14;caps(M,y,kicker, goldText,8);y+=15;
+  chapter=kicker;heading=title;starts.push({title,page:pdf.getPageCount(),top:y});rule(M,y+2,W-M,y+2,gold,.65);y+=14;caps(M,y,kicker, goldText,8);y+=15;
   y+=fixed(M,y,title,CW,18,"title",wine,22)+13;
  }
  function kundliChapter(kicker:string,title:string,intro:string){
@@ -338,6 +338,9 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  }else{
  interior(tr("CALCULATION RECORD","गणना विवरण","Calculation record"),tr("Birth data and calculation method","जन्म विवरण और गणना विधि","Birth data aur calculation method"),tr("The reference record keeps the exact birth instant and the selected calculation conventions separate from interpretation.","इस गणना रिकॉर्ड में सटीक जन्म समय और चुनी गई विधि को व्याख्या से अलग रखा गया है।","Reference record exact birth instant aur calculation method ko interpretation se alag rakhta hai."));
  table([tr("Parameter","विवरण"),tr("Actual input or calculation","वास्तविक विवरण या गणना","Di hui jaankari ya uski ganana")],[[tr("UTC birth instant","UTC जन्म समय","Janm ka UTC samay"),shown(birth.utcBirthInstant)],[tr("Latitude / longitude","अक्षांश / देशांतर"),shown(birth.latitude)+" / "+shown(birth.longitude)],[tr("Birth UTC offset","जन्म का UTC अंतर","Janm ke samay UTC ka antar"),shown(birth.utcOffsetAtBirth)],[tr("Ayanamsha","अयनांश"),shown(birth.ayanamsa)+" / "+deg(birth.ayanamsaDegree)],[tr("Ascendant longitude","लग्न देशांतर","Lagna ka deshantar"),deg(birth.ascendantLongitude)],[tr("House and node system","भाव और नोड पद्धति","Bhav aur lunar node ki paddhati"),display(birth.houseSystem)+" / "+display(birth.nodeMode)]],[1.4,2.6],9,25);
+ if(birth.lunarFrame==="lahiri-iae2000-p03-true-to-mean-v2"){
+  paragraph(tr("Lunar method v2 uses the mean Lahiri origin from the Indian Astronomical Ephemeris and corrects the Moon’s apparent longitude for nutation.","चंद्र गणना विधि 2 में भारतीय खगोलीय पंचांग का माध्य लाहिड़ी अयनांश लिया गया है। चंद्रमा के आभासी देशांतर में पृथ्वी के अक्ष के सूक्ष्म दोलन का सुधार किया गया है।","Chandra ganana ki doosri vidhi mein Bharatiya khagoliya panchang ka madhya Lahiri ayanamsha liya gaya hai. Chandra ke dikhai dene wale deshantar ko Prithvi ke aksh ke chhote dolan ke liye sudhaara gaya hai.")+" "+deg(birth.lunarMeanAyanamsaDegree),9,muted);
+ }
  const transitNote=transitClockNote(birth.transitTimeBasis,birth.transitTimezone);
  if(transitNote)note(tr(...transitNote));
  note(tr("Approximate birth times may alter house and divisional chart results. The supplied birth offset is used for the birth instant.","अनुमानित जन्म समय से भाव और वर्ग कुंडली बदल सकती है। दिए गए UTC अंतर से जन्म समय की गणना होती है।","Approximate birth time se bhav aur varga change ho sakte hain. Supplied UTC offset birth instant ke liye use hota hai."));
@@ -363,7 +366,7 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
    );
    const blockHeight=lines.reduce((total,line)=>total+wrap(line.text,CW,line.size,line.face).length*line.size*1.58+line.after,0);
    ensure(blockHeight);
-   starts.push({title:navamsaExample.title,page:pdf.getPageCount()});
+   starts.push({title:navamsaExample.title,page:pdf.getPageCount(),top:y});
    for(const line of lines)paragraph(line.text,line.size,line.color,line.face,line.after);
   }
   kundliChapter("03 / PLANETARY PLACEMENTS",tr("The nine grahas","नौ ग्रह","Nau grah"),tr("Degrees rounded to four decimal places.","अंश चार दशमलव स्थान तक।","Har sthiti degree mein di gayi hai, dashamlav ke baad chaar ankon tak."));planetTable(records(data("planets")));subhead(tr("Traditional interpretation","पारंपरिक व्याख्या","Paramparik vyakhya"));cardRows(insights.planetNotes.slice(0,2),2);
@@ -436,6 +439,19 @@ export async function renderEditorialReport(pdf:PDFDocument,content:PremiumRepor
  }}
  reflectionPlan();
  {const saved=page;page=contentsPage;rect(0,0,W,H,iv);brand(24);caps(W-M,32,tr("PRIVATE REPORT","निजी रिपोर्ट","NIJI REPORT"),muted,8,"right");rule(M,68,W-M,68,gold,1);caps(M,84,tr("YOUR READING GUIDE","पठन मार्गदर्शिका","Aapki padhne ki margdarshika"));fixed(M,104,tr("Contents","विषय सूची","Vishay suchi"),CW,29,"title",wine,35);let top=155;
- for(const item of starts){const lines=wrap(item.title,CW-58,10.2,"bold"),height=lines.length*14+10;if(top+height>BOTTOM)throw new ReportQualityError("REPORT_CONTENTS_OVERFLOW");tx(M,top,String(item.page).padStart(2,"0"),10,"bold",goldText);fixed(M+38,top,item.title,CW-58,10.2,"bold",ink,14);top+=height;rule(M+38,top-5,W-M,top-5,light);}page=saved;}
+ for(const item of starts){
+  const lines=wrap(item.title,CW-58,10.2,"bold"),height=lines.length*14+10;
+  if(top+height>BOTTOM)throw new ReportQualityError("REPORT_CONTENTS_OVERFLOW");
+  tx(M,top,String(item.page).padStart(2,"0"),10,"bold",goldText);
+  fixed(M+38,top,item.title,CW-58,10.2,"bold",ink,14);
+  const annotation=pdf.context.obj({
+   Type:"Annot",Subtype:"Link",Rect:[M,H-top-height+3,W-M,H-top+2],Border:[0,0,0],
+   Contents:PDFHexString.fromText(item.title),
+   Dest:[pdf.getPage(item.page-1).ref,"XYZ",0,H-item.top,0],
+  });
+  contentsPage.node.addAnnot(pdf.context.register(annotation));
+  top+=height;rule(M+38,top-5,W-M,top-5,light);
+ }
+ page=saved;}
  const pages=pdf.getPages();pages.forEach((p,i)=>{if(i===0)return;page=p;rule(M,H-44,W-M,H-44,gold);tx(M,H-34,"NAKSHARIX / care@naksharix.com",7.7,"bold",muted);tx(W-M,H-34,String(i+1).padStart(2,"0")+" / "+String(pages.length).padStart(2,"0"),8.3,"bold",muted,"right")});
 }

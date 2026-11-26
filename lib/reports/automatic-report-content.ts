@@ -1,5 +1,6 @@
 import "server-only";
 import { buildReportBinding } from "./report-quality";
+import { LUNAR_FRAME_VERSION } from "@/lib/astrology/own-engine/lahiri-moon";
 import {calculateVimshottariDasha,resolveDashaBirthInstant} from "@/lib/astrology/core-calculations";
 import {calculateVimshottariPratyantarWindow} from "@/lib/astrology/premium-engine/dasha";
 import { buildEditorialInsights,editorialHouse,YEARLY_PLANNING_HOUSES } from "@/lib/reports/editorial-insights";
@@ -85,7 +86,7 @@ export async function assembleAutomaticPaidReport(input:{
   const selected=(names:string[])=>chart.planetPositions.filter(p=>names.includes(p.planet)).map(compactPlanet);
   const houseReview=(nums:number[])=>nums.map(n=>editorialHouse(chart,n,l));
   const exactDasha=calculateVimshottariDasha(chart.planetPositions,resolveDashaBirthInstant(birth),l,now);
-  const dasha={asOf:now.toISOString(),method:exactDasha.method,currentMajor:exactDasha.currentMahadasha,currentSubPeriod:exactDasha.currentAntardasha,birthBalanceYears:exactDasha.birthBalanceYears,periods:exactDasha.mahadashas.map(p=>({planet:p.planet,startsAt:p.startsAt,endsAt:p.endsAt,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc,durationYears:p.durationYears})),nextTwelveMonths:exactDasha.mahadashas.flatMap(m=>m.antardashas??[]).filter(p=>Date.parse(p.endsAtUtc??p.endsAt)>now.getTime()&&Date.parse(p.startsAtUtc??p.startsAt)<now.getTime()+365.2425*86400000).map(p=>({major:p.parentPlanet,planet:p.planet,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc,startsAt:p.startsAt,endsAt:p.endsAt}))};
+  const dasha={asOf:now.toISOString(),method:exactDasha.method,lunarFrame:LUNAR_FRAME_VERSION,currentMajor:exactDasha.currentMahadasha,currentSubPeriod:exactDasha.currentAntardasha,birthBalanceYears:exactDasha.birthBalanceYears,periods:exactDasha.mahadashas.map(p=>({planet:p.planet,startsAt:p.startsAt,endsAt:p.endsAt,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc,durationYears:p.durationYears})),nextTwelveMonths:exactDasha.mahadashas.flatMap(m=>m.antardashas??[]).filter(p=>Date.parse(p.endsAtUtc??p.endsAt)>now.getTime()&&Date.parse(p.startsAtUtc??p.startsAt)<now.getTime()+365.2425*86400000).map(p=>({major:p.parentPlanet,planet:p.planet,startsAtUtc:p.startsAtUtc,endsAtUtc:p.endsAtUtc,startsAt:p.startsAt,endsAt:p.endsAt}))};
   const timingProducts=new Set(["premium-kundli","career-report","wealth-report","love-report","yearly-horoscope-report","fortune-report"]);
   const moonLongitude=planet("Moon")?.absoluteLongitude;
   const pratyantarWindow=timingProducts.has(input.slug)&&typeof moonLongitude==="number"?calculateVimshottariPratyantarWindow({moonLongitude,birthDateTime:resolveDashaBirthInstant(birth),from:now,to:new Date(now.getTime()+365.2425*86400000)}):[];
@@ -108,7 +109,7 @@ export async function assembleAutomaticPaidReport(input:{
   };
   section("birth",["Your birth details and calculation basis","आपके जन्म विवरण और गणना का आधार","Aapki birth details aur calculation basis"],{
     ...(includesTransits ? {transitTimeBasis:transitZone ? "civil_noon" : "fixed_offset_noon",transitTimezone:transitZone ?? birth.timezone} : {}),
-    name:birth.name,dateOfBirth:birth.dateOfBirth,timeOfBirth:birth.timeOfBirth,birthPlace:birth.birthPlace,
+    name:birth.name,dateOfBirth:birth.dateOfBirth,timeOfBirth:birth.timeOfBirth,birthPlace:birth.birthPlace,lunarFrame:chart.calculationMeta.lunarFrame,lunarMeanAyanamsaDegree:chart.calculationMeta.lunarMeanAyanamsaDegree,
     latitude:birth.latitude,longitude:birth.longitude,utcOffsetAtBirth:birth.timezone,utcBirthInstant:resolveDashaBirthInstant(birth).toISOString(),ayanamsaDegree:chart.calculationMeta.ayanamsaDegree,ascendantLongitude:chart.calculationMeta.ascendantLongitude,nodeMode:chart.calculationMeta.nodeMode,ascendant:chart.avakhada.ascendant,moonSign:chart.avakhada.moonSign,sunSign:chart.avakhada.sunSign,nakshatra:chart.avakhada.nakshatra,pada:planet("Moon")?.pada,ayanamsa:"Lahiri",houseSystem:"Whole sign",generatedOn:date
   },[BOUNDARY],"provider_verified");
   const question=input.question.trim();
@@ -267,7 +268,24 @@ export async function assembleAutomaticPaidReport(input:{
           ])]);
         }
       }
-      reflection("fortune-plan",["Build opportunities through action","प्रयास से अवसर बनाएँ","Action se opportunities build karein"],[["Set one achievable goal, ask for feedback and review progress weekly. No lucky outcome, lottery or financial gain can be guaranteed.","एक संभव लक्ष्य तय करें, प्रतिक्रिया लें और साप्ताहिक प्रगति देखें। किसी भाग्य, लॉटरी या लाभ की गारंटी नहीं।","Ek achievable goal set karein, feedback lein aur weekly progress review karein. Koi lottery ya financial gain guaranteed nahi."]]);
+      {
+        const day=Number(num.dateOfBirth.slice(-2));
+        const birthNumber=num.moolank.value,lifePath=num.lifePath.value;
+        const pair:LocalText=birthNumber===lifePath?[
+          "The two calculations converge here. Look for one occasion when the shared theme helped and one when circumstances outweighed it.",
+          "यहाँ दोनों गणनाओं का अंतिम अंक समान है। एक प्रसंग याद करें जिसमें यह विषय उपयोगी लगा और दूसरा जिसमें परिस्थिति का असर अधिक था।",
+          "Yahaan dono gananaon ka aakhiri ank ek hai. Ek mauka yaad karein jab yeh vishay kaam aaya aur ek jab halaat ka asar zyada tha.",
+        ]:[
+          "The two calculations emphasize different themes. Pick one real opportunity and write a separate question from each viewpoint before choosing a next step.",
+          "दोनों गणनाओं में अलग-अलग विषय सामने आते हैं। एक वास्तविक अवसर चुनें। अगला कदम तय करने से पहले दोनों दृष्टियों से एक-एक प्रश्न लिखें।",
+          "Dono gananaon mein alag vishay saamne aate hain. Ek asli mauka chunein aur agla kadam tay karne se pehle dono nazariyon se ek-ek sawaal likhein.",
+        ];
+        reflection("fortune-plan",["Build opportunities through action","प्रयास से अवसर बनाएँ","Apne prayaas se avsar banaayein"],[[
+          `Your birth day ${day} gives birth number ${birthNumber}; your full date ${num.dateOfBirth} gives life path ${lifePath}. Use the birth-number table to check both results.`,
+          `जन्म के दिन ${day} से मूलांक ${birthNumber} है। पूरी जन्मतिथि ${num.dateOfBirth} से जीवन पथ अंक ${lifePath} है। दोनों परिणाम आगे दिए अंक-विवरण से मिलाएँ।`,
+          `Janm ka din ${day} lene par moolank ${birthNumber} hai. Puri janm tithi ${num.dateOfBirth} se jeevan path ank ${lifePath} hai. Dono ko report ke ank-vivaran se milaayein.`,
+        ],pair]);
+      }
       break;
     default:throw new Error("REPORT_UNKNOWN");
   }
@@ -276,9 +294,9 @@ export async function assembleAutomaticPaidReport(input:{
   section("editorial-depth",["Calculation-led detailed reading","गणना आधारित विस्तृत विवेचन","Calculation-led detailed reading"],depth,["Traditional interpretations are not causal or predictive certification."]);
   section("editorial-insights",["Personal interpretation and reflection plan","व्यक्तिगत व्याख्या और चिंतन योजना","Personal interpretation aur reflection plan"],insights,["Traditional interpretations are not scientific predictions; no outcome is guaranteed."]);
   section("your-question",["Your submitted question and reflection","आपका प्रश्न और आत्मचिंतन","Aapka question aur reflection"],{
-    submittedQuestion:question,focus:tr(l,["Use the report's specific calculated indicators and practical checklist to reflect on your question. No exact event or outcome is predicted.","अपने प्रश्न पर विचार करने के लिए रिपोर्ट के गणना आधारित संकेत और व्यावहारिक सूची देखें। निश्चित घटना या परिणाम की भविष्यवाणी नहीं की गई है।","Apne question par report ke calculated indicators aur practical checklist se reflect karein. Exact outcome predict nahi kiya gaya hai."])
+    submittedQuestion:question,focus:insights.question.body
   });
   section("trust",["Important notes and support","महत्वपूर्ण सूचना और सहायता","Important notes aur support"],tr(l,[BOUNDARY,"यह रिपोर्ट नक्षरिक्ष की आंतरिक लाहिड़ी गणना और पारंपरिक नियमों पर आधारित आत्मचिंतन सामग्री है। बाहरी स्वतंत्र प्रमाणीकरण नहीं हुआ है। यह पेशेवर सलाह या निश्चित भविष्यवाणी नहीं है।","Yeh Naksharix internal Lahiri calculation aur traditional rules par based reflection report hai. Independent certification nahi hai; yeh professional advice ya guaranteed prediction nahi."]),["Care: care@naksharix.com | www.naksharix.com"]);
   if(sections.length<5||sections.some(s=>s.data==null))throw new Error("REPORT_CONTENT_INCOMPLETE");
-  return {title:report.name[l],content:{sections,metadata:{binding:buildReportBinding({...input,birth:checked.birth,extra:checked.extra},sections,now,includesTransits ? "naksharix-own-lahiri-transit-noon-v2" : "naksharix-own-lahiri-whole-sign-v1"),reportCompleteness:"partial_internal",verified:false,premiumComplete:false,providerVerifiedSections:sections.filter(s=>s.status==="provider_verified").map(s=>s.key),unavailableSections:[],limitations:[BOUNDARY]}}};
+  return {title:report.name[l],content:{sections,metadata:{binding:buildReportBinding({...input,birth:checked.birth,extra:checked.extra},sections,now,includesTransits ? "naksharix-own-lahiri-moon-v2-transit-noon-v2" : "naksharix-own-lahiri-moon-v2-whole-sign-v1"),reportCompleteness:"partial_internal",verified:false,premiumComplete:false,providerVerifiedSections:sections.filter(s=>s.status==="provider_verified").map(s=>s.key),unavailableSections:[],limitations:[BOUNDARY]}}};
 }

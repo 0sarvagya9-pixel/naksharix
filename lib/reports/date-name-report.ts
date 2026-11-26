@@ -108,9 +108,42 @@ export function buildDateNameReport(
     return card(t(["Applying this reading to your question","अपने प्रश्न के संदर्भ में पठन","Apne sawaal ke sandarbh mein"]),num.nameNumber.label+" "+num.nameNumber.value+" · "+num.nameNumber.meaning+" "+t(["Name one assumption in your question. Find an example from your experience that supports it and one that challenges it before deciding what to do.","अपने प्रश्न में एक धारणा पहचानें। आगे का कदम चुनने से पहले अपने अनुभव से उसके पक्ष और विपक्ष का एक-एक उदाहरण खोजें।","Apne question ka ek assumption pehchanein. Decision se pehle apne experience se uske favour aur against ek-ek example dhoondhein."]));
   };
   const response=questionCard();
+  const exercise=(title:LocalText,body:LocalText):EditorialCard=>({label:planLabel,title:t(title),body:t(body)});
+  const dailyPlan:EditorialCard[]=[];
+  if(slug==="name-correction-report"){
+    const spellings=[...new Set([name,...(extra.candidateNames??[])])];
+    for(const spelling of spellings){
+      const evidence=calculateRomanNameEvidence(spelling)!;
+      const letters=evidence.all.letters.map(item=>item.letter).join(" ");
+      const sum=evidence.all.sum, root=evidence.all.number;
+      dailyPlan.push({label:planLabel,title:spelling,body:t([
+        `Read these letters back: ${letters}. Their Pythagorean total is ${sum} and the reported number is ${root}. Try the spelling aloud before choosing how to write it.`,
+        `गणना में लिए गए अक्षर हैं ${letters}। इनका पाइथागोरियन योग ${sum} और अंतिम अंक ${root} है। नाम कैसे लिखना है, यह तय करने से पहले उसे बोलकर देखें।`,
+        `Ginti mein ye akshar aaye: ${letters}. Inka Pythagorean yog ${sum} aur aakhiri ank ${root} hai. Spelling chunne se pehle naam bolkar dekhein.`,
+      ])});
+    }
+  }else{
+    const counts=num.loShuGrid.filter(cell=>cell.present).map(cell=>`${cell.number} × ${cell.count}`).join(", ");
+    const missing=num.missingNumbers.map(item=>item.value).join(", ");
+    dailyPlan.push(exercise(["Rebuild your birth-date grid","अपनी जन्मतिथि का ग्रिड बनाएँ","Apni janm tithi ka grid banaayein"],[
+      `Write ${birth.dateOfBirth} as digits. Set aside zeroes and tally the remaining digits. Your occupied cells are ${counts}.`,
+      `जन्मतिथि ${birth.dateOfBirth} के अंक लिखें। शून्य अलग रखकर बाकी अंकों की आवृत्ति गिनें। भरे हुए खाने हैं ${counts}।`,
+      `Janm tithi ${birth.dateOfBirth} ke ank likhein. Shunya alag rakhkar baaki ankon ki ginti karein. Bhare hue khaane hain ${counts}.`,
+    ]));
+    dailyPlan.push(exercise(["Read the empty cells","खाली खाने पढ़ें","Khaali khaane padhein"],[
+      `Digits absent from this date: ${missing}. Check each against the date you wrote. A blank cell records a count of zero and says nothing about a person's ability.`,
+      `इस तिथि में अनुपस्थित अंक हैं ${missing}। अपनी लिखी तिथि से इन्हें मिलाएँ। खाली खाने का अर्थ है अंक की गिनती शून्य होना। इससे किसी व्यक्ति की क्षमता नहीं आँकी जा सकती।`,
+      `Is tithi mein ye ank nahi aaye: ${missing}. Apni likhi tareekh se inhein milaayein. Khaali khaana bas shunya ginti dikhaata hai. Isse kisi ki kshamata tay nahi hoti.`,
+    ]));
+    dailyPlan.push(exercise(["Compare two different inputs","दो अलग गणनाएँ मिलाएँ","Do alag gananaayein milaayein"],[
+      `The birth-date digits give life path ${num.lifePath.value}. The confirmed spelling ${name} gives name number ${num.nameNumber.value}. Circle the inputs that would change if the spelling changed.`,
+      `जन्मतिथि के अंकों से जीवन पथ अंक ${num.lifePath.value} और पुष्ट वर्तनी ${name} से नामांक ${num.nameNumber.value} है। पहचानें कि वर्तनी बदलने पर किस गणना के इनपुट बदलेंगे।`,
+      `Janm tithi ke ankon se jeevan path ank ${num.lifePath.value} hai. Pusht spelling ${name} se naamank ${num.nameNumber.value} hai. Dekhein ki spelling badalne par kis ganana ke akshar badlenge.`,
+    ]));
+  }
   const insights:EditorialInsights={
     overview:focus,cards:[profileCard(num.moolank),slug==="name-correction-report"?profileCard(num.lifePath):nameCard],
-    plan:num.remedies.map((body,i)=>({label:planLabel,title:String(i+1),body})),
+    plan:dailyPlan,
     question:response,planetNotes:[]
   };
   section("editorial-insights",["Personal reflection","व्यक्तिगत चिंतन","Personal reflection"],insights);

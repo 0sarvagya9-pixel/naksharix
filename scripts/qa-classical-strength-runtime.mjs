@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import {verifyPublishedAshtakavarga} from "./verify-published-ashtakavarga.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import Module,{createRequire} from "node:module";
@@ -7,7 +8,10 @@ Module._resolveFilename=function(n,...a){return resolve.call(this,n.startsWith("
 require.extensions[".ts"]=function(m,f){m._compile(ts.transpileModule(fs.readFileSync(f,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,f)};
 const {calculateVargaChart,calculateSupportedVargaCharts,calculateInternalClassicalVargas}=require("@/lib/astrology/varga/engine");
 const {calculateInternalAshtakvarga,reduceAiyarAshtakvarga}=require("@/lib/astrology/strength/ashtakvarga");
+console.log("PUBLISHED_ASHTAKAVARGA", JSON.stringify(verifyPublishedAshtakavarga(calculateInternalAshtakvarga, reduceAiyarAshtakvarga)));
 const {calculateClassicalStrengthBasis,calculateInternalShadbala,shadbalaSaptavargaSigns}=require("@/lib/astrology/strength/shadbala");
+const {verifyPublishedPositionStrength}=await import("./verify-published-position-strength.mjs");
+verifyPublishedPositionStrength(require("@/lib/astrology/strength/shadbala").calculateRamanPositionalCandidate);
 const ref=JSON.parse(fs.readFileSync("fixtures/astrology/classical-strength-reference.json","utf8"));
 const {fixtures}=JSON.parse(fs.readFileSync("fixtures/astrology/independent-runtime-swiss-reference.json","utf8"));
 const signs=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];

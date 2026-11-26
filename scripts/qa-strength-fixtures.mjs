@@ -77,22 +77,14 @@ function validateShadbalaFixtures() {
 }
 
 function validateAshtakvargaFixtures() {
-  const samples = readJson("fixtures/astrology/ashtakvarga-basic.json");
-  assert(Array.isArray(samples), "Ashtakvarga fixture root is array", `${samples.length} sample slots`);
-  for (const sample of samples) {
-    const prefix = `${sample.id ?? "missing-id"} schema`;
-    for (const field of ["id", "name", "purpose", "source_note", "verified_level"]) {
-      assert(isFilled(sample[field]), prefix, `${field} is required`);
-    }
-    assert(allowedLevels.has(sample.verified_level), prefix, `verified_level ${sample.verified_level}`);
-    assert(typeof sample.expected?.bhinna === "object", prefix, "expected.bhinna object exists");
-    assert(Array.isArray(sample.expected?.sarva), prefix, "expected.sarva array exists");
-    if (sample.verified_level === "verified_external") {
-      if (!sample.expected.sarva.length) record("FAILED", sample.name, "verified fixture has no Sarva Ashtakavarga values");
-      else record("BLOCKED_UNTIL_PROVIDER_READY", sample.name, "Calculated engine is present; trusted sign-by-sign runtime comparison still requires imported fixture values.");
-    } else {
-      record(sample.verified_level === "needs_external_validation" ? "SKIPPED_NEEDS_EXTERNAL_VALIDATION" : "BLOCKED_UNTIL_PROVIDER_READY", sample.name, sample.source_note);
-    }
+  const fixtures = readJson("fixtures/astrology/ashtakvarga-basic.json");
+  assert(Array.isArray(fixtures) && fixtures.length >= 2, "Published Ashtakavarga fixtures", "separate chart examples");
+  for (const filename of fixtures) {
+    const fixture = readJson(filename);
+    assert(/^https:\/\//.test(fixture.sourceUrl) && /^[a-f0-9]{64}$/.test(fixture.sourceSha256),
+      fixture.title, "source URL and digest recorded");
+    assert(Object.keys(fixture.grahas).length === 7 && fixture.sarva.length === 12,
+      fixture.title, "published seven-planet and twelve-sign tables present");
   }
 }
 
