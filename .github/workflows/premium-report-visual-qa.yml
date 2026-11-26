@@ -3,6 +3,12 @@ on:
   pull_request:
     paths:
       - 'lib/reports/**'
+      - 'lib/astrology/**'
+      - 'lib/numerology/**'
+      - 'public/fonts/**'
+      - 'public/report-design/royal/**'
+      - 'package.json'
+      - 'package-lock.json'
       - 'scripts/qa-automatic-report-delivery.mjs'
       - 'scripts/qa-royal-report-matrix.mjs'
       - 'scripts/qa-royal-report-pages.py'

@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {useRouter} from "next/navigation";
 import { normalizeLocale, requiredMessages, t, type Locale, type TranslationKey } from "@/lib/i18n";
 import { safeTranslation } from "@/lib/i18n-safe-overrides";
 
@@ -16,6 +17,8 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children, initialLocale = "en", routeLocale, documentLanguage = "en" }: { children: React.ReactNode; initialLocale?: Locale; routeLocale?: Locale; documentLanguage?: string }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const localeRef = useRef<Locale>(initialLocale);
+  const router = useRouter();
 
   useEffect(() => {
     const cookieLocale = document.cookie.match(/(?:^|;\s*)naksharix-language=([^;]+)/)?.[1];
@@ -34,7 +37,8 @@ export function LanguageProvider({ children, initialLocale = "en", routeLocale, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function updateLocale(nextLocale: Locale, persist = true) {
+  const updateLocale = useCallback((nextLocale: Locale, persist = true) => {
+    localeRef.current = nextLocale;
     setLocaleState(nextLocale);
     // Keep the language of a dedicated native-language page stable, while
     // retaining the user's original Hindi/Hinglish UI switch on English pages.
@@ -46,15 +50,21 @@ export function LanguageProvider({ children, initialLocale = "en", routeLocale, 
       document.cookie = `naksharix-language=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
       window.dispatchEvent(new CustomEvent("naksharix-language-change", { detail: nextLocale }));
     }
-  }
+  }, [documentLanguage]);
 
   const value = useMemo<LanguageContextValue>(() => ({
     locale,
-    setLocale: (nextLocale) => updateLocale(nextLocale),
+    setLocale: (nextLocale) => {
+      if(nextLocale===localeRef.current)return;
+      updateLocale(nextLocale);
+      // Server-rendered account and purchase status uses the saved language.
+      // Hydration and cross-tab synchronization do not invoke this action.
+      router.refresh();
+    },
     tr: (key) => safeTranslation(locale, key, t(locale, key)),
     requiredMessage: requiredMessages[locale],
     apiLocale: locale
-  }), [locale]);
+  }), [locale,router,updateLocale]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

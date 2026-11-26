@@ -17,6 +17,7 @@ import { decodeAutomaticReportInput,autoReportDeliveryMessage,needsOriginalGuard
 import { AutomaticReportProgress } from "@/components/report-request/automatic-report-progress";
 import {correctionCopy} from "@/lib/reports/report-correction-copy";
 import {fixedReportCheckout,hasCurrentPaidReportEntitlement} from "@/lib/reports/paid-entitlement";
+import {reportDeliveryCopy} from "@/lib/reports/delivery-copy";
 
 type SearchParams = Promise<{ id?: string }>;
 
@@ -27,6 +28,7 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
   if (!params.id) redirect("/profile");
 
   const locale = await readLocale();
+  const copy = reportDeliveryCopy(locale);
   const report = await prisma.reportRequest.findUnique({ where: { id: params.id } });
   if (!report || (!isAdmin(user) && report.userId !== user.id)) redirect("/profile");
 
@@ -68,31 +70,31 @@ export default async function ReportRequestSuccessPage({ searchParams }: { searc
 
           {paid ? (
             <p className="rounded-lg border border-emerald-300/20 bg-emerald-300/10 p-4 text-emerald-100">
-              {revisedReady?revisionCopy.revisedReady:guardianNeeded?revisionCopy.guardianRequired:sent?"Your report is ready and the email has been accepted by the delivery provider. If it is not in your inbox, use the secure download below.":ready?"Your report PDF is ready. Email delivery is pending; you can download it securely now.":automatic?autoReportDeliveryMessage(report.language):"Payment is verified and linked to this request. The request is in the paid review queue."}
+              {revisedReady?revisionCopy.revisedReady:guardianNeeded?revisionCopy.guardianRequired:sent?copy.sent:ready?copy.ready:automatic?autoReportDeliveryMessage(locale):copy.paidReview}
             </p>
-          ) : recordedPaid ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">Payment evidence requires reconciliation. Do not pay again; contact support with your existing request reference.</p> : report.paymentStatus==="REFUNDED" ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">This purchase has been refunded. Paid PDF access is no longer available.</p> : (
+          ) : recordedPaid ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">{copy.reconciliation}</p> : report.paymentStatus==="REFUNDED" ? <p className="rounded-lg border border-[#D4AF37]/20 p-4">{copy.refunded}</p> : (
             <p className="rounded-lg border border-[#D4AF37]/20 bg-[#D4AF37]/10 p-4">
-              This is a manual-review request. No payment has been collected. The team will confirm scope and fee before any checkout is enabled.
+              {copy.manual}
             </p>
           )}
 
-          {(paid||showAdminBypass)&&ready?<Button asChild><Link href={`/api/report-requests/${report.id}/download`}>Download private PDF</Link></Button>:<p>A download option will appear only after a real PDF has been generated.</p>}
+          {(paid||showAdminBypass)&&ready?<Button asChild><Link href={`/api/report-requests/${report.id}/download`}>{copy.download}</Link></Button>:<p>{copy.downloadPending}</p>}
           {revisions.length>0&&<section aria-label={revisionCopy.versions} className="space-y-2 rounded-lg border p-4">
             <h2 className="font-semibold">{revisionCopy.versions}</h2>
             {revisions.map(v=><p key={v.version}>{revisionCopy.version} {v.version} · {v.status==="READY"?
               <Link className="underline" href={`/api/report-requests/${report.id}/revisions/${v.version}`}>{revisionCopy.download}</Link>:
               v.status==="DECLINED"?revisionCopy.declined:v.status==="GENERATING"?revisionCopy.generating:revisionCopy.pending}</p>)}</section>}
           {canCorrect&&<Button asChild variant="outline"><Link href={`/report-request/${report.id}/correct`}>{revisionCopy.title}</Link></Button>}
-          {automatic&&paid&&!sent&&report.deliveryError?<p className="rounded-lg border border-[#D4AF37]/20 p-3 text-sm">{report.deliveryError}</p>:null}
+          {automatic&&paid&&!sent&&report.deliveryError?<p className="rounded-lg border border-[#D4AF37]/20 p-3 text-sm">{report.deliveryStatus==="auto_email_uncertain"?copy.emailUncertain:copy.deliveryReview}</p>:null}
           {automatic&&paid&&<AutomaticReportProgress id={report.id} pending={pending} canRetry={canRetry}/>}
-          {automatic&&!sent&&paid&&<p className="text-xs">Verify your registered account email to receive the report link. If delivery is delayed, contact care@naksharix.com with your request reference. No additional payment is needed.</p>}
-          <p className="text-xs break-all">Request reference: {report.id}</p>
-          <p>Request email: <span className="text-foreground">{report.deliveryEmail}</span></p>
+          {automatic&&!sent&&paid&&<p className="text-xs">{copy.verifyEmail}</p>}
+          <p className="text-xs break-all">{copy.reference}: {report.id}</p>
+          <p>{copy.email}: <span className="text-foreground">{report.deliveryEmail}</span></p>
           <p>{safeServerTranslation(locale, "needHelpCare")}</p>
 
           <div className="flex flex-wrap justify-center gap-3 pt-2">
-            <Button asChild><Link href="/my-readings">View My Readings</Link></Button>
-            <Button variant="outline" asChild><Link href="/reports">Browse Reports</Link></Button>
+            <Button asChild><Link href="/my-readings">{copy.readings}</Link></Button>
+            <Button variant="outline" asChild><Link href="/reports">{copy.browse}</Link></Button>
           </div>
         </CardContent>
       </Card>

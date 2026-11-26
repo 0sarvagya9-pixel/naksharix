@@ -350,6 +350,14 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/qa-consultation-request-ui.mjs | tee consultation-request-ui.log
+      - name: Qualify multilingual customer and contracted-business journeys
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-customer-localization-ui.mjs | tee customer-localization-ui.log
+          node scripts/qa-customer-status-pages.mjs | tee customer-status-pages.log
+          node scripts/qa-consultation-customer-locale.mjs | tee consultation-customer-locale.log
+          node scripts/qa-business-workspace-ui.mjs | tee business-workspace-ui.log
       - run: npx prisma generate
       - name: Bootstrap isolated browser-test database
         shell: bash
@@ -393,6 +401,10 @@ jobs:
           name: browser-release-qa
           path: |
             consultation-request-ui.log
+            customer-localization-ui.log
+            customer-status-pages.log
+            consultation-customer-locale.log
+            business-workspace-ui.log
             browser-qa.log
             /tmp/naksharix-browser-server.log
             test-results

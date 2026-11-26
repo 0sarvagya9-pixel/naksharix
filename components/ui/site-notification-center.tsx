@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AlertCircle, CheckCircle2, Info, TriangleAlert, X } from "lucide-react";
+import {useLanguage} from "@/components/language-provider";
+import {notificationCopy} from "@/lib/ui/notification-copy";
 import {
   SITE_NOTIFICATION_DURATION_MS,
   SITE_NOTIFICATION_EVENT,
@@ -22,6 +24,7 @@ const appearance = {
  * focus. Critical instructions stay visible in their original page as well.
  */
 export function SiteNotificationCenter() {
+  const {locale} = useLanguage(), copy = notificationCopy(locale);
   const [mounted, setMounted] = useState(false);
   const [queue, setQueue] = useState<(SiteNotice & { origin: HTMLElement | null })[]>([]);
   const region = useRef<HTMLDivElement>(null);
@@ -130,13 +133,13 @@ export function SiteNotificationCenter() {
           <div className="min-w-0 flex-1">
             <p className="font-cinzel text-lg font-bold leading-7">{active.title}</p>
             <p className="mt-1.5 break-words text-sm leading-6 text-[#655159]">{active.message}</p>
-            <p className="mt-3 text-xs font-medium text-[#967c83]">Closes automatically in 5 seconds</p>
+            <p className="mt-3 text-xs font-medium text-[#967c83]">{copy.closes}</p>
           </div>
         </div>
         <button
           type="button"
           onClick={dismiss}
-          aria-label="Dismiss notification"
+          aria-label={copy.dismiss}
           className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#72545d] hover:bg-[#fff1e5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8e3346]"
         >
           <X size={19} aria-hidden="true" />

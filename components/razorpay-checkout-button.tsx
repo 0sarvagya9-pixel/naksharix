@@ -13,6 +13,8 @@ import { canBypassPayment } from "@/lib/auth/permissions";
 import { PUJA_FEE_NOTICE_EN, PUJA_FEE_NOTICE_HI, PUJA_FEE_TERMS_VERSION } from "@/lib/puja/fee-terms";
 import Link from "next/link";
 import {getReportSlugForPaidId} from "@/lib/reports/checkout-catalogue";
+import {paymentCopy, paymentOrderMessage, type PaymentMessage} from "@/lib/payments/customer-copy";
+import {currentClientLocale} from "@/lib/i18n-copy";
 
 import {AI_CREDIT_TERMS_VERSION} from "@/lib/ai/credit-contract";
 import {PACKAGE_TERMS_VERSION} from "@/lib/digital-packages/catalogue";
@@ -58,17 +60,23 @@ type Props = {
   onVerified?: (paymentId:string)=>void|Promise<void>;
 };
 
+function paymentNotice(kind:"success"|"warning"|"info"|"error",message:PaymentMessage,title:PaymentMessage){
+  const copy=paymentCopy(currentClientLocale());
+  siteNotice[kind](copy[message],copy[title]);
+}
+
 export function RazorpayCheckoutButton({
   payload,
-  label = "Pay with Razorpay",
+  label,
   variant = "default",
   successHref,
   adminBypassHref,
   onVerified
 }: Props) {
-  const { tr } = useLanguage();
+  const { locale } = useLanguage();
+  const copy = paymentCopy(locale);
   const router = useRouter();
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<PaymentMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const verifiedRef = useRef(false);
   const busyRef=useRef(false);
@@ -76,7 +84,6 @@ export function RazorpayCheckoutButton({
   const [locked,setLocked]=useState(false);
   function setBusy(value:boolean){busyRef.current=value;setLoading(value);}
   function lockCheckout(){lockedRef.current=true;setLocked(true);}
-  const pendingMessage="Payment status needs confirmation. Check Payment History before retrying; do not pay twice.";
   const feeDialog = useRef<HTMLDialogElement>(null);
   const [feeAccepted, setFeeAccepted] = useState(false);
 
@@ -86,14 +93,14 @@ export function RazorpayCheckoutButton({
     const slug="reportId" in payload&&!payload.reportRequestId&&!payload.savedReportId&&!payload.preflightToken?getReportSlugForPaidId(payload.reportId):undefined;
     const preflightHref=slug?`/report-request/new?reportSlug=${encodeURIComponent(slug)}&prepare=1`:null;
     setBusy(true);
-    setStatus(tr("creatingSecureOrder"));
+    setStatus("creating");
 
     const userResponse = await fetch("/api/auth/me", { cache: "no-store" }).catch(() => null);
     const userJson = userResponse?.ok ? await userResponse.json().catch(() => null) : null;
     if (userResponse?.status === 401) {
       setBusy(false);
-      setStatus(tr("signInToPay"));
-      siteNotice.warning("Sign in to your account before starting payment.", "Sign in required");
+      setStatus("signIn");
+      paymentNotice("warning", "signIn", "signInTitle");
       // Resume the same public report or product after sign-in; never place a
       // charge before authentication, and never trust an external redirect.
       const resume = preflightHref??(window.location.pathname + window.location.search);
@@ -103,16 +110,14 @@ export function RazorpayCheckoutButton({
     }
     if (!userResponse?.ok || !userJson?.data?.user?.id) {
       setBusy(false);
-      setStatus("Unable to verify your account. No payment checkout was started. Please sign in or try again.");
+      setStatus("accountUnverified");
       return;
     }
     if (canBypassPayment(userJson?.data?.user)) {
       setBusy(false);
-      if(payload.purpose==="EXPERT_SERVICE"){setStatus("Expert services require an eligible customer account and verified payment.");return;}
-      if(payload.purpose==="DIGITAL_PACKAGE"){setStatus("Packages require an eligible customer account and captured payment.");return;}
-      if(payload.purpose==="AI_CREDITS"){setStatus("Credit packs require an eligible customer account and captured payment; no admin credits granted.");return;}
-      setStatus(tr("adminTestingModePaymentBypassed"));
-      siteNotice.info("Admin mode skipped a charge. No payment has been collected.", "Admin testing mode");
+      if(["EXPERT_SERVICE","DIGITAL_PACKAGE","AI_CREDITS"].includes(payload.purpose)){setStatus("eligibleAccount");return;}
+      setStatus("admin");
+      paymentNotice("info", "adminNotice", "adminTitle");
       router.push(adminBypassHref ?? getAdminBypassTarget(payload));
       return;
     }
@@ -122,8 +127,8 @@ export function RazorpayCheckoutButton({
     const scriptLoaded = await loadRazorpayScript();
     if (!scriptLoaded || !window.Razorpay) {
       setBusy(false);
-      setStatus(tr("paymentsComingSoon"));
-      siteNotice.warning("Secure payment checkout is unavailable. Please try later.", "Payment unavailable");
+      setStatus("unavailable");
+      paymentNotice("warning", "unavailable", "unavailableTitle");
       return;
     }
 
@@ -137,14 +142,14 @@ export function RazorpayCheckoutButton({
     } catch {
       setBusy(false);
       lockCheckout();
-      setStatus("Unable to reach the payment server. "+pendingMessage);
+      setStatus("networkPending");
       return;
     }
     const orderJson = await orderResponse.json().catch(() => null);
     if (!orderResponse.ok) {
       setBusy(false);
-      if(orderResponse.status>=500||orderResponse.status===409){lockCheckout();setStatus(pendingMessage);return;}
-      setStatus(toPaymentMessage(orderJson?.error, tr("paymentsComingSoon"), tr("signInToPay")));
+      if(orderResponse.status>=500||orderResponse.status===409){lockCheckout();setStatus("pending");return;}
+      setStatus(paymentOrderMessage(orderResponse.status));
       return;
     }
 
@@ -153,7 +158,7 @@ export function RazorpayCheckoutButton({
     if(!data){
       lockCheckout();
       setBusy(false);
-      setStatus(pendingMessage);
+      setStatus("pending");
       return;
     }
     const {keyId,order,item,paymentId}=data;
@@ -173,9 +178,9 @@ export function RazorpayCheckoutButton({
         verificationStarted=true;
         lockCheckout();
         setBusy(true);
-        setStatus(tr("verifyingPayment"));
+        setStatus("verifying");
         try {
-          if(response?.razorpay_order_id!==order.id||typeof response.razorpay_payment_id!=="string"||!response.razorpay_payment_id.startsWith("pay_")||typeof response.razorpay_signature!=="string"||!response.razorpay_signature){setStatus(pendingMessage);return;}
+          if(response?.razorpay_order_id!==order.id||typeof response.razorpay_payment_id!=="string"||!response.razorpay_payment_id.startsWith("pay_")||typeof response.razorpay_signature!=="string"||!response.razorpay_signature){setStatus("pending");return;}
           const verifyResponse = await secureFetch("/api/payments/razorpay/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -183,20 +188,20 @@ export function RazorpayCheckoutButton({
           });
           const verifyJson=await verifyResponse.json().catch(()=>null);
           if (!verifyResponse.ok||!isVerifiedPaymentAck(verifyJson,{id:paymentId,orderId:order.id,providerPaymentId:response.razorpay_payment_id,purpose:payload.purpose,amountPaise:order.amount})) {
-            setStatus("Payment confirmation is pending. Check your payment history before trying again; do not pay twice.");
+            setStatus("confirmationPending");
             // secureFetch already shows one centered payment error; preserve the detailed inline warning.
             return;
           }
           verifiedRef.current = true;
-          setStatus(tr("paymentVerified"));
-          siteNotice.success("Your payment has been verified. Check the booking/order history for fulfilment status.", "Payment verified");
+          setStatus("verified");
+          paymentNotice("success", "verifiedNotice", "verifiedTitle");
           const target = successHref?.replace("{paymentId}", encodeURIComponent(paymentId));
           if(onVerified){
-            try{await onVerified(paymentId);}catch{setStatus("Payment is verified. Review Payment History and the purchased service before retrying; do not pay again.");}
+            try{await onVerified(paymentId);}catch{setStatus("verifiedReview");}
           }else if (target) router.push(target);
           else router.refresh();
         } catch {
-          setStatus("Payment confirmation could not be checked. Check payment history before trying again; do not pay twice.");
+          setStatus("confirmationUnchecked");
           // secureFetch already provided one centered pending-payment notice.
         } finally {
           setBusy(false);
@@ -206,9 +211,9 @@ export function RazorpayCheckoutButton({
         ondismiss: () => {
           if (verifiedRef.current||verificationStarted) return;
           setBusy(false);
-          if(lockedRef.current){setStatus(pendingMessage);return;}
-          setStatus(tr("checkoutClosed"));
-          siteNotice.info("Checkout closed. If money was deducted, verify payment history before retrying.", "Checkout closed");
+          if(lockedRef.current){setStatus("pending");return;}
+          setStatus("closed");
+          paymentNotice("info", "closed", "closedTitle");
         }
       }
     });
@@ -217,14 +222,14 @@ export function RazorpayCheckoutButton({
         // Keep the current gateway session active; do not start another order.
         // A later successful retry inside this same checkout can still verify.
         lockCheckout();
-        setStatus("Payment was not confirmed. Check Payment History before retrying; do not pay twice.");
+        setStatus("failed");
       });
       checkout.open();
     } catch {
       setBusy(false);
       lockCheckout();
-      setStatus(pendingMessage);
-      siteNotice.error("Could not open checkout. Review payment history before trying again.", "Checkout unavailable");
+      setStatus("pending");
+      paymentNotice("error", "checkoutUnavailable", "checkoutUnavailableTitle");
     }
   }
 
@@ -232,18 +237,18 @@ export function RazorpayCheckoutButton({
     <div className="space-y-2">
       <Button type="button" className="h-auto min-h-10 w-full min-w-0 whitespace-normal py-2 text-center" variant={variant} onClick={() => { if (payload.purpose === "PUJA_BOOKING") { setFeeAccepted(false); feeDialog.current?.showModal(); } else void startCheckout(); }} disabled={loading||locked}>
         <CreditCard className="h-4 w-4" />
-        {loading ? tr("processing") : label}
+        {loading ? copy.processing : label ?? copy.pay}
       </Button>
-      {payload.purpose === "PUJA_BOOKING" ? <dialog ref={feeDialog} onClose={() => setFeeAccepted(false)} aria-label="Important Puja payment information" className="m-auto max-h-[90dvh] w-[min(92vw,32rem)] overflow-y-auto rounded-2xl border border-[#d8b58c] bg-white p-6 text-[#3c2830] shadow-2xl backdrop:bg-black/60">
-        <h2 className="text-xl font-bold">Important payment information</h2>
-        <p className="mt-3 text-2xl font-bold text-[#7b293d]">₹1,100 platform coordination fee</p>
+      {payload.purpose === "PUJA_BOOKING" ? <dialog ref={feeDialog} onClose={() => setFeeAccepted(false)} aria-label={copy.feeDialog} className="m-auto max-h-[90dvh] w-[min(92vw,32rem)] overflow-y-auto rounded-2xl border border-[#d8b58c] bg-white p-6 text-[#3c2830] shadow-2xl backdrop:bg-black/60">
+        <h2 className="text-xl font-bold">{copy.feeTitle}</h2>
+        <p className="mt-3 text-2xl font-bold text-[#7b293d]">{copy.feeAmount}</p>
         <p className="mt-3 text-sm leading-6">{PUJA_FEE_NOTICE_EN}</p>
         <p lang="hi" className="mt-3 text-sm leading-6">{PUJA_FEE_NOTICE_HI}</p>
-        <Link href="/refund-policy" target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm underline">Read refund policy</Link>
-        <label className="mt-4 flex items-start gap-3 text-sm font-semibold"><input type="checkbox" checked={feeAccepted} onChange={e=>setFeeAccepted(e.target.checked)} className="mt-1 h-4 w-4 shrink-0"/>I have read and accept the platform fee and availability terms.</label>
-        <div className="mt-5 flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" onClick={()=>feeDialog.current?.close()}>Cancel</Button><Button type="button" disabled={!feeAccepted || loading || locked} onClick={()=>{ if (!feeAccepted) return; feeDialog.current?.close(); void startCheckout(true); }}>Agree &amp; proceed to pay ₹1,100</Button></div>
+        <Link href="/refund-policy" target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm underline">{copy.refundPolicy}</Link>
+        <label className="mt-4 flex items-start gap-3 text-sm font-semibold"><input type="checkbox" checked={feeAccepted} onChange={e=>setFeeAccepted(e.target.checked)} className="mt-1 h-4 w-4 shrink-0"/>{copy.acceptFee}</label>
+        <div className="mt-5 flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" onClick={()=>feeDialog.current?.close()}>{copy.cancel}</Button><Button type="button" disabled={!feeAccepted || loading || locked} onClick={()=>{ if (!feeAccepted) return; feeDialog.current?.close(); void startCheckout(true); }}>{copy.agreePay}</Button></div>
       </dialog> : null}
-      {status ? <p className="text-sm naksh-muted-text" aria-live="polite">{status}</p> : null}
+      {status ? <p className="text-sm naksh-muted-text" aria-live="polite">{copy[status]}</p> : null}
     </div>
   );
 }
@@ -253,12 +258,6 @@ function getAdminBypassTarget(payload: CheckoutPayload) {
   if (payload.purpose === "SHOP_ORDER") return "/orders";
   if (payload.purpose === "SUBSCRIPTION") return `/report-request/new?plan=${payload.plan.toLowerCase()}&mode=admin`;
   return "/report-request/new?plan=premium&mode=admin";
-}
-
-function toPaymentMessage(error: string | undefined, fallback: string, signIn: string) {
-  if (!error || /razorpay|configured|key|server|unexpected/i.test(error)) return fallback;
-  if (/unauthenticated/i.test(error)) return signIn;
-  return error;
 }
 
 let razorpayScriptLoad:Promise<boolean>|null=null;

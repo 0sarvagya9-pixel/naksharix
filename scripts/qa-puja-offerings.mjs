@@ -70,9 +70,10 @@ assert.ok(bookingPage.includes("const canCheckout = release.enabled") &&
   bookingPage.includes("!paymentSettled && !pendingOld"),
   "PUJA_CHECKOUT_UI_MUST_REQUIRE_LAUNCH_PANDIT_SCHEDULE_CURRENCY_AND_NO_DUPLICATE");
 const checkoutClient=read("components/razorpay-checkout-button.tsx");
-assert.ok(checkoutClient.includes("Unable to reach the payment server")&&
-  checkoutClient.includes("Payment confirmation is pending")&&
-  checkoutClient.includes("do not pay twice")&&
+const checkoutCopy=read("lib/payments/customer-copy.ts");
+assert.ok(checkoutClient.includes('setStatus("networkPending")')&&checkoutCopy.includes("Unable to reach the payment server")&&
+  checkoutClient.includes('setStatus("confirmationPending")')&&checkoutCopy.includes("Payment confirmation is pending")&&
+  checkoutCopy.includes("do not pay twice")&&
   checkoutClient.includes('} finally {\n          setBusy(false);')&&
   checkoutClient.includes('checkout.on("payment.failed"')&&
   checkoutClient.includes('lockCheckout();')&&
