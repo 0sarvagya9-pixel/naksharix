@@ -2,6 +2,7 @@ import { reportConcernText,decodeAutomaticReportInput } from "@/lib/reports/auto
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
+import { ReportCorrectionReview } from "@/components/admin/report-correction-review";
 import { ReportRequestActions } from "@/components/admin/report-request-actions";
 import { requireAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
@@ -16,6 +17,7 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
     include: {
       user: { select: { email: true, name: true, role: true } },
       payment: { select: { id: true, amount: true, currency: true, providerOrderId: true, providerPaymentId: true, status: true, createdAt: true } },
+      revisions: {select:{version:true,status:true,input:true,reviewNote:true,emailStatus:true,providerEmailId:true},orderBy:{version:"desc"}},
       statusHistory: { orderBy: { createdAt: "desc" }, take: 12 }
     }
   });
@@ -57,6 +59,14 @@ export default async function AdminReportRequestDetailPage({ params }: { params:
             <p className="text-[#FFD700]">Concern</p>
             <p className="mt-2 naksh-muted-text">{reportConcernText(request.concern)||"-"}</p>
           </div>
+          {request.revisions.map(revision=><section key={revision.version} className="md:col-span-2 rounded-lg border p-4">
+            <h2>Correction · Version {revision.version} · {revision.status}</h2>
+            <details className="my-2"><summary>View corrected details</summary><pre className="mt-2 whitespace-pre-wrap break-words text-xs">{JSON.stringify(revision.input,null,2)}</pre></details>
+            {revision.reviewNote&&<p>{revision.reviewNote}</p>}
+            {revision.status==="READY"&&<p>Email · {revision.emailStatus} {revision.providerEmailId&&`· ${revision.providerEmailId}`}</p>}
+            {revision.status==="READY"&&revision.emailStatus!=="ACCEPTED"&&<ReportCorrectionReview id={id} version={revision.version} sendOnly/>}
+            {["PENDING","GENERATING"].includes(revision.status)&&<ReportCorrectionReview id={id} version={revision.version}/>}
+          </section>)}
           <div className="md:col-span-2">
             <ReportRequestActions
               requestId={request.id}

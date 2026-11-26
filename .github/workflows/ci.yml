@@ -147,6 +147,12 @@ jobs:
         run: node scripts/qa-saved-kundli-access-runtime.mjs
       - name: Exercise paid-report worker with disposable database and isolated email transport
         run: node scripts/qa-automatic-report-delivery.mjs --database
+      - name: Exercise report correction, versioned delivery and administrator races on disposable PostgreSQL
+        run: |
+          node scripts/qa-report-delivery-races.mjs
+          node scripts/qa-report-quality-quarantine.mjs
+      - name: Reconcile synthetic website and marketing provider preferences offline
+        run: node --experimental-strip-types scripts/qa-marketing-suppression.mjs --database
       - name: Qualify six digital products and course entitlements with disposable PostgreSQL
         env:
           PACKAGE_QA_DIR: ${{ runner.temp }}/package-qa
@@ -171,6 +177,10 @@ jobs:
         run: node scripts/qa-expert-services-runtime.mjs
       - name: Qualify credit reservation, expiry and refund runtime on disposable PostgreSQL
         run: node scripts/qa-ai-credit-runtime.mjs
+      - name: Verify paid report content and PDF binding
+        run: node --experimental-strip-types scripts/qa-report-quality-binding.mjs
+      - name: Verify report sales reconciliation on disposable PostgreSQL
+        run: node scripts/qa-report-sales-runtime.mjs
       - name: Qualify password recovery and quota isolation on disposable PostgreSQL
         run: node scripts/qa-password-reset-runtime.mjs
       - name: Verify deferred service review persistence and retry safety

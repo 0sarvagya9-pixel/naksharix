@@ -19,16 +19,17 @@ export async function buildFictionalReportSample(slug:string):Promise<Uint8Array
  // Include the cover and first interior pages of the actual renderer.
  const pages=await sample.copyPages(source,Array.from({length:Math.min(3,source.getPageCount())},(_,i)=>i));
  const font=await sample.embedFont(StandardFonts.HelveticaBold);
+ const royalPurple=rgb(0x24/255,0x0d/255,0x3d/255);
  for(const [index,page] of pages.entries()){
   sample.addPage(page);
   const {width,height}=page.getSize();
   const label="FICTIONAL SAMPLE - NOT A PERSONAL REPORT";
   const pagination="Preview "+(index+1)+" of "+pages.length+" pages | Full report "+source.getPageCount()+" pages";
   const size=10;
-  page.drawRectangle({x:0,y:height-25,width,height:25,color:rgb(.34,.10,.18)});
+  page.drawRectangle({x:0,y:height-25,width,height:25,color:royalPurple});
   page.drawText(label,{x:Math.max(10,(width-font.widthOfTextAtSize(label,size))/2),y:height-16,size,font,color:rgb(1,1,1)});
   // Original source page numbering remains visible, so identify the preview explicitly.
-  page.drawRectangle({x:0,y:0,width,height:14,color:rgb(.34,.10,.18)});
+  page.drawRectangle({x:0,y:0,width,height:14,color:royalPurple});
   page.drawText(pagination,{x:Math.max(10,(width-font.widthOfTextAtSize(pagination,8))/2),y:4,size:8,font,color:rgb(1,1,1)});
  }
  sample.setTitle("NAKSHARIX | FICTIONAL SAMPLE | "+title);

@@ -1,5 +1,5 @@
 import * as Astronomy from "astronomy-engine";
-import { nakshatraFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
+import { nakshatraFromLongitude, nakshatraIndexFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
 import { julianDayFromUtc, normalizeDegrees, parseTimezoneOffsetToHours,parseBirthDateTime,localBirthToUtcDate } from "@/lib/astrology/own-engine/time";
 import { tropicalToSidereal } from "@/lib/astrology/own-engine/zodiac";
 
@@ -85,7 +85,7 @@ export function calculatePremiumPanchang(input: PremiumPanchangInput): PremiumPa
     paksha: Math.floor(elongation / 12) < 15 ? "Shukla Paksha" : "Krishna Paksha",
     nakshatra: nakshatra.name,
     nakshatraPada: nakshatra.pada,
-    yoga: yogas[Math.min(26, Math.floor(yogaLongitude / (360 / 27)))],
+    yoga: yogas[nakshatraIndexFromLongitude(yogaLongitude)],
     karana: karanaFromElongation(elongation),
     vaar: weekday,
     rahuKaal: dayWindow?.rahuKaal ?? null,

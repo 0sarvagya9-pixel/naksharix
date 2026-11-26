@@ -1,18 +1,13 @@
 import "server-only";
 
 import { format } from "date-fns";
+import {nakshatraFromLongitude} from "@/lib/astrology/own-engine/nakshatra";
 import {navamsaSignFromLongitude} from "@/lib/astrology/own-engine/charts";
 import { calculateKundli, wholeSignHouse, type SwissKundliPlanet, type SwissKundliResult } from "@/lib/astrology/swiss-kundli";
 import { getPanchang } from "@/lib/astrology/engine";
 import type { AstrologyBirthInput, BirthChartData, HousePosition, PlanetPosition } from "@/lib/astrology/types";
 
 const rashis = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
-const nakshatras = [
-  "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha",
-  "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
-  "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
-];
-
 export function createSwissBirthChart(input: AstrologyBirthInput): BirthChartData {
   const dateOfBirth = formatDate(input.dateOfBirth);
   const timezoneOffset = resolveTimezoneOffset(input.timezone, dateOfBirth, input.timeOfBirth);
@@ -126,14 +121,6 @@ function toWholeSignChart(ascendantSignNumber: number, planets: PlanetPosition[]
       planets: planets.filter((planet) => planet.house === house).map((planet) => planet.planet)
     };
   });
-}
-
-function nakshatraFromLongitude(longitude: number) {
-  const normalized = ((longitude % 360) + 360) % 360;
-  const span = 360 / 27;
-  const index = Math.floor(normalized / span);
-  const pada = Math.floor((normalized % span) / (span / 4)) + 1;
-  return { name: nakshatras[index] ?? "Ashwini", pada };
 }
 
 function toAbsoluteLongitude(sign: string, degree: number) {

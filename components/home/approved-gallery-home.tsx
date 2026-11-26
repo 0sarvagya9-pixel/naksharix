@@ -54,6 +54,7 @@ const cards = [
 export function ApprovedGalleryHome() {
   return (
     <div className="nx-approved-home" data-visual-source="NAKSHARIX_DESIGN_APPROVAL_20261106">
+      <link rel="preload" as="image" href="/approved-gallery/hero-astrolabe.jpg" fetchPriority="high" />
       <section className="nx-a-hero" aria-labelledby="nx-a-heading">
         <div className="nx-a-hero-copy">
           <span className="nx-a-eyebrow">NAKSHARIX · Ancient wisdom for modern life</span>

@@ -67,6 +67,13 @@ try{
    const claims=await Promise.all([ledger.claimPackageItem(user.id,order.id,item.id),ledger.claimPackageItem(user.id,order.id,item.id)]);
    assert.deepEqual(claims.map(c=>c.kind).sort(),["busy","claimed"]);
    const claim=claims.find(c=>c.kind==="claimed");
+   if(def.key==="complete-life"&&item.kind==="numerology-lo-shu-report"){
+    assert.deepEqual(Object.keys(claim.item.privateInput.birth).sort(),["dateOfBirth","name"]);
+    assert.equal(claim.item.privateInput.extra.romanName,subjects[0].romanName);
+    const previous={...claim.item,privateInput:{...claim.item.privateInput,birth:subjects[0].birth}};
+    const previousPdf=await PDFDocument.load(await renderPackageItem(previous,claim.createdAt));
+    assert.ok(previousPdf.getPageCount()>1,"historical paid full-birth envelope still renders the name/date report");
+   }
    const bytes=await renderPackageItem(claim.item,claim.createdAt);
    const pdf=await PDFDocument.load(bytes);assert.ok(pdf.getPageCount()>=1);assert.ok(pdf.getTitle());
    assert.equal(await ledger.completePackageItem(user.id,order.id,item.id,randomUUID(),bytes),false);

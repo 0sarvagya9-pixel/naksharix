@@ -4,6 +4,7 @@ import { fail, handleApiError, ok } from "@/lib/api";
 import { getAdminApiUser } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
+import { hasActiveReportLease } from "@/lib/reports/report-delivery-service";
 import { assertAllowedReportStatusTransition } from "@/lib/reports/report-status-transitions";
 
 export async function GET() {
@@ -54,7 +55,7 @@ export async function PATCH(request: Request) {
     const body = patchSchema.parse(await request.json());
     const current = await prisma.reportRequest.findUnique({ where: { id: body.id } });
     if (!current) return fail("Report request not found", 404);
-    if(["auto_generating","auto_sending"].includes(current.deliveryStatus)&&Date.now()-current.updatedAt.getTime()<5*60_000)return fail("Automatic report processing is active. Retry after the current lease ends.",409);
+    if (hasActiveReportLease(current)) return fail("Report processing is active. Retry after the current operation ends.", 409);
     if (body.status === ReportRequestStatus.READY_FOR_GENERATION && current.status !== body.status) {
       if (body.reviewConfirmed !== true || (body.adminNotes ?? "").trim().length < 30) {
         return fail("Explicit admin review confirmation and at least 30 characters of chart/input review notes are required.", 422);
@@ -69,18 +70,20 @@ export async function PATCH(request: Request) {
     } catch (error) {
       return fail(error instanceof Error ? error.message : "Invalid status transition", 422);
     }
-    const reportRequest = await prisma.reportRequest.update({
-      where: { id: body.id },
+    const changed = await prisma.reportRequest.updateMany({
+      where: { id: body.id, updatedAt: current.updatedAt, status: current.status, deliveryStatus: current.deliveryStatus },
       data: {
         status: body.status,
         adminNotes: body.adminNotes ?? current.adminNotes
       }
     });
-    if (current.status !== reportRequest.status) {
+    if (changed.count !== 1) return fail("This request changed. Reload before updating the workflow.", 409);
+    const reportRequest = await prisma.reportRequest.findUniqueOrThrow({ where: { id: body.id } });
+    if (current.status !== body.status) {
       await writeReportStatusHistory({
         reportRequestId: reportRequest.id,
         oldStatus: current.status,
-        newStatus: reportRequest.status,
+        newStatus: body.status,
         actor: admin,
         note: body.adminNotes,
         metadata: { source: "admin_patch", reviewConfirmed: body.status === ReportRequestStatus.READY_FOR_GENERATION && body.reviewConfirmed === true }
@@ -91,7 +94,7 @@ export async function PATCH(request: Request) {
       action: "report_request.status_updated",
       targetType: "ReportRequest",
       targetId: reportRequest.id,
-      metadata: { from: current.status, to: reportRequest.status }
+      metadata: { from: current.status, to: body.status }
     });
     return ok({ reportRequest });
   } catch (error) {

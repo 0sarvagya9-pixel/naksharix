@@ -11,11 +11,21 @@ require.extensions[".ts"]=function(module,file){
 };
 const {calculateInternalChart}=require("@/lib/astrology/premium-engine/chart");
 const {calculatePremiumPanchang}=require("@/lib/astrology/premium-engine/panchang");
-const {normalizeBirthTime}=require("@/lib/astrology/own-engine/time");
+const {normalizeBirthTime,julianDayFromUtc}=require("@/lib/astrology/own-engine/time");
 const {provenance,fixtures}=JSON.parse(fs.readFileSync(new URL("../fixtures/astrology/independent-runtime-swiss-reference.json",import.meta.url),"utf8"));
 assert.equal(fixtures.length,10);assert.equal(provenance.angularToleranceDegrees,0.02);assert.equal(provenance.riseSetToleranceMinutes,3);
 assert.equal(normalizeBirthTime("12:00:59"),"12:00:59");
 assert.equal(normalizeBirthTime("12:00:00"),"12:00");
+// Published USNO Gregorian/UT examples. Additional half-second at J2000
+// checks that Date precision survives in the Julian day passed to the engine.
+const julianExamples=[
+ ["1877-08-11T07:30:00Z",2406842.8125],
+ ["1978-01-01T00:00:00Z",2443509.5],
+ ["1978-07-21T15:00:00Z",2443711.125],
+ ["2000-01-01T12:00:00.500Z",2451545+0.5/86400]
+];
+for(const [utc,jd] of julianExamples)assert.ok(Math.abs(julianDayFromUtc(new Date(utc))-jd)<=1e-9,utc);
+console.log("JULIAN_REFERENCE_PASS",julianExamples.length);
 const distance=(a,b)=>Math.abs(((a-b+540)%360)-180);
 const toMin=s=>{assert.match(s,/^\d{2}:\d{2}$/);const [h,m]=s.split(":").map(Number);assert.ok(h<24&&m<60);return h*60+m;};
 const signs=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];

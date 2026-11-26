@@ -410,6 +410,7 @@ model Payment {
   subscription      Subscription?    @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
   invoice           Invoice?
   purchasedReport   PurchasedReport?
+  reportCheckoutDraft ReportCheckoutDraft?
   reportRequest     ReportRequest?
   aiCreditGrant    AiCreditGrant?
   digitalPackageOrder DigitalPackageOrder?
@@ -420,6 +421,16 @@ model Payment {
 
   @@index([userId, createdAt])
   @@index([status, provider])
+}
+
+// Private working copy, isolated from provider/payment metadata and list responses.
+model ReportCheckoutDraft {
+  paymentId String @id
+  payment Payment @relation(fields:[paymentId],references:[id],onDelete:Cascade)
+  inputDigest String
+  fields Json
+  expiresAt DateTime
+  @@index([expiresAt])
 }
 
 model Invoice {
@@ -487,6 +498,7 @@ model ReportRequest {
   emailSentAt          DateTime?
   deliveryError        String?
   adminBypass   Boolean             @default(false)
+  revisions     ReportRevision[]
   statusHistory ReportStatusHistory[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
@@ -495,6 +507,32 @@ model ReportRequest {
   @@index([planType, status])
   @@index([reportSlug])
   @@index([paymentStatus])
+}
+
+model ReportRevision {
+  id              String        @id @default(cuid())
+  reportRequestId String
+  reportRequest   ReportRequest @relation(fields: [reportRequestId], references: [id], onDelete: Cascade)
+  version         Int
+  inputHash       String
+  input           Json
+  status          String        @default("PENDING")
+  reviewNote      String?
+  reviewedBy      String?
+  emailStatus     String        @default("PENDING")
+  firstEmailAt    DateTime?
+  acceptedEmailAt DateTime?
+  providerEmailId String?
+  bytes           Bytes?
+  storageDriver   String?
+  storageKey      String?
+  checksum        String?
+  size            Int?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([reportRequestId, version])
+  @@unique([reportRequestId, inputHash])
 }
 
 model ReportStatusHistory {

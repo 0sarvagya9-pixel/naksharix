@@ -1,4 +1,4 @@
-import { nakshatras } from "@/lib/astrology/own-engine/nakshatra";
+import { nakshatras, nakshatraIndexFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
 import { normalizeDegrees } from "@/lib/astrology/own-engine/time";
 
 export type DashaVerificationLevel = "limited_internal" | "provider_verified" | "verified_external" | "needs_external_validation";
@@ -75,8 +75,8 @@ export function calculateVimshottariDasha(input: {
   }
 
   const normalizedMoon = normalizeDegrees(input.moonLongitude);
-  const nakshatraIndex = Math.min(26, Math.floor(normalizedMoon / NAKSHATRA_SPAN));
-  const nakshatraOffset = normalizedMoon - nakshatraIndex * NAKSHATRA_SPAN;
+  const nakshatraIndex = nakshatraIndexFromLongitude(normalizedMoon);
+  const nakshatraOffset = normalizedMoon - nakshatraIndex * 40 / 3;
   const startingLord = lordForNakshatraIndex(nakshatraIndex);
   const startingDuration = yearsForLord(startingLord);
   const elapsedExact = (nakshatraOffset / NAKSHATRA_SPAN) * startingDuration;
@@ -100,7 +100,7 @@ export function calculateVimshottariDasha(input: {
     : [];
 
   return {
-    birthMoonLongitude: round(normalizedMoon),
+    birthMoonLongitude: normalizedMoon,
     birthNakshatra: nakshatras[nakshatraIndex],
     birthNakshatraIndex: nakshatraIndex + 1,
     startingMahadashaLord: startingLord,

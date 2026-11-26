@@ -1,5 +1,5 @@
-/** Fixed checked-in contract derived from the 17 reviewed Prisma release models
- * and the nine additive SQL migrations. Catalog metadata only, no data rows.
+/** Fixed checked-in contract derived from the 19 reviewed Prisma release models
+ * and the eleven additive SQL migrations. Catalog metadata only, no data rows.
  * CHECK counts detect omissions but are not proof of exact check semantics.
  */
 type Column={table:string;column:string;udt:string;nullable:boolean;precision:number|null};
@@ -25,7 +25,9 @@ export const RELEASE_SCHEMA_EXPECTED:ReleaseCatalog={
   "ReferenceReminder",
   "DeferredServicePlan",
   "DeferredServiceAllocation",
-  "DeferredServiceReceipt"
+  "DeferredServiceReceipt",
+  "ReportCheckoutDraft",
+  "ReportRevision"
  ],
  "columns": [
   {
@@ -1483,6 +1485,167 @@ export const RELEASE_SCHEMA_EXPECTED:ReleaseCatalog={
    "udt": "timestamp",
    "nullable": false,
    "precision": 3
+  },
+  {
+   "table": "ReportCheckoutDraft",
+   "column": "paymentId",
+   "udt": "text",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportCheckoutDraft",
+   "column": "inputDigest",
+   "udt": "text",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportCheckoutDraft",
+   "column": "fields",
+   "udt": "jsonb",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportCheckoutDraft",
+   "column": "expiresAt",
+   "udt": "timestamp",
+   "nullable": false,
+   "precision": 3
+  },
+  {
+   "table": "ReportRevision",
+   "column": "id",
+   "udt": "text",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "reportRequestId",
+   "udt": "text",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "version",
+   "udt": "int4",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "inputHash",
+   "udt": "text",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "input",
+   "udt": "jsonb",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "status",
+   "udt": "text",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "reviewNote",
+   "udt": "text",
+   "nullable": true,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "reviewedBy",
+   "udt": "text",
+   "nullable": true,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "emailStatus",
+   "udt": "text",
+   "nullable": false,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "firstEmailAt",
+   "udt": "timestamp",
+   "nullable": true,
+   "precision": 3
+  },
+  {
+   "table": "ReportRevision",
+   "column": "acceptedEmailAt",
+   "udt": "timestamp",
+   "nullable": true,
+   "precision": 3
+  },
+  {
+   "table": "ReportRevision",
+   "column": "providerEmailId",
+   "udt": "text",
+   "nullable": true,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "bytes",
+   "udt": "bytea",
+   "nullable": true,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "storageDriver",
+   "udt": "text",
+   "nullable": true,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "storageKey",
+   "udt": "text",
+   "nullable": true,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "checksum",
+   "udt": "text",
+   "nullable": true,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "size",
+   "udt": "int4",
+   "nullable": true,
+   "precision": null
+  },
+  {
+   "table": "ReportRevision",
+   "column": "createdAt",
+   "udt": "timestamp",
+   "nullable": false,
+   "precision": 3
+  },
+  {
+   "table": "ReportRevision",
+   "column": "updatedAt",
+   "udt": "timestamp",
+   "nullable": false,
+   "precision": 3
   }
  ],
  "indexes": [
@@ -1975,6 +2138,48 @@ export const RELEASE_SCHEMA_EXPECTED:ReleaseCatalog={
    ],
    "unique": false,
    "primary": false
+  },
+  {
+   "table": "ReportCheckoutDraft",
+   "columns": [
+    "paymentId"
+   ],
+   "unique": true,
+   "primary": true
+  },
+  {
+   "table": "ReportCheckoutDraft",
+   "columns": [
+    "expiresAt"
+   ],
+   "unique": false,
+   "primary": false
+  },
+  {
+   "table": "ReportRevision",
+   "columns": [
+    "id"
+   ],
+   "unique": true,
+   "primary": true
+  },
+  {
+   "table": "ReportRevision",
+   "columns": [
+    "reportRequestId",
+    "version"
+   ],
+   "unique": true,
+   "primary": false
+  },
+  {
+   "table": "ReportRevision",
+   "columns": [
+    "reportRequestId",
+    "inputHash"
+   ],
+   "unique": true,
+   "primary": false
   }
  ],
  "foreignKeys": [
@@ -2265,6 +2470,30 @@ export const RELEASE_SCHEMA_EXPECTED:ReleaseCatalog={
    ],
    "onDelete": "c",
    "onUpdate": "c"
+  },
+  {
+   "table": "ReportCheckoutDraft",
+   "columns": [
+    "paymentId"
+   ],
+   "target": "Payment",
+   "targetColumns": [
+    "id"
+   ],
+   "onDelete": "c",
+   "onUpdate": "c"
+  },
+  {
+   "table": "ReportRevision",
+   "columns": [
+    "reportRequestId"
+   ],
+   "target": "ReportRequest",
+   "targetColumns": [
+    "id"
+   ],
+   "onDelete": "c",
+   "onUpdate": "c"
   }
  ],
  "checkCounts": [
@@ -2335,6 +2564,14 @@ export const RELEASE_SCHEMA_EXPECTED:ReleaseCatalog={
   {
    "table": "DeferredServiceReceipt",
    "count": 1
+  },
+  {
+   "table": "ReportCheckoutDraft",
+   "count": 0
+  },
+  {
+   "table": "ReportRevision",
+   "count": 2
   }
  ],
  "enumValues": [

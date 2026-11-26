@@ -253,7 +253,7 @@ function verifyPromiseCoverage(slug,language,content){
  if(slug==="jupiter-transit-report")assert.equal(sections.get("jupiter-transits").data.length,13);
  if(slug==="name-correction-report")assert.ok(sections.get("name-comparison").data.length>=2);
  const fields=publicReportRequiredDetails(slug,language),scope=reportIntakeScope(slug);
- assert.equal(fields.length,5+(scope.couple?2:0)+(scope.numerologyName?1:0)+(scope.nameCorrection?2:0)+(scope.babyName?1:0));
+ assert.equal(fields.length,(scope.dateNameOnly?2:5)+(scope.couple?2:0)+(scope.numerologyName?1:0)+(scope.nameCorrection?2:0)+(scope.babyName?1:0));
  assert.ok(fields.every(x=>x.trim().length>0));assert.equal(new Set(fields).size,fields.length);
  requiredDisclosureChecks++;
 }
@@ -323,6 +323,77 @@ if(!dbMode){
  const altExtra={...extra,romanName:"Ravi Test",candidateNames:["Ravi","Raavi"]};let pairs=0;
  for(const slug of input.AUTO_REPORT_SLUGS){const now=new Date("2026-11-24T12:00:00Z");const a=await assembleAutomaticPaidReport({slug,birth,extra,question,language:"en",now}),b=await assembleAutomaticPaidReport({slug,birth:alt,extra:altExtra,question,language:"en",now});assert.notDeepEqual(a.content.sections.find(s=>s.key==="editorial-depth").data,b.content.sections.find(s=>s.key==="editorial-depth").data,slug+" differentiation");pairs++;}
  const {calculateNumerologyReport}=require("@/lib/numerology"),oldZone=process.env.TZ;
+ // Date/name products must run without birth time, coordinates or a chart.
+ const {calculateCalendarNumbers}=require("@/lib/numerology/calendar");
+ const reference=new Date("2026-11-23T00:00:00Z");
+ const bounded=(date,at=reference)=>calculateCalendarNumbers(new Date(date+"T00:00:00Z"),at);
+ const published=bounded("1980-05-05");
+ assert.deepEqual([published.personalYear,published.personalMonth,published.personalDay],[2,4,9]);
+ assert.deepEqual(bounded("1962-07-03").challenges,[4,6,2,2]);
+ assert.deepEqual(bounded("2007-09-09").challenges,[0,0,0,0]);
+ assert.deepEqual(bounded("2000-02-29").birthRoots,{month:2,day:2,year:2});
+ assert.equal(bounded("1980-05-05",new Date("2027-01-01T00:00:00Z")).personalYear,3);
+ assert.equal(bounded("2001-05-05").personalYear,published.personalYear);
+ assert.throws(()=>bounded("invalid"));
+ const dateNameBirth={name:"Asha Test",dateOfBirth:"1992-05-18"};
+ for(const slug of ["numerology-lo-shu-report","name-correction-report"])for(const language of ["en","hi","hinglish"]){
+   const options=slug==="name-correction-report"?{confirmed:true,romanName:"SKY",candidateNames:["AEIOU"]}:{confirmed:true,romanName:"SKY"};
+   const args={slug,birth:dateNameBirth,extra:options,question:"",language,now:reference};
+   const make=(a)=>assembleAutomaticPaidReport(a);
+   const minimal=await make(args);
+   assert.deepEqual(minimal,await make({...args,birth:{...birth,...dateNameBirth}}));
+   const basis=minimal.content.sections.find(s=>s.key==="birth").data;
+   assert.deepEqual(Object.keys(basis).sort(),["name","dateOfBirth","romanName","generatedOn","calculationBasis","nameMethod","calendarMethod"].sort());
+   assert.equal(basis.calculationBasis,"date_name_only");
+   assert.deepEqual(minimal.content.metadata.providerVerifiedSections,[]);
+   assert.equal(minimal.content.sections.some(s=>["planets","houses","dasha","panchang"].includes(s.key)),false);
+   const chapters=minimal.content.sections.find(s=>s.key==="editorial-depth").data;
+   if(slug==="name-correction-report"){
+     const methods=chapters.find(c=>c.key==="name-method-comparison").cards;
+     assert.deepEqual(methods.map(c=>c.title),["SKY","AEIOU"]);
+     assert.match(methods[0].body,/S=3 \+ K=2 \+ Y=1 = 6/);
+     assert.match(methods[1].body,/A=1 \+ E=5 \+ I=1 \+ O=7 \+ U=6 = 20/);
+     assert.ok(methods[1].body.endsWith(" 2."));
+   }
+   assert.ok(chapters.some(c=>c.key==="numerology-cycles"));
+   assert.ok(chapters.every(c=>c.key!=="house-lords"));
+   const months=chapters.find(c=>c.key==="numerology-next-twelve-months").cards;
+   assert.equal(months.length,12);
+   assert.deepEqual([months[0].label,months[11].label],["2026-12","2027-11"]);
+   assert.ok(months[0].title.endsWith("9")&&months[1].title.endsWith("8"));
+ }
+ let questionCases=0;
+ for(const language of ["en","hi","hinglish"]){
+   const questions=[
+     ["",false],["career ka next step?",true],["financial planning?",true],
+     ["relationship mein baat kaise karun?",true],["medical concern?",false],["Compare name AEIOU",true],
+     ["मेरे लक्ष्य के लिए क्या विचार है?",true]
+   ];
+   const answers=new Set();
+   for(const [question,usesNumber] of questions){
+     const report=await assembleAutomaticPaidReport({slug:"name-correction-report",birth:dateNameBirth,
+       extra:{confirmed:true,romanName:"SKY",candidateNames:["AI","AEIOU"]},question,language,now:reference});
+     const section=report.content.sections.find(s=>s.key==="editorial-insights").data.question;
+     answers.add(section.body);
+     if(usesNumber)assert.match(section.body,/\d/);
+     if(question.includes("AEIOU"))assert.ok(section.body.includes("AEIOU (24 -> 6)")&&section.body.includes("SKY (10 -> 1)"));
+     questionCases++;
+   }
+   assert.equal(answers.size,questions.length);
+ }
+ for(const [spelling,expected] of [[undefined,0],["Asha Test",1]]){
+   const fortune=await assembleAutomaticPaidReport({slug:"fortune-report",birth,extra:{confirmed:true,romanName:spelling},language:"en",question:"",now:reference});
+   const facts=fortune.content.sections;
+   const nameCards=facts.find(s=>s.key==="editorial-depth").data.find(c=>c.key==="numerology-arithmetic").cards;
+   assert.equal(nameCards.length,1+expected);
+   const profile=facts.find(s=>s.key==="numerology-profile");
+   assert.equal(Boolean(profile.data.nameNumber),Boolean(expected));
+   assert.equal(profile.limitations.length,expected?0:1);
+   assert.ok(require("@/lib/reports/report-quality").verifyReportContent(fortune.content,{requestId:"historic-fortune",templateId:"fortune-report",language:"en",customerName:birth.name}));
+   assert.equal(facts.find(s=>s.key==="lo-shu").data.grid.length,9);
+   assert.equal(facts.find(s=>s.key==="editorial-depth").data.find(c=>c.key==="numerology-next-twelve-months").cards.length,12);
+ }
+ console.log("DATE_NAME_REPORTS_PASS",JSON.stringify({minimalLocalizedReports:6,calendarBoundariesAndExamples:7,fortuneNameConsentCases:2,questionCases}));
  try{for(const zone of ["UTC","America/Los_Angeles","Asia/Kolkata","Pacific/Auckland"]){process.env.TZ=zone;const r=calculateNumerologyReport({name:"Asha Test",dateOfBirth:"1992-05-18",locale:"en"});assert.equal(r.dateOfBirth,"1992-05-18");assert.equal(r.moolank.value,9);assert.equal(r.lifePath.value,8);assert.equal(r.loShuGrid.find(x=>x.number===8).count,1);}}finally{if(oldZone===undefined)delete process.env.TZ;else process.env.TZ=oldZone;}
  assert.throws(()=>calculateNumerologyReport({name:"Asha Test",dateOfBirth:"1990-02-30",locale:"en"}));
  const noRoman=await assembleAutomaticPaidReport({slug:"premium-kundli",birth:{...birth,name:"आशा"},extra:{confirmed:true},question,language:"hi",now:new Date("2026-11-24T12:00:00Z")});

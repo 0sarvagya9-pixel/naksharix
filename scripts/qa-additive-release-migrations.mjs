@@ -19,16 +19,16 @@ const baseline=execFileSync("git",["show",base+":prisma/schema.prisma"],{encodin
 const hash=createHash("sha256").update(baseline).digest("hex");
 writeFileSync("prisma/release-fixture-baseline.prisma",baseline);
 execFileSync("npx",["--no-install","prisma","db","push","--skip-generate","--schema=prisma/release-fixture-baseline.prisma"],{stdio:"inherit"});
-const names=["MarketingConsent","AiCreditGrant","AiCreditUse","WebPushSubscription","DigitalPackageOrder","DigitalPackageItem","BusinessTenant","BusinessApiKey","BusinessUsageMonth","BusinessUsageCall","ExpertServiceRequest","AiMembership","AiMembershipCycle","ReferenceReminder","DeferredServicePlan","DeferredServiceAllocation","DeferredServiceReceipt"];
-const files=["20261124-marketing-consent.sql","20261124-ai-credit-ledger.sql","20261124-web-push.sql","20261124-digital-packages.sql","20261124-business-integrations.sql","20261124-expert-services.sql","20261124-ai-membership.sql","20261125-reference-reminders.sql","20261125-deferred-service-planning.sql"];
+const names=["MarketingConsent","AiCreditGrant","AiCreditUse","WebPushSubscription","DigitalPackageOrder","DigitalPackageItem","BusinessTenant","BusinessApiKey","BusinessUsageMonth","BusinessUsageCall","ExpertServiceRequest","AiMembership","AiMembershipCycle","ReferenceReminder","DeferredServicePlan","DeferredServiceAllocation","DeferredServiceReceipt","ReportCheckoutDraft","ReportRevision"];
+const files=["20261124-marketing-consent.sql","20261124-ai-credit-ledger.sql","20261124-web-push.sql","20261124-digital-packages.sql","20261124-business-integrations.sql","20261124-expert-services.sql","20261124-ai-membership.sql","20261125-reference-reminders.sql","20261125-deferred-service-planning.sql","20261126-private-report-checkout-draft.sql","20261126-report-revisions.sql"];
 const qnames=names.map(n=>"'"+n+"'").join(",");
 const list=()=>psql(["-Atc","SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name IN ("+qnames+") ORDER BY table_name"]).trim().split("\n").filter(Boolean);
 assert.equal(list().length,0);
 assert.deepEqual(RELEASE_SCHEMA_EXPECTED.tables,names,"Contract tracks the original migration table set");
 const catalog=()=>JSON.parse(psql(["-Atc",RELEASE_CATALOG_SQL]).trim());
 const before=compareReleaseCatalog(catalog());
-assert.equal(before.ready,false);assert.equal(before.missing.tables.length,17);
-assert.equal(before.missing.columns.length,208);assert.equal(before.missing.enumValues.length,4);
+assert.equal(before.ready,false);assert.equal(before.missing.tables.length,19);
+assert.equal(before.missing.columns.length,231);assert.equal(before.missing.enumValues.length,4);
 let firstCatalog;
 for(let round=1;round<=2;round++){
  for(const name of files){

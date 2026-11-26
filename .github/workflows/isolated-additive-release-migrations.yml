@@ -6,6 +6,7 @@ on:
       - 'prisma/schema.prisma'
       - 'deploy/sql/20261124-*.sql'
       - 'deploy/sql/20261125-*.sql'
+      - 'deploy/sql/20261126-*.sql'
       - 'lib/ops/release-schema-contract.ts'
       - 'scripts/qa-additive-release-migrations.mjs'
       - '.github/workflows/isolated-additive-release-migrations.yml'

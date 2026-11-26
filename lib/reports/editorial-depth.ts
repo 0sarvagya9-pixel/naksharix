@@ -102,27 +102,7 @@ export function buildReportDepth(chart:BirthChartData,slug:string,sections:Premi
   const placement=(p:typeof major)=>term(p.planet)+" / "+term(p.sign)+" / "+house(p.house!)+" ("+theme(p.house!)+")";
   return {label:start+" – "+end,title:term(major.planet)+" / "+term(sub.planet),body:t(["Natal major-period lord: ","जन्म महादशा स्वामी: ","Natal mahadasha lord: "])+placement(major)+". "+t(["Natal sub-period lord: ","जन्म अंतर्दशा स्वामी: ","Natal antardasha lord: "])+placement(sub)+".\n"+t(["Practical reflection: ","व्यावहारिक चिंतन: ","Practical reflection: "])+action(sub.house)};
  }));
- if(["premium-kundli","numerology-lo-shu-report","name-correction-report","baby-name-report","fortune-report"].includes(slug)){
-  const dob=chart.birthDetails.dateOfBirth,digits=dob.replace(/\D/g,"").split("").map(Number);
-  const reduce=(n:number)=>{const steps=[n];while(n>9&&![11,22,33].includes(n)){n=String(n).split("").reduce((a,b)=>a+Number(b),0);steps.push(n);}return steps.join(" -> ");};
-  const cards:EditorialCard[]=[{label:t(["CIVIL BIRTH DATE","स्थानीय जन्म तिथि","Civil birth date"]),title:dob,body:t(["Birth-day reduction: ","जन्म दिन की गणना: ","Birth day reduction: "])+reduce(Number(dob.slice(8,10)))+". "+digits.join(" + ")+" = "+reduce(digits.reduce((a,b)=>a+b,0))+". "+t(["The convention preserves 11, 22 and 33. Date digits are taken from the civil date, not converted to another timezone.","इस विधि में 11, 22 और 33 सुरक्षित रहते हैं। अंक स्थानीय जन्म तिथि से लिए जाते हैं, दूसरे समय क्षेत्र से नहीं।","Method 11, 22 aur 33 preserve karta hai. Digits civil date se hain, doosre timezone se nahi."])}];
-  const names=slug==="baby-name-report"?rows(data("name-options")).map(x=>str(x.name)):slug==="name-correction-report"?rows(data("name-comparison")).map(x=>str(x.name)):slug==="fortune-report"?[]:[romanName];
-  for(const name of [...new Set(names)].filter(isFullRomanNumerologyName)){
-   const e=calculateRomanNameEvidence(name)!;
-   const trace=(g:typeof e.vowels)=>g?g.letters.map(x=>x.letter+"="+x.value).join(", ")+"; "+g.steps.join(" -> "):term("Not available");
-   cards.push({label:t(["LETTER VALUES","अक्षर मान","Letter values"]),title:name,body:t(["All letters: ","सभी अक्षर: ","All letters: "])+trace(e.all)+"\n"+t(["Vowels (A,E,I,O,U): ","स्वर (A,E,I,O,U): ","Vowels (A,E,I,O,U): "])+trace(e.vowels)+"\n"+t(["Consonants (including Y): ","व्यंजन (Y सहित): ","Consonants (Y samet): "])+trace(e.consonants)+". "+t(["Only A–Z count; empty groups have no number. This symbolic method cannot establish luck, ability or a child's future.","केवल A–Z गिने जाते हैं; खाली समूह का अंक नहीं है। यह विधि भाग्य, क्षमता या बच्चे का भविष्य सिद्ध नहीं करती।","Sirf A–Z count hote hain; empty group ka number nahi hai. Method luck, ability ya bachche ka future prove nahi karta."])});
-  }
-  add("numerology-arithmetic",["Reproduce your numerical results","अपनी अंक गणना दोहराएँ","Apni numerical calculation repeat karein"],["Arithmetic and spelling are shown explicitly; symbolic interpretations remain separate.","अंक और वर्तनी की गणना स्पष्ट है; प्रतीकात्मक व्याख्या अलग है।","Arithmetic aur spelling explicit hain; symbolic interpretation alag hai."],cards);
- }
- if(slug==="numerology-lo-shu-report"){
-  const grid=rows(object(data("lo-shu")).grid),counts=new Map(grid.map(r=>[Number(r.number),Number(r.count)]));
-  if(grid.length!==9||counts.size!==9||Array.from({length:9},(_,i)=>i+1).some(n=>!Number.isInteger(counts.get(n))||counts.get(n)!<0))throw Error("REPORT_LO_SHU_GRID_INVALID");
-  const lines=[[4,9,2],[3,5,7],[8,1,6],[4,3,8],[9,5,1],[2,7,6],[4,5,6],[2,5,8]];
-  add("lo_shu_geometry",["Birth-date grid line audit","जन्म तिथि अंक-पंक्ति विवरण","Birth-date grid line audit"],["These are eight geometric lines of the Lo Shu layout. Counts show only recorded birth-date digits, not personality defects or measured abilities.","ये लो शू की आठ ज्यामितीय रेखाएँ हैं। गिनती केवल जन्म तिथि के अंक बताती है, व्यक्तित्व की कमी या क्षमता नहीं।","Yeh Lo Shu layout ki aath geometric lines hain. Counts sirf birth-date digits hain, personality defects ya measured abilities nahi."],lines.map((line,i)=>{
-   const present=line.filter(n=>counts.get(n)!>0),occurrences=line.reduce((s,n)=>s+counts.get(n)!,0);
-   return {label:t(["Line ","रेखा ","Line "])+(i+1),title:line.join(" / "),body:t(["Digit frequencies: ","अंकों की आवृत्ति: ","Digit frequencies: "])+line.map(n=>n+" × "+counts.get(n)).join(", ")+". "+t(["Distinct occupied cells: ","उपस्थित खाने: ","Occupied cells: "])+present.length+"/3; "+t(["Total occurrences: ","कुल आवृत्ति: ","Total occurrences: "])+occurrences+". "+t(["Zero means that a digit does not appear in the entered civil date. It is not a deficiency or prediction.","शून्य का अर्थ है कि अंक दी गई स्थानीय जन्म तिथि में नहीं है। यह कमी या भविष्यवाणी नहीं।","Zero ka matlab digit entered civil date mein nahi hai. Yeh deficiency ya prediction nahi."])};
-  }));
- }
+ result.push(...buildNumerologyDepth(slug,chart.birthDetails.dateOfBirth,sections,locale,romanName));
  for(const key of ["yearly-months","transit-months","node-transits","jupiter-transits","sade-sati-months"]){
   const sample=rows(data(key));if(!sample.length)continue;
   const flat=sample.flatMap(r=>Array.isArray(r.positions)?rows(r.positions).map(p=>({...p,date:r.date})): [r]);
@@ -164,5 +144,33 @@ export function buildReportDepth(chart:BirthChartData,slug:string,sections:Premi
   }));
  }
  if(!result.length)throw Error("REPORT_DEPTH_EMPTY");
+ return result;
+}
+
+export function buildNumerologyDepth(slug:string,dob:string,sections:PremiumReportContentSection[],locale:AstrologyLanguage,romanName:string):DepthChapter[]{
+ const t=(v:L)=>v[locale==="hi"?1:locale==="hinglish"?2:0],term=(v:string)=>editorialTerm(v,locale);
+ const data=(k:string)=>sections.find(s=>s.key===k)?.data,result:DepthChapter[]=[];
+ const add=(key:string,title:L,intro:L,cards:EditorialCard[])=>{if(cards.length) result.push({key,title:t(title),intro:t(intro),cards});};
+ if(["premium-kundli","numerology-lo-shu-report","name-correction-report","baby-name-report","fortune-report"].includes(slug)){
+  const digits=dob.replace(/\D/g,"").split("").map(Number);
+  const reduce=(n:number)=>{const steps=[n];while(n>9&&![11,22,33].includes(n)){n=String(n).split("").reduce((a,b)=>a+Number(b),0);steps.push(n);}return steps.join(" -> ");};
+  const cards:EditorialCard[]=[{label:t(["CIVIL BIRTH DATE","स्थानीय जन्म तिथि","Civil birth date"]),title:dob,body:t(["Birth-day reduction: ","जन्म दिन की गणना: ","Birth day reduction: "])+reduce(Number(dob.slice(8,10)))+". "+digits.join(" + ")+" = "+reduce(digits.reduce((a,b)=>a+b,0))+". "+t(["The convention preserves 11, 22 and 33. Date digits are taken from the civil date, not converted to another timezone.","इस विधि में 11, 22 और 33 सुरक्षित रहते हैं। अंक स्थानीय जन्म तिथि से लिए जाते हैं, दूसरे समय क्षेत्र से नहीं।","Method 11, 22 aur 33 preserve karta hai. Digits civil date se hain, doosre timezone se nahi."])}];
+  const names=slug==="baby-name-report"?rows(data("name-options")).map(x=>str(x.name)):slug==="name-correction-report"?rows(data("name-comparison")).map(x=>str(x.name)):[romanName];
+  for(const name of [...new Set(names)].filter(isFullRomanNumerologyName)){
+   const e=calculateRomanNameEvidence(name)!;
+   const trace=(g:typeof e.vowels)=>g?g.letters.map(x=>x.letter+"="+x.value).join(", ")+"; "+g.steps.join(" -> "):term("Not available");
+   cards.push({label:t(["LETTER VALUES","अक्षर मान","Letter values"]),title:name,body:t(["All letters: ","सभी अक्षर: ","All letters: "])+trace(e.all)+"\n"+t(["Vowels (A,E,I,O,U): ","स्वर (A,E,I,O,U): ","Vowels (A,E,I,O,U): "])+trace(e.vowels)+"\n"+t(["Consonants (including Y): ","व्यंजन (Y सहित): ","Consonants (Y samet): "])+trace(e.consonants)+". "+t(["Only A–Z count; empty groups have no number. This symbolic method cannot establish luck, ability or a child's future.","केवल A–Z गिने जाते हैं; खाली समूह का अंक नहीं है। यह विधि भाग्य, क्षमता या बच्चे का भविष्य सिद्ध नहीं करती।","Sirf A–Z count hote hain; empty group ka number nahi hai. Method luck, ability ya bachche ka future prove nahi karta."])});
+  }
+  add("numerology-arithmetic",["Reproduce your numerical results","अपनी अंक गणना दोहराएँ","Apni numerical calculation repeat karein"],["Arithmetic and spelling are shown explicitly; symbolic interpretations remain separate.","अंक और वर्तनी की गणना स्पष्ट है; प्रतीकात्मक व्याख्या अलग है।","Arithmetic aur spelling explicit hain; symbolic interpretation alag hai."],cards);
+ }
+ if(slug==="numerology-lo-shu-report"){
+  const grid=rows(object(data("lo-shu")).grid),counts=new Map(grid.map(r=>[Number(r.number),Number(r.count)]));
+  if(grid.length!==9||counts.size!==9||Array.from({length:9},(_,i)=>i+1).some(n=>!Number.isInteger(counts.get(n))||counts.get(n)!<0))throw Error("REPORT_LO_SHU_GRID_INVALID");
+  const lines=[[4,9,2],[3,5,7],[8,1,6],[4,3,8],[9,5,1],[2,7,6],[4,5,6],[2,5,8]];
+  add("lo_shu_geometry",["Birth-date grid line audit","जन्म तिथि अंक-पंक्ति विवरण","Birth-date grid line audit"],["These are eight geometric lines of the Lo Shu layout. Counts show only recorded birth-date digits, not personality defects or measured abilities.","ये लो शू की आठ ज्यामितीय रेखाएँ हैं। गिनती केवल जन्म तिथि के अंक बताती है, व्यक्तित्व की कमी या क्षमता नहीं।","Yeh Lo Shu layout ki aath geometric lines hain. Counts sirf birth-date digits hain, personality defects ya measured abilities nahi."],lines.map((line,i)=>{
+   const present=line.filter(n=>counts.get(n)!>0),occurrences=line.reduce((s,n)=>s+counts.get(n)!,0);
+   return {label:t(["Line ","रेखा ","Line "])+(i+1),title:line.join(" / "),body:t(["Digit frequencies: ","अंकों की आवृत्ति: ","Digit frequencies: "])+line.map(n=>n+" × "+counts.get(n)).join(", ")+". "+t(["Distinct occupied cells: ","उपस्थित खाने: ","Occupied cells: "])+present.length+"/3; "+t(["Total occurrences: ","कुल आवृत्ति: ","Total occurrences: "])+occurrences+". "+t(["Zero means that a digit does not appear in the entered civil date. It is not a deficiency or prediction.","शून्य का अर्थ है कि अंक दी गई स्थानीय जन्म तिथि में नहीं है। यह कमी या भविष्यवाणी नहीं।","Zero ka matlab digit entered civil date mein nahi hai. Yeh deficiency ya prediction nahi."])};
+  }));
+ }
  return result;
 }

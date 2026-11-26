@@ -4,13 +4,13 @@ import {reportRequestCopy} from "./report-request-copy";
 // The public product disclosure, client intake and strict new-request validation
 // use one report-specific scope. Historical envelopes remain supported.
 export function reportIntakeScope(slug:string){
- const couple=slug==="couple-kundli",nameCorrection=slug==="name-correction-report",babyName=slug==="baby-name-report",numerologyName=slug==="numerology-lo-shu-report";
- return {couple,nameCorrection,babyName,numerologyName,romanName:nameCorrection||numerologyName,candidateNames:nameCorrection||babyName};
+ const couple=slug==="couple-kundli",nameCorrection=slug==="name-correction-report",babyName=slug==="baby-name-report",dateNameOnly=nameCorrection||slug==="numerology-lo-shu-report",numerologyName=slug==="numerology-lo-shu-report"||slug==="fortune-report";
+ return {dateNameOnly,couple,nameCorrection,babyName,numerologyName,romanName:nameCorrection||numerologyName,candidateNames:nameCorrection||babyName};
 }
 const basic={
- en:["Full name, birth date and birth time","Birth place and its resolved coordinates","Actual UTC offset at birth (including daylight saving where applicable)","Main question or concern","Confirm the birth details; delivery to the registered account"],
- hi:["पूरा नाम, जन्म तिथि और जन्म समय","जन्म स्थान और उसके सत्यापित निर्देशांक","जन्म के समय का वास्तविक UTC अंतर (जहाँ लागू हो, डेलाइट सेविंग सहित)","मुख्य प्रश्न या चिंता","जन्म विवरण की पुष्टि; पंजीकृत खाते में डिलीवरी"],
- hinglish:["Poora naam, birth date aur birth time","Birth place aur resolved coordinates","Janm ke samay actual UTC offset (jahaan lagu ho daylight saving ke saath)","Main question ya concern","Birth details confirm karein; registered account mein delivery"]
+ en:["Full name, birth date and birth time","Birth place and its resolved coordinates","Actual UTC offset at birth (including daylight saving where applicable)","Main question or concern (optional)","Confirm the birth details; delivery to the registered account"],
+ hi:["पूरा नाम, जन्म तिथि और जन्म समय","जन्म स्थान और उसके सत्यापित निर्देशांक","जन्म के समय का वास्तविक UTC अंतर (जहाँ लागू हो, डेलाइट सेविंग सहित)","मुख्य प्रश्न या चिंता (वैकल्पिक)","जन्म विवरण की पुष्टि; पंजीकृत खाते में डिलीवरी"],
+ hinglish:["Poora naam, birth date aur birth time","Birth place aur resolved coordinates","Janm ke samay actual UTC offset (jahaan lagu ho daylight saving ke saath)","Main question ya concern (optional)","Birth details confirm karein; registered account mein delivery"]
 } as const;
 const partner={
  en:["Second person's full name, date, time, place, coordinates and birth-time UTC offset","Permission to submit the other person's birth details"],
@@ -18,7 +18,7 @@ const partner={
  hinglish:["Doosre vyakti ka poora naam, date, time, place, coordinates aur birth-time UTC offset","Doosre vyakti ki birth details share karne ki permission"]
 } as const;
 export function publicReportRequiredDetails(slug:string,locale:Locale):string[]{
- const scope=reportIntakeScope(slug),copy=reportRequestCopy[locale],list:string[]=[...basic[locale]];
+ const scope=reportIntakeScope(slug),copy=reportRequestCopy[locale],list:string[]=scope.dateNameOnly?[copy.dateNameDetails,copy.dateNameConsent]:[...basic[locale]];
  if(scope.couple)list.push(...partner[locale]);
  if(scope.numerologyName)list.push(copy.romanFullName);
  if(scope.nameCorrection)list.push(copy.romanCurrent,copy.alternatives);

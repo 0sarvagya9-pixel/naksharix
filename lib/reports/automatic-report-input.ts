@@ -1,4 +1,5 @@
 import { z } from "zod";
+import {reportRequestCopy} from "./report-request-copy";
 import {reportIntakeScope} from "./public-intake";
 import {isFullRomanNumerologyName} from "./roman-name";
 
@@ -31,8 +32,11 @@ export const reportBirthSchema=z.object({
 }).strict();
 export const automaticExtraSchema=z.object({
   confirmed:z.literal(true),
+  birthZone:z.string().trim().min(1).max(100).optional(),
+  partnerZone:z.string().trim().min(1).max(100).optional(),
   partner:reportBirthSchema.optional(),
   partnerPermission:z.boolean().optional(),
+  guardianPermission:z.boolean().optional(),
   romanName:z.string().trim().max(100).optional(),
   candidateNames:z.array(z.string().trim().min(1).max(100)).max(12).optional()
 }).strict();
@@ -55,20 +59,57 @@ export function checkAutomaticInputs(slug:string,birth:unknown,extra:unknown) {
   if(!b.success||!e.success)return {ok:false as const,reason:"Confirm complete birth details, including a valid date, time, location and birth-time UTC offset."};
   if(slug==="couple-kundli"&&(!e.data.partner||e.data.partnerPermission!==true))
     return {ok:false as const,reason:"Both people's complete birth details and permission to use the other person's details are required for matching."};
-  if(slug==="numerology-lo-shu-report"&&(!isFullRomanNumerologyName(e.data.romanName)))return {ok:false as const,reason:"Enter the full name in Roman letters for name numerology."};
-  if(slug==="name-correction-report"&&(!isFullRomanNumerologyName(e.data.romanName)||!e.data.candidateNames?.some(n=>isFullRomanNumerologyName(n)&&n.toLowerCase()!==e.data.romanName!.toLowerCase())))
-    return {ok:false as const,reason:"Enter the current name in Roman letters and at least one alternative spelling for comparison."};
-  if((slug==="name-correction-report"||slug==="baby-name-report")&&e.data.candidateNames?.some(n=>!isFullRomanNumerologyName(n)))
-    return {ok:false as const,reason:"Provide Roman-letter spellings for name numerology."};
+  const nameError=checkReportSpellings(slug,e.data);
+  if(nameError)return {ok:false as const,reason:nameError};
   return {ok:true as const,birth:b.data,extra:e.data};
+}
+function checkReportSpellings(slug:string,extra:AutomaticReportExtra){
+  const {romanName,candidateNames}=extra;
+  if(slug==="numerology-lo-shu-report"&&!isFullRomanNumerologyName(romanName))return reportRequestCopy.en.invalidRoman;
+  if(slug==="name-correction-report"&&(!isFullRomanNumerologyName(romanName)||!candidateNames?.some(n=>n.toLowerCase()!==romanName.toLowerCase())))return reportRequestCopy.en.invalidAlternative;
+  if((slug==="name-correction-report"||slug==="baby-name-report")&&candidateNames?.some(n=>!isFullRomanNumerologyName(n)))return reportRequestCopy.en.invalidSpellings;
+}
+
+// Historical stored orders may also contain chart fields. Only the civil date
+// and display name reach the name/date renderer.
+export const dateNameBirth=reportBirthSchema.pick({name:true,dateOfBirth:true}).strip();
+export function checkDateNameReportInputs(slug:string,birth:unknown,extra:unknown){
+  const b=dateNameBirth.safeParse(birth),e=automaticExtraSchema.safeParse(extra);
+  if(!reportIntakeScope(slug).dateNameOnly||!b.success||!e.success)return {ok:false as const,reason:reportRequestCopy.en.invalidDateName};
+  const reason=checkReportSpellings(slug,e.data);
+  if(reason)return {ok:false as const,reason};
+  return {ok:true as const,birth:b.data,extra:e.data};
+}
+
+// A supplied offset must convert to the same civil clock in its recorded
+// zone. This rejects DST gaps and lets a recorded offset select either fold.
+function matchesBirthZone(birth:ReportBirthDetails,zone:string){
+  try{
+    const utc=Date.parse(birth.dateOfBirth+"T"+birth.timeOfBirth+":00Z")-Math.round(birth.timezone*3600000);
+    const parts=new Intl.DateTimeFormat("en-GB",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(utc);
+    const civil=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    return civil.year+"-"+civil.month+"-"+civil.day===birth.dateOfBirth&&civil.hour+":"+civil.minute===birth.timeOfBirth&&civil.second==="00";
+  }catch{return false;}
 }
 // New intake must not collect unrelated birth/name data. Keep the existing
 // renderer validator compatible with historical saved report envelopes.
 export function checkNewReportInputs(slug:string,birth:unknown,extra:unknown) {
-  const checked=checkAutomaticInputs(slug,birth,extra);
+  const scope=reportIntakeScope(slug);
+  if(scope.dateNameOnly&&!dateNameBirth.strict().safeParse(birth).success)return {ok:false as const,reason:reportRequestCopy.en.invalidDateName};
+  const checked=scope.dateNameOnly?checkDateNameReportInputs(slug,birth,extra):checkAutomaticInputs(slug,birth,extra);
   if(!checked.ok)return checked;
   const details=checked.extra;
-  const scope=reportIntakeScope(slug);
+  if(slug==="name-correction-report"&&details.romanName){
+    const letters=(name:string)=>name.toUpperCase().replace(/[^A-Z]/g,"");
+    const names=[details.romanName,...details.candidateNames??[]].map(letters);
+    if(new Set(names).size!==names.length)return {ok:false as const,reason:reportRequestCopy.en.invalidAlternative};
+  }
+  if(slug==="fortune-report"&&!isFullRomanNumerologyName(details.romanName))return {ok:false as const,reason:reportRequestCopy.en.invalidRoman};
+  if((details.birthZone&&scope.dateNameOnly)||(!scope.couple&&details.partnerZone))return {ok:false as const,reason:reportRequestCopy.en.invalidExtra};
+  if((details.birthZone&&"timeOfBirth" in checked.birth&&!matchesBirthZone(checked.birth as ReportBirthDetails,details.birthZone))||
+     (details.partnerZone&&details.partner&&!matchesBirthZone(details.partner,details.partnerZone)))return {ok:false as const,reason:reportRequestCopy.en.invalidZone};
+  if(scope.babyName&&details.guardianPermission!==true)return {ok:false as const,reason:reportRequestCopy.en.guardianPermission};
+  if(!scope.babyName&&details.guardianPermission!==undefined)return {ok:false as const,reason:reportRequestCopy.en.invalidExtra};
   const allowedPartner=scope.couple,allowedRoman=scope.romanName,allowedCandidates=scope.candidateNames;
   if((!allowedPartner&&(details.partner!==undefined||details.partnerPermission!==undefined))||
      (!allowedRoman&&details.romanName!==undefined)||

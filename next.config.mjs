@@ -4,6 +4,9 @@ const nextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["@react-pdf/renderer"],
   ...(process.env.NEXT_STANDALONE === "true" ? { output: "standalone" } : {}),
+  outputFileTracingIncludes:Object.fromEntries([
+    "/api/report-requests","/api/report-requests/*/retry","/api/admin/report-requests/**","/api/cron/report-delivery","/api/digital-packages/**","/reports/*/sample"
+  ].map(route=>[route,["./public/report-design/royal/*.pdf","./public/fonts/*.ttf","./node_modules/@fontsource/noto-sans/files/noto-sans-latin-{400,700}-normal.woff","./node_modules/@fontsource/noto-serif/files/noto-serif-latin-700-normal.woff","./node_modules/@fontsource/noto-serif-devanagari/files/noto-serif-devanagari-devanagari-700-normal.woff"]])),
   experimental: {
     serverActions: {
       bodySizeLimit: "2mb"

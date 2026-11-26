@@ -213,7 +213,7 @@ export function KundliForm() {
       <div ref={formRef} className="mx-auto max-w-4xl">
       <Card className="glass">
         <CardHeader>
-          <CardTitle className="font-cinzel text-2xl">{tr("generateKundliReport")}</CardTitle>
+          <CardTitle as="h2" className="font-cinzel text-2xl">{tr("generateKundliReport")}</CardTitle>
           <p className="text-sm naksh-muted-text">{tr("kundliIntro")}</p>
         </CardHeader>
         <CardContent>

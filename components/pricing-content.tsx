@@ -75,7 +75,7 @@ export function PricingContent({ pujaPriceLabel, pujaEnabled }: { pujaPriceLabel
           <Card key={id} className="relative overflow-hidden border-[#D4AF37]/25 bg-[#02112C]/82">
             <CardHeader>
               <Icon className="h-7 w-7 text-[#00f5a0]" />
-              <CardTitle className="mt-4 font-cinzel">{title}</CardTitle>
+              <CardTitle as="h2" className="mt-4 font-cinzel">{title}</CardTitle>
               <p className="cosmic-gold-text text-xl font-black">{id === "pujas" ? pujaPriceLabel : price}</p>
               <p className="text-sm leading-6 naksh-muted-text">{id==="pujas" && !pujaEnabled ? "Puja bookings and online payments are paused until verified Pandits are available. No advance payment is due." : description}</p>
             </CardHeader>

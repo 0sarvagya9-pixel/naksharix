@@ -6,10 +6,21 @@ export const nakshatras = [
   "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
 ] as const;
 
+// Compare against the rounded representation of each exact 10/3-degree
+// boundary. Multiplication alone can put the immediately preceding float on it.
+function padaSector(longitude:number) {
+  const value=normalizeDegrees(longitude);
+  const estimate=Math.min(107,Math.floor(value*3/10));
+  if(value<estimate*10/3)return estimate-1;
+  if(estimate<107 && value>=(estimate+1)*10/3)return estimate+1;
+  return estimate;
+}
+
+export function nakshatraIndexFromLongitude(longitude:number){
+  return Math.floor(padaSector(longitude)/4);
+}
+
 export function nakshatraFromLongitude(longitude: number) {
-  const normalized = normalizeDegrees(longitude);
-  // The 108 half-open padas are each exactly 10/3 degrees. Compute both
-  // indices from the same global sector; epsilon must not move a boundary.
-  const sector=Math.min(107,Math.floor(normalized*3/10));
+  const sector=padaSector(longitude);
   return {name:nakshatras[Math.floor(sector/4)],pada:sector%4+1};
 }

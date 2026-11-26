@@ -29,6 +29,7 @@ type CheckoutPayload =
       savedReportId?: string;
       reportRequestId?: string;
       preflightToken?: string;
+      reviewedInput?: Record<string,unknown>;
     }
   | { purpose: "PUJA_BOOKING"; bookingId: string }
   | { purpose: "SHOP_ORDER"; shopOrderId: string; expectedTotalPaise?: number; expectedOrderVersion?: number; shippingTermsVersion?: string };

@@ -746,3 +746,85 @@ console.log("P0_TRADITIONAL_PATTERN_EVIDENCE "+JSON.stringify({nodalChecks,yogaP
  for(const r of observed)assert.ok(r.absoluteError<=F.toleranceVirupas,r.planet+" held-out historical table");
  console.log("P0_HELDOUT_1981_HISTORICAL_MOTION_PASS "+JSON.stringify({matched:5,compared:5,toleranceVirupas:F.toleranceVirupas,maxAbsoluteError:Math.max(...observed.map(r=>r.absoluteError)),observed,vendorParityAccepted:false,expertCertified:false}));
 }
+
+// Diagnostics against a published pair, with the original 0.25-virupa
+// tolerance. Arithmetic conventions are chosen from their texts before
+// comparing the tables; no parameters are estimated from these examples.
+{
+ const {calculateBirthStrengthEvidence}=require("@/lib/astrology/strength/birth-context");
+ const {classicalCheshtaFromMeanTrue}=require("@/lib/astrology/strength/temporal-components");
+ const {julianDayFromUtc}=require("@/lib/astrology/own-engine/time");
+ const primary=JSON.parse(fs.readFileSync("fixtures/astrology/published-classical-comparison.json","utf8"));
+ const held=JSON.parse(fs.readFileSync("fixtures/astrology/independent-heldout-strength-reference.json","utf8"));
+ const moonAndSaturn=new Set(["Moon","Saturn"]);
+ function signedNorthern(planet,north){return planet==="Mercury"?Math.abs(north):moonAndSaturn.has(planet)?-north:north;}
+ // BPHS 27.15–17 cumulative three-khanda table (45,33,12).
+ function khanda(planet,longitude){
+   const phase=(longitude+360)%360,equinoxDistance=Math.min(phase,Math.abs(180-phase),360-phase);
+   const k=45*Math.min(equinoxDistance,30)/30+33*Math.min(Math.max(equinoxDistance-30,0),30)/30+12*Math.max(equinoxDistance-60,0)/30;
+   const north=phase<=180?k:-k;
+   return (30+signedNorthern(planet,north)/3)*(planet==="Sun"?2:1);
+ }
+ assert.equal(khanda("Mars",0),30);assert.equal(khanda("Mars",90),60);assert.equal(khanda("Moon",90),0);assert.equal(khanda("Mercury",285),58);
+ // Suryasiddhanta adhyaaya I: traditional mean longitude from revolutions
+ // per mahayuga. The independent epoch example gives Sun 255.61° at local
+ // Ujjain midnight 1 Jan 2000. The frame differs from modern Lahiri; these
+ // comparisons intentionally test the substitution and do not activate it.
+ const revolutions={Sun:4320000,Mars:2296832,Mercury:17937060,Jupiter:364220,Venus:7022376,Saturn:146568};
+ const civilDays=1577917828,ujjain=75.7684565,local2000MidnightJD=2451544.5-ujjain/360;
+ function historicalMean(g,elapsed){
+   const whole=Math.floor(elapsed),fraction=elapsed-whole,rate=revolutions[g];
+   return ((whole*rate%civilDays)+fraction*rate)/civilDays*360%360;
+ }
+ assert.ok(Math.abs(historicalMean("Sun",1863079)-255.61)<.005);
+ const trace=[];
+ for(const [year,F] of [[1979,primary],[1978,held]]){
+   const input={...primary.birth,date:year+"-08-23"};
+   const actual=calculateBirthStrengthEvidence(input),utc=new Date(actual.geometry.utc);
+   const elapsed=1863079+julianDayFromUtc(utc)-local2000MidnightJD;
+   const defaultAyan=actual.geometry.chart.ayanamsa.degree;
+   const eps=23.439291-.00000036*(julianDayFromUtc(utc)-2451545);
+   const publishedAy=F.temporal?.ayana??[89.04,11.22,23.85,48.04,56.32,21.87,17.02];
+   const publishedKala=F.strength?.kala??[129.81,91.9,104.53,189.81,215.64,151.19,97.7];
+   const publishedMotion=F.strength?.cheshta??F.cheshta;
+   const ayana=[],motion=[];
+   for(const [i,g] of classical.entries()){
+     const tropical=(actual.geometry.chart.planets.find(p=>p.planet===g).absoluteLongitude+defaultAyan)%360;
+     const decl=actual.solar.declinations[g];
+     const row=actual.longitudeTemporal.rows.find(r=>r.planet===g),reference=publishedAy[i];
+     const trueEquatorial=(30+30*signedNorthern(g,decl)/eps)*(g==="Sun"?2:1);
+     const models={projected:row.components.ayana,khanda:khanda(g,tropical),trueEquatorial};
+     ayana.push({planet:g,reference,models,kalaReference:publishedKala[i],baseKala:row.kalaBeforeWar,
+       kalaResiduals:Object.fromEntries(Object.entries(models).map(([k,v])=>[k,row.kalaBeforeWar-row.components.ayana+v-publishedKala[i]])),
+       basis:row.components,natonnataReference:F.temporal?.natonnata[i]??[2.55,57.45,57.45,60,2.55,2.55,57.45][i]});
+     if(i<2)continue;
+     const [sign,d,m,s]=F.positionsDms[F.order.indexOf(g)];
+     const trueLon=(sign-1)*30+d+m/60+s/3600,inner=g==="Venus"||g==="Mercury";
+     const mean=historicalMean(inner?"Sun":g,elapsed),apogee=historicalMean(inner?g:"Sun",elapsed);
+     const siddhanta=classicalCheshtaFromMeanTrue(mean,trueLon,apogee).virupas;
+     const raman=actual.motionalCandidate.rows.find(r=>r.planet===g);
+     const printedInput=classicalCheshtaFromMeanTrue(raman.mean,trueLon,raman.seeghrocha).virupas;
+     motion.push({planet:g,expected:publishedMotion[i],actualTrue:raman.trueLongitude,printedTrue:trueLon,ramanMean:raman.mean,ramanSeeghrocha:raman.seeghrocha,
+       raman:raman.virupas,ramanWithPrintedTrue:printedInput,siddhantaMean:mean,siddhantaSeeghrocha:apogee,siddhantaWithPrintedTrue:siddhanta});
+   }
+   let controlledBhava=null;
+   if(year===1979){
+     // Experimental intervention: supply only the seven printed planetary
+     // totals, leaving independently calculated direction and aspect alone.
+     // This isolates propagation, never a production input or 97-cell score.
+     const supplied=Object.fromEntries(classical.map((g,i)=>[g,primary.strength.total[i]]));
+     const comparison=actual.temporalVariantBhava.houses.map((h,i)=>{
+       const controlledTotal=supplied[h.lord]+h.directionalVirupas+h.aspect.virupas;
+       return {house:h.house,lord:h.lord,originalLordResidual:h.lordStrengthVirupas-primary.bhava.lord[i],
+         controlledLordResidual:supplied[h.lord]-primary.bhava.lord[i],
+         originalTotalResidual:h.arithmeticTotalVirupas-primary.bhava.total[i],controlledTotalResidual:controlledTotal-primary.bhava.total[i]};
+     });
+     controlledBhava={originalMatches:comparison.reduce((n,h)=>n+Number(Math.abs(h.originalLordResidual)<=.25)+Number(Math.abs(h.originalTotalResidual)<=.25),0),
+       controlledMatches:comparison.reduce((n,h)=>n+Number(Math.abs(h.controlledLordResidual)<=.25)+Number(Math.abs(h.controlledTotalResidual)<=.25),0),comparison};
+   }
+   trace.push({year,ayana,motion,controlledBhava});
+ }
+ assert.equal(trace[0].ayana.length+trace[1].ayana.length,14);
+ assert.equal(trace[0].motion.length+trace[1].motion.length,10);
+ console.log("P0_STRENGTH_CONVENTION_ATTRIBUTION "+JSON.stringify({toleranceVirupas:.25,trace,fullParityAccepted:false}));
+}

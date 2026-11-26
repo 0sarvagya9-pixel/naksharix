@@ -232,7 +232,7 @@ export function julianDayFromUtc(date: Date) {
 
   const day =
     date.getUTCDate() +
-    (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) / 24;
+    (date.getUTCHours() + date.getUTCMinutes() / 60 + (date.getUTCSeconds() + date.getUTCMilliseconds() / 1000) / 3600) / 24;
 
   let y = year;
 

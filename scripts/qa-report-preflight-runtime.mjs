@@ -24,6 +24,8 @@ Module._load=function(name,...args){
 require.extensions[".ts"]=function(module,file){module._compile(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,file)};
 const {prisma}=require("@/lib/db");
 const {POST}=require("@/app/api/report-requests/preflight/route");
+const {POST:createReport}=require("@/app/api/report-requests/route");
+const {prepareReviewedSpecialistInput}=require("@/lib/reports/reviewed-report-input");
 const {checkAutomaticInputs,checkNewReportInputs,AUTO_REPORT_SLUGS}=require("@/lib/reports/automatic-report-input");
 const {verifyReportPreflight,REPORT_PREFLIGHT_TTL_MS}=require("@/lib/reports/preflight-contract");
 const {env}=require("@/lib/env");
@@ -50,8 +52,8 @@ const concern="Synthetic private reflection for admission QA only.";
 function extra(slug){
  if(slug==="couple-kundli")return {confirmed:true,partner,partnerPermission:true};
  if(slug==="name-correction-report")return {confirmed:true,romanName:"Asha Test",candidateNames:["Aasha Test"]};
- if(slug==="numerology-lo-shu-report")return {confirmed:true,romanName:"Asha Test"};
- if(slug==="baby-name-report")return {confirmed:true,candidateNames:["Asha"]};
+ if(["numerology-lo-shu-report","fortune-report"].includes(slug))return {confirmed:true,romanName:"Asha Test"};
+ if(slug==="baby-name-report")return {confirmed:true,guardianPermission:true,candidateNames:["Asha"]};
  return {confirmed:true};
 }
 const ids=[],run=randomUUID();let checks=0,validReports=0,negative=0;
@@ -60,7 +62,7 @@ async function account(label,admin=false){
  const row=await prisma.user.create({data:{name:"Synthetic admission account",email:run+"-"+label+"@example.invalid",role:admin?"ADMIN":"USER",emailVerified:new Date()}});
  ids.push(row.id);return {...row,isAdminLogin:admin,effectiveRole:admin?"ADMIN":"USER"};
 }
-function body(slug,email,overrides={}){return {reportSlug:slug,deliveryEmail:email,birth,automaticDetails:extra(slug),concern,...overrides}}
+function body(slug,email,overrides={}){return {reportSlug:slug,deliveryEmail:email,birth:["name-correction-report","numerology-lo-shu-report"].includes(slug)?{name:birth.name,dateOfBirth:birth.dateOfBirth}:birth,automaticDetails:extra(slug),concern,...overrides}}
 async function post(input,raw=false){
  return POST(new Request("http://localhost:3000/api/report-requests/preflight",{method:"POST",headers:{"content-type":"application/json"},body:raw?input:JSON.stringify(input)}));
 }
@@ -77,14 +79,14 @@ try{
  check(!checkNewReportInputs("premium-kundli",birth,previousExtras).ok,"new intake refuses unrelated data");
  for(const [i,[slug,[id,purpose,amount]]] of Object.entries(prices).entries()){
   if(i%5===0)identity=await account("valid-"+i);
-  const r=await post(body(slug,identity.email)),j=await r.json();
+  const r=await post(body(slug,identity.email,{concern:i%2===0?undefined:"  "})),j=await r.json();
   check(r.status===200&&j.data?.reportId===id&&j.data.price==="INR "+amount&&j.data.expiresInSeconds===1200,slug+" exact price and identity");
   check(r.headers.get("cache-control")==="no-store","no cache");
   const token=j.data.token,[payload,sig]=token.split(".");
   const claim=JSON.parse(Buffer.from(payload,"base64url").toString("utf8"));
-  check(Object.keys(claim).sort().join(",")==="amountPaise,exp,purpose,reportId,userId,v",slug+" minimal claim");
+  check(Object.keys(claim).sort().join(",")==="amountPaise,exp,inputDigest,purpose,reportId,userId,v",slug+" minimal claim");
   check(sig===createHmac("sha256",env.JWT_SECRET).update("naksharix-report-preflight-v1:"+payload).digest("base64url"),slug+" independent signature");
-  const exact={userId:identity.id,reportId:id,purpose,amountPaise:amount*100};
+  const exact={userId:identity.id,reportId:id,purpose,amountPaise:amount*100,inputDigest:claim.inputDigest};
   check(verifyReportPreflight(token,exact,env.JWT_SECRET),slug+" token valid");
   for(const wrong of [{...exact,userId:"other-account"},{...exact,reportId:id+"-other"},{...exact,purpose:"SHOP_ORDER"},{...exact,amountPaise:amount*100+1}])
    check(!verifyReportPreflight(token,wrong,env.JWT_SECRET),slug+" cross-binding denied");
@@ -92,12 +94,24 @@ try{
   check(claim.exp-Date.now()<=REPORT_PREFLIGHT_TTL_MS&&claim.exp>Date.now(),slug+" short TTL");
   validReports++;
  }
+ identity=await account("folds");
+ for(const timezone of [-4,-5]){
+  const response=await post(body("premium-kundli",identity.email,{birth:{...birth,dateOfBirth:"2024-11-03",timeOfBirth:"01:30",timezone},automaticDetails:{confirmed:true,birthZone:"America/New_York"}}));
+  check(response.status===200,"recorded offset selects valid instance of repeated local time: "+timezone);
+ }
  identity=null;await denied(body("premium-kundli","anonymous@example.invalid"),401,"anonymous");
  identity=await account("admin",true);await denied(body("premium-kundli",identity.email),403,"admin bypass not merchant");
  const neg=[
  ["premium-kundli",{deliveryEmail:"other@example.invalid"},403,"foreign email"],
  ["unknown-report",{},422,"unknown SKU"],
- ["premium-kundli",{concern:"   "},422,"blank concern"],
+ ["baby-name-report",{automaticDetails:{confirmed:true}},422,"missing guardian permission"],
+ ["premium-kundli",{concern:"a".repeat(2001)},422,"question too long"],
+ ["fortune-report",{automaticDetails:{confirmed:true}},422,"missing Roman name"],
+ ["fortune-report",{automaticDetails:{confirmed:true,romanName:"आशा Test"}},422,"mixed-script Roman name"],
+ ["numerology-lo-shu-report",{birth},422,"irrelevant birth place and time"],
+ ["premium-kundli",{birth:{...birth,dateOfBirth:"2024-03-10",timeOfBirth:"02:30",timezone:-5},automaticDetails:{confirmed:true,birthZone:"America/New_York"}},422,"DST gap"],
+ ["premium-kundli",{birth:{...birth,dateOfBirth:"2024-11-03",timeOfBirth:"01:30",timezone:-6},automaticDetails:{confirmed:true,birthZone:"America/New_York"}},422,"incorrect repeated-hour offset"],
+ ["couple-kundli",{automaticDetails:{...extra("couple-kundli"),partnerZone:"Europe/London"}},422,"invalid partner historical offset"],
  ["premium-kundli",{birth:{...birth,dateOfBirth:"1990-02-30"}},422,"invalid civil date"],
  ["premium-kundli",{birth:{...birth,timeOfBirth:"24:00"}},422,"invalid time"],
  ["premium-kundli",{birth:{...birth,timezone:5.123}},422,"invalid offset minutes"],
@@ -107,10 +121,12 @@ try{
  ["couple-kundli",{automaticDetails:{confirmed:true,partner,partnerPermission:false}},422,"missing partner permission"],
  ["numerology-lo-shu-report",{automaticDetails:{confirmed:true}},422,"missing Roman name"],
  ["name-correction-report",{automaticDetails:{confirmed:true,romanName:"Asha",candidateNames:["asha"]}},422,"no distinct alternative"],
+ ["name-correction-report",{automaticDetails:{confirmed:true,romanName:"Asha",candidateNames:["A-sha"]}},422,"punctuation-only alternative"],
+ ["name-correction-report",{automaticDetails:{confirmed:true,romanName:"Asha",candidateNames:["Aasha","Aa sha"]}},422,"duplicate alternative letter sequence"],
  ["baby-name-report",{automaticDetails:{confirmed:true,candidateNames:["आशा"]}},422,"non-Roman candidate"],
  ["premium-kundli",{automaticDetails:{confirmed:true,partner,partnerPermission:true}},422,"irrelevant third-party birth data"],
  ["career-report",{automaticDetails:{confirmed:true,romanName:"Unrelated Name"}},422,"irrelevant name"],
- ["fortune-report",{automaticDetails:{confirmed:true,candidateNames:["Unrelated Name"]}},422,"irrelevant candidate"],
+ ["fortune-report",{automaticDetails:{confirmed:true,romanName:"Asha Test",candidateNames:["Unrelated Name"]}},422,"irrelevant candidate"],
  ["premium-kundli",{extraPrivateField:"not requested"},422,"unknown top-level field"]
  ];
  for(const [i,[slug,overrides,status,label]] of neg.entries()){
@@ -124,7 +140,20 @@ try{
  check(await prisma.payment.count({where:{userId:{in:ids}}})===0,"zero payments");
  check(await prisma.reportRequest.count({where:{userId:{in:ids}}})===0,"zero report requests");
  console.log("REPORT_PREFLIGHT_ALL_SKU_RUNTIME_PASS "+JSON.stringify({checks,validReports,negative,rateLimit:"8/60s",paymentRows:0,reportRows:0,scope:"real API handler, disposable database, isolated identity, no merchant SDK or network"}));
+ identity=await account("review",true);
+ for(const slug of ["numerology-lo-shu-report","name-correction-report"]){
+  const details={reportSlug:slug,adminBypass:true,deliveryEmail:identity.email,fullName:"आशा",dateOfBirth:"1990-01-15",planType:"PREMIUM",language:"hi",automaticDetails:extra(slug)};
+  const send=payload=>createReport(new Request("http://localhost:3000/api/report-requests",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)}));
+  const invalid=await send({...details,birthPlace:"Unexpected place"});check(invalid.status===422,"irrelevant place rejected before persistence");
+  const saved=await send(details),result=await saved.json();check(saved.status===200&&result.data.reportRequest.id,"minimized request accepted in review workspace");
+  const row=await prisma.reportRequest.findUniqueOrThrow({where:{id:result.data.reportRequest.id}});
+  const restored=prepareReviewedSpecialistInput(row);
+  check(!row.timeOfBirth&&!row.birthPlace&&row.latitude===null&&row.longitude===null&&row.timezone===null&&row.gender===null,"no fabricated or unrelated birth information saved");
+  check(restored.kind==="specialist"&&Object.keys(restored.birth).sort().join(",")==="dateOfBirth,name"&&restored.extra.romanName==="Asha Test"&&restored.question==="","spelling, minimal date and optional question survive storage");
+ }
+ console.log("DATE_NAME_REVIEW_PERSISTENCE_PASS "+JSON.stringify({products:2,checks:8,syntheticReviewRequests:2,paidOrders:0}));
 }finally{
+ await prisma.reportRequest.deleteMany({where:{userId:{in:ids}}});
  await prisma.user.deleteMany({where:{id:{in:ids}}});
  await prisma.$disconnect();
 }

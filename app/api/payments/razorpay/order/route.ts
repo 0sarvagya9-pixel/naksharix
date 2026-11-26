@@ -19,6 +19,7 @@ import { checkExistingReportOrder } from "@/lib/payments/report-order-recovery";
 import { getReportSlugForPaidId, getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import {isSavedKundliCheckout,hasSavedKundliPayload} from "@/lib/reports/saved-kundli-contract";
 import {reportReservationScope,matchesReportCheckoutContext,type ReportCheckoutContext} from "@/lib/reports/checkout-context";
+import {CHECKOUT_DRAFT_LIFETIME_MS,normalizeReviewedFields,reviewedFieldsSchema,reviewedInputDigest,type ReviewedFields} from "@/lib/reports/checkout-draft";
 import { verifyReportPreflight } from "@/lib/reports/preflight-contract";
 import { googleSessionSchema, liveRazorpayAnalyticsOrder, sendGoogleCheckout } from "@/lib/analytics/google";
 import { getRequestIp, sharedRateLimitResponse as rateLimitResponse } from "@/lib/security/rate-limit";
@@ -36,9 +37,9 @@ const schema = z.discriminatedUnion("purpose", [
   z.object({purpose:z.literal("DIGITAL_PACKAGE"),packageOrderId:z.string().min(1).max(100),version:z.literal("v1"),pricePaise:z.number().int().min(100).max(10000000),termsVersion:z.literal(PACKAGE_TERMS_VERSION)}).strict(),
   z.object({purpose:z.literal("AI_CREDITS"),intent:z.string().refine(validCreditIntent),version:z.string().max(64),units:z.number().int().min(1).max(500),pricePaise:z.number().int().min(100).max(1000000),termsVersion:z.literal(AI_CREDIT_TERMS_VERSION)}).strict(),
   z.object({ purpose: z.literal("SUBSCRIPTION"), plan: z.enum(["PREMIUM", "VIP"]) }),
-  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
-  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
-  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("KUNDLI_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), reviewedInput:reviewedFieldsSchema.optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("YEARLY_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), reviewedInput:reviewedFieldsSchema.optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
+  z.object({ purpose: z.literal("MATCH_REPORT"), reportId: z.string().min(1), savedReportId: z.string().min(1).optional(), reportRequestId: z.string().min(1).optional(), preflightToken: z.string().max(1024).optional(), reviewedInput:reviewedFieldsSchema.optional(), analyticsSession: googleSessionSchema.optional().catch(undefined) }),
   z.object({ purpose: z.literal("CONSULTATION"), bookingId: z.string().min(1) }),
   z.object({ purpose: z.literal("PUJA_BOOKING"), bookingId: z.string().min(1), feeTermsVersion: z.literal(PUJA_FEE_TERMS_VERSION) }),
   z.object({ purpose: z.literal("SHOP_ORDER"), shopOrderId: z.string().min(1), expectedTotalPaise:z.number().int().positive().max(1000000000).optional(),expectedOrderVersion:z.number().int().positive().optional(),shippingTermsVersion:z.literal(SHIPPING_TERMS_VERSION).optional() }).strict()
@@ -66,7 +67,16 @@ export async function POST(request: NextRequest) {
     if (!item) return fail("Invalid or completed checkout item", 422);
     const reportRequestId = "reportRequestId" in body ? body.reportRequestId : undefined;
     const savedReportId = "savedReportId" in body ? body.savedReportId : undefined;
-    if("reportId" in body && !reportRequestId && !savedReportId && getReportSlugForPaidId(body.reportId) && !verifyReportPreflight(body.preflightToken,{userId:user.id,reportId:body.reportId,purpose:body.purpose,amountPaise:Math.round(item.amount*100)},env.JWT_SECRET))return fail("Complete and validate your report details before starting payment.",422);
+    let reviewed:{fields:ReviewedFields;inputDigest:string}|undefined;
+    if("reportId" in body&&!reportRequestId&&!savedReportId){
+      const slug=getReportSlugForPaidId(body.reportId);
+      if(!slug)return fail("This report is unavailable for a new purchase.",422);
+      const details=normalizeReviewedFields(slug,body.reviewedInput);
+      if(!details.ok)return fail(details.reason,422);
+      const inputDigest=reviewedInputDigest(user.id,slug,details.fields,env.JWT_SECRET);
+      if(!verifyReportPreflight(body.preflightToken,{userId:user.id,reportId:body.reportId,purpose:body.purpose,amountPaise:Math.round(item.amount*100),inputDigest},env.JWT_SECRET))return fail("Complete and validate your report details before starting payment.",422);
+      reviewed={fields:details.fields,inputDigest};
+    }
 
     if(reportRequestId&&savedReportId)return fail("Choose exactly one report checkout context.",422);
     if((reportRequestId&&!reportRequestId.trim())||(savedReportId&&!savedReportId.trim()))return fail("Invalid report checkout context.",422);
@@ -102,6 +112,10 @@ export async function POST(request: NextRequest) {
     }
 
     const reusable = await findReusablePayment(body, user.id);
+    if(reusable&&reviewed){
+      const prior=await prisma.reportCheckoutDraft.findUnique({where:{paymentId:reusable.id},select:{inputDigest:true,expiresAt:true}});
+      if(!prior||prior.inputDigest!==reviewed.inputDigest||prior.expiresAt<=new Date())return fail("An earlier report order has different or expired details. Review Payment History before paying.",409);
+    }
     if (reusable && (Number(reusable.amount) !== item.amount || reusable.currency !== "INR"))
       return fail("An earlier order has a different amount. Contact support before trying to pay again.", 409);
     if (reusable?.status === "PAID") return fail("This checkout item is already paid.", 409);
@@ -152,7 +166,7 @@ export async function POST(request: NextRequest) {
         status: "PENDING" as const,
         amount: item.amount,
         currency: "INR",
-        metadata: { ...item.metadata, reportRequestId, savedReportId, analyticsLiveOrder: liveRazorpayAnalyticsOrder() }
+        metadata: { ...item.metadata, ...(reviewed?{reviewedInputDigest:reviewed.inputDigest}:{}), reportRequestId, savedReportId, analyticsLiveOrder: liveRazorpayAnalyticsOrder() }
     };
     // Reserve the Shop payment under the same lock as admin quote updates.
     // Do not open a second gateway order during an in-flight reservation.
@@ -204,7 +218,9 @@ export async function POST(request: NextRequest) {
         const fresh=await tx.reportRequest.findUnique({where:{id:reportRequestId}});
         if(!fresh||fresh.paymentId||fresh.adminBypass||["PAID","REFUNDED","ADMIN_BYPASS"].includes(fresh.paymentStatus)||["CANCELLED","DELIVERED","SENT"].includes(fresh.status)|| (getManualReportCheckout(fresh.reportSlug)?.reportId??fresh.reportSlug)!==body.reportId)return null;
       }
-      return tx.payment.create({data:paymentData});
+      const reservation=await tx.payment.create({data:paymentData});
+      if(reviewed)await tx.reportCheckoutDraft.create({data:{paymentId:reservation.id,inputDigest:reviewed.inputDigest,fields:JSON.parse(JSON.stringify(reviewed.fields)),expiresAt:new Date(Date.now()+CHECKOUT_DRAFT_LIFETIME_MS)}});
+      return reservation;
     }):await prisma.payment.create({data:paymentData});
     if(!payment)return fail("An order or payment attempt already exists. Review Payment History or My Orders before trying again.",409);
 

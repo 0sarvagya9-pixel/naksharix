@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {reportBirthSchema,automaticExtraSchema,checkAutomaticInputs} from "@/lib/reports/automatic-report-input";
+import {dateNameBirth,reportBirthSchema,automaticExtraSchema,checkAutomaticInputs,checkDateNameReportInputs} from "@/lib/reports/automatic-report-input";
 import {compareBusinessNames} from "@/lib/digital-packages/business-names";
 import {getPackageDefinition,PACKAGE_TERMS_VERSION} from "@/lib/digital-packages/catalogue";
 export const packageLanguage=z.enum(["en","hi","hinglish"]);
@@ -10,7 +10,7 @@ export const packageDraftSchema=z.object({
  subjects:z.array(subject).max(3),names:z.array(z.string().max(70)).max(10),question:z.string().trim().max(1000)
 }).strict();
 export type PackageDraft=z.infer<typeof packageDraftSchema>;
-export const reportItemSchema=z.object({birth:reportBirthSchema,extra:automaticExtraSchema,language:packageLanguage,question:z.string().max(1000)}).strict();
+export const reportItemSchema=z.object({birth:z.union([reportBirthSchema,dateNameBirth.strict()]),extra:automaticExtraSchema,language:packageLanguage,question:z.string().max(1000)}).strict();
 export const nameItemSchema=z.object({names:z.array(z.string().max(70)).min(2).max(10)}).strict();
 export type ItemInput=z.infer<typeof reportItemSchema>|z.infer<typeof nameItemSchema>|{language:"en"};
 export function preparePackageItems(input:PackageDraft):{kind:string;privateInput:ItemInput}[]{
@@ -34,7 +34,9 @@ export function preparePackageItems(input:PackageDraft):{kind:string;privateInpu
   if(kind==="marriage-workbook")return {kind,privateInput:{language:"en" as const}};
   const current=input.subjects[def.key==="family-three"?i:0];
   const extra=automaticExtraSchema.parse({confirmed:true,...(kind==="couple-kundli"?{partner:input.subjects[1].birth,partnerPermission:true}:{}),...(kind==="numerology-lo-shu-report"?{romanName:current.romanName}: {})});
-  const checked=checkAutomaticInputs(kind,current.birth,extra);
+  // The complete-life bundle needs a chart for other items. Retain only
+  // the subject's civil date/name for its separate numerology document.
+  const checked=kind==="numerology-lo-shu-report"?checkDateNameReportInputs(kind,current.birth,extra):checkAutomaticInputs(kind,current.birth,extra);
   if(!checked.ok)throw Error(checked.reason);
   return {kind,privateInput:reportItemSchema.parse({birth:checked.birth,extra:checked.extra,language:input.language,question:input.question})};
  });

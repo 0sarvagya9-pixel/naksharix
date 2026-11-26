@@ -151,7 +151,7 @@ function PersonPanel({ title, personKey, value, onChange, onResolvedLocation, er
           borderBottom: "1px solid rgba(255, 255, 255, 0.56)"
         }}
       >
-        <CardTitle className="font-cinzel text-2xl text-[#17181d]">{title}</CardTitle>
+        <CardTitle as="h2" className="font-cinzel text-2xl text-[#17181d]">{title}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 overflow-visible p-4 sm:grid-cols-2 sm:p-6">
         <Field label={tr("name")} error={err("name")}><Input data-field={`${personKey}.name`} className={errorClass(Boolean(err("name")))} value={value.name} onChange={(event) => onChange({ name: event.target.value })} /></Field>
@@ -205,7 +205,7 @@ function MatchResultView({ result }: { result: MatchResult }) {
           borderBottom: "1px solid rgba(255, 255, 255, 0.56)"
         }}
       >
-        <CardTitle className="font-cinzel text-2xl text-[#17181d]">{tr("premiumCompatibilityReport")}</CardTitle>
+        <CardTitle as="h2" className="font-cinzel text-2xl text-[#17181d]">{tr("premiumCompatibilityReport")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 p-4 sm:p-6">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

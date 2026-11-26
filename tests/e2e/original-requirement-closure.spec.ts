@@ -124,10 +124,10 @@ test("A42 all 15 report detail pages show exact price, fictional sample, require
   const sample=page.getByRole("link",{name:"View fictional sample PDF (English)",exact:true});
   await expect(sample).toHaveAttribute("href","/reports/"+slug+"/sample");
   await expect(sample).toHaveAttribute("target","_blank");
-  await expect(page.getByText("Actual UTC offset at birth (including daylight saving where applicable)",{exact:true})).toBeVisible();
+  if(!["name-correction-report","numerology-lo-shu-report"].includes(slug))await expect(page.getByText("Actual UTC offset at birth (including daylight saving where applicable)",{exact:true})).toBeVisible();
   if(slug==="couple-kundli")await expect(page.getByText("Permission to submit the other person's birth details",{exact:true})).toBeVisible();
   if(slug==="name-correction-report")await expect(page.getByText("Alternative name spellings (at least one)",{exact:true})).toBeVisible();
-  if(slug==="numerology-lo-shu-report")await expect(page.getByText("Full name in Roman letters (for name numerology)",{exact:true})).toBeVisible();
+  if(["numerology-lo-shu-report","fortune-report"].includes(slug))await expect(page.getByText("Full name in Roman letters (for name numerology)",{exact:true})).toBeVisible();
   if(slug==="baby-name-report")await expect(page.getByText("Preferred names (optional)",{exact:true})).toBeVisible();
   const sticky=page.locator("[data-report-mobile-action]");await expect(sticky).toBeVisible();await expect(sticky.getByText("INR "+price,{exact:true})).toBeVisible();
   await expect(sticky.getByRole("link",{name:"Review & continue",exact:true})).toHaveAttribute("href","#report-purchase");

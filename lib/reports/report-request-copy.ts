@@ -1,6 +1,19 @@
 // Report checkout UI language is distinct from the customer's selected PDF language.
 export const reportRequestCopy = {
   "en": {
+    "replaceExpired": "My earlier private checkout copy has expired. I confirm these replacement details for this paid report.",
+    "guardianPermission": "I am the child’s parent or guardian, or have their informed permission to submit these details.",
+    "timeAccuracy": "Birth time accuracy",
+    "exactTime": "Known exact time",
+    "approximateTime": "Approximate time",
+    "unknownTime": "Unknown time",
+    "dateNameDetails": "Full name and date of birth",
+    "dateNameConsent": "I confirm the name spellings and date of birth and request my private report.",
+    "optionalQuestion": "Question for your report (optional)",
+    "editDetails": "Edit details",
+    "knownTime": "This chart needs a known birth time. If the time is approximate or unknown, do not guess it.",
+    "invalidZone": "Check the birth time and UTC offset against the selected time zone. A skipped local time cannot be used. For a repeated time, enter the recorded offset.",
+    "invalidDateName": "Enter a valid name and civil date of birth.",
     "preparing": "Complete the required details before payment. Your information will not be added to payment metadata.",
     "verifiedIntro": "Payment is verified. Submit accurate birth details to create the paid report request.",
     "manualIntro": "Submit accurate birth details for manual review. No payment is collected for this review-only request.",
@@ -12,7 +25,8 @@ export const reportRequestCopy = {
     "manualInterrupted": "Connection interrupted. No payment was started. Please try again.",
     "verified": "Payment verified",
     "review": "Details validated - review payment",
-    "pagePrivacy": "The validated details are kept only in this open page until payment is verified. If the page closes after payment, finish your report from Payment History without paying again.",
+    "pagePrivacy": "When you start payment, your reviewed details are saved privately for up to seven days to recover an interrupted order. They are removed from the temporary copy when your report request is created.",
+    "recoverDetails": "Use the details you reviewed before payment to create your private report request.",
     "pay": "Pay",
     "saveInterrupted": "Payment verified, report submission interrupted. Continue from Payment History.",
     "expiry": "Validation is valid for 20 minutes. If expired, reload this page and validate again. If money has been deducted, check Payment History first.",
@@ -58,6 +72,19 @@ export const reportRequestCopy = {
     "invalidExtra": "Remove extra personal details that are not required for this report."
   },
   "hi": {
+    "replaceExpired": "मेरी पुरानी निजी चेकआउट प्रति की अवधि पूरी हो गई है। मैं इस सशुल्क रिपोर्ट के लिए इन नए विवरणों की पुष्टि करता/करती हूँ।",
+    "guardianPermission": "मैं बच्चे का अभिभावक हूँ या मुझे ये विवरण साझा करने की अभिभावक की अनुमति है।",
+    "timeAccuracy": "जन्म समय की सटीकता",
+    "exactTime": "सटीक समय ज्ञात है",
+    "approximateTime": "अनुमानित समय",
+    "unknownTime": "समय अज्ञात है",
+    "dateNameDetails": "पूरा नाम और जन्म तिथि",
+    "dateNameConsent": "मैं नाम की वर्तनी और जन्म तिथि की पुष्टि करता/करती हूँ और अपनी निजी रिपोर्ट चाहता/चाहती हूँ।",
+    "optionalQuestion": "रिपोर्ट के लिए प्रश्न (वैकल्पिक)",
+    "editDetails": "विवरण बदलें",
+    "knownTime": "इस कुंडली के लिए सही जन्म समय आवश्यक है। समय अनुमानित या अज्ञात है तो अनुमान न भरें।",
+    "invalidZone": "जन्म समय और UTC अंतर चयनित समय क्षेत्र से मिलाएँ। जो स्थानीय समय मौजूद नहीं था वह स्वीकार नहीं होगा। दो बार आए समय के लिए दर्ज UTC अंतर भरें।",
+    "invalidDateName": "सही नाम और स्थानीय जन्म तिथि दर्ज करें।",
     "preparing": "भुगतान से पहले आवश्यक विवरण भरें। आपकी जानकारी भुगतान के मेटाडेटा में शामिल नहीं होगी।",
     "verifiedIntro": "भुगतान सत्यापित है। सशुल्क रिपोर्ट का अनुरोध बनाने के लिए सही जन्म विवरण भेजें।",
     "manualIntro": "समीक्षा के लिए सही जन्म विवरण भेजें। इस अनुरोध के लिए कोई भुगतान नहीं लिया जाता।",
@@ -69,7 +96,8 @@ export const reportRequestCopy = {
     "manualInterrupted": "कनेक्शन बाधित हुआ। कोई भुगतान शुरू नहीं हुआ। फिर कोशिश करें।",
     "verified": "भुगतान सत्यापित",
     "review": "विवरण सत्यापित - भुगतान की समीक्षा करें",
-    "pagePrivacy": "भुगतान की पुष्टि तक सत्यापित विवरण इसी खुले पेज में रहते हैं। भुगतान के बाद पेज बंद हो जाए तो दोबारा भुगतान किए बिना भुगतान इतिहास से रिपोर्ट पूरी करें।",
+    "pagePrivacy": "भुगतान शुरू करने पर आपके सत्यापित विवरण अधिकतम सात दिनों के लिए निजी रूप से सुरक्षित रहेंगे। रिपोर्ट अनुरोध बनने पर अस्थायी प्रति हटा दी जाती है।",
+    "recoverDetails": "भुगतान से पहले सत्यापित विवरणों से अपना निजी रिपोर्ट अनुरोध बनाएँ।",
     "pay": "भुगतान करें",
     "saveInterrupted": "भुगतान सत्यापित है, लेकिन रिपोर्ट जमा करना बाधित हुआ। भुगतान इतिहास से आगे बढ़ें।",
     "expiry": "सत्यापन 20 मिनट तक मान्य है। समय समाप्त होने पर पेज फिर खोलकर सत्यापन करें। राशि कट गई हो तो पहले भुगतान इतिहास देखें।",
@@ -115,6 +143,19 @@ export const reportRequestCopy = {
     "invalidExtra": "इस रिपोर्ट के लिए आवश्यक न होने वाले अतिरिक्त निजी विवरण हटाएँ।"
   },
   "hinglish": {
+    "replaceExpired": "Meri purani private checkout copy expire ho chuki hai. Main is paid report ke liye in replacement details ko confirm karta/karti hoon.",
+    "guardianPermission": "Main bachche ka parent ya guardian hoon, ya guardian ki permission se yeh details de raha/rahi hoon.",
+    "timeAccuracy": "Birth time ki accuracy",
+    "exactTime": "Exact time pata hai",
+    "approximateTime": "Approximate time",
+    "unknownTime": "Time unknown hai",
+    "dateNameDetails": "Poora naam aur birth date",
+    "dateNameConsent": "Main naam ki spellings aur birth date confirm karta/karti hoon aur apni private report chahta/chahti hoon.",
+    "optionalQuestion": "Report ke liye sawaal (optional)",
+    "editDetails": "Details badlein",
+    "knownTime": "Is chart ke liye known birth time chahiye. Time approximate ya unknown hai toh guess mat karein.",
+    "invalidZone": "Birth time aur UTC offset selected time zone se check karein. Skipped local time use nahi ho sakta. Repeated time ke liye recorded offset bharein.",
+    "invalidDateName": "Sahi naam aur civil birth date bharein.",
     "preparing": "Payment se pehle zaroori details bharein. Aapki jaankari payment metadata mein nahi jodee jayegi.",
     "verifiedIntro": "Payment verify ho chuka hai. Paid report request banane ke liye sahi birth details submit karein.",
     "manualIntro": "Manual review ke liye sahi birth details submit karein. Is review-only request ke liye payment nahi liya jata.",
@@ -126,7 +167,8 @@ export const reportRequestCopy = {
     "manualInterrupted": "Connection toot gaya. Koi payment shuru nahi hua. Dobara try karein.",
     "verified": "Payment verify ho gaya",
     "review": "Details verify ho gayi - payment review karein",
-    "pagePrivacy": "Payment verify hone tak validated details isi khule page mein rehti hain. Payment ke baad page band ho jaye to dobara pay kiye bina Payment History se report poori karein.",
+    "pagePrivacy": "Payment shuru karne par reviewed details saat din tak privately save hoti hain. Report request banne par temporary copy delete hoti hai.",
+    "recoverDetails": "Payment se pehle review ki hui details se apna private report request banayein.",
     "pay": "Pay karein",
     "saveInterrupted": "Payment verified hai, lekin report submit nahi ho saki. Payment History se aage badhein.",
     "expiry": "Validation 20 minutes tak valid hai. Expire hone par page reload karke phir validate karein. Paise kate hain to pehle Payment History dekhein.",
@@ -175,7 +217,7 @@ export const reportRequestCopy = {
 export type ReportRequestLocale=keyof typeof reportRequestCopy;
 export type ReportRequestCopyKey=keyof typeof reportRequestCopy.en;
 export type ReportRequestStage="preflight"|"paid"|"manual";
-const validationKeys=["invalidCatalogue","invalidBirth","invalidPartner","invalidRoman","invalidAlternative","invalidSpellings","invalidExtra"] as const;
+const validationKeys=["invalidCatalogue","invalidBirth","invalidPartner","invalidRoman","invalidAlternative","invalidSpellings","invalidExtra","invalidZone","invalidDateName","guardianPermission"] as const;
 export function reportRequestErrorKey(error:unknown,stage:ReportRequestStage,status?:number):ReportRequestCopyKey {
   // Only known public validation messages may cross this presentation boundary.
   const key=validationKeys.find(k=>reportRequestCopy.en[k]===error);

@@ -11,6 +11,7 @@ import { safeServerTranslation } from "@/lib/i18n-server";
 import { getManualReport } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
 import {isPersonalizedPaymentCandidate,personalizedPaymentContext} from "@/lib/reports/checkout-context";
+import {CHECKOUT_DRAFT_LIFETIME_MS} from "@/lib/reports/checkout-draft";
 import { cookies } from "next/headers";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
@@ -43,6 +44,7 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
   const checkout = getManualReportCheckout(report.slug);
   const preparing=Boolean(checkout&&params.prepare==="1"&&!params.orderId&&!adminMode&&!isAdmin);
   let paymentVerified = false;
+  let resumeReviewed=false,replaceExpiredReview=false;
   let plan: "PREMIUM" | "VIP" = params.plan?.toLowerCase() === "vip" ? "VIP" : "PREMIUM";
 
   if (!adminMode && checkout && !preparing) {
@@ -67,6 +69,8 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     if(!personalizedPaymentContext(metadata,existingRequest?.id)||(existingRequest&&(existingRequest.userId!==user.id||existingRequest.reportSlug!==report.slug)))redirect(`/reports/${report.slug}?checkout=invalid`);
     if (existingRequest) redirect(`/report-request/success?id=${existingRequest.id}`);
 
+    if(typeof metadata.reviewedInputDigest==="string")resumeReviewed=Boolean(await prisma.reportCheckoutDraft.findFirst({where:{paymentId:payment.id,expiresAt:{gt:new Date()}},select:{paymentId:true}}));
+    replaceExpiredReview=typeof metadata.reviewedInputDigest==="string"&&!resumeReviewed&&payment.createdAt.getTime()+CHECKOUT_DRAFT_LIFETIME_MS<=Date.now();
     paymentVerified = true;
     plan = "PREMIUM";
   } else if (!adminMode && params.orderId) {
@@ -93,6 +97,8 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
             reportSlug={report.slug}
             reportName={report.name[locale]}
             paymentVerified={paymentVerified}
+            resumeReviewed={resumeReviewed}
+            replaceExpiredReview={replaceExpiredReview}
             automaticDelivery={automaticDelivery}
             specialistDetails={Boolean(checkout)}
             adminBypass={adminMode && isAdmin}

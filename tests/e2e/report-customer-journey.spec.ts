@@ -55,16 +55,21 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
    await expect(page.getByRole("heading",{level:1})).toHaveCount(1);
    await expect(page.getByText("Premium Personalized Kundli Report · INR 799",{exact:true})).toBeVisible();
    await page.locator('[data-field="fullName"]').fill("Synthetic Birth Person");
-   await page.locator('[data-field="dateOfBirth"]').fill("1990-01-15");await page.locator('[data-field="timeOfBirth"]').fill("10:30");
+   await page.locator('[data-field="dateOfBirth"]').fill("1990-01-15");
+   const certainty=page.getByLabel("Birth time accuracy");
+   for(const value of ["unknown","approximate"]){await certainty.selectOption(value);await expect(page.getByRole("button",{name:"Validate details and continue"})).toBeDisabled();}
+   await certainty.selectOption("known");await page.locator('[data-field="timeOfBirth"]').fill("10:30");
    await page.locator('[data-field="birthPlace"]').fill("Delhi");await page.getByRole("option",{name:/Delhi, India/}).first().click();
    await expect(page.locator("#report-birth-offset")).toHaveValue("5.5");
    await page.getByRole("checkbox",{name:/I confirm these birth details/}).check();
    const submit=page.getByRole("button",{name:"Validate details and continue"});
    const form=page.locator("form").filter({has:submit});
-   // Empty concern must still be rejected before any preflight request.
-   await submit.click();
-   await expect(page.locator('[data-field="concern"]')).toHaveAttribute("aria-invalid","true");
-   expect(requests).not.toContain("/api/report-requests/preflight");
+   // A question is optional. Edit the confirmed details before the checkout
+   // control is invoked, then verify the original inputs were preserved.
+   const [withoutQuestion]=await Promise.all([page.waitForResponse(r=>new URL(r.url()).pathname==="/api/report-requests/preflight"),submit.click()]);
+   expect(withoutQuestion.status()).toBe(200);
+   expect(withoutQuestion.request().postDataJSON().concern).toBe("");
+   await page.getByRole("button",{name:"Edit details"}).click();
    await page.locator('[data-field="concern"]').fill("Synthetic private career reflection for QA only.");
    await expect(page.locator('[data-field="fullName"]')).toHaveValue("Synthetic Birth Person");
    await expect(page.locator('[data-field="concern"]')).toHaveValue("Synthetic private career reflection for QA only.");
@@ -89,7 +94,7 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
    expect(submitted.birth.name).toBe("Synthetic Birth Person");expect(submitted.concern).toBe("Synthetic private career reflection for QA only.");expect(submitted.birth.timezone).toBe(5.5);expect(submitted.automaticDetails.confirmed).toBe(true);
    const result=await preflight.json();expect(result.data.reportId).toBe("kundli-pro");expect(result.data.price).toBe("INR 799");expect(result.data.expiresInSeconds).toBe(1200);
    const claim=JSON.parse(Buffer.from(result.data.token.split(".")[0],"base64url").toString("utf8"));
-   expect(Object.keys(claim).sort()).toEqual(["amountPaise","exp","purpose","reportId","userId","v"]);expect(claim.userId).toBe(account.id);expect(claim.amountPaise).toBe(79900);
+   expect(Object.keys(claim).sort()).toEqual(["amountPaise","exp","inputDigest","purpose","reportId","userId","v"]);expect(claim.userId).toBe(account.id);expect(claim.amountPaise).toBe(79900);
    await expect(page.getByRole("heading",{name:"Details validated - review payment"})).toBeVisible();
    await expect(page.getByRole("button",{name:"Pay INR 799"})).toBeVisible();
    expect(await prisma.payment.count({where:{userId:account.id}})).toBe(0);expect(await prisma.reportRequest.count({where:{userId:account.id}})).toBe(0);
@@ -108,7 +113,23 @@ test.describe("Original report customer journey (A09/A16/A42/A45)",()=>{
     await expect(page.getByRole("checkbox",{name:c.consent,exact:false})).toBeVisible();
     await expect(page.locator('select[name="reportLanguage"]')).toHaveValue(c.locale);
    }
-   expect(requests.filter(p=>p==="/api/report-requests/preflight")).toHaveLength(1);
+   await context.addCookies([{name:"naksharix-language",value:"en",url:origin}]);
+   for(const slug of ["numerology-lo-shu-report","name-correction-report"]){
+    await page.goto(origin+"/report-request/new?reportSlug="+slug+"&prepare=1");
+    for(const field of ["reportBirthTime","reportGender","reportPhone","reportBirthOffset"])await expect(page.locator('[name="'+field+'"]')).toHaveCount(0);
+    await expect(page.locator('[data-field="birthPlace"]')).toHaveCount(0);
+    await page.locator('[name="reportFullName"]').fill("आशा");
+    await page.locator('[name="reportBirthDate"]').fill("1990-01-15");
+    await page.locator('[name="reportRomanName"]').fill("Asha");
+    if(slug==="name-correction-report")await page.locator('[name="reportCandidateNames"]').fill("Aasha");
+    await page.locator('[name="reportConfirmed"]').check();
+    const [result]=await Promise.all([page.waitForResponse(r=>new URL(r.url()).pathname==="/api/report-requests/preflight"),page.getByRole("button",{name:"Validate details and continue"}).click()]);
+    expect(result.status()).toBe(200);expect(result.request().postDataJSON().birth).toEqual({name:"आशा",dateOfBirth:"1990-01-15"});
+    await expect(page.getByRole("button",{name:"Pay INR 399"})).toBeVisible();
+   }
+   await page.goto(origin+"/report-request/new?reportSlug=fortune-report&prepare=1");
+   await expect(page.getByLabel("Full name in Roman letters (for name numerology)")).toHaveAttribute("required","");
+   expect(requests.filter(p=>p==="/api/report-requests/preflight")).toHaveLength(4);
    expect(blocked).toEqual([]);
    expect(await prisma.payment.count({where:{userId:account.id}})).toBe(0);
    expect(await prisma.reportRequest.count({where:{userId:account.id}})).toBe(0);

@@ -105,3 +105,37 @@ console.log("DASHA_TIMELINE_RUNTIME_PASS="+JSON.stringify({cases,assertions,year
  }
  console.log("P0_NESTED_TIMELINE_D60_CHALIT_PASS "+JSON.stringify({windowCases,windowChecks,d60Checks,chalitChecks,scope:"fixed-year arithmetic, named D60 convention and existing equal-house Chalit labels; not professional astrology certification"}));
 }
+
+{
+ const {nakshatraFromLongitude,nakshatras}=require("@/lib/astrology/own-engine/nakshatra");
+ const view=new DataView(new ArrayBuffer(8));
+ function adjacent(value,direction){
+   view.setFloat64(0,value);
+   view.setBigUint64(0,view.getBigUint64(0)+BigInt(direction));
+   return view.getFloat64(0);
+ }
+ let padaCases=0,dashaCases=0;
+ for(let sector=1;sector<108;sector++){
+   const boundary=sector*12000/3600;
+   for(const [longitude,expected] of [[adjacent(boundary,-1),sector-1],[boundary,sector],[adjacent(boundary,1),sector]]){
+     const mansion=Math.floor(expected/4),chart=nakshatraFromLongitude(longitude);
+     assert.equal(chart.name,nakshatras[mansion]);assert.equal(chart.pada,expected%4+1);padaCases++;
+     if(sector%4!==0)continue;
+     const result=precise({moonLongitude:longitude,birthDateTime:birth,currentDate:birth});
+     assert.equal(result.birthMoonLongitude,longitude);
+     assert.equal(result.birthNakshatra,chart.name);
+     assert.equal(result.startingMahadashaLord,order[mansion%9]);dashaCases++;
+   }
+ }
+ const {calculatePanchang}=require("@/lib/astrology/own-engine/panchang");
+ const original=process.env.TZ;
+ let weekdayCases=0;
+ try{
+   for(const zone of ["UTC","America/Los_Angeles","Pacific/Auckland"]){
+     process.env.TZ=zone;
+     const p=calculatePanchang({date:new Date("2026-11-25T19:00:00Z"),latitude:28.61,longitude:77.21,timezoneOffset:5.5,moonLongitude:280000/3000,sunLongitude:0});
+     assert.equal(p.date,"2026-11-26");assert.equal(p.vaar,"Thursday");assert.equal(p.yoga,"Dhriti");weekdayCases++;
+   }
+ }finally{if(original===undefined)delete process.env.TZ;else process.env.TZ=original;}
+ console.log("P0_LUNAR_BOUNDARY_AND_CIVIL_WEEKDAY_PASS",JSON.stringify({padaCases,dashaCases,weekdayCases}));
+}

@@ -1,9 +1,10 @@
-import { format } from "date-fns";
+import { calculateCalendarNumbers } from "./calendar";
 import type { Locale } from "@/lib/i18n";
 
 export type NumerologyInput = {
   name: string;
   dateOfBirth: string | Date;
+  asOf?: Date;
   gender?: string;
   mobile?: string;
   vehicle?: string;
@@ -40,6 +41,7 @@ export type NumerologyReport = {
   repeatedNumbers: Array<NumerologyNumber & { count: number }>;
   mobileAnalysis?: NumerologyNumber;
   vehicleAnalysis?: NumerologyNumber;
+  calendar: ReturnType<typeof calculateCalendarNumbers>;
   dailyPrediction: {
     date: string;
     personalDayNumber: number;
@@ -76,7 +78,7 @@ const copy = {
     labels: {
       moolank: "मूलांक / जन्मांक",
       lifePath: "भाग्यांक / जीवन पथ अंक",
-      destiny: "भाग्यांक",
+      destiny: "अभिव्यक्ति अंक (नाम से)",
       nameNumber: "नामांक",
       soulUrge: "आत्मिक ऊर्जा अंक",
       personality: "व्यक्तित्व अंक",
@@ -171,7 +173,7 @@ export function calculateNumerologyReport(input: NumerologyInput): NumerologyRep
   const digits = dateDigits(dob);
   const nameValues = nameNumerologyValues(name);
   const birthDay = dob.getUTCDate();
-  const day = new Date();
+  const calendar = calculateCalendarNumbers(dob, input.asOf ?? new Date());
   const lifePath = reduceNumber(digits.reduce((sum, digit) => sum + digit, 0));
   const moolank = reduceNumber(birthDay);
   const destiny = reduceNumber(nameValues.total);
@@ -201,15 +203,21 @@ export function calculateNumerologyReport(input: NumerologyInput): NumerologyRep
     repeatedNumbers: loShuOrder.filter((number) => (counts[number] ?? 0) > 1).map((number) => ({ ...numberResult(String(number), number, locale, copy[locale].repeated), count: counts[number] })),
     mobileAnalysis: mobile ? numberResult(copy[locale].labels.mobile, mobile, locale) : undefined,
     vehicleAnalysis: vehicle ? numberResult(copy[locale].labels.vehicle, vehicle, locale) : undefined,
+    calendar,
     dailyPrediction: {
-      date: format(day, "yyyy-MM-dd"),
-      personalDayNumber: reduceNumber(lifePath + day.getDate() + day.getMonth() + 1 + day.getFullYear()),
+      date: calendar.asOf,
+      personalDayNumber: calendar.personalDay,
       summary: copy[locale].daily,
-      focus: numberProfiles[locale][reduceNumber(lifePath + day.getDate())].strengths
+      focus: numberProfiles[locale][calendar.personalDay].strengths
     },
     remedies: copy[locale].remedies,
     disclaimer: copy[locale].disclaimer
   };
+}
+
+export function calendarReflection(value:number,locale:Locale) {
+  if(!Number.isInteger(value)||value<1||value>9) throw Error("Invalid calendar number");
+  return numberProfiles[locale][value];
 }
 
 function numberResult(label: string, value: number, locale: Locale, overrideMeaning?: string): NumerologyNumber {

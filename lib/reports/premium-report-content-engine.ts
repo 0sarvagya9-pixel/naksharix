@@ -15,9 +15,12 @@ export type PremiumReportContentSection = {
   limitations: string[];
 };
 
+import type { ReportBinding } from "./report-quality";
+
 export type PremiumReportContentResult = {
   sections: PremiumReportContentSection[];
   metadata: {
+    binding?: ReportBinding;
     reportCompleteness: "provider_verified_partial" | "partial_internal";
     verified: false;
     premiumComplete: false;

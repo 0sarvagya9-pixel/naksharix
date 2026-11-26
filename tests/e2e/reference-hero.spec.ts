@@ -8,6 +8,11 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
     await expect(surface.getByRole("heading", { level: 1, name: /Discover your cosmic journey/i })).toBeVisible();
     await expect(surface.locator(".nx-a-tool")).toHaveCount(6);
     await expect(surface.locator(".nx-a-card")).toHaveCount(4);
+    const retained = page.locator(".nx-approved-retained");
+    // A seasonal offer can render its dialog between the two homepage sections.
+    await retained.evaluate(section => section.before(document.createElement("dialog")));
+    await expect(retained.locator(".nx-ed-hero")).toBeHidden();
+    await expect(page.locator('link[rel="preload"][as="image"][href="/approved-gallery/hero-astrolabe.jpg"]')).toHaveCount(1);
 
     const expectedLinks = [
       ["Create Free Kundli", "/kundli"],

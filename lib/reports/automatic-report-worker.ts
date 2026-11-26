@@ -1,27 +1,27 @@
 import "server-only";
+import { reportQualityInputHash, ReportQualityError } from "./report-quality";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
-import { getManualReport } from "@/lib/manual-catalogue";
+import { personalizedPaymentContext } from "@/lib/reports/checkout-context";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
-import { checkAutomaticInputs,decodeAutomaticReportInput } from "@/lib/reports/automatic-report-input";
+import { checkAutomaticInputs,checkDateNameReportInputs,decodeAutomaticReportInput } from "@/lib/reports/automatic-report-input";
+import {reportIntakeScope} from "./public-intake";
 import { assembleAutomaticPaidReport } from "@/lib/reports/automatic-report-content";
 import { generatePremiumReportPdf } from "@/lib/reports/premium-report-generation-service";
 import { saveReportPdf,loadReportPdf } from "@/lib/storage/report-storage";
-import { sendReportDeliveryEmail } from "@/lib/reports/report-delivery-service";
+import { REPORT_LEASE_MS, reportDeliveryMessage, requiresEmailReconciliation, sendReportDeliveryEmail } from "@/lib/reports/report-delivery-service";
 import {notifyAccountUpdate} from "@/lib/notifications/web-push";
 import { writeAuditLog,writeReportStatusHistory } from "@/lib/reports/report-audit";
 import type { ReportRequest } from "@prisma/client";
 import {cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 
-const LEASE_MS=5*60_000;
-const EMAIL_REPLAY_MS=23*3600_000;
 const GEN_STATES=["auto_queued","auto_generation_retry","auto_generating"];
 const MAIL_STATES=["auto_email_ready","auto_email_retry","auto_email_uncertain","auto_sending"];
 const ALL_STATES=[...GEN_STATES,...MAIL_STATES];
 function stillActive(state:string){return state==="auto_generating"||state==="auto_sending";}
 function claimable(row:ReportRequest,now=Date.now()){
-  return ALL_STATES.includes(row.deliveryStatus)&&(!stillActive(row.deliveryStatus)||now-row.updatedAt.getTime()>=LEASE_MS);
+  return ALL_STATES.includes(row.deliveryStatus)&&(!stillActive(row.deliveryStatus)||now-row.updatedAt.getTime()>=REPORT_LEASE_MS);
 }
 function languageFor(value:string){return value==="hi"||value==="hinglish"?value:"en";}
 async function loadEntitled(id:string){
@@ -33,7 +33,7 @@ async function loadEntitled(id:string){
   const product=getManualReportCheckout(row.reportSlug);
   const p=row.payment,meta=p.metadata as Record<string,unknown>|null;
   if(!product||p.status!=="PAID"||!p.providerPaymentId||p.userId!==row.user.id||p.provider!=="RAZORPAY"||p.currency!=="INR"||
-      String(p.purpose)!==product.purpose||Number(p.amount)!==product.amount||meta?.reportId!==product.reportId)return null;
+      String(p.purpose)!==product.purpose||Number(p.amount)!==product.amount||meta?.reportId!==product.reportId||!personalizedPaymentContext(meta,id))return null;
   try{if(await cumulativeSignedRefund(prisma,p.providerPaymentId)>0)return null;}catch{return null;}
   return row;
 }
@@ -68,7 +68,8 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
     if(!["PAID","IN_PROGRESS"].includes(row.status))return "skipped";
     const lease=await claim(row,"auto_generating");if(!lease)return "skipped";
     try{
-      const checked=checkAutomaticInputs(row.reportSlug,{
+      const validate=reportIntakeScope(row.reportSlug).dateNameOnly?checkDateNameReportInputs:checkAutomaticInputs;
+      const checked=validate(row.reportSlug,{
         name:row.fullName,gender:row.gender??undefined,dateOfBirth:row.dateOfBirth,timeOfBirth:row.timeOfBirth,
         birthPlace:row.birthPlace,latitude:row.latitude,longitude:row.longitude,timezone:row.timezone
       },envelope.extra);
@@ -77,7 +78,8 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
         return "pending";
       }
       const generatedContent=await assembleAutomaticPaidReport({slug:row.reportSlug,birth:checked.birth,extra:checked.extra,question:envelope.question,language:languageFor(row.language)});
-      const generated=await generatePremiumReportPdf({requestId:id,templateId:row.reportSlug,status:"ready_for_generation",
+      const expectedInputHash=reportQualityInputHash({slug:row.reportSlug,birth:checked.birth,extra:checked.extra,question:envelope.question,language:languageFor(row.language)});
+      const generated=await generatePremiumReportPdf({requestId:id,templateId:row.reportSlug,status:"ready_for_generation",expectedInputHash,
         content:generatedContent.content,automatedInputValidated:true,reportTitle:generatedContent.title,customerName:row.fullName,language:languageFor(row.language)});
       if(!generated.generated||!generated.bytes?.length)throw new Error("REPORT_PDF_NOT_GENERATED");
       // Confirm captured entitlement again before storage or customer access.
@@ -92,9 +94,13 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
       });
       if(write.count!==1)return "skipped";
       if(row.userId)await notifyAccountUpdate({userId:row.userId,kind:"report",reference:id,status:"PDF_READY"});
-      await writeReportStatusHistory({reportRequestId:id,oldStatus:"IN_PROGRESS",newStatus:"GENERATED",note:"Automatic report calculated from validated customer inputs; PDF stored.",metadata:{source:"automatic_paid_report",size:stored.size}});
+      await writeReportStatusHistory({reportRequestId:id,oldStatus:"IN_PROGRESS",newStatus:"GENERATED",note:"Automatic report calculated from validated customer inputs; PDF stored.",metadata:{source:"automatic_paid_report",size:stored.size,qualityVersion:1,inputHash:expectedInputHash,pdfChecksum:stored.checksum}});
       await writeAuditLog({action:"report_pdf.automatically_generated",targetType:"ReportRequest",targetId:id,metadata:{reportSlug:row.reportSlug,size:stored.size,storageDriver:stored.storageDriver}});
-    }catch{
+    }catch(error){
+      if(error instanceof ReportQualityError){
+        await flag(id,lease,"auto_generating","auto_quality_review",error.message);
+        return "pending";
+      }
       await flag(id,lease,"auto_generating","auto_generation_retry","Automatic generation needs a retry.").catch(()=>null);
       return "pending";
     }
@@ -115,7 +121,7 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
   // Resend idempotency has a finite window. If an interrupted or uncertain
   // send is older than it, keep the private file and request operator reconciliation
   // rather than silently sending duplicate customer emails.
-  if(["auto_email_uncertain","auto_sending"].includes(row.deliveryStatus)&&Date.now()-row.generatedAt.getTime()>=EMAIL_REPLAY_MS){
+  if(requiresEmailReconciliation(row)){
     await prisma.reportRequest.updateMany({where:{id,updatedAt:row.updatedAt,deliveryStatus:row.deliveryStatus,paymentStatus:"PAID"},data:{status:"READY_FOR_DELIVERY",deliveryStatus:"auto_email_review",deliveryError:"Email attempt requires reconciliation. Secure download remains available."}});
     return "pending";
   }
@@ -126,21 +132,18 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
     if(bytes.length!==row.generatedPdfSize||Buffer.from(bytes.subarray(0,5)).toString("ascii")!=="%PDF-")throw new Error("REPORT_FILE_INVALID");
     const current=await loadEntitled(id);
     if(!current||current.updatedAt.getTime()!==lease.getTime()||current.deliveryStatus!=="auto_sending"||current.user!.email.toLowerCase()!==row.deliveryEmail.toLowerCase()||(!current.user!.emailVerified&&!current.user!.emailVerifiedAt&&!current.user!.googleId))return "skipped";
-    const title=getManualReport(row.reportSlug)?.name[languageFor(row.language)]??"Personalized Astrology Report";
     // Email contains a branded, authenticated PDF link, not personal birth data
     // or a public bearer download link. Refund entitlement is still checked at download.
-    const sent=await sendReportDeliveryEmail({to:current.user!.email,fullName:row.fullName,reportRequestId:id,
-      reportName:title,language:languageFor(row.language),
-      downloadUrl:new URL("/report-request/success?id="+encodeURIComponent(id),env.NEXT_PUBLIC_APP_URL).toString()});
+    const sent=await sendReportDeliveryEmail(reportDeliveryMessage(row, current.user!.email));
     const result=await prisma.reportRequest.updateMany({
       where:leasedWhere(id,lease,"auto_sending"),
       data:sent.sent?{status:"DELIVERED",deliveryStatus:"email_sent",emailSentAt:new Date(),deliveryError:null}:
-        {status:"READY_FOR_DELIVERY",deliveryStatus:sent.reason.includes("temporarily unavailable")?"auto_email_uncertain":"auto_email_retry",deliveryError:"Email provider did not confirm acceptance. Secure download is available."}
+        {status:"READY_FOR_DELIVERY",deliveryStatus:sent.acceptanceUncertain?"auto_email_uncertain":"auto_email_retry",deliveryError:"Email provider did not confirm acceptance. Secure download is available."}
     });
     if(result.count!==1)return "skipped";
     if(!sent.sent)return "pending";
-    await writeReportStatusHistory({reportRequestId:id,oldStatus:row.status,newStatus:"DELIVERED",note:"Report email accepted by provider; inbox receipt is not independently confirmed.",metadata:{source:"automatic_paid_report",deliveryMode:"registered_email_secure_link"}});
-    await writeAuditLog({action:"report_delivery.automatic_email_accepted",targetType:"ReportRequest",targetId:id,metadata:{reportSlug:row.reportSlug,deliveryMode:"registered_email_secure_link"}});
+    await writeReportStatusHistory({reportRequestId:id,oldStatus:row.status,newStatus:"DELIVERED",note:"Report email accepted by provider; inbox receipt is not independently confirmed.",metadata:{source:"automatic_paid_report",deliveryMode:"registered_email_secure_link",providerMessageId:sent.providerMessageId}});
+    await writeAuditLog({action:"report_delivery.automatic_email_accepted",targetType:"ReportRequest",targetId:id,metadata:{reportSlug:row.reportSlug,deliveryMode:"registered_email_secure_link",providerMessageId:sent.providerMessageId}});
     return "delivered";
   }catch{
     await flag(id,lease,"auto_sending","auto_email_uncertain","Report email needs a retry; secure download remains available.").catch(()=>null);
@@ -149,7 +152,7 @@ export async function processAutomaticReport(id:string):Promise<"delivered"|"pen
 }
 export async function runAutomaticReportRecovery(limit=12){
   if(env.AUTO_REPORT_DELIVERY_ENABLED!=="true")return {enabled:false,selected:0,delivered:0,pending:0,skipped:0};
-  const cutoff=new Date(Date.now()-LEASE_MS);
+  const cutoff=new Date(Date.now()-REPORT_LEASE_MS);
   const rows=await prisma.reportRequest.findMany({
     where:{paymentStatus:"PAID",adminBypass:false,status:{in:["PAID","IN_PROGRESS","GENERATED","READY_FOR_DELIVERY"]},
       OR:[{deliveryStatus:{in:["auto_queued","auto_generation_retry","auto_email_ready","auto_email_retry","auto_email_uncertain"]}},

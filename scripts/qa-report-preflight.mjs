@@ -102,6 +102,6 @@ console.log("REPORT_REQUEST_LOCALIZATION_CONTRACT_PASS;KEYS="+reportCopyKeys.len
 
 const newIntake=readFileSync("lib/reports/automatic-report-input.ts","utf8");
 const preflightRoute=readFileSync("app/api/report-requests/preflight/route.ts","utf8");
-assert.ok(newIntake.includes("export function checkNewReportInputs(")&&preflightRoute.includes("checkNewReportInputs(body.reportSlug,body.birth,body.automaticDetails)")&&reportCreate.includes("checkNewReportInputs(report.slug,")&&requestForm.includes("checkNewReportInputs(reportSlug,birth,automaticDetails)"));
+assert.ok(newIntake.includes("export function checkNewReportInputs(")&&preflightRoute.includes("normalizeReviewedFields(reportSlug,submitted)")&&reportCreate.includes("checkNewReportInputs(report.slug,")&&requestForm.includes("checkNewReportInputs(reportSlug,birth,automaticDetails)"));
 assert.ok(requestForm.includes('secureFetch("/api/report-requests/preflight",{silent:true,')&&requestForm.includes('secureFetch("/api/report-requests",{silent:true,'),"Localized form owns its status messages");
 console.log("REPORT_INTAKE_PRIVACY_SOURCE_CONTRACT_PASS; LEGACY_RENDERER_VALIDATOR_PRESERVED");

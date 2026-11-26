@@ -1,5 +1,13 @@
 /** Transparent traditional symbolism, not a prediction of business success. */
-const chaldean=["AIJQY","BKR","CGLS","DMT","EHNX","UVW","OZ","FP"] as const;
+// The Cheiro-style Chaldean alphabet assigns no letter to 9. Keep its
+// single-digit root separate from the Pythagorean master-number rule.
+const chaldeanGroups = ["AIJQY", "BKR", "CGLS", "DMT", "EHNX", "UVW", "OZ", "FP"];
+
+export function chaldeanLetterValue(letter:string):number{
+  const group=chaldeanGroups.findIndex(letters=>letters.includes(letter));
+  if(letter.length!==1||group<0)throw Error("INVALID_CHALDEAN_LETTER");
+  return group+1;
+}
 export function normalizedBusinessName(input:string){
  const value=input.trim().replace(/\s+/g," ");
  if(value.length<2||value.length>70||!/[A-Za-z]/.test(value)||!/^[A-Za-z .&'-]+$/.test(value))throw Error("Use Roman letters and ordinary name separators, without digits or symbols.");
@@ -13,7 +21,7 @@ export function compareBusinessNames(candidates:readonly string[]){
  if(new Set(names.map(canonical)).size!==names.length)throw Error("Candidate names must differ by letters, not just spacing or case.");
  return names.map(name=>{
   const letters=canonical(name).split("");
-  const breakdown=letters.map(letter=>({letter,pythagorean:(letter.charCodeAt(0)-65)%9+1,chaldean:chaldean.findIndex(row=>row.includes(letter))+1}));
+  const breakdown=letters.map(letter=>({letter,pythagorean:(letter.charCodeAt(0)-65)%9+1,chaldean:chaldeanLetterValue(letter)}));
   const pythagoreanTotal=breakdown.reduce((s,l)=>s+l.pythagorean,0),chaldeanTotal=breakdown.reduce((s,l)=>s+l.chaldean,0);
   return {name,pythagoreanTotal,pythagoreanRoot:root(pythagoreanTotal),chaldeanTotal,chaldeanRoot:root(chaldeanTotal),breakdown};
  });
