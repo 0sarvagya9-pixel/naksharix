@@ -28,6 +28,6 @@ export async function assessPaidCourse(userId:string,orderId:string,moduleId:str
   const lessonId=courseProgressKey(orderId,moduleId);
   // A later practice attempt cannot erase a previously passed formative check.
   if(outcome.passed)await tx.learningProgress.upsert({where:{userId_lessonId:{userId,lessonId}},create:{userId,lessonId,completedAt:new Date()},update:{completedAt:new Date()}});
-  return outcome;
+  return {...outcome,orderId,moduleId};
  });
 }
