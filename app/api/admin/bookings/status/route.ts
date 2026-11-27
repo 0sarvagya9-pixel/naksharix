@@ -8,6 +8,7 @@ import { validateConsultationMeetingUrl } from "@/lib/consultations/meeting-link
 
 const schema = z.object({
   bookingId: z.string().min(1),
+  expectedUpdatedAt: z.string().datetime(),
   status: z.enum(["PENDING", "REQUESTED", "PAYMENT_PENDING", "ACCEPTED", "CONFIRMED", "REJECTED", "COMPLETED", "CANCELED"]).optional(),
   paymentStatus: z.enum(["PENDING", "PAID", "FAILED", "REFUNDED", "ADMIN_BYPASS", "FREE"]).optional(),
   meetingLink: z.string().url().or(z.literal("")).optional(),
@@ -24,6 +25,10 @@ export async function POST(request: NextRequest) {
     const body = await validateJson(request, schema);
     const booking = await prisma.consultationBooking.findUnique({ where: { id: body.bookingId } });
     if (!booking) return fail("Booking not found", 404);
+    const expectedUpdatedAt = new Date(body.expectedUpdatedAt);
+    if (booking.updatedAt.getTime() !== expectedUpdatedAt.getTime()) {
+      return fail("Booking changed. Refresh the saved record before trying again.", 409);
+    }
 
     if (body.meetingLink !== undefined && body.meetingLink !== "" &&
         !validateConsultationMeetingUrl(body.meetingLink)) {
@@ -37,24 +42,39 @@ export async function POST(request: NextRequest) {
       astrologerNote: body.astrologerNote !== undefined ? body.astrologerNote : existingMetadata.astrologerNote
     };
 
-    const updated = await prisma.consultationBooking.update({
-      where: { id: body.bookingId },
-      data: {
-        status: body.status || undefined,
-        paymentStatus: body.paymentStatus || undefined,
-        metadata: updatedMetadata as Prisma.InputJsonValue
-      }
+    // Use the existing timestamp as an optimistic version. A concurrent admin,
+    // payment webhook or practitioner update must invalidate the saved draft.
+    // Advance by at least one millisecond even if two requests share a clock tick.
+    const nextUpdatedAt = new Date(Math.max(Date.now(), booking.updatedAt.getTime() + 1));
+    const updated = await prisma.$transaction(async tx => {
+      const change = await tx.consultationBooking.updateMany({
+        where: {
+          id: body.bookingId,
+          updatedAt: expectedUpdatedAt,
+          status: booking.status,
+          paymentStatus: booking.paymentStatus
+        },
+        data: {
+          status: body.status || undefined,
+          paymentStatus: body.paymentStatus || undefined,
+          metadata: updatedMetadata as Prisma.InputJsonValue,
+          updatedAt: nextUpdatedAt
+        }
+      });
+      if (change.count !== 1) return null;
+      const saved = await tx.consultationBooking.findUniqueOrThrow({where:{id:body.bookingId}});
+      await tx.adminActionLog.create({
+        data: {
+          adminId: admin.id,
+          action: "UPDATE_CONSULTATION_BOOKING",
+          targetType: "ConsultationBooking",
+          targetId: body.bookingId,
+          metadata: { status: body.status, paymentStatus: body.paymentStatus }
+        }
+      });
+      return saved;
     });
-
-    await prisma.adminActionLog.create({
-      data: {
-        adminId: admin.id,
-        action: "UPDATE_CONSULTATION_BOOKING",
-        targetType: "ConsultationBooking",
-        targetId: body.bookingId,
-        metadata: { status: body.status, paymentStatus: body.paymentStatus }
-      }
-    });
+    if (!updated) return fail("Booking changed. Refresh the saved record before trying again.", 409);
 
     return ok({ booking: updated });
   } catch (error) {

@@ -3,17 +3,23 @@ import { AdminConsultationsContent } from "@/components/admin-consultations-cont
 import { requireAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { seo } from "@/lib/seo";
+import {cookies} from "next/headers";
+import {normalizeLocale} from "@/lib/i18n";
+import {fulfilmentCopy} from "@/lib/admin/fulfilment-copy";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export async function generateMetadata():Promise<Metadata>{
+  const copy=fulfilmentCopy(normalizeLocale((await cookies()).get("naksharix-language")?.value));
+  return {
   ...seo({
-    title: "Admin Consultation Management - Naksharix",
-    description: "View, allocate meeting links, and manage statuses of all user consultations.",
+    title: copy.consultationTitle+" - Naksharix",
+    description: copy.consultationIntro,
     path: "/admin/consultations"
   }),
-  robots: { index: false, follow: true }
-};
+  robots: { index: false, follow: false }
+  };
+}
 
 export default async function AdminConsultationsPage() {
   await requireAdminRole();
@@ -28,6 +34,7 @@ export default async function AdminConsultationsPage() {
     id: booking.id,
     mode: booking.mode,
     status: booking.status,
+    updatedAt: booking.updatedAt.toISOString(),
     scheduledAt: booking.scheduledAt.toISOString(),
     durationMins: booking.durationMins,
     birthName: booking.birthName,
@@ -45,7 +52,7 @@ export default async function AdminConsultationsPage() {
     astrologerProfile: {
       displayName: booking.astrologerProfile.displayName
     }
-  }))).catch(() => []);
+  }))).catch(() => null);
 
-  return <AdminConsultationsContent initialBookings={bookings} />;
+  return <AdminConsultationsContent initialBookings={bookings??[]} initialAvailable={bookings!==null} />;
 }

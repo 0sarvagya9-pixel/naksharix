@@ -5,6 +5,8 @@ import {env} from "@/lib/env";
 import type {Prisma} from "@prisma/client";
 import {hasUnrefundedPackageEntitlement} from "@/lib/digital-packages/ledger";
 import {sendEmail} from "@/lib/email/email-service";
+import {normalizeLocale} from "@/lib/i18n";
+import {reminderEmail} from "@/lib/calendar/reminder-copy";
 import {referenceReminderEvents,reminderDueAt,reminderWindowOpen,REMINDER_CONSENT_VERSION,REMINDER_PRODUCT_KEY,REMINDER_END,REMINDER_DAILY_CAPACITY} from "@/lib/calendar/reminder-contract";
 import {reminderServiceReady,reminderSchemaReady} from "@/lib/calendar/reminder-readiness";
 const select={id:true,orderId:true,eventId:true,eventDate:true,leadDays:true,dueAt:true,status:true,acceptedAt:true} satisfies Prisma.ReferenceReminderSelect;
@@ -13,7 +15,7 @@ async function eligible(tx:Prisma.TransactionClient,userId:string,orderId:string
  const order=await tx.digitalPackageOrder.findFirst({where:{id:orderId,userId,productKey:REMINDER_PRODUCT_KEY,productVersion:"v1"},include:{payment:true}});
  return !!order&&await hasUnrefundedPackageEntitlement(tx,order,order.payment);
 }
-async function account(tx:Prisma.TransactionClient,userId:string){return tx.user.findFirst({where:{id:userId,role:{notIn:["ADMIN","SUPER_ADMIN"]},OR:[{emailVerified:{not:null}},{emailVerifiedAt:{not:null}}]},select:{id:true,email:true}});}
+async function account(tx:Prisma.TransactionClient,userId:string){return tx.user.findFirst({where:{id:userId,role:{notIn:["ADMIN","SUPER_ADMIN"]},OR:[{emailVerified:{not:null}},{emailVerifiedAt:{not:null}}]},select:{id:true,email:true,locale:true}});}
 export async function reminderAccount(userId:string,now=new Date()){
  if(!await reminderSchemaReady())return null;
  const candidates=await prisma.digitalPackageOrder.findMany({where:{userId,productKey:REMINDER_PRODUCT_KEY,status:"PAID"},include:{payment:true},orderBy:{createdAt:"desc"},take:20});
@@ -57,7 +59,7 @@ export async function runReferenceReminderRecovery(now=new Date(),transport=send
    const event=current&&referenceReminderEvents().find(e=>e.id===current.eventId);
    const user=current&&await account(prisma,current.userId);
    if(current&&current.status==="CLAIMED"&&event&&user&&current.consentVersion===REMINDER_CONSENT_VERSION&&current.eventDate===event.date&&[1,7].includes(current.leadDays)&&current.dueAt.getTime()===reminderDueAt(event,current.leadDays as 1|7).getTime()&&reminderWindowOpen(current.dueAt,now)&&current.recipientDigest===digest(user.id,user.email)&&await eligible(prisma,current.userId,current.orderId)){
-    const result=await transport({to:user.email,subject:"Naksharix: your requested reference-date reminder",text:["You requested this reminder.",event.name+" — "+event.date,"Confirm local timing and current official notices. This is not a booking or guaranteed muhurat.","Source: "+event.sourceUrl,"Manage future reminders: https://www.naksharix.com/reference-reminders"].join("\n\n"),idempotencyKey:"naksharix/reference-reminder/"+current.id});
+    const result=await transport({to:user.email,...reminderEmail(normalizeLocale(user.locale),event),idempotencyKey:"naksharix/reference-reminder/"+current.id});
     outcome=result.sent?"ACCEPTED":"UNKNOWN";
    }
   }catch{outcome="UNKNOWN";}

@@ -11,5 +11,5 @@ export async function PATCH(request:Request){try{
  const limit=await sharedRateLimitResponse("expert-admin",admin.id,20,60000);if(limit)return limit;
  const input=await validateJson(request,adminSchema);
  if(!await isOwnerRecoveryOperator(admin))return fail("Only the authorized owner may approve expert quotes or record settlement.",403);
- return await actExpertAdmin(admin.id,input)?ok({saved:true}):fail("Request state, practitioner approval, quote or settlement evidence is invalid.",409);
+ return await actExpertAdmin(admin.id,input)?ok({saved:true,id:input.id,action:input.action}):fail("Request state, practitioner approval, quote or settlement evidence is invalid.",409);
  }catch(e){return handleApiError(e);}}

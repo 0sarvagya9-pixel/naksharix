@@ -359,6 +359,24 @@ jobs:
           node scripts/qa-consultation-customer-locale.mjs | tee consultation-customer-locale.log
           node scripts/qa-business-workspace-ui.mjs | tee business-workspace-ui.log
       - run: npx prisma generate
+      - name: Qualify recovered account, specialist and administration journeys
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-support-language-ui.mjs | tee support-language-ui.log
+          node scripts/qa-support-response-contracts.mjs | tee support-response-contracts.log
+          node scripts/qa-admin-fulfilment-ui.mjs | tee admin-fulfilment-ui.log
+          node scripts/qa-admin-fulfilment-contracts.mjs | tee admin-fulfilment-contracts.log
+          node scripts/qa-consultation-admin-concurrency.mjs | tee consultation-admin-concurrency.log
+          node scripts/qa-fulfilment-locale-email.mjs | tee fulfilment-locale-email.log
+          node scripts/qa-paid-course-ui.mjs | tee paid-course-ui.log
+          node scripts/qa-expert-operations-ui.mjs | tee expert-operations-ui.log
+          node scripts/qa-admin-editorial-ui.mjs | tee admin-editorial-ui.log
+          node scripts/qa-ai-customer-locale.mjs | tee ai-customer-locale.log
+          node scripts/qa-reference-reminder-locale.mjs | tee reference-reminder-locale.log
+          node scripts/qa-ai-chat-recovery.mjs | tee ai-chat-recovery.log
+          node scripts/qa-digital-package-ui.mjs | tee digital-package-ui.log
+          node scripts/qa-admin-catalogue-ui.mjs | tee admin-catalogue-ui.log
       - name: Bootstrap isolated browser-test database
         shell: bash
         run: |
@@ -405,6 +423,20 @@ jobs:
             customer-status-pages.log
             consultation-customer-locale.log
             business-workspace-ui.log
+            support-language-ui.log
+            support-response-contracts.log
+            admin-fulfilment-ui.log
+            admin-fulfilment-contracts.log
+            consultation-admin-concurrency.log
+            fulfilment-locale-email.log
+            paid-course-ui.log
+            expert-operations-ui.log
+            admin-editorial-ui.log
+            ai-customer-locale.log
+            reference-reminder-locale.log
+            ai-chat-recovery.log
+            digital-package-ui.log
+            admin-catalogue-ui.log
             browser-qa.log
             /tmp/naksharix-browser-server.log
             test-results

@@ -138,10 +138,11 @@ assert.ok(home.includes('href={"/shop/"+item.id}') &&
   "HOMEPAGE_FEATURED_COMMERCE_LINKS_STALE");
 
 const adminPujaPhotos=read("components/admin-puja-offerings.tsx");
-for(const marker of ["needsExactPhoto","Show Pujas that still need a topic-specific photograph",
+for(const marker of ["needsExactPhoto","copy.exactPhoto",
   "pujaEditorialPhoto(topic.id,topic.category)","photo.author","photo.license"]){
   assert.ok(adminPujaPhotos.includes(marker),"ADMIN_PUJA_PHOTO_CURATION_UI_MISSING="+marker);
 }
+assert.ok(read("lib/admin/catalogue-copy.ts").includes("Show topics needing a specific photograph"),"ADMIN_PUJA_PHOTO_CURATION_LABEL_MISSING");
 
 const resilientPuja=read("components/puja/resilient-editorial-image.tsx");
 assert.ok(resilientPuja.includes("wikimediaOriginalForThumbnail(src)")&&

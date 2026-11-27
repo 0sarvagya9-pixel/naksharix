@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 
 const read = (path) => readFileSync(path, "utf8");
 const send = read("lib/notifications/fulfilment-updates.ts");
+const fulfilmentMailCopy = read("lib/notifications/fulfilment-email-copy.ts");
 const shop = read("app/api/admin/shop-orders/route.ts");
 const puja = read("app/api/admin/puja-bookings/route.ts");
 const adminShop = read("components/admin-shop-orders.tsx");
@@ -30,14 +31,16 @@ assert.ok(send.includes('import "server-only";') &&
   send.includes('kind: "shop"') === false,
   "Fulfilment notifications are protected by the server-only delivery service");
 for (const name of ["CONFIRMED","PACKING","DISPATCHED","DELIVERED","CANCELED","SCHEDULED","IN_PROGRESS","COMPLETED","REJECTED"]) {
-  assert.ok(send.includes(name+":"), "Missing real status notification: "+name);
+  assert.ok(fulfilmentMailCopy.includes(name+":"), "Missing real status notification: "+name);
 }
 assert.ok(send.includes("input.status === input.oldStatus") &&
   send.includes('outcome: "not_needed"') &&
   send.includes("sendEmail({") &&
   send.includes("provider_accepted") &&
   send.includes("catch {") &&
-  send.includes("not a payment receipt") &&
+  fulfilmentMailCopy.includes("not a payment receipt") &&
+  send.includes("fulfilmentStatusEmail({locale,") && send.includes("select: { email: true, locale: true }") &&
+  send.includes("locale = normalizeLocale(user?.locale)") &&
   send.includes("Provider API acceptance does not guarantee actual inbox placement"),
   "Status email must only be attempted on a transition, never claim payment or inbox delivery");
 for (const [file, kind] of [[shop,"shop"],[puja,"puja"]]) {
@@ -53,7 +56,9 @@ assert.ok(shop.includes("updateMany({") && shop.includes("version:input.expected
   puja.includes("updateMany({") && puja.includes("version:input.expectedVersion"),
   "Both fulfilment flows retain single-writer status change guards");
 assert.ok(adminShop.includes("nextStatuses") && adminPuja.includes("nextStatuses") &&
-  adminShop.includes("result.data.notification?.outcome") && adminPuja.includes("result.data.notification?.outcome"),
+  adminShop.includes("fulfilmentEmail(result.data?.notification?.outcome)") && adminPuja.includes("fulfilmentEmail(result.data?.notification?.outcome)") &&
+  read("lib/admin/fulfilment-copy.ts").includes("Email accepted by provider; inbox delivery is not confirmed.") &&
+  adminShop.includes("notificationRetryRecorded(result") && adminPuja.includes("notificationRetryRecorded(result"),
   "Owner UI restricts invalid status choices and explains email acceptance honestly");
 assert.ok(myShop.includes('order.status==="DELIVERED"') &&
   myPuja.includes("Pandit confirmation pending") &&

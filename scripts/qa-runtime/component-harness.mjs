@@ -35,7 +35,7 @@ export async function componentHarness({files,baseline,baselineFiles=[]}){
   if(name==='@/lib/auth/roles')return {requireAdminRole:async()=>{window.caseState.roleCalls.push('admin');if(window.caseState.authorized===false)throw Error('FORBIDDEN');return {id:'synthetic-admin'};},requireRole:async roles=>{window.caseState.roleCalls.push(roles);if(window.caseState.authorized===false)throw Error('FORBIDDEN');return {id:'synthetic-practitioner'};}};
   if(name==='@/lib/security/csrf')return {secureFetch:(url,options)=>window.fetch(url,options)};
   if(name==='@/components/razorpay-checkout-button')return {RazorpayCheckoutButton:props=>{window.caseState.checkoutPayload=props.payload;return React.createElement('button',{'data-checkout':'true'},props.label);}};
-  if(name==='@/lib/db')return {prisma:{blogPost:{findMany:async()=>window.caseState.posts??[]},astrologerProfile:{findMany:async()=>window.caseState.profiles??[]}}};
+  if(name==='@/lib/db')return {prisma:{blogPost:{findMany:async()=>(window.caseState.posts??[]).map(v=>({...v,createdAt:new Date(v.createdAt)}))},astrologerProfile:{findMany:async()=>(window.caseState.profiles??[]).map(v=>({...v,createdAt:new Date(v.createdAt)}))}}};
   if(cache[name])return cache[name].exports;if(!modules[name])throw Error('Unconfigured dependency '+name);const loaded={exports:{}};cache[name]=loaded;modules[name](loaded,loaded.exports,require);return loaded.exports;
  }
  window.testRequire=require;let root;window.held={};
@@ -50,10 +50,10 @@ export async function componentHarness({files,baseline,baselineFiles=[]}){
   root=ReactDOM.createRoot(document.getElementById('root'));root.render(React.createElement(require('@/components/language-provider').LanguageProvider,{initialLocale:input.locale},React.createElement(React.Fragment,null,React.createElement(LocaleControl),content)));
  };
  })()`;
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
  const page=await browser.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
- await page.route('**/*',route=>route.request().url()==='http://naksharix-fixture.test/'?route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><main id="root"></main></body></html>'}):route.abort());
- await page.goto('http://naksharix-fixture.test/');
+ await page.route('**/*',route=>route.request().url()==='http://localhost/'?route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><main id="root"></main></body></html>'}):route.abort());
+ await page.goto('http://localhost/');
  await page.addScriptTag({path:path.join(path.dirname(require.resolve('react/package.json')),'umd/react.development.js')});
  await page.addScriptTag({path:path.join(path.dirname(require.resolve('react-dom/package.json')),'umd/react-dom.development.js')});
  await page.addScriptTag({content:bundle});
