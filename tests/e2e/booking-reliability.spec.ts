@@ -9,6 +9,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import bcrypt from "bcryptjs";
+import { workspaceCopy } from "../../lib/astrologers/workspace-copy";
 const db=new PrismaClient();
 const base=process.env.PLAYWRIGHT_BASE_URL||'http://127.0.0.1:3000';
 const database=new URL(process.env.DATABASE_URL||'postgresql://invalid/invalid');
@@ -20,6 +21,9 @@ test.describe('real authenticated professional controls',()=>{
   test.use({ignoreHTTPSErrors:true}); // Applies only to the generated loopback test certificate.
   test.afterAll(async()=>{await db.$disconnect();});
   test('network failures recover and success refreshes real persisted booking state',async({page,context},info)=>{
+    // Each uncertain reply now requires a verified document reload before another action.
+    test.setTimeout(90_000);
+    const copy=workspaceCopy('en');
     const ids:string[]=[];const nonce=randomUUID();const password='OnlyCI!'+nonce;
     const directory=mkdtempSync(join(tmpdir(),'naksharix-test-tls-'));
     const key=join(directory,'key.pem'),cert=join(directory,'cert.pem');
@@ -60,6 +64,7 @@ test.describe('real authenticated professional controls',()=>{
     const address=proxy.address();if(!address||typeof address==='string')throw new Error('HTTPS fixture did not bind');
     const secureBase='https://127.0.0.1:'+address.port;
     try {
+      await context.addCookies([{name:'naksharix-language',value:'en',url:secureBase}]);
       const owner=await db.user.create({data:{email:'astro-'+nonce+'@example.test',name:'QA Astrologer',role:'ASTROLOGER',emailVerified:new Date(),emailVerifiedAt:new Date(),passwordHash:await bcrypt.hash(password,10)}});ids.push(owner.id);
       const client=await db.user.create({data:{email:'client-'+nonce+'@example.test',name:'QA Client',role:'USER',emailVerified:new Date()}});ids.push(client.id);
       const profile=await db.astrologerProfile.create({data:{userId:owner.id,displayName:'QA Astrologer',status:'APPROVED'}});
@@ -72,26 +77,66 @@ test.describe('real authenticated professional controls',()=>{
       expect(session?.secure).toBe(true);expect(session?.httpOnly).toBe(true);
       await page.goto(secureBase+'/astrologer/bookings/upcoming',{waitUntil:'domcontentloaded'});
       const controls=page.locator('[data-booking-actions="'+booking.id+'"]');await expect(controls).toBeVisible();
-      const complete=controls.getByRole('button',{name:'Complete',exact:true});await expect(complete).toBeEnabled();
-      await expect(controls.getByRole('button',{name:'Accept',exact:true})).toHaveCount(0);
+      const complete=controls.getByRole('button',{name:copy.COMPLETE,exact:true});await expect(complete).toBeEnabled();
+      await expect(controls.getByRole('button',{name:copy.ACCEPT,exact:true})).toHaveCount(0);
       const contrast=await complete.evaluate(el=>({color:getComputedStyle(el).color,height:el.getBoundingClientRect().height}));
       expect(contrast.color).toBe('rgb(245, 248, 252)');expect(contrast.height).toBeGreaterThanOrEqual(44);
-      await page.route('**/api/astrologer/bookings/action',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'Controlled service failure'})}));
-      await complete.click();await expect(controls.getByRole('alert')).toHaveText('Controlled service failure');await expect(complete).toBeEnabled();
-      await page.unroute('**/api/astrologer/bookings/action');
-      await page.route('**/api/astrologer/bookings/action',route=>route.fulfill({status:200,contentType:'application/json',body:'not-json'}));
-      await complete.click();await expect(controls.getByRole('alert')).toContainText('could not be confirmed');await expect(complete).toBeEnabled();
-      await page.unroute('**/api/astrologer/bookings/action');
-      await page.route('**/api/astrologer/bookings/action',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:{booking:{id:'different-booking',status:'COMPLETED'}}})}));
-      await complete.click();await expect(controls.getByRole('alert')).toContainText('could not be confirmed');await expect(complete).toBeEnabled();
-      expect((await db.consultationBooking.findUniqueOrThrow({where:{id:booking.id}})).status).toBe('ACCEPTED');
-      await page.unroute('**/api/astrologer/bookings/action');
+      const snapshot=()=>db.consultationBooking.findUniqueOrThrow({where:{id:booking.id},select:{id:true,status:true,paymentStatus:true,scheduledAt:true,updatedAt:true}});
+      const unchanged=await snapshot();
+      const uncertainReplies:Array<{name:string;status?:number;body?:string;abort?:boolean}>=[
+        {name:'HTTP 500',status:500,body:JSON.stringify({error:'Controlled service failure'})},
+        {name:'HTTP 503',status:503,body:JSON.stringify({error:'Controlled service failure'})},
+        {name:'malformed JSON',status:200,body:'not-json'},
+        {name:'empty acknowledgement',status:200,body:JSON.stringify({data:{}})},
+        {name:'wrong booking identity',status:200,body:JSON.stringify({data:{booking:{id:'different-booking',status:'COMPLETED'}}})},
+        {name:'wrong recorded status',status:200,body:JSON.stringify({data:{booking:{id:booking.id,status:'ACCEPTED'}}})},
+        {name:'interrupted transport',abort:true}
+      ];
+      const uncertaintyEvidence:Array<{case:string;requests:number;persistedStatus:string;reloadStatus:number}>=[];
+      for(const fixture of uncertainReplies)await test.step(fixture.name+' stays held until a verified reload',async()=>{
+        let requests=0;
+        await page.route('**/api/astrologer/bookings/action',async route=>{
+          expect(route.request().method()).toBe('POST');requests++;
+          if(fixture.abort)await route.abort('failed');
+          else await route.fulfill({status:fixture.status,contentType:'application/json',body:fixture.body});
+        });
+        // Same-turn input must produce one request even before disabled state renders.
+        await complete.evaluate(button=>{(button as HTMLButtonElement).click();(button as HTMLButtonElement).click();});
+        await expect(controls.getByRole('alert')).toHaveText(copy.uncertain);
+        await expect(controls).toHaveAttribute('aria-busy','false');
+        await expect(complete).toBeDisabled();
+        await expect(controls.getByRole('button',{name:copy.REJECT,exact:true})).toBeDisabled();
+        await expect(controls.getByRole('button',{name:copy.RESCHEDULE,exact:true})).toBeDisabled();
+        await expect(controls.getByLabel(copy.bookingDate,{exact:true})).toBeDisabled();
+        await expect(page.locator('body')).not.toContainText('Controlled service failure');
+        const refresh=controls.getByRole('button',{name:copy.refresh,exact:true});await expect(refresh).toBeEnabled();
+        // A held action must neither retry on further input nor mutate the real booking.
+        await complete.evaluate(button=>(button as HTMLButtonElement).click());
+        expect(await snapshot()).toEqual(unchanged);
+        await expect(controls.getByRole('alert')).toHaveText(copy.uncertain);
+        expect(requests).toBe(1);
+        expect(observed.filter(item=>item.path==='/api/astrologer/bookings/action')).toHaveLength(0);
+        await page.unroute('**/api/astrologer/bookings/action');
+        const [verifiedRead]=await Promise.all([
+          page.waitForResponse(response=>new URL(response.url()).pathname==='/astrologer/bookings/upcoming'&&response.request().isNavigationRequest()&&response.request().method()==='GET',{timeout:22000}),
+          refresh.click()
+        ]);
+        expect(verifiedRead.status()).toBe(200);
+        await page.waitForLoadState('domcontentloaded');
+        await expect(controls).toBeVisible();await expect(complete).toBeEnabled();
+        await expect(controls.getByRole('alert')).toHaveCount(0);
+        expect(await snapshot()).toEqual(unchanged);
+        expect(requests).toBe(1);
+        expect(observed.filter(item=>item.path==='/api/astrologer/bookings/action')).toHaveLength(0);
+        uncertaintyEvidence.push({case:fixture.name,requests,persistedStatus:unchanged.status,reloadStatus:verifiedRead.status()});
+      });
+      await info.attach('booking-uncertain-response-evidence.json',{body:Buffer.from(JSON.stringify(uncertaintyEvidence)),contentType:'application/json'});
       let realMutations=0;
       page.on('request',request=>{if(new URL(request.url()).pathname==='/api/astrologer/bookings/action' && request.method()==='POST')realMutations++;});
       const [completion, refreshedPage]=await Promise.all([
         page.waitForResponse(response=>new URL(response.url()).pathname==='/api/astrologer/bookings/action' && response.request().method()==='POST',{timeout:22000}),
         page.waitForResponse(response=>new URL(response.url()).pathname==='/astrologer/bookings/upcoming' && response.request().isNavigationRequest(),{timeout:22000}),
-        complete.click()
+        complete.evaluate(button=>{(button as HTMLButtonElement).click();(button as HTMLButtonElement).click();})
       ]);
       const actualCompletion=observed.filter(item=>item.path==='/api/astrologer/bookings/action');
       expect(actualCompletion).toHaveLength(1);
@@ -113,7 +158,7 @@ test.describe('real authenticated professional controls',()=>{
       // Sidebar logout must execute the real CSRF-protected POST, not a GET link.
       const opener=page.getByRole('button',{name:'Open astrologer navigation',exact:true});
       if(await opener.isVisible())await opener.click();
-      const logout=page.getByRole('complementary',{name:'Astrologer portal sidebar'}).getByRole('button',{name:'Logout',exact:true});
+      const logout=page.getByRole('complementary',{name:'Astrologer portal sidebar'}).getByRole('button',{name:copy.logout,exact:true});
       // WebKit may discard the document-scoped response event during an
       // immediate hard navigation. The loopback HTTPS proxy already records
       // the real POST status/body, so assert that durable server evidence
