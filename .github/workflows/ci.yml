@@ -377,6 +377,7 @@ jobs:
           node scripts/qa-ai-chat-recovery.mjs | tee ai-chat-recovery.log
           node scripts/qa-digital-package-ui.mjs | tee digital-package-ui.log
           node scripts/qa-admin-catalogue-ui.mjs | tee admin-catalogue-ui.log
+          node scripts/qa-report-admin-operations.mjs | tee report-admin-operations.log
       - name: Bootstrap isolated browser-test database
         shell: bash
         run: |
@@ -437,6 +438,7 @@ jobs:
             ai-chat-recovery.log
             digital-package-ui.log
             admin-catalogue-ui.log
+            report-admin-operations.log
             browser-qa.log
             /tmp/naksharix-browser-server.log
             test-results

@@ -71,8 +71,8 @@ assert(
 assert(adminLayout.includes("ADMIN") && adminLayout.includes("SUPER_ADMIN"), "Admin report routes are RBAC-protected", "admin layout guard");
 assert(adminApi.includes("PATCH") && adminApi.includes("adminNotes"), "Admin report workflow updates status and notes", "real admin workflow API");
 assert(adminApi.includes("assertAllowedReportStatusTransition"), "Admin workflow enforces centralized status transitions", "no fake lifecycle status");
-assert(adminActions.includes("Generate PDF") && adminActions.includes("Save workflow"), "Admin report detail exposes real actions", "no sample data");
-assert(adminActions.includes("Send Email") && adminActions.includes("/deliver"), "Admin report detail exposes real delivery action", "delivery is action-based");
+assert(adminActions.includes("copy.generate") && adminActions.includes("copy.save") && source("lib/admin/report-operations-copy.ts").includes("Generate PDF") && source("lib/admin/report-operations-copy.ts").includes("Save workflow"), "Admin report detail exposes real actions", "no sample data");
+assert(adminActions.includes("copy.send") && adminActions.includes('"deliver"') && source("lib/admin/report-operations-copy.ts").includes("Send registered email"), "Admin report detail exposes real delivery action", "delivery is action-based");
 assert(downloadApi.includes("reportRequest.userId !== user.id") && downloadApi.includes("application/pdf"), "Secure PDF download enforces owner/admin access", "no fake URL");
 assert(generatePdfApi.includes("generatePremiumReportPdf") && generatePdfApi.includes("generatedPdfBytes"), "Admin PDF generation stores real bytes", "no fake delivery");
 assert(deliverApi.includes("sendReportDeliveryEmail") && deliverApi.includes("ReportRequestStatus.DELIVERED"), "Delivery API marks delivered only through service action", "no manual fake delivery");

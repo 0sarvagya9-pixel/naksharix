@@ -165,7 +165,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     });
     logger.info("report_pdf_generated", { reportRequestId: reportRequest.id, storageDriver: stored.storageDriver, size: stored.size });
 
-    return ok({ fileName: stored.fileName, byteLength: stored.size, storageProvider: stored.storageDriver, status: ReportRequestStatus.GENERATED });
+    return ok({ reportRequestId: reportRequest.id, fileName: stored.fileName, byteLength: stored.size, storageProvider: stored.storageDriver, status: ReportRequestStatus.GENERATED });
   } catch (error) {
     return handleApiError(error);
   }

@@ -33,15 +33,15 @@ export async function POST(request:Request, {params}:{params:Promise<{id:string;
     if(action==="notify") {
       if(revision.status!=="READY") return fail("Publish the reviewed version first.",409);
       const result=await notifyReportRevision(revision.id);
-      return result.accepted ? ok(result) : fail(result.reason ?? "Email could not be confirmed.",409);
+      return result.accepted ? ok({...result,reportRequestId:id,version:revision.version,action}) : fail(result.reason ?? "Email could not be confirmed.",409);
     }
     if(note.length<30) return fail("Enter at least 30 characters of review notes.",422);
-    if (revision.status==="READY" || revision.status==="DECLINED") return ok({status:revision.status});
+    if (revision.status==="READY" || revision.status==="DECLINED") return ok({status:revision.status,reportRequestId:id,version:revision.version,action});
     if (revision.status==="GENERATING" && Date.now()-revision.updatedAt.getTime()<REPORT_LEASE_MS) return fail("This version is being generated.",409);
     const unchanged = {id:revision.id,updatedAt:revision.updatedAt,status:revision.status};
     if (action==="decline") {
       const updated = await prisma.reportRevision.updateMany({where:unchanged,data:{status:"DECLINED",reviewNote:note,reviewedBy:admin.id}});
-      return updated.count===1 ? ok({status:"DECLINED"}) : fail("Review changed. Reload the request.",409);
+      return updated.count===1 ? ok({status:"DECLINED",reportRequestId:id,version:revision.version,action}) : fail("Review changed. Reload the request.",409);
     }
     const input = normalizedCorrection(parent.reportSlug,revision.input);
     if (!input.ok) return fail(input.reason,422);
@@ -68,7 +68,7 @@ export async function POST(request:Request, {params}:{params:Promise<{id:string;
       });
       if (!ready) return fail("Report or purchase changed during regeneration.",409);
       const email=await notifyReportRevision(revision.id);
-      return ok({status:"READY",version:revision.version,email});
+      return ok({status:"READY",reportRequestId:id,version:revision.version,action,email});
     } finally {
       // A failed/aborted generation can be reviewed again. A newer lease or a completed version is untouched.
       await prisma.reportRevision.updateMany({where:leased,data:{status:"PENDING"}});
