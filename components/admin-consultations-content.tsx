@@ -94,7 +94,7 @@ export function AdminConsultationsContent({ initialBookings, initialAvailable = 
 
         {error?<p role="alert" className="mt-4 text-[#fda4af]">{copy[error]} {uncertain?copy.refreshPage:""}</p>:null}
         {notice?<p role="status" className="mt-4 text-[#00f5a0]">{copy[notice]}</p>:null}
-        <Button type="button" variant="outline" disabled={busyId!==null} onClick={()=>window.location.reload()} className="mt-4">{copy.refresh}</Button>
+        <Button type="button" variant="outline" disabled={busyId!==null} onClick={()=>{if(!inFlight.current)window.location.reload();}} className="mt-4">{copy.refresh}</Button>
         <div className="mt-8 grid gap-4">
           {bookings.map((booking) => {
             const form = forms[booking.id];

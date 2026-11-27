@@ -6,6 +6,7 @@ const reportAdmin = source("app/api/admin/report-requests/route.ts");
 const pdf = source("app/api/admin/report-requests/[id]/generate-pdf/route.ts");
 const reportPage = source("app/admin/report-requests/[id]/page.tsx");
 const reportActions = source("components/admin/report-request-actions.tsx");
+const reportCopy = source("lib/admin/report-operations-copy.ts");
 const workflow = source("lib/reports/report-workflow-status.ts");
 const draftApi = source("app/api/ai/report-generator/route.ts");
 const draftProvider = source("lib/ai/report-draft.ts");
@@ -34,10 +35,11 @@ assert.ok(pdf.includes('reportRequest.status !== ReportRequestStatus.READY_FOR_G
   pdf.includes("generatedPdfBytes"),
   "Report PDF generation must fail closed on unreviewed, unpaid, duplicated or stale requests");
 
-assert.ok(reportActions.includes("I have manually examined") &&
+assert.ok(reportCopy.includes("I have manually examined") && reportActions.includes("copy.review") &&
   reportActions.includes("reviewConfirmed") &&
-  reportActions.includes("at least 30 characters") &&
-  reportActions.includes('status !== "READY_FOR_GENERATION"') &&
+  reportCopy.includes("at least 30 characters") && reportActions.includes("copy.notes") &&
+  /adminNotes\.trim\(\)\.length\s*<\s*30/.test(reportActions) &&
+  /recordedStatus\s*!==\s*"READY_FOR_GENERATION"/.test(reportActions) &&
   reportPage.includes("request.generatedPdfStorageKey"),
   "Admin UI exposes real review approval and correctly recognizes R2/S3 stored PDFs");
 

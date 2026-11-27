@@ -17,6 +17,7 @@ export function AdminPujaBookings(){
  const [loading,setLoading]=useState(true),[known,setKnown]=useState(false),[uncertain,setUncertain]=useState(false);
  const inFlight=useRef(false),active=useRef(true),loadSequence=useRef(0);
  const refresh=useCallback(async()=>{
+  if(inFlight.current)return;
   const sequence=++loadSequence.current;setLoading(true);
   try{
    const response=await fetch("/api/admin/puja-bookings",{cache:"no-store"}),result:unknown=await response.json();

@@ -89,7 +89,7 @@ export function AdminPujaPartners() {
       </form>
       <div className="space-y-3">
         <h2 className="font-cinzel text-xl font-bold">{copy.queue}</h2>
-        <Button type="button" variant="outline" disabled={busy} onClick={()=>void load()}>{copy.refresh}</Button>
+        <Button type="button" variant="outline" disabled={busy} onClick={()=>{if(!lock.current)void load();}}>{copy.refresh}</Button>
         {loading?<p role="status">{copy.loading}</p>:null}
         <label className="grid gap-1 text-sm">{copy.reviewNote}
           <Input disabled={busy||!ready} required minLength={5} maxLength={300} value={reviewNote} onChange={(e) => setReviewNote(e.target.value)} />

@@ -367,6 +367,7 @@ jobs:
           node scripts/qa-support-response-contracts.mjs | tee support-response-contracts.log
           node scripts/qa-admin-fulfilment-ui.mjs | tee admin-fulfilment-ui.log
           node scripts/qa-admin-fulfilment-contracts.mjs | tee admin-fulfilment-contracts.log
+          node scripts/qa-admin-refresh-ordering.mjs | tee admin-refresh-ordering.log
           node scripts/qa-consultation-admin-concurrency.mjs | tee consultation-admin-concurrency.log
           node scripts/qa-fulfilment-locale-email.mjs | tee fulfilment-locale-email.log
           node scripts/qa-paid-course-ui.mjs | tee paid-course-ui.log
@@ -434,6 +435,7 @@ jobs:
             support-response-contracts.log
             admin-fulfilment-ui.log
             admin-fulfilment-contracts.log
+            admin-refresh-ordering.log
             consultation-admin-concurrency.log
             fulfilment-locale-email.log
             paid-course-ui.log

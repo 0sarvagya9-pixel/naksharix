@@ -10,7 +10,7 @@ export function readPackageOrder(value:unknown):PackageOrder|null{
  if(!def||value.productVersion!==def.version||!Number.isSafeInteger(value.pricePaise)||Number(value.pricePaise)<100||Number(value.pricePaise)>10000000||typeof value.status!=="string"||!["DRAFT","PAYMENT_PENDING","PAID","REVIEW","REFUNDED","CANCELED"].includes(value.status)||!date(value.expiresAt)||!date(value.createdAt)||!Array.isArray(value.items)||value.items.length!==def.kinds.length)return null;
  const seen=new Set<string>();
  for(let i=0;i<value.items.length;i++){
-  const item=value.items[i];if(!record(item)||!identifier(item.id)||seen.has(item.id)||item.kind!==def.kinds[i]||item.position!==i||typeof item.status!=="string"||!["PENDING","GENERATING","READY","FAILED"].includes(item.status)||!Number.isSafeInteger(item.attempts)||Number(item.attempts)<0||!(item.pdfSize===null||Number.isSafeInteger(item.pdfSize)&&Number(item.pdfSize)>0))return null;
+  const item=value.items[i];if(!record(item)||!identifier(item.id)||seen.has(item.id)||item.kind!==def.kinds[i]||item.position!==i||typeof item.status!=="string"||!["PENDING","GENERATING","RETRY","READY","FAILED"].includes(item.status)||!Number.isSafeInteger(item.attempts)||Number(item.attempts)<0||!(item.pdfSize===null||Number.isSafeInteger(item.pdfSize)&&Number(item.pdfSize)>0))return null;
   seen.add(item.id);
  }
  return value as unknown as PackageOrder;

@@ -48,7 +48,7 @@ export function AdminPujaOfferEditor(){
     <input type="checkbox" checked={needsExactPhoto} onChange={e=>setNeedsExactPhoto(e.target.checked)} />
     {copy.exactPhoto}
   </label>
-  <button type="button" disabled={busy} onClick={()=>void load()} className="mt-4 rounded-lg border px-4 py-2">{copy.refresh}</button>
+  <button type="button" disabled={busy} onClick={()=>{if(!lock.current)void load();}} className="mt-4 rounded-lg border px-4 py-2">{copy.refresh}</button>
   {loading?<p role="status">{copy.loading}</p>:null}
   {error?<p role="alert" className="mt-4 rounded-xl bg-[#fff0f0] p-4 text-sm text-[#8e2342]">{copy[error]}</p>:null}
   {notice?<p role="status" className="mt-4 rounded-xl bg-[#eff9f0] p-4 text-sm text-[#31592d]">{copy[notice]}</p>:null}

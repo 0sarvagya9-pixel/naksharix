@@ -22,7 +22,7 @@ The runtime test harness resolves actual relative TypeScript imports as well as 
 | Check | Result | Reproducible command |
 | --- | --- | --- |
 | Baseline defects | Reproduced | `DEFERRED_UI_BASELINE=0a68982 node scripts/qa-deferred-controls-ui.mjs` |
-| Actual mounted React controls | 204 cases, three languages | `node scripts/qa-deferred-controls-ui.mjs` |
+| Actual mounted React controls | 210 cases, three languages | `node scripts/qa-deferred-controls-ui.mjs` |
 | Actual API handlers, parser/sanitizer, schemas and owner authorization | 82 cases | `node scripts/qa-deferred-controls-routes.mjs` |
 | Actual private page SSR and metadata/access gates | 27 cases, three languages | same route script |
 | Full project TypeScript | Pass | `node_modules/.bin/tsc --noEmit` |
@@ -30,16 +30,19 @@ The runtime test harness resolves actual relative TypeScript imports as well as 
 | Existing deferred contract | 86 checks pass | `node scripts/qa-deferred-service-contract.mjs` |
 | Existing delivery, nonpayment and recovery guard suites | Pass, including the existing 8 isolated recovery-worker fixtures | `node scripts/qa-delivery.mjs`, `node scripts/qa-nonpayment-12-engineering.mjs`, `node scripts/qa-recovery-diagnostics.mjs` |
 
-The new scoped total is **313 cases = 204 Chromium + 82 API/schema/authorization + 27 private-page SSR**. Existing guard counts are reported separately and must not be added again as new cases. Browser prerequisites follow the existing isolated component harness; local receipt runs use `PLAYWRIGHT_BROWSERS_PATH=/tmp/naksharix-browser-cache-20261127`.
+The new scoped total is **319 cases = 210 Chromium + 82 API/schema/authorization + 27 private-page SSR**. Existing guard counts are reported separately and must not be added again as new cases. Browser prerequisites follow the existing isolated component harness; local receipt runs use `PLAYWRIGHT_BROWSERS_PATH=/tmp/naksharix-browser-cache-20261127`.
 
 Evidence directory: `/workspace/scratch/5d06e9e96c2f/evidence/`.
 
 - `deferred-controls-before.log`
-- `deferred-controls-ui-final.log`
+- `deferred-controls-ui-with-refresh-final.log`
 - `deferred-controls-routes-final.log`
 - `deferred-controls-typecheck-final.log`
 - `deferred-controls-lint-final.log`
 - `deferred-controls-existing-guards.log`
+- `deferred-controls-refresh-before.log`
+- `deferred-controls-refresh-typecheck.log`
+- `deferred-controls-refresh-lint.log`
 
 Failed attempts remain in `deferred-controls-ui-attempt1.log` and `deferred-controls-routes-attempt1.log`. They record an initial test expectation using the wrong existing consent constant and an isolated SSR harness missing the automatic JSX runtime; both harness issues were repaired, and neither failure is counted as a pass. The earlier lint report with two cleanup-ref warnings is retained as `deferred-controls-lint.log`; stable ref capture removes those warnings without changing invalidation behavior.
 
@@ -48,5 +51,7 @@ Failed attempts remain in `deferred-controls-ui-attempt1.log` and `deferred-cont
 All persistence, email service calls and recovery worker calls in new tests are intercepted in an isolated process; none reaches production. No real email, account/device action, recovery, payment, capacity reservation, actual provider approval or commercial booking was performed. API schema and owner authorization are actual source; planning storage/ledger outputs are isolated adapters, not a new database-concurrency proof. Existing database/runtime suites remain part of integration verification.
 
 Independent native-language review and real authorized mailbox receipt evidence remain open. The actual 11 diagnostic email bodies remain authored English. Wider dashboard/navigation/profile text and any other uncovered user journey must be reconciled against original A44 before it can be complete. Deferred services remain unpaid internal review/planning; genuine provider contracts, capacity, eligibility, fulfilment, refunds and external acceptance are still required for commercial offerings. Recovery verification remains externally unproven until the owner explicitly runs the protected operation and records its actual receipt.
+
+A final cross-button probe on `c34b458` reproduced a manual Refresh started in the same event as an allocation/planning mutation. Its late GET could clear the uncertain outcome and enable another change. Manual refresh now checks the synchronous mutation ref before starting; internal post-success refresh remains allowed. Six additional mounted cases cover both controls in all three languages. The earlier 204-browser receipt is superseded by 210; do not add both totals.
 
 Final integrated commit, remote CI and commercial release decision are owned by the parent integration batch and are not asserted by this local checkpoint.

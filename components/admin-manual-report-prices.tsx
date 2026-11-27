@@ -27,7 +27,7 @@ export function AdminManualReportPrices(){
  return <div className="mx-auto max-w-6xl px-5 py-12 text-[#3d2930]">
   <h1 className="font-cinzel text-3xl font-bold">{copy.manualTitle}</h1>
   <p className="mt-4 max-w-3xl text-sm leading-7">{copy.manualIntro}</p>
-  <button type="button" disabled={busy} onClick={()=>void load()} className="mt-4 rounded-lg border px-4 py-2">{copy.refresh}</button>
+  <button type="button" disabled={busy} onClick={()=>{if(!lock.current)void load();}} className="mt-4 rounded-lg border px-4 py-2">{copy.refresh}</button>
   {loading?<p role="status">{copy.loading}</p>:null}
   {!manual.length?<p className="mt-4">{copy.noManual}</p>:null}
   {error?<p role="alert" className="mt-5 rounded-lg bg-[#fff0f0] p-4">{copy[error]}</p>:null}

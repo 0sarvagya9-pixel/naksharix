@@ -26,10 +26,11 @@ window.packageTitle=(key,locale)=>actualRequire(${JSON.stringify(copy)}).package
 window.packageDefinitions=actualRequire(${JSON.stringify(catalogue)}).packageDefinitions;
 window.mountPackage=input=>{
  if(uiRoot)uiRoot.unmount();document.cookie='naksharix-language='+input.locale+'; path=/';localStorage.setItem('naksharix-language',input.locale);
- window.caseState={...input,requests:[],checkouts:[],getCount:0};
+ window.caseState={...input,requests:[],checkouts:[],getCount:0};window.releasePackage={};
  window.fetch=async(url,options={})=>{
   const state=window.caseState,method=options.method??'GET',body=options.body?JSON.parse(options.body):undefined;state.requests.push({url,method,body,silent:options.silent});
   const response=method==='GET'?(state.getReplies?.[state.getCount++]??state.registry):state.reply;
+  if(response?.hold)await new Promise(resolve=>{window.releasePackage[response.hold]=resolve;});
   if(response?.delay)await new Promise(resolve=>setTimeout(resolve,response.delay));
   if(response?.networkError)throw Error('Synthetic transport interruption');
   let reply=response?.body;
@@ -44,6 +45,26 @@ const load=sourceLoader(),definitions=load(catalogue).packageDefinitions;
 const offers=definitions.map(d=>({...d,pricePaise:10000}));
 const order={id:"synthetic-order",productKey:"astrology-workbook",productVersion:"v1",pricePaise:10000,status:"DRAFT",expiresAt:"2030-01-01T00:00:00Z",createdAt:"2026-11-27T00:00:00Z",items:[{id:"item-0",kind:"study-workbook",position:0,status:"PENDING",attempts:0,pdfSize:null}]};
 const registry={body:{data:{available:true,offers,orders:[]}}};
+// Exercise the actual failure-release ledger, GET selection/serialization and client reader.
+// Only identity, persistence and service readiness are isolated; no provider, database or payment is used.
+const retryUser='synthetic-retry-user',lease='synthetic-lease';
+let item={...order.items[0],orderId:order.id,status:'GENERATING',attempts:1,leaseToken:lease,leaseUntil:new Date('2030-01-01')},ledgerCases=0;
+const snapshot=()=>({...order,status:'PAID',createdAt:new Date(order.createdAt),expiresAt:new Date(order.expiresAt),items:[Object.fromEntries(Object.keys(ledger.packageOrderSelect.items.select).map(key=>[key,item[key]]))]});
+const persistence={
+ $queryRaw:async()=>[{ready:true}],
+ digitalPackageOrder:{findFirst:async({where})=>where.id===order.id&&where.userId===retryUser?{id:order.id}:null,findMany:async({where,select,take})=>{assert.equal(where.userId,retryUser);assert.deepEqual(select,ledger.packageOrderSelect);assert.equal(take,30);return [snapshot()];}},
+ digitalPackageItem:{updateMany:async({where,data})=>{if(!Object.entries(where).every(([key,value])=>item[key]===value))return {count:0};item={...item,...data};return {count:1};}}
+};persistence.$transaction=async work=>work(persistence);
+const actual=sourceLoader({'server-only':{},'@/lib/db':{prisma:persistence},'@/lib/env':{env:{DIGITAL_PACKAGE_SALES_ENABLED:'false'}},'@/lib/auth/jwt':{getCurrentUser:async()=>({id:retryUser})},'@/lib/payments/readiness':{getRazorpayReadiness:()=>({enabled:false})},'@/lib/storage/report-storage':{getReportStorageReadiness:()=>({enabled:false})},'@/lib/astrology/provider':{getActiveAstrologyProviderName:()=> 'own_engine'},'@/lib/calendar/reminder-readiness':{reminderServiceReady:async()=>false},'@/lib/payments/refund-evidence':{cumulativeSignedRefund:async()=>0},'@/lib/security/rate-limit':{sharedRateLimitResponse:async()=>null},'@/lib/api':{ok:data=>Response.json({data}),fail:(error,status)=>Response.json({error},{status}),handleApiError:error=>{throw error;}}});
+const ledger=actual('lib/digital-packages/ledger.ts'),accountRoute=actual('app/api/digital-packages/route.ts'),{readPackageAccount}=actual('lib/digital-packages/customer-contract.ts');
+async function account(){const response=await accountRoute.GET();assert.equal(response.status,200);return (await response.json()).data;}
+assert.equal(readPackageAccount(await account()).orders[0].items[0].status,'GENERATING');ledgerCases++;
+await ledger.releasePackageItem('other-user',order.id,item.id,lease);assert.equal(item.status,'GENERATING');ledgerCases++;
+await ledger.releasePackageItem(retryUser,order.id,item.id,'other-lease');assert.equal(item.status,'GENERATING');ledgerCases++;
+await ledger.releasePackageItem(retryUser,order.id,item.id,lease);assert.equal(item.status,'RETRY');assert.equal(item.leaseToken,null);const released=await account();assert.equal(readPackageAccount(released)?.orders[0].items[0].status,'RETRY','A genuine retry ledger state must remain readable');ledgerCases++;
+for(const status of ['','retry','UNKNOWN_STATE']){assert.equal(readPackageAccount({...released,orders:[{...released.orders[0],items:[{...released.orders[0].items[0],status}]}]}),null);ledgerCases++;}
+console.log('DIGITAL_PACKAGE_RELEASE_READER_PASS '+JSON.stringify({cases:ledgerCases,scope:'actual releasePackageItem -> GET -> JSON -> account reader; isolated persistence/identity/readiness; wrong owner and stale lease cannot release; unknown statuses rejected'}));
+
 const browser=await chromium.launch({headless:true,args:["--no-sandbox"]}),page=await browser.newPage(),errors=[];page.on("pageerror",e=>errors.push(e.message));
 await page.route("**/*",r=>r.request().url()==="http://localhost:43871/"?r.fulfill({contentType:"text/html",body:'<!doctype html><html><body><div id="root"></div></body></html>'}):r.abort());
 let cases=0;
@@ -51,6 +72,7 @@ async function mount(locale,extra={}){await page.evaluate(x=>window.mountPackage
 async function choose(c,index=5){await expect(page.getByRole('button',{name:c.prepare,exact:true})).toHaveCount(7);await page.getByRole('button',{name:c.prepare,exact:true}).nth(index).click();await page.getByLabel(c.accept,{exact:false}).check();}
 async function twice(){await page.locator('form').evaluate(f=>{f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});}
 async function requestCount(method){return page.evaluate(m=>window.caseState.requests.filter(x=>x.method===m).length,method);}
+async function writeThenRefresh(c,action){await page.evaluate(({refresh,action})=>{const buttons=[...document.querySelectorAll('button')],refreshButton=buttons.find(b=>b.textContent===refresh);if(action)buttons.find(b=>b.textContent===action).click();else document.querySelector('form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));refreshButton.click();},{refresh:c.refresh,action});}
 try{
  await page.goto("http://localhost:43871/");await page.addScriptTag({path:path.join(path.dirname(require.resolve('react/package.json')),'umd/react.development.js')});await page.addScriptTag({path:path.join(path.dirname(require.resolve('react-dom/package.json')),'umd/react-dom.development.js')});await page.addScriptTag({content:script});
  if(baseline){await page.evaluate(x=>window.mountPackage(x),{locale:'en',registry,reply:{body:{data:{order:{}}}}});await page.getByRole('button',{name:'Prepare package',exact:true}).nth(5).click();await page.locator('form input[type="checkbox"]').check();await twice();await expect(page.locator('form')).toHaveCount(0);const observed=await page.getByRole('status').innerText();console.log('BASELINE_FALSE_SAVE_OBSERVED '+observed);assert.ok(!observed.includes('Details saved.'),'Malformed HTTP 200 must not claim a recorded draft');}
@@ -69,6 +91,11 @@ try{
    c=await mount(locale,{registry:r,reply:{body:{data:state==='PAID'?{ready:true}:{canceled:true}}}});await page.getByRole('button',{name,exact:true}).click();await expect(page.getByRole('status')).toHaveText(state==='PAID'?c.generated:c.canceled);cases++;
   }
   c=await mount(locale,{reply:{ack:true}});await choose(c,1);await expect(page.getByLabel(c.language,{exact:true})).toHaveValue(locale);await page.getByLabel(c.language,{exact:true}).selectOption('en');await page.getByLabel(c.name,{exact:true}).fill('Synthetic Person');await page.getByLabel(c.birthDate,{exact:true}).fill('1990-01-01');await page.getByLabel(c.birthTime,{exact:true}).fill('10:30');await page.getByLabel(c.place,{exact:true}).fill('Delhi');await page.getByLabel(c.offset,{exact:true}).fill('5.5');await page.getByLabel(c.romanName,{exact:true}).fill('Synthetic Person');await page.getByLabel(c.permission,{exact:true}).check();await twice();await expect(page.getByRole('status')).toHaveText(c.saved);assert.equal(await page.evaluate(()=>window.caseState.requests.find(x=>x.method==='POST').body.language),'en');cases++;
+  const retryOrder={...order,status:'PAID',items:[{...order.items[0],status:'RETRY',attempts:1}]},retryRegistry={body:{data:{available:true,offers,orders:[retryOrder]}}};
+  c=await mount(locale,{registry:retryRegistry,reply:{hold:'generate',body:{data:{ready:true}},registryAfter:{body:{data:{available:true,offers,orders:[{...retryOrder,items:[{...retryOrder.items[0],status:'READY',pdfSize:150}]}]}}}}});await expect(page.getByRole('button',{name:c.generate,exact:true})).toBeEnabled();await expect(page.getByText(c.notGenerated,{exact:true})).toBeVisible();cases++;
+  await writeThenRefresh(c,c.generate);const readsDuringGeneration=await requestCount('GET');if(readsDuringGeneration!==1)console.log('PACKAGE_GENERATE_REFRESH_REGRESSION '+JSON.stringify({locale,readsDuringGeneration}));assert.equal(readsDuringGeneration,1);await page.evaluate(()=>window.releasePackage.generate());await expect(page.getByRole('status')).toHaveText(c.generated);await expect(page.getByRole('link',{name:c.download,exact:true})).toBeVisible();assert.equal(await requestCount('GET'),2,'Internal post-write reconciliation must still run');assert.equal(await requestCount('POST'),1);cases++;
+  c=await mount(locale,{reply:{hold:'draft',ack:true,registryAfter:{body:{data:{available:true,offers,orders:[order]}}}}});await choose(c);await writeThenRefresh(c);assert.equal(await requestCount('GET'),1);await page.evaluate(()=>window.releasePackage.draft());await expect(page.getByRole('status')).toHaveText(c.saved);assert.equal(await requestCount('GET'),2);await expect(page.locator('[data-checkout]')).toHaveCount(1);assert.deepEqual(await page.evaluate(()=>window.caseState.checkouts),[]);cases++;
+  const retryLimit={...retryOrder,items:[{...retryOrder.items[0],attempts:5}]};c=await mount(locale,{registry:{body:{data:{available:true,offers,orders:[retryLimit]}}}});await expect(page.getByText(c.needsSupport,{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:c.generate,exact:true})).toBeDisabled();cases++;
  }
  const c=await mount('en',{reply:{networkError:true}});await choose(c);await twice();await expect(page.getByRole('status')).toHaveText(c.unknown);await page.evaluate(()=>window.changePackageLocale('hi'));const hindi=await page.evaluate(()=>window.packageCopy('hi'));await expect(page.getByRole('status')).toHaveText(hindi.unknown);cases++;
  // Out-of-order read responses must not overwrite a later confirmed snapshot.

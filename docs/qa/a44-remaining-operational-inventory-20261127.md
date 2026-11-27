@@ -9,7 +9,7 @@ The 17-file list below is the historical inventory at `7c3de8f89c26bc4a5d3eb07bb
 | Account/device and provider controls | 8 | 314 mounted Chromium + 106 actual route/schema/policy + 24 private-page SSR cases | `docs/qa/provider-account-controls-20261127.md`; `qa-provider-account-controls.mjs`, `qa-provider-account-routes.mjs` |
 | Shop shipping and catalogue controls | 2 | 141 mounted Chromium + 43 actual route/private-page cases | `docs/SHOP_ADMIN_RECOVERY_20261127.md`; `qa-shop-admin-ui.mjs`, `qa-shop-admin-contracts.mjs` |
 | Report correction and workflow controls | 2 | 91 mounted Chromium + 25 actual route/private-page cases | `docs/REPORT_ADMIN_OPERATIONS_20261127.md`; `qa-report-admin-operations.mjs` |
-| Deferred-service and owner verification controls | 5 | 204 mounted Chromium + 82 actual handler/schema/policy + 27 private-page SSR cases | `docs/DEFERRED_AND_OWNER_CONTROLS_20261127.md`; `qa-deferred-controls-ui.mjs`, `qa-deferred-controls-routes.mjs` |
+| Deferred-service and owner verification controls | 5 | 210 mounted Chromium + 82 actual handler/schema/policy + 27 private-page SSR cases | `docs/DEFERRED_AND_OWNER_CONTROLS_20261127.md`; `qa-deferred-controls-ui.mjs`, `qa-deferred-controls-routes.mjs` |
 
 These are isolated development receipts. They do not establish real email delivery, a production encrypted restore, real device acceptance, independent language review or acceptance of every rendered route. Broader provider dashboard/navigation and authored course/workbook content remain outside this bounded list. A44 remains partial under its original acceptance criterion. The CI workflow runs all seven maintained commands above and retains their logs for the exact candidate commit.
 

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {componentHarness,expect} from './qa-runtime/component-harness.mjs';
-const baseline=process.env.DEFERRED_UI_BASELINE;
+const refreshBaseline=process.env.DEFERRED_REFRESH_BASELINE;
+const baseline=process.env.DEFERRED_UI_BASELINE??refreshBaseline;
 const entries={request:['components/deferred-service-request-form.tsx','DeferredServiceRequestForm'],customer:['components/deferred-service-allocations.tsx','DeferredServiceAllocations'],planning:['components/admin/deferred-service-planning.tsx','DeferredServicePlanning'],email:['components/admin/admin-email-acceptance-test.tsx','AdminEmailAcceptanceTest'],recovery:['components/admin/manual-encrypted-recovery-control.tsx','ManualEncryptedRecoveryControl']};
 const files=Object.values(entries).map(v=>v[0]);
 const h=await componentHarness({files:[...files,'lib/deferred-services/copy.ts','lib/admin/operations-control-copy.ts'],baseline,baselineFiles:files}),{page}=h;
@@ -12,8 +13,25 @@ const response=data=>({body:{data}});
 async function mount(mode,locale='en',options={}){const [file,component]=entries[mode];await h.mount({locale,entry:'@/'+file.replace(/\.tsx$/,''),component,props:mode==='email'?{enabled:true}:mode==='recovery'?{configured:true,verified:false}:{},responses:{GET:[response(mode==='planning'?view:{allocations:[allocation]})],POST:[response({})]},...options});return h.copy('@/lib/deferred-services/copy','deferredCopy',locale);}
 async function twice(label){await page.getByRole('button',{name:label,exact:true}).evaluate(b=>{b.click();b.click();});}
 async function formTwice(index=0){await page.locator('form').nth(index).evaluate(f=>{f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});}
+async function refreshMutationProbe(expectedGets){
+ let probes=0;
+ for(const locale of ['en','hi','hinglish'])for(const mode of ['customer','planning']){
+  const data=mode==='customer'?{allocations:[allocation]}:view;
+  const c=await mount(mode,locale,{responses:{GET:[response(data),{hold:'manual-refresh',body:{data}}],POST:[{hold:'mutation',body:{data:{}}}]}});
+  const action=mode==='customer'?c.accept:c.attest;
+  await expect(page.getByRole('button',{name:action,exact:true})).toBeEnabled();
+  await page.evaluate(({action,refresh})=>{const buttons=[...document.querySelectorAll('button')];buttons.find(b=>b.textContent===action).click();buttons.find(b=>b.textContent===refresh).click();},{action,refresh:c.refresh});
+  assert.equal((await h.requests('POST')).length,1);assert.equal((await h.requests('GET')).length,expectedGets);
+  await page.evaluate(()=>window.held.mutation());await expect(page.getByRole('status')).toHaveText(c.unknown);
+  if(expectedGets===2){await page.evaluate(()=>window.held['manual-refresh']());await expect(page.getByRole('button',{name:action,exact:true})).toBeEnabled();}
+  else await expect(page.getByRole('button',{name:action,exact:true})).toBeDisabled();
+  probes++;
+ }
+ return probes;
+}
 try{
- if(baseline){
+ if(refreshBaseline){console.log('DEFERRED_REFRESH_BASELINE_REPRODUCED',JSON.stringify({baseline,cases:await refreshMutationProbe(2),unsafeRefreshUnlocksUnknownMutation:true}));}
+ else if(baseline){
   await mount('request','en',{responses:{POST:[response({ticket:{id:'wrong-record'}})]}});await page.locator('input[type="checkbox"]').check();await formTwice();await expect(page.getByText('Your unpaid review request is recorded. No payment or reservation has been made.',{exact:true})).toBeVisible();
   await mount('customer','en',{responses:{GET:[response({allocations:[allocation]})],POST:[response({allocation:{id:'other',state:'CANCELED'}})]}});await twice('Acknowledge unpaid proposal');await expect(page.getByText('Review acknowledgement recorded. No payment or commercial booking.',{exact:true})).toBeVisible();
   await mount('planning','en');await twice('Attest reviewed records');await expect(page.getByText('Internal review operation recorded. No payment or commercial booking.',{exact:true})).toBeVisible();
@@ -75,6 +93,7 @@ try{
   await mount('recovery',locale,{props:{configured:true,verified:true,lastSuccessfulAt:new Date(Date.now()-37*3600000).toISOString()}});await expect(page.getByRole('status')).toHaveText(oc.unverified);await expect(page.locator('input[type=checkbox]')).toBeEnabled();cases++;
   await mount('recovery',locale,{responses:{GET:[response({configured:true,operational:true,encrypted:true,restoreVerified:true})]}});await twice(oc.recheck);await expect(page.getByRole('status')).toHaveText(oc.unavailable);assert.equal((await h.requests('GET')).length,1);cases++;
  }
+ cases+=await refreshMutationProbe(1);
  assert.deepEqual(h.errors,[]);console.log('DEFERRED_CONTROLS_UI_PASS',JSON.stringify({browserCases:cases,locales:3,scope:'actual five React controls with isolated HTTP, no email or recovery execution'}));
 }
 

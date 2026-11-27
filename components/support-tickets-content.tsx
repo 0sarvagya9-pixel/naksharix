@@ -29,7 +29,9 @@ export function SupportTicketsContent({ initialSubject = "" }: { initialSubject?
   const [error, setError] = useState<SupportCopyKey | "">("");
   const [notice, setNotice] = useState<SupportCopyKey | "">("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (acknowledgedRefresh = false) => {
+    // Only a verified create acknowledgement may refresh while its mutation lock is held.
+    if (inFlight.current && !acknowledgedRefresh) return;
     const sequence = ++loadSequence.current;
     setLoading(true);
     try {
@@ -83,7 +85,7 @@ export function SupportTicketsContent({ initialSubject = "" }: { initialSubject?
       setSubject("");
       setMessage("");
       setNotice("recorded");
-      try{await load();}catch{setError("savedRefreshFailed");}
+      try{await load(true);}catch{setError("savedRefreshFailed");}
     } catch {
       setError(failure);
     } finally {

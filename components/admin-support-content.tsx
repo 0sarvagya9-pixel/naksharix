@@ -24,6 +24,7 @@ export function AdminSupportContent() {
   const [notice, setNotice] = useState<SupportCopyKey | "">("");
 
   const refresh = useCallback(async () => {
+    if (inFlight.current) return;
     const sequence = ++loadSequence.current;
     setLoading(true);
     try {
