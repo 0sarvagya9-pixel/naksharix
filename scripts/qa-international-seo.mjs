@@ -248,7 +248,8 @@ const partnerSupport = read("app/support/page.tsx");
 assert.ok(partnerSupport.includes('params.topic === "partnership"') &&
   partnerSupport.includes('getCurrentUser()') &&
   partnerSupport.includes('encodeURIComponent("/support?topic=partnership")') &&
-  partnerSupport.includes('initialSubject={partnership ? "Partnership enquiry" : ""}'),
+  partnerSupport.includes('initialSubject={partnership ? copy.partnership : ""}') &&
+  read("lib/support/ui-copy.ts").includes('partnership: ["Partnership enquiry"'),
   "Preserve authentication and fixed partnership subject");
 assert.ok(read("app/contact/page.tsx").includes('href="/partnerships"') &&
   read("app/reports/page.tsx").includes('href="/partnerships"') &&

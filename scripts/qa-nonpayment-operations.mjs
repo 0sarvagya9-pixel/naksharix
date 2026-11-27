@@ -117,7 +117,8 @@ assert.ok(send.includes('export function isNotifiableFulfilmentStatus(') &&
 assert.ok(supportMail.includes('import "server-only";') &&
   supportMail.includes("await sendEmail({ to, subject, text, idempotencyKey })") &&
   supportMail.includes('new URL(path, env.NEXT_PUBLIC_APP_URL)') &&
-  supportMail.includes('select: { user: { select: { email: true } } }') &&
+  supportMail.includes('select: { user: { select: { email: true, locale: true } } }') &&
+  supportMail.includes('locale = normalizeLocale(ticket?.user?.locale)') && supportMail.includes('supportReplyEmail(locale, ticketId, supportUrl(false))') &&
   !supportMail.includes('input.message') && !supportMail.includes('ticket.subject') &&
   supportMail.includes("Provider acceptance of this message does not prove inbox delivery."),
   "Support email notifications must be private, owner-bound and inbox-proof neutral");
@@ -126,10 +127,10 @@ assert.ok(staffReply.includes('getAdminApiUser()') &&
   staffReply.includes('await notifyCustomerOfSupportReply(input.ticketId, input.clientMutationId)') &&
   newTicket.includes('await notifySupportTeamOfNewTicket(ticket.id)') &&
   guidance.includes('await notifySupportTeamOfNewTicket(ticket.id)') &&
-  staffReply.includes('return ok({ recorded:true,duplicate:result.duplicate,notification,clientMutationId:input.clientMutationId })') &&
+  staffReply.includes('return ok({ ticketId:input.ticketId,recorded:true,duplicate:result.duplicate,notification,clientMutationId:input.clientMutationId })') &&
   newTicket.includes('duplicate:true,clientMutationId:input.clientMutationId,notification:"not_needed"') &&
   newTicket.includes('skipDuplicates:true') &&
-  supportUi.includes('Email provider accepted a customer notification; inbox delivery is not confirmed.'),
+  supportUi.includes('result.data?.notification === "provider_accepted"') && supportUi.includes('"replyProvider"') && read('lib/support/ui-copy.ts').includes('Email provider accepted a customer notification; inbox delivery is not confirmed.'),
   "Admin replies and new support/enquiry tickets must notify without duplicate sends or fake delivery");
 assert.ok(newTicket.indexOf('supportTicket.create(') < newTicket.indexOf('notifySupportTeamOfNewTicket(ticket.id)') &&
   guidance.indexOf('supportTicket.create(') < guidance.indexOf('notifySupportTeamOfNewTicket(ticket.id)') &&

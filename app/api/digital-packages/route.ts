@@ -24,7 +24,7 @@ export async function POST(request:Request){
   try{preparePackageItems(input);}catch(e){return fail(e instanceof Error?e.message:"Invalid package details.",422);}
   const result=await preparePackage(user.id,input);
   if(result.kind!=="saved")return fail(result.kind==="limit"?"Review existing unpaid packages before preparing another.":result.kind==="conflict"?"This request identifier already belongs to a different package.":"This offer is not currently available at the selected price.",409);
-  return ok({order:result.order});
+  return ok({order:result.order,clientIntent:input.clientIntent});
  }catch(e){return handleApiError(e);}
 }
 export async function DELETE(request:Request){

@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     if (result.kind === "full") return fail("Conversation limit reached. Open a new ticket.", 409);
 
     if (result.kind !== "ok") return fail("Unable to append support reply.", 409);
-    return ok({ recorded:true,duplicate:result.duplicate,clientMutationId:input.clientMutationId });
+    return ok({ ticketId:input.ticketId,recorded:true,duplicate:result.duplicate,clientMutationId:input.clientMutationId });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
       return fail("Ticket changed at the same time. Retry the reply.", 409);

@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     // Staff reply is committed before provider acceptance is attempted.
     const notification = result.duplicate ? "not_needed" :
       await notifyCustomerOfSupportReply(input.ticketId, input.clientMutationId);
-    return ok({ recorded:true,duplicate:result.duplicate,notification,clientMutationId:input.clientMutationId });
+    return ok({ ticketId:input.ticketId,recorded:true,duplicate:result.duplicate,notification,clientMutationId:input.clientMutationId });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
       return fail("Ticket changed at the same time. Retry the reply.", 409);
