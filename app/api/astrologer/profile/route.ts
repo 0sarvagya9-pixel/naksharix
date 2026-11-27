@@ -13,14 +13,14 @@ const schema = z.object({
   specialization: z.string().min(2).max(160),
   languages: z.string().min(2).max(200),
   consultationPrice: z.coerce.number().min(0).max(100000),
-  pricePerSession: z.coerce.number().min(0).max(100000).optional().or(z.literal("")),
+  pricePerSession: z.preprocess(value=>value===""?undefined:value,z.coerce.number().min(0).max(100000).optional()),
   skills: z.string().min(2).max(400),
   city: z.string().max(80).optional().or(z.literal("")),
   country: z.string().max(80).optional().or(z.literal("")),
   availabilityStatus: z.enum(["ONLINE", "BUSY", "OFFLINE"]),
-  availableForChat: z.coerce.boolean().default(false),
-  availableForCall: z.coerce.boolean().default(false),
-  availableForVideo: z.coerce.boolean().default(false)
+  availableForChat: z.boolean().default(false),
+  availableForCall: z.boolean().default(false),
+  availableForVideo: z.boolean().default(false)
 });
 
 export async function POST(request: NextRequest) {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       specialization: body.specialization,
       languages: splitList(body.languages),
       consultationPrice: body.consultationPrice,
-      pricePerSession: body.pricePerSession === "" || body.pricePerSession === undefined ? null : Number(body.pricePerSession),
+      pricePerSession: body.pricePerSession === undefined ? null : body.pricePerSession,
       skills: splitList(body.skills),
       city: body.city || null,
       country: body.country || null,

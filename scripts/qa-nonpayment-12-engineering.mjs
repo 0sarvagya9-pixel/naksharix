@@ -88,7 +88,8 @@ const categories = [
   "Written guidance enquiry","Puja service enquiry","Puja booking status",
   "Shop order status","Personalized report ready","Report delivery fallback","Administrator diagnostic"
 ];
-for (const category of categories) assert.ok(emailAdmin.includes(category), "Missing email category: "+category);
+assert.ok(emailAdmin.includes("EMAIL_TEST_CATEGORIES"), "Email route uses the shared diagnostic categories");
+for (const category of categories) assert.ok(source("lib/admin/operations-control-copy.ts").includes(category), "Missing email category: "+category);
 assert.ok(!emailAdmin.includes("razorpay") && !emailAdmin.includes("prisma.payment.create") &&
   !emailAdmin.includes("createOrder("), "Email suite may never create commerce records");
 

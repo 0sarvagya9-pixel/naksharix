@@ -50,7 +50,9 @@ check('creation and reschedule use identical locking and interval checks', () =>
 });
 check('async controls recover without blind retry and reload confirmed state', () => {
   const text=readFileSync('components/astrologer-booking-actions.tsx','utf8');
-  for (const marker of ['finally {','clearTimeout(timeout)','setBusy(false)','window.location.reload()','inFlight.current','controller.abort()','New consultation date and time in IST']) assert.ok(text.includes(marker));
+  for (const marker of ['finally {','clearTimeout(timeout)','setBusy(false)','window.location.reload()','inFlight.current','controller.abort()']) assert.ok(text.includes(marker));
+  assert.ok(text.includes('aria-label={copy.bookingDate}'));
+  assert.ok(readFileSync('lib/astrologers/workspace-copy.ts','utf8').includes('New consultation date and time in IST'));
   assert.ok(text.includes('booking.id !== bookingId'));
   assert.ok(text.includes('expectedStatuses.includes(booking.status)'));
   assert.ok(text.includes('mounted.current && !committed'));

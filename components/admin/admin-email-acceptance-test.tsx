@@ -1,56 +1,22 @@
 "use client";
-
-import { useState } from "react";
-import { secureFetch } from "@/lib/security/csrf";
-
+import {useEffect,useRef,useState} from "react";
+import {secureFetch} from "@/lib/security/csrf";
+import {useLanguage} from "@/components/language-provider";
+import {operationsControlCopy,emailCategory} from "@/lib/admin/operations-control-copy";
+import {emailTestResult,type EmailTestResult} from "@/lib/admin/operations-control-client";
 /** Only explicitly invoked by an authenticated administrator. */
-export function AdminEmailAcceptanceTest({ enabled }: { enabled: boolean }) {
-  const [pending, setPending] = useState(false);
-  const [status, setStatus] = useState("");
-  async function submit(mode: "single" | "suite") {
-    if (pending || !enabled) return;
-    setPending(true);
-    setStatus("");
-    try {
-      const response = await secureFetch("/api/admin/email-test", {
-        method: "POST", headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({mode})
-      });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Email provider test failed.");
-      if (mode === "suite") {
-        const outcomes = payload.data?.outcomes ?? [];
-        const accepted = Number(payload.data?.acceptedCount ?? 0);
-        const lines = outcomes.map((item: {index:number;category:string;providerAccepted:boolean}) =>
-          `#${String(item.index).padStart(2,"0")} ${item.category}: ${item.providerAccepted?"Provider accepted":"Not accepted"}`);
-        setStatus(`Production Resend accepted ${accepted}/11 messages for the owner acceptance mailbox.\n${lines.join("\n")}\nInbox/Spam/Promotions receipt must be independently confirmed.`);
-      } else {
-        if (payload.data?.providerAccepted !== true) throw new Error("No provider acceptance recorded.");
-        setStatus("Email provider accepted the test request. Check your configured Admin mailbox and spam folder. This is not proof of delivery.");
-      }
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Email provider test failed.");
-    } finally {
-      setPending(false);
-    }
-  }
-  return <section className="mt-6 rounded-2xl border border-[#d5bb92] bg-[#231b27] p-5" aria-labelledby="admin-email-test-heading">
-    <h2 id="admin-email-test-heading" className="font-cinzel text-lg font-bold text-white">Email acceptance test</h2>
-    <p className="mt-2 text-sm leading-6 text-[#e3d5da]">
-      Send an individual admin smoke message or a once-daily set of 11 clearly marked templates to the preconfigured owner acceptance mailbox.
-      All messages use the real production Resend adapter; no OTP, purchase, Puja, order, or report record is created. Provider acceptance does not prove actual inbox delivery.
-    </p>
-    <div className="mt-4 flex flex-wrap gap-3">
-      <button type="button" disabled={!enabled || pending} onClick={()=>submit("single")}
-        className="min-h-11 rounded-lg border border-[#d4ac67] bg-[#6c2f46] px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">
-        {pending ? "Checking provider..." : "Send single admin test"}
-      </button>
-      <button type="button" disabled={!enabled || pending} onClick={()=>submit("suite")}
-        className="min-h-11 rounded-lg border border-[#d4ac67] bg-[#75452b] px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">
-        Send 11-category owner inbox tests
-      </button>
-    </div>
-    {!enabled ? <p className="mt-2 text-sm text-[#f4d89d]">Email adapter is not configured as ready.</p> : null}
-    {status ? <p role="status" aria-live="polite" className="mt-3 whitespace-pre-line text-sm leading-6 text-[#f4d89d]">{status}</p> : null}
-  </section>;
+export function AdminEmailAcceptanceTest({enabled}:{enabled:boolean}){
+ const {apiLocale}=useLanguage(),c=operationsControlCopy(apiLocale);
+ const [pending,setPending]=useState(false),[uncertain,setUncertain]=useState(false),[result,setResult]=useState<EmailTestResult|null>(null);
+ const lock=useRef(false),sequence=useRef(0);
+ useEffect(()=>()=>{sequence.current++;},[]);
+ async function submit(mode:"single"|"suite"){
+  if(lock.current||!enabled||uncertain)return;lock.current=true;const n=++sequence.current;setPending(true);setResult(null);
+  try{const response=await secureFetch("/api/admin/email-test", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode}),silent:true}),payload=await response.json().catch(()=>null);if(n!==sequence.current)return;const receipt=response.ok?emailTestResult(payload?.data,mode):null;if(!receipt){setUncertain(true);return;}setResult(receipt);}
+  catch{if(n===sequence.current)setUncertain(true);}finally{lock.current=false;if(n===sequence.current)setPending(false);}
+ }
+ const disabled=!enabled||pending||uncertain;
+ return <section className="mt-6 rounded-2xl border border-[#d5bb92] bg-[#231b27] p-5" aria-labelledby="admin-email-test-heading" aria-busy={pending}><h2 id="admin-email-test-heading" className="font-cinzel text-lg font-bold text-white">{c.emailTitle}</h2><p className="mt-2 text-sm leading-6 text-[#e3d5da]">{c.emailIntro}</p><div className="mt-4 flex flex-wrap gap-3"><button type="button" disabled={disabled} onClick={()=>void submit("single")} className="min-h-11 rounded-lg border border-[#d4ac67] bg-[#6c2f46] px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">{pending?c.checking:c.single}</button><button type="button" disabled={disabled} onClick={()=>void submit("suite")} className="min-h-11 rounded-lg border border-[#d4ac67] bg-[#75452b] px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">{c.suite}</button></div>{!enabled?<p className="mt-2 text-sm text-[#f4d89d]">{c.emailDisabled}</p>:null}
+ {uncertain?<div className="mt-3 text-sm leading-6 text-[#f4d89d]"><p role="status" aria-live="polite">{c.emailUnknown}</p><a href="/admin/readiness" className="underline">{c.reloadEmail}</a></div>:null}
+ {result?<div role="status" aria-live="polite" className="mt-3 text-sm leading-6 text-[#f4d89d]">{result.mode==="single"?<p>{c.singleAccepted}</p>:<><p>{c.suiteResult}: {result.acceptedCount}/{result.requestedCount}</p><ul>{result.outcomes.map(item=><li key={item.index}>#{String(item.index).padStart(2,"0")} {emailCategory(item.index,apiLocale)}: {item.providerAccepted?c.accepted:c.notAccepted}</li>)}</ul><p>{c.inbox}</p></>}</div>:null}</section>;
 }

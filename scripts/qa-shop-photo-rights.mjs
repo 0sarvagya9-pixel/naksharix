@@ -3,6 +3,7 @@ import fs from "node:fs";
 const read=(path)=>fs.readFileSync(path,"utf8");
 const ui=read("components/shop-coming-soon-content.tsx");
 const admin=read("components/admin-shop-content.tsx");
+const shopAdminCopy=read("lib/shop/admin-copy.ts");
 const api=read("app/api/admin/shop-catalogue/route.ts");
 const model=read("lib/manual-catalogue.ts");
 for(const part of ["safeProductVisual(product)","ResilientShopPhoto", "Images are for reference", "product.imageRights", "product.imageEvidenceUrl"]) {
@@ -11,9 +12,10 @@ for(const part of ["safeProductVisual(product)","ResilientShopPhoto", "Images ar
 for(const part of ["imageRights: z.enum", "imageEvidenceUrl: z.string().url()", "External product image requires documented image-use rights.", "evidence.protocol !== \"https:\""]) {
   assert.ok(api.includes(part),"SHOP_IMAGE_LICENSE_BACKEND_GUARD_MISSING="+part);
 }
-for(const part of ["Image usage rights", "Image rights evidence HTTPS URL", "SUPPLIER_AUTHORIZED"]) {
-  assert.ok(admin.includes(part),"SHOP_ADMIN_PHOTO_PROOF_UI_MISSING="+part);
+for(const [binding,phrase] of [["copy.imageRights","Image usage rights"],["copy.rightsEvidence","Image rights evidence HTTPS URL"]]) {
+  assert.ok(admin.includes(binding)&&shopAdminCopy.includes(phrase),"SHOP_ADMIN_PHOTO_PROOF_UI_MISSING="+binding);
 }
+assert.ok(admin.includes("SUPPLIER_AUTHORIZED"),"SHOP_ADMIN_SUPPLIER_EVIDENCE_CHOICE_MISSING");
 for(const part of ["imageRights?:", "imageEvidenceUrl?:", "imageRights: [\"OWNED\""]) {
   assert.ok(model.includes(part),"SHOP_IMAGE_PROOF_PERSISTENCE_MISSING="+part);
 }
@@ -159,7 +161,7 @@ for(const page of ["components/puja/puja-services-directory.tsx","app/pujas/[id]
 }
 
 const shopAdminReadiness=read("components/admin-shop-content.tsx");
-for(const phrase of ["hasSupplierPhotoEvidence","needs-supplier-photo","Needs approved price","supplierEvidenceCount",
-  "Licensed reference photographs do not count as actual stock photos."]){
+for(const phrase of ["hasSupplierPhotoEvidence","needs-supplier-photo","supplierEvidenceCount","copy.needsPrice","copy.imageGuidance"]){
   assert.ok(shopAdminReadiness.includes(phrase),"ADMIN_SHOP_OWNER_DATA_REVIEW_MISSING="+phrase);
 }
+assert.ok(shopAdminCopy.includes("Needs approved price")&&shopAdminCopy.includes("Licensed reference photographs do not count as actual stock photos."),"ADMIN_SHOP_LOCALIZED_OWNER_REVIEW_DISCLOSURE_MISSING");

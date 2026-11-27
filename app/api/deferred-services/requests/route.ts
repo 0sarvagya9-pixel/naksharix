@@ -27,7 +27,7 @@ export async function POST(request:Request){
     const respond=(row:NonNullable<Awaited<ReturnType<typeof read>>>,duplicate:boolean)=>{
       const first=Array.isArray(row.messages)?row.messages[0]:null;
       if(row.userId!==user.id||row.subject!==prepared.subject||!first||typeof first!=="object"||Array.isArray(first)||first.text!==prepared.description)return fail("Request reference was already used with different details.",409);
-      const response=ok({ticket:{id:row.id,status:row.status,createdAt:row.createdAt},duplicate,trackingPath:"/support",paymentRequired:false,orderCreated:false,bookingCreated:false,entitlementGranted:false,capacityReserved:false,fulfillmentConfirmed:false},{status:duplicate?200:201});
+      const response=ok({ticket:{id:row.id,status:row.status,createdAt:row.createdAt},requestId:input.requestId,request:{kind:input.kind,units:input.units,target:input.target.trim(),preferredDate:input.preferredDate},duplicate,trackingPath:"/support",paymentRequired:false,orderCreated:false,bookingCreated:false,entitlementGranted:false,capacityReserved:false,fulfillmentConfirmed:false},{status:duplicate?200:201});
       response.headers.set("Cache-Control","private, no-store");
       return response;
     };

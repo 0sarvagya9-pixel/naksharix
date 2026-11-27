@@ -24,7 +24,7 @@ export async function GET(){
   const admin=await getAdminApiUser();if(!admin)return fail("Forbidden",403);
   const [rates,catalogue]=await Promise.all([prisma.shopShippingRate.findMany({orderBy:[{country:"asc"},{productId:"asc"},{postalPrefix:"desc"}],take:2000}),getShopCatalogue()]);
   if(!catalogue.storageReady)return fail("Catalogue unavailable.",503);
-  return ok({rates,products:catalogue.products.map(p=>({id:p.id,name:p.name.en,status:p.status}))});
+  return ok({rates,products:catalogue.products.map(p=>({id:p.id,name:p.name.en,names:p.name,status:p.status}))});
  }catch(e){return handleApiError(e)}
 }
 export async function PUT(request:Request){

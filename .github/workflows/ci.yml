@@ -378,6 +378,12 @@ jobs:
           node scripts/qa-digital-package-ui.mjs | tee digital-package-ui.log
           node scripts/qa-admin-catalogue-ui.mjs | tee admin-catalogue-ui.log
           node scripts/qa-report-admin-operations.mjs | tee report-admin-operations.log
+          node scripts/qa-provider-account-controls.mjs | tee provider-account-controls.log
+          node scripts/qa-provider-account-routes.mjs | tee provider-account-routes.log
+          node scripts/qa-shop-admin-ui.mjs | tee shop-admin-ui.log
+          node scripts/qa-shop-admin-contracts.mjs | tee shop-admin-contracts.log
+          node scripts/qa-deferred-controls-ui.mjs | tee deferred-controls-ui.log
+          node scripts/qa-deferred-controls-routes.mjs | tee deferred-controls-routes.log
       - name: Bootstrap isolated browser-test database
         shell: bash
         run: |
@@ -439,6 +445,12 @@ jobs:
             digital-package-ui.log
             admin-catalogue-ui.log
             report-admin-operations.log
+            provider-account-controls.log
+            provider-account-routes.log
+            shop-admin-ui.log
+            shop-admin-contracts.log
+            deferred-controls-ui.log
+            deferred-controls-routes.log
             browser-qa.log
             /tmp/naksharix-browser-server.log
             test-results

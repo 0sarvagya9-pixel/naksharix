@@ -12,7 +12,8 @@ export async function componentHarness({files,baseline,baselineFiles=[]}){
  const stubNames=new Set(['@/lib/utils','@/components/ui/button','@/components/ui/card','@/components/section','@/lib/auth/jwt','@/lib/auth/roles','@/lib/security/csrf','@/components/razorpay-checkout-button','@/lib/db','@/lib/seo']);
  function add(file){const name='@/'+file.replace(/\.tsx?$/,'');if(modules.has(name)||stubNames.has(name))return;
   const source=baseline&&baselineFiles.includes(file)?execFileSync('git',['show',baseline+':'+file],{encoding:'utf8'}):readFileSync(file,'utf8');
-  const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
+  const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
+  const js=compiled.replace(/require\(["'](\.[^"']+)["']\)/g,(_,dep)=>'require('+JSON.stringify('@/'.concat(path.posix.normalize(path.posix.join(path.posix.dirname(file),dep)).replace(/\.tsx?$/,'')))+')');
   modules.set(name,js);
   for(const [,dep] of js.matchAll(/require\(["'](@\/[^"']+)["']\)/g)){if(stubNames.has(dep))continue;const base=dep.slice(2),target=['.ts','.tsx','/index.ts','/index.tsx'].map(ext=>base+ext).find(existsSync);if(!target)throw Error('Unconfigured dependency '+dep);add(target);}
  }

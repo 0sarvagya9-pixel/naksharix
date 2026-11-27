@@ -36,7 +36,7 @@ assert.ok(store.includes("shopCatalogueSnapshot.findUnique")&&store.includes("if
 assert.ok(admin.includes("unitPricePaise: editing.unitPricePaise ?? null"),"ADMIN_PRICE_OVERRIDE_LOST");
 assert.ok(admin.includes("applyMissingMarketPrices")&&
   admin.includes("if(hasPrice(product)||marketPricePaise===null)return product;")&&
-  admin.includes("Fill Missing Market Prices"),"ADMIN_EXPLICIT_PRICE_SEED_MERGE_NOT_GATED");
+  admin.includes("copy.fillPrices")&&read("lib/shop/admin-copy.ts").includes("Fill Missing Market Prices"),"ADMIN_EXPLICIT_PRICE_SEED_MERGE_NOT_GATED");
 assert.ok(orders.includes("product.unitPricePaise*item.quantity")&&
  orders.includes('paymentStatus:"UNPAID"')&&orders.includes('status:checkoutReady?"CONFIRMED":"REQUESTED"')&&
  orders.includes("shippingPaise:shipping.shippingPaise")&&orders.includes("taxPaise:shipping.taxPaise")&&orders.includes("totalPaise:shipping.totalPaise")&&orders.includes("expectedShippingQuoteKey!==quoteKey")&&

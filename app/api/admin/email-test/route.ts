@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 import { getEmailReadiness, sendEmail } from "@/lib/email/email-service";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { EMAIL_TEST_CATEGORIES } from "@/lib/admin/operations-control-copy";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60; // Owner-only 11-mail suite uses provider rate pacing.
@@ -13,19 +14,7 @@ export const maxDuration = 60; // Owner-only 11-mail suite uses provider rate pa
  * message body from the browser. Provider acceptance is NOT mailbox delivery.
  */
 const modeSchema = z.object({ mode: z.enum(["single", "suite"]).default("single") }).strict();
-const categories = [
-  "Account verification (no OTP issued)",
-  "Consultation request (no booking)",
-  "Support ticket received (no ticket created)",
-  "Support staff reply (no ticket updated)",
-  "Written guidance enquiry (no expert assigned)",
-  "Puja service enquiry (no Pandit assigned)",
-  "Puja booking status (no ceremony booked)",
-  "Shop order status (no order dispatched)",
-  "Personalized report ready (no PDF generated)",
-  "Report delivery fallback (no customer download)",
-  "Administrator diagnostic (no transaction)"
-] as const;
+const categories = EMAIL_TEST_CATEGORIES;
 
 export async function POST(request: Request) {
   const admin = await getAdminApiUser();
@@ -99,6 +88,7 @@ export async function POST(request: Request) {
       }
       const accepted = outcomes.filter(x => x.providerAccepted).length;
       return ok({
+        mode: "suite",
         providerAccepted: accepted === categories.length,
         acceptedCount: accepted,
         requestedCount: categories.length,
@@ -115,6 +105,7 @@ export async function POST(request: Request) {
     });
     if (!result.sent) return fail("Email provider did not accept the test message.", 502);
     return ok({
+      mode: "single", acceptedCount: 1, requestedCount: 1,
       providerAccepted: true,
       recipient: "configured admin mailbox",
       nextStep: "Check the mailbox (including spam) and inspect sender authentication headers. The API cannot verify final delivery."

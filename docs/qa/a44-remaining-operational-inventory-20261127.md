@@ -1,10 +1,23 @@
-# A44 — bounded remaining operational language inventory
+# A44 — bounded operational language inventory and completion receipts
+
+## Follow-up disposition — 2026-11-27
+
+The 17-file list below is the historical inventory at `7c3de8f89c26bc4a5d3eb07bb9cf56bd807fb21b`. All 17 listed controls have subsequently received English/Hindi/Hinglish action copy, receipt checks, guarded mutation paths and scoped runtime qualification in this development branch. The original table is retained to make that boundary auditable; its rows are no longer an unimplemented work list.
+
+| Inventory scope | Controls | Fresh scoped receipt | Maintained evidence |
+| --- | ---: | --- | --- |
+| Account/device and provider controls | 8 | 314 mounted Chromium + 106 actual route/schema/policy + 24 private-page SSR cases | `docs/qa/provider-account-controls-20261127.md`; `qa-provider-account-controls.mjs`, `qa-provider-account-routes.mjs` |
+| Shop shipping and catalogue controls | 2 | 141 mounted Chromium + 43 actual route/private-page cases | `docs/SHOP_ADMIN_RECOVERY_20261127.md`; `qa-shop-admin-ui.mjs`, `qa-shop-admin-contracts.mjs` |
+| Report correction and workflow controls | 2 | 91 mounted Chromium + 25 actual route/private-page cases | `docs/REPORT_ADMIN_OPERATIONS_20261127.md`; `qa-report-admin-operations.mjs` |
+| Deferred-service and owner verification controls | 5 | 204 mounted Chromium + 82 actual handler/schema/policy + 27 private-page SSR cases | `docs/DEFERRED_AND_OWNER_CONTROLS_20261127.md`; `qa-deferred-controls-ui.mjs`, `qa-deferred-controls-routes.mjs` |
+
+These are isolated development receipts. They do not establish real email delivery, a production encrypted restore, real device acceptance, independent language review or acceptance of every rendered route. Broader provider dashboard/navigation and authored course/workbook content remain outside this bounded list. A44 remains partial under its original acceptance criterion. The CI workflow runs all seven maintained commands above and retains their logs for the exact candidate commit.
 
 ## Boundary
 
 The AI customer, AI chat and reference-reminder batches do not close A44 for the whole site. This source inventory records **17 remaining component files** outside those batches. Their contents were checked against integration head `7c3de8f89c26bc4a5d3eb07bb9cf56bd807fb21b` on 2026-11-27 and matched the inspected recovery worktree. This is a bounded source inventory, not a declaration that every other rendered route is translated, accessible or independently reviewed.
 
-These controls need deliberate English/Hindi/Hinglish copy and runtime qualification. Merely changing visible headings would leave mutation errors, consent prompts, result acknowledgement and recovery paths untranslated.
+At the inventory checkpoint these controls needed deliberate English/Hindi/Hinglish copy and runtime qualification. The follow-up above includes mutation errors, consent prompts, result acknowledgement and recovery paths as well as visible headings.
 
 | Operational area | Exact remaining sources | Confirmed English examples |
 | --- | --- | --- |
@@ -41,4 +54,4 @@ Names entered by customers or staff, product identifiers, consent-version string
 
 ## Acceptance still required
 
-After the remaining operational controls are implemented, qualify their actual mounted flows, including rejected/uncertain requests and consent changes. Independent native Hindi/Hinglish review and real localized inbox acceptance remain separate evidence requirements. A44 remains partial until the original acceptance criteria, rather than a component count, are satisfied.
+The listed operational controls now have maintained qualification for actual mounted flows, rejected/uncertain requests and consent changes. Independent native Hindi/Hinglish review, real localized inbox acceptance and coverage of other rendered routes remain separate evidence requirements. A44 remains partial until the original acceptance criteria, rather than a component count, are satisfied.

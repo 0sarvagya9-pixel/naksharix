@@ -33,6 +33,7 @@ assert(adminActions.includes("/deliver") && adminActions.includes("Send Email"),
 
 const adminEmailRoute = source("app/api/admin/email-test/route.ts");
 const adminEmailUi = source("components/admin/admin-email-acceptance-test.tsx");
+const adminEmailCopy = source("lib/admin/operations-control-copy.ts");
 const readinessPage = source("app/admin/readiness/page.tsx");
 assert(adminEmailRoute.includes("getAdminApiUser()") &&
   adminEmailRoute.includes('if (!admin) return fail("Not found", 404)') &&
@@ -53,7 +54,7 @@ assert(adminEmailRoute.includes("getEmailReadiness()") &&
   adminEmailRoute.includes('Provider acceptance is not proof of inbox delivery.'), "Email smoke/suite is readiness gated, DB-throttled and truthful about provider acceptance", "no fake delivered state");
 assert(adminEmailUi.includes('secureFetch("/api/admin/email-test", {') &&
   adminEmailUi.includes('submit("suite")') &&
-  adminEmailUi.includes("Check your configured Admin mailbox") &&
+  adminEmailUi.includes("operationsControlCopy") && adminEmailCopy.includes("Check your configured Admin mailbox") &&
   readinessPage.includes("<AdminEmailAcceptanceTest enabled={email.emailEnabled} />"),
   "Email suite requires explicit, authenticated, secure admin interaction", "no background or anonymous sending");
 

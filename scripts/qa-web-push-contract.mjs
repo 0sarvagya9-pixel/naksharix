@@ -9,5 +9,5 @@ assert.ok(transport.includes('dsaEncoding:"ieee-p1363"')&&transport.includes('re
 assert.ok(!transport.includes('body:JSON.stringify'));
 assert.ok(route.includes("consent:z.literal(true)")&&route.includes("existing.userId!==user.id")&&route.includes("userId:user.id"));
 assert.ok(worker.includes('self.addEventListener("push"')&&!worker.includes('event.data.json'));
-assert.ok(prefs.includes("await Notification.requestPermission()")&&prefs.includes("delivery has not yet been verified"));
+assert.ok(prefs.includes("await Notification.requestPermission()")&&prefs.includes('setNotice("registered")')&&read("lib/account/device-copy.ts").includes("delivery has not yet been verified"));
 console.log("WEB_PUSH_CONTRACT_PASS;REAL_BROWSER_DELIVERY_PENDING");
