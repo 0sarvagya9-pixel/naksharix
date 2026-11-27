@@ -72,7 +72,8 @@ assert.ok(productDetail.includes("<ResilientShopPhoto")&&ui.includes("<Resilient
   "SHOP_GALLERY_CARDS_AND_CART_MUST_RECOVER_IMAGE_FAILURES");
 
 const reviewForm=read("components/consultation-review-form.tsx");
-assert.ok(reviewForm.includes("Rate your consultation") && reviewForm.includes("Submit rating") && reviewForm.includes("aria-pressed={rating === value}"),"ACCESSIBLE_CUSTOMER_RATINGS_MISSING");
+const reviewCopy=read("lib/consultations/customer-copy.ts");
+assert.ok(reviewForm.includes("copy.rateConsultation") && reviewForm.includes("copy.submitRating") && reviewForm.includes("aria-pressed={rating === value}") && reviewForm.includes("aria-label={copy.ratingGroup}") && reviewCopy.includes("Rate your consultation") && reviewCopy.includes("Submit rating"),"ACCESSIBLE_CUSTOMER_RATINGS_MISSING");
 assert.ok(read("app/api/consultation-bookings/review/route.ts").includes("rating: z.coerce.number().int().min(1).max(5)"),"RATINGS_MUST_BE_INTEGERS");
 console.log("SHOP_VISUAL_AND_IMAGE_RIGHTS_QA=PASS;LICENSED_PHOTO_REFERENCES=12;UNLICENSED_EXTERNAL_PHOTOS=HELD;CHECKOUT_GATED_BY_RAZORPAY=YES");
 
