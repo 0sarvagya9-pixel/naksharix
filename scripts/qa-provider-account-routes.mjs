@@ -24,6 +24,7 @@ const resolve=Module._resolveFilename,load=Module._load;
 Module._resolveFilename=function(name,...args){return resolve.call(this,name.startsWith('@/')?path.resolve(name.slice(2)):name,...args);};
 Module._load=function(name,...args){
  if(name==='server-only')return {};
+ if(name==='@/auth')return {signOut:async options=>{assert.equal(options?.redirect,false);calls.push(['authjs-signout']);}};
  if(name==='@/lib/db')return {prisma};
  if(name==='@/lib/monitoring/logger')return {logger:{error(){},warn(){},info(){}}};
  if(name==='@/lib/auth/jwt')return {getCurrentUser:async()=>state.user,authCookieName:'synthetic-auth-cookie',clearAuthCookie:async()=>calls.push(['clear-auth-cookie'])};
@@ -111,7 +112,7 @@ reset();state.existing={id:'device-id',userId:'provider-user'};await invoke('not
 reset();response=await invoke('notifications/subscribe',{all:true},200,'DELETE');assert.ok(pushContract.revokedPushReceipt((await response.json()).data,true));assert.deepEqual(selected('push-delete')[0][1].where,{userId:'provider-user'});
 reset();response=await invoke('notifications/subscribe',{endpoint:push.endpoint},200,'DELETE');assert.ok(pushContract.revokedPushReceipt((await response.json()).data));assert.deepEqual(selected('push-delete')[0][1].where,{userId:'provider-user',endpointDigest:'synthetic-endpoint-digest'});
 for(const [setup,payload,status] of [[()=>{state.user=null;},{all:true},401],[()=>{state.schema=false;},{all:true},503],[()=>{state.config=false;},{endpoint:push.endpoint},409],[()=>{},{endpoint:'https://evil.invalid/device'},422],[()=>{},{all:true,extra:true},422]]){reset();setup();await invoke('notifications/subscribe',payload,status,'DELETE');assert.equal(selected('push-delete').length,0);}
-reset();response=await routes['auth/logout'].POST();assert.equal(response.status,200);assert.deepEqual((await response.json()).data,{loggedOut:true});assert.deepEqual(calls,[['revoke-session','synthetic-session-token'],['clear-auth-cookie']]);cases++;
+reset();response=await routes['auth/logout'].POST();assert.equal(response.status,200);assert.deepEqual((await response.json()).data,{loggedOut:true});assert.deepEqual(calls,[['revoke-session','synthetic-session-token'],['clear-auth-cookie'],['authjs-signout']]);cases++;
 console.log('PROVIDER_ACCOUNT_ROUTES_PASS '+JSON.stringify({cases,routes:8,scope:'actual handlers/API/Zod/sanitizer/policies; isolated accounts, persistence, rate limits, signing and session operations; no network, DB, approval or real subscription'}));
 const {LanguageProvider}=require('@/components/language-provider'),{workspaceCopy}=require('@/lib/astrologers/workspace-copy'),{deviceCopy}=require('@/lib/account/device-copy');
 const pages={profile:require('@/app/astrologer/profile/page'),availability:require('@/app/astrologer/availability/page'),mobile:require('@/app/mobile/link/page')};

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { retryTransientDatabaseRead } from "@/lib/db-transient";
 import { env } from "@/lib/env";
 import { PASSWORD_RESET_PURPOSE,resetSessionIsStale } from "@/lib/auth/password-reset-contract";
+import { claimPublicAuthQuota, trustedPublicClientIp } from "@/lib/auth/public-quota";
 
 const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 const adminCredentialsEnabled = Boolean(env.ADMIN_EMAIL && env.ADMIN_PASSWORD);
@@ -44,7 +45,17 @@ if (adminCredentialsEnabled) {
         password: { label: "Password", type: "password" },
         loginMode: { label: "Login Mode", type: "text" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
+        // The Auth.js credentials callback is a second password entry point.
+        // Share the durable quota with /api/auth/login before testing credentials;
+        // a storage failure must also fail closed through Auth.js error handling.
+        const allowed = await claimPublicAuthQuota({
+          scope: "login-ip",
+          key: trustedPublicClientIp(request),
+          limit: 8,
+          windowSeconds: 60
+        });
+        if (!allowed) return null;
         const email = typeof credentials?.email === "string" ? credentials.email.trim().toLowerCase() : "";
         const password = typeof credentials?.password === "string" ? credentials.password : "";
         const rawLoginMode = typeof credentials?.loginMode === "string" ? credentials.loginMode : "USER";

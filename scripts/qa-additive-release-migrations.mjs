@@ -3,7 +3,9 @@ import {execFileSync} from "node:child_process";
 import {readFileSync,writeFileSync} from "node:fs";
 import {createHash} from "node:crypto";
 import {compareReleaseCatalog,RELEASE_CATALOG_SQL,RELEASE_SCHEMA_EXPECTED} from "../lib/ops/release-schema-contract.ts";
-const base="adbcd7e9c14a4bfe15f1f8ad829c1afe9f366204";
+// Rehearse from the exact production source observed before the owner-authorized
+// 28 November cutover. Keep the original additive/schema acceptance unchanged.
+const base="809b38e1cc91e9b781f6df5f1a74ac9814df6d3a";
 assert.equal(process.env.CI,"true");
 for(const key of ["DATABASE_URL","DIRECT_URL","PSQL_URL"]){
  const u=new URL(process.env[key]??"");
