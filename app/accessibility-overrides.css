@@ -19,8 +19,11 @@
   outline-offset: 3px;
 }
 
-/* Keep credential and report controls still as focus moves through their forms. */
+/* Keep credential, report intake and comparison controls still during focus changes.
+ * The native comparison summary can otherwise move during pointer activation in
+ * Firefox while the document's global smooth scroll is still in progress. */
 html:has([data-auth-frame]),
-html:has(form [name="reportConfirmed"]) {
+html:has(form [name="reportConfirmed"]),
+html:has(#compare-reports) {
   scroll-behavior: auto;
 }

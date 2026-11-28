@@ -54,7 +54,10 @@ test("A13 every authentication entry has one accessible H1 and labelled credenti
 });
 test("A17 and A18 report comparison uses the renderer-backed benefits and exact catalogue prices",async({page})=>{
  await page.goto("/reports",{waitUntil:"domcontentloaded"});
+ // Native pointer activation must not race a focus-driven document scroll.
+ await expect(page.locator("html")).toHaveCSS("scroll-behavior","auto");
  const details=page.locator("#compare-reports");await details.locator("summary").click();
+ await expect(details).toHaveAttribute("open","");
  const box=details.locator('section[aria-labelledby="compare-reports-heading"]');
  await expect(box.getByRole("status")).toHaveText("3/3");await expect(box.locator("article")).toHaveCount(3);
  const expected=[["premium-kundli","INR 799","Planet positions, twelve houses and Navamsa"],["couple-kundli","INR 699","Ashtakoot / 36-point Guna Milan"],["numerology-lo-shu-report","INR 399",null]];
