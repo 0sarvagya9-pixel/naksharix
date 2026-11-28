@@ -36,6 +36,10 @@ export async function POST(request: Request) {
   }
   const readiness = getEmailReadiness();
   if (!readiness.emailEnabled) return fail("Transactional email adapter is not ready.", 503);
+  const recipientSource = mode === "suite" || !env.ADMIN_EMAIL ? "EMAIL_QA_RECIPIENT" : "ADMIN_EMAIL";
+  const targetId = recipientSource === "EMAIL_QA_RECIPIENT" ? "configured-owner-qa-mailbox" : "configured-admin-mailbox";
+  const recipient = recipientSource === "EMAIL_QA_RECIPIENT" ? "configured owner acceptance mailbox" : "configured admin mailbox";
+  const transportMetadata = { recipientSource, provider: "resend", configuredProvider: readiness.provider, deliveryMode: readiness.deliveryMode };
 
   try {
     // A transaction-scoped Postgres advisory lock serializes the audit count
@@ -60,8 +64,8 @@ export async function POST(request: Request) {
           adminId: admin.id,
           action: mode === "suite" ? "email.smoke.suite.attempt" : "email.smoke.attempt",
           targetType: "OperationalEmailTest",
-          targetId: mode === "suite" ? "configured-owner-qa-mailbox" : "configured-admin-mailbox",
-          metadata: { recipientSource: mode === "suite" ? "EMAIL_QA_RECIPIENT" : "ADMIN_EMAIL", provider: "resend", samples: mode === "suite" ? 11 : 1 }
+          targetId,
+          metadata: { ...transportMetadata, samples: mode === "suite" ? 11 : 1 }
         }
       });
       return true;
@@ -69,7 +73,7 @@ export async function POST(request: Request) {
     if (!claim) return fail("Email acceptance test rate limit reached.", 429);
     if (mode === "suite") {
       const day = new Date().toISOString().slice(0, 10);
-      const outcomes: Array<{ index: number; category: string; providerAccepted: boolean }> = [];
+      const outcomes: Array<{ index: number; category: string; providerAccepted: boolean; acceptanceUncertain: boolean; providerMessageId: string | null }> = [];
       for (const [i, category] of categories.entries()) {
         const result = await sendEmail({
           to: env.EMAIL_QA_RECIPIENT!,
@@ -81,19 +85,34 @@ export async function POST(request: Request) {
             "Please confirm receipt in Inbox/Promotions/Spam and inspect SPF, DKIM and DMARC in full message headers.",
             "Provider acceptance is not proof of inbox delivery."
           ].join("\n"),
-          idempotencyKey: `naksharix/admin-acceptance/${day}/${i+1}`
+          idempotencyKey: `naksharix/admin-acceptance/${day}/${i+1}`,
+          requireProviderReceipt: true
         });
-        outcomes.push({ index: i+1, category, providerAccepted: result.sent });
+        const providerAccepted = result.sent && Boolean(result.providerMessageId);
+        const outcome = { index: i+1, category, providerAccepted,
+          acceptanceUncertain: result.acceptanceUncertain === true || (result.sent && !result.providerMessageId),
+          providerMessageId: providerAccepted ? result.providerMessageId! : null };
+        // Persist each receipt before the next send. A later timeout or audit
+        // failure must not erase the evidence for previously processed messages.
+        await prisma.adminActionLog.create({ data: {
+          adminId: admin.id, action: "email.smoke.suite.message.outcome", targetType: "OperationalEmailTest", targetId,
+          metadata: { ...transportMetadata, ...outcome, inboxVerified: false }
+        } });
+        outcomes.push(outcome);
         await new Promise(resolve => setTimeout(resolve, 650));
       }
       const accepted = outcomes.filter(x => x.providerAccepted).length;
+      await prisma.adminActionLog.create({ data: {
+        adminId: admin.id, action: "email.smoke.suite.outcome", targetType: "OperationalEmailTest", targetId,
+        metadata: { ...transportMetadata, acceptedCount: accepted, requestedCount: categories.length, outcomes, inboxVerified: false }
+      } });
       return ok({
         mode: "suite",
         providerAccepted: accepted === categories.length,
         acceptedCount: accepted,
         requestedCount: categories.length,
         outcomes,
-        recipient: "configured owner acceptance mailbox",
+        recipient, recipientSource,
         nextStep: "Ask the owner to confirm which test subjects actually arrived; this records provider acceptance only."
       }, { status: accepted === categories.length ? 200 : 207 });
     }
@@ -101,13 +120,22 @@ export async function POST(request: Request) {
     const result = await sendEmail({
       to: env.ADMIN_EMAIL ?? env.EMAIL_QA_RECIPIENT!,
       subject: "NAKSHARIX admin email delivery verification",
-      text: "NAKSHARIX administrator-requested email test. If this message reached your inbox, record the date and verify the sender's SPF/DKIM/DMARC alignment. Provider acceptance alone does not prove inbox delivery. This message does not confirm a booking, payment or order."
+      text: "NAKSHARIX administrator-requested email test. If this message reached your inbox, record the date and verify the sender's SPF/DKIM/DMARC alignment. Provider acceptance alone does not prove inbox delivery. This message does not confirm a booking, payment or order.",
+      requireProviderReceipt: true
     });
+    const providerAccepted = result.sent && Boolean(result.providerMessageId);
+    await prisma.adminActionLog.create({ data: {
+      adminId: admin.id, action: "email.smoke.outcome", targetType: "OperationalEmailTest", targetId,
+      metadata: { ...transportMetadata, providerAccepted,
+        acceptanceUncertain: result.acceptanceUncertain === true || (result.sent && !result.providerMessageId),
+        providerMessageId: providerAccepted ? result.providerMessageId! : null, inboxVerified: false }
+    } });
     if (!result.sent) return fail("Email provider did not accept the test message.", 502);
+    if (!providerAccepted) return fail("Email provider did not confirm a test message reference.", 502);
     return ok({
       mode: "single", acceptedCount: 1, requestedCount: 1,
       providerAccepted: true,
-      recipient: "configured admin mailbox",
+      recipient, recipientSource, providerMessageId: result.providerMessageId,
       nextStep: "Check the mailbox (including spam) and inspect sender authentication headers. The API cannot verify final delivery."
     });
   } catch {

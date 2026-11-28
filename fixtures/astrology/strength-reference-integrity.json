@@ -1,0 +1,30 @@
+{
+  "scope": "Additional published numerical facts for source consistency checks. Original expected strength values and tolerances are unchanged.",
+  "dhruv2025": {
+    "source": "https://onekundli.com/wp-content/uploads/2025/02/OneKundli-Sample-Report.pdf",
+    "sourceSha256": "2060490e9231446d5e28ce15e00a85f44a0d9eeed70ef515143d31cb896b5d6d",
+    "physicalPages": {"positions": 9, "naturalAndTemporaryFriendship": 134, "compoundFriendship": 135, "vargas": 136, "strength": 142},
+    "planetOrder": ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"],
+    "compoundFriendship": [
+      [null, "neutral", "neutral", "friend", "neutral", "neutral", "neutral"],
+      ["neutral", null, "enemy", "great_friend", "enemy", "friend", "friend"],
+      ["neutral", "neutral", null, "great_enemy", "great_friend", "enemy", "enemy"],
+      ["great_friend", "neutral", "enemy", null, "enemy", "great_friend", "friend"],
+      ["neutral", "neutral", "great_friend", "great_enemy", null, "neutral", "friend"],
+      ["neutral", "neutral", "enemy", "great_friend", "friend", null, "neutral"],
+      ["neutral", "neutral", "great_enemy", "great_friend", "friend", "neutral", null]
+    ],
+    "transcription": "Rows describe the planet on the left toward the column planet. Printed Intimat and Bitter map to great_friend and great_enemy. A printed dash on the diagonal is represented as null, not a friendship grade."
+  },
+  "ramanDignity": {
+    "source": "https://astrojyotish.info/pdf/graha-bhava-balas.pdf",
+    "article": 30,
+    "physicalPages": [27, 28, 29],
+    "weights": {"moolatrikona": 45, "own": 30, "great_friend": 22.5, "friend": 15, "neutral": 7.5, "enemy": 3.75, "great_enemy": 1.875},
+    "restriction": "Moolatrikona is assigned in D1 only in this named Raman candidate. The existing degree-qualified D1 definition is retained; whole-sign D1 sensitivity is reported separately without changing the reference or default."
+  },
+  "admission": {
+    "unexplainedVendorDifference": "Keep the original failed comparison. Published component fields not reproducing a total under the selected method is not proof that the vendor used that method, and does not authorize a replacement expected value.",
+    "arithmeticAndGeometry": "Distinguish a direct arithmetic/geometric contradiction from an undisclosed convention. Preserve source numbers, identity, rounding precision and complete downstream error accounting."
+  }
+}

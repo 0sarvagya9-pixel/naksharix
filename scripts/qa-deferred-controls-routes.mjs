@@ -21,7 +21,7 @@ const overrides={
  '@/lib/monitoring/logger':{logger:{error(){}}},
  '@/lib/rate-limit':{rateLimit:async()=>({allowed:rateAllowed})},
  '@/lib/env':{env:configuredMail},
- '@/lib/email/email-service':{getEmailReadiness:()=>({emailEnabled:mailReady}),sendEmail:async args=>{sent.push(args);return{sent:mailResult&&sent.length!==mailFailAt};}},
+ '@/lib/email/email-service':{getEmailReadiness:()=>({emailEnabled:mailReady,provider:'smtp',deliveryMode:'resend_api'}),sendEmail:async args=>{sent.push(args);const accepted=mailResult&&sent.length!==mailFailAt;return{sent:accepted,providerMessageId:accepted?'synthetic-receipt-'+sent.length:undefined};}},
  '@/lib/ops/daily-recovery':{dailyRecoveryConfigured:()=>configured,recoveryHealth:async()=>{const r=healthResponses[Math.min(healthIndex++,healthResponses.length-1)];if(r instanceof Error)throw r;return r;},runDailyRecovery:async()=>{workerCalls++;if(workerError)throw workerError;}},
  'next/navigation':{notFound(){throw Error('NOT_FOUND');},redirect(to){throw Error('REDIRECT '+to);}},
  'next/headers':{cookies:async()=>({get:()=>({value:locale})})},

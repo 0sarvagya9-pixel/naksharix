@@ -7,6 +7,11 @@ export type EditorialLocale="en"|"hi"|"hinglish";
 export const EDITORIAL_HOUSE_TABLE_FRACTIONS=[.72,.85,1.3,3.34] as const;
 const TERMS:Record<string,readonly [string,string]>={
  "Rule-based indicators, not guarantees or diagnoses.": ["ये संकेत पारंपरिक नियमों पर आधारित हैं। इनसे किसी परिणाम या निदान की पुष्टि नहीं होती।", "Yeh paramparik rules par aadharit sanket hain. Inse kisi outcome ya diagnosis ki pushti nahi hoti."],
+ "Remedies": ["उपाय","Upay"],
+ "Nadi Dosha": ["नाड़ी दोष","Nadi dosh"],
+ "Bhakoot Dosha": ["भकूट दोष","Bhakoot dosh"],
+ "Nadi Dosh": ["नाड़ी दोष","Nadi dosh"],
+ "Bhakoot Dosh": ["भकूट दोष","Bhakoot dosh"],
  "Traditional compatibility scoring is not a prediction of marriage success.": ["पारंपरिक मिलान के अंक विवाह की सफलता का पूर्वानुमान नहीं देते।", "Paramparik milan ke ank shaadi ki safalta ka forecast nahi dete."],
  "Transliterations and naming traditions vary; confirm the pronunciation with your family or a qualified priest.": ["लिप्यंतरण और नामकरण की परंपराएँ भिन्न हो सकती हैं। उच्चारण की पुष्टि अपने परिवार या जानकार पुरोहित से करें।", "Transliteration aur naamkaran ki paramparayein alag ho sakti hain. Uchcharan apne parivar ya jaankar purohit se confirm karein."],
  "Illustrative spellings, not verified meanings or guarantees; no name determines a child's future.": ["ये वर्तनियाँ उदाहरण हैं। इनके अर्थों का स्वतंत्र सत्यापन नहीं हुआ है। बच्चे का भविष्य उसके नाम से निर्धारित नहीं होता।", "Yeh spellings misaal hain. Inke arthon ka independent verification nahi hua hai. Bachche ka bhavishya uske naam se tay nahi hota."],
@@ -124,6 +129,10 @@ const TERMS:Record<string,readonly [string,string]>={
  "Meaning / guidance": [
   "अर्थ / मार्गदर्शन",
   "Meaning / guidance"
+ ],
+ "Number symbolism / reflection": [
+  "अंक की व्याख्या / चिंतन",
+  "Ank ki vyakhya / reflection"
  ],
  "Number": [
   "अंक",
@@ -635,5 +644,44 @@ export function editorialDate(value:string,locale:EditorialLocale):string {
  const dt=new Date(day+"T00:00:00Z");
  if(!Number.isFinite(dt.getTime())||dt.toISOString().slice(0,10)!==day)return value;
  return new Intl.DateTimeFormat(locale==="hi"?"hi-IN":"en-GB",{day:"2-digit",month:"short",year:"numeric",numberingSystem:"latn",timeZone:"UTC"}).format(dt);
+}
+export type EditorialDoshaKind="manglik"|"kaalSarp"|"factor";
+/** Describe the supplied rule evidence without turning a hit count into a
+ * severity measure. This changes presentation only, never the engine result.
+ * Missing/inconsistent evidence must not be presented as a negative finding.
+ */
+export function editorialDoshaPresentation(assessment:Record<string,unknown>,locale:EditorialLocale,kind:EditorialDoshaKind):{title:string;body:string}{
+ const tr=(en:string,hi:string,hinglish:string)=>locale==="hi"?hi:locale==="hinglish"?hinglish:en;
+ const text=(value:unknown)=>typeof value==="string"?value:"";
+ const remedies=Array.isArray(assessment.remedies)?assessment.remedies.filter((value):value is string=>typeof value==="string").join("\n"):text(assessment.remedies);
+ const body=(...parts:string[])=>parts.filter(Boolean).join("\n");
+ const unavailable=(reason:string)=>({title:editorialTerm("Not available",locale),body:body(reason,remedies)});
+ if(assessment.available===false||typeof assessment.present!=="boolean")return unavailable(text(assessment.summary));
+ if(kind==="manglik"){
+  const houses=[assessment.marsHouseFromLagna,assessment.marsHouseFromMoon,assessment.marsHouseFromVenus];
+  if(!houses.every((value):value is number=>typeof value==="number"&&Number.isInteger(value)&&value>=1&&value<=12)){
+   return unavailable(tr("Three valid reference houses are required for this rule assessment.","इस नियम की जाँच के लिए तीनों संदर्भों से मंगल का सही भाव चाहिए।","Is niyam ki jaanch ke liye teenon sandarbhon se Mangal ka sahi bhav chahiye."));
+  }
+  // This is the explicitly declared six-house convention used by the supplied
+  // engine assessment; exceptions and the separate five-house variant are not
+  // silently substituted. The semantic QA compares this display to engine data.
+  const sensitive=new Set([1,2,4,7,8,12]);
+  const references=tr("Lagna|Moon|Venus","लग्न|चंद्र|शुक्र","Lagna|Chandra|Shukra").split("|");
+  const matched=references.filter((_,index)=>sensitive.has(houses[index]));
+  const referenceLine=tr("Mars houses: ","मंगल का भाव: ","Mangal ka bhav: ")+references.map((reference,index)=>tr("from "+reference,reference+" से",reference+" se")+" "+houses[index]).join(" · ");
+  if(assessment.present!==(matched.length>0))return unavailable(body(tr("The rule result and reference houses disagree; the calculation needs review.","नियम का परिणाम और संदर्भ भाव मेल नहीं खाते। गणना की समीक्षा आवश्यक है।","Niyam ka natija aur sandarbh bhav mel nahi khate. Ganana ki samiksha zaroori hai."),referenceLine));
+  return {
+   title:tr("Rule matches: ","नियम का मेल: ","Niyam se mel: ")+matched.length+" / 3",
+   body:body(referenceLine,
+    tr("Six-house rule: 1, 2, 4, 7, 8, 12. Matches: ","नियम के छह भाव: 1, 2, 4, 7, 8, 12। मेल: ","Niyam ke chhah bhav: 1, 2, 4, 7, 8, 12. Mel: ")+(matched.join(", ")||tr("None","कोई नहीं","Koi nahi")),
+    tr("This count does not measure severity or predict marriage outcomes.","यह गिनती दोष की तीव्रता या विवाह का परिणाम नहीं बताती।","Yeh ginti dosh ki teevrata ya shaadi ka natija nahi batati."),remedies)
+  };
+ }
+ const title=assessment.present?tr("Rule matched","नियम से मेल मिला","Niyam se mel mila"):tr("Rule not matched","नियम से मेल नहीं मिला","Niyam se mel nahi mila");
+ if(kind==="kaalSarp")return {title,body:body(assessment.present
+  ?tr("The seven classical grahas are all in one Rahu–Ketu semicircle, including its boundary points.","सातों पारंपरिक ग्रह राहु-केतु के बीच एक ही अर्धवृत्त में आते हैं। इस नियम में सीमा-बिंदु शामिल हैं।","Saaton paramparik grah Rahu-Ketu ke beech ek hi ardhvritt mein aate hain. Is niyam mein seema ke bindu shaamil hain.")
+  :tr("The seven classical grahas are not all in one Rahu–Ketu semicircle, including its boundary points.","सातों पारंपरिक ग्रह राहु-केतु के बीच एक ही अर्धवृत्त में नहीं आते। इस नियम में सीमा-बिंदु शामिल हैं।","Saaton paramparik grah Rahu-Ketu ke beech ek hi ardhvritt mein nahi aate. Is niyam mein seema ke bindu shaamil hain."),
+  tr("This geometry does not predict harm.","इस ज्यामितीय नियम से हानि का पूर्वानुमान नहीं होता।","Isse nuksan ki bhavishyavaani nahi hoti."),remedies)};
+ return {title,body:body(text(assessment.summary),remedies)};
 }
 export const EDITORIAL_TERM_COUNT=Object.keys(TERMS).length;
