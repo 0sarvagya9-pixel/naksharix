@@ -56,6 +56,8 @@ function toTransitPositions(chart: ReturnType<typeof calculateInternalChart>): T
     degree: planet.degree,
     absoluteLongitude: planet.absoluteLongitude ?? null,
     retrograde: planet.retrograde ?? null,
+    speedDegreesPerDay: planet.speedDegreesPerDay ?? null,
+    motionState: planet.motionState,
     verified: true
   }));
 }
@@ -167,7 +169,7 @@ function refineTransitionTime(
   if (!lowPosition || !highPosition || !stateChanged(eventType, lowPosition, highPosition)) return null;
 
   for (let iteration = 0; iteration < 24 && high.getTime() - low.getTime() > 60_000; iteration += 1) {
-    const mid = new Date(Math.floor((low.getTime() + high.getTime()) / 2));
+    const mid = new Date(Math.floor((low.getTime() + high.getTime()) / 2000)*1000);
     const midPosition = findPosition(positionsAtUtc(input, mid), planet);
     if (!midPosition) return null;
     if (stateChanged(eventType, lowPosition, midPosition)) {
@@ -179,55 +181,60 @@ function refineTransitionTime(
     }
   }
 
-  return { occurredAt: high.toISOString(), before: lowPosition, after: highPosition };
+  if(!stateChanged(eventType,lowPosition,highPosition))return null;
+  return { occurredAt: high.toISOString(), bracketStartUtc:low.toISOString(),bracketEndUtc:high.toISOString(),bracketSeconds:(high.getTime()-low.getTime())/1000,before: lowPosition, after: highPosition };
 }
 
+/** Refined search uses an explicitly UTC day interval. The minute bracket
+ * is a numerical search resolution, not a measured one-minute accuracy.
+ * Public predictive activation remains locked.
+ */
 export function calculateRefinedTransitTimeline(input: TransitCalculationInput, days = 45): TransitTimelineEvent[] {
-  const normalizedDays = Math.max(1, Math.min(days, 180));
-  const events: TransitTimelineEvent[] = [];
-  let left = new Date(`${input.date}T00:00:00.000Z`);
-  let leftPositions = positionsAtUtc(input, left);
-
-  for (let offset = 1; offset <= normalizedDays; offset += 1) {
-    const right = new Date(left.getTime() + 86_400_000);
-    const rightPositions = positionsAtUtc(input, right);
-
-    for (const after of rightPositions) {
-      const before = findPosition(leftPositions, after.planet);
-      if (!before) continue;
-
-      const candidates: TransitTimelineEvent["eventType"][] = [];
-      if (before.sign !== after.sign) candidates.push("sign_ingress");
-      if (typeof before.retrograde === "boolean" && typeof after.retrograde === "boolean" && before.retrograde !== after.retrograde) {
-        candidates.push(after.retrograde ? "station_retrograde" : "station_direct");
+  if(input.ayanamsa!=="lahiri")throw Error("TRANSIT_AYANAMSA_UNQUALIFIED");
+  if(!Number.isInteger(days)||days<1||days>180)throw Error("TRANSIT_WINDOW_INVALID");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(input.date))throw Error("TRANSIT_DATE_INVALID");
+  const start=new Date(input.date+"T00:00:00.000Z");
+  if(!Number.isFinite(start.getTime())||start.toISOString().slice(0,10)!==input.date)throw Error("TRANSIT_DATE_INVALID");
+  const events:TransitTimelineEvent[]=[];
+  const emit=(planet:TransitTimelineEvent["planet"],eventType:TransitTimelineEvent["eventType"],refined:NonNullable<ReturnType<typeof refineTransitionTime>>)=>{
+    const after=refined.after,before=refined.before;
+    events.push({planet,eventType,date:refined.occurredAt.slice(0,10),occurredAt:refined.occurredAt,
+      bracketStartUtc:refined.bracketStartUtc,bracketEndUtc:refined.bracketEndUtc,bracketSeconds:refined.bracketSeconds,
+      from:eventType==="sign_ingress"?before.sign:before.retrograde,
+      to:eventType==="sign_ingress"?after.sign:after.retrograde,
+      degree:after.degree,source:PROVIDER,verificationLevel:"needs_external_validation",precision:"minute_internal_search",externalValidationRequired:true,
+      note:"Six-hour search checkpoints, refined to a one-minute internal bracket. Physical ephemeris errors may be larger; very short unbracketed excursions are not exhaustively qualified."});
+  };
+  const findIngress=(planet:TransitTimelineEvent["planet"],a:TransitPosition,b:TransitPosition,lo:Date,hi:Date)=>{
+    if(a.sign===b.sign)return;
+    const r=refineTransitionTime(input,planet,"sign_ingress",lo,hi);
+    if(r)emit(planet,"sign_ingress",r);
+  };
+  let left=start,leftPositions=positionsAtUtc(input,left);
+  for(let n=1;n<=days*4;n++){
+    const right=new Date(start.getTime()+n*6*3600000),rightPositions=positionsAtUtc(input,right);
+    for(const after of rightPositions){
+      const before=findPosition(leftPositions,after.planet);
+      if(!before)continue;
+      const reversed=typeof before.retrograde==="boolean"&&typeof after.retrograde==="boolean"&&before.retrograde!==after.retrograde;
+      if(reversed){
+        const type=after.retrograde?"station_retrograde":"station_direct";
+        const station=refineTransitionTime(input,after.planet,type,left,right);
+        if(station){
+          emit(after.planet,type,station);
+          // A reversal can hide ingress and return within a single scan
+          // interval even when the endpoint signs agree. Check both sides.
+          const pivot=new Date(station.occurredAt);
+          findIngress(after.planet,before,station.after,left,pivot);
+          findIngress(after.planet,station.after,after,pivot,right);
+          continue;
+        }
       }
-
-      for (const eventType of candidates) {
-        const refined = refineTransitionTime(input, after.planet, eventType, left, right);
-        if (!refined) continue;
-        const refinedAfter = refined.after;
-        events.push({
-          planet: after.planet,
-          eventType,
-          date: refined.occurredAt.slice(0, 10),
-          occurredAt: refined.occurredAt,
-          from: eventType === "sign_ingress" ? refined.before.sign : refined.before.retrograde,
-          to: eventType === "sign_ingress" ? refinedAfter.sign : refinedAfter.retrograde,
-          degree: refinedAfter.degree,
-          source: PROVIDER,
-          verificationLevel: "needs_external_validation",
-          precision: "minute_internal_search",
-          externalValidationRequired: true,
-          note: "Internally refined to an approximately one-minute bracket using repeated provider calculations. External ephemeris fixtures are required before public factual use."
-        });
-      }
+      findIngress(after.planet,before,after,left,right);
     }
-
-    left = right;
-    leftPositions = rightPositions;
+    left=right;leftPositions=rightPositions;
   }
-
-  return events;
+  return events.sort((a,b)=>(a.occurredAt??"").localeCompare(b.occurredAt??"")||a.planet.localeCompare(b.planet)||a.eventType.localeCompare(b.eventType));
 }
 
 function addDays(dateText: string, days: number) {

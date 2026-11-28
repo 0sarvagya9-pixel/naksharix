@@ -1,4 +1,6 @@
 import { z } from "zod";
+import {isNumerologyBirthDate, isNumerologyMobile, isNumerologyVehicle} from "@/lib/numerology/input";
+import {isFullRomanNumerologyName} from "@/lib/numerology/name";
 
 export const birthDetailsSchema = z.object({
   name: z.string().min(2).max(80),
@@ -19,6 +21,7 @@ export const birthDetailsSchema = z.object({
 export const horoscopeRequestSchema = z.object({
   zodiac: z.string().min(3).max(20),
   period: z.enum(["daily", "weekly", "monthly", "yearly"]),
+  year: z.number().int().min(1900).max(2100).optional(),
   category: z.enum(["general", "love", "career", "finance", "health", "education", "family", "travel"]).default("general"),
   locale: z.enum(["en", "hi", "hinglish"]).default("en"),
   birthDetails: birthDetailsSchema.optional()
@@ -31,11 +34,11 @@ export const matchMakingSchema = z.object({
 });
 
 export const numerologySchema = z.object({
-  name: z.string().min(2).max(80),
-  dateOfBirth: z.coerce.date(),
+  name: z.string().trim().min(2).max(80).refine(isFullRomanNumerologyName, "Enter the complete name spelling using A–Z letters."),
+  dateOfBirth: z.string().refine(isNumerologyBirthDate, "Enter a valid date of birth in YYYY-MM-DD format."),
   locale: z.enum(["en", "hi", "hinglish"]).default("en"),
-  mobile: z.string().optional(),
-  vehicle: z.string().optional()
+  mobile: z.string().refine(value => !value.trim() || isNumerologyMobile(value), "Enter a valid mobile number.").optional(),
+  vehicle: z.string().refine(value => !value.trim() || isNumerologyVehicle(value), "Enter a valid vehicle number.").optional()
 });
 
 export const tarotSchema = z.object({

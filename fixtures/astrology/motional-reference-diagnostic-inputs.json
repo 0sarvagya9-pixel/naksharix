@@ -1,0 +1,560 @@
+{
+  "schemaVersion": 1,
+  "baselineCommit": "f4bccdf832c25de43ef8eeddeaaa746702006b9a",
+  "toleranceVirupas": 0.25,
+  "sourceTrace": "final-strength-comparison-trace-20261127.json",
+  "accounts": [
+    {
+      "date": "1978-08-23",
+      "input": {
+        "date": "1978-08-23",
+        "time": "23:53:18",
+        "timezone": "5.5",
+        "latitude": 28.666666666666668,
+        "longitude": 77.21666666666667
+      },
+      "utc": "1978-08-23T18:23:18.000Z",
+      "software": "AstroSage Brihat",
+      "source": "https://www.astrosage.com/pdf/poojasharmaE.pdf",
+      "referenceFrame": "Lahiri",
+      "computedFrame": "Lahiri",
+      "rows": [
+        {
+          "planet": "Mars",
+          "trueLongitude": 168.653042237347,
+          "baseline": {
+            "planet": "Mars",
+            "mean": 202.14073657107838,
+            "trueLongitude": 168.653042237347,
+            "seeghrocha": 127.88506901883375,
+            "midpoint": 185.39688940421274,
+            "kendraDegrees": 57.511820385378996,
+            "virupas": 19.170606795126332
+          },
+          "expected": 19.68,
+          "priorActual": 19.170606795126332
+        },
+        {
+          "planet": "Mercury",
+          "trueLongitude": 118.27631825008406,
+          "baseline": {
+            "planet": "Mercury",
+            "mean": 127.88506901883375,
+            "trueLongitude": 118.27631825008406,
+            "seeghrocha": 358.2168357145856,
+            "midpoint": 123.0806936344589,
+            "kendraDegrees": 124.86385791987323,
+            "virupas": 41.62128597329107
+          },
+          "expected": 44.21,
+          "priorActual": 41.62128597329107
+        },
+        {
+          "planet": "Jupiter",
+          "trueLongitude": 93.94004763338106,
+          "baseline": {
+            "planet": "Jupiter",
+            "mean": 83.04485003287937,
+            "trueLongitude": 93.94004763338106,
+            "seeghrocha": 127.88506901883375,
+            "midpoint": 88.4924488331302,
+            "kendraDegrees": 39.39262018570355,
+            "virupas": 13.130873395234516
+          },
+          "expected": 12.46,
+          "priorActual": 13.130873395234516
+        },
+        {
+          "planet": "Venus",
+          "trueLongitude": 172.67487130967768,
+          "baseline": {
+            "planet": "Venus",
+            "mean": 127.88506901883375,
+            "trueLongitude": 172.67487130967768,
+            "seeghrocha": 263.5188727035711,
+            "midpoint": 150.2799701642557,
+            "kendraDegrees": 113.2389025393154,
+            "virupas": 37.746300846438466
+          },
+          "expected": 37.71,
+          "priorActual": 37.746300846438466
+        },
+        {
+          "planet": "Saturn",
+          "trueLongitude": 129.92987319442383,
+          "baseline": {
+            "planet": "Saturn",
+            "mean": 122.32791910498895,
+            "trueLongitude": 129.92987319442383,
+            "seeghrocha": 127.88506901883375,
+            "midpoint": 126.1288961497064,
+            "kendraDegrees": 1.7561728691273402,
+            "virupas": 0.5853909563757801
+          },
+          "expected": 0.1,
+          "priorActual": 0.5853909563757801
+        }
+      ]
+    },
+    {
+      "date": "1990-04-23",
+      "input": {
+        "date": "1990-04-23",
+        "time": "06:15:00",
+        "timezone": "5.5",
+        "latitude": 13.083333333333334,
+        "longitude": 80.28333333333333
+      },
+      "utc": "1990-04-23T00:45:00.000Z",
+      "software": "Parashara's Light 7.0.3",
+      "source": "https://astrograha.com/Content/AstrologyReports/Pro/Pro%20Sample%20Reports%20-%20North%20Indian.pdf",
+      "referenceFrame": "Lahiri",
+      "computedFrame": "Lahiri",
+      "rows": [
+        {
+          "planet": "Mars",
+          "trueLongitude": 307.856676595012,
+          "baseline": {
+            "planet": "Mars",
+            "mean": 274.6021917144826,
+            "trueLongitude": 307.856676595012,
+            "seeghrocha": 6.81363071576925,
+            "midpoint": 291.2294341547473,
+            "kendraDegrees": 75.58419656102194,
+            "virupas": 25.194732187007315
+          },
+          "expected": 34.23,
+          "priorActual": 25.194732187007315
+        },
+        {
+          "planet": "Mercury",
+          "trueLongitude": 23.801343639809676,
+          "baseline": {
+            "planet": "Mercury",
+            "mean": 6.81363071576925,
+            "trueLongitude": 23.801343639809676,
+            "seeghrocha": 152.56049304598127,
+            "midpoint": 15.307487177789483,
+            "kendraDegrees": 137.2530058681918,
+            "virupas": 45.75100195606393
+          },
+          "expected": 54.02,
+          "priorActual": 45.75100195606393
+        },
+        {
+          "planet": "Jupiter",
+          "trueLongitude": 71.9333895446687,
+          "baseline": {
+            "planet": "Jupiter",
+            "mean": 76.97689464891164,
+            "trueLongitude": 71.9333895446687,
+            "seeghrocha": 6.81363071576925,
+            "midpoint": 74.45514209679015,
+            "kendraDegrees": 67.6415113810209,
+            "virupas": 22.5471704603403
+          },
+          "expected": 37.65,
+          "priorActual": 22.5471704603403
+        },
+        {
+          "planet": "Venus",
+          "trueLongitude": 323.9632590947325,
+          "baseline": {
+            "planet": "Venus",
+            "mean": 6.81363071576925,
+            "trueLongitude": 323.9632590947325,
+            "seeghrocha": 249.08599617003347,
+            "midpoint": 345.3884449052509,
+            "kendraDegrees": 96.30244873521741,
+            "virupas": 32.10081624507247
+          },
+          "expected": 46.96,
+          "priorActual": 32.10081624507247
+        },
+        {
+          "planet": "Saturn",
+          "trueLongitude": 271.5013006181556,
+          "baseline": {
+            "planet": "Saturn",
+            "mean": 264.8002342510067,
+            "trueLongitude": 271.5013006181556,
+            "seeghrocha": 6.81363071576925,
+            "midpoint": 268.1507674345812,
+            "kendraDegrees": 98.66286328118804,
+            "virupas": 32.887621093729344
+          },
+          "expected": 43.35,
+          "priorActual": 32.887621093729344
+        }
+      ]
+    },
+    {
+      "date": "2000-11-11",
+      "input": {
+        "date": "2000-11-11",
+        "time": "09:01:20",
+        "timezone": "5.5",
+        "latitude": 28.666666666666668,
+        "longitude": 77.21666666666667
+      },
+      "utc": "2000-11-11T03:31:20.000Z",
+      "software": "Parashara's Light 7.0.3",
+      "source": "https://www.astrograha.com/Content/AstrologyReports/Circular-Astrology-Report.pdf",
+      "referenceFrame": "Lahiri",
+      "computedFrame": "Lahiri",
+      "rows": [
+        {
+          "planet": "Mars",
+          "trueLongitude": 160.4768299666731,
+          "baseline": {
+            "planet": "Mars",
+            "mean": 134.75742601523234,
+            "trueLongitude": 160.4768299666731,
+            "seeghrocha": 206.42571038865572,
+            "midpoint": 147.61712799095272,
+            "kendraDegrees": 58.80858239770299,
+            "virupas": 19.602860799234332
+          },
+          "expected": 28.43,
+          "priorActual": 19.602860799234332
+        },
+        {
+          "planet": "Mercury",
+          "trueLongitude": 186.8897870330857,
+          "baseline": {
+            "planet": "Mercury",
+            "mean": 206.42571038865572,
+            "trueLongitude": 186.8897870330857,
+            "seeghrocha": 88.90595457775635,
+            "midpoint": 196.6577487108707,
+            "kendraDegrees": 107.75179413311434,
+            "virupas": 35.917264711038115
+          },
+          "expected": 51.96,
+          "priorActual": 35.917264711038115
+        },
+        {
+          "planet": "Jupiter",
+          "trueLongitude": 44.513784391134465,
+          "baseline": {
+            "planet": "Jupiter",
+            "mean": 37.255892717998904,
+            "trueLongitude": 44.513784391134465,
+            "seeghrocha": 206.42571038865572,
+            "midpoint": 40.88483855456667,
+            "kendraDegrees": 165.5408718340891,
+            "virupas": 55.180290611363034
+          },
+          "expected": 55.47,
+          "priorActual": 55.180290611363034
+        },
+        {
+          "planet": "Venus",
+          "trueLongitude": 243.79437773894148,
+          "baseline": {
+            "planet": "Venus",
+            "mean": 206.42571038865572,
+            "trueLongitude": 243.79437773894148,
+            "seeghrocha": 305.54441228228825,
+            "midpoint": 225.11004406379857,
+            "kendraDegrees": 80.43436821848968,
+            "virupas": 26.811456072829895
+          },
+          "expected": 37.18,
+          "priorActual": 26.811456072829895
+        },
+        {
+          "planet": "Saturn",
+          "trueLongitude": 34.303782936655736,
+          "baseline": {
+            "planet": "Saturn",
+            "mean": 33.72262853190841,
+            "trueLongitude": 34.303782936655736,
+            "seeghrocha": 206.42571038865572,
+            "midpoint": 34.01320573428211,
+            "kendraDegrees": 172.4125046543736,
+            "virupas": 57.4708348847912
+          },
+          "expected": 57.6,
+          "priorActual": 57.4708348847912
+        }
+      ]
+    },
+    {
+      "date": "2020-01-25",
+      "input": {
+        "date": "2020-01-25",
+        "time": "07:00:00",
+        "timezone": "5.5",
+        "latitude": 28.6,
+        "longitude": 77.2
+      },
+      "utc": "2020-01-25T01:30:00.000Z",
+      "software": "Parashara's Light 9.0",
+      "source": "https://s3.amazonaws.com/kajabi-storefronts-production/sites/67114/themes/1451148/downloads/1gUAatafTVm0rQVQDGX1_Sample_PDF_Report.pdf",
+      "referenceFrame": "True Citra",
+      "computedFrame": "Lahiri",
+      "rows": [
+        {
+          "planet": "Mars",
+          "trueLongitude": 230.5285665173911,
+          "baseline": {
+            "planet": "Mars",
+            "mean": 210.1851953181431,
+            "trueLongitude": 230.5285665173911,
+            "seeghrocha": 279.35968352581403,
+            "midpoint": 220.35688091776706,
+            "kendraDegrees": 59.00280260804698,
+            "virupas": 19.66760086934899
+          },
+          "expected": 24.71,
+          "priorActual": 19.66760086934899
+        },
+        {
+          "planet": "Mercury",
+          "trueLongitude": 290.02140286881513,
+          "baseline": {
+            "planet": "Mercury",
+            "mean": 279.35968352581403,
+            "trueLongitude": 290.02140286881513,
+            "seeghrocha": 352.05330184623017,
+            "midpoint": 284.6905431973146,
+            "kendraDegrees": 67.36275864891559,
+            "virupas": 22.45425288297186
+          },
+          "expected": 24.33,
+          "priorActual": 22.45425288297186
+        },
+        {
+          "planet": "Jupiter",
+          "trueLongitude": 258.00754894011175,
+          "baseline": {
+            "planet": "Jupiter",
+            "mean": 259.9526361661515,
+            "trueLongitude": 258.00754894011175,
+            "seeghrocha": 279.35968352581403,
+            "midpoint": 258.9800925531316,
+            "kendraDegrees": 20.379590972682422,
+            "virupas": 6.793196990894141
+          },
+          "expected": 14.81,
+          "priorActual": 6.793196990894141
+        },
+        {
+          "planet": "Venus",
+          "trueLongitude": 319.4899058879637,
+          "baseline": {
+            "planet": "Venus",
+            "mean": 279.35968352581403,
+            "trueLongitude": 319.4899058879637,
+            "seeghrocha": 22.862232315383153,
+            "midpoint": 299.42479470688886,
+            "kendraDegrees": 83.43743760849429,
+            "virupas": 27.81247920283143
+          },
+          "expected": 39.27,
+          "priorActual": 27.81247920283143
+        },
+        {
+          "planet": "Saturn",
+          "trueLongitude": 270.0987194990135,
+          "baseline": {
+            "planet": "Saturn",
+            "mean": 268.2831161649565,
+            "trueLongitude": 270.0987194990135,
+            "seeghrocha": 279.35968352581403,
+            "midpoint": 269.19091783198496,
+            "kendraDegrees": 10.168765693829073,
+            "virupas": 3.389588564609691
+          },
+          "expected": 6.86,
+          "priorActual": 3.389588564609691
+        }
+      ]
+    },
+    {
+      "date": "1979-08-23",
+      "input": {
+        "date": "1979-08-23",
+        "time": "23:53:18",
+        "timezone": "5.5",
+        "latitude": 28.666666666666668,
+        "longitude": 77.21666666666667
+      },
+      "utc": "1979-08-23T18:23:18.000Z",
+      "software": "AstroSage Brihat",
+      "source": "https://www.astrosage.com/pdf/brihat-horoscope.pdf",
+      "referenceFrame": "Lahiri",
+      "computedFrame": "Lahiri",
+      "rows": [
+        {
+          "planet": "Mars",
+          "trueLongitude": 76.40039370233636,
+          "baseline": {
+            "planet": "Mars",
+            "mean": 33.40780982706383,
+            "trueLongitude": 76.40039370233636,
+            "seeghrocha": 127.6300379437962,
+            "midpoint": 54.9041017647001,
+            "kendraDegrees": 72.7259361790961,
+            "virupas": 24.241978726365364
+          },
+          "expected": 23.74,
+          "priorActual": 24.241978726365364
+        },
+        {
+          "planet": "Mercury",
+          "trueLongitude": 108.90786671367565,
+          "baseline": {
+            "planet": "Mercury",
+            "mean": 127.6300379437962,
+            "trueLongitude": 108.90786671367565,
+            "seeghrocha": 51.911591896321625,
+            "midpoint": 118.2689523287359,
+            "kendraDegrees": 66.35736043241428,
+            "virupas": 22.119120144138094
+          },
+          "expected": 24.71,
+          "priorActual": 22.119120144138094
+        },
+        {
+          "planet": "Jupiter",
+          "trueLongitude": 118.7358940372153,
+          "baseline": {
+            "planet": "Jupiter",
+            "mean": 113.36831498238143,
+            "trueLongitude": 118.7358940372153,
+            "seeghrocha": 127.6300379437962,
+            "midpoint": 116.05210450979837,
+            "kendraDegrees": 11.577933433997828,
+            "virupas": 3.8593111446659427
+          },
+          "expected": 3.18,
+          "priorActual": 3.8593111446659427
+        },
+        {
+          "planet": "Venus",
+          "trueLongitude": 125.96978024774515,
+          "baseline": {
+            "planet": "Venus",
+            "mean": 127.6300379437962,
+            "trueLongitude": 125.96978024774515,
+            "seeghrocha": 128.3022069395447,
+            "midpoint": 126.79990909577066,
+            "kendraDegrees": 1.5022978437740448,
+            "virupas": 0.5007659479246817
+          },
+          "expected": 0.47,
+          "priorActual": 0.5007659479246817
+        },
+        {
+          "planet": "Saturn",
+          "trueLongitude": 141.46181956448376,
+          "baseline": {
+            "planet": "Saturn",
+            "mean": 134.53426646734852,
+            "trueLongitude": 141.46181956448376,
+            "seeghrocha": 127.6300379437962,
+            "midpoint": 137.99804301591615,
+            "kendraDegrees": 10.368005072119956,
+            "virupas": 3.456001690706652
+          },
+          "expected": 4.14,
+          "priorActual": 3.456001690706652
+        }
+      ]
+    },
+    {
+      "date": "2025-01-01",
+      "input": {
+        "date": "2025-01-01",
+        "time": "00:00:00",
+        "timezone": "5.5",
+        "latitude": 28.666666666666668,
+        "longitude": 77.21666666666667
+      },
+      "utc": "2024-12-31T18:30:00.000Z",
+      "software": "OneKundli / Dhruv Astro Software",
+      "source": "https://onekundli.com/wp-content/uploads/2025/02/OneKundli-Sample-Report.pdf",
+      "referenceFrame": "Lahiri",
+      "computedFrame": "Lahiri",
+      "rows": [
+        {
+          "planet": "Mars",
+          "trueLongitude": 97.78651204375667,
+          "baseline": {
+            "planet": "Mars",
+            "mean": 74.8392962793514,
+            "trueLongitude": 97.78651204375667,
+            "seeghrocha": 256.11380230874056,
+            "midpoint": 86.312904161554,
+            "kendraDegrees": 169.80089814718656,
+            "virupas": 56.60029938239552
+          },
+          "expected": 56.58,
+          "priorActual": 56.60029938239552
+        },
+        {
+          "planet": "Mercury",
+          "trueLongitude": 235.37063608859603,
+          "baseline": {
+            "planet": "Mercury",
+            "mean": 256.11380230874056,
+            "trueLongitude": 235.37063608859603,
+            "seeghrocha": 169.30382301667123,
+            "midpoint": 245.7422191986683,
+            "kendraDegrees": 76.43839618199706,
+            "virupas": 25.47946539399902
+          },
+          "expected": 25.76,
+          "priorActual": 25.47946539399902
+        },
+        {
+          "planet": "Jupiter",
+          "trueLongitude": 49.033556162286885,
+          "baseline": {
+            "planet": "Jupiter",
+            "mean": 49.72430494927994,
+            "trueLongitude": 49.033556162286885,
+            "seeghrocha": 256.11380230874056,
+            "midpoint": 49.37893055578343,
+            "kendraDegrees": 153.26512824704287,
+            "virupas": 51.08837608234762
+          },
+          "expected": 51.15,
+          "priorActual": 51.08837608234762
+        },
+        {
+          "planet": "Venus",
+          "trueLongitude": 303.26052087747746,
+          "baseline": {
+            "planet": "Venus",
+            "mean": 256.11380230874056,
+            "trueLongitude": 303.26052087747746,
+            "seeghrocha": 31.0644901029591,
+            "midpoint": 279.68716159310907,
+            "kendraDegrees": 111.37732850985003,
+            "virupas": 37.12577616995001
+          },
+          "expected": 38.25,
+          "priorActual": 37.12577616995001
+        },
+        {
+          "planet": "Saturn",
+          "trueLongitude": 320.2994247367326,
+          "baseline": {
+            "planet": "Saturn",
+            "mean": 328.56843507277495,
+            "trueLongitude": 320.2994247367326,
+            "seeghrocha": 256.11380230874056,
+            "midpoint": 324.43392990475377,
+            "kendraDegrees": 68.32012759601321,
+            "virupas": 22.773375865337737
+          },
+          "expected": 22.82,
+          "priorActual": 22.773375865337737
+        }
+      ]
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-audit";
 import { finalizePaidPayment, verifyRazorpayCapturedPayment, verifyRazorpayPaymentSignature } from "@/lib/revenue";
-import { getRequestIp, rateLimitResponse } from "@/lib/security/rate-limit";
+import { getRequestIp, sharedRateLimitResponse as rateLimitResponse } from "@/lib/security/rate-limit";
 import { reconcileCapturedPurpose } from "@/lib/payments/purpose-reconciliation";
 import { googleSessionSchema, sendVerifiedGooglePurchase } from "@/lib/analytics/google";
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthenticated", 401);
-    const limited = rateLimitResponse("razorpay-verify", user.id || getRequestIp(request), 12, 60_000);
+    const limited = await rateLimitResponse("razorpay-verify", user.id || getRequestIp(request), 12, 60_000);
     if (limited) return limited;
     const body = await validateJson(request, schema);
     const valid = verifyRazorpayPaymentSignature(body.razorpay_order_id, body.razorpay_payment_id, body.razorpay_signature);
@@ -32,20 +32,21 @@ export async function POST(request: NextRequest) {
       select: { id: true, userId: true, amount: true, currency: true, status: true, providerPaymentId: true, metadata: true, provider: true, purpose: true }
     });
     if (!existingPayment || existingPayment.userId !== user.id) return fail("Payment not found", 404);
-    if (existingPayment.status === "PAID") {
-      if (existingPayment.providerPaymentId !== body.razorpay_payment_id) {
-        return fail("Payment ID does not match the completed order", 409);
-      }
-      await sendVerifiedGooglePurchase(request,body.analyticsSession,existingPayment);
-      return ok({ payment: existingPayment });
+    const alreadyPaid = existingPayment.status === "PAID";
+    if (alreadyPaid && existingPayment.providerPaymentId !== body.razorpay_payment_id) {
+      return fail("Payment ID does not match the completed order", 409);
     }
+    // A retry after ledger capture must also retry the guarded dependent
+    // workflow. A prior request may have failed after finalization committed.
     if (existingPayment.status === "REFUNDED" || existingPayment.status === "ADMIN_BYPASS" ||
         existingPayment.status === "FREE") {
       return fail("This payment cannot be captured again", 409);
     }
 
     const captured = await verifyRazorpayCapturedPayment(body.razorpay_order_id, body.razorpay_payment_id, Number(existingPayment.amount), existingPayment.currency);
-    if (!captured.ok) return fail("Payment could not be verified", 400);
+    if (!captured.ok) return alreadyPaid
+      ? fail("Payment requires reconciliation before acknowledgement", 409)
+      : fail("Payment could not be verified", 400);
 
     const payment = await finalizePaidPayment(body.razorpay_order_id, body.razorpay_payment_id, { verifiedBy: "client", gatewayStatus: "captured" });
     if (!payment) return fail("Payment no longer eligible for capture", 409);
@@ -54,11 +55,12 @@ export async function POST(request: NextRequest) {
     const reportRequestId = typeof metadata.reportRequestId === "string" ? metadata.reportRequestId : null;
     const bookingId = typeof metadata.bookingId === "string" ? metadata.bookingId : null;
 
-    if (payment && reportRequestId) {
+    if (reportRequestId && ["KUNDLI_REPORT", "YEARLY_REPORT", "MATCH_REPORT"].includes(payment.purpose)) {
       const reportRequest = await prisma.reportRequest.findUnique({ where: { id: reportRequestId } });
       if (reportRequest && reportRequest.userId === user.id) {
         const updated = await prisma.reportRequest.updateMany({
-          where: { id: reportRequestId, userId: user.id,
+          where: { id: reportRequestId, userId: user.id, paymentId: payment.id,
+            payment: { is: { status: "PAID", providerPaymentId: body.razorpay_payment_id } },
             status: { in: [ReportRequestStatus.RECEIVED, ReportRequestStatus.PENDING_REVIEW, ReportRequestStatus.PAYMENT_PENDING] },
             paymentStatus: { in: [ReportPaymentStatus.PENDING, ReportPaymentStatus.FAILED] } },
           data: { paymentStatus: ReportPaymentStatus.PAID, status: ReportRequestStatus.PAID }
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (payment && bookingId) {
+    if (bookingId && payment.purpose === "CONSULTATION") {
       // A captured payment does not resurrect a canceled or rejected session.
       await prisma.consultationBooking.updateMany({
         where: {
@@ -86,7 +88,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (payment) {
+    if (!alreadyPaid) {
       await writeAuditLog({
         actor: user,
         action: "payment.razorpay_client_verified",

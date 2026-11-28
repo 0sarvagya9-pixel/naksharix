@@ -37,7 +37,7 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ c
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         {(posts.length ? posts : []).map((post) => (
           <Card key={post.slug}>
-            <CardHeader><CardTitle>{post.title}</CardTitle></CardHeader>
+            <CardHeader><CardTitle as="h2">{post.title}</CardTitle></CardHeader>
             <CardContent>
               <p className="text-sm naksh-muted-text">{post.description}</p>
               <Link className="mt-4 inline-block text-sm font-semibold text-[#01A361]" href={`/blog/${post.slug}`}>Read article</Link>

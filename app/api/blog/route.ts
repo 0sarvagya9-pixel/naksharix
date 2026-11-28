@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { fail, handleApiError, ok, validateJson } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/jwt";
@@ -31,7 +32,8 @@ export async function POST(request: NextRequest) {
     const post = await prisma.blogPost.create({
       data: {
         ...body,
-        slug: slugify(body.title),
+        // Preserve existing ASCII slugs. Native-script-only titles need a stable nonempty stored identifier.
+        slug: slugify(body.title) || "post-" + randomUUID(),
         authorId: user.id,
         publishedAt: body.status === "PUBLISHED" ? new Date() : null
       }

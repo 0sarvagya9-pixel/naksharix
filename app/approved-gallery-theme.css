@@ -212,15 +212,15 @@ body.naksh-page-bg [data-layout="editorial"] header a[aria-label="Naksharix home
 
 /* Keep existing live catalogues, zodiac views, online checkout and information
  * below the approved first-screen sections. Suppress ONLY duplicated headings. */
-.nx-approved-home + .nx-approved-retained .nx-ed-hero,
-.nx-approved-home + .nx-approved-retained .nx-ed-quick-section,
-.nx-approved-home + .nx-approved-retained .nx-ed-services {
+.nx-approved-retained .nx-ed-hero,
+.nx-approved-retained .nx-ed-quick-section,
+.nx-approved-retained .nx-ed-services {
   display:none !important;
 }
-.nx-approved-home + .nx-approved-retained .nx-editorial {
+.nx-approved-retained .nx-editorial {
   overflow:visible;
 }
-.nx-approved-home + .nx-approved-retained .nx-ed-section {
+.nx-approved-retained .nx-ed-section {
   padding-block:clamp(35px,4vw,62px);
 }
 .nx-approved-home :is(a,button):focus-visible {
@@ -544,4 +544,21 @@ body.naksh-page-bg [data-layout="workspace"] header {
   body.naksh-page-bg [data-layout="editorial"] header .nx-gallery-more {
     display:block;
   }
+}
+
+/* Stable, accessible desktop disclosure after navigation/hydration. Before hydration,
+   the existing :hover/:focus-within utility rules remain a usable fallback. */
+html body.naksh-page-bg header nav[aria-label="Primary navigation"] [data-nav-parent][data-menu-ready="true"] > .nx-nav-dropdown {
+  visibility:hidden; opacity:0; pointer-events:none;
+  /* Visibility must update immediately for keyboard focus; only opacity animates. */
+  transition-property:opacity;
+}
+html body.naksh-page-bg header nav[aria-label="Primary navigation"] [data-nav-parent][data-menu-ready="true"][data-menu-open="true"] > .nx-nav-dropdown {
+  visibility:visible; opacity:1; pointer-events:auto;
+}
+
+/* Real CSS hover also works during the small native-state reconciliation
+   window; never override explicit Escape or click dismissal. */
+html body.naksh-page-bg header nav[aria-label="Primary navigation"] [data-nav-parent][data-menu-ready="true"][data-menu-dismissed="false"]:hover > .nx-nav-dropdown {
+  visibility:visible; opacity:1; pointer-events:auto;
 }

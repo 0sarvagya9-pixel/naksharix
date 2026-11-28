@@ -8,7 +8,8 @@ export const publishedSeoPairs = [
   { en: "/about", hi: "/hi/about" },
   { en: "/kumbh-mela-2027", hi: "/hi/kumbh-mela-2027" },
   { en: "/festival-calendar", hi: "/hi/festival-calendar" },
-  { en: "/grahan-2027", hi: "/hi/grahan-2027" }
+  { en: "/grahan-2027", hi: "/hi/grahan-2027" },
+  { en: "/yearly-horoscope-2027", hi: "/hi/yearly-horoscope-2027" }
 ] as const;
 
 /** Expansion inventory; these are NOT published or advertised language pages. */

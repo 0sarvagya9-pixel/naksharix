@@ -5,10 +5,11 @@ import { ShoppingCart } from "lucide-react";
 import { siteNotice } from "@/lib/ui/site-notification";
 import {useLanguage} from "@/components/language-provider";
 import {checkoutCopy} from "@/lib/shop/checkout-copy";
-import {normalizeCartLines,type CartLine} from "@/lib/shop/checkout-contract";
+import {cartFingerprint,normalizeCartLines,readCartIntent,type CartLine} from "@/lib/shop/checkout-contract";
 export type {CartLine} from "@/lib/shop/checkout-contract";
 
 export const SHOP_CART_STORAGE_KEY="naksharix-product-cart-v1";
+const CHECKOUT_INTENT_KEY="naksharix-product-cart-intent-v1";
 export function readCart():CartLine[]{
   try{
     const raw=JSON.parse(window.localStorage.getItem(SHOP_CART_STORAGE_KEY)||"[]");
@@ -16,8 +17,41 @@ export function readCart():CartLine[]{
   }catch{return[]}
 }
 export function writeCart(lines:CartLine[]){
-  window.localStorage.setItem(SHOP_CART_STORAGE_KEY,JSON.stringify(normalizeCartLines(lines)));
+  const normalized=normalizeCartLines(lines);
+  window.localStorage.setItem(SHOP_CART_STORAGE_KEY,JSON.stringify(normalized));
+  if(!normalized.length)window.localStorage.removeItem(CHECKOUT_INTENT_KEY);
   window.dispatchEvent(new Event("naksharix-cart-changed"));
+}
+function storedCheckoutIntent(fingerprint:string):string|null{
+ const raw=window.localStorage.getItem(CHECKOUT_INTENT_KEY);
+ if(!raw)return null;
+ try{return readCartIntent(JSON.parse(raw),fingerprint);}catch{return null;}
+}
+function withCheckoutIntentLock<T>(action:()=>T):Promise<T>{
+ // Modern browsers serialize allocation/clear across tabs. The older-browser
+ // fallback preserves an intent on reload; the server always rejects its replay.
+ return typeof navigator.locks?.request==="function"
+  ?navigator.locks.request("naksharix-shop-intent-v1",()=>action())
+  :Promise.resolve().then(action);
+}
+export function reserveCartCheckoutIntent(lines:CartLine[]):Promise<string>{
+ const fingerprint=cartFingerprint(lines);
+ return withCheckoutIntentLock(()=>{
+  if(fingerprint==="[]"||cartFingerprint(readCart())!==fingerprint)throw Error("CART_CHANGED");
+  const existing=storedCheckoutIntent(fingerprint);
+  if(existing)return existing;
+  const intent=window.crypto.randomUUID().toLowerCase();
+  window.localStorage.setItem(CHECKOUT_INTENT_KEY,JSON.stringify({version:1,fingerprint,intent}));
+  if(storedCheckoutIntent(fingerprint)!==intent)throw Error("CART_INTENT_NOT_PERSISTED");
+  return intent;
+ });
+}
+export function clearConfirmedCart(fingerprint:string,intent:string):Promise<boolean>{
+ return withCheckoutIntentLock(()=>{
+  if(cartFingerprint(readCart())!==fingerprint||storedCheckoutIntent(fingerprint)!==intent)return false;
+  writeCart([]);
+  return true;
+ });
 }
 type CartResult="idle"|"added"|"limit"|"full"|"unavailable";
 export function AddToCartButton({productId}:{productId:string}){

@@ -177,7 +177,7 @@ test.describe("Naksharix release browser QA", () => {
     await expect(page.getByRole("heading", { level: 2, name: "Shri Yantra" })).toBeVisible();
     await expect(page.locator('img[alt*="Yantra"]').first()).toBeVisible();
     await expect(page.getByText(/Images are for reference/).first()).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add product to cart" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add to cart" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Buy Now|Pay with Razorpay/i })).toHaveCount(0);
   });
 
@@ -185,7 +185,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.goto(absolute("/shop"), { waitUntil: "domcontentloaded" });
     await page.getByPlaceholder("Search products...").fill("Shri Yantra");
     await expect(page.getByRole("heading", { name: "Shri Yantra", exact: true })).toBeVisible();
-    await page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add product to cart" }).click();
+    await page.getByRole("heading", { name: "Shri Yantra", exact: true }).locator("xpath=ancestor::*[contains(@class, \"inner-card\")][1]").getByRole("button", { name: "Add to cart" }).click();
     await page.getByRole("link", { name: "View cart" }).first().click();
     await expect(page).toHaveURL(/\/cart$/);
     await expect(page.getByRole("heading", { name: "Shopping cart" })).toBeVisible();
@@ -239,7 +239,7 @@ test.describe("Naksharix release browser QA", () => {
     await page.goto(absolute("/shop/shri-yantra"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Shri Yantra" })).toBeVisible();
     await expect(page.getByText(/Product images are for reference/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Add product to cart" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add to cart" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Share Shri Yantra on WhatsApp" })).toHaveAttribute("href", /^https:\/\/wa\.me\/\?text=/);
     await expect(page.getByRole("button", { name: "Copy product link" })).toBeVisible();
     await expect(page.locator("#shop-breadcrumb-shri-yantra")).toHaveCount(1);
@@ -274,12 +274,20 @@ test.describe("Naksharix release browser QA", () => {
   test("all fifteen premium report cards display fixed verified checkout prices", async ({ page }) => {
     await page.goto(absolute("/reports"), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { level: 1, name: "Premium Astrology Reports" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Pay INR [0-9,]+$/ })).toHaveCount(15);
+    await expect(page.getByRole("button", { name: /^Validate details INR [0-9,]+$/ })).toHaveCount(15);
     await expect(page.getByText("Fee confirmation required")).toHaveCount(0);
     await expect(page.getByText("15 clearly priced personalized reports")).toBeVisible();
-    await page.getByRole("button", { name: "Pay INR 399" }).first().click();
-    await expect(page).toHaveURL(/\/login\?redirectTo=%2Freports/i);
-    await expect(page.getByRole("heading", { name: "Login to Naksharix" })).toBeVisible();
+    let orderRequests = 0;
+    await page.route("**/api/payments/razorpay/order", async route => { orderRequests++; await route.abort(); });
+    const babyCard=page.locator("#report-catalogue > *").filter({has:page.locator('a[href="/reports/baby-name-report"]')});
+    await expect(babyCard).toHaveCount(1);
+    await babyCard.getByRole("button", { name: "Validate details INR 399" }).click();
+    await expect(page).toHaveURL(/\/login\?/);
+    const loginUrl=new URL(page.url());
+    expect(loginUrl.pathname).toBe("/login");
+    expect(loginUrl.searchParams.get("redirectTo")).toBe("/report-request/new?reportSlug=baby-name-report&prepare=1");
+    await expect(page.getByRole("heading", { name: "Sign in to Naksharix" })).toBeVisible();
+    expect(orderRequests).toBe(0);
   });
 
   test("pricing exposes only active services", async ({ page }) => {
@@ -312,6 +320,27 @@ test.describe("Naksharix release browser QA", () => {
     const sharedText=shareUrl.searchParams.get("text") ?? "";
     expect(sharedText).toContain("/reports/love-report");
     expect(sharedText).not.toMatch(/orderId=|paymentId=|birthDate=|email=/i);
+  });
+
+  test("partnership page links current priced reports and preserves private enquiry authentication", async ({ page, request }) => {
+    await page.goto(absolute("/partnerships"), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { level: 1, name: "Explore a partnership with Naksharix" })).toBeVisible();
+    const cards = page.locator('section[aria-labelledby="partner-report-heading"] article');
+    await expect(cards).toHaveCount(3);
+    for (const slug of ["premium-kundli", "couple-kundli", "numerology-lo-shu-report"]) {
+      await expect(cards.locator('a[href="/reports/'+slug+'"]')).toBeVisible();
+    }
+    await expect(cards.getByText(/one-time report fee/)).toHaveCount(3);
+    await expect(page.getByText("No purchase is needed to enquire.",{exact:false})).toBeVisible();
+    const link = page.getByRole("link", { name: "Send a private collaboration enquiry" });
+    await expect(link).toHaveAttribute("href","/support?topic=partnership");
+    await link.click();
+    await expect(page).toHaveURL(/\/login\?redirectTo=%2Fsupport%3Ftopic%3Dpartnership$/i);
+    // Read-only GET only: close the HTTP socket, and recover at most once from
+    // ECONNRESET. HTTP status failures are never retried or ignored.
+    const privateResponse = await request.get(absolute("/api/support/tickets"), {maxRedirects:0,maxRetries:1,headers:{connection:"close"}});
+    expect(privateResponse.status()).toBe(401);
+    expect((await privateResponse.json()).error).toBe("Unauthenticated");
   });
 
   test("security headers are present on public pages", async ({ request }) => {
@@ -385,4 +414,18 @@ test.describe("Naksharix release browser QA", () => {
     expect(response?.status()).toBe(404);
     await expect(page.locator("body")).toBeVisible();
   });
+});
+
+
+test("email updates landing is public and does not silently subscribe a visitor", async ({ page }) => {
+  const response = await page.goto(absolute("/email-updates"), { waitUntil: "domcontentloaded" });
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1, name: "Naksharix email updates" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in to subscribe" })).toHaveAttribute("href", "/login?redirectTo=%2Femail-updates");
+  await expect(page.getByRole("button", { name: "Subscribe to updates" })).toHaveCount(0);
+});
+
+test("email updates POST rejects a visitor with no CSRF token", async ({ request }) => {
+  const response = await request.post(absolute("/api/marketing-consent"), { data: { action: "subscribe", consent: true, interest: "kundli", locale: "en" } });
+  expect(response.status()).toBe(403);
 });

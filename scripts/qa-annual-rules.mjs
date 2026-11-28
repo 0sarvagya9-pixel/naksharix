@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import {annualSigns,annualSampleDates,annualRelativeHouse,annualInterpretation,calendarYearInIndia} from "../lib/horoscope/annual-rules.ts";
+assert.equal(calendarYearInIndia(new Date("2026-12-31T18:30:00Z")),2027);
+assert.equal(calendarYearInIndia(new Date("2026-12-31T18:29:59Z")),2026);
+assert.equal(annualRelativeHouse("Pisces","Aries"),2);
+assert.equal(annualRelativeHouse("Taurus","Aries"),12);
+assert.throws(()=>annualRelativeHouse("fake","Aries"));
+assert.throws(()=>annualSampleDates(2101));
+const rows=annualSampleDates(2027).map((date,i)=>({date,jupiter:annualSigns[i],saturn:annualSigns[(i+1)%12]}));
+const g=annualInterpretation(2027,"Aries",rows,"hi");
+assert.equal(g.rows.length,12);assert.equal(g.rows[0].growthHouse,1);assert.equal(g.rows[11].growthHouse,12);
+assert.equal(g.personalPrediction,false);assert.ok(g.rows.every(r=>r.growthTheme&&r.structureTheme));assert.throws(()=>annualInterpretation(2027,"Aries",rows.slice(1)));
+console.log("ANNUAL_RULES_PASS");

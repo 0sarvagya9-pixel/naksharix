@@ -1,114 +1,121 @@
 "use client";
-import { useEffect,useState,type FormEvent } from "react";
+import { useCallback,useEffect,useRef,useState,type FormEvent } from "react";
 import { secureFetch } from "@/lib/security/csrf";
 import { shortlistPujaPartners, type ShortlistPartner as Partner } from "@/lib/puja/partner-shortlist";
-type Booking={id:string;userId:string;topicId:string;quotedPricePaise:number;preferredDate:string;city:string;
- devoteeName:string;gotra:string|null;sankalpNote:string;customerPhone:string;status:string;
- partnerId:string|null;scheduledAt:string|null;adminNote:string;evidenceUrl:string|null;version:number;createdAt:string};
+import { useLanguage } from "@/components/language-provider";
+import { fulfilmentCopy, fulfilmentDate, fulfilmentEmail, fulfilmentFailure, fulfilmentState, type FulfilmentCopyKey } from "@/lib/admin/fulfilment-copy";
+import { fulfilmentObject, isPujaBooking, notificationRetryRecorded, savedPujaBooking, type PujaBooking as Booking } from "@/lib/admin/fulfilment-contract";
 const nextStatuses:Record<string,string[]>={REQUESTED:["CONFIRMED","CANCELED","REJECTED"],
  CONFIRMED:["SCHEDULED","CANCELED"],SCHEDULED:["IN_PROGRESS","CANCELED"],
  IN_PROGRESS:["COMPLETED"],COMPLETED:[],CANCELED:[],REJECTED:[]};
 export function AdminPujaBookings(){
- const [bookings,setBookings]=useState<Booking[]>([]);
- const [partners,setPartners]=useState<Partner[]>([]);
- const [editing,setEditing]=useState<Booking|null>(null);
- const [partnerAccepted,setPartnerAccepted]=useState(false);
- const [error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[retrying,setRetrying]=useState<string|null>(null);
- useEffect(()=>{let active=true;fetch("/api/admin/puja-bookings",{cache:"no-store"}).then(async r=>{
-  const result=await r.json();if(!r.ok)throw Error(result.error||"Unable to load bookings");return result.data as {bookings:Booking[];partners:Partner[]};
- }).then(data=>{if(active){setBookings(data.bookings);setPartners(data.partners)}})
- .catch(e=>{if(active)setError(e instanceof Error?e.message:"Unable to load booking requests")});
- return()=>{active=false}},[]);
- async function save(e:FormEvent<HTMLFormElement>){
-  e.preventDefault();if(!editing||busy)return;setError("");setNotice("");setBusy(true);
+ const {locale}=useLanguage(),copy=fulfilmentCopy(locale);
+ const [bookings,setBookings]=useState<Booking[]>([]),[partners,setPartners]=useState<Partner[]>([]);
+ const [editing,setEditing]=useState<Booking|null>(null),[partnerAccepted,setPartnerAccepted]=useState(false);
+ const [error,setError]=useState<FulfilmentCopyKey|"">(""),[notice,setNotice]=useState<{message:FulfilmentCopyKey;email:FulfilmentCopyKey}|null>(null);
+ const [busy,setBusy]=useState(false),[retrying,setRetrying]=useState<string|null>(null);
+ const [loading,setLoading]=useState(true),[known,setKnown]=useState(false),[uncertain,setUncertain]=useState(false);
+ const inFlight=useRef(false),active=useRef(true),loadSequence=useRef(0);
+ const refresh=useCallback(async()=>{
+  if(inFlight.current)return;
+  const sequence=++loadSequence.current;setLoading(true);
   try{
-   const response=await secureFetch("/api/admin/puja-bookings",{method:"PATCH",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({id:editing.id,expectedVersion:editing.version,status:editing.status,partnerId:editing.partnerId,
-      scheduledAt:editing.scheduledAt,adminNote:editing.adminNote,evidenceUrl:editing.evidenceUrl,
-      partnerAcceptanceConfirmed:partnerAccepted})});
-   const result=await response.json();if(!response.ok)throw Error(result.error||"Unable to save");
-   setBookings(rows=>rows.map(row=>row.id===editing.id?result.data.booking:row));
-   setEditing(null);setPartnerAccepted(false);setNotice(result.data.notification?.outcome==="provider_accepted"
-    ? "Booking status saved. Email accepted by provider; inbox delivery is not guaranteed."
-    : "Booking status saved. The customer can track it in My Puja Requests; email delivery was not confirmed.");
-  }catch(e){setError(e instanceof Error?e.message:"Could not update booking")}
-  finally{setBusy(false)}
+   const response=await fetch("/api/admin/puja-bookings",{cache:"no-store"}),result:unknown=await response.json();
+   const data=fulfilmentObject(fulfilmentObject(result)?.data);
+   if(!response.ok||!data||!Array.isArray(data.bookings)||!data.bookings.every(isPujaBooking)||!Array.isArray(data.partners)||!data.partners.every(value=>{const p=fulfilmentObject(value);return !!p&&typeof p.id==='string'&&!!p.id.trim()&&typeof p.name==='string'&&typeof p.region==='string'&&Array.isArray(p.traditions)&&p.traditions.every(x=>typeof x==='string');}))throw Error('Unverified Puja records');
+   if(active.current&&sequence===loadSequence.current){setBookings(data.bookings);setPartners(data.partners as Partner[]);setKnown(true);setError("");setUncertain(false);setEditing(null);setPartnerAccepted(false);}
+  }catch{if(active.current&&sequence===loadSequence.current){setKnown(false);setError("unavailable");}}
+  finally{if(active.current&&sequence===loadSequence.current)setLoading(false);}
+ },[]);
+ useEffect(()=>{active.current=true;void refresh();return()=>{active.current=false;};},[refresh]);
+ function edit(patch:Partial<Booking>){if(!editing)return;setEditing({...editing,...patch});if('partnerId' in patch||'scheduledAt' in patch||'status' in patch)setPartnerAccepted(false);}
+ async function save(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();if(!editing||inFlight.current||uncertain||!known)return;
+  const draft={...editing},previous=bookings.find(row=>row.id===draft.id);if(!previous)return;
+  inFlight.current=true;loadSequence.current++;setLoading(false);setError("");setNotice(null);setBusy(true);
+  let failure:FulfilmentCopyKey="unconfirmed";
+  try{
+   const response=await secureFetch("/api/admin/puja-bookings",{method:"PATCH",silent:true,headers:{"Content-Type":"application/json"},body:JSON.stringify({id:draft.id,expectedVersion:draft.version,status:draft.status,partnerId:draft.partnerId,scheduledAt:draft.scheduledAt,adminNote:draft.adminNote,evidenceUrl:draft.evidenceUrl,partnerAcceptanceConfirmed:partnerAccepted})});
+   const result=await response.json();if(!response.ok){failure=fulfilmentFailure(response.status);throw Error('Puja update not acknowledged');}
+   const saved=savedPujaBooking(result,draft,previous);if(!saved)throw Error('Unmatched Puja acknowledgement');
+   setBookings(rows=>rows.map(row=>row.id===saved.id?saved:row));setEditing(null);setPartnerAccepted(false);setNotice({message:"pujaSaved",email:fulfilmentEmail(result.data?.notification?.outcome)});
+  }catch{setError(failure);setUncertain(true);}
+  finally{inFlight.current=false;setBusy(false);}
  }
  async function retryEmail(booking:Booking){
-  if(retrying)return;
-  setRetrying(booking.id);setError("");setNotice("");
+  if(inFlight.current||uncertain||!known)return;
+  inFlight.current=true;loadSequence.current++;setLoading(false);setRetrying(booking.id);setError("");setNotice(null);
+  let failure:FulfilmentCopyKey="unconfirmed";
   try{
-   const response=await secureFetch("/api/admin/fulfilment-notification",{
-    method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({kind:"puja",id:booking.id,expectedVersion:booking.version})
-   });
-   const data=await response.json();
-   if(!response.ok)throw Error(data.error||"Could not retry notification.");
-   setNotice(data.data?.notification?.outcome==="provider_accepted"
-    ? "Puja status email accepted by provider. Inbox receipt is not guaranteed."
-    : "Puja status email was not confirmed; booking remains visible in the customer's account.");
-  }catch(e){setError(e instanceof Error?e.message:"Email retry failed.");}
-  finally{setRetrying(null);}
+   const response=await secureFetch("/api/admin/fulfilment-notification",{method:"POST",silent:true,headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:"puja",id:booking.id,expectedVersion:booking.version})});
+   const result=await response.json();if(!response.ok){failure=fulfilmentFailure(response.status);throw Error('Retry not acknowledged');}
+   if(!notificationRetryRecorded(result,{kind:'puja',id:booking.id,version:booking.version,status:booking.status}))throw Error('Unmatched notification acknowledgement');
+   setNotice({message:"retryRecorded",email:fulfilmentEmail(result.data.notification.outcome)});
+  }catch{setError(failure);setUncertain(true);}
+  finally{inFlight.current=false;setRetrying(null);}
  }
  return <div className="mx-auto max-w-7xl space-y-5 px-5 py-12 text-[#3d2631]">
-   <h1 className="font-cinzel text-3xl font-bold">Puja requests & delivery</h1>
-   <p className="max-w-3xl text-sm leading-6">Manage customer bookings and private Sankalp details. Assign an admin-verified Pandit for this exact Puja before accepting the request, record their confirmation, then schedule before payment.</p>
-   {error?<p role="alert" className="rounded-lg bg-[#fff0f0] p-4 text-[#9b3247]">{error}</p>:null}
-   {notice?<p role="status" className="rounded-lg bg-[#eef9ec] p-4 text-[#345c34]">{notice}</p>:null}
+   <h1 className="font-cinzel text-3xl font-bold">{copy.pujaTitle}</h1>
+   <p className="max-w-3xl text-sm leading-6">{copy.pujaIntro}</p>
+   {error?<p role="alert" className="rounded-lg bg-[#fff0f0] p-4 text-[#9b3247]">{copy[error]}</p>:null}
+   {notice?<p role="status" className="rounded-lg bg-[#eef9ec] p-4 text-[#345c34]">{copy[notice.message]} {copy[notice.email]}</p>:null}
+   <button type="button" disabled={loading||busy||retrying!==null} onClick={()=>void refresh()} className="rounded-lg border px-4 py-2">{loading?copy.refreshing:copy.refresh}</button>
+   {loading?<p role="status">{copy.loading}</p>:null}
    {editing?<form className="max-w-2xl space-y-4 rounded-2xl border border-[#d8b589] bg-white p-6" onSubmit={save}>
-    <h2 className="text-xl font-bold">{editing.topicId} — #{editing.id.slice(0,12)}</h2>
-    <label className="block text-sm font-bold">Status
-      <select value={editing.status} onChange={e=>setEditing({...editing,status:e.target.value})} className="mt-2 block w-full rounded-lg border p-3">
+    <fieldset disabled={busy||retrying!==null||uncertain} className="space-y-4"><h2 className="text-xl font-bold">{editing.topicId} — #{editing.id.slice(0,12)}</h2>
+    <label className="block text-sm font-bold">{copy.status}
+      <select aria-label={copy.status} value={editing.status} onChange={e=>edit({status:e.target.value})} className="mt-2 block w-full rounded-lg border p-3">
        {(()=>{
          const current=bookings.find(row=>row.id===editing.id)?.status??editing.status;
-         return [current,...(nextStatuses[current]??[])].map(x=><option key={x} value={x}>{x}</option>);
+         return [current,...(nextStatuses[current]??[])].map(x=><option key={x} value={x}>{fulfilmentState(x,locale)}</option>);
        })()}
       </select>
     </label>
-    <label className="block text-sm font-bold">Matched Pandit shortlist (up to 10)
-     <select value={editing.partnerId??""} onChange={e=>setEditing({...editing,partnerId:e.target.value||null})} className="mt-2 block w-full rounded-lg border p-3">
-      <option value="">Select verified Pandit (required for confirmation)</option>{shortlistPujaPartners(partners,editing.topicId,editing.city).map(p=><option key={p.id} value={p.id}>{p.name} — {p.region}</option>)}
+    <label className="block text-sm font-bold">{copy.shortlist}
+     <select aria-label={copy.shortlist} value={editing.partnerId??""} onChange={e=>edit({partnerId:e.target.value||null})} className="mt-2 block w-full rounded-lg border p-3">
+      <option value="">{copy.choosePandit}</option>{shortlistPujaPartners(partners,editing.topicId,editing.city).map(p=><option key={p.id} value={p.id}>{p.name} — {p.region}</option>)}
      </select>
     </label>
-    <p className="text-sm">Candidates are verified for the exact Puja, ranked with local matches first. If none accepts, the request stays with the coordination team. A shortlist is not a booking confirmation.</p>
+    <p className="text-sm">{copy.shortlistHelp}</p>
     <div className="rounded-xl border border-[#e6cbaa] bg-[#fff8ee] p-4 text-sm leading-6">
-      <p className="font-bold">Before changing a request to Confirmed / Scheduled / In Progress</p>
-      <p className="mt-1">You must directly contact and obtain acceptance from the named verified Pandit for this exact Puja. This checkbox records your assertion, not an automated Pandit message.</p>
+      <p className="font-bold">{copy.consentTitle}</p>
+      <p className="mt-1">{copy.consentHelp}</p>
       <label className="mt-3 flex items-center gap-3 font-semibold">
         <input type="checkbox" checked={partnerAccepted} onChange={e=>setPartnerAccepted(e.target.checked)} />
-        I have personally confirmed Pandit acceptance and the agreed arrangements.
+        {copy.panditConsent}
       </label>
     </div>
-    <label className="block text-sm font-bold">Confirmed ceremony date/time (ISO, with timezone)
-     <input value={editing.scheduledAt??""} onChange={e=>setEditing({...editing,scheduledAt:e.target.value||null})}
+    <label className="block text-sm font-bold">{copy.ceremonyTime}
+     <input aria-label={copy.ceremonyTime} value={editing.scheduledAt??""} onChange={e=>edit({scheduledAt:e.target.value||null})}
        placeholder="2026-11-01T10:30:00+05:30" className="mt-2 block w-full rounded-lg border p-3"/>
     </label>
-    <label className="block text-sm font-bold">Private completion / coordinator note
-     <textarea rows={4} maxLength={1500} value={editing.adminNote} onChange={e=>setEditing({...editing,adminNote:e.target.value})} className="mt-2 block w-full rounded-lg border p-3"/>
+    <label className="block text-sm font-bold">{copy.coordinatorNote}
+     <textarea aria-label={copy.coordinatorNote} rows={4} maxLength={1500} value={editing.adminNote} onChange={e=>setEditing({...editing,adminNote:e.target.value})} className="mt-2 block w-full rounded-lg border p-3"/>
     </label>
-    <label className="block text-sm font-bold">Real completion evidence HTTPS URL, if applicable
-     <input maxLength={500} value={editing.evidenceUrl??""} onChange={e=>setEditing({...editing,evidenceUrl:e.target.value||null})} className="mt-2 block w-full rounded-lg border p-3"/>
+    <label className="block text-sm font-bold">{copy.completionEvidence}
+     <input maxLength={500} aria-label={copy.completionEvidence} value={editing.evidenceUrl??""} onChange={e=>setEditing({...editing,evidenceUrl:e.target.value||null})} className="mt-2 block w-full rounded-lg border p-3"/>
     </label>
-    <div className="flex gap-3"><button disabled={busy} className="rounded-lg bg-[#822e40] px-5 py-3 font-bold text-white">{busy?"Saving...":"Update booking"}</button>
-     <button type="button" onClick={()=>setEditing(null)} className="rounded-lg border px-5 py-3 font-bold">Cancel</button>
+    <div className="flex gap-3"><button disabled={busy} className="rounded-lg bg-[#822e40] px-5 py-3 font-bold text-white">{busy?copy.saving:copy.savePuja}</button>
+     <button type="button" onClick={()=>setEditing(null)} className="rounded-lg border px-5 py-3 font-bold">{copy.cancel}</button>
     </div>
+    </fieldset>
    </form>:null}
-   {!bookings.length?<p className="rounded-xl border bg-white p-6">No Puja requests yet.</p>:null}
+   {known&&!loading&&!bookings.length?<p className="rounded-xl border bg-white p-6">{copy.noPujas}</p>:null}
    <div className="grid gap-4 md:grid-cols-2">
     {bookings.map(b=><article key={b.id} className="rounded-2xl border border-[#e4cbaa] bg-white p-5">
-     <p className="font-bold text-[#7e2b3c]">{b.topicId} · {b.status}</p>
-     <p className="mt-2 text-sm">Devotee: {b.devoteeName} · {b.city} · {b.customerPhone}</p>
-     <p className="mt-2 text-sm">Requested date: {b.preferredDate.slice(0,10)} · Fee: ₹{(b.quotedPricePaise/100).toFixed(2)}</p>
-     <p className="mt-2 text-sm">Confirmed: {b.scheduledAt?new Date(b.scheduledAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"}):"Not scheduled"} · Coordinator: {b.partnerId?"Verified Pandit assigned":"Pandit not assigned"}</p>
-     <details className="mt-3 rounded-lg bg-[#fff7ed] p-3 text-xs"><summary className="cursor-pointer font-bold">Private Sankalp details</summary>
-      <p className="mt-3">Gotra: {b.gotra||"Not supplied"}</p><p className="mt-2 whitespace-pre-wrap">{b.sankalpNote}</p>
+     <p className="font-bold text-[#7e2b3c]">{b.topicId} · {fulfilmentState(b.status,locale)}</p>
+     <p className="mt-2 text-sm">{copy.devotee}: {b.devoteeName} · {b.city} · {b.customerPhone}</p>
+     <p className="mt-2 text-sm">{copy.requestedDate}: {fulfilmentDate(b.preferredDate,locale,true)} · {copy.fee}: ₹{(b.quotedPricePaise/100).toFixed(2)}</p>
+     <p className="mt-2 text-sm">{copy.confirmedTime}: {b.scheduledAt?fulfilmentDate(b.scheduledAt,locale):copy.notScheduled} · {copy.coordinator}: {b.partnerId?copy.assigned:copy.unassigned}</p>
+     <details className="mt-3 rounded-lg bg-[#fff7ed] p-3 text-xs"><summary className="cursor-pointer font-bold">{copy.sankalp}</summary>
+      <p className="mt-3">{copy.gotra}: {b.gotra||copy.notSupplied}</p><p className="mt-2 whitespace-pre-wrap">{b.sankalpNote}</p>
      </details>
      <div className="mt-4 flex flex-wrap gap-2">
-      <button type="button" onClick={()=>{setEditing({...b});setPartnerAccepted(false)}} className="rounded-lg border border-[#bd8e83] px-4 py-2 text-sm font-bold text-[#762c3d]">Manage Puja</button>
+      <button type="button" disabled={busy||retrying!==null||uncertain||!known} onClick={()=>{setEditing({...b});setPartnerAccepted(false)}} className="rounded-lg border border-[#bd8e83] px-4 py-2 text-sm font-bold text-[#762c3d]">{copy.managePuja}</button>
       {["CONFIRMED","SCHEDULED","IN_PROGRESS","COMPLETED","CANCELED","REJECTED"].includes(b.status)?
-       <button type="button" disabled={retrying!==null} onClick={()=>retryEmail(b)}
+       <button type="button" disabled={busy||retrying!==null||uncertain||!known} onClick={()=>retryEmail(b)}
         className="rounded-lg border border-[#bd8e83] px-4 py-2 text-sm font-semibold text-[#762c3d] disabled:opacity-60">
-        {retrying===b.id?"Retrying email…":"Retry status email"}
+        {retrying===b.id?copy.retrying:copy.retry}
        </button>:null}
      </div>
     </article>)}

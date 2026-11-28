@@ -99,3 +99,8 @@ assert.ok(control.includes('secureFetch("/api/admin/ops/run-recovery"')&&
   "Owner-only control must use protected CSRF request and independently check verification state");
 
 console.log("BACKUP_CRON_REGISTERED=PASS;BACKUP_DIAGNOSTIC_QA=PASS;NO_RAW_SECRET_LOGGING=PASS;READONLY_PRODUCTION=PASS;RESTORE_GUARD_PRESERVED=PASS");
+
+assert.ok(runner.includes("readRestoreCounts(JSON.parse(")&&runner.includes("verifyRecoveryReceipt(receipt,day,receipt.keyFingerprint")&&runner.includes("sameRecoveryProof(receipt,proof)"),"Strict worker fields and exact durable readback required");
+assert.ok(runner.indexOf("const saved=await put(receiptPath")<runner.indexOf("const proof=await readReceipt(day)")&&runner.indexOf("const proof=await readReceipt(day)")<runner.indexOf("const accepted=await notify(day,true"),"Success notification must follow independently verified private receipt");
+assert.ok(runner.includes("allowOverwrite:true,ifMatch:saved.etag")&&runner.includes("del(lock.url,{ifMatch:lock.etag})"),"Receipt email update and lease cleanup must use conditional writes");
+console.log("RECOVERY_SUCCESS_ORDER_AND_LEASE_CAS_PASS");

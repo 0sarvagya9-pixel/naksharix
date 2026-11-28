@@ -58,6 +58,7 @@ export async function sendEmail(input: {
   text?: string;
   html?: string;
   idempotencyKey?: string;
+  requireProviderReceipt?: boolean;
 }): Promise<EmailSendResult> {
   const readiness = getEmailReadiness();
   if (!readiness.emailEnabled) {
@@ -96,14 +97,26 @@ export async function sendEmail(input: {
   });
   } catch {
     logger.warn("email_delivery_network_error", { provider: "resend" });
-    return { sent: false, reason: "Email provider is temporarily unavailable.", missing: [] };
+    return { sent: false, acceptanceUncertain: true, reason: "Email provider is temporarily unavailable.", missing: [] };
   }
 
   if (!response.ok) {
     logger.warn("email_delivery_provider_rejected", { provider: "resend", status: response.status });
-    return { sent: false, reason: "Email provider rejected the delivery request.", missing: [] };
+    const acceptanceUncertain = response.status >= 500 || response.status === 408 || response.status === 409;
+    return { sent: false, acceptanceUncertain, reason: acceptanceUncertain
+      ? "Email provider did not confirm the delivery request."
+      : "Email provider rejected the delivery request.", missing: [] };
   }
 
+  let providerMessageId: string | undefined;
+  if (input.requireProviderReceipt) {
+    const body: unknown = await response.json().catch(() => null);
+    const id = body && typeof body === "object" && "id" in body ? body.id : null;
+    if (typeof id !== "string" || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) {
+      return {sent:false, acceptanceUncertain:true, reason:"Email provider did not return a delivery reference.", missing:[]};
+    }
+    providerMessageId = id;
+  }
   logger.info("email_delivery_completed", { provider: "resend", status: response.status });
-  return { sent: true, reason: "Email accepted by provider; inbox delivery is not confirmed.", missing: [] };
+  return { sent: true, providerMessageId, reason: "Email accepted by provider; inbox delivery is not confirmed.", missing: [] };
 }

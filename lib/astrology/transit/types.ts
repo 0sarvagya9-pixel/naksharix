@@ -33,6 +33,8 @@ export type TransitPosition = {
   degree: number | null;
   absoluteLongitude: number | null;
   retrograde: boolean | null;
+  speedDegreesPerDay?: number | null;
+  motionState?: "direct" | "retrograde" | "near_station";
   verified: boolean;
 };
 
@@ -51,6 +53,9 @@ export type TransitTimelineEvent = {
   eventType: "sign_ingress" | "station_retrograde" | "station_direct";
   date: string;
   occurredAt?: string;
+  bracketStartUtc?: string;
+  bracketEndUtc?: string;
+  bracketSeconds?: number;
   from: string | boolean | null;
   to: string | boolean | null;
   degree: number | null;

@@ -13,7 +13,9 @@ Naksharix is the platform's brand name, distinct from the traditional astrology 
 - [Hindi Free Kundli](https://www.naksharix.com/hi/free-kundli): Hindi birth-chart introduction.
 - [Kundli Matching](https://www.naksharix.com/kundli-matching): Compatibility and Guna Milan guidance.
 - [Panchang](https://www.naksharix.com/panchang): Location- and date-specific traditional calendar.
+- [Weekly Love Horoscope](https://www.naksharix.com/weekly-love-horoscope): general sign-based relationship reflection, not a personal prediction.
 - [Numerology](https://www.naksharix.com/numerology): Traditional number interpretations.
+- [Name Number Calculator](https://www.naksharix.com/free-calculators/name-number-calculator): letter mapping, worked arithmetic and method limitations.
 - [Lo Shu Grid](https://www.naksharix.com/free-calculators/lo-shu-grid-calculator): Worked example and calculator.
 - [Digital reports](https://www.naksharix.com/reports): Current report catalogue.
 - [Report delivery guide](https://www.naksharix.com/blog/personalized-astrology-report-delivery-guide): Purchase and delivery information.
@@ -33,3 +35,6 @@ This is an optional human- and machine-readable public directory, not an instruc
 - [हिंदू त्योहार कैलेंडर और आगामी व्रत तिथियाँ](https://www.naksharix.com/hi/festival-calendar): public reference guide, not a guaranteed booking.
 - [Grahan 2027: Solar & Lunar Eclipses in India](https://www.naksharix.com/grahan-2027): public reference guide, not a guaranteed booking.
 - [ग्रहण 2027: भारत में सूर्य और चंद्र ग्रहण](https://www.naksharix.com/hi/grahan-2027): public reference guide, not a guaranteed booking.
+
+- [2027 yearly rashi guide](https://www.naksharix.com/yearly-horoscope-2027): internally calculated monthly educational Jupiter/Saturn reference; not independent certification or a personal prediction.
+- [2027 वार्षिक राशि मार्गदर्शिका](https://www.naksharix.com/hi/yearly-horoscope-2027): Hindi reference.

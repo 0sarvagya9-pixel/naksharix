@@ -1,7 +1,8 @@
+import {prisma} from "@/lib/db";
 import { NextResponse } from "next/server";
 import { createHash,timingSafeEqual } from "node:crypto";
 import { runAutomaticReportRecovery } from "@/lib/reports/automatic-report-worker";
-
+import { runReferenceReminderRecovery } from "@/lib/calendar/reminder-ledger";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export const maxDuration=300;
@@ -14,6 +15,10 @@ function authorized(request:Request){
 }
 export async function GET(request:Request){
   if(!authorized(request))return NextResponse.json({error:"Unauthorized"},{status:401,headers});
-  try{return NextResponse.json({data:await runAutomaticReportRecovery()},{headers});}
-  catch{return NextResponse.json({error:"Report recovery unavailable"},{status:503,headers});}
+  try{
+    await prisma.reportCheckoutDraft.deleteMany({where:{expiresAt:{lte:new Date()}}});
+    const reports=await runAutomaticReportRecovery();
+    const referenceReminders=await runReferenceReminderRecovery().catch(()=>({enabled:false,unavailable:true}));
+    return NextResponse.json({data:{...reports,referenceReminders}},{headers});
+  }catch{return NextResponse.json({error:"Report recovery unavailable"},{status:503,headers});}
 }

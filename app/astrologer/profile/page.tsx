@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import {cookies} from "next/headers";
+import {normalizeLocale} from "@/lib/i18n";
+import {workspaceCopy} from "@/lib/astrologers/workspace-copy";
 import { AstrologerProfileForm } from "@/components/astrologer-profile-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "@/components/section";
@@ -10,14 +13,11 @@ import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = seo({
-  title: "Manage Astrologer Profile - Naksharix",
-  description: "Update your Naksharix astrologer or consultant marketplace profile, pricing, skills, languages, and online status.",
-  path: "/astrologer/profile"
-});
+async function labels(){return workspaceCopy(normalizeLocale((await cookies()).get("naksharix-language")?.value));}
+export async function generateMetadata():Promise<Metadata>{const copy=await labels();return {...seo({title:copy.profileTitle+" | Naksharix",description:copy.profileIntro,path:"/astrologer/profile"}),robots:{index:false,follow:false}};}
 
 export default async function AstrologerProfilePage() {
-  const user = await requireAstroRole();
+  const user = await requireAstroRole(),copy=await labels();
   const [profile, consultantProfile] = await Promise.all([
     prisma.astrologerProfile.findUnique({ where: { userId: user.id } }),
     prisma.consultantProfile.findUnique({ where: { userId: user.id } })
@@ -29,12 +29,12 @@ export default async function AstrologerProfilePage() {
       <Section>
         <Card className="glass">
           <CardHeader>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">Profile Management</p>
-            <CardTitle className="font-cinzel text-3xl">Marketplace Profile</CardTitle>
-            <p className="text-sm naksh-muted-text">Update your public profile, consultation pricing, expertise, languages, city, and availability for admin approval.</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#FFD700]">{copy.profileEyebrow}</p>
+            <CardTitle className="font-cinzel text-3xl">{copy.profileTitle}</CardTitle>
+            <p className="text-sm naksh-muted-text">{copy.profileIntro}</p>
           </CardHeader>
           <CardContent>
-            <AstrologerProfileForm defaults={activeProfile ? {
+            <AstrologerProfileForm userId={user.id} profileId={activeProfile?.id} defaults={activeProfile ? {
               displayName: activeProfile.displayName,
               photoUrl: activeProfile.photoUrl ?? "",
               bio: activeProfile.bio,

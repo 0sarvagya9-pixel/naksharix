@@ -3,35 +3,35 @@ import {ActivityIndicator,Pressable,ScrollView,StyleSheet,Text,View} from "react
 import {getPublicData} from "../config/api";
 import {zodiacSigns,type ZodiacSign} from "../data/zodiac";
 import {colors,sharedStyles as S} from "../ui/theme";
-type Period="daily"|"weekly"|"monthly"|"yearly";
-type Horoscope={zodiac:string;period:Period;title:string;subtitle:string;overview:string;
-  sections:Array<{title:string;body:string}>;luckyNumber:string;luckyColor:string;remedy:string;notice:string};
+import {indiaCalendarYear,nativeAnnualYears,nativeHoroscopePath,validateNativeHoroscope,type HoroscopePeriod as Period,type NativeHoroscope as Horoscope} from "../native/horoscope-contract";
 const periods:ReadonlyArray<{id:Period,label:string}>=[
   {id:"daily",label:"Today"},{id:"weekly",label:"Week"},
-  {id:"monthly",label:"Month"},{id:"yearly",label:"2026"}
+  {id:"monthly",label:"Month"},{id:"yearly",label:"Year"}
 ];
 
 export function HoroscopeScreen(){
   const [sign,setSign]=useState<ZodiacSign>("aries");
   const [period,setPeriod]=useState<Period>("daily");
-  const [state,setState]=useState<{loading:boolean;data:Horoscope|null;error:string}>({loading:true,data:null,error:""});
+  const [year,setYear]=useState(()=>indiaCalendarYear());
+  const years=nativeAnnualYears();
+  const [state,setState]=useState<{loading:boolean;data:Horoscope|null;error:string;key:string}>({loading:true,data:null,error:"",key:""});
   const [refresh,setRefresh]=useState(0);
+  const request={sign,period,year},requestKey=nativeHoroscopePath(request)+":"+refresh;
   useEffect(()=>{
-    const controller=new AbortController();
-    setState({loading:true,data:null,error:""});
-    const url="/api/mobile/horoscope?zodiac="+encodeURIComponent(sign)+
-      "&period="+encodeURIComponent(period)+"&locale=en";
-    getPublicData<Horoscope>(url,controller.signal)
+    const controller=new AbortController(),selection={sign,period,year};
+    const url=nativeHoroscopePath(selection),key=url+":"+refresh;
+    setState({loading:true,data:null,error:"",key});
+    getPublicData<unknown>(url,controller.signal)
       .then(result=>{
         if(controller.signal.aborted)return;
-        if(!result||typeof result.overview!=="string"||!Array.isArray(result.sections))
-          throw Error("Invalid horoscope response");
-        setState({loading:false,data:result,error:""});
+        const checked=validateNativeHoroscope(result,selection);
+        if(!checked)throw Error("The service did not return the selected sign, period or year. Refresh to try again.");
+        setState({loading:false,data:checked,error:"",key});
       })
       .catch(error=>{if(!controller.signal.aborted)
-        setState({loading:false,data:null,error:error instanceof Error?error.message:"Service unavailable"});});
+        setState({loading:false,data:null,error:error instanceof Error?error.message:"Service unavailable",key});});
     return()=>controller.abort();
-  },[sign,period,refresh]);
+  },[sign,period,year,refresh]);
   const selected=zodiacSigns.find(z=>z.id===sign)!;
   return <ScrollView contentContainerStyle={S.scroll} showsVerticalScrollIndicator={false}>
     <Text style={S.eyebrow}>RASHIFAL • SIGN-LEVEL GUIDANCE</Text>
@@ -43,6 +43,7 @@ export function HoroscopeScreen(){
         <Text style={[S.pillText,p.id===period&&S.pillTextSelected]}>{p.label}</Text>
       </Pressable>)}
     </View>
+    {period==="yearly"?<View style={{gap:8}}><Text style={S.sectionTitle}>Reference year</Text><View style={styles.periods}>{years.map(y=><Pressable key={y} accessibilityRole="button" accessibilityLabel={String(y)+" yearly reference"} accessibilityState={{selected:y===year}} onPress={()=>setYear(y)} style={[S.pill,y===year&&S.pillSelected]}><Text style={[S.pillText,y===year&&S.pillTextSelected]}>{y}</Text></Pressable>)}</View><Text style={S.cardText}>Monthly Jupiter and Saturn reference positions. This is not a personal prediction.</Text></View>:null}
     <View style={styles.signGrid}>
       {zodiacSigns.map(z=><Pressable key={z.id} accessibilityRole="button"
         accessibilityLabel={z.label+" "+z.hindi} accessibilityState={{selected:z.id===sign}}
@@ -55,13 +56,13 @@ export function HoroscopeScreen(){
       <Text style={styles.largeSymbol}>{selected.symbol}</Text>
       <View style={{flex:1}}>
         <Text style={styles.selectedTitle}>{selected.label} / {selected.hindi}</Text>
-        <Text style={styles.selectedSubtitle}>{period==="yearly"?"2026 yearly themes":period+" guidance"}</Text>
+        <Text style={styles.selectedSubtitle}>{period==="yearly"?year+" yearly reference":period+" guidance"}</Text>
       </View>
       <Pressable accessibilityRole="button" onPress={()=>setRefresh(n=>n+1)} style={styles.refresh}>
         <Text style={styles.refreshText}>Refresh</Text>
       </Pressable>
     </View>
-    {state.loading?<View style={styles.loading}>
+    {state.loading||state.key!==requestKey?<View style={styles.loading}>
       <ActivityIndicator color={colors.burgundy} size="large"/>
       <Text style={S.cardText}>Loading the latest published guidance...</Text>
     </View>:state.error?<View style={S.card}>
@@ -75,12 +76,12 @@ export function HoroscopeScreen(){
         <Text style={S.cardTitle}>{state.data.title||"Zodiac reflection"}</Text>
         <Text style={S.cardText}>{state.data.overview}</Text>
       </View>
-      <View style={styles.twocol}>
+      {period!=="yearly"?<View style={styles.twocol}>
         <View style={styles.mini}><Text style={styles.miniLabel}>Lucky number</Text>
           <Text style={styles.miniValue}>{String(state.data.luckyNumber||"—")}</Text></View>
         <View style={styles.mini}><Text style={styles.miniLabel}>Color</Text>
           <Text style={styles.colorValue}>{state.data.luckyColor||"—"}</Text></View>
-      </View>
+      </View>:<Text style={S.disclaimer}>{state.data.subtitle}</Text>}
       {state.data.sections.map((section,index)=><View key={section.title+"-"+index} style={S.card}>
         <Text style={S.cardTitle}>{section.title}</Text>
         <Text style={S.cardText}>{section.body}</Text>
@@ -94,7 +95,7 @@ export function HoroscopeScreen(){
   </ScrollView>;
 }
 const styles=StyleSheet.create({
-  periods:{flexDirection:"row",justifyContent:"space-between",gap:6},
+  periods:{flexDirection:"row",flexWrap:"wrap",gap:6},
   signGrid:{flexDirection:"row",flexWrap:"wrap",justifyContent:"space-between",rowGap:8},
   sign:{width:"31.5%",borderWidth:1,borderColor:colors.border,backgroundColor:colors.surface,
     borderRadius:15,alignItems:"center",paddingVertical:11,gap:3,minHeight:73},

@@ -4,6 +4,7 @@ import { Section } from "@/components/section";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/db";
 import { getConsultationSessionPrice } from "@/lib/consultations/pricing";
+import {isBookableConsultationSlot,verifiedConsultationPractitioner} from "@/lib/consultations/slot-contract";
 
 export const dynamic = "force-dynamic";
 
@@ -13,15 +14,15 @@ export default async function BookAstrologerPage({ params }: PageProps) {
   const { astrologerId } = await params;
   const [user, astrologer] = await Promise.all([
     getCurrentUser(),
-    prisma.astrologerProfile.findFirst({ where: { id: astrologerId, status: "APPROVED" }, include: { slots: { where: { isActive: true, isHoliday: false }, orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }] } } })
+    prisma.astrologerProfile.findFirst({ where: { id: astrologerId, status: "APPROVED" }, include: { user:{select:{role:true,emailVerified:true,emailVerifiedAt:true}},slots: { where: { isActive: true, isHoliday: false }, orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }] } } })
   ]);
-  if (!astrologer) notFound();
+  if (!astrologer||!verifiedConsultationPractitioner(astrologer)) notFound();
   const sessionPrice = getConsultationSessionPrice(Number(astrologer.consultationPrice),
     astrologer.pricePerSession === null ? null : Number(astrologer.pricePerSession));
   return (
     <main className="star-field">
       <Section className="max-w-3xl">
-        <ConsultationRequestForm sessionPrice={sessionPrice} astrologerId={astrologer.id} astrologerName={astrologer.displayName} userEmail={user?.email} userName={user?.name} slots={astrologer.slots.map((slot) => ({ id: slot.id, dayOfWeek: slot.dayOfWeek, startTime: slot.startTime, endTime: slot.endTime, consultationType: slot.consultationType, isActive: slot.isActive }))} />
+        <ConsultationRequestForm sessionPrice={sessionPrice} astrologerId={astrologer.id} astrologerName={astrologer.displayName} userEmail={user?.email} userName={user?.name} slots={astrologer.slots.filter(isBookableConsultationSlot).map((slot) => ({ id: slot.id, dayOfWeek: slot.dayOfWeek, startTime: slot.startTime, endTime: slot.endTime, consultationType: slot.consultationType, isActive: slot.isActive }))} />
       </Section>
     </main>
   );

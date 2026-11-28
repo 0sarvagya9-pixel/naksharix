@@ -4,7 +4,7 @@ import { FocusedCalculatorContent } from "@/components/focused-calculator-conten
 import { seo } from "@/lib/seo";
 
 export const metadata: Metadata = seo({
-  title: "Birth Nakshatra Calculator: Method and Pada Guide",
+  title: "Birth Nakshatra Calculator: Method & Pada Guide",
   description: "Find a traditional birth Nakshatra and Pada. Learn why 27 lunar divisions use 13°20′ each, how the four Padas are formed, and why accurate birth details matter.",
   path: "/free-calculators/nakshatra-calculator",
   keywords: ["Birth Nakshatra Calculator", "Nakshatra Pada", "Moon Sign"]

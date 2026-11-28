@@ -5,8 +5,8 @@ const ADS_SELLER = "google.com, pub-7848529669366564, DIRECT, f08c47fec0942fa0";
 
 
 // Check actual server-rendered HTML, not strings embedded in Next.js hydration scripts.
-// Coming Soon is healthy while bookings are intentionally closed; the old Book Now
-// directory is not a valid active state under the request-before-payment contract.
+// Three owner-controlled modes: paused, unpaid request-only, verified paid launch.
+// Request-only is deliberately noindex. Unexplained noindex on paid launch fails.
 export function classifyPujaPage(html) {
   const rendered = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<!--[\s\S]*?-->/g, "");
@@ -15,17 +15,25 @@ export function classifyPujaPage(html) {
   const noindex = robots.some(tag => /\bcontent=["'][^"']*\bnoindex\b/i.test(tag));
   const paused = rendered.match(/<section\b[^>]*\baria-labelledby=["']puja-coming-soon-heading["'][^>]*>[\s\S]*?<\/section>/i)?.[0] ?? "";
   const active = /\bid=["']puja-catalogue-heading["']/i.test(rendered);
-  if (paused && !active && noindex &&
+  const modes=[...rendered.matchAll(/<main\b[^>]*\bdata-puja-mode=["']([^"']+)["']/gi)].map(x=>x[1]);
+  if(modes.length>1||modes.some(mode=>!["paused","request-only","active"].includes(mode)))return "invalid";
+  const mode=modes[0];
+  if (paused && !active && noindex && (!mode||mode==="paused") &&
       paused.includes("Coming Soon") &&
       paused.includes("नई पूजा बुकिंग और ऑनलाइन भुगतान उपलब्ध नहीं हैं।") &&
       !/(?:Book Now|Request preferred date|href=["']\/puja-booking(?:[?"'/]|$))/i.test(paused)) {
     return "paused";
   }
-  if (!paused && active && !noindex &&
+  const requestFirst=!paused && active &&
       rendered.includes("Puja Directory") &&
       rendered.includes("No upfront payment") &&
       rendered.includes("Request preferred date") &&
-      /href=["']\/puja-booking\?item=[^"']+/i.test(rendered)) {
+      /href=["']\/puja-booking\?item=[^"']+/i.test(rendered) &&
+      !/>\s*(?:Book Now|Pay Now|Pay upfront)\s*</i.test(rendered);
+  if(requestFirst&&mode==="request-only"&&noindex&&rendered.includes("request date without paying")){
+    return "request-only";
+  }
+  if(requestFirst&&(!mode||mode==="active")&&!noindex){
     return "active";
   }
   return "invalid";
@@ -77,7 +85,7 @@ export async function checkPublicEndpoints(fetcher = fetch, base = BASE_URL) {
             !body.includes("<loc>https://www.naksharix.com/admin");
           const pujaRoot = /<loc>\s*https:\/\/www\.naksharix\.com\/pujas\/?\s*<\/loc>/i.test(body);
           const pujaEntry = /<loc>\s*https:\/\/www\.naksharix\.com\/pujas(?:\/[^<]*)?\s*<\/loc>/i.test(body);
-          passed = passed && (pujaState === "paused" ? !pujaEntry :
+          passed = passed && (pujaState === "paused" || pujaState === "request-only" ? !pujaEntry :
             pujaState === "active" ? pujaRoot : false);
         } else if (path === "/reports") {
           passed = body.includes("Premium Astrology Reports") &&

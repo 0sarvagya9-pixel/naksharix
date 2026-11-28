@@ -1,0 +1,76 @@
+name: Internal development source checks
+on:
+  push:
+    branches: [internal-naksharix-development-hold-20261124]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: internal-development-source-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-contracts:
+    if: github.ref == 'refs/heads/internal-naksharix-development-hold-20261124'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: "true"
+      DATABASE_URL: postgresql://fixture:fixture@127.0.0.1:5432/naksharix_source_check
+      DIRECT_URL: postgresql://fixture:fixture@127.0.0.1:5432/naksharix_source_check
+      JWT_SECRET: internal-source-check-fixture-key-not-used-in-production
+      NEXTAUTH_SECRET: internal-source-check-fixture-key-not-used-in-production
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      ASTROLOGY_PROVIDER: own_engine
+      EMAIL_PROVIDER: disabled
+      AI_ASTROLOGER_ENABLED: "false"
+      AI_CREDIT_PACK_SALES_ENABLED: "false"
+      AI_CREDIT_USAGE_ENABLED: "false"
+      AI_MEMBERSHIP_SALES_ENABLED: "false"
+      EXPERT_SERVICE_INTAKE_ENABLED: "false"
+      EXPERT_SERVICE_SALES_ENABLED: "false"
+      DIGITAL_PACKAGE_SALES_ENABLED: "false"
+      DIGITAL_PACKAGE_GENERATION_ENABLED: "false"
+      B2B_INTEGRATION_ENABLED: "false"
+      WEB_PUSH_ENABLED: "false"
+      SUBSCRIPTIONS_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Verify strict deployment hold
+        run: |
+          node --input-type=module -e 'import fs from "node:fs";import assert from "node:assert/strict";assert.equal(JSON.parse(fs.readFileSync("vercel.json","utf8")).git.deploymentEnabled["internal-naksharix-development-hold-20261124"],false)'
+          git diff --check
+          find scripts -maxdepth 1 -type f -name "*.mjs" -print0 | xargs -0 -r -n1 node --check
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Source validation and TypeScript
+        run: |
+          npx --no-install prisma validate --schema=prisma/schema.prisma
+          npx --no-install prisma generate --schema=prisma/schema.prisma
+          npm run typecheck
+          npx --no-install eslint lib/learning/paid-course.ts lib/learning/paid-course-contract.ts components/ai-membership-workspace.tsx
+      - name: Deterministic contracts only (no live acceptance)
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          failed=0
+          for check in qa:auth-redirect qa:worldclass-timezone qa:worldclass-auth qa:report-order-recovery qa:report-preflight qa:annual-rules qa:calendar-export qa:recovery-receipt qa:ai-credit-contract qa:durable-ops qa:web-push-contract qa:independent-ephemeris qa:digital-package-contract qa:business-integrations-contract qa:paid-course-contract qa:expert-services-contract qa:ai-membership-contract; do
+            echo "::group::$check"
+            npm run "$check" || failed=1
+            echo "::endgroup::"
+          done
+          node --experimental-strip-types scripts/qa-country-shipping.mjs || failed=1
+          for audit in qa-puja-coming-soon qa-shop-photo-rights qa-shop-market-pricing qa-production-acceptance-contract qa-site-notifications qa-commerce-enquiry qa-final-code-closure; do
+            node --experimental-strip-types scripts/$audit.mjs || failed=1
+          done
+          node scripts/qa-backup-worker-fixtures.mjs || failed=1
+          node --experimental-strip-types scripts/qa-marketing-consent-ui.mjs || failed=1
+          node scripts/qa-csrf-coverage.mjs || failed=1
+          node scripts/qa-source-hygiene.mjs || failed=1
+          exit "$failed"

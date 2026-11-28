@@ -1,4 +1,5 @@
 import "server-only";
+import { verifyReportContent, verifyRoyalPdf } from "./report-quality";
 import { renderEditorialReport } from "@/lib/reports/editorial-pdf";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -11,12 +12,15 @@ import { premiumReportAutomationStatus, type PremiumReportGenerationStatus } fro
 
 export type PremiumReportGenerationRequest = {
   requestId: string;
+  expectedInputHash?: string;
   templateId: string;
   status: PremiumReportGenerationStatus;
   content?: PremiumReportContentResult;
   reviewedByAdmin?: boolean;
   // Only the server-owned paid report worker supplies this validation mode.
   automatedInputValidated?: boolean;
+  // Validated specialty content generated only after explicit operator review.
+  specialistInputValidated?: boolean;
   reportTitle?: string;
   customerName?: string;
   language?: "en" | "hi" | "hinglish";
@@ -102,6 +106,21 @@ async function loadReportFonts(pdf: PDFDocument): Promise<Fonts> {
   };
 }
 
+// Fontsource distributes these OFL-licensed faces as pinned dependencies.
+// Static paths keep them in the server function's output trace. Royal pages
+// must fail generation if a required face cannot be embedded.
+async function loadRoyalFonts(pdf:PDFDocument,base:Fonts){
+  const paths=[
+    path.join(process.cwd(),"node_modules","@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff"),
+    path.join(process.cwd(),"node_modules","@fontsource/noto-sans/files/noto-sans-latin-700-normal.woff"),
+    path.join(process.cwd(),"node_modules","@fontsource/noto-serif/files/noto-serif-latin-700-normal.woff"),
+    path.join(process.cwd(),"node_modules","@fontsource/noto-serif-devanagari/files/noto-serif-devanagari-devanagari-700-normal.woff"),
+    path.join(process.cwd(),"public","fonts","NotoSansDevanagari-Bold.ttf")
+  ];
+  const [latin,bold,title,indicTitle,indicBold]=await Promise.all(paths.map(async file=>pdf.embedFont(await readFile(file),{subset:true})));
+  return {...base,latin,bold,title,indicTitle,indicBold};
+}
+
 function safePrint(value: string): string {
   // Keep Hindi, ₹, degrees and readable punctuation. Replace unsupported
   // glyphs visibly instead of silently deleting prices or measurements.
@@ -161,21 +180,28 @@ export async function generatePremiumReportPdf(request: PremiumReportGenerationR
   const status = getPremiumEngineActivationStatus("pdf_generation");
   if (!request.content) return blocked("blocked_until_report_content", "Real chart-based report content is required.");
   const automated = request.automatedInputValidated === true && request.status === "ready_for_generation" && request.content.sections.length >= 5;
+  const reviewedSpecialist=request.reviewedByAdmin===true&&request.specialistInputValidated===true&&request.status==="ready_for_generation"&&request.content.sections.length>=5;
   if (!request.reviewedByAdmin && !automated) return blocked("blocked_until_admin_review", "Admin review or validated paid-report automation is required before creating a report PDF.");
 
+  const receipt = automated || reviewedSpecialist ? verifyReportContent(request.content, request) : undefined;
   const pdf = await PDFDocument.create();
-  pdf.setTitle("NAKSHARIX | " + (request.reportTitle ?? "Premium Report") + " | " + request.requestId);
+  const pdfTitle = "NAKSHARIX | " + (request.reportTitle ?? "Premium Report") + " | " + request.requestId;
+  pdf.setTitle(pdfTitle);
+  if (receipt) pdf.setKeywords([receipt]);
   pdf.setAuthor("NAKSHARIX");
   pdf.setSubject(automated ? "Personalized calculated astrology and numerology report; independent chart verification remains required" : "Admin-reviewed astrological working report; independent chart verification remains required");
   pdf.setLanguage(request.language === "hi" ? "hi-IN" : "en-IN");
   const fonts = await loadReportFonts(pdf);
-  const logo = await pdf.embedPng(await readFile(path.join(process.cwd(), "public", "images", "naksharix-final-logo-symbol.png"))).catch(() => null);
-  if (automated) {
-    await renderEditorialReport(pdf, request.content, request, fonts, logo);
+  if (automated||reviewedSpecialist) {
+    const artDir=path.join(process.cwd(),"public","report-design","royal");
+    const [[cover],[lotus]]=await Promise.all(["cover-art.pdf","celestial-lotus.pdf"].map(async file=>pdf.embedPdf(await readFile(path.join(artDir,file)),[0])));
+    const royalFonts=await loadRoyalFonts(pdf,fonts);
+    await renderEditorialReport(pdf, request.content, request, royalFonts, {cover,lotus});
     const bytes=Buffer.from(await pdf.save({useObjectStreams:true}));
-    if(bytes.subarray(0,5).toString("ascii")!=="%PDF-")throw Error("PDF serialization returned an invalid document");
+    await verifyRoyalPdf(bytes,receipt!,pdfTitle);
     return {generated:true,status:"generated_internal_unverified",pdfUrl:null,bytes,byteLength:bytes.byteLength,deliveryEnabled:false,reason:"Personalized editorial report generated from validated input; independent chart certification is not claimed."};
   }
+  const logo = await pdf.embedPng(await readFile(path.join(process.cwd(), "public", "images", "naksharix-final-logo-symbol.png"))).catch(() => null);
   let page!: PDFPage;
   let y = TOP;
   const newPage = (cover = false) => {

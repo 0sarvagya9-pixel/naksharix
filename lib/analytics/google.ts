@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { googleSources, googleMedia, reportPurposes, isLiveReportPurchase, publicEventParams, commerceParams, type GoogleSession } from "@/lib/analytics/google-contract";
 import type { AggregateEventName } from "@/lib/analytics/public-routes";
+import {recordOpsMetric} from "@/lib/ops/metrics";
+import {googleTransportMetric} from "@/lib/ops/metric-contract";
 
 export const googleSessionSchema = z.object({
   client_id:z.string().regex(/^\d{1,10}\.\d{10}$/),
@@ -26,7 +28,7 @@ export function analyticsPrivacyAllowed(request:Request) {
 async function send(session:GoogleSession,events:{name:string;params:Record<string,unknown>}[]) {
   if (!googleAnalyticsEnabled()) return false;
   const now=Math.floor(Date.now()/1000);
-  if (session.session_id > now+60 || session.session_id < now-86400) return false;
+  if (session.session_id > now+60 || session.session_id < now-86400){await recordOpsMetric("ga4_session_rejected");return false;}
   try {
     const url=new URL("https://www.google-analytics.com/mp/collect");
     url.searchParams.set("measurement_id",process.env.GA4_MEASUREMENT_ID!);
@@ -34,8 +36,9 @@ async function send(session:GoogleSession,events:{name:string;params:Record<stri
     const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},
       signal:AbortSignal.timeout(2200),cache:"no-store",
       body:JSON.stringify({client_id:session.client_id,consent:{ad_user_data:"DENIED",ad_personalization:"DENIED"},events})});
+    await recordOpsMetric(googleTransportMetric(events[0]?.name,response.ok));
     return response.ok;
-  } catch { return false; }
+  } catch {await recordOpsMetric(googleTransportMetric(events[0]?.name,false));return false;}
 }
 export async function sendPublicGoogleEvent(session:GoogleSession,event:AggregateEventName,route:string) {
   const params=publicEventParams(session,route);

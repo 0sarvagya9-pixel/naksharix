@@ -66,6 +66,32 @@ try {
     assert.deepEqual(res.map(r=>r.status).sort(),[200,409]);
     assert.equal(await db.consultationBooking.count({where:{astrologerProfileId:profile.id,scheduledAt:new Date(target)}}),1);
   });
+  await check('invalid slot windows and duplicate active availability are rejected by real handlers',async()=>{
+    const input={dayOfWeek:origin.getUTCDay(),startTime:"15:00",endTime:"15:30",isActive:true,isHoliday:false,consultationType:"CHAT",status:"ONLINE"};
+    for(const patch of [{dayOfWeek:1.5},{startTime:"24:00"},{endTime:"15:15"},{endTime:"14:30"},{isActive:"false"},{consultationType:"UNKNOWN"}]){
+     const result=await post('/api/astrologer/availability',{...input,...patch},owner.cookie);
+     assert.equal(result.status,422,await result.text());
+    }
+    const pair=await Promise.all([post('/api/astrologer/availability',input,owner.cookie),post('/api/astrologer/availability',input,owner.cookie)]);
+    assert.deepEqual(pair.map(r=>r.status).sort(),[201,409]);
+    assert.equal(await db.availabilitySlot.count({where:{astrologerProfileId:profile.id,startTime:"15:00",endTime:"15:30"}}),1);
+  });
+  await check('new bookings reject old short slots, invalid birth fields and unverified practitioners',async()=>{
+    const date=origin.toISOString().slice(0,10),dayOfWeek=origin.getUTCDay();
+    const oldShort=await db.availabilitySlot.create({data:{astrologerProfileId:profile.id,dayOfWeek,startTime:"16:00",endTime:"16:10",isActive:true,isHoliday:false,consultationType:"CHAT"}});
+    const valid=await db.availabilitySlot.create({data:{astrologerProfileId:profile.id,dayOfWeek,startTime:"17:00",endTime:"17:30",isActive:true,isHoliday:false,consultationType:"CHAT"}});
+    const body={astrologerProfileId:profile.id,slotId:valid.id,bookingDate:date,customerName:"QA USER",customerEmail:customer.user.email,question:"Isolated valid appointment intake."};
+    assert.equal((await post('/api/consultation-bookings',{...body,slotId:oldShort.id},customer.cookie)).status,422);
+    assert.equal((await post('/api/consultation-bookings',{...body,birthDate:"1990-02-30"},customer.cookie)).status,422);
+    assert.equal((await post('/api/consultation-bookings',{...body,birthTime:"25:00"},customer.cookie)).status,422);
+    await db.user.update({where:{id:owner.user.id},data:{emailVerified:null,emailVerifiedAt:null}});
+    try{assert.equal((await post('/api/consultation-bookings',body,customer.cookie)).status,404);}
+    finally{await db.user.update({where:{id:owner.user.id},data:{emailVerified:new Date(),emailVerifiedAt:new Date()}});}
+    await db.astrologerProfile.update({where:{id:profile.id},data:{status:"PENDING_REVIEW"}});
+    try{assert.equal((await post('/api/consultation-bookings',body,customer.cookie)).status,404);}
+    finally{await db.astrologerProfile.update({where:{id:profile.id},data:{status:"APPROVED"}});}
+    assert.equal(await db.consultationBooking.count({where:{astrologerProfileId:profile.id,scheduledAt:new Date(date+"T11:30:00.000Z")}}),0);
+  });
   await check('new customer booking cannot overlap a rescheduled reservation',async()=>{
     const slot=await db.availabilitySlot.create({data:{astrologerProfileId:profile.id,dayOfWeek:origin.getUTCDay(),startTime:'10:15',endTime:'10:45',isActive:true,isHoliday:false,consultationType:'CHAT'}});
     const result=await post('/api/consultation-bookings',{astrologerProfileId:profile.id,slotId:slot.id,bookingDate:origin.toISOString().slice(0,10),customerName:'QA USER',customerEmail:customer.user.email,question:'Only a disposable concurrency check.'},customer.cookie);

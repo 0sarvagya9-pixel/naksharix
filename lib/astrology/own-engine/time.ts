@@ -40,9 +40,10 @@ export function normalizeBirthDate(dateOfBirth: string | Date) {
 export function normalizeBirthTime(timeOfBirth: string) {
   const parts = parseTimeParts(timeOfBirth);
 
-  return `${parts.hour.toString().padStart(2, "0")}:${parts.minute
-    .toString()
-    .padStart(2, "0")}`;
+  const minuteTime=`${parts.hour.toString().padStart(2,"0")}:${parts.minute.toString().padStart(2,"0")}`;
+  // Preserve explicitly supplied birth seconds while retaining legacy HH:MM
+  // for minute-only/zero-second inputs. Both engines use this normalization.
+  return parts.second===0?minuteTime:`${minuteTime}:${parts.second.toString().padStart(2,"0")}`;
 }
 
 function parseDateParts(dateInput: string | Date): ParsedDateParts {
@@ -183,66 +184,33 @@ function parseTimeParts(timeText: string): ParsedTimeParts {
   };
 }
 
-export function parseTimezoneOffsetToHours(
-  timezone: string | number | undefined,
-  date: string,
-  time: string
-) {
-  if (typeof timezone === "number" && Number.isFinite(timezone)) {
-    return timezone;
-  }
-
-  const value = String(timezone ?? "Asia/Kolkata").trim();
-
-  if (!value) {
-    return 5.5;
-  }
-
-  const numeric = Number(value);
-  if (Number.isFinite(numeric)) {
-    return numeric;
-  }
-
-  const offsetMatch = value.match(/^([+-])?(\d{1,2})(?::?(\d{2})|\.(\d{1,2}))?$/);
-  if (offsetMatch) {
-    const sign = offsetMatch[1] === "-" ? -1 : 1;
-    const hours = Number(offsetMatch[2]);
-    const rawMinutes = offsetMatch[3] ?? offsetMatch[4];
-
-    const minutes = rawMinutes
-      ? value.includes(".") && rawMinutes.length === 1
-        ? Number(`0.${rawMinutes}`) * 60
-        : Number(rawMinutes)
-      : 0;
-
-    return sign * (hours + minutes / 60);
-  }
-
-  try {
-    const normalizedDate = normalizeBirthDate(date);
-    const normalizedTime = withSeconds(time);
-    const utcGuess = new Date(`${normalizedDate}T${normalizedTime}.000Z`);
-
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: value,
-      timeZoneName: "shortOffset",
-      hour: "2-digit",
-    }).formatToParts(utcGuess);
-
-    const token = parts.find((part) => part.type === "timeZoneName")?.value ?? "GMT+0";
-    const match = token.match(/GMT([+-]\d{1,2})(?::(\d{2}))?/);
-
-    if (!match) {
-      return 5.5;
-    }
-
-    const hours = Number(match[1]);
-    const minutes = Number(match[2] ?? 0);
-
-    return hours + Math.sign(hours || 1) * (minutes / 60);
-  } catch {
-    return 5.5;
-  }
+/** Resolve a civil birth time, including DST transitions. Unknown IANA zones
+ * and ambiguous/nonexistent local clock times never fall back silently to IST.
+ */
+export function parseTimezoneOffsetToHours(timezone:string|number|undefined,date:string,time:string){
+  const local=parseBirthDateTime(date,time);
+  const validOffset=(hours:number)=>{
+    if(!Number.isFinite(hours)||Math.abs(hours)>14)throw new Error("Invalid timezone offset.");
+    return hours;
+  };
+  if(typeof timezone==="number")return validOffset(timezone);
+  const value=String(timezone??"Asia/Kolkata").trim();
+  if(!value)throw new Error("Timezone required.");
+  if(/^[+-]?\d{1,2}(?:\.\d+)?$/.test(value))return validOffset(Number(value));
+  const explicit=value.match(/^([+-])(\d{1,2}):?(\d{2})$/);
+  if(explicit){const minutes=Number(explicit[3]);if(minutes>=60)throw new Error("Invalid timezone minutes.");return validOffset((explicit[1]==="-"?-1:1)*(Number(explicit[2])+minutes/60));}
+  const fmt=new Intl.DateTimeFormat("en-GB",{timeZone:value,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"});
+  const localMillis=Date.UTC(local.year,local.month-1,local.day,local.hour,local.minute,local.second);
+  const civilMillis=(utc:number)=>{
+    const parts=fmt.formatToParts(new Date(utc));
+    const n=(kind:string)=>Number(parts.find(p=>p.type===kind)?.value);
+    return Date.UTC(n("year"),n("month")-1,n("day"),n("hour"),n("minute"),n("second"));
+  };
+  const offsets=new Set<number>();
+  for(const delta of [-48,-24,0,24,48]){const candidate=localMillis+delta*3600000;offsets.add((civilMillis(candidate)-candidate)/3600000);}
+  const matches=[...offsets].filter(offset=>civilMillis(localMillis-offset*3600000)===localMillis);
+  if(matches.length!==1)throw new Error("Local birth time is ambiguous or nonexistent. Supply the recorded UTC offset.");
+  return validOffset(matches[0]);
 }
 
 export function localBirthToUtcDate(parts: ParsedBirthDateTime, timezoneOffsetHours: number) {
@@ -264,7 +232,7 @@ export function julianDayFromUtc(date: Date) {
 
   const day =
     date.getUTCDate() +
-    (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) / 24;
+    (date.getUTCHours() + date.getUTCMinutes() / 60 + (date.getUTCSeconds() + date.getUTCMilliseconds() / 1000) / 3600) / 24;
 
   let y = year;
 
@@ -304,5 +272,7 @@ export function withSeconds(time: string) {
 }
 
 export function normalizeDegrees(value: number) {
-  return ((value % 360) + 360) % 360;
+  if(value>=0&&value<360)return value;
+  const rest=value%360;
+  return rest>=0?rest:Math.min(360-Number.EPSILON*256,360+rest);
 }

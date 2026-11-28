@@ -2,6 +2,14 @@ import "server-only";
 
 import { fail } from "@/lib/api";
 import { cacheIncrement } from "@/lib/cache";
+import {sharedRedisConfigured} from "@/lib/cache/redis-cache";
+import {durableRateCount} from "@/lib/security/durable-rate-counter";
+import {trustedPublicClientIp} from "@/lib/auth/public-quota";
+
+async function sharedCount(key:string,ttlSeconds:number){
+  if(sharedRedisConfigured()||process.env.NODE_ENV!=="production")return cacheIncrement(key,ttlSeconds);
+  return (await durableRateCount(key,ttlSeconds)).count;
+}
 
 type RateLimitOptions = {
   request: Request;
@@ -18,13 +26,13 @@ export function rateLimitMessage(language: RateLimitOptions["language"] = "en") 
 }
 
 export async function checkRateLimit({ request, key, limit, windowSeconds, language = "en" }: RateLimitOptions) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
-  const count = await cacheIncrement(`rate:${key}:${ip}`, windowSeconds);
+  const ip=trustedPublicClientIp(request);
+  const count = await sharedCount(`rate:${key}:${ip}`, windowSeconds);
   if (count > limit) return fail(rateLimitMessage(language), 429);
   return null;
 }
 
 export async function rateLimit(key: string, limit: number, windowSeconds: number) {
-  const count = await cacheIncrement(`rate:${key}`, windowSeconds);
+  const count = await sharedCount(`rate:${key}`, windowSeconds);
   return { allowed: count <= limit, count, limit, remaining: Math.max(0, limit - count) };
 }

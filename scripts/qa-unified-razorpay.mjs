@@ -72,9 +72,13 @@ gate(verify.includes("reconcileCapturedPurpose(payment)") &&
   webhook.includes("reconcileCapturedPurpose(paid)"), "client and webhook converge on one receipt state");
 gate(reportDownload.includes('reportRequest.paymentStatus !== "PAID"') &&
   refund.includes('data: { paymentStatus: "REFUNDED" }'), "refunded report PDF cannot be accessed");
-gate(paymentHistory.includes("Complete purchased report details") &&
+gate(paymentHistory.includes("copy.completeReport") &&
+  read("lib/payments/customer-copy.ts").includes("Complete purchased report details") &&
   paymentHistory.includes('payment.status === "PAID"') &&
-  paymentHistory.includes("orderId="), "paid incomplete report can resume without another purchase");
+  paymentHistory.includes("!payment.reportRequest") &&
+  paymentHistory.includes("!payment.metadata?.savedReportId") &&
+  paymentHistory.includes("getReportSlugForPaidId(payment.metadata.reportId)") &&
+  paymentHistory.includes("orderId=${encodeURIComponent(payment.id)}"), "paid incomplete report can resume without another purchase");
 gate(!receipt.includes('const taxAmount = Number(payment.amount) * 0.18') &&
   receipt.includes("This is a payment receipt, not a tax invoice"), "no invented universal 18% GST");
 gate(consultationApi.includes("getConsultationSessionPrice") &&

@@ -65,20 +65,23 @@ export function KumbhHomePromotion({availableIds,initialNow}:{availableIds:strin
     if(!nextId||!el){if(el?.open)el.close();return;}
     if(shown.current)return;
     try{if(sessionStorage.getItem(PROMO_SESSION_KEY))return;}catch{/* private browsing */}
+    const priorFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const restoreFocus=()=>{if(priorFocus?.isConnected)priorFocus.focus({preventScroll:true});};
     const timer=window.setTimeout(()=>{
       if(!el.isConnected||document.visibilityState!=="visible"||document.querySelector("dialog[open], [role=dialog][aria-modal=true]"))return;
       const active=visibleKumbhEvents().find(e=>e.id===nextId);
       if(!active||!kumbhEventRequestOpen(active))return;
       try{
         el.showModal();
+        el.addEventListener("close",restoreFocus,{once:true});
         shown.current=true;
         try{sessionStorage.setItem(PROMO_SESSION_KEY,"shown");}catch{/* optional session memory */}
       }catch{/* Home remains usable even when modal display is unavailable. */}
     },5000);
-    return()=>{window.clearTimeout(timer);if(el.open)el.close()};
+    return()=>{window.clearTimeout(timer);if(el.open)el.close();el.removeEventListener("close",restoreFocus)};
   },[nextId]);
   if(!next)return null;
-  return <dialog ref={dialog} aria-labelledby="kumbh-promo-title" className="m-auto max-h-[90dvh] w-[min(92vw,32rem)] overflow-y-auto rounded-[1.6rem] border border-[#e7c38c] bg-[#fffaf0] p-0 text-[#492b35] shadow-2xl backdrop:bg-black/55">
+  return <dialog ref={dialog} aria-labelledby="kumbh-promo-title" aria-describedby="kumbh-promo-note" className="m-auto overscroll-contain max-h-[90dvh] w-[min(92vw,32rem)] overflow-y-auto rounded-[1.6rem] border border-[#e7c38c] bg-[#fffaf0] p-0 text-[#492b35] shadow-2xl backdrop:bg-black/55">
     <div className="relative isolate overflow-hidden bg-gradient-to-br from-[#421b30] via-[#8d3f3c] to-[#b56b2a] px-6 pb-6 pt-8 text-white">
       <Image src="/pujas/festival-illustration.svg" alt="" width={220} height={180} className="pointer-events-none absolute -right-8 bottom-0 -z-10 opacity-25"/>
       <button type="button" aria-label="Close Kumbh promotion" autoFocus onClick={()=>dialog.current?.close()} className="absolute right-3 top-3 rounded-full border border-white/40 bg-[#3a1c28] p-2 text-white"><X size={19}/></button>
@@ -92,7 +95,7 @@ export function KumbhHomePromotion({availableIds,initialNow}:{availableIds:strin
       <p className="mt-2 text-lg font-bold">{next.eventTitle}</p>
       <p className="mt-2 flex items-center gap-2 text-sm"><CalendarDays size={16} aria-hidden="true"/>{displayKumbhDate(next)} · {next.city}</p>
       <p className="mt-3 text-xl font-bold text-[#842f42]">₹1,100 <span className="text-sm font-medium">platform coordination fee</span></p>
-      <p className="mt-2 text-sm leading-6 text-[#624c54]">Explore date-wise Kumbh Pujas. Send a request without paying now. Pandit availability and actual ceremony arrangements must be confirmed. Not an official Mela booking.</p>
+      <p id="kumbh-promo-note" className="mt-2 text-sm leading-6 text-[#624c54]">Explore date-wise Kumbh Pujas. Send a request without paying now. Pandit availability and actual ceremony arrangements must be confirmed. Not an official Mela booking.</p>
       <Link href="/pujas#kumbh-2027" onClick={()=>dialog.current?.close()} className="mt-5 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#7d3044] px-5 py-3 font-bold text-white">Explore Kumbh Pujas <ArrowRight size={17}/></Link>
       <button type="button" onClick={()=>dialog.current?.close()} className="mt-3 w-full rounded-lg px-3 py-2 text-sm font-semibold underline">Not now</button>
     </div>

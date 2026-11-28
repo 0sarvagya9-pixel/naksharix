@@ -1,0 +1,130 @@
+name: Razorpay protected test scope
+on:
+  push:
+    branches: [internal-naksharix-development-hold-20261124]
+    paths:
+      - .github/workflows/razorpay-test-scope.yml
+      - scripts/qa-razorpay-sandbox-provider.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: naksharix-razorpay-test-scope
+  cancel-in-progress: false
+
+env:
+  NAKSHARIX_RAZORPAY_TEST_EVIDENCE_DIR: qa-razorpay-test-evidence
+
+jobs:
+  repository:
+    if: github.repository == '0sarvagya9-pixel/naksharix' && github.ref == 'refs/heads/internal-naksharix-development-hold-20261124' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      NAKSHARIX_RAZORPAY_TEST_SCOPE: repository
+    outputs:
+      ready: ${{ steps.availability.outputs.ready }}
+      eligible: ${{ steps.environments.outputs.eligible }}
+      names: ${{ steps.environments.outputs.names }}
+      sole: ${{ steps.environments.outputs.sole }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check repository and inherited test configuration
+        id: availability
+        env: &test-secrets
+          NAKSHARIX_RAZORPAY_TEST_KEY_ID: ${{ secrets.NAKSHARIX_RAZORPAY_TEST_KEY_ID }}
+          NAKSHARIX_RAZORPAY_TEST_KEY_SECRET: ${{ secrets.NAKSHARIX_RAZORPAY_TEST_KEY_SECRET }}
+          NAKSHARIX_RAZORPAY_TEST_CONFIRM: ${{ secrets.NAKSHARIX_RAZORPAY_TEST_CONFIRM }}
+        run: node scripts/qa-razorpay-sandbox-provider.mjs --check-availability
+      - name: Find existing eligible development environments
+        id: environments
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {appendFileSync,mkdirSync,writeFileSync} from "node:fs";
+          import path from "node:path";
+          const api = process.env.GITHUB_API_URL;
+          const repo = process.env.GITHUB_REPOSITORY;
+          const eligible = [];
+          let scanned = 0;
+          let status;
+          for (let page = 1; ; page++) {
+            const response = await fetch(api + "/repos/" + repo + "/environments?per_page=100&page=" + page, {
+              headers: {Authorization: "Bearer " + process.env.GH_TOKEN, Accept: "application/vnd.github+json"},
+              redirect: "error"
+            });
+            status = response.status;
+            if (!response.ok) break;
+            const {environments} = await response.json();
+            if (!Array.isArray(environments)) throw Error("Environment list unavailable");
+            scanned += environments.length;
+            for (const item of environments) {
+              const tokens = item.name.toLowerCase().split(/[^a-z0-9]+/);
+              if (!tokens.some(t => ["development","dev","sandbox","test","staging","preview"].includes(t))) continue;
+              if (tokens.some(t => ["production","prod","live","release"].includes(t))) continue;
+              if (!item.protection_rules?.length && !item.deployment_branch_policy) continue;
+              eligible.push(item.name);
+            }
+            if (environments.length < 100) break;
+          }
+          // A listing error must not cause a partial environment list to be used.
+          if (status !== 200) eligible.length = 0;
+          console.log("RAZORPAY_TEST_ENVIRONMENT_DISCOVERY=" + JSON.stringify({status,scanned,eligibleCount:eligible.length}));
+          mkdirSync(process.env.NAKSHARIX_RAZORPAY_TEST_EVIDENCE_DIR,{recursive:true,mode:0o700});
+          writeFileSync(path.join(process.env.NAKSHARIX_RAZORPAY_TEST_EVIDENCE_DIR,"environment-discovery.json"),JSON.stringify({schemaVersion:1,kind:"environment-discovery",observedAt:new Date().toISOString(),sourceSha:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,status,scanned,eligibleCount:eligible.length,fullMerchantToInboxAccepted:false},null,2)+"\n",{mode:0o600,flag:"wx"});
+          appendFileSync(process.env.GITHUB_OUTPUT, "eligible=" + Boolean(eligible.length) +
+            "\nnames=" + JSON.stringify(eligible) + "\nsole=" + (eligible.length === 1) + "\n");
+          NODE
+      - name: Create and read one provider test order when configured
+        if: steps.availability.outputs.ready == 'true'
+        env: *test-secrets
+        run: node scripts/qa-razorpay-sandbox-provider.mjs --provider-test-order
+      - name: Preserve redacted availability and provider-order evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: razorpay-test-scope-${{ github.run_id }}-repository
+          path: qa-razorpay-test-evidence/*.json
+          if-no-files-found: error
+          retention-days: 14
+
+  protected-development:
+    needs: repository
+    if: needs.repository.outputs.eligible == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(needs.repository.outputs.names) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      NAKSHARIX_RAZORPAY_TEST_SCOPE: protected-development
+    environment:
+      name: ${{ matrix.environment }}
+      deployment: false
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check protected development test configuration
+        id: availability
+        env: *test-secrets
+        run: node scripts/qa-razorpay-sandbox-provider.mjs --check-availability
+      - name: Create and read one provider test order in the sole eligible environment
+        if: needs.repository.outputs.ready != 'true' && needs.repository.outputs.sole == 'true' && steps.availability.outputs.ready == 'true'
+        env: *test-secrets
+        run: node scripts/qa-razorpay-sandbox-provider.mjs --provider-test-order
+      - name: Preserve redacted protected-development evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: razorpay-test-scope-${{ github.run_id }}-protected-${{ strategy.job-index }}
+          path: qa-razorpay-test-evidence/*.json
+          if-no-files-found: error
+          retention-days: 14

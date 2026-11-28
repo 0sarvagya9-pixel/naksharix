@@ -5,6 +5,7 @@ import { allPujaTopics, findPujaTopic, findKumbhEvent, displayKumbhDate, KUMBH_2
 import { getPujaRequestState as getPujaLaunchState } from "@/lib/puja/request-readiness";
 import { displayPujaPrice } from "@/lib/puja/offerings";
 import { PUJA_FEE_NOTICE_EN, PUJA_FEE_NOTICE_HI } from "@/lib/puja/fee-terms";
+import { seo } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = false;
@@ -19,8 +20,11 @@ export async function generateMetadata({params}:Props):Promise<Metadata> {
   if (!release.enabled || !topic || !release.offers[id])
     return {title:"Puja Services Coming Soon | Naksharix",robots:{index:false,follow:true}};
   return {
-    title: topic.name+" — Puja Date Requests | Naksharix",
-    description: topic.description+". Preferred-date requests only; payment after Pandit and schedule confirmation.",
+    ...seo({
+      title: `${topic.name} Cost & Date Request`,
+      description: `${topic.name}: ${displayPujaPrice(release.offers[id].pricePaise)} platform coordination fee. Request a date; no payment until Pandit and schedule are confirmed. Separate ceremony costs may apply.`,
+      path: `/pujas/${encodeURIComponent(id)}`
+    }),
     robots:{index:!release.requestOnly && !findKumbhEvent(id),follow:true}
   };
 }

@@ -75,3 +75,12 @@ for (const value of ["Secur3!Pass", "ordinary space inside", "कुंडली
 for (const value of [" password123", "password123 ", "<script>password123</script>", "javascript:password123", "abc onclick='x' pass123", null, 123]) assert.equal(isUnchangedCredential(value),false);
 assert.equal(sanitizeString(" password123 "),"password123"); // preserve legacy login normalization
 console.log("NEW_PASSWORD_NO_SILENT_NORMALIZATION_CONTRACT_PASS");
+
+import {professionalApplicationCopy,professionalApplicationAcknowledged} from "../lib/auth/professional-application-copy.ts";
+for(const locale of ["en","hi","hinglish"]){assert.deepEqual(Object.keys(professionalApplicationCopy[locale]),Object.keys(professionalApplicationCopy.en));assert.ok(Object.values(professionalApplicationCopy[locale]).every(v=>v.trim()));}
+for(const role of ["ASTROLOGER","CONSULTANT"]){
+ const data={role,effectiveRole:role,redirectTo:"/astrologer/profile",isAdminLogin:false,canBypassPayment:false};
+ assert.equal(professionalApplicationAcknowledged({data},role),true);
+ for(const patch of [{role:"USER"},{effectiveRole:"ADMIN"},{redirectTo:"https://example.invalid"},{isAdminLogin:true},{canBypassPayment:true},{canBypassPayment:undefined}])assert.equal(professionalApplicationAcknowledged({data:{...data,...patch}},role),false);
+}
+console.log("PROFESSIONAL_APPLICATION_ACK_CONTRACT_PASS");

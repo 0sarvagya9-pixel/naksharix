@@ -1,5 +1,5 @@
-import { normalizeDegrees } from "@/lib/astrology/own-engine/time";
-import { longitudeToRashi, rashis, wholeSignHouse } from "@/lib/astrology/own-engine/zodiac";
+import {navamsaCoordinates} from "@/lib/astrology/varga/partition";
+import {rashis,wholeSignHouse} from "@/lib/astrology/own-engine/zodiac";
 import type { HousePosition, PlanetPosition } from "@/lib/astrology/types";
 
 export function buildD1Chart(ascendantSignNumber: number, planets: PlanetPosition[]): HousePosition[] {
@@ -17,7 +17,11 @@ export function buildD1Chart(ascendantSignNumber: number, planets: PlanetPositio
 export function buildD9Chart(ascendantLongitude: number, sourcePlanets: Array<PlanetPosition & { absoluteLongitude?: number }>): HousePosition[] {
   const navamsaAscendant = navamsaSignFromLongitude(ascendantLongitude);
   const navamsaPlanets = sourcePlanets.map((planet) => {
-    const absolute = planet.absoluteLongitude ?? 0;
+    const idx=rashis.findIndex(sign=>sign===planet.sign);
+    const supplied=planet.absoluteLongitude;
+    const absolute=typeof supplied==="number"&&Number.isFinite(supplied)?supplied:
+      idx>=0&&typeof planet.degree==="number"&&Number.isFinite(planet.degree)&&planet.degree>=0&&planet.degree<30?idx*30+planet.degree:NaN;
+    if(!Number.isFinite(absolute))throw Error("NAVAMSA_PLANET_LONGITUDE_REQUIRED");
     const navamsa = navamsaSignFromLongitude(absolute);
     return {
       ...planet,
@@ -30,16 +34,6 @@ export function buildD9Chart(ascendantLongitude: number, sourcePlanets: Array<Pl
 }
 
 export function navamsaSignFromLongitude(longitude: number) {
-  const normalized = normalizeDegrees(longitude);
-  const signIndex = Math.floor(normalized / 30);
-  const degreeInSign = normalized % 30;
-  const navamsaIndex = Math.floor(degreeInSign / (30 / 9));
-  const startIndex = [0, 3, 6, 9].includes(signIndex)
-    ? signIndex
-    : [1, 4, 7, 10].includes(signIndex)
-      ? (signIndex + 8) % 12
-      : (signIndex + 4) % 12;
-  const d9SignIndex = (startIndex + navamsaIndex) % 12;
-  const degreeInSignD9 = (degreeInSign % (30 / 9)) * 9;
-  return { ...longitudeToRashi(d9SignIndex * 30 + degreeInSignD9), rashiNumber: d9SignIndex + 1, rashi: rashis[d9SignIndex] };
+  const {signIndex,degree}=navamsaCoordinates(longitude);
+  return {rashi:rashis[signIndex],rashiNumber:signIndex+1,degreeInSign:degree};
 }

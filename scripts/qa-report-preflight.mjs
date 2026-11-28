@@ -29,3 +29,79 @@ for(const wrong of [{id:"another"},{providerOrderId:"order_another"},{providerPa
 assert.equal(isVerifiedPaymentAck({data:{}},expected),false);
 assert.equal(isVerifiedPaymentAck(null,expected),false);
 console.log("CHECKOUT_ACK_CONTRACT_PASS; synthetic fixtures only");
+
+for(const invalid of [undefined,null,"","pay_","pay_ bad","order_fixture","pay_fixture\n"]){
+ assert.equal(isVerifiedPaymentAck({data:{payment:{...payment,providerPaymentId:invalid}}},{...expected,providerPaymentId:invalid}),false);
+}
+for(const invalid of [undefined,null,"","order_","order_ bad","pay_fixture"]){
+ assert.equal(isVerifiedPaymentAck({data:{payment:{...payment,providerOrderId:invalid}}},{...expected,orderId:invalid}),false);
+}
+for(const invalid of [undefined,null,""," "]){
+ assert.equal(isVerifiedPaymentAck({data:{payment:{...payment,id:invalid}}},{...expected,id:invalid}),false);
+ assert.equal(isVerifiedPaymentAck({data:{payment:{...payment,purpose:invalid}}},{...expected,purpose:invalid}),false);
+}
+for(const invalid of [0,-1,79900.5,NaN,Infinity])assert.equal(isVerifiedPaymentAck({data:{payment}},{...expected,amountPaise:invalid}),false);
+assert.equal(isVerifiedPaymentAck({data:{payment}},null),false);
+for(const id of ["order_","order_ bad","pay_fixture","order_fixture\n"])assert.equal(readCheckoutOrderAck({data:{...orderAck.data,order:{...orderAck.data.order,id}}},79900),null);
+console.log("CHECKOUT_ACK_MALFORMED_IDENTITY_GUARDS_PASS; synthetic fixtures only");
+
+import {isUnrefundedCapture} from "../lib/payments/capture-evidence.ts";
+import {readFileSync} from "node:fs";
+const capturedFixture={status:"captured",amount:79900,amount_refunded:0};
+assert.equal(isUnrefundedCapture(capturedFixture,79900),true);
+for(const refund of [undefined,null,1,79900,-1,"0",false,NaN,Infinity])assert.equal(isUnrefundedCapture({...capturedFixture,amount_refunded:refund},79900),false);
+for(const amount of [0,-1,"79900",79900.1,79899,NaN,Infinity,null,undefined])assert.equal(isUnrefundedCapture({...capturedFixture,amount},79900),false);
+for(const amount of [0,-1,NaN,Infinity,79900.5,Number.MAX_SAFE_INTEGER+1])assert.equal(isUnrefundedCapture({...capturedFixture,amount},amount),false);
+for(const status of ["authorized","refunded","failed","pending",null,undefined])assert.equal(isUnrefundedCapture({...capturedFixture,status},79900),false);
+for(const value of [null,undefined,[],true,79900,"captured"])assert.equal(isUnrefundedCapture(value,79900),false);
+const captureWebhook=readFileSync("app/api/payments/razorpay/webhook/route.ts","utf8"),captureServer=readFileSync("lib/revenue.ts","utf8");
+assert.ok(captureWebhook.includes("isUnrefundedCapture(payment, Math.round(Number(existingPayment.amount) * 100))"));
+assert.ok(captureServer.includes("isUnrefundedCapture(payment, Math.round(expectedAmount * 100))"));
+assert.ok(captureWebhook.includes('if (paid) await writeAuditLog({')&&captureWebhook.includes("razorpay_capture_not_finalized_requires_review"));
+console.log("UNREFUNDED_CAPTURE_EVIDENCE_PASS; provider and database integration acceptance pending");
+
+const captureVerify=readFileSync("app/api/payments/razorpay/verify/route.ts","utf8"),refundReconcile=readFileSync("lib/payments/purpose-reconciliation.ts","utf8");
+const lockPos=captureServer.indexOf("await lockProviderPayment(tx,providerPaymentId)"),receiptPos=captureServer.indexOf("await cumulativeSignedRefund(tx,providerPaymentId)"),claimPos=captureServer.indexOf("const claimed = await tx.payment.updateMany");
+assert.ok(lockPos>=0&&receiptPos>lockPos&&claimPos>receiptPos);
+assert.ok(captureServer.includes("Prisma.TransactionIsolationLevel.ReadCommitted"));
+assert.ok(captureWebhook.indexOf("const fresh = await verifyRazorpayCapturedPayment")<captureWebhook.indexOf("const paid = await finalizePaidPayment"));
+assert.ok(captureWebhook.includes("Payment verification temporarily unavailable"));
+// Both first capture and already-paid retry must use the same verified path.
+const retryGuard=captureVerify.indexOf('alreadyPaid && existingPayment.providerPaymentId !== body.razorpay_payment_id');
+const freshCapture=captureVerify.indexOf("const captured = await verifyRazorpayCapturedPayment(");
+const finalize=captureVerify.indexOf("const payment = await finalizePaidPayment(");
+const rejectUnfinalized=captureVerify.indexOf('if (!payment) return fail("Payment no longer eligible for capture", 409);');
+const reconcile=captureVerify.indexOf("await reconcileCapturedPurpose(payment)");
+const acknowledge=captureVerify.indexOf("return ok({ payment });");
+assert.ok(retryGuard>=0&&freshCapture>retryGuard&&finalize>freshCapture&&rejectUnfinalized>finalize&&reconcile>rejectUnfinalized&&acknowledge>reconcile);
+assert.ok(captureVerify.includes('if (!captured.ok) return alreadyPaid')&&captureVerify.includes('fail("Payment requires reconciliation before acknowledgement", 409)'));
+assert.equal((captureVerify.match(/await finalizePaidPayment\(/g)||[]).length,1);
+assert.equal((captureVerify.match(/return ok\(/g)||[]).length,1);
+assert.ok(refundReconcile.includes("if(signedTotal===null)return;")&&refundReconcile.includes("const effectiveRefund=signedTotal;"));
+console.log("CAPTURE_REFUND_ORDERING_SOURCE_CONTRACT_PASS; real gateway and concurrent DB acceptance pending");
+
+const reportCreate=readFileSync("app/api/report-requests/route.ts","utf8");
+const reportLock=reportCreate.indexOf("await lockProviderPayment(tx,providerPaymentId)"),reportRefund=reportCreate.indexOf("await cumulativeSignedRefund(tx,providerPaymentId)"),reportRowLock=reportCreate.indexOf("FOR UPDATE"),reportRead=reportCreate.indexOf("const current=await tx.payment.findUnique"),reportDuplicate=reportCreate.indexOf("const existing=await tx.reportRequest.findUnique"),reportInsert=reportCreate.indexOf("const row=await tx.reportRequest.create");
+assert.ok(reportLock>=0&&reportRefund>reportLock&&reportRowLock>reportRefund&&reportRead>reportRowLock&&reportDuplicate>reportRead&&reportInsert>reportDuplicate);
+assert.ok(reportCreate.includes("current.status!==PaymentStatus.PAID")&&reportCreate.includes("current.userId!==user.id")&&reportCreate.includes("current.providerPaymentId!==providerPaymentId")&&reportCreate.includes("if(existing)return {row:existing,created:false}")&&reportCreate.includes("if(!result.created)"));
+console.log("PAID_REPORT_REQUEST_REFUND_AND_DUPLICATE_SOURCE_GUARD_PASS");
+
+import {reportRequestCopy,reportRequestErrorKey} from "../lib/reports/report-request-copy.ts";
+const reportCopyKeys=Object.keys(reportRequestCopy.en).sort();
+for(const locale of ["en","hi","hinglish"]){assert.deepEqual(Object.keys(reportRequestCopy[locale]).sort(),reportCopyKeys);assert.ok(Object.values(reportRequestCopy[locale]).every(v=>typeof v==="string"&&v.trim().length>0));}
+for(const k of ["invalidCatalogue","invalidBirth","invalidPartner","invalidRoman","invalidAlternative","invalidSpellings","invalidExtra"])for(const stage of ["preflight","paid","manual"])assert.equal(reportRequestErrorKey(reportRequestCopy.en[k],stage,422),k);
+for(const raw of [undefined,null,{},["bad"],"Internal database error: synthetic private value","__proto__"]){assert.equal(reportRequestErrorKey(raw,"preflight",500),"preflightFailed");assert.equal(reportRequestErrorKey(raw,"paid",500),"requestUnconfirmed");assert.equal(reportRequestErrorKey(raw,"manual",500),"manualUnconfirmed");}
+assert.equal(reportRequestErrorKey("Unauthorized","paid",401),"signIn");
+assert.equal(reportRequestErrorKey(null,"preflight",503),"unavailable");
+assert.equal(reportRequestErrorKey(null,"manual",429),"busy");
+assert.equal(reportRequestErrorKey(null,"paid",429),"requestUnconfirmed");
+const requestForm=readFileSync("components/report-request/report-request-form.tsx","utf8");
+assert.ok(!requestForm.includes("setStatus(json?.error")&&!requestForm.includes("setStatus(checked.reason)"));
+assert.ok(requestForm.includes("reportRequestCopy[apiLocale]")&&requestForm.includes("autoReportDeliveryMessage(apiLocale)")&&requestForm.includes("language:selectedLanguage"));
+console.log("REPORT_REQUEST_LOCALIZATION_CONTRACT_PASS;KEYS="+reportCopyKeys.length+";LOCALES=3;RAW_ERROR_FALLBACK=SAFE");
+
+const newIntake=readFileSync("lib/reports/automatic-report-input.ts","utf8");
+const preflightRoute=readFileSync("app/api/report-requests/preflight/route.ts","utf8");
+assert.ok(newIntake.includes("export function checkNewReportInputs(")&&preflightRoute.includes("normalizeReviewedFields(reportSlug,submitted)")&&reportCreate.includes("checkNewReportInputs(report.slug,")&&requestForm.includes("checkNewReportInputs(reportSlug,birth,automaticDetails)"));
+assert.ok(requestForm.includes('secureFetch("/api/report-requests/preflight",{silent:true,')&&requestForm.includes('secureFetch("/api/report-requests",{silent:true,'),"Localized form owns its status messages");
+console.log("REPORT_INTAKE_PRIVACY_SOURCE_CONTRACT_PASS; LEGACY_RENDERER_VALIDATOR_PRESERVED");

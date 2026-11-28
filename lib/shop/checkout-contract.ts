@@ -62,3 +62,15 @@ export function checkoutErrorKey(status:number):"sessionExpired"|"changed"|"inva
  if(status===429)return "limited";
  return "uncertain";
 }
+
+/** Opaque persisted cart-attempt ID; it is not an authorization credential. */
+export function validCheckoutIntent(value:unknown):value is string{
+ return typeof value==="string"&&/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(value);
+}
+export function readCartIntent(value:unknown,fingerprint:string):string|null{
+ const record=obj(value);
+ return record?.version===1&&record.fingerprint===fingerprint&&validCheckoutIntent(record.intent)?record.intent.toLowerCase():null;
+}
+export function checkoutIntentAlreadyUsed(status:number,value:unknown):boolean{
+ return status===409&&obj(obj(value)?.details)?.code==="ORDER_INTENT_ALREADY_USED";
+}

@@ -8,7 +8,7 @@ import { rateLimit } from "@/lib/rate-limit";
 const schema = z.object({
   ticketId: z.string().min(1),
   message: z.string().trim().min(2).max(1200),
-  clientMutationId: z.string().uuid()
+  clientMutationId: z.string().uuid().transform(value=>value.toLowerCase())
 }).strict();
 
 export async function POST(request: Request) {
@@ -25,11 +25,13 @@ export async function POST(request: Request) {
       message: input.message,
       clientMutationId: input.clientMutationId
     });
+    if (result.kind === "conflict") return fail("Reply reference is already used with different details.",409);
     if (result.kind === "not_found") return fail("Ticket not found", 404);
     if (result.kind === "closed") return fail("Ticket is closed. Open a new request for more help.", 409);
     if (result.kind === "full") return fail("Conversation limit reached. Open a new ticket.", 409);
 
-    if (result.kind !== "ok") return fail("Unable to append support reply.", 409);    return ok({ recorded: true, duplicate: result.duplicate });
+    if (result.kind !== "ok") return fail("Unable to append support reply.", 409);
+    return ok({ ticketId:input.ticketId,recorded:true,duplicate:result.duplicate,clientMutationId:input.clientMutationId });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
       return fail("Ticket changed at the same time. Retry the reply.", 409);

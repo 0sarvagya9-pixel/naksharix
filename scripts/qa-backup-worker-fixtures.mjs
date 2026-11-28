@@ -11,22 +11,32 @@ const source=raw.slice(start+"export const EXPORT_WORKER = String.raw".length+1,
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),"naksh-backup-fixture-"));
 const worker=path.join(tmp,"export.mjs"),psql=path.join(tmp,"psql"),dump=path.join(tmp,"pg_dump");
 fs.writeFileSync(worker,source);
+const guard=[
+  'test "${PGHOST:-}" = "ep-qa.c-8.us-east-1.aws.neon.tech" || exit 92',
+  'test "${PGSSLMODE:-}" = "verify-full" && test "${PGSSLROOTCERT:-}" = "system" && test "${PGSSLCERTMODE:-}" = "disable" || exit 92',
+  'test -z "${PGHOSTADDR:-}${PGSERVICE:-}${PGSERVICEFILE:-}${SSL_CERT_FILE:-}${SSL_CERT_DIR:-}${BACKUP_DATABASE_URL:-}" || exit 92',
+  'case " $* " in *" --no-password "*) ;; *) exit 92;; esac',
+  '. "$(dirname "$0")/case.env"'
+];
 fs.writeFileSync(psql,[
-"#!/bin/sh",
+"#!/bin/sh",...guard,
 'if [ "$TEST_PSQL_FAIL" = "auth" ]; then echo "password authentication failed" >&2; exit 1; fi',
 'if [ "$TEST_PSQL_FAIL" = "off" ]; then echo off; exit 0; fi',
 'if [ "$TEST_PSQL_FAIL" = "once" ] && [ ! -e "$TEST_STATEFILE" ]; then touch "$TEST_STATEFILE"; echo "connection timed out" >&2; exit 1; fi',
 'echo on'].join("\n")+"\n");
 fs.writeFileSync(dump,[
-"#!/bin/sh",
+"#!/bin/sh",...guard,
 'if [ "$TEST_DUMP_FAIL" = "query" ]; then echo "canceling statement due to statement timeout" >&2; exit 1; fi',
 'if [ "$TEST_DUMP_FAIL" = "net" ]; then echo "could not connect to server" >&2; exit 1; fi',
 'printf PGDMP > /tmp/naksh-source.dump',
 'head -c 160 /dev/zero >> /tmp/naksh-source.dump'].join("\n")+"\n");
 fs.chmodSync(psql,0o700);fs.chmodSync(dump,0o700);
-const cases=[["success",{},0,"archiveBytes"],["readonly-off",{TEST_PSQL_FAIL:"off"},1,"READONLY_GUARD"],["auth-denied",{TEST_PSQL_FAIL:"auth"},1,"AUTH"],["retry-once",{TEST_PSQL_FAIL:"once",TEST_STATEFILE:path.join(tmp,"state")},0,"archiveBytes"],["query-timeout",{TEST_DUMP_FAIL:"query"},1,"QUERY_TIMEOUT"],["network-fail",{TEST_DUMP_FAIL:"net"},1,"NETWORK"]];
+const cases=[["success",{},0,"archiveBytes"],["readonly-off",{TEST_PSQL_FAIL:"off"},1,"READONLY_GUARD"],["auth-denied",{TEST_PSQL_FAIL:"auth"},1,"AUTH"],["retry-once",{TEST_PSQL_FAIL:"once",TEST_STATEFILE:path.join(tmp,"state")},0,"archiveBytes"],["query-timeout",{TEST_DUMP_FAIL:"query"},1,"QUERY_TIMEOUT"],["network-fail",{TEST_DUMP_FAIL:"net"},1,"NETWORK"],["inherited-overrides",{PGHOSTADDR:"192.0.2.1",PGSERVICE:"fixture",PGSERVICEFILE:"/tmp/untrusted",PGSSLMODE:"disable",PGSSLROOTCERT:"untrusted",SSL_CERT_FILE:"/tmp/untrusted",SSL_CERT_DIR:"/tmp/untrusted"},0,"archiveBytes"],["wrong-host",{BACKUP_EXPECTED_SOURCE_HOST:"other.neon.tech"},1,"HOST_MISMATCH"]];
 for(const [name,flags,exit,diagnostic] of cases){
   try{fs.unlinkSync("/tmp/naksh-source.dump")}catch{}
+  // Fixture controls are read by the fake binaries, not inherited from the
+  // actual worker's deliberately minimal child environment.
+  fs.writeFileSync(path.join(tmp,"case.env"),Object.entries(flags).filter(([key])=>key.startsWith("TEST_")).map(([key,value])=>key+"="+JSON.stringify(value)).join("\n")+"\n");
   const env={...process.env,PATH:tmp+":"+process.env.PATH,BACKUP_DATABASE_URL:"postgresql://fixture:dummy@ep-qa.c-8.us-east-1.aws.neon.tech/neondb",BACKUP_EXPECTED_SOURCE_HOST:"ep-qa.c-8.us-east-1.aws.neon.tech",...flags};
   const r=spawnSync(process.execPath,[worker],{env,encoding:"utf8",timeout:15000});
   assert.equal(r.status,exit,name+" unexpected exit");
@@ -36,4 +46,4 @@ for(const [name,flags,exit,diagnostic] of cases){
 }
 try{fs.unlinkSync("/tmp/naksh-source.dump")}catch{}
 fs.rmSync(tmp,{recursive:true,force:true});
-console.log("BACKUP_WORKER_RUNTIME_FIXTURES=6/6_PASS");
+console.log("BACKUP_WORKER_RUNTIME_FIXTURES=8/8_PASS");

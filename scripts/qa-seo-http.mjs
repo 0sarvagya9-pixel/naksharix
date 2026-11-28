@@ -10,7 +10,8 @@ const pairs = [
   ["/about", "/hi/about"],
   ["/kumbh-mela-2027", "/hi/kumbh-mela-2027"],
   ["/festival-calendar", "/hi/festival-calendar"],
-  ["/grahan-2027", "/hi/grahan-2027"]
+  ["/grahan-2027", "/hi/grahan-2027"],
+  ["/yearly-horoscope-2027", "/hi/yearly-horoscope-2027"]
 ];
 const nativeGuides = ["en", "hi", "mr", "bn", "es", "fr"];
 const approvedGuides = ["en", "hi"];
@@ -91,7 +92,7 @@ for (const locale of approvedGuides) {
 for (const locale of nativeGuides.filter((x) => !approvedGuides.includes(x))) {
   assert.ok(!xml.includes("<loc>" + absolute(guidePath(locale)) + "</loc>"), "Unreviewed guide sitemap leak: " + locale);
 }
-for (const route of ["/commerce-enquiry", "/ask-astrologer", "/puja-enquiry"]) {
+for (const route of ["/commerce-enquiry", "/ask-astrologer", "/puja-enquiry", "/dashboard/deferred-services"]) {
   assert.ok(!xml.includes("<loc>" + absolute(route) + "</loc>"), "Private intake sitemap leak: " + route);
 }
 const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
@@ -113,7 +114,7 @@ for (const route of ["/","/about","/hi/about"]) {
 const llms=await fetch(base+"/llms.txt");
 assert.equal(llms.status,200);
 assert.ok((await llms.text()).includes("https://www.naksharix.com/hi/about"),"Missing public brand directory");
-console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=14;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");
+console.log("SEO_RUNTIME_HTTP=PASS;BILINGUAL_ROUTES=16;SITEMAP_ALTERNATES=YES;SSR_LANGUAGE=YES;BRAND_GRAPH=YES");
 
  
 // Check the actual rendered public pages from the previous 50-page audit.
@@ -130,7 +131,11 @@ for(const path of focusedSeoRoutes){
   assert.equal(response.status,200,"Audit page unavailable "+path);
   const html=stripMarkup(await response.text());
   const title=decodeBasic(html.match(/<title>([^<]+)<\/title>/i)?.[1]??"");
-  assert.ok(title.length>=15 && title.length<=65,"Missing/overlong editorial title "+path+": "+title);
+  assert.ok(title.length>=15 && title.length<=60,"Missing/overlong editorial title "+path+": "+title);
+  if(path==="/panchang"){
+    const description=decodeBasic([...html.matchAll(/<meta\b[^>]*>/gi)].map(m=>m[0]).find(tag=>/\bname="description"/i.test(tag))?.match(/\bcontent="([^"]*)"/i)?.[1]??"");
+    assert.ok(description.length>=70&&description.length<=160,"Missing/overlong Panchang description: "+description);
+  }
   if(["/calculators","/horoscope","/transits"].includes(path)){
     const levels=[...html.matchAll(/<h([1-6])\b[^>]*>/gi)].map(m=>Number(m[1]));
     const start=levels.indexOf(1);
@@ -169,3 +174,24 @@ for(const [path,kind,markers] of [
   assert.ok(!/<meta[^>]*name="robots"[^>]*content="[^"]*noindex/i.test(publicHtml),"Unexpected noindex "+path);
 }
 console.log("SEASONAL_HTTP=PASS;SIX_BILINGUAL_ROUTES;DATES_AND_SAFETY");
+
+for(const path of ["/yearly-horoscope-2027","/hi/yearly-horoscope-2027"]){const r=await fetch(base+path);assert.equal(r.status,200);const html=stripMarkup(await r.text());assert.ok(html.includes("annual-rashi"));assert.ok(html.includes("2027-01-01")&&html.includes("2027-12-01"));assert.equal([...html.matchAll(/<h1\b[^>]*>/gi)].length,1);}
+
+// Query-led helpful content: visible answers and valid, voluntary public tool links.
+for (const [path,topic,english,hindi,links] of [
+  ["/weekly-love-horoscope","love","How to read a weekly love horoscope","साप्ताहिक प्रेम राशिफल कैसे पढ़ें?",["/free-kundli","/kundli-matching"]],
+  ["/numerology","numerology","What is a numerology reading?","अंक ज्योतिष रीडिंग क्या है?",["/free-calculators/name-number-calculator","/free-calculators/lo-shu-grid-calculator"]]
+]) {
+  for(const [locale,heading] of [["en",english],["hi",hindi]]) {
+    const r=await fetch(base+path,{headers:{Cookie:"naksharix-language="+locale}});
+    assert.equal(r.status,200);
+    const html=stripMarkup(await r.text());
+    assert.equal([...html.matchAll(/<h1\b[^>]*>/gi)].length,1,"One H1 "+path);
+    assert.ok(html.includes('id="reading-guide-'+topic+'"')&&html.includes(heading),"Missing rendered reading guide "+locale+" "+path);
+    if(locale==="en")for(const link of links){assert.ok(html.includes('href="'+link+'"'),"Missing resource link "+link);assert.equal((await fetch(base+link)).status,200);}
+    assert.ok([...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/gi)].map(m=>m[0]).some(tag=>hrefMatches(tag,path)),"Guide canonical "+path);
+  }
+}
+const guideDirectory=await(await fetch(base+"/llms.txt")).text();
+assert.ok(guideDirectory.includes("https://www.naksharix.com/weekly-love-horoscope")&&guideDirectory.includes("https://www.naksharix.com/free-calculators/name-number-calculator"));
+console.log("QUERY_LED_PUBLIC_GUIDES_HTTP=PASS;2_EXISTING_ROUTES;EN_HI_VISIBLE;CANONICAL;PUBLIC_TOOL_LINKS");

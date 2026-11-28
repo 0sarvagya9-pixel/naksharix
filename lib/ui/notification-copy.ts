@@ -1,0 +1,47 @@
+import type {Locale} from "@/lib/i18n";
+import {selectCopy, type LocalizedCopy} from "@/lib/i18n-copy";
+
+const dictionary = {
+  completed: ["Action completed", "कार्य पूरा हुआ", "Action complete hua"], attention: ["Action needs attention", "कार्य पर ध्यान दें", "Action par dhyan dein"],
+  information: ["Information", "जानकारी", "Jaankari"], review: ["Please review", "कृपया जाँचें", "Kripya review karein"],
+  saved: ["Saved successfully", "सफलतापूर्वक सुरक्षित हुआ", "Save ho gaya"],
+  paymentPending: ["Payment status pending", "भुगतान की पुष्टि बाकी", "Payment status pending"],
+  paymentAttention: ["Payment needs attention", "भुगतान पर ध्यान दें", "Payment par dhyan dein"],
+  notCompleted: ["Action not completed", "कार्य पूरा नहीं हुआ", "Action complete nahi hua"],
+  connectionTitle: ["Connection problem", "कनेक्शन की समस्या", "Connection problem"],
+  closes: ["Closes automatically in 5 seconds", "5 सेकंड में अपने आप बंद होगा", "5 second mein apne aap band hoga"],
+  dismiss: ["Dismiss notification", "सूचना बंद करें", "Notification band karein"],
+  order: ["Order request saved. Confirm the final amount and payment status in My Orders.", "आदेश अनुरोध सुरक्षित हुआ। मेरे आदेश में अंतिम राशि और भुगतान की स्थिति जाँचें।", "Order request saved hai. My Orders mein final amount aur payment status check karein."],
+  puja: ["Puja request received. A Pandit and ceremony time must be confirmed; no payment is due yet.", "पूजा अनुरोध प्राप्त हुआ। पंडित और पूजा का समय पुष्ट होना बाकी है; अभी भुगतान देय नहीं है।", "Puja request mili hai. Pandit aur puja ka time confirm hona baaki hai; abhi payment due nahi hai."],
+  consultation: ["Consultation request received. Check your account for acceptance and payment status.", "परामर्श अनुरोध प्राप्त हुआ। स्वीकृति और भुगतान की स्थिति अपने खाते में देखें।", "Consultation request mili hai. Acceptance aur payment status apne account mein dekhein."],
+  login: ["Sign-in accepted. Opening your account.", "साइन इन स्वीकार हुआ। आपका खाता खोला जा रहा है।", "Sign in accept hua. Aapka account khul raha hai."],
+  signup: ["Registration accepted. Complete any required email verification.", "पंजीकरण स्वीकार हुआ। आवश्यक ईमेल सत्यापन पूरा करें।", "Registration accept hua. Zaroori email verification poori karein."],
+  report: ["Report request recorded. Payment and document delivery are tracked separately.", "रिपोर्ट अनुरोध दर्ज हुआ। भुगतान और दस्तावेज़ डिलीवरी की स्थिति अलग-अलग दर्ज होती है।", "Report request record hui. Payment aur document delivery alag track hote hain."],
+  support: ["Support request recorded. You can follow progress in your account.", "सहायता अनुरोध दर्ज हुआ। प्रगति अपने खाते में देख सकते हैं।", "Support request record hui. Progress apne account mein dekh sakte hain."],
+  supportReply: ["Support reply saved in the conversation.", "सहायता का उत्तर बातचीत में सुरक्षित हुआ।", "Support reply conversation mein save hua."],
+  astrologerProfile: ["Astrologer profile saved for review, not yet approved.", "ज्योतिषी प्रोफ़ाइल समीक्षा के लिए सुरक्षित है; अभी अनुमोदित नहीं है।", "Astrologer profile review ke liye saved hai; abhi approved nahi hai."],
+  offering: ["Puja offering settings saved. Service launch and Pandit availability are verified separately.", "पूजा सेवा की सेटिंग सुरक्षित हुई। सेवा शुरू होने और पंडित की उपलब्धता का सत्यापन अलग होता है।", "Puja offering settings saved hain. Service launch aur Pandit availability alag verify hote hain."],
+  partner: ["Pandit profile saved for review. This does not confirm availability.", "पंडित प्रोफ़ाइल समीक्षा के लिए सुरक्षित है। इससे उपलब्धता की पुष्टि नहीं होती।", "Pandit profile review ke liye saved hai. Isse availability confirm nahi hoti."],
+  partnerReview: ["Pandit review decision saved. Individual ceremony dates still need confirmation.", "पंडित की समीक्षा का निर्णय सुरक्षित हुआ। प्रत्येक पूजा की तारीख की पुष्टि अभी भी आवश्यक है।", "Pandit review decision saved hai. Har ceremony date abhi bhi confirm honi chahiye."],
+  pujaStatus: ["Puja status saved. Customer inbox delivery is not guaranteed.", "पूजा की स्थिति सुरक्षित हुई। ग्राहक के इनबॉक्स में संदेश पहुँचने की गारंटी नहीं है।", "Puja status saved hai. Customer inbox delivery ki guarantee nahi hai."],
+  shopStatus: ["Shop order status saved. Payment and actual delivery remain separate checks.", "दुकान के आदेश की स्थिति सुरक्षित हुई। भुगतान और वास्तविक डिलीवरी की जाँच अलग रहती है।", "Shop order status saved hai. Payment aur actual delivery alag check hote hain."],
+  notificationRetry: ["Notification retry recorded. Provider acceptance does not prove inbox delivery.", "सूचना का पुनः प्रयास दर्ज हुआ। सेवा प्रदाता का स्वीकार करना इनबॉक्स में पहुँचने का प्रमाण नहीं है।", "Notification retry record hua. Provider acceptance inbox delivery ka proof nahi hai."],
+  supportAdminReply: ["Support reply saved. Email delivery status is shown on the page.", "सहायता का उत्तर सुरक्षित हुआ। ईमेल डिलीवरी की स्थिति पेज पर दिखाई गई है।", "Support reply saved hai. Email delivery status page par dikhta hai."],
+  supportStatus: ["Support status saved.", "सहायता की स्थिति सुरक्षित हुई।", "Support status saved hai."],
+  reportStatus: ["Report workflow update recorded in the audit history.", "रिपोर्ट प्रक्रिया का बदलाव जाँच इतिहास में दर्ज हुआ।", "Report workflow update audit history mein record hua."],
+  generated: ["Report PDF generation finished. Check saved report details before delivery.", "रिपोर्ट PDF बन गई। डिलीवरी से पहले सुरक्षित रिपोर्ट विवरण जाँचें।", "Report PDF generation complete hua. Delivery se pehle saved report details check karein."],
+  delivered: ["Report delivery action processed. The page confirms provider acceptance separately.", "रिपोर्ट डिलीवरी का कार्य संसाधित हुआ। सेवा प्रदाता की स्वीकृति की पुष्टि पेज पर अलग है।", "Report delivery action process hua. Provider acceptance page par alag confirm hoti hai."],
+  verificationError: ["Payment status could not be verified here. Check payment history before trying again; do not pay twice.", "यहाँ भुगतान की स्थिति सत्यापित नहीं हो सकी। फिर प्रयास से पहले भुगतान इतिहास देखें; दोहरा भुगतान न करें।", "Yahan payment status verify nahi hua. Phir try karne se pehle Payment History dekhein; do baar payment na karein."],
+  paymentError: ["The payment action needs review. Check your payment history before another attempt.", "भुगतान कार्य की समीक्षा आवश्यक है। दूसरे प्रयास से पहले भुगतान इतिहास देखें।", "Payment action ko review chahiye. Doosre attempt se pehle Payment History dekhein."],
+  authError: ["Sign-in or registration needs attention. Follow any verification instructions on the page.", "साइन इन या पंजीकरण पर ध्यान दें। पेज पर दिए सत्यापन निर्देशों का पालन करें।", "Sign in ya registration par dhyan dein. Page ki verification instructions follow karein."],
+  unauthorized: ["Please sign in with an authorized account and try again.", "अधिकृत खाते से साइन इन करके फिर प्रयास करें।", "Authorized account se sign in karke phir try karein."],
+  conflict: ["This item changed or a previous request exists. Review the current details before retrying.", "विवरण बदले हैं या पहले का अनुरोध मौजूद है। फिर प्रयास से पहले वर्तमान विवरण देखें।", "Details badli hain ya pehli request maujood hai. Retry se pehle current details dekhein."],
+  invalid: ["Please review the information in the form and correct any errors.", "फॉर्म में जानकारी जाँचें और त्रुटियाँ सुधारें।", "Form ki jaankari check karke errors sudharein."],
+  limited: ["Too many attempts. Please try again later.", "बहुत अधिक प्रयास हुए हैं। बाद में प्रयास करें।", "Bahut zyada attempts hue hain. Baad mein try karein."],
+  unavailable: ["This service is temporarily unavailable. Your request has not been confirmed.", "यह सेवा अस्थायी रूप से उपलब्ध नहीं है। आपके अनुरोध की पुष्टि नहीं हुई है।", "Yeh service filhaal available nahi hai. Aapki request confirm nahi hui hai."],
+  error: ["This action could not be completed. Review the page message and try again.", "यह कार्य पूरा नहीं हो सका। पेज का संदेश देखें और फिर प्रयास करें।", "Yeh action complete nahi hua. Page ka message dekhkar phir try karein."],
+  paymentConnection: ["Payment confirmation could not be checked. Review payment history before retrying; do not pay twice.", "भुगतान की पुष्टि जाँची नहीं जा सकी। फिर प्रयास से पहले भुगतान इतिहास देखें; दोहरा भुगतान न करें।", "Payment confirmation check nahi hui. Retry se pehle Payment History dekhein; do baar payment na karein."],
+  connection: ["The secure request could not connect. Check your connection and the on-page status before trying again.", "सुरक्षित अनुरोध के लिए संपर्क नहीं हो सका। फिर प्रयास से पहले कनेक्शन और पेज की स्थिति जाँचें।", "Secure request connect nahi hui. Phir try karne se pehle connection aur page status check karein."]
+} satisfies Record<string, LocalizedCopy>;
+export type NotificationMessage = keyof typeof dictionary;
+export const notificationCopy = (locale: Locale) => selectCopy(dictionary, locale);

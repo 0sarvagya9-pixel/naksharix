@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         traditions: [...new Set(input.traditions)],
         evidenceUrl: input.evidenceUrl || null,
         reviewStatus: "PENDING"
-      }, select: { id: true, reviewStatus: true }
+      }, select: { id: true, name: true, region: true, traditions: true, evidenceUrl: true, reviewStatus: true }
     });
     return ok({ partner }, { status: 201 });
   } catch (error) { return handleApiError(error); }
@@ -100,7 +100,7 @@ export async function PATCH(request: NextRequest) {
     if (result === "not_found") return fail("Partner not found", 404);
     if (result === "missing_evidence") return fail("Evidence required before review.", 422);
     if (result === "missing_topic_approval") return fail("Assign at least one exact supported Puja topic before verification.", 422);
-    return ok({ recorded: true, reviewStatus: input.decision });
+    return ok({ recorded: true, partnerId: input.partnerId, reviewStatus: input.decision });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
       return fail("Another review changed this record. Retry.", 409);

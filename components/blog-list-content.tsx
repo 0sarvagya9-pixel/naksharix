@@ -23,7 +23,7 @@ export function BlogListContent() {
         {blogPosts.map((post) => (
           <Card key={post.slug}>
             <CardHeader>
-              <CardTitle>{post.title}</CardTitle>
+              <CardTitle as="h2">{post.title}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm naksh-muted-text">{post.description}</p>

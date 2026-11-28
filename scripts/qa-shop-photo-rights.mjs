@@ -3,6 +3,7 @@ import fs from "node:fs";
 const read=(path)=>fs.readFileSync(path,"utf8");
 const ui=read("components/shop-coming-soon-content.tsx");
 const admin=read("components/admin-shop-content.tsx");
+const shopAdminCopy=read("lib/shop/admin-copy.ts");
 const api=read("app/api/admin/shop-catalogue/route.ts");
 const model=read("lib/manual-catalogue.ts");
 for(const part of ["safeProductVisual(product)","ResilientShopPhoto", "Images are for reference", "product.imageRights", "product.imageEvidenceUrl"]) {
@@ -11,9 +12,10 @@ for(const part of ["safeProductVisual(product)","ResilientShopPhoto", "Images ar
 for(const part of ["imageRights: z.enum", "imageEvidenceUrl: z.string().url()", "External product image requires documented image-use rights.", "evidence.protocol !== \"https:\""]) {
   assert.ok(api.includes(part),"SHOP_IMAGE_LICENSE_BACKEND_GUARD_MISSING="+part);
 }
-for(const part of ["Image usage rights", "Image rights evidence HTTPS URL", "SUPPLIER_AUTHORIZED"]) {
-  assert.ok(admin.includes(part),"SHOP_ADMIN_PHOTO_PROOF_UI_MISSING="+part);
+for(const [binding,phrase] of [["copy.imageRights","Image usage rights"],["copy.rightsEvidence","Image rights evidence HTTPS URL"]]) {
+  assert.ok(admin.includes(binding)&&shopAdminCopy.includes(phrase),"SHOP_ADMIN_PHOTO_PROOF_UI_MISSING="+binding);
 }
+assert.ok(admin.includes("SUPPLIER_AUTHORIZED"),"SHOP_ADMIN_SUPPLIER_EVIDENCE_CHOICE_MISSING");
 for(const part of ["imageRights?:", "imageEvidenceUrl?:", "imageRights: [\"OWNED\""]) {
   assert.ok(model.includes(part),"SHOP_IMAGE_PROOF_PERSISTENCE_MISSING="+part);
 }
@@ -57,10 +59,11 @@ const cartControls=read("components/shop/quote-cart-controls.tsx");
 for(const invariant of ["list[index].quantity>=10","list.length>=20","writeCart(list)","setResult(\"unavailable\")","copy=checkoutCopy[apiLocale]","copy.limitMessage","copy.fullMessage","copy.cartStorage"]){
   assert.ok(cartControls.includes(invariant),"CART_CONTROL_DUPLICATE_OR_STORAGE_GUARD_MISSING="+invariant);
 }
-for(const invariant of ['setOrderId(order.id);', 'readCheckoutOrder(payload,', 'if(cartFingerprint(readCart())===fingerprint){writeCart([]);setLines([]);}', 'setIssue("cartClear")', 'setIssue("cartChanged")', 'setIssue("cartStorage")', 'setUncertain(true)', 'inFlight.current||locked']){
+for(const invariant of ['setOrderId(order.id);', 'readCheckoutOrder(payload,', 'if(await clearConfirmedCart(fingerprint,checkoutIntent)){setLines([]);}', 'setIssue("cartClear")', 'setIssue("cartChanged")', 'setIssue("cartStorage")', 'setUncertain(true)', 'inFlight.current||locked']){
   assert.ok(cart.includes(invariant),"CART_ACCEPTED_ORDER_OR_STORAGE_FAILURE_HANDLING_MISSING="+invariant);
 }
 
+assert.ok(cartControls.includes("cartFingerprint(readCart())!==fingerprint")&&cartControls.includes("storedCheckoutIntent(fingerprint)!==intent")&&cartControls.includes("window.localStorage.setItem(CHECKOUT_INTENT_KEY")&&cart.includes("checkoutIntentAlreadyUsed(response.status,payload)"),"CART_REPLAY_OR_WRONG_REVISION_GUARD_MISSING");
 const checkoutText=read("lib/shop/checkout-copy.ts");
 for(const marker of ['"limitMessage": "Maximum 10 units of this product per cart."', '"cartStorage": "Cart could not be saved in this browser. Enable storage and retry."', '"cartClear": "Order saved. The cart could not be cleared; do not submit a duplicate order."'])assert.ok(checkoutText.includes(marker),"LOCALIZED_CART_SAFETY_DISCLOSURE_MISSING="+marker);
 const productResilience=read("components/shop/resilient-shop-photo.tsx");
@@ -71,7 +74,8 @@ assert.ok(productDetail.includes("<ResilientShopPhoto")&&ui.includes("<Resilient
   "SHOP_GALLERY_CARDS_AND_CART_MUST_RECOVER_IMAGE_FAILURES");
 
 const reviewForm=read("components/consultation-review-form.tsx");
-assert.ok(reviewForm.includes("Rate your consultation") && reviewForm.includes("Submit rating") && reviewForm.includes("aria-pressed={rating === value}"),"ACCESSIBLE_CUSTOMER_RATINGS_MISSING");
+const reviewCopy=read("lib/consultations/customer-copy.ts");
+assert.ok(reviewForm.includes("copy.rateConsultation") && reviewForm.includes("copy.submitRating") && reviewForm.includes("aria-pressed={rating === value}") && reviewForm.includes("aria-label={copy.ratingGroup}") && reviewCopy.includes("Rate your consultation") && reviewCopy.includes("Submit rating"),"ACCESSIBLE_CUSTOMER_RATINGS_MISSING");
 assert.ok(read("app/api/consultation-bookings/review/route.ts").includes("rating: z.coerce.number().int().min(1).max(5)"),"RATINGS_MUST_BE_INTEGERS");
 console.log("SHOP_VISUAL_AND_IMAGE_RIGHTS_QA=PASS;LICENSED_PHOTO_REFERENCES=12;UNLICENSED_EXTERNAL_PHOTOS=HELD;CHECKOUT_GATED_BY_RAZORPAY=YES");
 
@@ -136,10 +140,11 @@ assert.ok(home.includes('href={"/shop/"+item.id}') &&
   "HOMEPAGE_FEATURED_COMMERCE_LINKS_STALE");
 
 const adminPujaPhotos=read("components/admin-puja-offerings.tsx");
-for(const marker of ["needsExactPhoto","Show Pujas that still need a topic-specific photograph",
+for(const marker of ["needsExactPhoto","copy.exactPhoto",
   "pujaEditorialPhoto(topic.id,topic.category)","photo.author","photo.license"]){
   assert.ok(adminPujaPhotos.includes(marker),"ADMIN_PUJA_PHOTO_CURATION_UI_MISSING="+marker);
 }
+assert.ok(read("lib/admin/catalogue-copy.ts").includes("Show topics needing a specific photograph"),"ADMIN_PUJA_PHOTO_CURATION_LABEL_MISSING");
 
 const resilientPuja=read("components/puja/resilient-editorial-image.tsx");
 assert.ok(resilientPuja.includes("wikimediaOriginalForThumbnail(src)")&&
@@ -156,7 +161,7 @@ for(const page of ["components/puja/puja-services-directory.tsx","app/pujas/[id]
 }
 
 const shopAdminReadiness=read("components/admin-shop-content.tsx");
-for(const phrase of ["hasSupplierPhotoEvidence","needs-supplier-photo","Needs approved price","supplierEvidenceCount",
-  "Licensed reference photographs do not count as actual stock photos."]){
+for(const phrase of ["hasSupplierPhotoEvidence","needs-supplier-photo","supplierEvidenceCount","copy.needsPrice","copy.imageGuidance"]){
   assert.ok(shopAdminReadiness.includes(phrase),"ADMIN_SHOP_OWNER_DATA_REVIEW_MISSING="+phrase);
 }
+assert.ok(shopAdminCopy.includes("Needs approved price")&&shopAdminCopy.includes("Licensed reference photographs do not count as actual stock photos."),"ADMIN_SHOP_LOCALIZED_OWNER_REVIEW_DISCLOSURE_MISSING");

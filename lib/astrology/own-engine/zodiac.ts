@@ -34,3 +34,9 @@ export function absoluteLongitude(rashi: string, degreeInSign: number) {
   const index = Math.max(0, rashis.findIndex((sign) => sign === rashi));
   return index * 30 + degreeInSign;
 }
+
+/** For display only; never round a valid degree into the next sign. */
+export function boundedDegreeDisplay(degree:number,digits:4|6){
+ if(!Number.isFinite(degree)||degree<0||degree>=30)throw Error("INVALID_SIGN_DEGREE");
+ return Math.min(30-10**(-digits),Number(degree.toFixed(digits)));
+}

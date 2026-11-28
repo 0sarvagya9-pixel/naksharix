@@ -4,6 +4,7 @@ const read=(p)=>readFileSync(p,"utf8");
 const prisma=read("prisma/schema.prisma");
 const admin=read("app/api/admin/puja-offerings/route.ts");
 const ui=read("components/admin-puja-offerings.tsx");
+const catalogueCopy=read("lib/admin/catalogue-copy.ts");
 const index=read("app/pujas/page.tsx");
 const detail=read("app/pujas/[id]/page.tsx");
 const listings=read("components/puja/puja-services-directory.tsx");
@@ -25,7 +26,7 @@ assert.ok(admin.includes("getAdminApiUser()")&&admin.includes("validateJson(requ
 assert.ok(admin.includes('if(!findPujaTopic(input.topicId))')&&admin.includes('input.available&&input.pricePaise===null'),"Invented Puja ID or zero-priced live publication");
 assert.ok(admin.includes('pricePaise:z.number().int().min(100).max(100000000).nullable()'),"Unsafe amount range");
 assert.ok(!/\b(?:razorpay|payment\.create|checkoutSession|prisma\.payment\.create)\b/.test(admin),"Admin rate update must not collect a payment");
-assert.ok(ui.includes('secureFetch("/api/admin/puja-offerings"')&&ui.includes("Publish price"),"Missing editable Admin Puja prices");
+assert.ok(ui.includes('secureFetch("/api/admin/puja-offerings"')&&ui.includes("copy.publishOffer")&&catalogueCopy.includes("Publish price only if this Puja can actually be offered"),"Missing editable Admin Puja prices");
 assert.ok(pujaPaused || (index.includes("getPublishedPujaOffers()")&&listings.includes("offerings[topic.id]")&&detail.includes('const offering=(await getPublishedPujaOffers())[item.id]')),"Public price integration must be active or deliberately paused");
 assert.ok(db.includes('error.code==="P2021"')&&db.includes("return {}"),"Missing-table fallback must not fake prices");
 assert.ok(pujaPaused || (listings.includes('"Book Now" : "Enquire"')&&detail.includes('"Book Now — "')&&listings.includes("listed service fee · secure checkout")),"Puja public booking must be priced or coming soon");
@@ -42,7 +43,7 @@ assert.ok(pujaPaused || (!detail.includes("₹1,100 is the listed service fee.")
 assert.ok(ui.includes('ResilientEditorialImage')&&ui.includes('fallbackSrc={topic.graphic}')&&
   !ui.includes('import Image from "next/image"'), "ADMIN_PHOTO_MUST_FALLBACK_IF_COMMONS_UNAVAILABLE");
 assert.ok(ui.includes("pricePaise:110000,durationMinutes:null,available:false")&&
-  ui.includes("Existing saved rates are preserved"),"UNPUBLISHED_OWNER_1100_DRAFT_MISSING");
+  ui.includes("copy.feeTerms")&&catalogueCopy.includes("Existing saved rates are preserved"),"UNPUBLISHED_OWNER_1100_DRAFT_MISSING");
 console.log("PUJA_OFFER_PRICING_QA=PASS;94_TOPICS_ADMIN_CONTROLS=READY;OWNER_PRICES_MANAGED=YES;PAYMENTS_REQUIRE_PUBLISHED_FEE_AND_GATEWAY");
 
 const gatewayOrder=read("app/api/payments/razorpay/order/route.ts");
@@ -70,10 +71,14 @@ assert.ok(bookingPage.includes("const canCheckout = release.enabled") &&
   bookingPage.includes("!paymentSettled && !pendingOld"),
   "PUJA_CHECKOUT_UI_MUST_REQUIRE_LAUNCH_PANDIT_SCHEDULE_CURRENCY_AND_NO_DUPLICATE");
 const checkoutClient=read("components/razorpay-checkout-button.tsx");
-assert.ok(checkoutClient.includes("Unable to reach the payment server")&&
-  checkoutClient.includes("Payment confirmation is pending")&&
-  checkoutClient.includes("do not pay twice")&&
-  checkoutClient.includes('} finally {\n          setLoading(false);'),"RAZORPAY_CLIENT_FAILURE_OR_DUPLICATE_CHARGE_GUIDANCE_MISSING");
+const checkoutCopy=read("lib/payments/customer-copy.ts");
+assert.ok(checkoutClient.includes('setStatus("networkPending")')&&checkoutCopy.includes("Unable to reach the payment server")&&
+  checkoutClient.includes('setStatus("confirmationPending")')&&checkoutCopy.includes("Payment confirmation is pending")&&
+  checkoutCopy.includes("do not pay twice")&&
+  checkoutClient.includes('} finally {\n          setBusy(false);')&&
+  checkoutClient.includes('checkout.on("payment.failed"')&&
+  checkoutClient.includes('lockCheckout();')&&
+  checkoutClient.includes('if (busyRef.current || lockedRef.current'),"RAZORPAY_CLIENT_FAILURE_OR_DUPLICATE_CHARGE_GUIDANCE_MISSING");
 
 const pricingPage=read("app/pricing/page.tsx");
 const pricingContent=read("components/pricing-content.tsx");

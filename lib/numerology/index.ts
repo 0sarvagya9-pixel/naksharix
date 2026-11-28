@@ -1,9 +1,12 @@
-import { format } from "date-fns";
+import { calculateCalendarNumbers } from "./calendar";
+import {calculateRomanNameEvidence} from "./name";
+import {normalizeNumerologyBirthDate, isNumerologyMobile, isNumerologyVehicle} from "./input";
 import type { Locale } from "@/lib/i18n";
 
 export type NumerologyInput = {
   name: string;
   dateOfBirth: string | Date;
+  asOf?: Date;
   gender?: string;
   mobile?: string;
   vehicle?: string;
@@ -31,15 +34,18 @@ export type NumerologyReport = {
   dateOfBirth: string;
   moolank: NumerologyNumber;
   lifePath: NumerologyNumber;
-  destiny: NumerologyNumber;
-  nameNumber: NumerologyNumber;
-  soulUrge: NumerologyNumber;
-  personality: NumerologyNumber;
+  destiny: NumerologyNumber | null;
+  nameNumber: NumerologyNumber | null;
+  soulUrge: NumerologyNumber | null;
+  personality: NumerologyNumber | null;
   loShuGrid: LoShuCell[];
   missingNumbers: NumerologyNumber[];
   repeatedNumbers: Array<NumerologyNumber & { count: number }>;
   mobileAnalysis?: NumerologyNumber;
   vehicleAnalysis?: NumerologyNumber;
+  calendar: ReturnType<typeof calculateCalendarNumbers>;
+  nameMethod: "pythagorean_a_z_aeiou_master_11_22_33";
+  nameUnavailableReason: "complete_roman_spelling_required" | null;
   dailyPrediction: {
     date: string;
     personalDayNumber: number;
@@ -52,7 +58,6 @@ export type NumerologyReport = {
 
 const masterNumbers = new Set([11, 22, 33]);
 const loShuOrder = [4, 9, 2, 3, 5, 7, 8, 1, 6];
-const vowels = new Set(["A", "E", "I", "O", "U"]);
 
 const copy = {
   en: {
@@ -76,7 +81,7 @@ const copy = {
     labels: {
       moolank: "मूलांक / जन्मांक",
       lifePath: "भाग्यांक / जीवन पथ अंक",
-      destiny: "भाग्यांक",
+      destiny: "अभिव्यक्ति अंक (नाम से)",
       nameNumber: "नामांक",
       soulUrge: "आत्मिक ऊर्जा अंक",
       personality: "व्यक्तित्व अंक",
@@ -136,13 +141,13 @@ const numberProfiles: Record<Locale, Record<number, Omit<NumerologyNumber, "labe
     3: profile("अभिव्यक्ति, रचनात्मकता और आनंदपूर्ण संवाद।", ["रचनात्मकता", "आशावाद"], ["बिखरा ध्यान", "अधिक बोलना"], "एक विचार चुनकर उसे सुंदर ढंग से पूरा करें।"),
     4: profile("संरचना, अनुशासन और व्यावहारिक स्थिरता।", ["योजना", "विश्वसनीयता"], ["कठोरता", "बदलाव का भय"], "जल्दबाजी के बजाय स्थिर प्रणाली बनाएं।"),
     5: profile("स्वतंत्रता, गति, सीखना और अनुकूलन।", ["बहुमुखीपन", "यात्रा ऊर्जा"], ["बेचैनी", "अनियमितता"], "लचीलापन रखें, पर लिखित योजना के साथ।"),
-    6: profile("देखभाल, जिम्मेदारी, सौंदर्य और परिवारिक सामंजस्य।", ["पालन-पोषण", "सेवा"], ["अधिक जिम्मेदारी", "नियंत्रण"], "सब कुछ अपने ऊपर लिए बिना सहयोग दें।"),
-    7: profile("शोध, अंतर्ज्ञान, एकांत और आंतरिक ज्ञान।", ["विश्लेषण", "आध्यात्मिक दृष्टि"], ["अलगाव", "अधिक सोचना"], "चिंतन को grounded routine से संतुलित करें।"),
+    6: profile("देखभाल, जिम्मेदारी, सौंदर्य और पारिवारिक सामंजस्य।", ["पालन-पोषण", "सेवा"], ["अधिक जिम्मेदारी", "नियंत्रण"], "सब कुछ अपने ऊपर लिए बिना सहयोग दें।"),
+    7: profile("शोध, अंतर्ज्ञान, एकांत और आंतरिक ज्ञान।", ["विश्लेषण", "आध्यात्मिक दृष्टि"], ["अलगाव", "अधिक सोचना"], "चिंतन के साथ व्यावहारिक दिनचर्या का संतुलन रखें।"),
     8: profile("शक्ति, प्रबंधन, वित्त और भौतिक अनुशासन।", ["कार्यान्वयन", "महत्वाकांक्षा"], ["दबाव", "काम असंतुलन"], "अधिकार का नैतिक उपयोग करें और संसाधन ट्रैक करें।"),
     9: profile("करुणा, पूर्णता, ज्ञान और व्यापक दृष्टि।", ["उदारता", "परिपक्वता"], ["भावनात्मक भारीपन", "लगाव"], "सीमाओं के साथ सेवा करें और पुराने चक्र छोड़ें।"),
-    11: profile("अंतर्ज्ञान, प्रेरणा और बढ़ी संवेदनशीलता।", ["दृष्टि", "आध्यात्मिक जागरूकता"], ["नर्वस तनाव", "अधिक आदर्शवाद"], "प्रेरणा को सरल दैनिक अनुशासन से जमीन दें।"),
+    11: profile("अंतर्ज्ञान, प्रेरणा और बढ़ी संवेदनशीलता।", ["दृष्टि", "आध्यात्मिक जागरूकता"], ["नर्वस तनाव", "अधिक आदर्शवाद"], "प्रेरणा को सरल दैनिक अनुशासन से व्यवहार में उतारें।"),
     22: profile("बड़ी दृष्टि, निर्माण और व्यावहारिक अभिव्यक्ति।", ["विस्तार", "संगठन"], ["दबाव", "परफेक्शनिज्म"], "बड़ी योजना को मापने योग्य चरणों में बदलें।"),
-    33: profile("करुणामय शिक्षण, healing और सेवा।", ["मार्गदर्शन", "हृदय ज्ञान"], ["आत्म-बलिदान", "भावनात्मक बोझ"], "मजबूत सीमाओं के साथ सेवा करें।")
+    33: profile("करुणामय शिक्षण, सांत्वना और सेवा।", ["मार्गदर्शन", "हृदय ज्ञान"], ["आत्म-बलिदान", "भावनात्मक बोझ"], "मजबूत सीमाओं के साथ सेवा करें।")
   },
   hinglish: {
     1: profile("Leadership, initiative aur self-direction.", ["confidence", "new beginnings"], ["impatience", "ego balance"], "Clarity se lead karein aur action se pehle sunen."),
@@ -166,31 +171,33 @@ function profile(meaning: string, strengths: string[], growthAreas: string[], gu
 
 export function calculateNumerologyReport(input: NumerologyInput): NumerologyReport {
   const locale = input.locale ?? "en";
-  const dob = normalizeBirthDate(input.dateOfBirth);
+  const dob = normalizeNumerologyBirthDate(input.dateOfBirth);
   const name = input.name.trim();
   const digits = dateDigits(dob);
-  const nameValues = nameNumerologyValues(name);
-  const birthDay = dob.getDate();
-  const day = new Date();
+  const nameEvidence = calculateRomanNameEvidence(name);
+  const birthDay = dob.getUTCDate();
+  const calendar = calculateCalendarNumbers(dob, input.asOf ?? new Date());
   const lifePath = reduceNumber(digits.reduce((sum, digit) => sum + digit, 0));
   const moolank = reduceNumber(birthDay);
-  const destiny = reduceNumber(nameValues.total);
-  const soulUrge = reduceNumber(nameValues.vowels || nameValues.total);
-  const personality = reduceNumber(Math.max(1, nameValues.consonants || nameValues.total));
-  const dateText = format(dob, "yyyy-MM-dd");
+  const destiny = nameEvidence?.all.number ?? null;
+  const soulUrge = nameEvidence?.vowels?.number ?? null;
+  const personality = nameEvidence?.consonants?.number ?? null;
+  const dateText = dob.toISOString().slice(0,10);
   const counts = loShuCounts(digits);
-  const mobile = input.mobile ? reduceNumber(digitsFromString(input.mobile).reduce((sum, digit) => sum + digit, 0)) : undefined;
-  const vehicle = input.vehicle ? reduceNumber(alphaNumericValue(input.vehicle)) : undefined;
+  if (input.mobile?.trim() && !isNumerologyMobile(input.mobile)) throw new Error("Invalid mobile number");
+  if (input.vehicle?.trim() && !isNumerologyVehicle(input.vehicle)) throw new Error("Invalid vehicle number");
+  const mobile = input.mobile?.trim() ? reduceNumber(digitsFromString(input.mobile).reduce((sum, digit) => sum + digit, 0)) : undefined;
+  const vehicle = input.vehicle?.trim() ? reduceNumber(alphaNumericValue(input.vehicle)) : undefined;
 
   return {
     name,
     dateOfBirth: dateText,
     moolank: numberResult(copy[locale].labels.moolank, moolank, locale),
     lifePath: numberResult(copy[locale].labels.lifePath, lifePath, locale),
-    destiny: numberResult(copy[locale].labels.destiny, destiny, locale),
-    nameNumber: numberResult(copy[locale].labels.nameNumber, destiny, locale),
-    soulUrge: numberResult(copy[locale].labels.soulUrge, soulUrge, locale),
-    personality: numberResult(copy[locale].labels.personality, personality, locale),
+    destiny: destiny === null ? null : numberResult(copy[locale].labels.destiny, destiny, locale),
+    nameNumber: destiny === null ? null : numberResult(copy[locale].labels.nameNumber, destiny, locale),
+    soulUrge: soulUrge === null ? null : numberResult(copy[locale].labels.soulUrge, soulUrge, locale),
+    personality: personality === null ? null : numberResult(copy[locale].labels.personality, personality, locale),
     loShuGrid: loShuOrder.map((number) => ({
       number,
       count: counts[number] ?? 0,
@@ -201,15 +208,23 @@ export function calculateNumerologyReport(input: NumerologyInput): NumerologyRep
     repeatedNumbers: loShuOrder.filter((number) => (counts[number] ?? 0) > 1).map((number) => ({ ...numberResult(String(number), number, locale, copy[locale].repeated), count: counts[number] })),
     mobileAnalysis: mobile ? numberResult(copy[locale].labels.mobile, mobile, locale) : undefined,
     vehicleAnalysis: vehicle ? numberResult(copy[locale].labels.vehicle, vehicle, locale) : undefined,
+    calendar,
+    nameMethod: "pythagorean_a_z_aeiou_master_11_22_33",
+    nameUnavailableReason: nameEvidence ? null : "complete_roman_spelling_required",
     dailyPrediction: {
-      date: format(day, "yyyy-MM-dd"),
-      personalDayNumber: reduceNumber(lifePath + day.getDate() + day.getMonth() + 1 + day.getFullYear()),
+      date: calendar.asOf,
+      personalDayNumber: calendar.personalDay,
       summary: copy[locale].daily,
-      focus: numberProfiles[locale][reduceNumber(lifePath + day.getDate())].strengths
+      focus: numberProfiles[locale][calendar.personalDay].strengths
     },
     remedies: copy[locale].remedies,
     disclaimer: copy[locale].disclaimer
   };
+}
+
+export function calendarReflection(value:number,locale:Locale) {
+  if(!Number.isInteger(value)||value<1||value>9) throw Error("Invalid calendar number");
+  return numberProfiles[locale][value];
 }
 
 function numberResult(label: string, value: number, locale: Locale, overrideMeaning?: string): NumerologyNumber {
@@ -224,14 +239,9 @@ function numberResult(label: string, value: number, locale: Locale, overrideMean
   };
 }
 
-function normalizeBirthDate(value: string | Date) {
-  const date = value instanceof Date ? value : new Date(`${String(value).slice(0, 10)}T00:00:00.000Z`);
-  if (Number.isNaN(date.getTime())) throw new Error("Invalid date of birth");
-  return date;
-}
-
 function dateDigits(date: Date) {
-  return format(date, "ddMMyyyy").split("").map(Number).filter((digit) => Number.isFinite(digit));
+  const iso=date.toISOString().slice(0,10);
+  return (iso.slice(8,10)+iso.slice(5,7)+iso.slice(0,4)).split("").map(Number);
 }
 
 function digitsFromString(value: string) {
@@ -242,20 +252,6 @@ function reduceNumber(value: number): number {
   if (masterNumbers.has(value)) return value;
   if (value <= 9) return Math.max(1, value);
   return reduceNumber(String(value).split("").reduce((sum, digit) => sum + Number(digit), 0));
-}
-
-function nameNumerologyValues(name: string) {
-  const letters = name.toUpperCase().replace(/[^A-Z]/g, "");
-  let total = 0;
-  let vowelTotal = 0;
-  let consonantTotal = 0;
-  for (const letter of letters) {
-    const value = ((letter.charCodeAt(0) - 65) % 9) + 1;
-    total += value;
-    if (vowels.has(letter)) vowelTotal += value;
-    else consonantTotal += value;
-  }
-  return { total: total || 1, vowels: vowelTotal, consonants: consonantTotal };
 }
 
 function loShuCounts(digits: number[]) {

@@ -1,0 +1,281 @@
+{
+  "provenance": {
+    "engine": "Swiss Ephemeris Python 2.10.03",
+    "flags": 65860,
+    "method": "Moshier geocentric sidereal Lahiri apparent ecliptic longitudes; mean node; Ketu opposite Rahu; whole sign ascendant; Python zoneinfo civil day UTC start/end; rise_trans standard refraction at sea level, 15 C; local HH:MM truncated",
+    "sourceArraySha256": "30d87a972317f9c790824295511962955888e1b911f3e4550c6c57811a6565f8",
+    "angularToleranceDegrees": 0.02,
+    "riseSetToleranceMinutes": 3,
+    "scope": "Numerical reference for synthetic fixtures. No predictive or professional certification."
+  },
+  "fixtures": [
+    {
+      "id": "delhi-noon",
+      "input": {
+        "date": "2026-11-25",
+        "time": "12:00:00",
+        "timezone": "Asia/Kolkata",
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "longitudeDegrees": {
+        "ascendant": 293.552237,
+        "Sun": 218.758267,
+        "Moon": 47.908819,
+        "Mars": 125.478738,
+        "Mercury": 199.909756,
+        "Jupiter": 122.28026,
+        "Venus": 180.994861,
+        "Saturn": 343.918595,
+        "Rahu": 300.553184,
+        "Ketu": 120.553184
+      },
+      "panchangRiseSet": {
+        "sunrise": "06:51",
+        "sunset": "17:24",
+        "moonrise": "17:55",
+        "moonset": "07:35"
+      }
+    },
+    {
+      "id": "delhi-seconds",
+      "input": {
+        "date": "2026-11-25",
+        "time": "12:00:59",
+        "timezone": "Asia/Kolkata",
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "longitudeDegrees": {
+        "ascendant": 293.858223,
+        "Sun": 218.758957,
+        "Moon": 47.919141,
+        "Mars": 125.479013,
+        "Mercury": 199.910631,
+        "Jupiter": 122.280299,
+        "Venus": 180.995135,
+        "Saturn": 343.918576,
+        "Rahu": 300.553147,
+        "Ketu": 120.553147
+      }
+    },
+    {
+      "id": "kathmandu-leap-day",
+      "input": {
+        "date": "2000-02-29",
+        "time": "12:00:00",
+        "timezone": "Asia/Kathmandu",
+        "latitude": 27.7172,
+        "longitude": 85.324
+      },
+      "longitudeDegrees": {
+        "ascendant": 57.348999,
+        "Sun": 316.109745,
+        "Moon": 248.849754,
+        "Mars": 349.185913,
+        "Mercury": 318.890726,
+        "Jupiter": 8.676267,
+        "Venus": 289.805053,
+        "Saturn": 18.490789,
+        "Rahu": 98.073591,
+        "Ketu": 278.073591
+      },
+      "panchangRiseSet": {
+        "sunrise": "06:29",
+        "sunset": "18:03",
+        "moonrise": "02:08",
+        "moonset": "12:57"
+      }
+    },
+    {
+      "id": "london-dst-start",
+      "input": {
+        "date": "2026-03-29",
+        "time": "12:00:00",
+        "timezone": "Europe/London",
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      },
+      "longitudeDegrees": {
+        "ascendant": 86.190075,
+        "Sun": 344.540292,
+        "Moon": 121.036447,
+        "Mars": 326.902974,
+        "Mercury": 317.507773,
+        "Jupiter": 81.399223,
+        "Venus": 4.284685,
+        "Saturn": 341.005686,
+        "Rahu": 313.314316,
+        "Ketu": 133.314316
+      },
+      "panchangRiseSet": {
+        "sunrise": "06:42",
+        "sunset": "19:28",
+        "moonrise": "15:22",
+        "moonset": "05:34"
+      }
+    },
+    {
+      "id": "new-york-dst-end",
+      "input": {
+        "date": "2026-11-01",
+        "time": "12:00:00",
+        "timezone": "America/New_York",
+        "latitude": 40.7128,
+        "longitude": -74.006
+      },
+      "longitudeDegrees": {
+        "ascendant": 265.835853,
+        "Sun": 195.051109,
+        "Moon": 103.179777,
+        "Mars": 114.743378,
+        "Mercury": 201.616761,
+        "Jupiter": 120.174507,
+        "Venus": 181.668647,
+        "Saturn": 345.007841,
+        "Rahu": 301.801807,
+        "Ketu": 121.801807
+      },
+      "panchangRiseSet": {
+        "sunrise": "06:26",
+        "sunset": "16:52",
+        "moonrise": "23:14",
+        "moonset": "13:06"
+      }
+    },
+    {
+      "id": "chatham-dateline",
+      "input": {
+        "date": "2026-12-15",
+        "time": "12:00:00",
+        "timezone": "Pacific/Chatham",
+        "latitude": -43.95,
+        "longitude": -176.55
+      },
+      "longitudeDegrees": {
+        "ascendant": 313.373087,
+        "Sun": 238.700071,
+        "Moon": 302.577181,
+        "Mars": 132.232109,
+        "Mercury": 228.879826,
+        "Jupiter": 122.78247,
+        "Venus": 193.548699,
+        "Saturn": 343.708949,
+        "Rahu": 299.51156,
+        "Ketu": 119.51156
+      },
+      "panchangRiseSet": {
+        "sunrise": "05:42",
+        "sunset": "21:09",
+        "moonrise": "11:02",
+        "moonset": "00:30"
+      }
+    },
+    {
+      "id": "sydney-summer",
+      "input": {
+        "date": "2026-11-25",
+        "time": "12:00:00",
+        "timezone": "Australia/Sydney",
+        "latitude": -33.8688,
+        "longitude": 151.2093
+      },
+      "longitudeDegrees": {
+        "ascendant": 302.398847,
+        "Sun": 218.526636,
+        "Moon": 44.446743,
+        "Mars": 125.386287,
+        "Mercury": 199.617341,
+        "Jupiter": 122.267265,
+        "Venus": 180.903595,
+        "Saturn": 343.925055,
+        "Rahu": 300.565328,
+        "Ketu": 120.565328
+      },
+      "panchangRiseSet": {
+        "sunrise": "05:38",
+        "sunset": "19:45",
+        "moonrise": "20:48",
+        "moonset": "05:29"
+      }
+    },
+    {
+      "id": "los-angeles-seconds",
+      "input": {
+        "date": "1987-07-21",
+        "time": "23:59:59",
+        "timezone": "America/Los_Angeles",
+        "latitude": 34.0522,
+        "longitude": -118.2437
+      },
+      "longitudeDegrees": {
+        "ascendant": 0.897475,
+        "Sun": 95.278354,
+        "Moon": 56.233824,
+        "Mars": 106.258322,
+        "Mercury": 75.943432,
+        "Jupiter": 4.738856,
+        "Venus": 86.489881,
+        "Saturn": 231.466889,
+        "Rahu": 342.100179,
+        "Ketu": 162.100179
+      }
+    },
+    {
+      "id": "london-dst-civil-day",
+      "input": {
+        "date": "2023-03-26",
+        "time": "12:00:00",
+        "timezone": "Europe/London",
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      },
+      "longitudeDegrees": {
+        "ascendant": 83.767183,
+        "Sun": 341.345895,
+        "Moon": 41.319103,
+        "Mars": 66.290774,
+        "Mercury": 350.429187,
+        "Jupiter": 353.613126,
+        "Venus": 17.24049,
+        "Saturn": 307.960955,
+        "Rahu": 11.55251,
+        "Ketu": 191.55251
+      },
+      "panchangRiseSet": {
+        "sunrise": "06:50",
+        "sunset": "19:23",
+        "moonrise": "08:40",
+        "moonset": null
+      }
+    },
+    {
+      "id": "sydney-dst-event-offset",
+      "input": {
+        "date": "2026-10-04",
+        "time": "12:00:00",
+        "timezone": "Australia/Sydney",
+        "latitude": -33.8688,
+        "longitude": 151.2093
+      },
+      "longitudeDegrees": {
+        "ascendant": 259.815386,
+        "Sun": 166.597448,
+        "Moon": 82.941646,
+        "Mars": 99.218688,
+        "Mercury": 190.374558,
+        "Jupiter": 115.896319,
+        "Venus": 194.247272,
+        "Saturn": 347.106424,
+        "Rahu": 303.320911,
+        "Ketu": 123.320911
+      },
+      "panchangRiseSet": {
+        "sunrise": "06:28",
+        "sunset": "18:59",
+        "moonrise": "01:17",
+        "moonset": "12:04"
+      }
+    }
+  ]
+}

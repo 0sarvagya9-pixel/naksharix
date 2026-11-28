@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       return true;
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
     if (!result) return fail("Profile or evidence not found", 404);
-    return ok({ recorded: true, decision: input.decision });
+    return ok({ recorded: true, profileId: input.profileId, decision: input.decision });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
       return fail("Credential record changed while reviewing. Retry.", 409);

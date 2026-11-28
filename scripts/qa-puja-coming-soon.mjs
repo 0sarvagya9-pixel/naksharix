@@ -24,7 +24,8 @@ assert.ok(release.includes('env.PUJA_BOOKINGS_ENABLED !== "true"') &&
   "Puja launch must fail closed without owner, payments, email and exact-topic Pandit");
 assert.ok(page.includes("Coming Soon") && page.includes("पूजा सेवाएँ") &&
   page.includes("नई पूजा बुकिंग") && page.includes('robots: { index: false, follow: true }') &&
-  page.includes("if (release.enabled) return <PujaServicesDirectory offerings={release.offers} initialNow={Date.now()} />"),
+  page.includes('if (release.enabled) return <PujaServicesDirectory offerings={release.offers} initialNow={Date.now()} mode={release.requestOnly?"request-only":"active"} />') &&
+  page.includes('data-puja-mode="paused"') && page.includes('index: !release.requestOnly'),
   "Puja page must show Coming Soon by default, live directory only after all checks");
 assert.ok(!page.includes("RazorpayCheckoutButton") && !page.includes("Book Now"),
   "Paused public page must never expose a payment CTA");

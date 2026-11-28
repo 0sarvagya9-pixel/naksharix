@@ -163,7 +163,7 @@ export function EditorialHome({featuredShopPrices={},pujaEnabled=false,available
         }}>
         <div className="nx-ed-hero-imagery" aria-hidden="true">
           <div className="nx-ed-hero-photo is-active">
-            <Image src="/images/premium-cosmic-bg-v2.webp" alt="" fill priority sizes="100vw"
+            <Image src="/images/premium-cosmic-bg-v2.webp" alt="" fill sizes="100vw"
               quality={85} className="nx-ed-photo" />
           </div>
         </div>

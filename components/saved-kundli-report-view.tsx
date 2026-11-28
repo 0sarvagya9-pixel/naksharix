@@ -23,13 +23,15 @@ export function SavedKundliReportView({
   reportId,
   language,
   createdAt,
-  isUnlocked = false
+  isUnlocked = false,
+  paymentReviewRequired = false
 }: {
   report: SavedReportPayload;
   reportId: string;
   language: Locale;
   createdAt: string;
   isUnlocked?: boolean;
+  paymentReviewRequired?: boolean;
 }) {
   const { tr } = useLanguage();
   const fallback = tr("notAvailable");
@@ -52,11 +54,13 @@ export function SavedKundliReportView({
               <Meta label={tr("generatedDate")} value={new Date(createdAt).toLocaleString(language === "hi" ? "hi-IN" : "en-IN", { dateStyle: "medium", timeStyle: "short" })} />
             </div>
           </div>
-          <SavedKundliReportActions report={report} reportId={reportId} language={language} showView={false} isUnlocked={isUnlocked} />
+          <SavedKundliReportActions report={report} reportId={reportId} language={language} showView={false} isUnlocked={isUnlocked} paymentReviewRequired={paymentReviewRequired} />
         </div>
       </div>
 
-      {!isUnlocked ? (
+      {paymentReviewRequired ? (
+        <section className="rounded-2xl border border-amber-600/50 bg-amber-50 p-4 text-amber-950"><h2 className="font-semibold">Previous payment requires review</h2><p className="text-sm">Your prior payment record needs reconciliation. Do not pay again. Review Payment History or contact support.</p><Link href="/dashboard" className="mt-2 inline-block underline">Open Payment History</Link></section>
+      ) : !isUnlocked ? (
         <div
           className="rounded-2xl border border-[#D4AF37]/50 bg-gradient-to-r from-[#D4AF37]/10 via-[#0C152B]/40 to-[#D4AF37]/5 p-6 text-center"
           style={{

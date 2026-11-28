@@ -5,6 +5,7 @@ const app=read("mobile-app/App.tsx");
 const home=read("mobile-app/src/screens/HomeScreen.tsx");
 const number=read("mobile-app/src/native/NumerologyScreen.tsx");
 const horizon=read("mobile-app/src/screens/HoroscopeScreen.tsx");
+const horoscopeContract=read("mobile-app/src/native/horoscope-contract.ts");
 const panchang=read("mobile-app/src/screens/PanchangScreen.tsx");
 const explore=read("mobile-app/src/screens/ExploreScreen.tsx");
 const account=read("mobile-app/src/screens/AccountScreen.tsx");
@@ -18,9 +19,11 @@ for(const name of ["HoroscopeScreen","PanchangScreen","ExploreScreen","AccountSc
 assert.ok(home.includes('onNavigate("horoscope")')&&
   home.includes("onNavigate(tile.target)")&&home.includes("assets/icon.png"),
   "Home must navigate natively rather than only link to a website");
-assert.ok(horizon.includes('getPublicData<Horoscope>')&&
-  horizon.includes("controller.abort()")&&horizon.includes("zodiacSigns.map"),
-  "Live horoscope must load server content, handle cancellation and list the signs");
+assert.ok(horizon.includes('getPublicData<unknown>')&&
+  horizon.includes("validateNativeHoroscope(result,selection)")&&horizon.includes("nativeHoroscopePath(selection)")&&
+  horizon.includes("state.key!==requestKey")&&horizon.includes("controller.abort()")&&horizon.includes("zodiacSigns.map"),
+  "Live horoscope must load and validate the selected server content, handle cancellation and list the signs");
+assert.ok(horoscopeContract.includes("guide.year!==request.year")&&horoscopeContract.includes("guide.rows.length!==12")&&horizon.includes("nativeAnnualYears()")&&!horizon.includes("2026 yearly themes"),"Native annual guide must retain exact year and full month validation");
 assert.ok(panchang.includes('getPublicData<{panchang:Panchang}>')&&
   panchang.includes("timezone=%2B05%3A30")&&panchang.includes("setDate")&&
   panchang.includes("No device location permission"),

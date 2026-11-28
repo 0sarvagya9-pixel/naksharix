@@ -21,6 +21,9 @@ export const DISCOVERY_ROUTES = Object.freeze([
   "/festival-calendar",
   "/hi/festival-calendar",
   "/grahan-2027",
+  "/yearly-horoscope",
+  "/yearly-horoscope-2027",
+  "/hi/yearly-horoscope-2027",
   "/hi/grahan-2027",
   "/puja-calendar",
   "/panchang",
@@ -60,7 +63,7 @@ export const DISCOVERY_ROUTES = Object.freeze([
 export function assertDiscoveryConfiguration() {
   assert.match(INDEXNOW_KEY, /^[a-f0-9]{32}$/, "Invalid public IndexNow proof key");
   assert.equal(new Set(DISCOVERY_ROUTES).size, DISCOVERY_ROUTES.length, "Duplicate discovery routes");
-  assert.ok(DISCOVERY_ROUTES.every(route => route === "/" || /^\/(?:hi\/)?(?:kumbh-mela-2027|festival-calendar|grahan-2027)$/.test(route) || /^\/(?:puja-calendar|panchang|about|faq|hi(?:\/about)?|blog(?:\/[a-z-]+)?|learn|shop(?:\/[a-z0-9-]+)?|reports(?:\/(?:premium-kundli|couple-kundli|love-report|career-report|numerology-lo-shu-report))?|free-kundli|hi\/(?:free-kundli|kundli-milan)|kundli-matching|tarot|numerology|weekly-love-horoscope|numerology-monthly-horoscope)$/.test(route)),
+  assert.ok(DISCOVERY_ROUTES.every(route => route === "/" || /^\/(?:hi\/)?(?:kumbh-mela-2027|festival-calendar|grahan-2027|yearly-horoscope-2027)$/.test(route) || /^\/(?:yearly-horoscope|puja-calendar|panchang|about|faq|hi(?:\/about)?|blog(?:\/[a-z-]+)?|learn|shop(?:\/[a-z0-9-]+)?|reports(?:\/(?:premium-kundli|couple-kundli|love-report|career-report|numerology-lo-shu-report))?|free-kundli|hi\/(?:free-kundli|kundli-milan)|kundli-matching|tarot|numerology|weekly-love-horoscope|numerology-monthly-horoscope)$/.test(route)),
     "Unexpected or sensitive submission path");
   return DISCOVERY_ROUTES.map(route => ORIGIN + route);
 }
@@ -104,6 +107,7 @@ export function changedDiscoveryRoutes(all, changedFiles) {
     if(file==="components/schema-markup.tsx" || file==="lib/seo-brand.ts" || file==="components/seo/brand-answers.tsx" || file==="components/legal-policy-page.tsx") ["/","/hi","/about","/hi/about","/faq"].forEach(add);
     if(file==="components/home/approved-gallery-home.tsx")add("/");
     if(file==="components/seo/seasonal-guides.tsx" || file==="lib/seo-seasonal.ts" || file==="lib/seo-seasonal-copy.ts") ["/kumbh-mela-2027","/hi/kumbh-mela-2027","/festival-calendar","/hi/festival-calendar","/grahan-2027","/hi/grahan-2027"].forEach(add);
+    if(file==="lib/horoscope/annual.ts" || file==="lib/horoscope/annual-rules.ts" || file==="components/horoscope/annual-guide-view.tsx") ["/yearly-horoscope","/yearly-horoscope-2027","/hi/yearly-horoscope-2027"].forEach(add);
     if(file==="lib/puja/observances.ts") ["/festival-calendar","/hi/festival-calendar","/puja-calendar"].forEach(add);
     if(file==="lib/blog-content.ts" || file.startsWith("app/blog/")) all.filter(url=>url.startsWith(ORIGIN+"/blog")).forEach(url=>selected.add(url));
     if(file==="lib/shop/organic-discovery.ts" || file==="components/shop/product-share-actions.tsx" || file==="app/shop/[slug]/page.tsx") all.filter(url=>url.startsWith(ORIGIN+"/shop")||url.startsWith(ORIGIN+"/reports")).forEach(url=>selected.add(url));

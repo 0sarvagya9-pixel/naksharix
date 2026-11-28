@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/language-provider";
 import { isAdmin as canOpenAdminPanel } from "@/lib/auth/permissions";
 import { secureFetch } from "@/lib/security/csrf";
+import {disableCurrentPushDevice} from "@/lib/notifications/push-client";
 
 type SessionUser = {
   id: string;
@@ -100,6 +101,7 @@ export function AuthProfileMenu({ showGalleryLabel = false }: { showGalleryLabel
 
   async function handleLogout() {
     setOpen(false);
+    await disableCurrentPushDevice().catch(()=>{});
     await secureFetch("/api/auth/logout", { method: "POST" }).catch(() => null);
     await signOut({ callbackUrl: "/" });
   }

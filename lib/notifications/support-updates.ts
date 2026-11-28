@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { sendEmail } from "@/lib/email/email-service";
 import { logger } from "@/lib/monitoring/logger";
+import { normalizeLocale } from "@/lib/i18n";
+import { supportReplyEmail } from "@/lib/support/email-copy";
 
 export type SupportMailOutcome =
   | "provider_accepted"
@@ -50,23 +52,17 @@ export async function notifySupportTeamOfNewTicket(ticketId: string): Promise<Su
 /** Called only for an admin reply persisted once, never for client retry replays. */
 export async function notifyCustomerOfSupportReply(ticketId: string, clientMutationId: string): Promise<SupportMailOutcome> {
   let recipient: string | null | undefined;
+  let locale = normalizeLocale("en");
   try {
     const ticket = await prisma.supportTicket.findUnique({
-      where: { id: ticketId }, select: { user: { select: { email: true } } }
+      where: { id: ticketId }, select: { user: { select: { email: true, locale: true } } }
     });
     recipient = ticket?.user?.email;
+    locale = normalizeLocale(ticket?.user?.locale);
   } catch {
     logger.warn("support_notification_recipient_lookup_failed");
     return "provider_unavailable";
   }
-  return deliver(recipient, "Naksharix Support: New response to your ticket", [
-    "Namaste,",
-    "",
-    "A member of the Naksharix support team has replied to your support ticket.",
-    `Reference: ${ticketId}`,
-    `Read the response securely after signing in: ${supportUrl(false)}`,
-    "",
-    "We do not include private ticket messages, birth details, OTPs or passwords in this notification.",
-    "Provider acceptance of this message does not prove inbox delivery."
-  ].join("\n"), "naksharix/support-reply/" + ticketId + "/" + clientMutationId);
+  const copy = supportReplyEmail(locale, ticketId, supportUrl(false));
+  return deliver(recipient, copy.subject, copy.text, "naksharix/support-reply/" + ticketId + "/" + clientMutationId);
 }

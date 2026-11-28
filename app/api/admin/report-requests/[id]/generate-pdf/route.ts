@@ -10,6 +10,10 @@ import { writeAuditLog, writeReportStatusHistory } from "@/lib/reports/report-au
 import { assemblePremiumReportContent } from "@/lib/reports/premium-report-content-engine";
 import { generatePremiumReportPdf } from "@/lib/reports/premium-report-generation-service";
 import { saveReportPdf } from "@/lib/storage/report-storage";
+import {fixedReportCheckout,hasCurrentPaidReportEntitlement} from "@/lib/reports/paid-entitlement";
+import {prepareReviewedSpecialistInput} from "@/lib/reports/reviewed-report-input";
+import {assembleAutomaticPaidReport} from "@/lib/reports/automatic-report-content";
+import {getActiveAstrologyProviderName} from "@/lib/astrology/provider";
 import { rateLimitResponse } from "@/lib/security/rate-limit";
 
 type Params = Promise<{ id: string }>;
@@ -49,19 +53,30 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     if (!reportRequest.adminBypass && reportRequest.paymentStatus !== "PAID") {
       return fail("Verified payment or authorized admin bypass is required before generating a paid report.", 409);
     }
-    if (reportRequest.latitude === null || reportRequest.longitude === null || reportRequest.timezone === null) {
+    const requiresPaidEntitlement=!reportRequest.adminBypass&&Boolean(fixedReportCheckout(reportRequest.reportSlug));
+    if(requiresPaidEntitlement&&!await hasCurrentPaidReportEntitlement(reportRequest))return fail("Current payment evidence requires reconciliation before generating this report.",409);
+    const {latitude,longitude,timezone}=reportRequest;
+    if (latitude === null || longitude === null || timezone === null) {
       return fail("Birth latitude, longitude, and timezone are required before PDF generation.", 422);
     }
 
+    const specialist=prepareReviewedSpecialistInput(reportRequest);
+    if(specialist.kind==="invalid")return fail("Specialist input required: "+specialist.reason,422);
+    if(specialist.kind==="specialist"&&getActiveAstrologyProviderName()!=="own_engine")return fail("The selected report calculation provider is unavailable. Do not deliver a substitute report.",503);
+    const generated=await (async()=>{
+      if(specialist.kind==="specialist"){
+        const assembled=await assembleAutomaticPaidReport(specialist);
+        return generatePremiumReportPdf({requestId:reportRequest.id,templateId:specialist.slug,status:"ready_for_generation",content:assembled.content,reviewedByAdmin:true,specialistInputValidated:true,reportTitle:assembled.title,customerName:reportRequest.fullName,language:specialist.language});
+      }
     const chart = calculateInternalChart({
       name: reportRequest.fullName,
       gender: reportRequest.gender ?? undefined,
       dateOfBirth: reportRequest.dateOfBirth,
       timeOfBirth: reportRequest.timeOfBirth,
       birthPlace: reportRequest.birthPlace,
-      latitude: reportRequest.latitude,
-      longitude: reportRequest.longitude,
-      timezone: String(reportRequest.timezone),
+      latitude,
+      longitude,
+      timezone: String(timezone),
       language: reportRequest.language === "hi" || reportRequest.language === "hinglish" ? reportRequest.language : "en",
       ayanamsa: "lahiri",
       houseSystem: "whole_sign"
@@ -69,34 +84,38 @@ export async function POST(_request: Request, { params }: { params: Params }) {
 
     const panchang = calculatePremiumPanchang({
       date: reportRequest.dateOfBirth,
-      latitude: reportRequest.latitude,
-      longitude: reportRequest.longitude,
-      timezone: String(reportRequest.timezone),
+      latitude,
+      longitude,
+      timezone: String(timezone),
       place: reportRequest.birthPlace
     });
 
     const transit = calculateInternalTransitSnapshot({
       date: new Date().toISOString().slice(0, 10),
-      latitude: reportRequest.latitude,
-      longitude: reportRequest.longitude,
-      timezone: String(reportRequest.timezone),
+      latitude,
+      longitude,
+      timezone: String(timezone),
       place: reportRequest.birthPlace,
       ayanamsa: "lahiri"
     });
 
     const content = assemblePremiumReportContent({ chart, includePanchang: panchang, includeTransit: transit });
-    const generated = await generatePremiumReportPdf({
+    return generatePremiumReportPdf({
       requestId: reportRequest.id,
       templateId: reportRequest.reportSlug,
       status: "ready_for_generation",
       content,
-      reviewedByAdmin: Boolean(approvedReview.note)
+      reviewedByAdmin: Boolean(approvedReview.note),
+      customerName:reportRequest.fullName,
+      language:reportRequest.language==="hi"||reportRequest.language==="hinglish"?reportRequest.language:"en"
     });
+    })();
 
     if (generated.status !== "generated_internal_unverified" || !generated.bytes?.byteLength) {
       return fail("PDF generation did not produce a file.", 500);
     }
 
+    if(requiresPaidEntitlement&&!await hasCurrentPaidReportEntitlement(reportRequest))return fail("Report purchase changed during generation.",409);
     const stored = await saveReportPdf({
       reportRequestId: reportRequest.id,
       reportSlug: reportRequest.reportSlug,
@@ -107,6 +126,10 @@ export async function POST(_request: Request, { params }: { params: Params }) {
       where: {
         id: reportRequest.id,
         status: ReportRequestStatus.READY_FOR_GENERATION,
+        updatedAt:reportRequest.updatedAt,
+        paymentId:reportRequest.paymentId,
+        paymentStatus:reportRequest.paymentStatus,
+        ...(requiresPaidEntitlement?{payment:{is:{status:"PAID" as const}}}:{}),
         generatedPdfSize: null,
         generatedPdfStorageKey: null
       },
@@ -142,7 +165,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     });
     logger.info("report_pdf_generated", { reportRequestId: reportRequest.id, storageDriver: stored.storageDriver, size: stored.size });
 
-    return ok({ fileName: stored.fileName, byteLength: stored.size, storageProvider: stored.storageDriver, status: ReportRequestStatus.GENERATED });
+    return ok({ reportRequestId: reportRequest.id, fileName: stored.fileName, byteLength: stored.size, storageProvider: stored.storageDriver, status: ReportRequestStatus.GENERATED });
   } catch (error) {
     return handleApiError(error);
   }

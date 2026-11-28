@@ -5,6 +5,12 @@ import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { razorpay } from "@/lib/payments/razorpay";
 import { subscriptionPlans } from "@/lib/subscription-plans";
+import {creditSnapshot} from "@/lib/ai/credit-contract";
+import {lockCreditAccount} from "@/lib/ai/credit-ledger";
+import {validatePackageCapture} from "@/lib/digital-packages/ledger";
+import {validateExpertCapture} from "@/lib/expert-services/ledger";
+import {isUnrefundedCapture} from "@/lib/payments/capture-evidence";
+import {lockProviderPayment,cumulativeSignedRefund} from "@/lib/payments/refund-evidence";
 
 export function getSubscriptionPlan(id: string) {
   return subscriptionPlans.find((plan) => plan.id === id);
@@ -25,12 +31,13 @@ export async function verifyRazorpayCapturedPayment(orderId: string, paymentId: 
       order_id?: string;
       status?: string;
       amount?: number;
+      amount_refunded?: number;
       currency?: string;
     };
     if (payment.id !== paymentId) return { ok: false, reason: "Payment id mismatch" };
     if (payment.order_id !== orderId) return { ok: false, reason: "Order id mismatch" };
     if (payment.status !== "captured") return { ok: false, reason: "Payment is not captured" };
-    if (Number(payment.amount) !== Math.round(expectedAmount * 100)) return { ok: false, reason: "Amount mismatch" };
+    if (!isUnrefundedCapture(payment, Math.round(expectedAmount * 100))) return { ok: false, reason: "Amount or refund evidence requires reconciliation" };
     if ((payment.currency ?? "").toUpperCase() !== expectedCurrency.toUpperCase()) return { ok: false, reason: "Currency mismatch" };
     return { ok: true, reason: "verified" };
   } catch {
@@ -53,11 +60,8 @@ function safeEqual(a: string, b: string) {
 export async function finalizePaidPayment(providerOrderId: string, providerPaymentId: string, metadata: Record<string, unknown> = {}) {
   const payment = await prisma.payment.findUnique({ where: { providerOrderId } });
   if (!payment) return null;
-  // A late captured webhook must never reopen a refunded/waived payment.
-  if (payment.status === PaymentStatus.PAID) {
-    return payment.providerPaymentId === providerPaymentId ? payment : null;
-  }
-  if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.FAILED) return null;
+  if(payment.provider!=="RAZORPAY")return null;
+  if (![PaymentStatus.PAID, PaymentStatus.PENDING, PaymentStatus.FAILED].some(status=>status===payment.status)) return null;
 
   const invoiceNumber = `NXR-${new Date().getFullYear()}-${payment.id.slice(-8).toUpperCase()}`;
   const md = (payment.metadata as Record<string, unknown> | null) ?? {};
@@ -71,6 +75,24 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
   const mergedMetadata = { ...existingMetadata, ...metadata } as Prisma.InputJsonObject;
 
   return prisma.$transaction(async (tx) => {
+    // Serialize with durable signed refund receipt insertion, even when a
+    // refund arrives before providerPaymentId has been linked to this row.
+    // READ COMMITTED below gives the receipt query a fresh snapshot after
+    // waiting for the advisory lock. The purpose-specific locks and
+    // conditional payment transition still serialize each entitlement.
+    await lockProviderPayment(tx,providerPaymentId);
+    if(await cumulativeSignedRefund(tx,providerPaymentId)>0)return null;
+    const currentPayment=await tx.payment.findUnique({where:{id:payment.id}});
+    if(!currentPayment||currentPayment.provider!=="RAZORPAY"||currentPayment.providerOrderId!==providerOrderId||!currentPayment.amount.equals(payment.amount)||currentPayment.currency!==payment.currency)return null;
+    if(currentPayment.status===PaymentStatus.PAID)return currentPayment.providerPaymentId===providerPaymentId?currentPayment:null;
+    if(currentPayment.status!==PaymentStatus.PENDING&&currentPayment.status!==PaymentStatus.FAILED)return null;
+    const expertOrder=payment.purpose==="EXPERT_SERVICE"?await validateExpertCapture(tx,payment,metadata.gatewayStatus):null;
+    const packageOrderId=payment.purpose==="DIGITAL_PACKAGE"?await validatePackageCapture(tx,payment,metadata.gatewayStatus):null;
+    const credit=payment.purpose==="AI_CREDITS"?creditSnapshot(payment.metadata,Math.round(Number(payment.amount)*100),payment.currency):null;
+    if(payment.purpose==="AI_CREDITS"){
+      if(!credit||payment.provider!=="RAZORPAY"||metadata.gatewayStatus!=="captured"||(process.env.VERCEL_ENV==="production"&&existingMetadata.analyticsLiveOrder!==true))throw new Error("AI_CREDIT_CAPTURE_CONTRACT_INVALID");
+      await lockCreditAccount(tx,payment.userId);
+    }
     const claimed = await tx.payment.updateMany({
       where: { id: payment.id, status: { in: [PaymentStatus.PENDING, PaymentStatus.FAILED] } },
       data: {
@@ -118,6 +140,13 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
       });
     }
 
+    if(expertOrder)await tx.expertServiceRequest.update({where:{id:expertOrder.id},data:{status:expertOrder.status}});
+    if(packageOrderId)await tx.digitalPackageOrder.update({where:{id:packageOrderId},data:{status:"PAID"}});
+    if(paid.purpose==="AI_CREDITS"&&credit){
+      // Capture and unique credit grant commit together. No credits from pending, test-in-production, waived or duplicate payments.
+      await tx.aiCreditGrant.create({data:{paymentId:paid.id,units:credit.units,remaining:credit.units,offerVersion:credit.version}});
+    }
+
     if (paid.purpose === PaymentPurpose.SUBSCRIPTION) {
       const plan = String((paid.metadata as Record<string, unknown> | null)?.plan ?? "PREMIUM") as SubscriptionPlan;
       const now = new Date();
@@ -137,7 +166,7 @@ export async function finalizePaidPayment(providerOrderId: string, providerPayme
     }
 
     return paid;
-  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }, { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted });
 }
 
 function reportTitle(purpose: PaymentPurpose) {

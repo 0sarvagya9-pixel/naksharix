@@ -63,4 +63,27 @@ test("mobile notifications never overflow viewport and Escape dismisses", async 
   expect(dimensions.right).toBeLessThanOrEqual(dimensions.screen);
   await page.keyboard.press("Escape");
   await expect(popup).toHaveCount(0);
+
+  await page.goto("/shop/5-mukhi-rudraksha", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-site-notifications-ready="true"]')).toBeAttached();
+  const add = page.getByRole("button", { name: "Add to cart", exact: true });
+  const success = page.locator('[data-notification-kind="success"]');
+  for (const dismissFrom of ["cart", "notice"]) {
+    await add.focus();
+    await page.keyboard.press("Enter");
+    await expect(success).toBeVisible();
+    await expect(add).toBeFocused();
+    await expect.poll(() => add.evaluate(button => {
+      const r = button.getBoundingClientRect();
+      return button.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2));
+    })).toBe(true);
+    if (dismissFrom === "notice") {
+      await success.getByRole("button", { name: "Dismiss notification" }).focus();
+      await page.keyboard.press("Enter");
+    } else {
+      await page.keyboard.press("Escape");
+    }
+    await expect(success).toHaveCount(0);
+    await expect(add).toBeFocused();
+  }
 });

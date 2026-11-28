@@ -24,7 +24,7 @@ export default function ZodiacPage() {
             <Link key={sign.slug} href={`/zodiac/${sign.slug}`}>
               <Card className="glass h-full transition hover:border-[#D4AF37]/55">
                 <CardHeader>
-                  <CardTitle className="font-cinzel">{sign.name}</CardTitle>
+                  <CardTitle as="h2" className="font-cinzel">{sign.name}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-start gap-3 text-sm naksh-muted-text">
                   <Sparkles className="mt-0.5 h-4 w-4 text-[#FFD700]" />

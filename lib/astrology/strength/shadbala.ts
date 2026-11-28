@@ -1,4 +1,6 @@
 import type { CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
+import {classicalVargaCoordinates,type ClassicalVargaKey} from "@/lib/astrology/varga/partition";
+import {calculateSaptavargajaEvidence,calculateExactDirectionalBala,calculateRamanSaptavargajaCandidate} from "@/lib/astrology/strength/classical-components";
 import type { PartialShadbalaResult, ShadbalaComponent, ShadbalaPlanetScore, StrengthFoundationStatus } from "@/lib/astrology/strength/types";
 
 const classicalPlanets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"] as const;
@@ -7,25 +9,9 @@ const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "
 
 const naisargika: Record<ClassicalPlanet, number> = { Sun: 60, Moon: 51.43, Venus: 42.86, Jupiter: 34.29, Mercury: 25.71, Mars: 17.14, Saturn: 8.57 };
 const exaltationLongitude: Record<ClassicalPlanet, number> = { Sun: 10, Moon: 33, Mars: 298, Mercury: 165, Jupiter: 95, Venus: 357, Saturn: 200 };
-const ownSigns: Record<ClassicalPlanet, readonly string[]> = {
-  Sun: ["Leo"], Moon: ["Cancer"], Mars: ["Aries", "Scorpio"], Mercury: ["Gemini", "Virgo"],
-  Jupiter: ["Sagittarius", "Pisces"], Venus: ["Taurus", "Libra"], Saturn: ["Capricorn", "Aquarius"]
-};
-const friends: Record<ClassicalPlanet, readonly ClassicalPlanet[]> = {
-  Sun: ["Moon", "Mars", "Jupiter"], Moon: ["Sun", "Mercury"], Mars: ["Sun", "Moon", "Jupiter"],
-  Mercury: ["Sun", "Venus"], Jupiter: ["Sun", "Moon", "Mars"], Venus: ["Mercury", "Saturn"], Saturn: ["Mercury", "Venus"]
-};
-const enemies: Record<ClassicalPlanet, readonly ClassicalPlanet[]> = {
-  Sun: ["Venus", "Saturn"], Moon: [], Mars: ["Mercury"], Mercury: ["Moon"], Jupiter: ["Mercury", "Venus"],
-  Venus: ["Sun", "Moon"], Saturn: ["Sun", "Moon", "Mars"]
-};
-const signLords: Record<string, ClassicalPlanet> = {
-  Aries: "Mars", Taurus: "Venus", Gemini: "Mercury", Cancer: "Moon", Leo: "Sun", Virgo: "Mercury",
-  Libra: "Venus", Scorpio: "Mars", Sagittarius: "Jupiter", Capricorn: "Saturn", Aquarius: "Saturn", Pisces: "Jupiter"
-};
 const strongestHouse: Record<ClassicalPlanet, number> = { Sun: 10, Mars: 10, Jupiter: 1, Mercury: 1, Saturn: 7, Moon: 4, Venus: 4 };
 
-export type InternalShadbalaContext = { ascendantLongitude: number; localTime?: string; date?: string };
+export type InternalShadbalaContext = { ascendantLongitude: number; localTime?: string; date?: string; bhavaMidpoints?: readonly number[] };
 
 export function getShadbalaFoundationStatus(): StrengthFoundationStatus {
   return {
@@ -57,36 +43,14 @@ function angularDistance(a: number, b: number) {
 }
 
 function absoluteLongitude(planet: CanonicalPlanet) {
-  if (typeof planet.absoluteLongitude === "number") return normalize(planet.absoluteLongitude);
+  if (typeof planet.absoluteLongitude === "number") return Number.isFinite(planet.absoluteLongitude)?normalize(planet.absoluteLongitude):null;
   const index = signs.indexOf(planet.sign as (typeof signs)[number]);
-  return index >= 0 && typeof planet.degree === "number" ? normalize(index * 30 + planet.degree) : null;
+  return index >= 0 && typeof planet.degree === "number" && Number.isFinite(planet.degree) && planet.degree>=0 && planet.degree<30 ? normalize(index * 30 + planet.degree) : null;
 }
 
-function dignityScore(planet: ClassicalPlanet, sign: string) {
-  if (ownSigns[planet].includes(sign)) return 30;
-  const lord = signLords[sign];
-  if (!lord) return 7.5;
-  if (friends[planet].includes(lord)) return 22.5;
-  if (enemies[planet].includes(lord)) return 3.75;
-  return 15;
-}
-
-function vargaSigns(longitude: number) {
-  const value = normalize(longitude);
-  const signIndex = Math.floor(value / 30);
-  const degree = value % 30;
-  const odd = signIndex % 2 === 0;
-  const d2 = odd ? (degree < 15 ? "Leo" : "Cancer") : (degree < 15 ? "Cancer" : "Leo");
-  const d3Part = Math.min(2, Math.floor(degree / 10));
-  const d3 = signs[[signIndex, (signIndex + 4) % 12, (signIndex + 8) % 12][d3Part]];
-  const d7Part = Math.min(6, Math.floor(degree / (30 / 7)));
-  const d7 = signs[((odd ? signIndex : (signIndex + 6) % 12) + d7Part) % 12];
-  const d9Part = Math.min(8, Math.floor(degree / (30 / 9)));
-  const d9Start = [0, 3, 6, 9].includes(signIndex) ? signIndex : [1, 4, 7, 10].includes(signIndex) ? (signIndex + 8) % 12 : (signIndex + 4) % 12;
-  const d9 = signs[(d9Start + d9Part) % 12];
-  const d12 = signs[(signIndex + Math.min(11, Math.floor(degree / 2.5))) % 12];
-  const d30 = signs[(signIndex + Math.min(29, Math.floor(degree))) % 12];
-  return [signs[signIndex], d2, d3, d7, d9, d12, d30];
+export function shadbalaSaptavargaSigns(longitude:number){
+ const keys:ClassicalVargaKey[]=["D1","D2","D3","D7","D9","D12","D30"];
+ return keys.map(key=>signs[classicalVargaCoordinates(key,longitude).signIndex]);
 }
 
 function uchchaBala(planet: ClassicalPlanet, longitude: number) {
@@ -101,21 +65,36 @@ function kendradiBala(house: number | null | undefined) {
 
 function drekkanaBala(planet: ClassicalPlanet, longitude: number) {
   const third = Math.min(2, Math.floor((normalize(longitude) % 30) / 10));
-  const preferred = ["Sun", "Mars", "Jupiter"].includes(planet) ? 0 : ["Moon", "Venus"].includes(planet) ? 1 : 2;
+  const preferred = ["Sun", "Mars", "Jupiter"].includes(planet) ? 0 : ["Mercury", "Saturn"].includes(planet) ? 1 : 2; // Raman arts. 36–39; female grahas receive third-decan strength.
   return third === preferred ? 15 : 0;
 }
 
 function ojayugmaBala(planet: ClassicalPlanet, longitude: number) {
-  if (planet === "Mercury") return 30;
   const rashiOdd = Math.floor(normalize(longitude) / 30) % 2 === 0;
-  const d9 = vargaSigns(longitude)[4];
+  const d9 = shadbalaSaptavargaSigns(longitude)[4];
   const d9Odd = signs.indexOf(d9 as (typeof signs)[number]) % 2 === 0;
-  const preferredOdd = ["Sun", "Mars", "Jupiter"].includes(planet);
+  const preferredOdd = planet!=="Moon"&&planet!=="Venus";
   return (rashiOdd === preferredOdd ? 15 : 0) + (d9Odd === preferredOdd ? 15 : 0);
 }
 
-function sthanaBala(planet: ClassicalPlanet, value: CanonicalPlanet, longitude: number) {
-  const saptavargaja = vargaSigns(longitude).reduce((sum, sign) => sum + dignityScore(planet, sign), 0);
+// Individually traceable BPHS 27.1–6 subcomponents, not a complete strength.
+export function calculateClassicalStrengthBasis(planet:CanonicalPlanet){
+ if(!isClassicalPlanet(planet.planet))return null;
+ const longitude=absoluteLongitude(planet);
+ if(longitude===null)return null;
+ const validHouse=Number.isInteger(planet.house)&&Number(planet.house)>=1&&Number(planet.house)<=12;
+ return {planet:planet.planet,uchchaVirupas:uchchaBala(planet.planet,longitude),
+  naisargikaVirupas:60*(["Saturn","Mars","Mercury","Jupiter","Venus","Moon","Sun"].indexOf(planet.planet)+1)/7,
+  ojayugmaVirupas:ojayugmaBala(planet.planet,longitude),
+  kendradiVirupas:validHouse?kendradiBala(planet.house):null,
+  drekkanaVirupas:drekkanaBala(planet.planet,longitude),
+  saptavargaSigns:shadbalaSaptavargaSigns(longitude),
+  method:"classical_component_basis_only" as const,fullShadbalaVerified:false as const};
+}
+function sthanaBala(planet: ClassicalPlanet, value: CanonicalPlanet, longitude: number,planets:CanonicalPlanet[]) {
+  const evidence=calculateSaptavargajaEvidence(planets,planet);
+  if(!evidence)return null;
+  const saptavargaja=evidence.totalVirupas;
   return round(uchchaBala(planet, longitude) + saptavargaja + ojayugmaBala(planet, longitude) + kendradiBala(value.house) + drekkanaBala(planet, longitude));
 }
 
@@ -214,16 +193,16 @@ function scorePlanet(value: CanonicalPlanet, planets: CanonicalPlanet[], context
   const longitude = absoluteLongitude(value);
   if (longitude === null) return null;
   const components: Record<ShadbalaComponent, number | null> = {
-    sthanaBala: sthanaBala(value.planet, value, longitude),
-    digBala: digBala(value.planet, longitude, context.ascendantLongitude),
+    sthanaBala: sthanaBala(value.planet, value, longitude,planets),
+    digBala: context.bhavaMidpoints?round(calculateExactDirectionalBala(value.planet,longitude,context.bhavaMidpoints).virupas):digBala(value.planet, longitude, context.ascendantLongitude),
     kalaBala: kalaBala(value.planet, planets, context),
     cheshtaBala: cheshtaBala(value.planet, value, planets, context),
     naisargikaBala: naisargika[value.planet],
     drikBala: drikBala(value, planets)
   };
   const componentStatus = Object.fromEntries((Object.keys(components) as ShadbalaComponent[]).map((component) => [component, {
-    status: "calculated" as const,
-    reason: component === "cheshtaBala"
+    status: components[component]===null?"unavailable" as const:"calculated" as const,
+    reason: components[component]===null?"Required unique, consistent natal positions unavailable.":component === "cheshtaBala"
       ? "Available motion-state calculation; exact speed-state parity remains fixture-gated."
       : component === "kalaBala"
         ? "Available temporal subcomponents calculated; Ayana/Yuddha calibration remains fixture-gated."
@@ -233,13 +212,19 @@ function scorePlanet(value: CanonicalPlanet, planets: CanonicalPlanet[], context
     planet: value.planet,
     components,
     componentStatus,
-    total: round(Object.values(components).reduce<number>((sum, component) => sum + Number(component ?? 0), 0)),
+    total: Object.values(components).every(v=>typeof v==="number"&&Number.isFinite(v))?round(Object.values(components).reduce<number>((sum, component) => sum + Number(component), 0)):null,
     verified: false
   };
 }
 
 export function calculateInternalShadbala(planets: CanonicalPlanet[], context: InternalShadbalaContext): PartialShadbalaResult {
-  const scores = planets.map((planet) => scorePlanet(planet, planets, context)).filter((score): score is ShadbalaPlanetScore => Boolean(score));
+  const classical=planets.filter(p=>isClassicalPlanet(p.planet));
+  const complete=classical.length===7&&new Set(classical.map(p=>p.planet)).size===7&&Number.isFinite(context.ascendantLongitude)&&classical.every(p=>absoluteLongitude(p)!==null&&Number.isInteger(p.house)&&Number(p.house)>=1&&Number(p.house)<=12);
+  if(!complete){
+    const result=calculatePartialShadbala(classical.filter((p,i)=>classical.findIndex(v=>v.planet===p.planet)===i));
+    return {...result,verificationLevel:"needs_external_validation",missingDependencies:["Unique complete finite classical positions, valid houses and ascendant are required.",...result.missingDependencies]};
+  }
+  const scores = classical.map((planet) => scorePlanet(planet, classical, context)).filter((score): score is ShadbalaPlanetScore => Boolean(score));
   const missing = classicalPlanets.filter((planet) => !scores.some((score) => score.planet === planet));
   return {
     scores,
@@ -250,7 +235,8 @@ export function calculateInternalShadbala(planets: CanonicalPlanet[], context: I
       "Independent full-component Shadbala reference fixtures and accepted tolerances."
     ],
     limitations: [
-      "All six top-level components are numerically calculated from available internal chart data.",
+      "All six top-level components are approximate internal engineering indicators, not complete classical Shadbala. Corrected D30 and parity calculations do not qualify the remaining approximations.",
+      "Saptavargaja now uses a named compound friendship and degree-qualified D1 moolatrikona convention; external parity is pending. Dig uses supplied midpoints when available, otherwise the legacy approximate equal-spaced cusps.",
       "Kala Bala includes Natonnata, Paksha, Tribhaga, weekday and Hora contributions; Ayana/Yuddha calibration remains external-validation work.",
       "Cheshta uses exact retrograde state where available and a conservative direct-motion fallback until mean/true speed-state fixtures are imported.",
       "Drik uses deterministic classical full/special aspect geometry; exact reference-software parity remains fixture-gated.",
@@ -264,7 +250,8 @@ export function calculatePartialShadbala(planets: CanonicalPlanet[], context?: P
     return calculateInternalShadbala(planets, {
       ascendantLongitude: context.ascendantLongitude,
       localTime: context.localTime,
-      date: context.date
+      date: context.date,
+      bhavaMidpoints:context.bhavaMidpoints
     });
   }
   const scores: ShadbalaPlanetScore[] = planets.filter((planet) => isClassicalPlanet(planet.planet)).map((planet) => ({
@@ -299,4 +286,16 @@ export function calculatePartialShadbala(planets: CanonicalPlanet[], context?: P
 
 function round(value: number) {
   return Number(value.toFixed(4));
+}
+
+/** Named whole-sign Kendra and Raman dignity weighting, not a certified
+ * full strength. Recompute the sign-relative house rather than reusing a
+ * quadrant assigned house. */
+export function calculateRamanPositionalCandidate(planets:CanonicalPlanet[],planet:ClassicalPlanet,ascendantLongitude:number){
+ if(!Number.isFinite(ascendantLongitude)||ascendantLongitude<0||ascendantLongitude>=360)return null;
+ const p=planets.find(p=>p.planet===planet),dignity=calculateRamanSaptavargajaCandidate(planets,planet);if(!p||!dignity)return null;
+ const lon=absoluteLongitude(p);if(lon===null)return null;
+ const house=(Math.floor(lon/30)-Math.floor(ascendantLongitude/30)+12)%12+1;
+ const basis=calculateClassicalStrengthBasis({...p,house});if(!basis||basis.kendradiVirupas===null)return null;
+ return {planet,house,basis,dignity,virupas:basis.uchchaVirupas+basis.ojayugmaVirupas+basis.kendradiVirupas+basis.drekkanaVirupas+dignity.totalVirupas,method:"raman_weights_whole_sign_kendra_corrected_decan" as const,publicEnabled:false as const,verified:false as const};
 }

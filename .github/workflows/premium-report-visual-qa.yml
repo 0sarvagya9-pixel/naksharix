@@ -3,7 +3,17 @@ on:
   pull_request:
     paths:
       - 'lib/reports/**'
+      - 'lib/astrology/**'
+      - 'lib/numerology/**'
+      - 'public/fonts/**'
+      - 'public/report-design/royal/**'
+      - 'package.json'
+      - 'package-lock.json'
       - 'scripts/qa-automatic-report-delivery.mjs'
+      - 'scripts/qa-royal-report-matrix.mjs'
+      - 'scripts/qa-royal-report-pages.py'
+      - 'scripts/qa_royal_profile_cards.py'
+      - 'scripts/qa_royal_question_blocks.py'
       - '.github/workflows/premium-report-visual-qa.yml'
 permissions:
   contents: read
@@ -31,6 +41,7 @@ jobs:
       - run: node scripts/qa-automatic-report-delivery.mjs
         env:
           REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
+          REPORT_SAMPLE_QA_DIR: ${{ runner.temp }}/public-sample-qa
       - name: Verify 45 genuine synthetic PDF samples
         env:
           REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
@@ -38,10 +49,43 @@ jobs:
           set -euo pipefail
           test "$(find "$REPORT_VISUAL_QA_DIR" -type f -name '*.pdf' | wc -l)" = 45
           du -sh "$REPORT_VISUAL_QA_DIR"
+      - name: Verify London Premium Kundli pagination in all three languages
+        env:
+          REPORT_MATRIX_DIR: ${{ runner.temp }}/royal-pagination-regressions
+          REPORT_MATRIX_PROFILE: "2"
+          REPORT_MATRIX_SKU: premium-kundli
+        run: node scripts/qa-royal-report-matrix.mjs
+      - name: Verify short Hindi answer and disclaimer pagination
+        env:
+          REPORT_MATRIX_DIR: ${{ runner.temp }}/royal-pagination-regressions
+          REPORT_MATRIX_PROFILE: "1"
+          REPORT_MATRIX_SKU: numerology-lo-shu-report
+          REPORT_MATRIX_LANG: hi
+        run: node scripts/qa-royal-report-matrix.mjs
+      - name: Read back the four pagination regression PDFs
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          command -v pdftotext >/dev/null || (sudo apt-get update && sudo apt-get install -y poppler-utils)
+          python scripts/qa_royal_question_blocks.py "$RUNNER_TEMP/royal-pagination-regressions" --expected-documents 4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: royal-pagination-regressions
+          path: ${{ runner.temp }}/royal-pagination-regressions
+          retention-days: 3
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: premium-report-editorial-visual-fixtures
           path: ${{ runner.temp }}/report-visual-qa
           retention-days: 3
           compression-level: 1
+          if-no-files-found: error
+      - name: Verify all 15 public fictional sample renderings
+        run: test "$(find "$RUNNER_TEMP/public-sample-qa" -type f -name '*.pdf' | wc -l)" = 15
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-fictional-sample-pdfs
+          path: ${{ runner.temp }}/public-sample-qa
+          retention-days: 3
           if-no-files-found: error

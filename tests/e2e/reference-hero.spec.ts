@@ -8,10 +8,15 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
     await expect(surface.getByRole("heading", { level: 1, name: /Discover your cosmic journey/i })).toBeVisible();
     await expect(surface.locator(".nx-a-tool")).toHaveCount(6);
     await expect(surface.locator(".nx-a-card")).toHaveCount(4);
+    const retained = page.locator(".nx-approved-retained");
+    // A seasonal offer can render its dialog between the two homepage sections.
+    await retained.evaluate(section => section.before(document.createElement("dialog")));
+    await expect(retained.locator(".nx-ed-hero")).toBeHidden();
+    await expect(page.locator('link[rel="preload"][as="image"][href="/approved-gallery/hero-astrolabe.jpg"]')).toHaveCount(1);
 
     const expectedLinks = [
       ["Create Free Kundli", "/kundli"],
-      ["Explore Services", "/free-calculators"],
+      ["Explore Free Tools", "/free-calculators"],
       ["Kundli", "/kundli"],
       ["Matching", "/matchmaking"],
       ["Panchang", "/panchang"],
@@ -94,7 +99,11 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
 
   test("paused Puja service shows its honest, accessible Coming Soon notice", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/pujas", { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const availability=page.getByRole("navigation",{name:"Explore personal services"}).getByRole("link",{name:"Puja services · Coming Soon"});
+    await expect(availability).toHaveAttribute("href","/pujas");
+    await availability.click();
+    await expect(page).toHaveURL(/\/pujas$/);
     await expect(page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ })).toBeVisible();
     await expect(page.getByText("Coming Soon", { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: /पुरानी बुकिंग देखें/i })).toHaveAttribute("href", "/puja-bookings");
@@ -113,6 +122,12 @@ test.describe("Owner-approved NAKSHARIX gallery reference fidelity", () => {
       const top = await first.evaluate(node => Math.round(node.getBoundingClientRect().top));
       expect(top, route + " must show a catalogue card on the first mobile screen").toBeLessThan(844);
     }
+    await page.goto("/reports", { waitUntil: "domcontentloaded" });
+    const compare = page.locator("#compare-reports");
+    await expect(compare).not.toHaveAttribute("open", "");
+    await compare.locator("summary").click();
+    await expect(compare.getByRole("heading", {name:"Compare personalized reports"})).toBeVisible();
+    await expect(compare.getByRole("article")).toHaveCount(3);
     await page.goto("/pujas", { waitUntil: "domcontentloaded" });
     const title = page.getByRole("heading", { level: 1, name: /पूजा सेवाएँ/ });
     await expect(title).toBeVisible();

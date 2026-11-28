@@ -17,6 +17,10 @@ import { ProductShareActions } from "@/components/shop/product-share-actions";
 import { canonicalSeoOrigin } from "@/lib/seo-origin";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
+import { automaticReportPublicPreview } from "@/lib/reports/public-preview";
+import {publicReportRequiredDetails,publicReportSampleAvailable,reportSurfaceCopy} from "@/lib/reports/public-intake";
+import { autoReportSlugSet } from "@/lib/reports/automatic-report-input";
+import { getActiveAstrologyProviderName } from "@/lib/astrology/provider";
 
 
 type Params = Promise<{ slug: string }>;
@@ -30,11 +34,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { slug } = await params;
   const report = getManualReport(slug);
   if (!report) return {};
+  const checkout = getManualReportCheckout(report.slug);
+  const locale=normalizeLocale((await cookies()).get("naksharix-language")?.value);
+  const preview = checkout ? automaticReportPublicPreview(report.slug, locale) : null;
+  const feeLabel=locale==="hi"?"एक बार का शुल्क":locale==="hinglish"?"Ek baar ki fee":"One-time fee";
   return seo({
-    title: `${report.name.en} | Naksharix Premium Astrology Report`,
-    description: env.AUTO_REPORT_DELIVERY_ENABLED==="true"&&getManualReportCheckout(report.slug)?`${report.name.en}. ${autoReportDeliveryMessage("en")}`:report.description.en,
+    title: `${report.name[locale]} | ${checkout ? checkout.price : "Report enquiry"}`,
+    description: preview && checkout ? `${preview.summary} ${feeLabel} ${checkout.price}.` : report.description[locale],
     path: `/reports/${report.slug}`,
-    keywords: [report.name.en, "Premium Astrology Report", "Manual Astrology Report", "Naksharix"]
+    keywords: [report.name[locale], "Naksharix"]
   });
 }
 
@@ -44,9 +52,10 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   if (!report) notFound();
 
   const locale = normalizeLocale((await cookies()).get("naksharix-language")?.value);
-  const labels = detailLabels(locale);
+  const labels = detailLabels(locale),surface=reportSurfaceCopy[locale];
   const checkout = getManualReportCheckout(report.slug);
   const automaticDelivery=Boolean(checkout)&&env.AUTO_REPORT_DELIVERY_ENABLED==="true";
+  const publicPreview = checkout ? automaticReportPublicPreview(report.slug, locale) : null;
   const publicReportUrl = new URL(`/reports/${report.slug}`, canonicalSeoOrigin(env.NEXT_PUBLIC_APP_URL)).toString();
   const ownerApprovedManualFee=!checkout?(await getPublishedManualReportOffers())[report.slug]:undefined;
   const manualFee=ownerApprovedManualFee?new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(ownerApprovedManualFee.pricePaise/100):null;
@@ -55,16 +64,16 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
   const checkoutSuccessHref = `${requestHref}&orderId={paymentId}`;
 
   return (
-    <main className="inner-page-shell star-field">
+    <main className="inner-page-shell star-field pb-28 lg:pb-0">
       <Section>
         <div className="inner-section grid gap-8 rounded-3xl border border-[#263957] p-6 md:p-8 lg:grid-cols-[1fr_0.52fr]">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#dca956]">{report.category}</p>
             <h1 className="mt-3 font-cinzel text-4xl font-black text-[#f3d382] sm:text-5xl">{report.name[locale]}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{automaticDelivery?autoReportDeliveryMessage(locale):report.description[locale]}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[#a8b3c7]">{publicPreview?.summary ?? report.description[locale]}</p>
+            <div id="report-purchase" tabIndex={-1} className="mt-7 flex scroll-mt-28 flex-wrap gap-3">
               {checkout ? (
-                <div className="min-w-56">
+                <div className="w-full min-w-0 sm:w-auto sm:min-w-56">
                   <RazorpayCheckoutButton
                     payload={{ purpose: checkout.purpose, reportId: checkout.reportId }}
                     label={`${labels.payAndContinue} ${checkout.price}`}
@@ -91,9 +100,9 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
-          <InfoSection title={labels.included} items={report.includes[locale]} />
-          <InfoSection title={labels.whoShouldRequest} items={report.who[locale]} />
-          <InfoSection title={labels.requiredDetails} items={report.required[locale]} />
+          <InfoSection title={labels.included} items={publicPreview?.features ?? report.includes[locale]} />
+          <InfoSection title={labels.whoShouldRequest} items={publicPreview?[publicPreview.audience]:report.who[locale]} />
+          <InfoSection title={labels.requiredDetails} items={checkout?publicReportRequiredDetails(report.slug,locale):report.required[locale]} />
           <InfoSection title={labels.languageOptions} items={labels.languages} />
         </div>
 
@@ -102,7 +111,8 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             <CardContent className="p-6">
               <Sparkles className="h-6 w-6 text-[#dca956]" />
               <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.samplePreview}</h2>
-              <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{report.preview[locale]}</p>
+              <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{checkout?surface.sampleDescription:report.preview[locale]}</p>
+              {autoReportSlugSet.has(report.slug)&&publicReportSampleAvailable(report.slug,getActiveAstrologyProviderName())?<div className="mt-4 space-y-2"><Button asChild variant="outline"><Link href={`/reports/${report.slug}/sample`} target="_blank" rel="noopener noreferrer">{surface.sample} ({surface.sampleLanguage})</Link></Button><p className="text-xs text-[#a8b3c7]">{surface.sampleNote}</p></div>:null}
             </CardContent>
           </Card>
           <Card className="inner-card">
@@ -110,7 +120,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
               <ShieldCheck className="h-6 w-6 text-[#00f5a0]" />
               <h2 className="mt-4 font-cinzel text-2xl font-bold text-[#f3d382]">{labels.deliveryProcess}</h2>
               <ol className="mt-4 grid gap-3 text-sm text-[#dbeafe]">
-                {(automaticDelivery?[...labels.paidSteps.slice(0,3),autoReportDeliveryMessage(locale),locale==="hi"?"रिपोर्ट की स्थिति अपने खाते में देखें और निजी PDF डाउनलोड करें।":"Track your report in your account and download the private PDF."]:checkout ? labels.paidSteps : labels.manualSteps).map((step, index) => (
+                {(automaticDelivery?[...labels.paidSteps.slice(0,3),autoReportDeliveryMessage(locale),surface.track]:checkout ? labels.paidSteps : labels.manualSteps).map((step, index) => (
                   <li key={step} className="rounded-lg border border-[#263957] bg-[#142647]/72 p-3"><span className="mr-2 text-[#fbc02d]">{index + 1}.</span>{step}</li>
                 ))}
               </ol>
@@ -124,7 +134,7 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             <p className="mt-3 text-sm leading-6 text-[#a8b3c7]">{labels.disclaimerCopy}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               {checkout ? (
-                <div className="min-w-56">
+                <div className="w-full min-w-0 sm:w-auto sm:min-w-56">
                   <RazorpayCheckoutButton
                     payload={{ purpose: checkout.purpose, reportId: checkout.reportId }}
                     label={`${labels.payAndContinue} ${checkout.price}`}
@@ -141,17 +151,18 @@ export default async function ReportDetailPage({ params }: { params: Params }) {
             </div>
           </CardContent>
         </Card>
-        <aside className="mt-10 rounded-2xl border border-[#ddc19b] bg-[#fffaf1] p-5 text-[#402a2d]" aria-label="Report buying guidance">
-          <h2 className="font-cinzel text-xl font-bold">Before you buy</h2>
-          <p className="mt-2 text-sm leading-7">Review what is included, how to receive your report and the applicable refund policy before paying. Your personal results are private.</p>
+        <aside className="mt-10 rounded-2xl border border-[#ddc19b] bg-[#fffaf1] p-5 text-[#402a2d]" aria-label={surface.guidance}>
+          <h2 className="font-cinzel text-xl font-bold">{surface.buying}</h2>
+          <p className="mt-2 text-sm leading-7">{surface.buyingDescription}</p>
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-            <Link href="/blog/personalized-astrology-report-delivery-guide" className="underline underline-offset-4">Report delivery guide</Link>
-            <Link href="/refund-policy" className="underline underline-offset-4">Refund policy</Link>
-            <Link href="/reports" className="underline underline-offset-4">Compare all reports</Link>
+            <Link href="/blog/personalized-astrology-report-delivery-guide" className="underline underline-offset-4">{surface.deliveryGuide}</Link>
+            <Link href="/refund-policy" className="underline underline-offset-4">{surface.refund}</Link>
+            <Link href="/reports" className="underline underline-offset-4">{surface.compare}</Link>
           </div>
           <ProductShareActions name={report.name[locale]} productUrl={publicReportUrl} kind="report" />
         </aside>
       </Section>
+      {checkout?<div data-report-mobile-action className="sticky bottom-0 z-20 border-t border-[#e4cbaa] bg-[#fffdf8] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-[#372630] lg:hidden"><div className="mx-auto flex max-w-xl flex-wrap items-center justify-between gap-3"><div className="min-w-0"><p className="text-xs">{locale==="hi"?"एक बार का शुल्क":locale==="hinglish"?"One-time fee":"One-time fee"}</p><p className="font-bold">{checkout.price}</p></div><Button asChild className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-center"><a href="#report-purchase">{locale==="hi"?"विवरण और खरीद":locale==="hinglish"?"Details aur purchase":"Review & continue"}</a></Button></div></div>:null}
     </main>
   );
 }
@@ -173,21 +184,21 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") {
     return {
       request: "Review request submit करें",
-      payAndContinue: "भुगतान करके आगे बढ़ें",
+      payAndContinue: "विवरण जाँचें",
       contactSupport: "सपोर्ट से संपर्क करें",
       emailSupport: "ईमेल सपोर्ट",
       price: "Report fee",
       manualReview: "Manual review",
-      paidNote: "Razorpay payment server पर verify होने के बाद secure birth-details form खुलेगा।",
+      paidNote: "पहले जन्म विवरण सुरक्षित फ़ॉर्म में जाँचें। पुष्टि के बाद ही सूचीबद्ध शुल्क का भुगतान करें।",
       manualNote: "इस specialist report के लिए payment claim नहीं किया जाता। Request DB में pending review के रूप में save होगी।",
       included: "क्या शामिल है",
       whoShouldRequest: "किसे request करनी चाहिए",
       requiredDetails: "आवश्यक विवरण",
       languageOptions: "भाषा विकल्प",
       languages: ["English", "Hindi", "Hinglish"],
-      samplePreview: "Sample preview",
+      samplePreview: "Report format",
       deliveryProcess: "Delivery process",
-      paidSteps: ["Razorpay पर listed fee का secure payment करें", "Server payment capture और signature verify करेगा", "Accurate birth details secure form में submit करें", "Request paid status के साथ review queue में जाएगी", "Download केवल actual generated PDF पर दिखेगा"],
+      paidSteps: ["सटीक जन्म विवरण सुरक्षित फ़ॉर्म में भरें और जाँचें", "जाँच सफल होने पर सूचीबद्ध शुल्क का सुरक्षित भुगतान करें", "सर्वर भुगतान की पुष्टि और हस्ताक्षर की जाँच करेगा", "भुगतान के बाद अनुरोध समीक्षा में जाएगा", "वास्तविक PDF तैयार होने पर ही डाउनलोड उपलब्ध होगा"],
       manualSteps: ["Secure form में accurate birth details submit करें", "Request pending review status के साथ save होगी", "Admin scope और fee confirm करेगा", "कोई unsupported payment या delivery confirmation नहीं दिखाई जाएगी", "Download केवल actual generated PDF पर दिखेगा"],
       disclaimer: "अस्वीकरण",
       disclaimerCopy: "ज्योतिष रिपोर्ट चिंतनात्मक मार्गदर्शन के साधन हैं। ये परिणामों की गारंटी नहीं देतीं और चिकित्सा, कानूनी, वित्तीय या पेशेवर सलाह का विकल्प नहीं हैं।"
@@ -197,21 +208,21 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hinglish") {
     return {
       request: "Submit Review Request",
-      payAndContinue: "Pay and Continue",
+      payAndContinue: "Validate details",
       contactSupport: "Contact Support",
       emailSupport: "Email Support",
       price: "Report fee",
       manualReview: "Manual review",
-      paidNote: "Razorpay payment server par verify hone ke baad secure birth-details form khulega.",
+      paidNote: "Pehle secure form mein birth details validate karein. Validation ke baad hi listed fee ka payment karein.",
       manualNote: "Is specialist report ke liye payment claim nahi hota. Request DB me pending review ke roop me save hogi.",
       included: "What is included",
       whoShouldRequest: "Who should request this report",
       requiredDetails: "Required details",
       languageOptions: "Language options",
       languages: ["English", "Hindi", "Hinglish"],
-      samplePreview: "Sample preview",
+      samplePreview: "Report format",
       deliveryProcess: "Delivery process",
-      paidSteps: ["Razorpay par listed fee ka secure payment karein", "Server payment capture aur signature verify karega", "Accurate birth details secure form me submit karein", "Request paid status ke saath review queue me jayegi", "Download sirf actual generated PDF par dikhega"],
+      paidSteps: ["Accurate birth details secure form mein fill aur validate karein", "Validation ke baad listed fee ka secure payment karein", "Server payment capture aur signature verify karega", "Paid request review queue mein jayegi", "Download sirf actual generated PDF par dikhega"],
       manualSteps: ["Secure form me accurate birth details submit karein", "Request pending review status ke saath save hogi", "Admin scope aur fee confirm karega", "Koi unsupported payment ya delivery confirmation nahi dikhaya jayega", "Download sirf actual generated PDF par dikhega"],
       disclaimer: "Disclaimer",
       disclaimerCopy: "Astrology reports reflective guidance tools hain. Ye guaranteed outcomes nahi deti aur medical, legal, financial ya professional advice ka replacement nahi hain."
@@ -220,21 +231,21 @@ function detailLabels(locale: "en" | "hi" | "hinglish") {
 
   return {
     request: "Submit Review Request",
-    payAndContinue: "Pay and Continue",
+    payAndContinue: "Validate details",
     contactSupport: "Contact Support",
     emailSupport: "Email Support",
     price: "Report fee",
     manualReview: "Manual review",
-    paidNote: "After secure payment, you can submit your birth details.",
+    paidNote: "Validate your birth details first. Pay the listed fee only after validation succeeds.",
     manualNote: "Send your request and our team will confirm the next steps.",
     included: "What is included",
     whoShouldRequest: "Who should request this report",
     requiredDetails: "Required details",
     languageOptions: "Language options",
     languages: ["English", "Hindi", "Hinglish"],
-    samplePreview: "Sample preview",
+    samplePreview: "Report format",
     deliveryProcess: "Delivery process",
-    paidSteps: ["Pay the listed fee through secure Razorpay checkout", "The server verifies the payment capture and signature", "Submit accurate birth details through the secure form", "The request enters review with paid status", "Download appears only when an actual generated PDF exists"],
+    paidSteps: ["Enter and validate accurate birth details through the secure form", "After validation, pay the listed fee through secure Razorpay checkout", "The server verifies the payment capture and signature", "The request enters review with paid status", "Download appears only when an actual generated PDF exists"],
     manualSteps: ["Submit accurate birth details through the secure form", "The request is saved with pending-review status", "An administrator confirms scope and fee", "No unsupported payment or delivery confirmation is displayed", "Download appears only when an actual generated PDF exists"],
     disclaimer: "Disclaimer",
     disclaimerCopy: "Astrology reports are reflective guidance tools. They do not guarantee outcomes and should not replace medical, legal, financial, or professional advice."

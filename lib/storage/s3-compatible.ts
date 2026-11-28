@@ -21,6 +21,7 @@ type RequestInput = {
   key: string;
   body?: Uint8Array;
   contentType?: string;
+  createOnly?: boolean;
 };
 
 function sha256(value: string | Uint8Array) {
@@ -105,6 +106,7 @@ async function signedRequest(input: RequestInput) {
     ["x-amz-date", timestamp]
   ];
   if (input.contentType) canonicalHeaderEntries.push(["content-type", input.contentType]);
+  if(input.method==="PUT"&&input.createOnly)canonicalHeaderEntries.push(["if-none-match","*"]);
   canonicalHeaderEntries.sort(([a], [b]) => a.localeCompare(b));
 
   const canonicalHeaders = canonicalHeaderEntries.map(([name, value]) => `${name}:${value.trim()}\n`).join("");
@@ -138,22 +140,30 @@ async function signedRequest(input: RequestInput) {
     "x-amz-date": timestamp
   });
   if (input.contentType) headers.set("content-type", input.contentType);
+  if(input.method==="PUT"&&input.createOnly)headers.set("if-none-match","*");
 
   const response = await fetch(`${config.endpoint}${path}`, {
     method: input.method,
     headers,
     body: input.method === "PUT" ? toArrayBuffer(body) : undefined,
-    cache: "no-store"
+    cache: "no-store",redirect:"error",signal:AbortSignal.timeout(30_000)
   });
 
+  if(input.method==="PUT"&&input.createOnly&&response.status===412)return response;
   if (!response.ok) {
     throw new Error(`${input.driver.toUpperCase()} storage ${input.method} failed with HTTP ${response.status}.`);
   }
   return response;
 }
 
-export async function putPrivateObject(driver: S3CompatibleDriver, key: string, bytes: Uint8Array, contentType: string) {
-  await signedRequest({ driver, method: "PUT", key, body: bytes, contentType });
+export async function putPrivateObject(driver: S3CompatibleDriver, key: string, bytes: Uint8Array, contentType: string,createOnly=false) {
+  const response=await signedRequest({ driver, method: "PUT", key, body: bytes, contentType,createOnly });
+  if(response.status===412){
+    // Same immutable content can safely be reused on retry, but never trust
+    // an existing object solely because its key includes a checksum.
+    const stored=await getPrivateObject(driver,key);
+    if(sha256(stored)!==sha256(bytes)||stored.length!==bytes.length)throw Error("Existing immutable report object failed integrity verification.");
+  }
   return { driver, key };
 }
 

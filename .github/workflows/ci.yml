@@ -100,10 +100,11 @@ jobs:
       - name: Run complete QA suite
         env:
           REPORT_VISUAL_QA_DIR: ${{ runner.temp }}/report-visual-qa
+          STRENGTH_QUALIFICATION_OUTPUT: ${{ runner.temp }}/strength-reference-qualification.json
         shell: bash
         run: |
           set +e
-          npm run qa:all > quality-qa.log 2>&1
+          node scripts/qa-all-independent.mjs > quality-qa.log 2>&1
           QA_EXIT=$?
           npm run qa:final-closure >> quality-qa.log 2>&1
           FINAL_EXIT=$?
@@ -116,6 +117,16 @@ jobs:
           name: quality-qa-log
           path: quality-qa.log
           if-no-files-found: warn
+      - name: Preserve original-tolerance strength qualification and provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strength-reference-qualification
+          path: |
+            ${{ runner.temp }}/strength-reference-qualification.json
+            /tmp/naksharix-motion-reference-diagnostic.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Verify and upload synthetic premium report renderings
         shell: bash
         env:
@@ -141,8 +152,61 @@ jobs:
           node -e 'const u = new URL(process.env.DATABASE_URL || ""); if (process.env.CI !== "true" || u.hostname !== "localhost" || u.port !== "5432" || u.pathname !== "/naksharix") { process.exit(1); }'
           npx prisma db push --skip-generate
           node scripts/qa-align-disposable-feature-schema.mjs
+      - name: Qualify preflight admission for all fifteen priced reports and private-input boundaries
+        run: node scripts/qa-report-preflight-runtime.mjs
+      - name: Qualify saved Kundli purchase identity, private PDF authorization and free cache isolation
+        run: node scripts/qa-saved-kundli-access-runtime.mjs
       - name: Exercise paid-report worker with disposable database and isolated email transport
         run: node scripts/qa-automatic-report-delivery.mjs --database
+      - name: Qualify all 45 paid-report delivery variants with isolated transport
+        run: node scripts/qa-report-delivery-matrix.mjs "${{ runner.temp }}/report-delivery-matrix.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paid-report-delivery-matrix-synthetic
+          path: ${{ runner.temp }}/report-delivery-matrix.json
+          retention-days: 3
+          if-no-files-found: warn
+      - name: Exercise report correction, versioned delivery and administrator races on disposable PostgreSQL
+        run: |
+          node scripts/qa-report-delivery-races.mjs
+          node scripts/qa-report-quality-quarantine.mjs
+      - name: Reconcile synthetic website and marketing provider preferences offline
+        run: node --experimental-strip-types scripts/qa-marketing-suppression.mjs --database
+      - name: Qualify six digital products and course entitlements with disposable PostgreSQL
+        env:
+          PACKAGE_QA_DIR: ${{ runner.temp }}/package-qa
+        run: node scripts/qa-digital-package-runtime.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: digital-package-synthetic-renderings
+          path: ${{ runner.temp }}/package-qa
+          retention-days: 3
+          if-no-files-found: error
+      - name: Qualify B2B calculations and concurrent tenant quota on disposable PostgreSQL
+        env:
+          PACKAGE_QA_DIR: ${{ runner.temp }}/partner-qa
+        run: node scripts/qa-business-integrations-runtime.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: partner-chart-synthetic-pdf
+          path: ${{ runner.temp }}/partner-qa
+          retention-days: 3
+          if-no-files-found: error
+      - name: Qualify expert service and report-review runtime on disposable PostgreSQL
+        run: node scripts/qa-expert-services-runtime.mjs
+      - name: Qualify credit reservation, expiry and refund runtime on disposable PostgreSQL
+        run: node scripts/qa-ai-credit-runtime.mjs
+      - name: Verify paid report content and PDF binding
+        run: node --experimental-strip-types scripts/qa-report-quality-binding.mjs
+      - name: Verify report sales reconciliation on disposable PostgreSQL
+        run: node scripts/qa-report-sales-runtime.mjs
+      - name: Qualify password recovery and quota isolation on disposable PostgreSQL
+        run: node scripts/qa-password-reset-runtime.mjs
+      - name: Verify deferred service review persistence and retry safety
+        run: node scripts/qa-deferred-service-runtime.mjs
+      - name: Exercise all seven deferred-service planning workflows on isolated PostgreSQL
+        run: node scripts/qa-deferred-planning-runtime.mjs
       - name: Run local production HTTP smoke
         shell: bash
         run: |
@@ -176,8 +240,59 @@ jobs:
             node scripts/qa-seo-http.mjs >> http-smoke.log 2>&1
             SMOKE_EXIT=$?
           fi
+          if [ "$SMOKE_EXIT" -eq 0 ]; then
+            node scripts/qa-full-sitemap-local.mjs >> http-smoke.log 2>&1
+            SMOKE_EXIT=$?
+          fi
+          if [ "$SMOKE_EXIT" -eq 0 ]; then
+            node scripts/qa-local-http-load.mjs >> http-smoke.log 2>&1
+            SMOKE_EXIT=$?
+          fi
           cat http-smoke.log
           exit "$SMOKE_EXIT"
+      - name: Verify automatic-report public landing copy on isolated HTTP runtime
+        env:
+          AUTO_REPORT_DELIVERY_ENABLED: "true"
+          EMAIL_PROVIDER: disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run start -- -p 3001 > /tmp/naksharix-report-copy.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:3001/api/health > /dev/null; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$READY" -ne 1 ]; then
+            cat /tmp/naksharix-report-copy.log
+            exit 1
+          fi
+          node --input-type=module <<'JS'
+          import assert from "node:assert/strict";
+          const examples = [
+            ["premium-kundli", "en", "Explore your birth chart, planetary positions", "Planet positions, twelve houses and Navamsa", "INR 799"],
+            ["couple-kundli", "en", "Review both birth charts, 36-point Guna Milan", "Ashtakoot / 36-point Guna Milan", "INR 699"],
+            ["numerology-lo-shu-report", "en", "Explore birth number, life path and name number", "Lo Shu grid and missing or repeated digits", "INR 399"],
+            ["couple-kundli", "hi", "दोनों की जन्म कुंडली, 36 गुण मिलान", "अष्टकूट / 36 गुण मिलान", "INR 699"],
+            ["numerology-lo-shu-report", "hinglish", "Moolank, life path, name number", "Lo Shu grid aur missing/repeated digits", "INR 399"]
+          ];
+          for (const [slug, locale, summary, feature, price] of examples) {
+            const response = await fetch("http://127.0.0.1:3001/reports/" + slug, {headers:{Cookie:"naksharix-language="+locale}});
+            assert.equal(response.status, 200, slug+" "+locale);
+            const html = await response.text();
+            const body = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,"").replace(/<[^>]+>/g," ").replace(/\s+/g," ");
+            assert.ok(body.includes(summary), slug+" "+locale+" missing product summary");
+            assert.ok(body.includes(feature), slug+" "+locale+" missing product feature");
+            assert.ok(body.includes(price), slug+" "+locale+" missing current catalogue fee");
+            assert.ok(body.includes("Report format"), slug+" misleading sample label");
+            console.log("PASS",slug,locale);
+          }
+          JS
       - name: Upload HTTP smoke log
         if: always()
         uses: actions/upload-artifact@v4
@@ -241,7 +356,46 @@ jobs:
             test -d "/ms-playwright" || { echo "No browser cache"; exit 1; }
           done
           node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" --version
+      - name: Qualify localized consultation recovery and payment acknowledgements
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-consultation-request-ui.mjs | tee consultation-request-ui.log
+      - name: Qualify multilingual customer and contracted-business journeys
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-customer-localization-ui.mjs | tee customer-localization-ui.log
+          node scripts/qa-customer-status-pages.mjs | tee customer-status-pages.log
+          node scripts/qa-consultation-customer-locale.mjs | tee consultation-customer-locale.log
+          node scripts/qa-business-workspace-ui.mjs | tee business-workspace-ui.log
       - run: npx prisma generate
+      - name: Qualify recovered account, specialist and administration journeys
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-support-language-ui.mjs | tee support-language-ui.log
+          node scripts/qa-support-response-contracts.mjs | tee support-response-contracts.log
+          node scripts/qa-admin-fulfilment-ui.mjs | tee admin-fulfilment-ui.log
+          node scripts/qa-admin-fulfilment-contracts.mjs | tee admin-fulfilment-contracts.log
+          node scripts/qa-admin-refresh-ordering.mjs | tee admin-refresh-ordering.log
+          node scripts/qa-consultation-admin-concurrency.mjs | tee consultation-admin-concurrency.log
+          node scripts/qa-fulfilment-locale-email.mjs | tee fulfilment-locale-email.log
+          node scripts/qa-paid-course-ui.mjs | tee paid-course-ui.log
+          node scripts/qa-expert-operations-ui.mjs | tee expert-operations-ui.log
+          node scripts/qa-admin-editorial-ui.mjs | tee admin-editorial-ui.log
+          node scripts/qa-ai-customer-locale.mjs | tee ai-customer-locale.log
+          node scripts/qa-reference-reminder-locale.mjs | tee reference-reminder-locale.log
+          node scripts/qa-ai-chat-recovery.mjs | tee ai-chat-recovery.log
+          node scripts/qa-digital-package-ui.mjs | tee digital-package-ui.log
+          node scripts/qa-admin-catalogue-ui.mjs | tee admin-catalogue-ui.log
+          node scripts/qa-report-admin-operations.mjs | tee report-admin-operations.log
+          node scripts/qa-provider-account-controls.mjs | tee provider-account-controls.log
+          node scripts/qa-provider-account-routes.mjs | tee provider-account-routes.log
+          node scripts/qa-shop-admin-ui.mjs | tee shop-admin-ui.log
+          node scripts/qa-shop-admin-contracts.mjs | tee shop-admin-contracts.log
+          node scripts/qa-deferred-controls-ui.mjs | tee deferred-controls-ui.log
+          node scripts/qa-deferred-controls-routes.mjs | tee deferred-controls-routes.log
       - name: Bootstrap isolated browser-test database
         shell: bash
         run: |
@@ -283,6 +437,34 @@ jobs:
         with:
           name: browser-release-qa
           path: |
+            consultation-request-ui.log
+            customer-localization-ui.log
+            customer-status-pages.log
+            consultation-customer-locale.log
+            business-workspace-ui.log
+            support-language-ui.log
+            support-response-contracts.log
+            admin-fulfilment-ui.log
+            admin-fulfilment-contracts.log
+            admin-refresh-ordering.log
+            consultation-admin-concurrency.log
+            fulfilment-locale-email.log
+            paid-course-ui.log
+            expert-operations-ui.log
+            admin-editorial-ui.log
+            ai-customer-locale.log
+            reference-reminder-locale.log
+            ai-chat-recovery.log
+            digital-package-ui.log
+            admin-catalogue-ui.log
+            report-admin-operations.log
+            provider-account-controls.log
+            provider-account-routes.log
+            shop-admin-ui.log
+            shop-admin-contracts.log
+            deferred-controls-ui.log
+            deferred-controls-routes.log
             browser-qa.log
+            /tmp/naksharix-browser-server.log
             test-results
           if-no-files-found: warn

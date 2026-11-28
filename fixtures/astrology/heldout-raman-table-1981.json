@@ -1,0 +1,22 @@
+{
+  "source": "V. P. Jain, Text Book for Shadbala (Grahas) and Bhavabala, pp. 43–45 and Ishta/Kashta example p. 63; https://pdfcoffee.com/jyotishtext-book-for-shadbala-and-bhavabalavp-jain2-pdf-free.html",
+  "secondarySource": "https://pdfcoffee.com/jyotishtext-book-for-shadbala-and-bhavabalavp-jain-pdf-free.html",
+  "scope": "Separate held-out birth example, same historical tables adapted from B.V. Raman. Numeric facts only from publicly accessible extracted text; no private details or prose copied. Not independent method certification.",
+  "utc": "1981-09-12T20:00:00Z",
+  "printedElapsedDays": 29840.04,
+  "trueLongitudes": {
+    "Mars": 103.18,
+    "Mercury": 170.53,
+    "Jupiter": 170.45,
+    "Venus": 186.27,
+    "Saturn": 166.43
+  },
+  "publishedCheshta": {
+    "Mars": 20.93,
+    "Mercury": 28.76,
+    "Jupiter": 8.43,
+    "Venus": 28.18,
+    "Saturn": 5.05
+  },
+  "toleranceVirupas": 0.03
+}

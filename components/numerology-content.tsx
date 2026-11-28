@@ -1,5 +1,8 @@
 "use client";
 
+import {isFullRomanNumerologyName, numerologyNameNotice} from "@/lib/numerology/name";
+import {isNumerologyBirthDate, isNumerologyMobile, isNumerologyVehicle} from "@/lib/numerology/input";
+
 import { useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { CalendarDays, Calculator, Car, Grid3X3, Hash, Route, Smartphone, Sparkles, Target } from "lucide-react";
@@ -229,6 +232,7 @@ export function NumerologyContent() {
   const [form, setForm] = useState<FormState>({ name: "", dateOfBirth: "", mobile: "", vehicle: "" });
   const [errors, setErrors] = useState<Errors>({});
   const [report, setReport] = useState<NumerologyReport | null>(null);
+  const [resultInput, setResultInput] = useState<FormState | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const nameRef = useRef<HTMLInputElement | null>(null);
   const dateOfBirthRef = useRef<HTMLInputElement | null>(null);
@@ -237,10 +241,10 @@ export function NumerologyContent() {
   const coreNumbers = useMemo(() => report ? [
     { key: "moolank", value: report.moolank.value },
     { key: "lifePath", value: report.lifePath.value },
-    { key: "destiny", value: report.destiny.value },
-    { key: "nameNumber", value: report.nameNumber.value },
-    { key: "soulUrge", value: report.soulUrge.value },
-    { key: "personality", value: report.personality.value }
+    { key: "destiny", value: report.destiny?.value ?? null },
+    { key: "nameNumber", value: report.nameNumber?.value ?? null },
+    { key: "soulUrge", value: report.soulUrge?.value ?? null },
+    { key: "personality", value: report.personality?.value ?? null }
   ] : [], [report]);
 
   function updateField(field: keyof FormState, value: string) {
@@ -251,10 +255,11 @@ export function NumerologyContent() {
   function validate() {
     const next: Errors = {};
     if (!form.name.trim()) next.name = lang.required;
+    else if (!isFullRomanNumerologyName(form.name)) next.name = numerologyNameNotice(locale);
     if (!form.dateOfBirth) next.dateOfBirth = lang.required;
-    else if (Number.isNaN(new Date(`${form.dateOfBirth}T00:00:00.000Z`).getTime())) next.dateOfBirth = lang.invalidDate;
-    if (form.mobile.trim() && !/^\+?[0-9\s-]{7,20}$/.test(form.mobile.trim())) next.mobile = lang.invalidMobile;
-    if (form.vehicle.trim() && !/^[A-Za-z0-9\s-]{2,20}$/.test(form.vehicle.trim())) next.vehicle = lang.invalidVehicle;
+    else if (!isNumerologyBirthDate(form.dateOfBirth)) next.dateOfBirth = lang.invalidDate;
+    if (form.mobile.trim() && !isNumerologyMobile(form.mobile)) next.mobile = lang.invalidMobile;
+    if (form.vehicle.trim() && !isNumerologyVehicle(form.vehicle)) next.vehicle = lang.invalidVehicle;
     setErrors(next);
     return next;
   }
@@ -280,6 +285,7 @@ export function NumerologyContent() {
       const payload = await response.json().catch(() => null);
       if (!response.ok || !payload?.data?.report) throw new Error("Numerology calculation failed");
       setReport(payload.data.report as NumerologyReport);
+      setResultInput({...form});
       setStatus("success");
     } catch {
       setStatus("error");
@@ -433,7 +439,7 @@ export function NumerologyContent() {
                   <CompatibilityCard title={lang.nameCompatibility} verdict={nameVerdict(report)} items={nameCompatibility(report, locale)} lang={lang} locale={locale} />
                   <CompatibilityCard title={lang.phoneCompatibility} verdict={numberVerdict(report, report.mobileAnalysis?.value)} items={phoneCompatibility(report, locale)} lang={lang} locale={locale} />
                   <CompatibilityCard title={lang.vehicleCompatibility} verdict={numberVerdict(report, report.vehicleAnalysis?.value)} items={vehicleCompatibility(report, locale)} lang={lang} locale={locale} />
-                  <InsightList title={lang.loShuImpact} items={loShuImpact(report, locale, form)} />
+                  <InsightList title={lang.loShuImpact} items={loShuImpact(report, locale, resultInput ?? form)} />
                   <div id="numerology-suggestions"><InsightList title={lang.compatibleSuggestions} items={compatibleNumberSuggestions(report, locale, lang)} /></div>
                 </div>
               </section>
@@ -446,7 +452,7 @@ export function NumerologyContent() {
                     <h2 className="font-cinzel text-xl font-bold text-[#17181d]">{lang.daily}: {report.dailyPrediction.personalDayNumber}</h2>
                     <p className="mt-3 text-sm leading-6 text-[#525866]">{report.dailyPrediction.summary}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {numberProfile(reduceDisplayNumber(report.lifePath.value + new Date(report.dailyPrediction.date).getDate()), locale).strengths.map((item) => (
+                      {numberProfile(report.dailyPrediction.personalDayNumber, locale).strengths.map((item) => (
                         <span
                           key={item}
                           className="rounded-full px-3 py-1 text-xs font-semibold text-[#c98924]"
@@ -505,7 +511,8 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   );
 }
 
-function NumberCard({ item, labels, locale }: { item: { key: string; value: number }; labels: Record<string, string>; locale: Locale }) {
+function NumberCard({ item, labels, locale }: { item: { key: string; value: number | null }; labels: Record<string, string>; locale: Locale }) {
+  if (item.value === null) return <Card><CardContent className="p-5"><h3 className="font-semibold">{numberLabel(item.key, locale)}</h3><p className="mt-3 text-sm leading-6">{numerologyNameNotice(locale, item.key === "soulUrge" ? "vowels" : item.key === "personality" ? "consonants" : "spelling")}</p></CardContent></Card>;
   const profile = numberProfile(item.value, locale);
   return (
     <Card className="h-full">
@@ -655,7 +662,7 @@ function verdictLabel(verdict: Verdict, locale: Locale, lang: Record<string, str
 function numberLabel(key: string, locale: Locale) {
   const map: Record<Locale, Record<string, string>> = {
     en: { moolank: "Moolank / Birth Number", lifePath: "Bhagyank / Life Path Number", destiny: "Destiny Number", nameNumber: "Name Number / Naamank", soulUrge: "Soul Urge Number", personality: "Personality Number", mobile: "Mobile Number Analysis", vehicle: "Vehicle Number Analysis" },
-    hi: { moolank: "मूलांक / जन्मांक", lifePath: "भाग्यांक / जीवन पथ अंक", destiny: "भाग्यांक", nameNumber: "नामांक", soulUrge: "आत्मिक ऊर्जा अंक", personality: "व्यक्तित्व अंक", mobile: "मोबाइल नंबर विश्लेषण", vehicle: "वाहन नंबर विश्लेषण" },
+    hi: { moolank: "मूलांक / जन्मांक", lifePath: "भाग्यांक / जीवन पथ अंक", destiny: "अभिव्यक्ति अंक (नाम से)", nameNumber: "नामांक", soulUrge: "आत्मिक ऊर्जा अंक", personality: "व्यक्तित्व अंक", mobile: "मोबाइल नंबर विश्लेषण", vehicle: "वाहन नंबर विश्लेषण" },
     hinglish: { moolank: "Moolank / Birth Number", lifePath: "Bhagyank / Life Path Number", destiny: "Destiny Number", nameNumber: "Naamank", soulUrge: "Soul Urge Number", personality: "Personality Number", mobile: "Mobile Number Analysis", vehicle: "Vehicle Number Analysis" }
   };
   return map[locale][key] ?? key;
@@ -680,7 +687,7 @@ function numberProfile(value: number, locale: Locale) {
       3: p("रचनात्मकता, अभिव्यक्ति, सीखने की क्षमता", ["रचनात्मकता", "संवाद"], ["बिखरा ध्यान", "अधिक बोलना"], "लेखन, सीखने और केंद्रित अभिव्यक्ति का अभ्यास करें।"),
       4: p("अनुशासन, संरचना, स्थिरता", ["योजना", "विश्वसनीयता"], ["कठोरता", "बदलाव का भय"], "दिनचर्या, योजना और चरणबद्ध अनुशासन अपनाएं।"),
       5: p("संतुलन, अनुकूलन, संवाद", ["अनुकूलन", "गतिशीलता"], ["बेचैनी", "अनियमितता"], "स्वतंत्रता को स्पष्ट संवाद और व्यावहारिक योजना से संतुलित करें।"),
-      6: p("जिम्मेदारी, परिवार, देखभाल", ["देखभाल", "सामंजस्य"], ["अधिक जिम्मेदारी", "नियंत्रण"], "सब कुछ अकेले उठाए बिना परिवारिक सामंजस्य बनाएं।"),
+      6: p("जिम्मेदारी, परिवार, देखभाल", ["देखभाल", "सामंजस्य"], ["अधिक जिम्मेदारी", "नियंत्रण"], "सब कुछ अकेले उठाए बिना पारिवारिक सामंजस्य बनाएं।"),
       7: p("विश्लेषण, आध्यात्मिकता, आंतरिक ज्ञान", ["विश्लेषण", "अंतर्ज्ञान"], ["अलगाव", "अधिक सोचना"], "चिंतन को स्थिर दिनचर्या से संतुलित करें।"),
       8: p("महत्वाकांक्षा, प्रबंधन, भौतिक विकास", ["कार्यान्वयन", "प्रबंधन"], ["दबाव", "काम असंतुलन"], "धन अनुशासन, नैतिक महत्वाकांक्षा और संसाधन प्रबंधन रखें।"),
       9: p("करुणा, ज्ञान, पूर्णता", ["करुणा", "परिपक्वता"], ["भावनात्मक भारीपन", "लगाव"], "पुराने चक्र पूरे करें और सीमाओं के साथ सेवा करें।")
@@ -732,8 +739,8 @@ function missingNumberText(number: number, locale: Locale) {
       3: "रचनात्मकता, अभिव्यक्ति, सीखने और संवाद को सक्रिय अभ्यास की आवश्यकता है। लिखें, बोलें और विचार पूरे करें।",
       4: "दिनचर्या, अनुशासन, योजना और संरचना को मजबूत करने की आवश्यकता है। सूची, समय-सारणी और स्थिर प्रणाली अपनाएं।",
       5: "अनुकूलन, संतुलन और व्यावहारिक संवाद को विकसित करना उपयोगी रहेगा। स्पष्ट प्राथमिकताओं के साथ लचीलापन रखें।",
-      6: "परिवारिक जिम्मेदारी, देखभाल और सामंजस्य को सचेत सहयोग चाहिए। सब कुछ अकेले उठाए बिना जिम्मेदारी निभाएं।",
-      7: "चिंतन, विश्लेषण और आध्यात्मिक सीख के लिए अधिक स्थान बनाना उपयोगी रहेगा। एकांत को grounded action से संतुलित करें।",
+      6: "पारिवारिक जिम्मेदारी, देखभाल और सामंजस्य को सचेत सहयोग चाहिए। सब कुछ अकेले उठाए बिना जिम्मेदारी निभाएं।",
+      7: "चिंतन, विश्लेषण और आध्यात्मिक सीख के लिए अधिक स्थान बनाना उपयोगी रहेगा। एकांत के साथ व्यावहारिक प्रयासों का संतुलन रखें।",
       8: "धन अनुशासन, प्रबंधन और जिम्मेदारी को मजबूत करने की आवश्यकता है। संसाधन और commitments ध्यान से ट्रैक करें।",
       9: "करुणा, पूर्णता और व्यापक सोच को विकसित करना उपयोगी रहेगा। पुराने चक्र पूरे करें और सीमाओं के साथ सेवा करें।"
     },
@@ -770,7 +777,7 @@ function repeatedNumberText(number: number, locale: Locale) {
       2: "2 का दोहराव संवेदनशीलता और भावनात्मक जागरूकता दिखाता है। इसे स्पष्ट सीमाओं से संतुलित करें।",
       3: "3 का दोहराव अभिव्यक्ति और रचनात्मक ऊर्जा दिखाता है। नए विचार शुरू करने से पहले पुराने पूरे करें।",
       4: "4 का दोहराव मजबूत संरचना और कार्य-केंद्रित ऊर्जा दिखाता है। इसे लचीलापन और विश्राम से संतुलित करें।",
-      5: "5 का दोहराव गति, बदलाव और संवाद की ऊर्जा दिखाता है। इसे नियमितता और grounded choices से संतुलित करें।",
+      5: "5 का दोहराव गति, बदलाव और संवाद की ऊर्जा दिखाता है। इसे नियमितता और व्यावहारिक विकल्पों से संतुलित करें।",
       6: "6 का दोहराव देखभाल, परिवार और जिम्मेदारी की ऊर्जा दिखाता है। अत्यधिक जिम्मेदारी से बचकर संतुलन रखें।",
       7: "7 का दोहराव विश्लेषण और आंतरिक खोज दिखाता है। इसे व्यावहारिक action और सामाजिक जुड़ाव से संतुलित करें।",
       8: "8 का दोहराव महत्वाकांक्षा और प्रबंधन ऊर्जा दिखाता है। इसे नैतिकता, विश्राम और धन अनुशासन से संतुलित करें।",
@@ -825,7 +832,7 @@ function loShuBalancingSuggestions(report: NumerologyReport, locale: Locale) {
 function relationshipPattern(report: NumerologyReport, locale: Locale) {
   const has2 = presentNumbers(report).includes(2);
   const has6 = presentNumbers(report).includes(6);
-  if (locale === "hi") return has2 || has6 ? "संबंधों में सहयोग, देखभाल और संवाद सहायक रहेंगे।" : "संबंधों में सुनना, भावनात्मक अभिव्यक्ति और परिवारिक जिम्मेदारी पर सचेत काम उपयोगी रहेगा।";
+  if (locale === "hi") return has2 || has6 ? "संबंधों में सहयोग, देखभाल और संवाद सहायक रहेंगे।" : "संबंधों में सुनना, भावनात्मक अभिव्यक्ति और पारिवारिक जिम्मेदारी पर सचेत काम उपयोगी रहेगा।";
   if (locale === "hinglish") return has2 || has6 ? "Relationships me cooperation, care aur communication supportive rahenge." : "Relationships me listening, emotional expression aur family responsibility par conscious work helpful rahega.";
   return has2 || has6 ? "Cooperation, care, and communication can support relationships." : "Listening, emotional expression, and family responsibility need conscious attention.";
 }
@@ -839,6 +846,7 @@ function careerPattern(report: NumerologyReport, locale: Locale) {
 }
 
 function nameCompatibility(report: NumerologyReport, locale: Locale) {
+  if (!report.nameNumber) return [numerologyNameNotice(locale)];
   const aligned = compatibleSet(report.lifePath.value).includes(reduceDisplayNumber(report.nameNumber.value));
   const missing = missingValues(report);
   const nameSupportsMissing = missing.includes(reduceDisplayNumber(report.nameNumber.value));
@@ -897,7 +905,7 @@ function compatibilityForNumber(report: NumerologyReport, value: number, type: "
 
 function compatibleNumberSuggestions(report: NumerologyReport, locale: Locale, lang: Record<string, string>) {
   const careful = repeatedValues(report).slice(0, 4);
-  const name = Array.from(new Set([report.nameNumber.value, report.lifePath.value].map(reduceDisplayNumber))).join(", ");
+  const name = Array.from(new Set([...(report.nameNumber ? [report.nameNumber.value] : []), report.lifePath.value].map(reduceDisplayNumber))).join(", ");
   const phone = Array.from(new Set([report.moolank.value, report.lifePath.value, 5, ...missingValues(report).slice(0, 2)].map(reduceDisplayNumber))).slice(0, 4).join(", ");
   const vehicle = Array.from(new Set([report.moolank.value, 4, 6, ...missingValues(report).slice(0, 2)].map(reduceDisplayNumber))).slice(0, 4).join(", ");
   if (locale === "hi") return [
@@ -929,7 +937,7 @@ function compatibleSet(value: number) {
 }
 
 function supportiveNumbers(report: NumerologyReport) {
-  return Array.from(new Set([report.moolank.value, report.lifePath.value, report.nameNumber.value, ...missingValues(report).slice(0, 3)].map(reduceDisplayNumber))).slice(0, 5);
+  return Array.from(new Set([report.moolank.value, report.lifePath.value, ...(report.nameNumber ? [report.nameNumber.value] : []), ...missingValues(report).slice(0, 3)].map(reduceDisplayNumber))).slice(0, 5);
 }
 
 function overallNumerologyVerdict(report: NumerologyReport): Verdict {
@@ -952,6 +960,7 @@ function loShuVerdict(report: NumerologyReport): Verdict {
 }
 
 function nameVerdict(report: NumerologyReport): Verdict {
+  if (!report.nameNumber) return "reviewSuggested";
   const nameNumber = reduceDisplayNumber(report.nameNumber.value);
   if (compatibleSet(report.lifePath.value).includes(nameNumber)) return "supportive";
   if (missingValues(report).includes(nameNumber)) return "supportive";
@@ -969,6 +978,7 @@ function numberVerdict(report: NumerologyReport, value?: number): Verdict {
 }
 
 function loShuImpact(report: NumerologyReport, locale: Locale, form: FormState) {
+  if (!report.nameNumber) return [numerologyNameNotice(locale)];
   const missing = missingValues(report);
   const repeated = repeatedValues(report);
   const nameNumber = reduceDisplayNumber(report.nameNumber.value);

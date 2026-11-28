@@ -65,6 +65,6 @@ export async function POST(request: Request) {
       action:"fulfilment.email.retry.outcome",targetType:type,targetId:input.id,
       metadata:{outcome:notification.outcome,status:claim.status,version:claim.version}
     }}).catch(()=>undefined);
-    return ok({status:claim.status,notification});
+    return ok({kind:input.kind,id:input.id,version:claim.version,status:claim.status,notification});
   } catch(error) {return handleApiError(error);}
 }

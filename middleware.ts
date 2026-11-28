@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPrefixes = ["/dashboard", "/admin", "/astrologer", "/profile", "/my-readings", "/saved-reports"];
+const protectedPrefixes = ["/ai-membership","/expert-services","/learn/paid-course","/digital-packages","/business-workspace","/dashboard", "/admin", "/astrologer", "/profile", "/my-readings", "/saved-reports"];
 const authJsCookieNames = [
   "authjs.session-token",
   "__Secure-authjs.session-token",
@@ -42,6 +42,10 @@ function hasAuthCookie(request: NextRequest) {
 function requiresCsrf(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/api/")) return false;
   if (["GET", "HEAD", "OPTIONS"].includes(request.method.toUpperCase())) return false;
+  // Exact server-to-server endpoint; its own bearer-key validation is mandatory.
+  if(request.nextUrl.pathname==="/api/partner/v1/calculate"&&request.method==="POST")return false;
+  // Exact public publisher endpoint: short-lived signed grant, exact origin, no cookies.
+  if(request.nextUrl.pathname==="/api/partner/v1/widget"&&request.method==="POST")return false;
   return !csrfExemptApiPrefixes.some((prefix) => request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(prefix));
 }
 
@@ -86,7 +90,7 @@ export function middleware(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.search = "";
-    loginUrl.searchParams.set("next", pathname);
+    loginUrl.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -96,6 +100,11 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/api/:path*",
+    "/ai-membership/:path*",
+    "/expert-services/:path*",
+    "/learn/paid-course/:path*",
+    "/digital-packages/:path*",
+    "/business-workspace/:path*",
     "/dashboard/:path*",
     "/admin/:path*",
     "/astrologer/:path*",

@@ -1,6 +1,5 @@
 import * as Astronomy from "astronomy-engine";
-import { format } from "date-fns";
-import { nakshatraFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
+import { nakshatraFromLongitude, nakshatraIndexFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
 import { normalizeDegrees } from "@/lib/astrology/own-engine/time";
 import type { PanchangSnapshot } from "@/lib/astrology/types";
 
@@ -21,7 +20,7 @@ export function calculatePanchang(input: {
   const tithiIndex = Math.min(29, Math.floor(elongation / 12));
   const nakshatra = nakshatraFromLongitude(input.moonLongitude);
   const yogaLongitude = normalizeDegrees(input.sunLongitude + input.moonLongitude);
-  const yogaIndex = Math.min(26, Math.floor(yogaLongitude / (360 / 27)));
+  const yogaIndex = nakshatraIndexFromLongitude(yogaLongitude);
   const notAvailable = input.notAvailable ?? "Not available";
   const timezoneOffset = input.timezoneOffset ?? 5.5;
   const localDate = localDateParts(input.date, timezoneOffset);
@@ -31,7 +30,7 @@ export function calculatePanchang(input: {
     date: `${localDate.year}-${String(localDate.month).padStart(2, "0")}-${String(localDate.day).padStart(2, "0")}`,
     tithi: tithis[tithiIndex],
     paksha: tithiIndex < 15 ? "Shukla Paksha" : "Krishna Paksha",
-    vaar: format(offsetDate(input.date, timezoneOffset), "EEEE"),
+    vaar: offsetDate(input.date, timezoneOffset).toLocaleDateString("en-US", {weekday:"long",timeZone:"UTC"}),
     nakshatra: nakshatra.name,
     nakshatraPada: nakshatra.pada,
     yoga: yogas[yogaIndex],

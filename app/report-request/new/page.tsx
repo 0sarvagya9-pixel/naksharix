@@ -10,11 +10,14 @@ import { normalizeLocale, type Locale } from "@/lib/i18n";
 import { safeServerTranslation } from "@/lib/i18n-server";
 import { getManualReport } from "@/lib/manual-catalogue";
 import { getManualReportCheckout } from "@/lib/reports/checkout-catalogue";
+import {isPersonalizedPaymentCandidate,personalizedPaymentContext} from "@/lib/reports/checkout-context";
+import {CHECKOUT_DRAFT_LIFETIME_MS} from "@/lib/reports/checkout-draft";
 import { cookies } from "next/headers";
 import { env } from "@/lib/env";
 import { autoReportDeliveryMessage } from "@/lib/reports/automatic-report-input";
+import {reportRequestCopy} from "@/lib/reports/report-request-copy";
 
-type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string; reportSlug?: string }>;
+type SearchParams = Promise<{ orderId?: string; plan?: string; mode?: string; reportSlug?: string; prepare?: string }>;
 
 export default async function NewReportRequestPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
@@ -24,9 +27,11 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     if(params.orderId)query.set("orderId",params.orderId);
     if(params.reportSlug)query.set("reportSlug",params.reportSlug);
     if(params.plan)query.set("plan",params.plan);
+    if(params.prepare==="1")query.set("prepare","1");
     redirect("/login?redirectTo="+encodeURIComponent("/report-request/new?"+query.toString()));
   }
   const locale = await readLocale();
+  const copy=reportRequestCopy[locale==="hi"||locale==="hinglish"?locale:"en"];
   const adminMode = params.mode === "admin";
   const isAdmin = canBypassPayment(user);
 
@@ -37,10 +42,12 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
   if (!report) redirect("/reports");
 
   const checkout = getManualReportCheckout(report.slug);
+  const preparing=Boolean(checkout&&params.prepare==="1"&&!params.orderId&&!adminMode&&!isAdmin);
   let paymentVerified = false;
+  let resumeReviewed=false,replaceExpiredReview=false;
   let plan: "PREMIUM" | "VIP" = params.plan?.toLowerCase() === "vip" ? "VIP" : "PREMIUM";
 
-  if (!adminMode && checkout) {
+  if (!adminMode && checkout && !preparing) {
     if (!params.orderId) redirect(`/reports/${report.slug}?checkout=required`);
 
     const payment = await prisma.payment.findUnique({ where: { id: params.orderId } });
@@ -52,14 +59,18 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
       && payment.purpose === checkout.purpose
       && Number(payment.amount) === checkout.amount
       && metadata.reportId === checkout.reportId
+      && isPersonalizedPaymentCandidate(metadata)
       && (env.AUTO_REPORT_DELIVERY_ENABLED!=="true"||(payment.provider==="RAZORPAY"&&payment.currency==="INR"))
     );
 
     if (!validPayment || !payment) redirect(`/reports/${report.slug}?checkout=invalid`);
 
     const existingRequest = await prisma.reportRequest.findUnique({ where: { paymentId: payment.id } });
+    if(!personalizedPaymentContext(metadata,existingRequest?.id)||(existingRequest&&(existingRequest.userId!==user.id||existingRequest.reportSlug!==report.slug)))redirect(`/reports/${report.slug}?checkout=invalid`);
     if (existingRequest) redirect(`/report-request/success?id=${existingRequest.id}`);
 
+    if(typeof metadata.reviewedInputDigest==="string")resumeReviewed=Boolean(await prisma.reportCheckoutDraft.findFirst({where:{paymentId:payment.id,expiresAt:{gt:new Date()}},select:{paymentId:true}}));
+    replaceExpiredReview=typeof metadata.reviewedInputDigest==="string"&&!resumeReviewed&&payment.createdAt.getTime()+CHECKOUT_DRAFT_LIFETIME_MS<=Date.now();
     paymentVerified = true;
     plan = "PREMIUM";
   } else if (!adminMode && params.orderId) {
@@ -71,11 +82,11 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
     <Section className="max-w-4xl">
       <Card className="glass overflow-visible border-[#D4AF37]/25">
         <CardHeader>
-          <CardTitle className="font-cinzel text-3xl">{safeServerTranslation(locale, "reportRequestDetails")}</CardTitle>
+          <CardTitle as="h1" className="font-cinzel text-3xl">{safeServerTranslation(locale, "reportRequestDetails")}</CardTitle>
           <p className="text-sm naksh-muted-text">
-            {paymentVerified
-              ? automaticDelivery ? autoReportDeliveryMessage(locale) : "Payment is verified. Submit accurate birth details to create the paid report request."
-              : "Submit accurate birth details for manual review. No payment is collected for this review-only request."}
+            {preparing?copy.preparing:paymentVerified
+              ? automaticDelivery ? autoReportDeliveryMessage(locale) : copy.verifiedIntro
+              : copy.manualIntro}
           </p>
         </CardHeader>
         <CardContent className="overflow-visible">
@@ -86,8 +97,12 @@ export default async function NewReportRequestPage({ searchParams }: { searchPar
             reportSlug={report.slug}
             reportName={report.name[locale]}
             paymentVerified={paymentVerified}
+            resumeReviewed={resumeReviewed}
+            replaceExpiredReview={replaceExpiredReview}
             automaticDelivery={automaticDelivery}
+            specialistDetails={Boolean(checkout)}
             adminBypass={adminMode && isAdmin}
+            preflight={preparing&&checkout?{reportId:checkout.reportId,purpose:checkout.purpose,price:checkout.price}:undefined}
           />
         </CardContent>
       </Card>

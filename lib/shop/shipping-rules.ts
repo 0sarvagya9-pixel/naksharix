@@ -10,7 +10,14 @@ export const CUSTOMS_NOTICE="Destination customs duties, import VAT or carrier c
 export function normalizePostal(code:string,value:string){const v=value.trim().toUpperCase().replace(/\s+/g," ");return code==="IN"?v:v;}
 export const postalKey=(v:string)=>v.toUpperCase().replace(/[\s-]/g,"");
 const patterns:Record<string,RegExp>={IN:/^[1-9]\d{5}$/,US:/^\d{5}(-\d{4})?$/,CA:/^[A-Z]\d[A-Z] ?\d[A-Z]\d$/,GB:/^(GIR ?0AA|[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2})$/,AU:/^\d{4}$/,NZ:/^\d{4}$/,DE:/^\d{5}$/,FR:/^\d{5}$/,IT:/^\d{5}$/,ES:/^\d{5}$/,NL:/^\d{4} ?[A-Z]{2}$/,SG:/^\d{6}$/,JP:/^\d{3}-?\d{4}$/,KR:/^\d{5}$/,BR:/^\d{5}-?\d{3}$/,ZA:/^\d{4}$/,CH:/^\d{4}$/,AT:/^\d{4}$/,BE:/^\d{4}$/,SE:/^\d{3} ?\d{2}$/,NO:/^\d{4}$/,FI:/^\d{5}$/,DK:/^\d{4}$/,IE:/^[A-Z\d]{3} ?[A-Z\d]{4}$/,PT:/^\d{4}-?\d{3}$/,PL:/^\d{2}-?\d{3}$/,MX:/^\d{5}$/,PK:/^\d{5}$/,BD:/^\d{4}$/,MY:/^\d{5}$/,TH:/^\d{5}$/,ID:/^\d{5}$/,PH:/^\d{4}$/,SA:/^\d{5}$/,IL:/^\d{7}$/,LK:/^\d{5}$/,CN:/^\d{6}$/};
-const noPostal=new Set(["AE","HK","MO","QA","BH","OM"]);
+// UPU country addressing sheets: Bahrain (2024-01), Oman (2026-01).
+patterns.BH=/^(?:[1-9]\d{2}|1[0-2]\d{2})$/;
+patterns.OM=/^\d{3}$/;
+const noPostal=new Set(["AE","HK","MO","QA"]);
+// A generic input format is adequate for a manual inquiry, not an
+// automatic carrier rate. Keep every selectable country available for
+// manual address review; never infer its postal requirements or delivery.
+export function hasPublishedPostalPolicy(code:string){return isShippingCountry(code)&&(Object.hasOwn(patterns,code)||noPostal.has(code));}
 export function postalRequired(code:string){return Boolean(patterns[code])&&!noPostal.has(code);}
 export function validPostal(code:string,value:string){
  if(!isShippingCountry(code))return false;
@@ -39,6 +46,7 @@ export function computeShipping(country:string,postal:string,lines:CanonicalShip
  const normalized=normalizePostal(country,postal);
  const pending:ShippingResult={kind:"QUOTE_REQUIRED",subtotalPaise,shippingPaise:null,taxPaise:null,totalPaise:null,snapshot:null};
  if(country==="IN")return {kind:"DOMESTIC_INCLUDED",subtotalPaise,shippingPaise:0,taxPaise:0,totalPaise:subtotalPaise,snapshot:{kind:"DOMESTIC_INCLUDED",country,postalCode:normalized,shippingPaise:0,taxPaise:0,carrier:"Domestic seller fulfilment",dutiesMode:"INCLUDED",expiresAt:null,rateVersions:[]}};
+ if(!hasPublishedPostalPolicy(country))return pending;
  const matched:RateRule[]=[];
  for(const line of lines){
   const eligible=rates.filter(r=>r.country===country&&r.productId===line.productId&&r.active&&r.reviewedBy&&r.evidenceReference.trim().length>=8&&r.carrier.trim().length>=2&&Number.isFinite(new Date(r.expiresAt).getTime())&&new Date(r.expiresAt).getTime()>now&&Number.isInteger(r.maxQuantity)&&r.maxQuantity>=line.quantity&&r.maxQuantity<=10&&integer(r.shippingPaisePerUnit)&&integer(r.taxPaisePerUnit)&&["INCLUDED","RECIPIENT_MAY_PAY"].includes(r.dutiesMode)&&(r.postalPrefix===""||postalKey(normalized).startsWith(r.postalPrefix)));
@@ -58,11 +66,14 @@ export function readShippingSnapshot(v:unknown):ShippingSnapshot|null{
  if(!v||typeof v!=="object"||Array.isArray(v))return null;
  const r=v as ShippingSnapshot;
  if(!["DOMESTIC_INCLUDED","PUBLISHED_RATE","MANUAL_QUOTE"].includes(r.kind)||!isShippingCountry(r.country)||typeof r.postalCode!=="string"||!validPostal(r.country,r.postalCode)||!integer(r.shippingPaise)||!integer(r.taxPaise)||typeof r.carrier!=="string"||!r.carrier.trim()||!["INCLUDED","RECIPIENT_MAY_PAY"].includes(r.dutiesMode)||!Array.isArray(r.rateVersions))return null;
+ if(!r.rateVersions.every(v=>typeof v==="string"&&v.trim().length>0&&v.length<=256)||new Set(r.rateVersions).size!==r.rateVersions.length)return null;
+ if(r.kind==="PUBLISHED_RATE"&&(!hasPublishedPostalPolicy(r.country)||!r.rateVersions.length))return null;
+ if(r.kind!=="PUBLISHED_RATE"&&r.rateVersions.length!==0)return null;
  if(r.kind!=="DOMESTIC_INCLUDED"&&(r.country==="IN"||typeof r.expiresAt!=="string"||!Number.isFinite(Date.parse(r.expiresAt))))return null;
  return r;
 }
 export function shippingPayable(order:{deliveryCountry:string;postalCode:string;shippingQuote:unknown;shippingPaise:number|null;taxPaise:number|null;subtotalPaise:number;totalPaise:number|null},now=Date.now()){
- if(!isShippingCountry(order.deliveryCountry)||!validPostal(order.deliveryCountry,order.postalCode)||!integer(order.shippingPaise)||!integer(order.taxPaise)||!integer(order.totalPaise)||order.totalPaise!==order.subtotalPaise+order.shippingPaise!+order.taxPaise!)return false;
+ if(!Number.isFinite(now)||!integer(order.subtotalPaise)||order.subtotalPaise<100||!isShippingCountry(order.deliveryCountry)||!validPostal(order.deliveryCountry,order.postalCode)||!integer(order.shippingPaise)||!integer(order.taxPaise)||!integer(order.totalPaise)||order.totalPaise!==order.subtotalPaise+order.shippingPaise!+order.taxPaise!)return false;
  // Preserve previous India orders, whose original shipping was seller-included.
  if(order.deliveryCountry==="IN")return true;
  const quote=readShippingSnapshot(order.shippingQuote);

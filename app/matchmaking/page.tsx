@@ -2,6 +2,7 @@ import { EditorialServiceBanner } from "@/components/home/editorial-service-bann
 import type { Metadata } from "next";
 import { seo } from "@/lib/seo";
 import { MatchmakingContent } from "@/components/matchmaking-content";
+import { RelevantReportDiscovery } from "@/components/relevant-report-discovery";
 
 export const metadata: Metadata = seo({
   title: "Kundli Matching - Gun Milan and Marriage Compatibility",
@@ -15,5 +16,5 @@ export default function MatchmakingPage() {
   headline="Explore traditional compatibility"
   caption="Compare birth details with Guna Milan concepts and review the calculation caveats before drawing conclusions."
   image="/naksharix/editorial-kundli.svg" imageAlt="Original Vedic birth-chart geometry illustration"
-  link="/kundli" linkLabel="Generate your own Kundli" /><MatchmakingContent /></>;
+  link="/kundli" linkLabel="Generate your own Kundli" /><MatchmakingContent /><RelevantReportDiscovery topic="matching" /></>;
 }

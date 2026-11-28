@@ -1,4 +1,6 @@
 "use client";
+import {currentClientLocale} from "@/lib/i18n-copy";
+import {notificationCopy} from "@/lib/ui/notification-copy";
 
 /**
  * Global visual feedback bus. Notifications describe actions that have
@@ -27,11 +29,12 @@ export function showSiteNotification(
   const safeMessage = message.trim().slice(0, 280);
   if (!safeMessage) return;
   sequence += 1;
+  const copy = notificationCopy(currentClientLocale());
   const defaults: Record<SiteNoticeKind, string> = {
-    success: "Action completed",
-    error: "Action needs attention",
-    info: "Information",
-    warning: "Please review"
+    success: copy.completed,
+    error: copy.attention,
+    info: copy.information,
+    warning: copy.review
   };
   const detail: SiteNotice = {
     id: String(Date.now()) + "-" + sequence,

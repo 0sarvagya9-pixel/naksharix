@@ -78,6 +78,10 @@ enum PaymentPurpose {
   PUJA_BOOKING
   SHOP_ORDER
   WALLET_TOPUP
+  AI_CREDITS
+  DIGITAL_PACKAGE
+  EXPERT_SERVICE
+  AI_MEMBERSHIP
 }
 
 enum ReportPlanType {
@@ -182,6 +186,7 @@ model User {
   chatThreads                  ChatThread[]
   appointments                 Appointment[]         @relation("ClientAppointments")
   supportTickets               SupportTicket[]
+  deferredServiceAllocations   DeferredServiceAllocation[]
   learningProgress              LearningProgress[]
   reviews                      Review[]
   affiliate                    Affiliate?
@@ -194,6 +199,14 @@ model User {
   adminActionLogs              AdminActionLog[]
   shopOrders                   ShopOrder[]
   pujaBookingRequests          PujaBookingRequest[]
+  marketingConsent             MarketingConsent?
+  aiCreditUses                 AiCreditUse[]
+  webPushSubscriptions         WebPushSubscription[]
+  digitalPackageOrders         DigitalPackageOrder[]
+  referenceReminders            ReferenceReminder[]
+  businessTenants              BusinessTenant[]
+  expertServiceRequests         ExpertServiceRequest[]
+  aiMemberships                 AiMembership[]
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 
@@ -397,12 +410,27 @@ model Payment {
   subscription      Subscription?    @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
   invoice           Invoice?
   purchasedReport   PurchasedReport?
+  reportCheckoutDraft ReportCheckoutDraft?
   reportRequest     ReportRequest?
+  aiCreditGrant    AiCreditGrant?
+  digitalPackageOrder DigitalPackageOrder?
+  expertServiceRequest ExpertServiceRequest?
+  aiMembershipCycle AiMembershipCycle?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
   @@index([userId, createdAt])
   @@index([status, provider])
+}
+
+// Private working copy, isolated from provider/payment metadata and list responses.
+model ReportCheckoutDraft {
+  paymentId String @id
+  payment Payment @relation(fields:[paymentId],references:[id],onDelete:Cascade)
+  inputDigest String
+  fields Json
+  expiresAt DateTime
+  @@index([expiresAt])
 }
 
 model Invoice {
@@ -470,6 +498,7 @@ model ReportRequest {
   emailSentAt          DateTime?
   deliveryError        String?
   adminBypass   Boolean             @default(false)
+  revisions     ReportRevision[]
   statusHistory ReportStatusHistory[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
@@ -478,6 +507,32 @@ model ReportRequest {
   @@index([planType, status])
   @@index([reportSlug])
   @@index([paymentStatus])
+}
+
+model ReportRevision {
+  id              String        @id @default(cuid())
+  reportRequestId String
+  reportRequest   ReportRequest @relation(fields: [reportRequestId], references: [id], onDelete: Cascade)
+  version         Int
+  inputHash       String
+  input           Json
+  status          String        @default("PENDING")
+  reviewNote      String?
+  reviewedBy      String?
+  emailStatus     String        @default("PENDING")
+  firstEmailAt    DateTime?
+  acceptedEmailAt DateTime?
+  providerEmailId String?
+  bytes           Bytes?
+  storageDriver   String?
+  storageKey      String?
+  checksum        String?
+  size            Int?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([reportRequestId, version])
+  @@unique([reportRequestId, inputHash])
 }
 
 model ReportStatusHistory {
@@ -634,6 +689,7 @@ model Notification {
 }
 
 model SupportTicket {
+  deferredServiceAllocation DeferredServiceAllocation?
   id        String   @id @default(cuid())
   userId    String
   subject   String
@@ -708,6 +764,7 @@ model AstrologerProfile {
   notes              AstrologerNote[]
   payouts            Payout[]
   reviews            Review[]
+  expertServiceRequests ExpertServiceRequest[]
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
 
@@ -993,4 +1050,326 @@ model ShopShippingRate {
   updatedAt              DateTime @default(now()) @updatedAt
   @@unique([country, productId, postalPrefix])
   @@index([country, active, expiresAt])
+}
+
+
+// Explicit email marketing permission is independent of sign-up, purchase, and transactional mail.
+model MarketingConsent {
+  userId         String    @id
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailAtConsent String
+  interest       String
+  country        String?
+  locale         String
+  source         String
+  consentVersion String
+  confirmedAt    DateTime
+  revokedAt      DateTime?
+  updatedAt      DateTime  @updatedAt
+
+  @@index([revokedAt, confirmedAt])
+}
+
+model AiCreditGrant {
+  paymentId   String   @id
+  payment     Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  units       Int
+  remaining   Int
+  offerVersion String
+  validFrom   DateTime?
+  validUntil  DateTime?
+  suspendedAt DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  uses        AiCreditUse[]
+}
+
+model AiCreditUse {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestId      String
+  grantPaymentId String
+  grant          AiCreditGrant @relation(fields: [grantPaymentId], references: [paymentId], onDelete: Cascade)
+  status         String   @default("RESERVED")
+  expiresAt      DateTime
+  finishedAt     DateTime?
+  createdAt      DateTime @default(now())
+  @@unique([userId, requestId])
+  @@index([userId, createdAt])
+  @@index([userId, status, expiresAt])
+}
+
+model WebPushSubscription {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpointDigest    String   @unique
+  endpointCiphertext String
+  keyFingerprint    String
+  consentVersion    String
+  lastAcceptedAt    DateTime?
+  lastOutcome       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  @@index([userId, createdAt])
+}
+
+model DigitalPackageOrder {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields:[userId], references:[id], onDelete:Cascade)
+  clientIntent  String
+  productKey    String
+  productVersion String
+  pricePaise    Int
+  consentVersion String
+  inputDigest   String
+  status        String   @default("DRAFT")
+  expiresAt     DateTime
+  paymentId     String?  @unique
+  payment       Payment? @relation(fields:[paymentId], references:[id], onDelete:SetNull)
+  items         DigitalPackageItem[]
+  referenceReminders ReferenceReminder[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@unique([userId,clientIntent])
+  @@index([userId,createdAt])
+  @@index([userId,status])
+}
+model DigitalPackageItem {
+  id           String @id @default(cuid())
+  orderId      String
+  order        DigitalPackageOrder @relation(fields:[orderId], references:[id], onDelete:Cascade)
+  position     Int
+  kind         String
+  privateInput Json?
+  status       String @default("PENDING")
+  leaseToken   String?
+  leaseUntil   DateTime?
+  attempts     Int @default(0)
+  pdfBytes     Bytes?
+  pdfStorageKey String?
+  pdfStorageDriver String?
+  pdfChecksum  String?
+  pdfSize      Int?
+  generatedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([orderId,position])
+  @@index([orderId,status])
+}
+
+model BusinessTenant {
+ id String @id @default(cuid())
+ ownerUserId String
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ displayName String
+ brandName String
+ contractReference String
+ approvedById String
+ status String @default("ACTIVE")
+ contractExpiresAt DateTime
+ monthlyUnitLimit Int
+ unitPricePaise Int
+ scopes String[]
+ keys BusinessApiKey[]
+ usage BusinessUsageMonth[]
+ calls BusinessUsageCall[]
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@index([ownerUserId,status])
+}
+model BusinessApiKey {
+ id String @id
+ tenantId String
+ tenant BusinessTenant @relation(fields:[tenantId],references:[id],onDelete:Cascade)
+ digest String @unique
+ label String
+ scopes String[]
+ expiresAt DateTime
+ revokedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([tenantId,revokedAt])
+}
+model BusinessUsageMonth {
+ tenantId String
+ tenant BusinessTenant @relation(fields:[tenantId],references:[id],onDelete:Cascade)
+ period String
+ attemptedUnits Int @default(0)
+ completedUnits Int @default(0)
+ failedUnits Int @default(0)
+ unitPricePaise Int
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@id([tenantId,period])
+}
+model BusinessUsageCall {
+ tenantId String
+ tenant BusinessTenant @relation(fields:[tenantId],references:[id],onDelete:Cascade)
+ requestId String
+ period String
+ keyId String
+ scope String
+ units Int
+ state String @default("RESERVED")
+ createdAt DateTime @default(now())
+ finishedAt DateTime?
+ @@id([tenantId,requestId])
+ @@index([tenantId,period])
+}
+
+model ExpertServiceRequest {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  clientIntent String
+  kind String
+  question String
+  language String
+  sourceReportId String?
+  sourceChecksum String?
+  consentVersion String
+  status String @default("REQUESTED")
+  astrologerProfileId String?
+  astrologerProfile AstrologerProfile? @relation(fields:[astrologerProfileId],references:[id],onDelete:SetNull)
+  quoteVersion Int @default(0)
+  pricePaise Int?
+  expertFeePaise Int?
+  dueAt DateTime?
+  providerAcceptedAt DateTime?
+  paymentId String? @unique
+  payment Payment? @relation(fields:[paymentId],references:[id],onDelete:SetNull)
+  sourceReadAt DateTime?
+  sourceReadChecksum String?
+  response String?
+  completedAt DateTime?
+  settlementStatus String @default("NOT_EARNED")
+  settlementReference String? @unique
+  settledAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId,clientIntent])
+  @@index([userId,status])
+  @@index([astrologerProfileId,status])
+  @@index([status,createdAt])
+}
+
+model AiMembership {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Restrict)
+ clientIntent String
+ version String
+ planId String
+ pricePaise Int
+ unitsPerCycle Int
+ totalCycles Int
+ approvedModel String
+ termsVersion String
+ liveMode Boolean
+ providerSubscriptionId String? @unique
+ hostedUrl String?
+ state String @default("CREATING")
+ providerState String?
+ lastProviderCheckedAt DateTime?
+ cancellationRequestedAt DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ cycles AiMembershipCycle[]
+ @@unique([userId,clientIntent])
+ @@index([userId,state])
+}
+model AiMembershipCycle {
+ id String @id @default(cuid())
+ membershipId String
+ membership AiMembership @relation(fields:[membershipId],references:[id],onDelete:Cascade)
+ cycleNumber Int
+ periodStart DateTime
+ periodEnd DateTime
+ providerInvoiceId String @unique
+ paymentId String @unique
+ payment Payment @relation(fields:[paymentId],references:[id],onDelete:Cascade)
+ createdAt DateTime @default(now())
+ @@unique([membershipId,cycleNumber])
+ @@unique([membershipId,periodStart])
+ @@index([membershipId,periodEnd])
+}
+
+model ReferenceReminder {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  orderId String
+  order DigitalPackageOrder @relation(fields:[orderId],references:[id],onDelete:Cascade)
+  eventId String
+  eventDate String
+  leadDays Int
+  dueAt DateTime
+  consentVersion String
+  recipientDigest String
+  status String @default("SCHEDULED")
+  claimedAt DateTime?
+  acceptedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId,eventId])
+  @@index([status,dueAt])
+  @@index([orderId])
+}
+
+model DeferredServicePlan {
+  id              String   @id @default(cuid())
+  kind            String
+  target          String
+  label           String
+  providerRef     String
+  evidenceRef     String
+  termsRef        String
+  capacity        Int
+  startsAt        DateTime
+  endsAt          DateTime
+  state           String   @default("DRAFT")
+  reviewedById    String?
+  reviewedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  allocations     DeferredServiceAllocation[]
+  @@index([kind, state, endsAt])
+}
+
+model DeferredServiceAllocation {
+  id              String   @id @default(cuid())
+  planId          String
+  ticketId        String   @unique
+  userId          String
+  units           Int
+  completedUnits  Int      @default(0)
+  state           String   @default("HELD")
+  version         Int      @default(1)
+  holdUntil       DateTime
+  acceptedAt      DateTime?
+  canceledAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  plan            DeferredServicePlan @relation(fields:[planId],references:[id],onDelete:Restrict)
+  ticket          SupportTicket @relation(fields:[ticketId],references:[id],onDelete:Cascade)
+  user            User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  receipts        DeferredServiceReceipt[]
+  @@index([planId,state,holdUntil])
+  @@index([userId,createdAt])
+}
+
+model DeferredServiceReceipt {
+  id              String   @id @default(cuid())
+  allocationId    String
+  operationId     String   @unique
+  evidenceRef     String
+  units           Int
+  occurredAt      DateTime
+  actorId         String
+  createdAt       DateTime @default(now())
+  allocation      DeferredServiceAllocation @relation(fields:[allocationId],references:[id],onDelete:Cascade)
+  @@unique([allocationId,evidenceRef])
+  @@index([allocationId,occurredAt])
 }

@@ -5,6 +5,7 @@ import { Section } from "@/components/section";
 import { GuidanceIntakeForm } from "@/components/guidance-intake-form";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { seo } from "@/lib/seo";
+import {expertIntakeEnabled} from "@/lib/expert-services/ledger";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { ...seo({
@@ -32,6 +33,7 @@ export default async function AskAstrologerPage() {
             not guaranteed, and no response deadline is advertised. For approved
             appointment options, visit <Link className="font-semibold text-[#FFD700] underline" href="/consultation">consultations</Link>.
           </div>
+          {expertIntakeEnabled()?<div className="rounded-xl border border-[#D4AF37]/30 p-5"><p className="mb-3">For an optional paid written service or human review, request a real practitioner assignment. Pay only after an approved practitioner accepts the exact quote.</p><Button asChild><Link href="/expert-services">Review private expert services</Link></Button></div>:null}
           {user ? (
             <GuidanceIntakeForm kind="WRITTEN_GUIDANCE" />
           ) : (

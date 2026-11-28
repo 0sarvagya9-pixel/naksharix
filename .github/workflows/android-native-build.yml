@@ -83,6 +83,13 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          # Reuse Gradle artifacts across held-branch builds. The Expo prebuild
+          # inputs are pinned by the mobile dependency lockfile and app config.
+          cache: gradle
+          cache-dependency-path: |
+            mobile-app/package-lock.json
+            mobile-app/app.json
+            .github/workflows/android-native-build.yml
       # Ubuntu 24.04 runners already provide the Android SDK. Avoid the legacy
       # setup-android action, which requests the removed SDK package "tools".
       - name: Verify Android SDK and install required API 36 packages

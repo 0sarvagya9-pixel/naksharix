@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { normalizeLocale } from "@/lib/i18n";
 import { safeServerTranslation } from "@/lib/i18n-server";
 import { canBypassPayment } from "@/lib/auth/permissions";
+import { savedKundliAccessMap } from "@/lib/reports/saved-kundli-access";
 
 export const dynamic = "force-dynamic";
 
@@ -19,25 +20,12 @@ export default async function SavedReportsPage() {
     take: 48
   });
 
-  const paidPayments = await prisma.payment.findMany({
-    where: {
-      userId: user.id,
-      status: "PAID",
-      purpose: "KUNDLI_REPORT"
-    },
-    select: { metadata: true }
-  });
-
-  const paidReportIds = new Set(
-    paidPayments
-      .map((payment) => (payment.metadata as Record<string, unknown> | null)?.savedReportId)
-      .filter(Boolean) as string[]
-  );
-
   const isAdmin = canBypassPayment(user);
-  const reportsWithUnlockStatus = reports.map((report) => ({
+  const access=isAdmin?new Map():await savedKundliAccessMap(user.id,reports.map(report=>report.id));
+  const reportsWithUnlockStatus=reports.map(report=>({
     ...report,
-    isUnlocked: isAdmin || paidReportIds.has(report.id)
+    isUnlocked:isAdmin||access.get(report.id)==="UNLOCKED",
+    paymentReviewRequired:!isAdmin&&access.get(report.id)==="REVIEW"
   }));
   const title = safeServerTranslation(locale, "savedReports");
   const emptyText = safeServerTranslation(locale, "noSavedReports");

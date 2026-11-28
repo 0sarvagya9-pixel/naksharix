@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { getEmailReadiness, sendEmail } from "@/lib/email/email-service";
+import { verificationEmailMessage } from "@/lib/auth/transactional-email-copy";
 import { logger } from "@/lib/monitoring/logger";
 
 export const EMAIL_VERIFY_PURPOSE = "EMAIL_VERIFY";
@@ -83,6 +84,7 @@ export async function deliverEmailVerificationOtp(input: {
   email: string;
   code: string;
   name?: string | null;
+  locale?: string;
 }) {
   const readiness = getEmailReadiness();
 
@@ -96,17 +98,7 @@ export async function deliverEmailVerificationOtp(input: {
   try {
     const result = await sendEmail({
       to: normalizeAuthEmail(input.email),
-      subject: "Your Naksharix verification code",
-      text: [
-        `Hello ${input.name?.trim() || "Naksharix user"},`,
-        "",
-        `Your Naksharix verification code is: ${input.code}`,
-        "",
-        "This code expires in 10 minutes.",
-        "Do not share this code with anyone.",
-        "",
-        "If you did not create a Naksharix account, you can ignore this email."
-      ].join("\n")
+      ...verificationEmailMessage(input.locale, input.name, input.code, EMAIL_OTP_TTL_SECONDS / 60)
     });
 
     return {
@@ -129,6 +121,7 @@ export async function issueEmailVerificationOtp(input: {
   userId: string;
   email: string;
   name?: string | null;
+  locale?: string;
 }) {
   const prepared = prepareEmailVerificationOtp(input.email);
 
@@ -144,7 +137,8 @@ export async function issueEmailVerificationOtp(input: {
   const delivery = await deliverEmailVerificationOtp({
     email: prepared.email,
     code: prepared.code,
-    name: input.name
+    name: input.name,
+    locale: input.locale
   });
 
   return {

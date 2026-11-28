@@ -1,0 +1,19 @@
+# P0 current numerical and browser applicability evidence
+
+## Historical motional method: separate held-out example
+V. P. Jain's worked example (Text Book for Shadbala and Bhavabala, pp. 43–45, 63) uses B. V. Raman's historical tables. Actual Node 22 run against the checksum-verified 0a1ac04 source archive: 5/5 star-planet motional strengths matched within the existing 0.03 virupa worked-example tolerance. Computed maximum error 0.021964461963 virupa (Jupiter); historical elapsed days 29840.0444444 vs printed 29840.04. The 800-day Jupiter table entry in the extracted Jain example reads 66.58; exact documented revolution-rate calculation gives 66.4771. Do not change the engine to reproduce the rounded or possibly misprinted entry. This is a separate held-out chart using the same table convention, not a second independent calculation method. Source text extraction was inspected, not the original scanned PDF pages. The earlier 1918 and 1912 evidence remains unchanged.
+
+## Rejected modern approximations
+NASA/JPL Table 1 fitted heliocentric elements (https://ssd.jpl.nasa.gov/planets/approx_pos.html) were tested as a diagnostic, using J2000 mean-longitude terms minus 23.856446 degrees and the classical superior/interior mapping. JPL explicitly cautions these elements are best-fit approximations, not a physical mean. A separate local Swiss Ephemeris 2.10.03 Moshier osculating-element probe used TT and heliocentric J2000 mean longitude at epoch. Both used the published 1978 and 1979 true-longitude inputs, original 0.25 virupa diagnostic tolerance, no fitted vendor offsets. JPL and Swiss are not proposed production replacements because neither reproduced the vendor model. Numerical residuals (Mars/Mercury/Jupiter/Venus/Saturn):
+- 1979 reference: 23.74,24.71,3.18,0.47,4.14; JPL 24.057958,26.515186,4.053977,0.608411,3.823316; Swiss 24.057020,26.515692,4.043239,0.608577,3.793348.
+- 1978 reference: 19.68,44.21,12.46,37.71,0.10; JPL 19.360029,46.018624,13.325981,36.641283,0.216029; Swiss 19.360815,46.019378,13.314208,36.642347,0.250657.
+Each alternative matched 2/10 within 0.25. Preserve current historical implementation, candidate gates and 71/97 full-birth baseline. No claim that mismatching software is wrong. Further reference-method documentation is required. Neither probe nor historical 5/5 establishes scientific predictive validity.
+
+## Browser skips
+At 0a1ac04, CI run 45684373092 job 139452943049 recorded 317 passed, 10 skipped, 0 failed. Exact source predicates reconcile the ten skipped combinations:
+- tests/e2e/responsive-core.spec.ts: eight routes, 1440px only on iPhone-emulated WebKit excluded. Desktop Chromium and Firefox are tested separately. Not applicable to declared iPhone viewport; do not relabel as executed.
+- tests/e2e/visual-reference.spec.ts: Firefox reference screenshot test excluded because owner reference gallery targets desktop Chromium and iPhone WebKit. Firefox actual functional and responsive tests remain covered. This is an explicitly scoped duplicate-reference capture, not a failed functional test.
+- tests/e2e/accessibility.spec.ts: iPhone-emulated WebKit keyboard skip-navigation scenario excluded due to mobile focus behavior. Desktop Chromium/Firefox keyboard test passed under the full suite. Mobile hardware keyboard / assistive technology acceptance remains open.
+- Authenticated report and booking tests retain disposable database, disabled email and loopback guards; the ten existing skips are fully accounted for by the above three predicates. Do not weaken these guards to force a green test.
+
+No production mutation, live price change, credentials read, or paid expenditure. Full independent strength and report-review gates remain open. Actual payment-provider sandbox and mobile accessibility need genuine execution evidence.

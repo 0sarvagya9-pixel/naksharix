@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {computeShipping,validPostal,shippingPayable,SHIPPING_COUNTRIES,normalizePostal} from "../lib/shop/shipping-rules.ts";
+import {computeShipping,validPostal,shippingPayable,SHIPPING_COUNTRIES,normalizePostal,postalRequired,hasPublishedPostalPolicy} from "../lib/shop/shipping-rules.ts";
 assert.equal(new Set(SHIPPING_COUNTRIES.map(x=>x.code)).size,SHIPPING_COUNTRIES.length);
 assert.ok(SHIPPING_COUNTRIES.length>240);
 for(const [country,postal,ok] of [["IN","452001",true],["IN","012345",false],["IN","10001",false],["US","10001",true],["US","10001-1234",true],["US","452001",false],["GB","SW1A 1AA",true],["GB","123456",false],["CA","K1A 0B1",true],["AE","",true],["AU","2000",true],["XX","12345",false]])assert.equal(validPostal(country,postal),ok,country+" "+postal);
@@ -69,3 +69,39 @@ for(const path of ["components/shop/cart-page-client.tsx","components/shop/shop-
  for(const match of source.matchAll(/\bcopy\.([A-Za-z][A-Za-z0-9]*)/g))assert.ok(match[1] in checkoutCopy.en,path+" missing copy key "+match[1]);
 }
 console.log("SHOP_CHECKOUT_LOCALIZED_UI_CONTRACT_PASS");
+
+import {validCheckoutIntent,readCartIntent,checkoutIntentAlreadyUsed} from "../lib/shop/checkout-contract.ts";
+import {shopOrderIntentId} from "../lib/shop/order-intent.ts";
+const fixtureIntent="63c576ba-7523-4e44-a8b0-f3929d888908",fixtureFingerprint=cartFingerprint([{productId:"sku-a",quantity:1}]);
+assert.ok(validCheckoutIntent(fixtureIntent));
+for(const bad of [null,"",{},"63c576ba-7523-1e44-a8b0-f3929d888908","63c576ba-7523-4e44-78b0-f3929d888908"])assert.equal(validCheckoutIntent(bad),false);
+assert.equal(readCartIntent({version:1,fingerprint:fixtureFingerprint,intent:fixtureIntent},fixtureFingerprint),fixtureIntent);
+assert.equal(readCartIntent({version:1,fingerprint:"different",intent:fixtureIntent},fixtureFingerprint),null);
+assert.equal(readCartIntent({version:2,fingerprint:fixtureFingerprint,intent:fixtureIntent},fixtureFingerprint),null);
+assert.equal(readCartIntent({version:1,fingerprint:fixtureFingerprint,intent:"bad"},fixtureFingerprint),null);
+const same=shopOrderIntentId("fixture-user",fixtureIntent);
+assert.match(same,/^shop_[a-f0-9]{64}$/);
+assert.equal(shopOrderIntentId("fixture-user",fixtureIntent.toUpperCase()),same);
+assert.notEqual(shopOrderIntentId("another-user",fixtureIntent),same);
+assert.notEqual(shopOrderIntentId("fixture-user","63c576ba-7523-4e44-a8b0-f3929d888909"),same);
+assert.throws(()=>shopOrderIntentId("fixture-user","bad"));
+assert.equal(checkoutIntentAlreadyUsed(409,{details:{code:"ORDER_INTENT_ALREADY_USED"}}),true);
+for(const v of [null,{}, {details:{code:"STALE_QUOTE"}}])assert.equal(checkoutIntentAlreadyUsed(409,v),false);
+assert.equal(checkoutIntentAlreadyUsed(200,{details:{code:"ORDER_INTENT_ALREADY_USED"}}),false);
+const orderSource=readFileSync("app/api/commerce/orders/route.ts","utf8");
+assert.ok(orderSource.includes("shopOrderIntentId(user.id,input.checkoutIntent)")&&orderSource.includes("where:{id:intentId,userId:user.id}")&&orderSource.includes("...(intentId?{id:intentId}:{})"));
+assert.ok(orderSource.indexOf("pg_advisory_xact_lock")<orderSource.indexOf("throw new OrderIntentConflict(existing.id)")&&orderSource.indexOf("throw new OrderIntentConflict(existing.id)")<orderSource.indexOf("const recent=await tx.shopOrder.count"));
+console.log("DURABLE_SHOP_ORDER_INTENT_CONTRACT_PASS; NO_SCHEMA_CHANGE");
+
+assert.equal(postalRequired("BH"),true);
+assert.equal(postalRequired("OM"),true);
+for(const [country,postal,expected] of [["BH","",false],["BH","317",true],["BH","1200",true],["BH","1300",false],["BH","ABC",false],["OM","",false],["OM","133",true],["OM","1234",false]])assert.equal(validPostal(country,postal),expected,country+" "+postal);
+assert.equal(hasPublishedPostalPolicy("AR"),false);
+assert.equal(validPostal("AR","1234"),true);
+assert.equal(computeShipping("AR","1234",lines,rates.map(r=>({...r,country:"AR"})),now).kind,"QUOTE_REQUIRED");
+for(const rateVersions of [[],[123],["same:1","same:1"]])assert.equal(shippingPayable({...order,shippingQuote:{...q.snapshot,rateVersions}},now),false);
+assert.equal(shippingPayable({...order,subtotalPaise:-100,totalPaise:order.shippingPaise+order.taxPaise-100},now),false);
+assert.equal(shippingPayable({...order,deliveryCountry:"AR",postalCode:"1234",shippingQuote:{...q.snapshot,kind:"MANUAL_QUOTE",country:"AR",postalCode:"1234",rateVersions:[]}},now),true);
+const adminRateSource=readFileSync("app/api/admin/shop-shipping/route.ts","utf8");
+assert.ok(adminRateSource.includes("!hasPublishedPostalPolicy(input.country)"));
+console.log("POSTAL_POLICY_AND_SNAPSHOT_GUARDS_PASS");

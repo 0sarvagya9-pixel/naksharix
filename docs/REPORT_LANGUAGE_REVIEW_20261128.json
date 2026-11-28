@@ -1,0 +1,943 @@
+{
+  "date": "2026-11-28",
+  "reviewType": "Independently assigned AI language/content review; not human/native/practitioner certification",
+  "developmentBaseline": "f4bccdf832c25de43ef8eeddeaaa746702006b9a",
+  "frozenCorpusSource": "0a68982ac00f90353f0234d818073273f940f200",
+  "frozenCorpusZipSha256": "c94aafb77d30ced09806f697acd33646f6929a1df68d053290c1fd01ffa31227",
+  "machineExtraction": {
+    "pdfs": 135,
+    "pages": 2024,
+    "extractors": [
+      "PyMuPDF",
+      "pdftotext -raw"
+    ]
+  },
+  "modelSample": {
+    "profile": 1,
+    "products": 15,
+    "languages": [
+      "en",
+      "hi",
+      "hinglish"
+    ],
+    "pdfs": 45,
+    "selection": "Deduplicated normalized lines at least 50 characters long; running footer removed. Tables and short lines are not exhaustively language-reviewed. Repeated common prose was read once per language.",
+    "selectedLines": {
+      "en": 637,
+      "hi": 415,
+      "hinglish": 649
+    }
+  },
+  "perProduct": [
+    {
+      "slug": "baby-name-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 47,
+          "pagesWithSelectedLines": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "pdfPages": 12,
+          "pdfSha256": "9af9609307807b323dd9daa76604234c153ed1fe237e3a360fb32a79278f1d71",
+          "selectedTextSha256": "a0f6a3722d43cb41ede79092b801f5fc166c787a59a4255b9697e81070e4075d"
+        },
+        "hi": {
+          "selectedLongLines": 33,
+          "pagesWithSelectedLines": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "pdfPages": 11,
+          "pdfSha256": "22fc0207ae50252355834c5441434b50fb67346d702098a893363d5f7fede2a2",
+          "selectedTextSha256": "790afa840a07e773dcb52678f7a9939c08c9ec72034b2bbedf3ffd155faa4ce4"
+        },
+        "hinglish": {
+          "selectedLongLines": 48,
+          "pagesWithSelectedLines": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "pdfPages": 12,
+          "pdfSha256": "18a0d70b81a5aa2f027d18906e267a35e969e7f711927a931be49b241bb73760",
+          "selectedTextSha256": "605be20913fd295b3cc8bcca3f6fccf7d214d76954a24f4571d90fa458e17e36"
+        }
+      },
+      "focusAndChanges": "Naming syllable and declared Drik tradition; candidate table; numerology arithmetic and naming limitations. Corrected the column that could be mistaken for name etymology.",
+      "remainingApprovalOrRisk": "A qualified reviewer must approve pronunciation/romanization and cultural suitability. Proposed customer spellings and automatically supplied example names are distinct sets; their wording should be reviewed together. Etymologies remain explicitly unverified."
+    },
+    {
+      "slug": "career-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 53,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            7,
+            8,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "pdfPages": 14,
+          "pdfSha256": "0f06e4d3cd37472593374619391fd7338da4eba27a7de29d37c0701894fa55bb",
+          "selectedTextSha256": "b53f4d1816a347c2fb90d3fc256b94c55c95c69efebe1a1aa5d25941c89763de"
+        },
+        "hi": {
+          "selectedLongLines": 42,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "pdfPages": 12,
+          "pdfSha256": "120f3e581485877ef4431c5cae31fa05b424474d7e84fd0b90c87eaddfaed999",
+          "selectedTextSha256": "195e0db5c06266f9909e11a771a5975326092673385b7ef5d39053c706fffc27"
+        },
+        "hinglish": {
+          "selectedLongLines": 58,
+          "pagesWithSelectedLines": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "pdfPages": 14,
+          "pdfSha256": "07b79e90a0d92ae2b77e9624c9b508b5961b0098906b994cc3be21e4a943f8ca",
+          "selectedTextSha256": "df9f42d3df733cb00390d1301c305658ed3611b41ec3989a5791985960bad0f5"
+        }
+      },
+      "focusAndChanges": "Career houses, Dasha methodology, 90-day practical plan, out-of-scope reader-question handling and qualified health-advice boundary.",
+      "remainingApprovalOrRisk": "House-to-career interpretations and Hindi/Hinglish register still need named practitioner/editor acceptance; no job or income guarantee was found in the sampled passages."
+    },
+    {
+      "slug": "couple-kundli",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 72,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "pdfPages": 16,
+          "pdfSha256": "1a49f1a659dc95c1af6baa79bb8427e8bfb7b4e455f1e9ecfab09c5638f98893",
+          "selectedTextSha256": "2d5892d925a13956545d41bd9b6501983a9db3083e3dcf1085c9efb1509e43bb"
+        },
+        "hi": {
+          "selectedLongLines": 60,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "pdfPages": 14,
+          "pdfSha256": "07512d92b374cc08f9098190d0ecdb03ef3bbfb1fe77cb792396490a516f03f9",
+          "selectedTextSha256": "e4cc99f2727bf54bf9c7897fbd3b301ca9ae9bffff019c8c23d17eab40573251"
+        },
+        "hinglish": {
+          "selectedLongLines": 73,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "pdfPages": 17,
+          "pdfSha256": "f5f41855d137568444953045dff26bc241ba693bbfb3f0a810ae00c0994d018b",
+          "selectedTextSha256": "7169f60fc298d43089388de5047eee983b853e9adeddfc056c0f78d6b9d712b2"
+        }
+      },
+      "focusAndChanges": "Ordered Guna factors; Manglik cards; rule-comparison summary; Nadi/Bhakoot labels; sentence lists; consent, worth and health boundaries. Removed severity/compatibility inference and corrected renderer labels/punctuation.",
+      "remainingApprovalOrRisk": "Practitioner approval of the selected ordered Ashtakoot convention and cultural wording remains open. A native editor must accept the full narrative, including the concern/average/good terminology. The integrator corrected the source-copy spelling परिवारिक → पारिवारिक without changing scoring rules."
+    },
+    {
+      "slug": "fortune-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 53,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            8,
+            10,
+            12,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "pdfPages": 20,
+          "pdfSha256": "a29186d07b7e17d3b9a14b0d3d734589ba3824348e07a3e7113a38a83787500b",
+          "selectedTextSha256": "966536a8feb58e8090e28057b05b68002e1cae4b9ff58bbf9e2fe766ef38cc16"
+        },
+        "hi": {
+          "selectedLongLines": 40,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            8,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "pdfPages": 19,
+          "pdfSha256": "16c59aafde09a91700fc2d9ed72d81c3219649437084761e353a41c0b8a6f3dd",
+          "selectedTextSha256": "e5066b080d076cf9a74bbe235f926616adb6329c7773bc5e0ffd5e1a3816b228"
+        },
+        "hinglish": {
+          "selectedLongLines": 61,
+          "pagesWithSelectedLines": [
+            2,
+            3,
+            5,
+            8,
+            10,
+            12,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "pdfPages": 20,
+          "pdfSha256": "1f50861bec0e4b34662ef9fbdd4b1fe4024f09145da7b99c1c1a410222f8c751",
+          "selectedTextSha256": "c479e05265f3e6b91108abe59e7aff672456848df4e4335d37571b1e47ae96ee"
+        }
+      },
+      "focusAndChanges": "House/ruler connections, calendar cycles, civil-date arithmetic, Lo Shu interpretation, opportunity reflection and reader-question scope.",
+      "remainingApprovalOrRisk": "Interpretive associations and preferred Hindi/Hinglish terms need native/practitioner approval. The sampled wording treats these as symbolic reflection, not certified fortune or measured strength."
+    },
+    {
+      "slug": "jupiter-transit-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 22,
+          "pagesWithSelectedLines": [
+            4,
+            5,
+            6,
+            8,
+            9,
+            10
+          ],
+          "pdfPages": 10,
+          "pdfSha256": "4acd6241be75348e82972ae280b1a85cbedd4934e676e808899e83bdedaeb93d",
+          "selectedTextSha256": "53bd14c2f3b95d22a2be2bd43b590209abaf26574e02a8a31cb24e65627c59de"
+        },
+        "hi": {
+          "selectedLongLines": 16,
+          "pagesWithSelectedLines": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "pdfPages": 9,
+          "pdfSha256": "37ed746ac918d7aabb33eb81146f5df39d8b5dcbbb67974f028af57c8bf1a480",
+          "selectedTextSha256": "1bfe909b67766c69015c57576f06d7b16932022026297735fe94760138d64122"
+        },
+        "hinglish": {
+          "selectedLongLines": 21,
+          "pagesWithSelectedLines": [
+            4,
+            5,
+            6,
+            8,
+            9,
+            10
+          ],
+          "pdfPages": 10,
+          "pdfSha256": "cfa8cbc2119dd117b6f298da44c6cc758f0587dbd6170f9180eb2c6b15fdb909",
+          "selectedTextSha256": "fe9ebc941f4cab413bc4ce3f26341311231358049871d44d730702a7ce573e82"
+        }
+      },
+      "focusAndChanges": "Local-noon snapshot clock; retrograde rows; observed change intervals; learning/mentor prompts and exact-event limitations.",
+      "remainingApprovalOrRisk": "Selected transit conventions and native terminology require reviewer acceptance. Snapshot rows do not certify an exact station or ingress time."
+    },
+    {
+      "slug": "love-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 10,
+          "pagesWithSelectedLines": [
+            5,
+            7,
+            8,
+            11,
+            13
+          ],
+          "pdfPages": 13,
+          "pdfSha256": "6a0533110b9346234053f70e6404a3704780c8416ddbee60ba20e6fb69710c18",
+          "selectedTextSha256": "a225208bad77ea00f37a71d7189cc3efb5f1571ce21610fe7d162726a8488cc3"
+        },
+        "hi": {
+          "selectedLongLines": 10,
+          "pagesWithSelectedLines": [
+            5,
+            7,
+            10,
+            11
+          ],
+          "pdfPages": 11,
+          "pdfSha256": "02dac723ff2ca062aa8024cf4c9d0cf88dc9adc7dbbeaca3fc49c0780475d468",
+          "selectedTextSha256": "910ddc8dba2502ff9249a45457211515b61525e807b76a4476eb40f7ee442397"
+        },
+        "hinglish": {
+          "selectedLongLines": 9,
+          "pagesWithSelectedLines": [
+            5,
+            7,
+            8,
+            11,
+            13
+          ],
+          "pdfPages": 13,
+          "pdfSha256": "657239e7f3be3aa9eb72f6b93a558fa7c8c33ea361a404c8d68ae73deefaf7a2",
+          "selectedTextSha256": "8d0cca86e8c24521cf6cd6f8d1216271f1de1955f30ed9171835d5fa34360bc0"
+        }
+      },
+      "focusAndChanges": "Relationship houses, timing context, boundaries/consent guidance and the explicit one-person-report limitation.",
+      "remainingApprovalOrRisk": "A native/practitioner reviewer must approve interpretive wording. The sampled text explicitly avoids claiming another person’s feelings or determining compatibility from this report."
+    },
+    {
+      "slug": "manglik-kaal-sarp-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 31,
+          "pagesWithSelectedLines": [
+            5,
+            6,
+            9,
+            10,
+            11,
+            12
+          ],
+          "pdfPages": 12,
+          "pdfSha256": "ae8faeb4f9306d29a3c1b405b173cb4fdb6b402bf3d093d062756e631ace8908",
+          "selectedTextSha256": "86c3201d20578a7981c86a64f6cc99d76cf4acaa7011d6e926bd1c450fb7c41d"
+        },
+        "hi": {
+          "selectedLongLines": 20,
+          "pagesWithSelectedLines": [
+            5,
+            6,
+            8,
+            9,
+            10,
+            11
+          ],
+          "pdfPages": 11,
+          "pdfSha256": "46df18a49f52757df512495aafea2a6e54f5f813406929c27edf20d05f69406b",
+          "selectedTextSha256": "6c9a151e07f7e19f669bc2593dfdff7bfa8208fac541a6ec9e3d96e57f94bd4a"
+        },
+        "hinglish": {
+          "selectedLongLines": 21,
+          "pagesWithSelectedLines": [
+            5,
+            6,
+            9,
+            10,
+            11,
+            12
+          ],
+          "pdfPages": 12,
+          "pdfSha256": "76754b6792a606e2f13fac849bbc3bcae81ec7527976ee5702941bbc1fb472bc",
+          "selectedTextSha256": "24399c622b139a0a1f4a3b7a76f1d36d4fe9d4f6d4b4094d1ca5eea6a757a697"
+        }
+      },
+      "focusAndChanges": "All three Manglik reference origins; six-house membership; closed-node-arc explanation; exceptions and fear-free guidance. Corrected severity, negative-result wording, reference attribution and repeated caution.",
+      "remainingApprovalOrRisk": "The chosen conventions and treatment of boundary points, exceptions and cancellation still need qualified practitioner acceptance. This review does not establish a universal traditional verdict or predictive validity."
+    },
+    {
+      "slug": "name-correction-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 27,
+          "pagesWithSelectedLines": [
+            3,
+            4,
+            6,
+            8,
+            9,
+            13,
+            14
+          ],
+          "pdfPages": 14,
+          "pdfSha256": "8f619a6adea03586d887a543f2f5a01bebdbc61871a5bdaab7b941bfc23e2e4d",
+          "selectedTextSha256": "369322a643b70b5fc91b5d443b2b4d1225cd97b1762e2f7643bcde206c34be53"
+        },
+        "hi": {
+          "selectedLongLines": 18,
+          "pagesWithSelectedLines": [
+            3,
+            4,
+            5,
+            6,
+            8,
+            13
+          ],
+          "pdfPages": 13,
+          "pdfSha256": "3b4f2c1fcf690bc7e35f211f98e134ed16f1eea320caaafaed1442c43f0f70b1",
+          "selectedTextSha256": "1ec84b5b69353caedc4aa932e56ecb335cfd2652d04f1b17077625a4d42285a7"
+        },
+        "hinglish": {
+          "selectedLongLines": 25,
+          "pagesWithSelectedLines": [
+            2,
+            3,
+            4,
+            6,
+            8,
+            9,
+            13
+          ],
+          "pdfPages": 13,
+          "pdfSha256": "c86881090256aaf67fed5697308f589c216b72c995a5d393e550f3eff38c1c0f",
+          "selectedTextSha256": "e9a9cb084ae6c3f1c51f08dd068421d8790e132c24f4861954616a1b96373dd6"
+        }
+      },
+      "focusAndChanges": "Roman-letter comparison; master-number retention; Chaldean/Pythagorean distinctions; empty letter groups; personal-identity and legal-name-change guidance. Corrected the number-symbolism column.",
+      "remainingApprovalOrRisk": "Native terminology and the full naming narrative require approval. The report does not verify etymology or establish that a spelling changes luck."
+    },
+    {
+      "slug": "numerology-lo-shu-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 20,
+          "pagesWithSelectedLines": [
+            3,
+            6,
+            8,
+            9,
+            10,
+            11,
+            16
+          ],
+          "pdfPages": 16,
+          "pdfSha256": "9757c7caf3049612e381a341f11105f41844d609c5f8704735a3a4f4a2c3731c",
+          "selectedTextSha256": "039b530e6d140bbf3e6e9aef28b713fbe7827a00234c77a14f586d5766e31c2c"
+        },
+        "hi": {
+          "selectedLongLines": 15,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            8,
+            9,
+            10,
+            14
+          ],
+          "pdfPages": 15,
+          "pdfSha256": "24409a292499e18280cb5d46bce00f1f333b2a5fb8dcabf8ba0aac27f370975b",
+          "selectedTextSha256": "e6e65962fb6aeba63563452bd7fdbc53b4b2105855ae69fbc914e11119b2ec52"
+        },
+        "hinglish": {
+          "selectedLongLines": 20,
+          "pagesWithSelectedLines": [
+            2,
+            3,
+            6,
+            8,
+            9,
+            10,
+            11,
+            16
+          ],
+          "pdfPages": 16,
+          "pdfSha256": "bcf91a3fa0fd75e9bfe663480aa97ccdc20b33b268787263e55050a277014111",
+          "selectedTextSha256": "3e1a40ea081053033b33e7ac7366702ebd91ac00b542ea86e53d8aa2ffd62327"
+        }
+      },
+      "focusAndChanges": "A–Z/vowel/consonant conventions; digit frequencies; empty cells; eight-line geometry; calendar cycles and non-diagnostic limitations.",
+      "remainingApprovalOrRisk": "A qualified reviewer must accept the selected symbolic conventions and native register. Digit absence is not presented as a defect or ability measure in the sampled text."
+    },
+    {
+      "slug": "premium-kundli",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 153,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            7,
+            8,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            29
+          ],
+          "pdfPages": 29,
+          "pdfSha256": "22a0cad44825ced2a2fa710b230048f95d43f31dfba9b15c3d263e776298cd7c",
+          "selectedTextSha256": "999a8d5f63db254759bc6c220f8ce9e5dadb9d72339027528e017dbb89efc3b3"
+        },
+        "hi": {
+          "selectedLongLines": 45,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            7,
+            8,
+            10,
+            15,
+            16,
+            17,
+            20,
+            21,
+            22,
+            23,
+            24,
+            26
+          ],
+          "pdfPages": 26,
+          "pdfSha256": "2952306e5ae7951a6400529c31f47551ad4200a51834bed6dadfbd7ec3db63da",
+          "selectedTextSha256": "54d11bbac3eecd375f8b251aef93db183ffc4bc79a5f0434e579a3f20fe00e69"
+        },
+        "hinglish": {
+          "selectedLongLines": 161,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            22,
+            23,
+            24,
+            25,
+            26,
+            28
+          ],
+          "pdfPages": 28,
+          "pdfSha256": "df6cfe94b568df558acb8402649d0bb9d590f99b55ded1666756dc3345d4c6c7",
+          "selectedTextSha256": "c24b1beff03eab86face458e5b950e5fde632fe07e072fa1d7d18e8ecdabeaeb"
+        }
+      },
+      "focusAndChanges": "D1/D9 explanation and worked example; Dasha chronology boundaries; yoga/dosha wording; birth Panchang; numerology and interpretation-vs-strength limits. Corrected the dosha and calculation-record presentation.",
+      "remainingApprovalOrRisk": "Qualified review of yoga interpretation, all calculation conventions and language remains open; numerical audit acceptance is a separate workstream. The transcript of long chronology rows is not an independent recalculation."
+    },
+    {
+      "slug": "rahu-ketu-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 16,
+          "pagesWithSelectedLines": [
+            3,
+            6,
+            9,
+            10,
+            11
+          ],
+          "pdfPages": 11,
+          "pdfSha256": "3300ca5257ecc2654a0ca05a9219e6ff212e374a0ae9ddcdb1918d0d88972e2b",
+          "selectedTextSha256": "1fcf0cc7e4406af558703ec6d5629137cd99e0c9e25f551a6d3a6a4dff1b4c4a"
+        },
+        "hi": {
+          "selectedLongLines": 11,
+          "pagesWithSelectedLines": [
+            3,
+            6,
+            8,
+            9,
+            10
+          ],
+          "pdfPages": 10,
+          "pdfSha256": "c4bcaf7711ee5c6f9bd2d91a52c14e2ff3cfc5d69c21dbe17660fe7d4413ee9e",
+          "selectedTextSha256": "006f1348755a1e35122a7484eda17a8f7c2e6e4c9edda87b646113166ecc9614"
+        },
+        "hinglish": {
+          "selectedLongLines": 18,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            8,
+            9,
+            10
+          ],
+          "pdfPages": 10,
+          "pdfSha256": "e952afbbd1d87131830de3749b7179c315c4d3b819c3043f4e53c2d21dc1b4d9",
+          "selectedTextSha256": "f2505aaf22d5eeae3a6734fad67bd5c093a676d4ec977407c7525b17de3a0324"
+        }
+      },
+      "focusAndChanges": "Mean-node disclosure; motion legend; observations vs event timing; nodal house references and reflection prompts.",
+      "remainingApprovalOrRisk": "Native terms for nodes/arc geometry and practitioner acceptance remain open. Monthly observations are not exact transit-event certification."
+    },
+    {
+      "slug": "sade-sati-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 31,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            9,
+            10,
+            11
+          ],
+          "pdfPages": 11,
+          "pdfSha256": "1f4daccde58ade513f42d58f66dccd885e09b034b9aeaa9f81877b2cae621497",
+          "selectedTextSha256": "bf9f1801475f6769a4addfc2148217d4447f4aa9a2ce17965c658c30ad33fdd9"
+        },
+        "hi": {
+          "selectedLongLines": 17,
+          "pagesWithSelectedLines": [
+            3,
+            6,
+            8,
+            9,
+            10
+          ],
+          "pdfPages": 10,
+          "pdfSha256": "bf93063f11a680c6ae7ce8bfc7365ae1733d1c0b2873c760bf593923b835b255",
+          "selectedTextSha256": "406cdca2002a952bc1246a586efa4831c0c90c513ab89c974d49460e88317f8b"
+        },
+        "hinglish": {
+          "selectedLongLines": 34,
+          "pagesWithSelectedLines": [
+            3,
+            5,
+            6,
+            9,
+            10,
+            11
+          ],
+          "pdfPages": 11,
+          "pdfSha256": "2e54f4b8ab2388070f0b953694192f40dcf4cfefcd3d937176ca7e84e1393905",
+          "selectedTextSha256": "434b381eadf4e1aec44c7c529bb1776b35632254042312c6ed49649b4c97434c"
+        }
+      },
+      "focusAndChanges": "Three-sign status, sampled Saturn positions, transition intervals and guidance against fear-based or costly conclusions.",
+      "remainingApprovalOrRisk": "A practitioner must approve the selected convention and native wording. This sample does not certify exact start/end dates or establish a predicted loss."
+    },
+    {
+      "slug": "transit-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 41,
+          "pagesWithSelectedLines": [
+            5,
+            9,
+            10,
+            11,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "pdfPages": 17,
+          "pdfSha256": "416f06f44ee6471abfc9ee4181afc1db880b9cddac4e4661a13e6e53330ef837",
+          "selectedTextSha256": "63ba0074165752a42bebfd3866be04663a65c733a61336d3f602f336c6393bff"
+        },
+        "hi": {
+          "selectedLongLines": 26,
+          "pagesWithSelectedLines": [
+            5,
+            8,
+            9,
+            11,
+            12,
+            13,
+            14
+          ],
+          "pdfPages": 14,
+          "pdfSha256": "0fa3cf76fd093d88c91b700d9407137c02085846dabe8d1412a6d661652f952a",
+          "selectedTextSha256": "e400e19c29a7ae013a5ea97668218448ca7b9c6e51b48a52d69cbd37245f1d98"
+        },
+        "hinglish": {
+          "selectedLongLines": 36,
+          "pagesWithSelectedLines": [
+            5,
+            6,
+            9,
+            10,
+            12,
+            13,
+            14,
+            15
+          ],
+          "pdfPages": 16,
+          "pdfSha256": "fe3c925f0f3195ab6f5874a9d7416651d7afc653c0c1d560134b0894e3641245",
+          "selectedTextSha256": "b2c50c5fb448a15efb42e3f01839a08aef09c078600d5569f612e76d555969da"
+        }
+      },
+      "focusAndChanges": "Planet/motion legend; monthly samples; observed sign-change ranges; two reference frames and exact-timing limitations.",
+      "remainingApprovalOrRisk": "Native terminology and domain review remain open. Date pairs bracket observations; the review did not turn them into exact ingress dates."
+    },
+    {
+      "slug": "wealth-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 12,
+          "pagesWithSelectedLines": [
+            3,
+            7,
+            8,
+            12,
+            14
+          ],
+          "pdfPages": 14,
+          "pdfSha256": "3cdd32463d0ba8f5ebc11d99e74c7d7f41517ecb13026b13280f61c40fda5853",
+          "selectedTextSha256": "ec3d3627b0d150568096f286b7ed72c587826877e53f8b97a09d187a33fe58e4"
+        },
+        "hi": {
+          "selectedLongLines": 10,
+          "pagesWithSelectedLines": [
+            3,
+            7,
+            10,
+            12
+          ],
+          "pdfPages": 12,
+          "pdfSha256": "547b0579fa843953d186cdb867da7b34f95240060df0ce4690e45ff2b3960e53",
+          "selectedTextSha256": "ea9ea683ea603f14131ecf226c8e9873c1ac2aeb35e7c1ce33497f0694537af2"
+        },
+        "hinglish": {
+          "selectedLongLines": 13,
+          "pagesWithSelectedLines": [
+            3,
+            7,
+            8,
+            12,
+            14
+          ],
+          "pdfPages": 14,
+          "pdfSha256": "566baeee781c54afd285246bee677e2b8cae54a0d7bc58636a36b97b3aacb94e",
+          "selectedTextSha256": "5bc679ce0605428dbfe759799b3c4ec7d14619a2bc3e3cc1b28222aeb598650e"
+        }
+      },
+      "focusAndChanges": "Spending/reserve prompts, financial decision boundary, house/ruler connections, timing context and reader-question scope.",
+      "remainingApprovalOrRisk": "Native/practitioner review remains open. Sampled wording directs investment/borrowing/trading decisions to real financial data and qualified advice; it contains no verified financial prediction."
+    },
+    {
+      "slug": "yearly-horoscope-report",
+      "coverage": {
+        "en": {
+          "selectedLongLines": 49,
+          "pagesWithSelectedLines": [
+            8,
+            9,
+            10,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27
+          ],
+          "pdfPages": 28,
+          "pdfSha256": "abecfed123e1f34e241f412a51c1912d346f7918d775854236f41a18bde37feb",
+          "selectedTextSha256": "70f9e89ce6b5a7e4d5e5df249c312c3b72f17b0321f9eb9c74b5802f48fbb2f5"
+        },
+        "hi": {
+          "selectedLongLines": 52,
+          "pagesWithSelectedLines": [
+            8,
+            9,
+            10,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21
+          ],
+          "pdfPages": 21,
+          "pdfSha256": "b4c07d6aa8619c466dadf01789213d4320e8d4691e03c27f6c0e09d4f63e867b",
+          "selectedTextSha256": "71bc8f459ae4e02d3a84c8378aa3cdf440acf5c49482ece24be96dd60cda00bb"
+        },
+        "hinglish": {
+          "selectedLongLines": 51,
+          "pagesWithSelectedLines": [
+            8,
+            9,
+            10,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24
+          ],
+          "pdfPages": 24,
+          "pdfSha256": "a23a1835af71a1b9dde3b0beafa1c6e7c5f4ce933b6eafc1e4a1e27644c78d41",
+          "selectedTextSha256": "2000e651d65c586ca48bfc58addc9d70c77fd0e6bb7105f384684d4405707ec4"
+        }
+      },
+      "focusAndChanges": "First-day monthly samples, quarterly planning prompts, actual calendar-year cycles, observation-vs-prediction language and practical review questions.",
+      "remainingApprovalOrRisk": "Native wording and practitioner acceptance remain open. Rolling month indices and sample dates require review in context, and no date-specific event forecast is certified."
+    }
+  ],
+  "visualInspectionByThisReviewer": [
+    {
+      "stage": "baseline",
+      "file": "profile-1/baby-name-report-hi.pdf",
+      "pages": [
+        4,
+        5
+      ],
+      "purpose": "distinguish extraction artifacts from actual glyphs"
+    },
+    {
+      "stage": "candidate",
+      "file": "profile-1/manglik-kaal-sarp-report-hi.pdf",
+      "pages": [
+        5
+      ],
+      "purpose": "reference counts, house values and readable Hindi"
+    },
+    {
+      "stage": "candidate",
+      "file": "profile-1/manglik-kaal-sarp-report-en.pdf",
+      "pages": [
+        6
+      ],
+      "purpose": "negative rule wording and Royal layout"
+    },
+    {
+      "stage": "candidate",
+      "file": "profile-1/baby-name-report-hi.pdf",
+      "pages": [
+        5
+      ],
+      "purpose": "number-symbolism header and unchanged candidate rows"
+    }
+  ],
+  "tests": {
+    "engineDisplayGeometryCases": 1728,
+    "engineDisplayLocaleCases": 5184,
+    "unavailableCases": 114,
+    "factorCases": 15,
+    "displayContractChecks": 100,
+    "tablePaginationCases": 25202,
+    "initialProfileOneGeneration": {
+      "passed": 45,
+      "total": 45,
+      "pages": 676,
+      "maximumPages": 29
+    },
+    "finalIntegrated135": "Pending integrator exact-commit render and proof; do not reuse preliminary PDFs as final artifacts"
+  },
+  "formalAcceptance": {
+    "qualifiedHumanLanguageApproval": false,
+    "qualifiedPractitionerApproval": false,
+    "releaseGateClosedByThisReview": false
+  }
+}

@@ -82,9 +82,12 @@ test("public practitioner recruitment redirects the old onboarding URL without e
   await page.goto(new URL("/astrologer/onboarding", baseURL).toString(), { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/join-astrologer\/?$/);
   await expect(page.getByRole("heading", { name: "Apply as an Astrologer" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Create professional account" })).toHaveAttribute("href", "/signup");
+  await expect(page.getByRole("link", { name: "Create professional account" })).toHaveAttribute("href", "/signup?role=professional");
   await expect(page.getByRole("link", { name: "Professional sign in" })).toHaveAttribute("href", "/auth/astrologer-login");
   await expect(page.getByRole("navigation", { name: "Astrologer portal sidebar" })).toHaveCount(0);
+  await page.getByRole("link", {name:"Create professional account"}).click();
+  await expect(page).toHaveURL(/\/signup\?role=professional$/);
+  await expect(page.locator("#professionalRole")).toBeVisible();
   await page.goto(new URL("/astrologer/dashboard", baseURL).toString(), { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/(?:auth\/)?login(?:\?|$)/);
 });

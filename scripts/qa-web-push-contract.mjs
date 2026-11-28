@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {allowedPushEndpoint,pushOutcome,validPushEvent} from "../lib/notifications/push-contract.ts";
+for(const url of ["https://fcm.googleapis.com/fcm/send/fixture-token","https://updates.push.services.mozilla.com/wpush/v2/fixture-token","https://web.push.apple.com/example-push-token"])assert.equal(allowedPushEndpoint(url),url);
+for(const url of ["http://fcm.googleapis.com/fcm/send/x","https://127.0.0.1/private","https://fcm.googleapis.com.evil.test/fcm/send/x","https://evil.test@fcm.googleapis.com/fcm/send/x","https://fcm.googleapis.com:444/fcm/send/x","https://fcm.googleapis.com/other","https://fcm.googleapis.com/fcm/send/x?redirect=evil","https://push.apple.com.evil.test/secret","https://fcm.googleapis.com/fcm/send/x#fragment"])assert.equal(allowedPushEndpoint(url),null);
+assert.equal(pushOutcome(201),"provider_accepted");assert.equal(pushOutcome(410),"expired");assert.equal(pushOutcome(429),"failed_or_unknown");assert.equal(validPushEvent("marketing","x","SENT"),false);
+const read=p=>readFileSync(p,"utf8"),transport=read("lib/notifications/web-push-transport.ts"),route=read("app/api/notifications/subscribe/route.ts"),worker=read("public/sw.js"),prefs=read("components/push-preferences.tsx");
+assert.ok(transport.includes('dsaEncoding:"ieee-p1363"')&&transport.includes('redirect:"error"')&&transport.includes('createCipheriv("aes-256-gcm"'));
+assert.ok(!transport.includes('body:JSON.stringify'));
+assert.ok(route.includes("consent:z.literal(true)")&&route.includes("existing.userId!==user.id")&&route.includes("userId:user.id"));
+assert.ok(worker.includes('self.addEventListener("push"')&&!worker.includes('event.data.json'));
+assert.ok(prefs.includes("await Notification.requestPermission()")&&prefs.includes('setNotice("registered")')&&read("lib/account/device-copy.ts").includes("delivery has not yet been verified"));
+console.log("WEB_PUSH_CONTRACT_PASS;REAL_BROWSER_DELIVERY_PENDING");

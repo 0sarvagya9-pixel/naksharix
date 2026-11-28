@@ -5,6 +5,7 @@ import { seo } from "@/lib/seo";
 import { LearningProgress } from "@/components/learning-progress";
 import { LearningSelfCheck } from "@/components/learning-self-check";
 import { EditorialServiceBanner } from "@/components/home/editorial-service-banner";
+import {availablePackageOffers} from "@/lib/digital-packages/ledger";
 
 export const metadata: Metadata = seo({
   title: "Learn the Basics of Vedic Astrology | Free Lessons",
@@ -67,7 +68,8 @@ const lessons = [
   }
 ] as const;
 
-export default function LearnPage() {
+export default async function LearnPage() {
+  const course=(await availablePackageOffers()).find(o=>o.key==="astrology-course");
   return (
     <main className="star-field">
       <EditorialServiceBanner eyebrow="THE LEARNING LIBRARY"
@@ -123,6 +125,7 @@ export default function LearnPage() {
               ))}
             </ul>
           </section>
+          {course?<section className="mt-8 rounded-2xl border border-[#e4bf86] bg-[#fffaf3] p-6 text-[#422a31]"><h2 className="font-cinzel text-2xl font-black">{course.title}</h2><p className="mt-3 leading-7">{course.description}</p><p className="mt-2 font-bold">{new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format(course.pricePaise/100)} · One-time purchase</p><Link href="/digital-packages" className="mt-4 inline-block rounded-lg bg-[#70283d] px-4 py-3 font-semibold text-white">Review course package</Link></section>:null}
           <LearningSelfCheck />
           <LearningProgress />
           <div className="mt-8 rounded-xl border border-[#D4AF37]/20 p-5 text-sm leading-7 naksh-muted-text">

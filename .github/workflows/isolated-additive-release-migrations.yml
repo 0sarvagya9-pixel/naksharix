@@ -1,0 +1,63 @@
+name: Isolated additive release migration rehearsal
+on:
+  push:
+    branches: [internal-naksharix-development-hold-20261124]
+    paths:
+      - 'prisma/schema.prisma'
+      - 'deploy/sql/20261124-*.sql'
+      - 'deploy/sql/20261125-*.sql'
+      - 'deploy/sql/20261126-*.sql'
+      - 'lib/ops/release-schema-contract.ts'
+      - 'scripts/qa-additive-release-migrations.mjs'
+      - '.github/workflows/isolated-additive-release-migrations.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-migration:
+    if: github.ref == 'refs/heads/internal-naksharix-development-hold-20261124'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fixture
+          POSTGRES_PASSWORD: fixture
+          POSTGRES_DB: naksharix_release_fixture
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U fixture -d naksharix_release_fixture"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      CI: "true"
+      DATABASE_URL: postgresql://fixture:fixture@127.0.0.1:5432/naksharix_release_fixture?schema=public
+      DIRECT_URL: postgresql://fixture:fixture@127.0.0.1:5432/naksharix_release_fixture?schema=public
+      PSQL_URL: postgresql://fixture:fixture@127.0.0.1:5432/naksharix_release_fixture
+      EMAIL_PROVIDER: disabled
+      AI_ASTROLOGER_ENABLED: "false"
+      AI_MEMBERSHIP_SALES_ENABLED: "false"
+      DIGITAL_PACKAGE_SALES_ENABLED: "false"
+      EXPERT_SERVICE_SALES_ENABLED: "false"
+      WEB_PUSH_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install PostgreSQL client if missing
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client
+          fi
+      - name: Rehearse all checked-in additive migrations and catalog contract twice
+        run: node --experimental-strip-types scripts/qa-additive-release-migrations.mjs

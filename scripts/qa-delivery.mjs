@@ -21,6 +21,7 @@ const email = source("lib/email/email-service.ts");
 const delivery = source("lib/reports/report-delivery-service.ts");
 const deliverRoute = source("app/api/admin/report-requests/[id]/deliver/route.ts");
 const adminActions = source("components/admin/report-request-actions.tsx");
+const reportCopy = source("lib/admin/report-operations-copy.ts");
 
 assert(schema.includes("deliveryStatus") && schema.includes("emailSentAt") && schema.includes("deliveryError"), "Delivery state fields exist", "Prisma metadata");
 assert(email.includes("EMAIL_PROVIDER") && email.includes("SMTP_FROM"), "Email provider readiness validates SMTP env", "disabled-safe email");
@@ -29,10 +30,14 @@ assert(delivery.includes("sendEmail") && delivery.includes("secure download"), "
 assert(deliverRoute.includes("generatedPdfBytes") && deliverRoute.includes("generatedPdfSize"), "Delivery route requires generated PDF", "no fake delivery");
 assert(deliverRoute.includes("READY_FOR_DELIVERY") && deliverRoute.includes("DELIVERED"), "Delivery route separates ready and delivered", "sent only after action");
 assert(deliverRoute.includes("emailSentAt") && deliverRoute.includes("deliveryStatus"), "Delivery route stores delivery metadata", "real delivery state");
-assert(adminActions.includes("/deliver") && adminActions.includes("Send Email"), "Admin action calls delivery route", "admin-triggered delivery");
+assert(adminActions.includes('/api/admin/report-requests/${requestId}/') &&
+  /\?\s*"generate-pdf"\s*:\s*"deliver"/.test(adminActions) &&
+  adminActions.includes('perform("deliver")') && adminActions.includes("copy.send") &&
+  reportCopy.includes("Send registered email"), "Admin action calls delivery route", "admin-triggered delivery with localized label");
 
 const adminEmailRoute = source("app/api/admin/email-test/route.ts");
 const adminEmailUi = source("components/admin/admin-email-acceptance-test.tsx");
+const adminEmailCopy = source("lib/admin/operations-control-copy.ts");
 const readinessPage = source("app/admin/readiness/page.tsx");
 assert(adminEmailRoute.includes("getAdminApiUser()") &&
   adminEmailRoute.includes('if (!admin) return fail("Not found", 404)') &&
@@ -53,7 +58,7 @@ assert(adminEmailRoute.includes("getEmailReadiness()") &&
   adminEmailRoute.includes('Provider acceptance is not proof of inbox delivery.'), "Email smoke/suite is readiness gated, DB-throttled and truthful about provider acceptance", "no fake delivered state");
 assert(adminEmailUi.includes('secureFetch("/api/admin/email-test", {') &&
   adminEmailUi.includes('submit("suite")') &&
-  adminEmailUi.includes("Check your configured Admin mailbox") &&
+  adminEmailUi.includes("operationsControlCopy") && adminEmailCopy.includes("Check your configured Admin mailbox") &&
   readinessPage.includes("<AdminEmailAcceptanceTest enabled={email.emailEnabled} />"),
   "Email suite requires explicit, authenticated, secure admin interaction", "no background or anonymous sending");
 

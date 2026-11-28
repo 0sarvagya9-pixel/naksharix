@@ -1,4 +1,7 @@
 import * as Astronomy from "astronomy-engine";
+import { apparentTropicalToMeanLahiri, meanLahiriOfDate, terrestrialTimeForCivilEphemeris } from "@/lib/astrology/own-engine/lahiri-reference";
+import { lahiriMoonLongitude } from "@/lib/astrology/own-engine/lahiri-moon";
+import {estimateSiderealMotion} from "@/lib/astrology/own-engine/motion";
 import { calculateVimshottariDasha } from "@/lib/astrology/premium-engine/dasha";
 import { nakshatraFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
 import {
@@ -11,8 +14,8 @@ import {
   parseBirthDateTime,
   parseTimezoneOffsetToHours
 } from "@/lib/astrology/own-engine/time";
-import { lahiriAyanamsa, longitudeToRashi, tropicalToSidereal, wholeSignHouse } from "@/lib/astrology/own-engine/zodiac";
-import type { CanonicalChartInput, CanonicalChartResult, CanonicalPlanet } from "@/lib/astrology/ephemeris/types";
+import { lahiriAyanamsa, longitudeToRashi, tropicalToSidereal, wholeSignHouse, boundedDegreeDisplay } from "@/lib/astrology/own-engine/zodiac";
+import type { CanonicalChartInput, CanonicalChartResult, CanonicalPlanet, PhysicalLongitudeMethod } from "@/lib/astrology/ephemeris/types";
 
 type SupportedBody = "Sun" | "Moon" | "Mars" | "Mercury" | "Jupiter" | "Venus" | "Saturn";
 type PlanetName = CanonicalPlanet["planet"];
@@ -39,8 +42,15 @@ export function calculateInternalChart(input: InternalChartInput): CanonicalChar
   const ayanamsa = lahiriAyanamsa(julianDay);
   const ascendantLongitude = calculateAscendant(julianDay, normalized.latitude, normalized.longitude);
   const ascendantRashi = longitudeToRashi(ascendantLongitude);
-  const longitudes = calculateSiderealLongitudes(time, julianDay);
-  const planets = buildCanonicalPlanets(longitudes, ascendantRashi.rashiNumber, time, julianDay);
+  const physicalMethod = normalized.physicalLongitudeMethod ?? "historical_nonlunar";
+  if (physicalMethod !== "historical_nonlunar" && physicalMethod !== "apparent_iae_p03") {
+    throw new Error("Unsupported physical longitude method.");
+  }
+  if (physicalMethod === "apparent_iae_p03" && normalized.ayanamsa !== "lahiri") {
+    throw new Error("The apparent physical longitude method requires Lahiri ayanamsha.");
+  }
+  const longitudes = calculateSiderealLongitudes(time, julianDay, physicalMethod);
+  const planets = buildCanonicalPlanets(longitudes, ascendantRashi.rashiNumber, time, julianDay, physicalMethod);
   const moon = planets.find((planet) => planet.planet === "Moon");
   const moonNakshatra = moon?.absoluteLongitude != null ? nakshatraFromLongitude(moon.absoluteLongitude) : { name: null, pada: null };
   const dasha = moon?.absoluteLongitude != null
@@ -60,12 +70,13 @@ export function calculateInternalChart(input: InternalChartInput): CanonicalChar
       key: "lahiri",
       label: "Lahiri / Chitra Paksha",
       degree: round(ayanamsa),
+      ...(physicalMethod === "apparent_iae_p03" ? {physicalMeanDegree: round(meanLahiriOfDate(terrestrialTimeForCivilEphemeris(time)))} : {}),
       verified: false
     },
     ascendant: {
       sign: ascendantRashi.rashi,
-      degree: round(ascendantRashi.degreeInSign),
-      absoluteLongitude: round(ascendantLongitude)
+      degree: boundedDegreeDisplay(ascendantRashi.degreeInSign,6),
+      absoluteLongitude: ascendantLongitude
     },
     moon: {
       sign: moon?.sign ?? null,
@@ -92,10 +103,14 @@ export function calculateInternalChart(input: InternalChartInput): CanonicalChar
       : undefined,
     metadata: {
       provider: "naksharix_astronomy_engine_lahiri_internal",
-      calculationMode: "astronomy_engine_geocentric_sidereal_limited_internal",
+      calculationMode: physicalMethod === "apparent_iae_p03"
+        ? "internal_apparent_planets_iae_lahiri_p03_historical_nodes_houses"
+        : "astronomy_engine_geocentric_sidereal_limited_internal",
+      ...(physicalMethod === "apparent_iae_p03" ? {physicalLongitudeMethod: physicalMethod} : {}),
       precisionLevel: "provider_verified",
       verified: false,
       limitations: [
+        ...(physicalMethod === "apparent_iae_p03" ? ["Physical planets use the IAE J2000/P03 mean Lahiri origin. The ascendant and mean nodes retain the historical origin shown in ayanamsa.degree."] : []),
         "Planet positions are calculated internally with astronomy-engine and Lahiri sidereal conversion.",
         "Ascendant and planet positions are provider-regression-tested but not externally verified.",
         "Rahu uses mean lunar node formula; Ketu is opposite Rahu.",
@@ -134,54 +149,41 @@ function normalizeChartInput(input: InternalChartInput): CanonicalChartInput {
   };
 }
 
-function calculateSiderealLongitudes(time: Astronomy.AstroTime, julianDay: number): Record<PlanetName, number> {
-  const entries: Array<[PlanetName, number]> = physicalBodies.map((body) => [body, siderealLongitude(body, time, julianDay)]);
+function calculateSiderealLongitudes(time: Astronomy.AstroTime, julianDay: number, method: PhysicalLongitudeMethod): Record<PlanetName, number> {
+  const entries: Array<[PlanetName, number]> = physicalBodies.map((body) => [body, siderealLongitude(body, time, julianDay, method)]);
   const rahu = meanRahuLongitude(julianDay);
   entries.push(["Rahu", rahu], ["Ketu", normalizeDegrees(rahu + 180)]);
   return Object.fromEntries(entries) as Record<PlanetName, number>;
 }
 
-function siderealLongitude(body: SupportedBody, time: Astronomy.AstroTime, julianDay: number) {
-  const tropical = body === "Moon"
-    ? Astronomy.EclipticGeoMoon(time).lon
-    : Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[body], time, true)).elon;
+function siderealLongitude(body: SupportedBody, time: Astronomy.AstroTime, julianDay: number, method: PhysicalLongitudeMethod) {
+  if (body === "Moon") return lahiriMoonLongitude(time);
+  const clock = method === "apparent_iae_p03" ? terrestrialTimeForCivilEphemeris(time) : time;
+  const tropical = Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[body], clock, true)).elon;
+  if (method === "apparent_iae_p03") return apparentTropicalToMeanLahiri(tropical, clock);
   return tropicalToSidereal(tropical, julianDay);
 }
 
-function buildCanonicalPlanets(longitudes: Record<PlanetName, number>, ascendantSignNumber: number, time: Astronomy.AstroTime, julianDay: number): CanonicalPlanet[] {
+function buildCanonicalPlanets(longitudes: Record<PlanetName, number>, ascendantSignNumber: number, time: Astronomy.AstroTime, julianDay: number, method: PhysicalLongitudeMethod): CanonicalPlanet[] {
   const sunLongitude = longitudes.Sun;
 
   return planetOrder.map((planet) => {
-    const absoluteLongitude = round(longitudes[planet]);
+    const absoluteLongitude = longitudes[planet];
     const rashi = longitudeToRashi(absoluteLongitude);
-    const retrograde = isPhysicalBody(planet) && planet !== "Sun" && planet !== "Moon"
-      ? isRetrograde(planet, time, julianDay)
-      : planet === "Rahu" || planet === "Ketu";
+    const motion=estimateSiderealMotion(days=>planet==="Rahu"||planet==="Ketu"?normalizeDegrees(meanRahuLongitude(julianDay+days)+(planet==="Ketu"?180:0)):siderealLongitude(planet,Astronomy.MakeTime(new Date(time.date.getTime()+days*86400000)),julianDay+days,method));
 
     return {
       planet,
       sign: rashi.rashi,
-      degree: round(rashi.degreeInSign),
+      degree: boundedDegreeDisplay(rashi.degreeInSign,6),
       absoluteLongitude,
       house: wholeSignHouse(rashi.rashiNumber, ascendantSignNumber),
-      retrograde,
+      ...motion,
       combust: combustionFlag(planet, absoluteLongitude, sunLongitude)
     };
   });
 }
 
-function isRetrograde(body: SupportedBody, time: Astronomy.AstroTime, julianDay: number) {
-  const laterDate = new Date(time.date.getTime() + 24 * 60 * 60 * 1000);
-  const laterJulian = julianDay + 1;
-  const later = siderealLongitude(body, Astronomy.MakeTime(laterDate), laterJulian);
-  const now = siderealLongitude(body, time, julianDay);
-  const delta = signedDelta(later - now);
-  return delta < 0;
-}
-
-function isPhysicalBody(planet: PlanetName): planet is SupportedBody {
-  return physicalBodies.includes(planet as SupportedBody);
-}
 
 function combustionFlag(planet: PlanetName, planetLongitude: number, sunLongitude: number) {
   if (planet === "Sun" || planet === "Moon" || planet === "Rahu" || planet === "Ketu") return null;

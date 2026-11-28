@@ -8,6 +8,8 @@ const center = read("components/ui/site-notification-center.tsx");
 const emitter = read("lib/ui/site-notification.ts");
 const secure = read("lib/security/csrf.ts");
 const pay = read("components/razorpay-checkout-button.tsx");
+const paymentCopy = read("lib/payments/customer-copy.ts");
+const noticeCopy = read("lib/ui/notification-copy.ts");
 const browserConfig = read("tests/e2e/playwright.config.ts");
 const add = read("components/shop/quote-cart-controls.tsx");
 
@@ -28,7 +30,8 @@ assert.ok(center.includes("SITE_NOTIFICATION_DURATION_MS") &&
   center.includes('className="pointer-events-none fixed left-[50vw] top-[50vh]') &&
   center.includes("w-[calc(100vw-2rem)]") &&
   center.includes("-translate-x-1/2 -translate-y-1/2") &&
-  center.includes('aria-label="Dismiss notification"') &&
+  center.includes('aria-label={copy.dismiss}') &&
+  noticeCopy.includes('"Dismiss notification"') &&
   center.includes('data-site-notifications-ready="true"') &&
   center.includes('role={active.kind === "error" ? "alert" : "status"}') &&
   center.includes("window.addEventListener(SITE_NOTIFICATION_EVENT") &&
@@ -52,15 +55,19 @@ assert.ok(secure.includes("if (isMutation && !response.ok)") &&
   !secure.includes('"POST /api/payments/razorpay/verify":'),
   "Global mutation notifications may show persisted requests but never infer payment success from an HTTP order");
 const verified = pay.indexOf('if (!verifyResponse.ok||!isVerifiedPaymentAck(');
-const success = pay.indexOf('siteNotice.success("Your payment has been verified.');
+const success = pay.indexOf('paymentNotice("success", "verifiedNotice", "verifiedTitle")');
 assert.ok(verified !== -1 && success > verified &&
   pay.includes('secureFetch("/api/payments/razorpay/verify"') &&
   pay.includes("const verifyJson=await verifyResponse.json()") &&
   pay.includes("providerPaymentId:response.razorpay_payment_id") &&
   secure.includes('siteNotice.warning(') &&
-  secure.includes('"Payment status pending"') &&
-  pay.includes('setStatus("Payment confirmation is pending.') &&
-  pay.includes('setStatus("Payment confirmation could not be checked.'),
+  secure.includes('copy.paymentPending') &&
+  noticeCopy.includes('"Payment status pending"') &&
+  pay.includes('setStatus("confirmationPending")') &&
+  pay.includes('setStatus("confirmationUnchecked")') &&
+  paymentCopy.includes('"Payment confirmation is pending.') &&
+  paymentCopy.includes('"Payment confirmation could not be checked.') &&
+  pay.includes('siteNotice[kind](copy[message],copy[title])'),
   "Only gateway-verified capture gets a success notification; pending must remain visible");
 assert.ok(add.includes('siteNotice.success(copy.addedMessage,copy.added)') &&
   add.includes('siteNotice.error(copy.cartStorage,copy.storageTitle)') &&

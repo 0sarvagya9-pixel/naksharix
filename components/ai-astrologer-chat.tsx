@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { useLanguage } from "@/components/language-provider";
 import { secureFetch } from "@/lib/security/csrf";
+import {AiCreditControls,useCreditAccount} from "@/components/ai-credit-controls";
+import {aiChatCustomerCopy,aiChatFailure,aiChatNoticeText,type AiChatNotice} from "@/lib/ai/chat-customer-copy";
 
 type ChatMessage = {
   id: string;
@@ -16,15 +18,18 @@ type ChatMessage = {
   content: string;
 };
 
-export function AiAstrologerChat() {
+export function AiAstrologerChat({creditFeature=false}:{creditFeature?:boolean}={}) {
   const { locale, apiLocale } = useLanguage();
-  const labels = chatLabels(locale);
+  const labels = chatLabels(locale), recoveryCopy=aiChatCustomerCopy(locale);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [memory, setMemory] = useState("");
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<AiChatNotice|null>(null);
+  const inflight=useRef(false);
+  const [paid,setPaid]=useState(false);
+  const creditAccount=useCreditAccount(creditFeature);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,20 +39,23 @@ export function AiAstrologerChat() {
   async function submit(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
     const content = input.trim();
-    if (!content || loading) return;
+    if (!content || inflight.current) return;
     if (!consent) {
-      setStatus(labels.consentRequired);
+      setStatus({kind:"consentRequired",paid:false});
       return;
     }
 
+    inflight.current=true;
+    const paidForRequest=paid;
+    let completed=false;
     const userMessage: ChatMessage = { id: crypto.randomUUID(), role: "user", content };
     const outbound = [...messages, userMessage]
       .slice(-24)
-      .map(({ role, content: messageContent }) => ({ role, content: messageContent }));
+      .map(({ role, content: messageContent }) => ({ role, content: messageContent.slice(0,2000) }));
 
     setMessages((current) => [...current, userMessage]);
     setInput("");
-    setStatus("");
+    setStatus(null);
     setLoading(true);
 
     try {
@@ -57,13 +65,17 @@ export function AiAstrologerChat() {
         body: JSON.stringify({
           messages: outbound,
           language: apiLocale,
-          kundliContext: memory || undefined
-        })
+          kundliContext: memory || undefined,
+          consent,
+          billing:paidForRequest?"credit":"free",
+          creditRequestId:paidForRequest?userMessage.id:undefined
+        }),
+        silent:true
       });
       const json = await response.json().catch(() => null);
 
-      if (!response.ok || typeof json?.data?.answer !== "string" || !json.data.answer.trim()) {
-        setStatus(json?.error || labels.error);
+      if (!response.ok || typeof json?.data?.answer !== "string" || !json.data.answer.trim() || json.data.creditUsed!==(paidForRequest?1:0)) {
+        setStatus(aiChatFailure(response.ok?0:response.status,paidForRequest));
         return;
       }
 
@@ -72,12 +84,15 @@ export function AiAstrologerChat() {
         role: "assistant",
         content: json.data.answer.trim()
       };
+      completed=true;
       setMessages((current) => [...current, assistantMessage].slice(-24));
       if (typeof json.data.memory === "string") setMemory(json.data.memory.slice(0, 3500));
     } catch {
-      setStatus(labels.error);
+      setStatus({kind:"unconfirmed",paid:paidForRequest});
     } finally {
-      setLoading(false);
+      if(!completed){setMessages(current=>current.filter(message=>message.id!==userMessage.id));setInput(current=>current||content);}
+      // Paid mode is selected for one answer; never retry or switch a free request automatically.
+      try{if(paidForRequest){setPaid(false);await creditAccount.refresh();}}finally{inflight.current=false;setLoading(false);}
     }
   }
 
@@ -89,10 +104,11 @@ export function AiAstrologerChat() {
   }
 
   function clearChat() {
+    if(inflight.current)return;
     setMessages([]);
     setMemory("");
     setInput("");
-    setStatus("");
+    setStatus(null);
   }
 
   return (
@@ -145,7 +161,7 @@ export function AiAstrologerChat() {
 
                 <div className="space-y-4">
                   {messages.map((message) => (
-                    <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div key={message.id} data-chat-message={message.role} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[88%] rounded-2xl p-4 text-sm leading-6 sm:max-w-[78%] ${message.role === "user" ? "rounded-tr-sm bg-[#b8862e] text-white" : "rounded-tl-sm border border-[#263957] bg-[#142647]/85 text-[#dbeafe]"}`}>
                         <div className={`mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] ${message.role === "user" ? "text-white/80" : "text-[#f3d382]"}`}>
                           {message.role === "user" ? <UserRound className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
@@ -189,10 +205,12 @@ export function AiAstrologerChat() {
                   </Button>
                 </div>
                 {!consent ? <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-lg border border-amber-400/40 bg-[#fff8e9] p-3 text-sm font-semibold leading-6 text-[#4b2931]">
-                  <input type="checkbox" checked={consent} onChange={(event) => { setConsent(event.target.checked); setStatus(""); }} className="mt-1 h-4 w-4 shrink-0 accent-[#853548]" />
+                  <input type="checkbox" checked={consent} onChange={(event) => { setConsent(event.target.checked); setStatus(null); }} className="mt-1 h-4 w-4 shrink-0 accent-[#853548]" />
                   {labels.consent}
                 </label> : null}
-                {status ? <p className="mt-3 rounded-lg border border-amber-300/25 bg-[#fff8e9] px-3 py-2 text-sm font-semibold text-[#6b2e3b]" role="alert">{status}</p> : null}
+                {status?.kind==="signedOut"?<Link className="mt-3 inline-block font-semibold underline" href="/login?redirectTo=%2Fai-astrologer">{recoveryCopy.signIn}</Link>:null}
+                {status?.paid?<Link className="mt-3 inline-block font-semibold underline" href="/dashboard">{recoveryCopy.history}</Link>:null}
+                {status ? <p className="mt-3 rounded-lg border border-amber-300/25 bg-[#fff8e9] px-3 py-2 text-sm font-semibold text-[#6b2e3b]" role="alert">{aiChatNoticeText(status,locale)}</p> : null}
               </form>
             </CardContent>
           </Card>
@@ -217,9 +235,10 @@ export function AiAstrologerChat() {
               </CardContent>
             </Card>
 
+            {creditFeature?<Card className="inner-card"><CardContent className="p-4"><AiCreditControls account={creditAccount} paid={paid} onPaid={setPaid} busy={loading}/></CardContent></Card>:null}
             <Card className="inner-card border-[#263957] bg-[#0f1c3a]/82">
               <CardContent className="p-5">
-                <p className="text-sm font-semibold leading-6 text-[#f3d382]">{consent ? "AI processing consent accepted" : "Privacy consent required before sending"}</p>
+                <p className="text-sm font-semibold leading-6 text-[#f3d382]">{consent ? recoveryCopy.consentAccepted : recoveryCopy.consentNeeded}</p>
                 <p className="mt-4 text-xs leading-5 text-[#94a3b8]">{labels.privacy}</p>
               </CardContent>
             </Card>
@@ -243,8 +262,8 @@ export function AiAstrologerChat() {
 
 function chatLabels(locale: "en" | "hi" | "hinglish") {
   if (locale === "hi") return {
-    eyebrow: "AI Guidance",
-    title: "Naksharix AI Astrologer",
+    eyebrow: "AI मार्गदर्शन",
+    title: "Naksharix AI ज्योतिषी",
     subtitle: "करियर, विवाह, धन, प्रेम, समय, दोष या उपाय पर चिंतनात्मक मार्गदर्शन पूछें। अधिक व्यक्तिगत उत्तर के लिए जन्म तिथि, समय और स्थान दें।",
     safety: "यह AI आधारित चिंतनात्मक मार्गदर्शन है, निश्चित भविष्यवाणी या चिकित्सा, कानूनी और वित्तीय सलाह नहीं।",
     chatTitle: "AI से बातचीत",
@@ -268,7 +287,7 @@ function chatLabels(locale: "en" | "hi" | "hinglish") {
     bookConsultation: "परामर्श बुक करें"
   };
   if (locale === "hinglish") return {
-    eyebrow: "AI Guidance",
+    eyebrow: "AI margdarshan",
     title: "Naksharix AI Astrologer",
     subtitle: "Career, marriage, finance, love, timing, dosha ya remedies par reflective guidance poochein. Personalized answer ke liye birth date, exact time aur place dein.",
     safety: "Ye AI-based reflective guidance hai, guaranteed prediction ya medical, legal aur financial advice nahi.",

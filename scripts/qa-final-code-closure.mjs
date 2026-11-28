@@ -89,7 +89,7 @@ assert(transitEngine.includes("publicPredictionEnabled: false"), "Unverified adv
 assert(shadbala.includes("calculateInternalShadbala"), "Six-component internal Shadbala calculator exists", "Sthana, Dig, Kala, Cheshta, Naisargika and Drik are numerically produced with full context");
 assert(shadbala.includes("sthanaBala") && shadbala.includes("digBala") && shadbala.includes("kalaBala") && shadbala.includes("cheshtaBala") && shadbala.includes("naisargikaBala") && shadbala.includes("drikBala"), "All six Shadbala top-level components are implemented", "internal totals remain evidence-gated");
 assert(shadbala.includes('verificationLevel: "needs_external_validation"'), "Shadbala public claim remains validation-gated", "reference-software calibration required");
-assert(shadbala.includes("total: round("), "Internal Shadbala total is computed, not hardcoded", "numeric engineering result only");
+assert(shadbala.includes('total: Object.values(components).every(v=>typeof v==="number"&&Number.isFinite(v))?round(Object.values(components).reduce<number>') && shadbala.includes("Number(component), 0)):null"), "Internal Shadbala total is computed only from six finite components", "incomplete scores must not be silently replaced with zero; numeric engineering result only");
 
 assert(ashtakvarga.includes("calculateInternalAshtakvarga"), "Bhinna and Sarva Ashtakavarga calculator exists", "seven classical planetary tables are calculated");
 assert(ashtakvarga.includes("Sarva: 337"), "Ashtakavarga aggregate checksum is locked", "337-point invariant enforced");

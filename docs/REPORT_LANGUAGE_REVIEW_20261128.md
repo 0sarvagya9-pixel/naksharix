@@ -1,0 +1,69 @@
+# Royal report language/content review — 28 November 2026
+
+## Result and qualification
+
+An independently assigned AI reviewer inspected actual rendered report text and repaired concrete presentation defects. A separate agent reviewed selected rendered examples and found the exact `Nadi Dosh` / `Bhakoot Dosh` label mismatch; that finding and the repeated Kaal Sarp caution were repaired before source freeze. **This is not qualified human, native-language or practitioner sign-off. The existing commercial-release gate remains open.**
+
+## Frozen evidence and scope
+
+- Development checkpoint: `f4bccdf832c25de43ef8eeddeaaa746702006b9a`. The supplied corpus was generated at `0a68982ac00f90353f0234d818073273f940f200`; its manifests retain that honest provenance. The engineering handover identifies the unchanged report generation inputs between the checkpoints.
+- The recovered corpus contains 135 PDFs, three fictional profiles, 15 products and three languages, totaling 2,024 pages. Its ZIP SHA-256 is `c94aafb77d30ced09806f697acd33646f6929a1df68d053290c1fd01ffa31227`.
+- Machine scope: all 135 PDFs were text-extracted. PyMuPDF sometimes duplicated parts of Hindi glyph clusters; actual page images and `pdftotext -raw` showed those were extraction artifacts. They were not recorded as spelling defects.
+- Model reading: selected text from all 45 profile-1 PDFs, covering English, Hindi and Hinglish. Deduplicated normalized lines of at least 50 characters were read: 637 English, 415 Hindi and 649 Hinglish lines (1,701 in total). This includes long data rows; it is not a count of fully certified sentences or a complete word-by-word review. Common repeated text was reviewed once per language.
+- Additional contextual reads focused on calculation records, name tables, all three Manglik origins, Kaal Sarp, the relationship factor/guidance blocks, and financial/health/consent boundaries. The page table below identifies the pages contributing to the reproducible text sample; it does not claim every item on those pages was audited.
+- Actual visual inspection by this reviewer: baseline Hindi Baby Name pages 4–5; candidate Hindi Baby Name page 5, Hindi Manglik/Kaal Sarp page 5, and English Manglik/Kaal Sarp page 6. The independent evaluator records its additional visual coverage separately.
+- Workflows actually applied: Intellectra Universal `d071-c04` (translation), `d018-c03` (technical writing), relevant language/writing/cultural domain guidance, enterprise independent QA; Enterprise V2 `sp-61` (astrology services), `sp-65` (language services), `in-09` (independent verification).
+
+## Repaired defects
+
+| Finding | Actual baseline evidence | Presentation correction |
+| --- | --- | --- |
+| Number commentary can be mistaken for name meaning | Baby Name table p5 and Name Correction p6 use “Meaning / guidance” while cells describe number symbolism | Explicit “Number symbolism / reflection”, with Hindi and Hinglish equivalents; names and numerical values preserved |
+| Unlabeled second ayanamsha and unitless offset | Astrology calculation record p4 shows one ayanamsha in the table and a second bare degree value in the lunar paragraph | Label the lunar mean ayanamsha and the UTC offset unit; both numerical values preserved |
+| Manglik severity and overbroad reference wording | Profile 1: Lagna 10, Moon 5, Venus 12, with “Mild” and a summary implying all three were sensitive houses | Display one of three matched references, state the six-house set and exact matched origin; no severity inference |
+| Evaluated negative Kaal Sarp result sounds like unavailable data | Manglik/Kaal Sarp p6 says “Not clearly detected” even with `available: true, present: false` | “Rule not matched” with the chosen seven-graha, closed-semicircle convention; unavailable data remains unavailable |
+| Sentence-list punctuation and unsupported pair comparison | Dosha and couple guidance displays `sentence., next sentence`; couple summary calls Manglik levels balanced | Preserve separate complete sentences; compare explicit rule evidence without inferring compatibility or cancellation |
+| Exact localization keys and repeated caution | Independent evaluator observed `NADI DOSH` / `BHAKOOT DOSH` in Hindi, plus the same Kaal Sarp caveat twice | Exact `Dosh` and `Dosha` label mappings; emit an identical Kaal Sarp note once |
+
+## Per-product review ledger
+
+Page numbers refer to the frozen profile-1 PDFs. `E`, `H` and `HG` mean English, Hindi and Hinglish. The JSON companion contains per-language excerpt counts and source PDF/text hashes.
+
+| Product | Pages contributing selected text (E / H / HG) | Focus and changes | Remaining approval or terminology risk |
+| --- | --- | --- | --- |
+| baby-name-report | E: 3–12 (47 lines); H: 3–11 (33 lines); HG: 3–12 (48 lines) | Naming syllable and declared Drik tradition; candidate table; numerology arithmetic and naming limitations. Corrected the column that could be mistaken for name etymology. | A qualified reviewer must approve pronunciation/romanization and cultural suitability. Proposed customer spellings and automatically supplied example names are distinct sets; their wording should be reviewed together. Etymologies remain explicitly unverified. |
+| career-report | E: 3, 5–8, 10–14 (53 lines); H: 3, 5–12 (42 lines); HG: 3–8, 10–14 (58 lines) | Career houses, Dasha methodology, 90-day practical plan, out-of-scope reader-question handling and qualified health-advice boundary. | House-to-career interpretations and Hindi/Hinglish register still need named practitioner/editor acceptance; no job or income guarantee was found in the sampled passages. |
+| couple-kundli | E: 3, 5–16 (72 lines); H: 3, 5–14 (60 lines); HG: 3, 5–17 (73 lines) | Ordered Guna factors; Manglik cards; rule-comparison summary; Nadi/Bhakoot labels; sentence lists; consent, worth and health boundaries. Removed severity/compatibility inference and corrected renderer labels/punctuation. | Practitioner approval of the selected ordered Ashtakoot convention and cultural wording remains open. A native editor must accept the full narrative, including the concern/average/good terminology. The integrator corrected the source-copy spelling परिवारिक → पारिवारिक without changing scoring rules. |
+| fortune-report | E: 3, 5, 8, 10, 12, 14–20 (53 lines); H: 3, 5, 8, 10–19 (40 lines); HG: 2–3, 5, 8, 10, 12, 14–20 (61 lines) | House/ruler connections, calendar cycles, civil-date arithmetic, Lo Shu interpretation, opportunity reflection and reader-question scope. | Interpretive associations and preferred Hindi/Hinglish terms need native/practitioner approval. The sampled wording treats these as symbolic reflection, not certified fortune or measured strength. |
+| jupiter-transit-report | E: 4–6, 8–10 (22 lines); H: 4–9 (16 lines); HG: 4–6, 8–10 (21 lines) | Local-noon snapshot clock; retrograde rows; observed change intervals; learning/mentor prompts and exact-event limitations. | Selected transit conventions and native terminology require reviewer acceptance. Snapshot rows do not certify an exact station or ingress time. |
+| love-report | E: 5, 7–8, 11, 13 (10 lines); H: 5, 7, 10–11 (10 lines); HG: 5, 7–8, 11, 13 (9 lines) | Relationship houses, timing context, boundaries/consent guidance and the explicit one-person-report limitation. | A native/practitioner reviewer must approve interpretive wording. The sampled text explicitly avoids claiming another person’s feelings or determining compatibility from this report. |
+| manglik-kaal-sarp-report | E: 5–6, 9–12 (31 lines); H: 5–6, 8–11 (20 lines); HG: 5–6, 9–12 (21 lines) | All three Manglik reference origins; six-house membership; closed-node-arc explanation; exceptions and fear-free guidance. Corrected severity, negative-result wording, reference attribution and repeated caution. | The chosen conventions and treatment of boundary points, exceptions and cancellation still need qualified practitioner acceptance. This review does not establish a universal traditional verdict or predictive validity. |
+| name-correction-report | E: 3–4, 6, 8–9, 13–14 (27 lines); H: 3–6, 8, 13 (18 lines); HG: 2–4, 6, 8–9, 13 (25 lines) | Roman-letter comparison; master-number retention; Chaldean/Pythagorean distinctions; empty letter groups; personal-identity and legal-name-change guidance. Corrected the number-symbolism column. | Native terminology and the full naming narrative require approval. The report does not verify etymology or establish that a spelling changes luck. |
+| numerology-lo-shu-report | E: 3, 6, 8–11, 16 (20 lines); H: 3, 5, 8–10, 14 (15 lines); HG: 2–3, 6, 8–11, 16 (20 lines) | A–Z/vowel/consonant conventions; digit frequencies; empty cells; eight-line geometry; calendar cycles and non-diagnostic limitations. | A qualified reviewer must accept the selected symbolic conventions and native register. Digit absence is not presented as a defect or ability measure in the sampled text. |
+| premium-kundli | E: 3, 5, 7–8, 10–18, 22–27, 29 (153 lines); H: 3, 5, 7–8, 10, 15–17, 20–24, 26 (45 lines); HG: 3, 5–18, 22–26, 28 (161 lines) | D1/D9 explanation and worked example; Dasha chronology boundaries; yoga/dosha wording; birth Panchang; numerology and interpretation-vs-strength limits. Corrected the dosha and calculation-record presentation. | Qualified review of yoga interpretation, all calculation conventions and language remains open; numerical audit acceptance is a separate workstream. The transcript of long chronology rows is not an independent recalculation. |
+| rahu-ketu-report | E: 3, 6, 9–11 (16 lines); H: 3, 6, 8–10 (11 lines); HG: 3, 5–6, 8–10 (18 lines) | Mean-node disclosure; motion legend; observations vs event timing; nodal house references and reflection prompts. | Native terms for nodes/arc geometry and practitioner acceptance remain open. Monthly observations are not exact transit-event certification. |
+| sade-sati-report | E: 3, 5–6, 9–11 (31 lines); H: 3, 6, 8–10 (17 lines); HG: 3, 5–6, 9–11 (34 lines) | Three-sign status, sampled Saturn positions, transition intervals and guidance against fear-based or costly conclusions. | A practitioner must approve the selected convention and native wording. This sample does not certify exact start/end dates or establish a predicted loss. |
+| transit-report | E: 5, 9–11, 13–17 (41 lines); H: 5, 8–9, 11–14 (26 lines); HG: 5–6, 9–10, 12–15 (36 lines) | Planet/motion legend; monthly samples; observed sign-change ranges; two reference frames and exact-timing limitations. | Native terminology and domain review remain open. Date pairs bracket observations; the review did not turn them into exact ingress dates. |
+| wealth-report | E: 3, 7–8, 12, 14 (12 lines); H: 3, 7, 10, 12 (10 lines); HG: 3, 7–8, 12, 14 (13 lines) | Spending/reserve prompts, financial decision boundary, house/ruler connections, timing context and reader-question scope. | Native/practitioner review remains open. Sampled wording directs investment/borrowing/trading decisions to real financial data and qualified advice; it contains no verified financial prediction. |
+| yearly-horoscope-report | E: 8–10, 16–27 (49 lines); H: 8–10, 14–21 (52 lines); HG: 8–10, 16–24 (51 lines) | First-day monthly samples, quarterly planning prompts, actual calendar-year cycles, observation-vs-prediction language and practical review questions. | Native wording and practitioner acceptance remain open. Rolling month indices and sample dates require review in context, and no date-specific event forecast is certified. |
+
+## Verification and handoff
+
+- `scripts/qa-editorial-rule-semantics.mjs`: 1,728 actual engine reference geometries × three languages = 5,184 display comparisons; 114 malformed/unavailable/contradictory cases; 15 generic-factor cases. Checks that the input objects remain unchanged and a rule count is not presented as severity.
+- Existing editorial checks passed: 100 display checks, 25,202 pagination cases, 55,064 table fragments, four invalid-input cases and three grouping cases.
+- Initial candidate generation passed 45/45 profile-1 reports (676 pages, maximum 29). Subsequent independent-review fixes supersede some preliminary PDFs. **The final artifact must be regenerated from the integrated commit.**
+- `scripts/qa-royal-language-content.py` checks the repaired distinctions in actual PDFs and compares frozen identity, question, profile-card and rendered ayanamsha values. It is a targeted regression; it does not grant language or domain certification.
+- Full artifact handoff: run the 135-report matrix, physical Royal page checker and targeted PDF semantic checker against the exact integrated source. Record the resulting source revision, hashes and failures separately; do not copy preliminary pass counts into final acceptance.
+- Final human acceptance requires a named native-language/editorial reviewer and a qualified practitioner to review the exact final PDF hashes and selected conventions, recording corrections and approval. No outreach, paid review or human approval was performed or invented in this task.
+
+## Owned source and reproducibility
+
+Presentation changes are confined to `lib/reports/editorial-display.ts` and `lib/reports/editorial-pdf.ts`. The two new QA scripts and this ledger provide evidence; they do not alter engine rules, report identities, customer inputs, design artwork, or release qualification.
+
+```bash
+node scripts/qa-editorial-rule-semantics.mjs
+node scripts/qa-editorial-display.mjs
+REPORT_MATRIX_DIR=/absolute/private/royal-reviewed-135 node scripts/qa-royal-report-matrix.mjs
+python scripts/qa-royal-report-pages.py /absolute/private/royal-reviewed-135 /absolute/approved-reference.pdf /absolute/private/page-proof.json
+python scripts/qa-royal-language-content.py /absolute/private/royal-reviewed-135 /absolute/private/semantic-proof.json --baseline /absolute/frozen-corpus
+```

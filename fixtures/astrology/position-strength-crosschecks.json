@@ -1,0 +1,111 @@
+{
+  "planetOrder": ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"],
+  "vargaOrder": ["D1", "D2", "D3", "D7", "D9", "D12", "D30"],
+  "format": "Positions are [sign 1–12, degree, arcminute, arcsecond], starting with the ascendant. Varga rows contain seven printed sign numbers in planet order. Occasional published 0 in D7 denotes Pisces, as confirmed independently by those planets’ printed houses relative to the D7 ascendant.",
+  "raman": {
+    "name": "Raman worked example, October 1918",
+    "source": "https://astrojyotish.info/pdf/graha-bhava-balas.pdf",
+    "articles": "6–7 (positions), 30 (Example 9, individual weights), 40 (Example 13, totals)",
+    "longitudeDms": [
+      [180, 53, 55],
+      [311, 17, 19],
+      [229, 30, 34],
+      [181, 31, 34],
+      [84, 0, 49],
+      [171, 9, 56],
+      [124, 22, 41]
+    ],
+    "ascendantLongitudeDms": [298, 27, 0],
+    "weights": [
+      [7.5, 30, 7.5, 7.5, 7.5, 7.5, 22.5],
+      [3.75, 7.5, 7.5, 15, 3.75, 7.5, 3.75],
+      [30, 22.5, 7.5, 7.5, 7.5, 7.5, 7.5],
+      [22.5, 7.5, 22.5, 22.5, 22.5, 22.5, 15],
+      [1.875, 7.5, 15, 7.5, 7.5, 30, 1.875],
+      [22.5, 7.5, 30, 1.875, 1.875, 30, 22.5],
+      [7.5, 7.5, 7.5, 22.5, 22.5, 22.5, 7.5]
+    ],
+    "saptavargaja": [90, 48.75, 90, 135, 71.25, 116.25, 97.5],
+    "sthana": [198, 126.5, 172.06, 279.5, 157.58, 178.2, 177.3]
+  },
+  "software": [
+    {
+      "name": "AstroSage 1978",
+      "source": "https://www.astrosage.com/pdf/poojasharmaE.pdf",
+      "sourceSha256": "60e25e051fc904b3060b870663b54cd1c8f75a68f58c39bcc93102beac194035",
+      "physicalPages": [5, 112, 118],
+      "positionsDms": [
+        [2, 15, 30, 14],
+        [5, 6, 42, 30],
+        [1, 16, 23, 10],
+        [6, 18, 40, 48],
+        [4, 28, 16, 43],
+        [4, 3, 54, 40],
+        [6, 22, 40, 42],
+        [5, 9, 57, 57]
+      ],
+      "divisions": {
+        "D1": [5, 1, 6, 4, 4, 6, 5],
+        "D2": [5, 4, 5, 5, 4, 5, 5],
+        "D3": [5, 5, 10, 12, 4, 2, 5],
+        "D7": [6, 4, 4, 4, 10, 5, 7],
+        "D9": [3, 5, 3, 12, 5, 4, 3],
+        "D12": [7, 7, 1, 3, 5, 3, 8],
+        "D30": [11, 9, 12, 8, 2, 10, 11]
+      },
+      "saptavargaja": [144.38, 97.5, 112.5, 90, 135, 114.38, 88.13]
+    },
+    {
+      "name": "Parashara’s Light 9, True Citra",
+      "source": "https://s3.amazonaws.com/kajabi-storefronts-production/sites/67114/themes/1451148/downloads/1gUAatafTVm0rQVQDGX1_Sample_PDF_Report.pdf",
+      "sourceSha256": "7a096f02474fd4aa97859f54fa554d123cbbfd4389e13b3ace2d3d675147b5de",
+      "physicalPages": [4, 10, 18],
+      "positionsDms": [
+        [10, 5, 40, 41],
+        [10, 10, 24, 9],
+        [10, 12, 12, 59],
+        [8, 20, 32, 49],
+        [10, 20, 2, 24],
+        [9, 18, 1, 31],
+        [11, 19, 30, 31],
+        [10, 0, 7, 5]
+      ],
+      "divisions": {
+        "D1": [10, 10, 8, 10, 9, 11, 10],
+        "D2": [4, 4, 5, 5, 4, 4, 4],
+        "D3": [2, 2, 4, 6, 1, 3, 10],
+        "D7": [6, 6, 6, 8, 1, 3, 4],
+        "D9": [1, 1, 10, 4, 6, 12, 10],
+        "D12": [2, 2, 4, 6, 4, 6, 10],
+        "D30": [6, 12, 10, 10, 3, 3, 2]
+      },
+      "saptavargaja": [54.38, 101.25, 135, 91.88, 135, 135, 146.25]
+    },
+    {
+      "name": "Dhruv Astro Software 2025",
+      "source": "https://onekundli.com/wp-content/uploads/2025/02/OneKundli-Sample-Report.pdf",
+      "sourceSha256": "2060490e9231446d5e28ce15e00a85f44a0d9eeed70ef515143d31cb896b5d6d",
+      "physicalPages": [9, 135, 136, 137, 142],
+      "positionsDms": [
+        [6, 10, 32, 15],
+        [9, 16, 23, 2],
+        [9, 26, 37, 35],
+        [4, 7, 45, 24],
+        [8, 25, 22, 47],
+        [2, 18, 58, 33],
+        [11, 3, 16, 7],
+        [11, 20, 17, 41]
+      ],
+      "divisions": {
+        "D1": [9, 9, 4, 8, 2, 11, 11],
+        "D2": [4, 4, 4, 5, 5, 5, 4],
+        "D3": [1, 5, 4, 4, 6, 11, 7],
+        "D7": [0, 3, 11, 7, 0, 11, 3],
+        "D9": [5, 8, 6, 11, 3, 7, 1],
+        "D12": [3, 7, 7, 6, 9, 12, 7],
+        "D30": [9, 7, 6, 8, 12, 1, 3]
+      },
+      "saptavargaja": [82.5, 97.5, 33.75, 90, 82.5, 78.75, 114.38]
+    }
+  ]
+}

@@ -20,7 +20,7 @@ const password = "E2e!" + randomUUID() + "abc";
 const testCode = "734928";
 const usersToClean = new Set();
 let csrf, csrfCookie, userCookie, adminCookie, astroCookie;
-let userId, astroId, adminId, astroProfileId, bookingId, reportId;
+let userId, astroId, adminId, astroProfileId, bookingId, reportId, reportPaymentId, reportProviderPaymentId;
 let passed = 0, failed = 0;
 async function req(path, options = {}) {
   const controller = new AbortController();
@@ -109,6 +109,63 @@ try {
     const me = await req("/api/auth/me", { headers: { cookie: userCookie } });
     assert.equal(me.status, 200);
     assert.equal((await me.json()).data.user.id, userId);
+  });
+  await check("marketing consent requires verified account and explicit unspoofable permission", async () => {
+    const endpoint = "/api/marketing-consent";
+    const selected = { action: "subscribe", consent: true, consentVersion: "email-updates-v1-20261124", interest: "kundli", locale: "hi", country: "India" };
+    assert.equal((await post(endpoint, selected)).status, 401);
+    assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 0);
+    for (const invalid of [
+      { ...selected, consent: false },
+      { ...selected, consentVersion: undefined },
+      { ...selected, consentVersion: "obsolete-consent" },
+      { ...selected, email: "someone-else@example.invalid" },
+      { ...selected, userId: "another-user" },
+      { ...selected, interest: "unknown-interest" }
+    ]) {
+      const denied = await post(endpoint, invalid, userCookie);
+      assert.equal(denied.status, 422, await denied.text());
+    }
+    assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 0);
+    const saved = await post(endpoint, selected, userCookie);
+    assert.equal(saved.status, 200, await saved.clone().text());
+    const acknowledgement = (await saved.json()).data;
+    assert.equal(acknowledgement.subscribed, true);
+    const consentRow = await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } });
+    assert.equal(consentRow.emailAtConsent, email);
+    assert.equal(consentRow.interest, "kundli");
+    assert.equal(consentRow.locale, "hi");
+    assert.equal(consentRow.country, "India");
+    assert.equal(consentRow.source, "website-email-updates");
+    assert.equal(consentRow.consentVersion, "email-updates-v1-20261124");
+    assert.ok(consentRow.confirmedAt instanceof Date);
+    assert.equal(acknowledgement.confirmedAt, consentRow.confirmedAt.toISOString());
+    assert.equal(acknowledgement.consentVersion, consentRow.consentVersion);
+    assert.equal(consentRow.revokedAt, null);
+    const repeated = await post(endpoint, selected, userCookie);
+    assert.equal(repeated.status, 200, await repeated.text());
+    assert.equal(await prisma.marketingConsent.count({ where: { userId } }), 1);
+    const beforeStale = await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } });
+    const stale = await post(endpoint, { ...selected, interest: "career", consentVersion: "obsolete-consent" }, userCookie);
+    assert.equal(stale.status, 422, await stale.text());
+    assert.deepEqual(await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } }), beforeStale, "Obsolete consent cannot mutate active preferences");
+    const active = await req("/email-updates", { headers: { cookie: userCookie } });
+    assert.equal(active.status, 200);
+    const activeHtml = await active.text();
+    assert.match(activeHtml, /lang="hi"/);
+    assert.ok(activeHtml.includes("वेबसाइट पर ईमेल की आपकी अनुमति दर्ज है।"));
+    assert.ok(!activeHtml.includes("आप वेबसाइट के ईमेल अपडेट के लिए सदस्य नहीं हैं।"));
+    const revoked = await post(endpoint, { action: "unsubscribe" }, userCookie);
+    assert.equal(revoked.status, 200, await revoked.clone().text());
+    assert.equal((await revoked.json()).data.subscribed, false);
+    assert.ok((await prisma.marketingConsent.findUniqueOrThrow({ where: { userId } })).revokedAt instanceof Date);
+    const inactive = await req("/email-updates", { headers: { cookie: userCookie } });
+    assert.equal(inactive.status, 200);
+    const inactiveHtml = await inactive.text();
+    assert.match(inactiveHtml, /lang="hi"/);
+    assert.ok(inactiveHtml.includes("आप वेबसाइट के ईमेल अपडेट के लिए सदस्य नहीं हैं।"));
+    assert.ok(!inactiveHtml.includes("वेबसाइट पर ईमेल की आपकी अनुमति दर्ज है।"));
+    // Leave no opted-in fixture even in disposable CI.
   });
   await check("OTP replay rejected", async () => {
     assert.equal((await post("/api/auth/otp/verify", { email, code: testCode })).status, 400);
@@ -267,6 +324,39 @@ try {
     assert.equal(callback.status, 410);
     assert.doesNotMatch(callback.headers.get("set-cookie") || "", /naksharix_session/);
   });
+  await check("A06 professional confirmation GET is read-only and concurrent role conversion is atomic",async()=>{
+    const fixture=await prisma.user.create({data:{name:"QA Personal Applicant",email:"qa-application-"+unique+"@example.test",role:"USER",passwordHash:await bcrypt.hash(password,10),emailVerified:new Date(),emailVerifiedAt:new Date()}});
+    usersToClean.add(fixture.id);
+    const login=await req("/api/auth/login",{method:"POST",headers:{"content-type":"application/json","x-csrf-token":csrf,cookie:csrfCookie,"x-forwarded-for":"203.0.113.219"},body:JSON.stringify({email:fixture.email,password,roleIntent:"USER",loginMode:"USER"})});
+    assert.equal(login.status,200,await login.clone().text());
+    const session=(login.headers.get("set-cookie")||"").split(";")[0];assert.ok(session);
+    const before=await prisma.user.findUniqueOrThrow({where:{id:fixture.id}});
+    const page=await req("/auth/google-complete?role=ASTROLOGER&redirectTo=%2Freports",{headers:{cookie:session}});
+    assert.equal(page.status,200);assert.match(await page.text(),/Confirm professional application/);
+    assert.equal((await prisma.user.findUniqueOrThrow({where:{id:fixture.id}})).role,"USER");
+    assert.equal(await prisma.astrologerProfile.count({where:{userId:fixture.id}}),0);
+    assert.equal(await prisma.consultantProfile.count({where:{userId:fixture.id}}),0);
+    assert.equal((await post("/api/astrologer/become",{role:"ASTROLOGER"})).status,401);
+    const noCsrf=await req("/api/astrologer/become",{method:"POST",headers:{"content-type":"application/json",cookie:session},body:JSON.stringify({role:"ASTROLOGER"})});assert.equal(noCsrf.status,403);
+    for(const body of [{},{role:"ADMIN"},{role:"ASTROLOGER",userId:astroId},{role:"ASTROLOGER",canBypassPayment:true}])assert.equal((await post("/api/astrologer/become",body,session)).status,422);
+    await prisma.user.update({where:{id:fixture.id},data:{emailVerified:null,emailVerifiedAt:null}});
+    assert.equal((await post("/api/astrologer/become",{role:"ASTROLOGER"},session)).status,409);
+    await prisma.user.update({where:{id:fixture.id},data:{emailVerified:before.emailVerified,emailVerifiedAt:before.emailVerifiedAt}});
+    const sessionsBefore=await prisma.session.count({where:{userId:fixture.id}});
+    const pair=await Promise.all(["ASTROLOGER","CONSULTANT"].map(role=>post("/api/astrologer/become",{role},session)));
+    assert.equal(pair.filter(r=>r.status===200).length,1);assert.ok(pair.every(r=>[200,403,409].includes(r.status)));
+    const won=pair.find(r=>r.status===200),ack=(await won.json()).data;
+    const current=await prisma.user.findUniqueOrThrow({where:{id:fixture.id}});
+    assert.equal(ack.role,current.role);assert.equal(ack.effectiveRole,current.role);assert.equal(ack.isAdminLogin,false);assert.equal(ack.canBypassPayment,false);
+    const ap=await prisma.astrologerProfile.findUnique({where:{userId:fixture.id}}),cp=await prisma.consultantProfile.findUnique({where:{userId:fixture.id}});
+    assert.equal(Number(Boolean(ap))+Number(Boolean(cp)),1);
+    assert.equal((ap||cp).status,"PENDING_REVIEW");
+    assert.equal(await prisma.session.count({where:{userId:fixture.id}}),sessionsBefore+1);
+    const nextCookie=(won.headers.get("set-cookie")||"").split(";")[0];assert.ok(nextCookie);
+    const me=await req("/api/auth/me",{headers:{cookie:nextCookie}});assert.equal(me.status,200);assert.equal((await me.json()).data.user.effectiveRole,current.role);
+    assert.equal((await post("/api/astrologer/become",{role:"ASTROLOGER"},nextCookie)).status,403);
+    console.log("A06_PROFESSIONAL_ROLE_HTTP_PASS "+JSON.stringify({getReadOnly:true,csrf:true,explicitRole:true,verifiedAccount:true,oneConcurrentRole:true,onePendingProfile:true,oneNewSession:true,scope:"real local HTTP and database, credential-session fixture; external Google OAuth not exercised"}));
+  });
   await check("second unpaid booking of same astrologer slot is rejected", async () => {
     const slot = await prisma.availabilitySlot.findFirstOrThrow({ where: { astrologerProfileId: astroProfileId } });
     const collision = await post("/api/consultation-bookings", {
@@ -402,7 +492,7 @@ try {
   await check("support tickets are owned by the user and triaged only by admin", async () => {
     const anonRead = await req("/api/support/tickets");
     assert.equal(anonRead.status, 401);
-    const payload = { subject: "Account access assistance", message: "Please help with my account settings and access." };
+    const payload = { subject: "Account access assistance", message: "Please help with my account settings and access.",clientMutationId:randomUUID() };
     const created = await post("/api/support/tickets", payload, userCookie);
     const createBody = await created.json();
     assert.equal(created.status, 201, JSON.stringify(createBody));
@@ -410,6 +500,22 @@ try {
       "New support ticket should expose provider acceptance without changing record durability");
     const ticketId = createBody.data.ticket.id;
     assert.equal(createBody.data.ticket.status, "OPEN");
+    assert.equal(createBody.data.clientMutationId,payload.clientMutationId);
+    assert.equal(createBody.data.duplicate,false);
+    const dup=await post("/api/support/tickets",payload,userCookie);
+    assert.equal(dup.status,200);
+    const dupBody=await dup.json();
+    assert.equal(dupBody.data.ticket.id,ticketId);
+    assert.equal(dupBody.data.duplicate,true);
+    assert.equal(dupBody.data.notification,"not_needed");
+    assert.equal((await post("/api/support/tickets",{...payload,message:"Changed details for the same ticket reference."},userCookie)).status,409);
+    const concurrent={...payload,subject:"Concurrent partnership enquiry",clientMutationId:randomUUID()};
+    const parallel=await Promise.all([post("/api/support/tickets",concurrent,userCookie),post("/api/support/tickets",concurrent,userCookie)]);
+    assert.deepEqual(parallel.map(r=>r.status).sort(),[200,201]);
+    const parallelBodies=await Promise.all(parallel.map(r=>r.json()));
+    assert.equal(new Set(parallelBodies.map(r=>r.data.ticket.id)).size,1);
+    assert.equal(await prisma.supportTicket.count({where:{userId,subject:concurrent.subject}}),1);
+    assert.equal(parallelBodies.filter(r=>r.data.notification==="not_needed").length,1);
 
     const owned = await req("/api/support/tickets", { headers: { cookie: userCookie } });
     const ownedBody = await owned.json();
@@ -447,6 +553,9 @@ try {
     const replayBody = await replay.json();
     assert.equal(replay.status, 200);
     assert.equal(replayBody.data.duplicate, true);
+    assert.equal(replayBody.data.clientMutationId,userMutation);
+    assert.equal((await post("/api/support/tickets/reply",{...userReply,message:"Different reply text for the same reference."},userCookie)).status,409);
+    assert.equal((await post("/api/admin/support/reply",userReply,adminCookie)).status,409,"Staff cannot claim a customer mutation ID");
     const deniedStaff = await post("/api/admin/support/reply", {
       ticketId, message: "I should not be able to respond as staff.", clientMutationId: randomUUID()
     }, userCookie);
@@ -479,6 +588,7 @@ try {
       ticketId, message: "I need more help.", clientMutationId: randomUUID()
     }, userCookie);
     assert.equal(closedReply.status, 409);
+    console.log("SUPPORT_IDEMPOTENCY_HTTP=PASS;DUPLICATE_CREATE_AND_REPLY_CONFLICTS_DENIED;CONCURRENT_CREATE_SINGLE_RECORD");
   });
 
   await check("push subscription API does not falsely claim unimplemented delivery", async () => {
@@ -781,19 +891,27 @@ try {
       const anon=await post("/api/commerce/orders",input);assert.equal(anon.status,401);
       const forged=await post("/api/commerce/orders",{...input,paymentStatus:"PAID",amount:1},userCookie);
       assert.equal(forged.status,422);
-      const created=await post("/api/commerce/orders",input,userCookie);
+      const checkoutIntent=randomUUID();
+      assert.equal((await post("/api/commerce/orders",{...input,checkoutIntent:"invalid"},userCookie)).status,422);
+      const attempts=await Promise.all([post("/api/commerce/orders",{...input,checkoutIntent},userCookie),post("/api/commerce/orders",{...input,checkoutIntent},userCookie)]);
+      assert.deepEqual(attempts.map(r=>r.status).sort(),[201,409],"Concurrent checkout replay must create exactly one order");
+      const created=attempts.find(r=>r.status===201),duplicate=attempts.find(r=>r.status===409);
       const body=await created.json();assert.equal(created.status,201,JSON.stringify(body));
+      const replay=await duplicate.json();assert.equal(replay.details?.code,"ORDER_INTENT_ALREADY_USED");assert.equal(replay.details?.orderId,body.data.order.id);
       orderId=body.data.order.id;assert.equal(body.data.order.subtotalPaise,259800);
       assert.equal(body.data.order.deliveryCountry,"IN");assert.equal(body.data.order.shippingPaise,0);assert.equal(body.data.order.totalPaise,259800);
       assert.equal(body.data.order.paymentStatus,"UNPAID");
       assert.equal(body.data.charged,false);
+      const changedReplay=await post("/api/commerce/orders",{...input,checkoutIntent,customerNote:"Changed test note"},userCookie);
+      assert.equal(changedReplay.status,409);assert.equal((await changedReplay.json()).details?.orderId,orderId);
+      assert.equal(await prisma.shopOrder.count({where:{userId,id:orderId}}),1);
       // Verify real persisted 24-hour quota using a disposable CI database.
       for(let n=0;n<4;n++){
-        const extra=await post("/api/commerce/orders",input,userCookie);
+        const extra=await post("/api/commerce/orders",{...input,checkoutIntent:randomUUID()},userCookie);
         assert.equal(extra.status,201,"Shop request "+(n+2)+" should fit quota");
         extraOrderIds.push((await extra.json()).data.order.id);
       }
-      const overLimit=await post("/api/commerce/orders",input,userCookie);
+      const overLimit=await post("/api/commerce/orders",{...input,checkoutIntent:randomUUID()},userCookie);
       assert.equal(overLimit.status,429,"Sixth Shop request must be denied without a write");
       const userOrders=await req("/api/commerce/orders",{headers:{cookie:userCookie}});
       assert.ok((await userOrders.json()).data.orders.some(o=>o.id===orderId));
@@ -942,6 +1060,11 @@ try {
     // Disposable QA database only. This update is not a real merchant payment
     // and has no effect on production payment records.
     await prisma.reportRequest.update({ where: { id: reportId }, data: { paymentStatus: "PAID" } });
+    const providerId="pay_QA"+unique.replace(/[^a-zA-Z0-9]/g,"");
+    reportProviderPaymentId=providerId;
+    const payment=await prisma.payment.create({data:{userId,provider:"RAZORPAY",purpose:"KUNDLI_REPORT",status:"PAID",amount:799,currency:"INR",providerOrderId:"order_QA"+unique.replace(/[^a-zA-Z0-9]/g,""),providerPaymentId:providerId,metadata:{reportId:"kundli-pro"}}});
+    reportPaymentId=payment.id;
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:payment.id}});
     const endpoint="/api/admin/report-requests";
     const generate="/api/admin/report-requests/" + reportId + "/generate-pdf";
     const withoutReview=await post(generate,{},adminCookie);
@@ -956,6 +1079,10 @@ try {
       adminNotes:"Reviewed the synthetic birth date, time, location, coordinates and calculation limitations; internal QA only.",
       reviewConfirmed:true},adminCookie,"PATCH");
     assert.equal(reviewed.status,200,await reviewed.text());
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:null}});
+    const orphan=await post(generate,{},adminCookie);
+    assert.equal(orphan.status,409,"Stale request PAID without payment must not generate");
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:reportPaymentId}});
     const pdf = await post(generate, {}, adminCookie);
     const result = await pdf.json();
     assert.equal(pdf.status, 200, JSON.stringify(result).slice(0, 600));
@@ -973,6 +1100,71 @@ try {
     assert.equal(magic, "%PDF-");
     const anon = await req("/api/report-requests/" + reportId + "/download");
     assert.equal(anon.status, 401);
+    const download=()=>req("/api/report-requests/"+reportId+"/download",{headers:{cookie:userCookie}});
+    await prisma.payment.update({where:{id:reportPaymentId},data:{status:"REFUNDED"}});
+    assert.equal((await download()).status,403,"Current refunded payment denies stale request PAID");
+    await prisma.payment.update({where:{id:reportPaymentId},data:{status:"PAID"}});
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:null}});
+    assert.equal((await download()).status,403,"Missing linked payment denies download");
+    await prisma.reportRequest.update({where:{id:reportId},data:{paymentId:reportPaymentId}});
+    await prisma.payment.update({where:{id:reportPaymentId},data:{metadata:{reportId:"career-report"}}});
+    assert.equal((await download()).status,403,"Different paid product denies download");
+    await prisma.payment.update({where:{id:reportPaymentId},data:{metadata:{reportId:"kundli-pro"}}});
+    await prisma.reportRequest.update({where:{id:reportId},data:{generatedPdfChecksum:"invalid-checksum"}});
+    assert.equal((await download()).status,503,"Malformed declared checksum must deny download");
+    await prisma.reportRequest.update({where:{id:reportId},data:{generatedPdfChecksum:row.generatedPdfChecksum}});
+    const refundReceipt=await prisma.auditLog.create({data:{id:"razorpay-refund:rfnd_QA"+unique.replace(/[^a-zA-Z0-9]/g,""),action:"payment.razorpay_refund_processed_receipt",targetType:"RazorpayPayment",targetId:reportProviderPaymentId,metadata:{amountPaise:100}}});
+    assert.equal((await download()).status,403,"Durable refund receipt denies access before payment reconciliation");
+    assert.equal((await post("/api/admin/report-requests/"+reportId+"/deliver",{},adminCookie)).status,409,"Refund receipt blocks new delivery");
+    await prisma.auditLog.delete({where:{id:refundReceipt.id}});
+    assert.equal((await download()).status,200,"Valid linked purchase still downloads");
+    console.log("REPORT_ENTITLEMENT_HTTP=PASS;ORPHAN_REFUNDED_WRONG_PRODUCT_RECEIPT_AND_CORRUPT_CHECKSUM_DENIED");
+  });
+
+  await check("manual delivery preserves specialist inputs and generates the selected couple report",async()=>{
+    // Entirely synthetic local purchase fixture; never calls Razorpay or email.
+    assert.notEqual(process.env.AUTO_REPORT_DELIVERY_ENABLED,"true");
+    const payment=await prisma.payment.create({data:{userId,provider:"RAZORPAY",purpose:"MATCH_REPORT",status:"PAID",amount:699,currency:"INR",providerOrderId:"order_QAcouple"+unique.replace(/[^a-zA-Z0-9]/g,""),providerPaymentId:"pay_QAcouple"+unique.replace(/[^a-zA-Z0-9]/g,""),metadata:{reportId:"marriage-report"}}});
+    let requestId;
+    try{
+      const partner={name:"Synthetic Partner",gender:"male",dateOfBirth:"1991-11-23",timeOfBirth:"17:20",birthPlace:"Mumbai, India",latitude:19.076,longitude:72.8777,timezone:5.5};
+      const details={orderId:payment.id,planType:"PREMIUM",reportSlug:"couple-kundli",deliveryEmail:email,fullName:"Synthetic Primary",gender:"female",dateOfBirth:"1992-05-18",timeOfBirth:"08:15",birthPlace:"Delhi, India",latitude:28.6139,longitude:77.209,timezone:5.5,concern:"Synthetic relationship discussion only.",language:"en",automaticDetails:{confirmed:true,partner,partnerPermission:true}};
+      const denied=await post("/api/report-requests",{...details,automaticDetails:{confirmed:true,partner,partnerPermission:false}},userCookie);
+      assert.equal(denied.status,422,"Missing partner consent must not create a reviewed order");
+      assert.equal(await prisma.reportRequest.count({where:{paymentId:payment.id}}),0);
+      const created=await post("/api/report-requests",details,userCookie);
+      const result=await created.json();assert.equal(created.status,200,JSON.stringify(result).slice(0,400));
+      assert.equal(result.data.automaticQueued,false,"Manual delivery must not be activated by specialist input");
+      requestId=result.data.reportRequest.id;
+      const stored=await prisma.reportRequest.findUniqueOrThrow({where:{id:requestId}});
+      assert.equal(stored.deliveryStatus,"not_ready");
+      const envelope=JSON.parse(stored.concern);
+      assert.equal(envelope.extra.partner.name,partner.name);
+      assert.equal(envelope.extra.partnerPermission,true);
+      const replay=await post("/api/report-requests",details,userCookie);
+      assert.equal(replay.status,200);
+      assert.equal((await replay.json()).data.reportRequest.id,requestId);
+      const endpoint="/api/admin/report-requests";
+      const reviewNote="Reviewed both synthetic subjects, permission and the selected matching-report limitations in isolated QA.";
+      assert.equal((await post(endpoint,{id:requestId,status:"IN_PROGRESS",adminNotes:reviewNote},adminCookie,"PATCH")).status,200);
+      assert.equal((await post(endpoint,{id:requestId,status:"READY_FOR_GENERATION",adminNotes:reviewNote,reviewConfirmed:true},adminCookie,"PATCH")).status,200);
+      const generated=await post("/api/admin/report-requests/"+requestId+"/generate-pdf",{},adminCookie);
+      assert.equal(generated.status,200,await generated.text());
+      const response=await req("/api/report-requests/"+requestId+"/download",{headers:{cookie:userCookie}});
+      assert.equal(response.status,200);
+      const {PDFDocument}=await import("pdf-lib");
+      const pdf=await PDFDocument.load(await response.arrayBuffer());
+      assert.match(pdf.getTitle(),/Couple Kundli/);
+      assert.ok(pdf.getPageCount()>=4);
+      assert.equal((await req("/api/report-requests/"+requestId+"/download",{headers:{cookie:astroCookie}})).status,403);
+      console.log("MANUAL_SPECIALTY_REPORT_HTTP=PASS;VALIDATED_PARTNER_CONSENT;PERSISTED_SPECIALIST_INPUT;REVIEWED_MATCHING_PDF;OWNER_ONLY;AUTOMATION_DISABLED");
+    }finally{
+      if(requestId){
+        await prisma.auditLog.deleteMany({where:{targetId:requestId}});
+        await prisma.reportRequest.delete({where:{id:requestId}});
+      }
+      await prisma.payment.delete({where:{id:payment.id}});
+    }
   });
 
 } finally {
@@ -982,6 +1174,7 @@ try {
       await prisma.auditLog.deleteMany({ where: { targetId: reportId } });
       await prisma.reportRequest.delete({ where: { id: reportId } }).catch(() => {});
     }
+    if(reportProviderPaymentId)await prisma.auditLog.deleteMany({where:{targetId:reportProviderPaymentId,targetType:"RazorpayPayment"}});
     for (const id of usersToClean) await prisma.user.delete({ where: { id } }).catch(() => {});
   } finally { await prisma.$disconnect(); }
 }

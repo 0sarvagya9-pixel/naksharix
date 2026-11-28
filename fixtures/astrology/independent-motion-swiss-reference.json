@@ -1,0 +1,262 @@
+{
+  "provenance": {
+    "engine": "Swiss Ephemeris Python 2.10.03",
+    "flags": 65796,
+    "method": "swe.calc_ut, Moshier + Lahiri sidereal + speed, mean lunar node; Ketu opposite mean node. Ten prior independent civil-time inputs; five synthetic hourly samples near motion stations. No Swiss library or ephemeris data redistributed.",
+    "speedToleranceDegreesPerDay": 0.02,
+    "stationClassificationThresholdDegreesPerDay": 0.01,
+    "scope": "sampled numerical reference, not precise station-time certification"
+  },
+  "rows": [
+    {
+      "id": "delhi-noon",
+      "speedDegreesPerDay": {
+        "Sun": 1.010795779,
+        "Moon": 15.116302074,
+        "Mars": 0.40283483,
+        "Mercury": 1.281258239,
+        "Jupiter": 0.056362353,
+        "Venus": 0.401741309,
+        "Saturn": -0.027995549,
+        "Rahu": -0.052992012,
+        "Ketu": -0.052992012
+      }
+    },
+    {
+      "id": "delhi-seconds",
+      "speedDegreesPerDay": {
+        "Sun": 1.01079605,
+        "Moon": 15.116348598,
+        "Mars": 0.402831322,
+        "Mercury": 1.281289267,
+        "Jupiter": 0.05636031,
+        "Venus": 0.401762041,
+        "Saturn": -0.027994405,
+        "Rahu": -0.052991995,
+        "Ketu": -0.052991995
+      }
+    },
+    {
+      "id": "kathmandu-leap-day",
+      "speedDegreesPerDay": {
+        "Sun": 1.004170145,
+        "Moon": 11.811439667,
+        "Mars": 0.751987724,
+        "Mercury": -0.994445818,
+        "Jupiter": 0.188769522,
+        "Venus": 1.235463565,
+        "Saturn": 0.081136539,
+        "Rahu": -0.052992019,
+        "Ketu": -0.052992019
+      }
+    },
+    {
+      "id": "london-dst-start",
+      "speedDegreesPerDay": {
+        "Sun": 0.988374871,
+        "Moon": 13.32845166,
+        "Mars": 0.783174418,
+        "Mercury": 0.696782106,
+        "Jupiter": 0.057707998,
+        "Venus": 1.232740878,
+        "Saturn": 0.12465639,
+        "Rahu": -0.052991996,
+        "Ketu": -0.052991996
+      }
+    },
+    {
+      "id": "new-york-dst-end",
+      "speedDegreesPerDay": {
+        "Sun": 1.000369842,
+        "Moon": 13.945392045,
+        "Mars": 0.501301628,
+        "Mercury": -1.179679191,
+        "Jupiter": 0.119855414,
+        "Venus": -0.475336864,
+        "Saturn": -0.062208036,
+        "Rahu": -0.052992012,
+        "Ketu": -0.052992012
+      }
+    },
+    {
+      "id": "chatham-dateline",
+      "speedDegreesPerDay": {
+        "Sun": 1.017223297,
+        "Moon": 12.029319471,
+        "Mars": 0.275043541,
+        "Mercury": 1.543764025,
+        "Jupiter": -0.006250198,
+        "Venus": 0.821425201,
+        "Saturn": 0.007175417,
+        "Rahu": -0.052991978,
+        "Ketu": -0.052991978
+      }
+    },
+    {
+      "id": "sydney-summer",
+      "speedDegreesPerDay": {
+        "Sun": 1.01070534,
+        "Moon": 15.09653678,
+        "Mars": 0.404011713,
+        "Mercury": 1.270655588,
+        "Jupiter": 0.057046968,
+        "Venus": 0.394749649,
+        "Saturn": -0.028381936,
+        "Rahu": -0.052991995,
+        "Ketu": -0.052991995
+      }
+    },
+    {
+      "id": "los-angeles-seconds",
+      "speedDegreesPerDay": {
+        "Sun": 0.95482398,
+        "Moon": 12.008396256,
+        "Mars": 0.636779809,
+        "Mercury": 0.643985178,
+        "Jupiter": 0.089071744,
+        "Venus": 1.228114983,
+        "Saturn": -0.042641674,
+        "Rahu": -0.052992033,
+        "Ketu": -0.052992033
+      }
+    },
+    {
+      "id": "london-dst-civil-day",
+      "speedDegreesPerDay": {
+        "Sun": 0.990798017,
+        "Moon": 12.722182922,
+        "Mars": 0.486064015,
+        "Mercury": 1.998054997,
+        "Jupiter": 0.239060079,
+        "Venus": 1.193267933,
+        "Saturn": 0.107733456,
+        "Rahu": -0.052991999,
+        "Ketu": -0.052991999
+      }
+    },
+    {
+      "id": "sydney-dst-event-offset",
+      "speedDegreesPerDay": {
+        "Sun": 0.984570316,
+        "Moon": 14.105167554,
+        "Mars": 0.576648615,
+        "Mercury": 1.256647638,
+        "Jupiter": 0.17466637,
+        "Venus": -0.028823555,
+        "Saturn": -0.078685622,
+        "Rahu": -0.052991962,
+        "Ketu": -0.052991962
+      }
+    },
+    {
+      "id": "mars-station-neighborhood",
+      "input": {
+        "date": "2027-01-10",
+        "time": "13:00:00",
+        "timezone": "UTC",
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "stationPlanet": "Mars",
+      "speedDegreesPerDay": {
+        "Sun": 1.019307394,
+        "Moon": 11.938694846,
+        "Mars": -0.000047341,
+        "Mercury": 1.6611624,
+        "Jupiter": -0.087962193,
+        "Venus": 1.059392737,
+        "Saturn": 0.05380778,
+        "Rahu": -0.052991978,
+        "Ketu": -0.052991978
+      }
+    },
+    {
+      "id": "mercury-station-neighborhood",
+      "input": {
+        "date": "2026-07-23",
+        "time": "23:00:00",
+        "timezone": "UTC",
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "stationPlanet": "Mercury",
+      "speedDegreesPerDay": {
+        "Sun": 0.954830816,
+        "Moon": 11.92675101,
+        "Mars": 0.685184502,
+        "Mercury": 0.000078626,
+        "Jupiter": 0.221256784,
+        "Venus": 1.071075572,
+        "Saturn": 0.004826941,
+        "Rahu": -0.052991995,
+        "Ketu": -0.052991995
+      }
+    },
+    {
+      "id": "jupiter-station-neighborhood",
+      "input": {
+        "date": "2026-03-11",
+        "time": "04:00:00",
+        "timezone": "UTC",
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "stationPlanet": "Jupiter",
+      "speedDegreesPerDay": {
+        "Sun": 0.998761254,
+        "Moon": 11.884842529,
+        "Mars": 0.787575173,
+        "Mercury": -0.922701329,
+        "Jupiter": 0.000014831,
+        "Venus": 1.242307145,
+        "Saturn": 0.122897952,
+        "Rahu": -0.052991996,
+        "Ketu": -0.052991996
+      }
+    },
+    {
+      "id": "venus-station-neighborhood",
+      "input": {
+        "date": "2026-10-03",
+        "time": "07:00:00",
+        "timezone": "UTC",
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "stationPlanet": "Venus",
+      "speedDegreesPerDay": {
+        "Sun": 0.984082238,
+        "Moon": 14.18059763,
+        "Mars": 0.578202062,
+        "Mercury": 1.274386039,
+        "Jupiter": 0.175771523,
+        "Venus": 0.000356387,
+        "Saturn": -0.078647446,
+        "Rahu": -0.052991995,
+        "Ketu": -0.052991995
+      }
+    },
+    {
+      "id": "saturn-station-neighborhood",
+      "input": {
+        "date": "2026-07-26",
+        "time": "19:00:00",
+        "timezone": "UTC",
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "stationPlanet": "Saturn",
+      "speedDegreesPerDay": {
+        "Sun": 0.955182596,
+        "Moon": 11.903311385,
+        "Mars": 0.681811196,
+        "Mercury": 0.277475596,
+        "Jupiter": 0.221420389,
+        "Venus": 1.060205802,
+        "Saturn": -0.000002528,
+        "Rahu": -0.052991962,
+        "Ketu": -0.052991962
+      }
+    }
+  ]
+}

@@ -29,6 +29,13 @@ const downloadApi = source("app/api/report-requests/[id]/download/route.ts");
 const generatePdfApi = source("app/api/admin/report-requests/[id]/generate-pdf/route.ts");
 const deliverApi = source("app/api/admin/report-requests/[id]/deliver/route.ts");
 const workflow = source("lib/reports/report-workflow-status.ts");
+const verifyPayment = source("app/api/payments/razorpay/verify/route.ts");
+const webhookPayment = source("app/api/payments/razorpay/webhook/route.ts");
+assert((verifyPayment.match(/await finalizePaidPayment\(/g)||[]).length===1 && !verifyPayment.includes("return ok({ payment: current })") && verifyPayment.includes("await reconcileCapturedPurpose(payment)"), "Already-paid retries share reconciliation", "no early acknowledgement before retrying dependent workflow");
+assert(verifyPayment.includes('paymentId: payment.id,\n            payment: { is: { status: "PAID", providerPaymentId: body.razorpay_payment_id } }'), "Client report capture bound to current exact payment", "stale payment cannot change a replacement request");
+assert(webhookPayment.includes('paymentId: paid.id,\n                payment: { is: { status: "PAID", providerPaymentId: payment.id } }'), "Webhook report capture bound to current exact payment", "capture cannot reopen a different order");
+assert(webhookPayment.includes('paymentId: existingPayment.id,\n              payment: { is: { status: "FAILED" } }'), "Webhook failure bound to current exact payment", "stale failure cannot downgrade a replacement order");
+assert(verifyPayment.includes('bookingId && payment.purpose === "CONSULTATION"') && webhookPayment.includes('bookingId && paid.purpose === "CONSULTATION"') && webhookPayment.includes('bookingId && existingPayment.purpose === "CONSULTATION"'), "Consultation callback purpose isolation", "unrelated payment metadata is not sufficient");
 
 assert(schema.includes("model ReportRequest"), "ReportRequest model exists", "Prisma persistence surface present");
 assert(schema.includes("reportSlug") && schema.includes("adminNotes") && schema.includes("generatedPdfBytes"), "ReportRequest stores workflow and PDF fields", "real report workflow metadata");
@@ -36,7 +43,8 @@ assert(reportApi.includes("getCurrentUser()"), "Report request API requires auth
 assert(reportApi.includes("ReportPaymentStatus.PENDING") && reportApi.includes("PENDING_REVIEW"), "Report request API creates pending-review records", "no-payment request stage is real DB persistence");
 assert(
   reportsContent.includes("Personalized quote before any payment")
-    && reportsContent.includes("Complete secure checkout, then enter your birth details")
+    && reportsContent.includes("Enter and validate your birth details before proceeding to secure payment")
+    && reportsContent.includes("Manual-review reports do not require upfront payment")
     && reportsContent.includes("Download your report when it is ready."),
   "Reports page explains paid and pending-review workflows",
   "no unsupported payment or delivery claim"
@@ -63,8 +71,8 @@ assert(
 assert(adminLayout.includes("ADMIN") && adminLayout.includes("SUPER_ADMIN"), "Admin report routes are RBAC-protected", "admin layout guard");
 assert(adminApi.includes("PATCH") && adminApi.includes("adminNotes"), "Admin report workflow updates status and notes", "real admin workflow API");
 assert(adminApi.includes("assertAllowedReportStatusTransition"), "Admin workflow enforces centralized status transitions", "no fake lifecycle status");
-assert(adminActions.includes("Generate PDF") && adminActions.includes("Save workflow"), "Admin report detail exposes real actions", "no sample data");
-assert(adminActions.includes("Send Email") && adminActions.includes("/deliver"), "Admin report detail exposes real delivery action", "delivery is action-based");
+assert(adminActions.includes("copy.generate") && adminActions.includes("copy.save") && source("lib/admin/report-operations-copy.ts").includes("Generate PDF") && source("lib/admin/report-operations-copy.ts").includes("Save workflow"), "Admin report detail exposes real actions", "no sample data");
+assert(adminActions.includes("copy.send") && adminActions.includes('"deliver"') && source("lib/admin/report-operations-copy.ts").includes("Send registered email"), "Admin report detail exposes real delivery action", "delivery is action-based");
 assert(downloadApi.includes("reportRequest.userId !== user.id") && downloadApi.includes("application/pdf"), "Secure PDF download enforces owner/admin access", "no fake URL");
 assert(generatePdfApi.includes("generatePremiumReportPdf") && generatePdfApi.includes("generatedPdfBytes"), "Admin PDF generation stores real bytes", "no fake delivery");
 assert(deliverApi.includes("sendReportDeliveryEmail") && deliverApi.includes("ReportRequestStatus.DELIVERED"), "Delivery API marks delivered only through service action", "no manual fake delivery");

@@ -46,6 +46,11 @@ jobs:
           node -e 'const u=new URL(process.env.DATABASE_URL);if(process.env.CI!=="true"||u.hostname!=="localhost"||u.pathname!=="/naksharix")process.exit(1)'
           npx prisma db push --skip-generate
           node scripts/qa-align-disposable-feature-schema.mjs
+      - name: Exercise actual shared rate counter across independent processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-durable-rate-concurrency.mjs | tee durable-rate-concurrency.log
       - run: npm run build
       - name: Run real HTTP conflict and consent tests
         shell: bash
@@ -62,11 +67,14 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-16
       - name: Verify encrypted archive and isolated restore
+        shell: bash
         env:
           PGPASSWORD: postgres
         run: |
+          set -euo pipefail
           export PATH=/usr/lib/postgresql/16/bin:$PATH
-          node --experimental-strip-types scripts/qa-encrypted-restore.mjs | tee encrypted-restore.log
+          node --experimental-strip-types scripts/qa-encrypted-restore.mjs 2>&1 | tee encrypted-restore.log
+          grep -q '"result":"ENCRYPTED_RESTORE_PASS"' encrypted-restore.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -74,4 +82,5 @@ jobs:
           path: |
             operations-http.log
             encrypted-restore.log
+            durable-rate-concurrency.log
           if-no-files-found: warn

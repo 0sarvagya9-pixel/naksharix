@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { BriefcaseBusiness, Chrome, UserRound } from "lucide-react";
@@ -29,7 +28,6 @@ function landingPath(effectiveRole?: LoginMode) {
 }
 
 export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", showRoleCards = true, resumePath }: { mode: Mode; googleEnabled?: boolean; loginMode?: LoginMode; showRoleCards?: boolean; resumePath?: string | null }) {
-  const router = useRouter();
   const { tr, apiLocale, requiredMessage } = useLanguage();
   const copy = authFormCopy[apiLocale];
   const [error, setError] = useState<AuthFormErrorKey | null>(null);
@@ -38,6 +36,9 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     siteNotice.error(copy[key], copy.errorTitle);
   }
   const [passwordVisible,setPasswordVisible]=useState(false);
+  const [hydrated,setHydrated]=useState(false);
+  useEffect(()=>setHydrated(true),[]);
+  const submission=useRef(false),[busy,setBusy]=useState(false);
   const [roleIntent, setRoleIntent] = useState<RoleIntent>(loginMode === "ASTROLOGER" || loginMode === "CONSULTANT" ? "ASTROLOGER" : "USER");
   const [professionalRole, setProfessionalRole] = useState<"ASTROLOGER" | "CONSULTANT">(loginMode === "CONSULTANT" ? "CONSULTANT" : "ASTROLOGER");
   const schema = mode === "signup" ? signupSchema : loginSchema;
@@ -54,7 +55,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
     const explicitRole=new URLSearchParams(window.location.search).get("role");
     if(explicitRole==="professional"){chooseRole("ASTROLOGER");return;}
     if(explicitRole==="user"){chooseRole("USER");return;}
-    const saved = window.localStorage.getItem("naksharix-role-intent");
+    const saved = (()=>{try{return window.localStorage.getItem("naksharix-role-intent");}catch{return null;}})();
     if (saved === "USER" || saved === "ASTROLOGER") chooseRole(saved);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -65,7 +66,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
 
   function chooseRole(next: RoleIntent) {
     setRoleIntent(next);
-    window.localStorage.setItem("naksharix-role-intent", next);
+    try{window.localStorage.setItem("naksharix-role-intent", next);}catch{/* The explicit role selection works without storage. */}
     if (mode === "login") form.setValue("roleIntent", next);
     if (mode === "login") form.setValue("loginMode", next === "ASTROLOGER" ? professionalRole : "USER");
     if (mode === "signup") form.setValue("role", next === "USER" ? "USER" : professionalRole);
@@ -78,6 +79,12 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
   }
 
   async function onSubmit(values: Record<string, string>) {
+    if(submission.current)return;
+    submission.current=true;setBusy(true);
+    try{await submitCredentials(values);}
+    finally{submission.current=false;setBusy(false);}
+  }
+  async function submitCredentials(values: Record<string, string>) {
     setError(null);
     const selectedLoginMode: LoginMode = mode === "login"
       ? roleIntent === "ASTROLOGER" ? professionalRole : "USER"
@@ -109,7 +116,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         window.sessionStorage.removeItem("naksharix-otp-delivery-sent");
         preserveVerificationDestination();
         siteNotice.warning(copy.verifyRequired, copy.successTitle);
-        router.push("/verify-email");
+        window.location.assign("/verify-email");
         return;
       }
 
@@ -128,16 +135,16 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
       );
       preserveVerificationDestination();
       siteNotice.success(copy.signupAccepted, copy.successTitle);
-      router.push("/verify-email");
+      window.location.assign("/verify-email");
       return;
     }
 
     siteNotice.success(copy.loginAccepted, copy.successTitle);
     const redirectTo=resume;
     if (redirectTo) {
-      router.push(redirectTo);
+      window.location.assign(redirectTo);
     } else {
-      router.push(landingPath(result.data?.user?.effectiveRole));
+      window.location.assign(landingPath(result.data?.user?.effectiveRole));
     }
   }
 
@@ -155,6 +162,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
   }
 
   function handleGoogleSignIn() {
+    if(submission.current)return;
     const selectedLoginMode: LoginMode = roleIntent === "ASTROLOGER" ? professionalRole : "USER";
     window.localStorage.setItem("naksharix-role-intent", roleIntent);
     window.localStorage.setItem("naksharix-login-mode", selectedLoginMode);
@@ -169,20 +177,21 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
 
   return (
     <div className="space-y-5">
-      {showRoleCards ? <RoleCards selected={roleIntent} onSelect={chooseRole} /> : null}
+      {showRoleCards ? <RoleCards selected={roleIntent} onSelect={chooseRole} disabled={busy} /> : null}
       {roleIntent === "ASTROLOGER" ? (
-        <div className="rounded-lg border border-[#D4AF37]/20 bg-[#061D3C]/70 p-4">
-          <Label htmlFor="professionalRole">{tr("professionalType")}</Label>
+        <div className="rounded-lg border border-[#b69b78] bg-[#fff9ef] p-4 text-[#372630]">
+          <Label htmlFor="professionalRole" className="text-[#372630]">{tr("professionalType")}</Label>
           <select
             id="professionalRole"
             value={professionalRole}
+            disabled={busy}
             onChange={(event) => chooseProfessionalRole(event.target.value as "ASTROLOGER" | "CONSULTANT")}
-            className="mt-2 h-10 w-full rounded-md border border-[#D4AF37]/20 bg-[#02112C] px-3 text-sm"
+            className="mt-2 h-10 w-full rounded-md border border-[#947c68] bg-white px-3 text-sm text-[#372630] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#70283d]"
           >
             <option value="ASTROLOGER">{tr("astrologer")}</option>
             <option value="CONSULTANT">{tr("consultant")}</option>
           </select>
-          {mode === "signup" ? <p className="mt-2 text-xs leading-5 naksh-muted-text">{tr("pendingApprovalNote")}</p> : null}
+          {mode === "signup" ? <p className="mt-2 text-xs leading-5 text-[#55474b]">{tr("pendingApprovalNote")}</p> : null}
         </div>
       ) : null}
       {googleEnabled ? (
@@ -191,6 +200,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
             className="w-full"
             variant="outline"
             type="button"
+            disabled={busy}
             onClick={handleGoogleSignIn}
           >
             <Chrome className="h-4 w-4" />
@@ -203,7 +213,7 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
           </div>
         </>
       ) : null}
-      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-4" noValidate>
+      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-4" noValidate aria-busy={busy||!hydrated}><fieldset className="space-y-4 min-w-0" disabled={busy||!hydrated}>
         {mode === "signup" ? (
           <div className="space-y-2">
             <Label htmlFor="name">{tr("name")}</Label>
@@ -222,28 +232,29 @@ export function AuthForm({ mode, googleEnabled = false, loginMode = "USER", show
         <div className="space-y-2">
           <Label htmlFor="password">{tr("password")}</Label>
           <Input id="password" data-field="password" type={passwordVisible?"text":"password"} autoComplete={mode==="signup"?"new-password":"current-password"} className={errorClass(Boolean(fieldError("password")))} {...form.register("password", { onChange: () => form.clearErrors("password") })} placeholder={mode === "signup" ? tr("minimumPassword") : copy.loginPlaceholder} aria-invalid={Boolean(fieldError("password"))} aria-describedby={fieldError("password")?"auth-password-error":undefined} />
-          <button type="button" aria-controls="password" aria-pressed={passwordVisible} className="text-sm font-medium underline" onClick={()=>setPasswordVisible(v=>!v)}>{passwordVisible?(apiLocale==="hi"?"पासवर्ड छिपाएँ":apiLocale==="hinglish"?"Password hide karein":"Hide password"):(apiLocale==="hi"?"पासवर्ड दिखाएँ":apiLocale==="hinglish"?"Password dikhayein":"Show password")}</button>
+          <button type="button" aria-controls="password" aria-pressed={passwordVisible} className="min-h-10 text-sm font-medium underline" disabled={!hydrated||busy} onClick={()=>setPasswordVisible(v=>!v)}>{passwordVisible?(apiLocale==="hi"?"पासवर्ड छिपाएँ":apiLocale==="hinglish"?"Password hide karein":"Hide password"):(apiLocale==="hi"?"पासवर्ड दिखाएँ":apiLocale==="hinglish"?"Password dikhayein":"Show password")}</button>
           {fieldError("password") ? <p id="auth-password-error" role="alert" className="text-sm text-destructive">{fieldError("password")}</p> : null}
         </div>
         {mode==="login"?<Link href="/forgot-password" className="inline-block text-sm font-semibold underline">{apiLocale==="hi"?"पासवर्ड भूल गए?":apiLocale==="hinglish"?"Password bhool gaye?":"Forgot password?"}</Link>:null}
         {error ? <p role="alert" className="rounded-md bg-[#FF4D4F]/15 p-3 text-sm text-[#FF4D4F]">{copy[error]}</p> : null}
-        <Button className="w-full" disabled={form.formState.isSubmitting}>
+        <Button type="submit" className="w-full min-h-10 h-auto whitespace-normal py-2" disabled={busy||form.formState.isSubmitting}>
           {form.formState.isSubmitting ? tr("pleaseWait") : mode === "signup" ? roleIntent === "USER" ? tr("createUserAccount") : tr("createProAccount") : tr("login")}
         </Button>
-      </form>
+      </fieldset></form>
     </div>
   );
 }
 
-function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (role: RoleIntent) => void }) {
+function RoleCards({ selected, onSelect,disabled }: { selected: RoleIntent; onSelect: (role: RoleIntent) => void;disabled:boolean }) {
   const { tr } = useLanguage();
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <button
         type="button"
+        disabled={disabled}
         onClick={() => onSelect("USER")}
         aria-pressed={selected==="USER"}
-        className={`group rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#FFD700]/60 hover:bg-[#024B30]/76 ${selected === "USER" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-[#D4AF37]/20 bg-[#061D3C]/70"}`}
+        className={`group min-w-0 break-words rounded-lg border p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#70283d] disabled:opacity-60 transition hover:-translate-y-0.5 hover:border-[#FFD700]/60 hover:bg-[#024B30]/76 ${selected === "USER" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-[#D4AF37]/20 bg-[#061D3C]/70"}`}
       >
         <UserRound className="h-5 w-5 text-[#FFD700]" />
         <p className="mt-3 font-cinzel font-bold">{tr("loginAsUser")}</p>
@@ -251,9 +262,10 @@ function RoleCards({ selected, onSelect }: { selected: RoleIntent; onSelect: (ro
       </button>
       <button
         type="button"
+        disabled={disabled}
         onClick={() => onSelect("ASTROLOGER")}
         aria-pressed={selected==="ASTROLOGER"}
-        className={`group rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#FFD700]/60 hover:bg-[#024B30]/76 ${selected === "ASTROLOGER" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-[#D4AF37]/20 bg-[#061D3C]/70"}`}
+        className={`group min-w-0 break-words rounded-lg border p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#70283d] disabled:opacity-60 transition hover:-translate-y-0.5 hover:border-[#FFD700]/60 hover:bg-[#024B30]/76 ${selected === "ASTROLOGER" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-[#D4AF37]/20 bg-[#061D3C]/70"}`}
       >
         <BriefcaseBusiness className="h-5 w-5 text-[#FFD700]" />
         <p className="mt-3 font-cinzel font-bold">{tr("loginAsPro")}</p>

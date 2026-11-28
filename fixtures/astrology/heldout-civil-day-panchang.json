@@ -1,0 +1,167 @@
+{
+  "source": "Swiss Ephemeris 2.10.03 Moshier rise_trans, sea-level upper limb, 1013.25 hPa, 15 C; Python zoneinfo, civil date and UTC duration; display HH:mm",
+  "cases": [
+    {
+      "id": "sao-paulo-gap",
+      "input": {
+        "date": "2018-11-04",
+        "latitude": -23.5505,
+        "longitude": -46.6333,
+        "timezone": "America/Sao_Paulo"
+      },
+      "expected": {
+        "sunrise": "06:18",
+        "sunset": "19:21",
+        "moonrise": "04:22",
+        "moonset": "16:34",
+        "rahuKaal": "17:44 - 19:22",
+        "gulikaKaal": "16:06 - 17:44",
+        "yamaganda": "12:50 - 14:28",
+        "abhijitMuhurat": "12:24 - 13:16"
+      }
+    },
+    {
+      "id": "havana-fold",
+      "input": {
+        "date": "2020-11-01",
+        "latitude": 23.1136,
+        "longitude": -82.3666,
+        "timezone": "America/Havana"
+      },
+      "expected": {
+        "sunrise": "06:34",
+        "sunset": "17:50",
+        "moonrise": "18:45",
+        "moonset": "07:20",
+        "rahuKaal": "16:26 - 17:51",
+        "gulikaKaal": "15:02 - 16:26",
+        "yamaganda": "12:13 - 13:37",
+        "abhijitMuhurat": "11:50 - 12:35"
+      }
+    },
+    {
+      "id": "apia-eve-of-skipped-day",
+      "input": {
+        "date": "2011-12-29",
+        "latitude": -13.8333,
+        "longitude": -171.75,
+        "timezone": "Pacific/Apia"
+      },
+      "expected": {
+        "sunrise": "07:00",
+        "sunset": "19:57",
+        "moonrise": "11:36",
+        "moonset": "23:59",
+        "rahuKaal": "15:06 - 16:43",
+        "gulikaKaal": "10:15 - 11:52",
+        "yamaganda": "07:01 - 08:38",
+        "abhijitMuhurat": "13:03 - 13:55"
+      }
+    },
+    {
+      "id": "apia-skipped-day",
+      "input": {
+        "date": "2011-12-30",
+        "latitude": -13.8333,
+        "longitude": -171.75,
+        "timezone": "Pacific/Apia"
+      },
+      "nonexistent": true
+    },
+    {
+      "id": "santiago-gap",
+      "input": {
+        "date": "2025-09-07",
+        "latitude": -33.4489,
+        "longitude": -70.6693,
+        "timezone": "America/Santiago"
+      },
+      "expected": {
+        "sunrise": "07:52",
+        "sunset": "19:29",
+        "moonrise": "19:37",
+        "moonset": "07:47",
+        "rahuKaal": "18:02 - 19:29",
+        "gulikaKaal": "16:35 - 18:02",
+        "yamaganda": "13:41 - 15:08",
+        "abhijitMuhurat": "13:18 - 14:04"
+      }
+    },
+    {
+      "id": "new-york-fold",
+      "input": {
+        "date": "2026-11-01",
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "timezone": "America/New_York"
+      },
+      "expected": {
+        "sunrise": "06:26",
+        "sunset": "16:52",
+        "moonrise": "23:14",
+        "moonset": "13:06",
+        "rahuKaal": "15:34 - 16:52",
+        "gulikaKaal": "14:16 - 15:34",
+        "yamaganda": "11:39 - 12:58",
+        "abhijitMuhurat": "11:18 - 12:00"
+      }
+    },
+    {
+      "id": "london-spring",
+      "input": {
+        "date": "2025-03-30",
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "timezone": "Europe/London"
+      },
+      "expected": {
+        "sunrise": "06:40",
+        "sunset": "19:30",
+        "moonrise": "06:52",
+        "moonset": "21:27",
+        "rahuKaal": "17:54 - 19:31",
+        "gulikaKaal": "16:18 - 17:54",
+        "yamaganda": "13:05 - 14:42",
+        "abhijitMuhurat": "12:40 - 13:31"
+      }
+    },
+    {
+      "id": "sydney-autumn",
+      "input": {
+        "date": "2025-04-06",
+        "latitude": -33.8688,
+        "longitude": 151.2093,
+        "timezone": "Australia/Sydney"
+      },
+      "expected": {
+        "sunrise": "06:10",
+        "sunset": "17:43",
+        "moonrise": "14:20",
+        "moonset": "00:17",
+        "rahuKaal": "16:17 - 17:44",
+        "gulikaKaal": "14:51 - 16:17",
+        "yamaganda": "11:57 - 13:24",
+        "abhijitMuhurat": "11:34 - 12:20"
+      }
+    },
+    {
+      "id": "tromso-polar-day",
+      "input": {
+        "date": "2025-06-21",
+        "latitude": 69.6492,
+        "longitude": 18.9553,
+        "timezone": "Europe/Oslo"
+      },
+      "expected": {
+        "sunrise": null,
+        "sunset": null,
+        "moonrise": "22:49",
+        "moonset": "19:08",
+        "rahuKaal": null,
+        "gulikaKaal": null,
+        "yamaganda": null,
+        "abhijitMuhurat": null
+      }
+    }
+  ]
+}

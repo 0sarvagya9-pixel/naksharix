@@ -19,7 +19,7 @@ export async function GET() {
     const user = await getCurrentUser();
     if (!user) return fail("Unauthenticated", 401);
     const records = await prisma.learningProgress.findMany({
-      where: { userId: user.id, completedAt: { not: null } },
+      where: { userId: user.id, completedAt: { not: null },lessonId:{in:[...FREE_LESSON_IDS]} },
       select: { lessonId: true },
       take: FREE_LESSON_IDS.length
     });

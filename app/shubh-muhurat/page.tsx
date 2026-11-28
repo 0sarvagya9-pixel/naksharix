@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Clock, Sparkles } from "lucide-react";
-import { getPanchang } from "@/lib/astrology/engine";
+import { calculatePremiumPanchang } from "@/lib/astrology/premium-engine/panchang";
+import { todayInTimezone } from "@/lib/astrology/timezone-offset";
 import { Section } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,10 +15,12 @@ export const metadata: Metadata = seo({
   keywords: ["Shubh Muhurat", "Muhurat Finder", "Panchang", "Auspicious Time"]
 });
 
+export const dynamic = "force-dynamic";
+
 const categories = ["Marriage Muhurat", "Griha Pravesh", "Business Start", "Vehicle Purchase", "Puja Muhurat", "Travel Muhurat"];
 
 export default function ShubhMuhuratPage() {
-  const panchang = getPanchang();
+  const panchang = calculatePremiumPanchang({date:todayInTimezone("Asia/Kolkata"),latitude:28.6139,longitude:77.209,timezone:"+05:30",place:"Delhi, India"});
   return (
     <main className="star-field">
       <Section>
@@ -31,9 +34,10 @@ export default function ShubhMuhuratPage() {
         <Card className="glass mt-10">
           <CardContent className="p-6">
             <Clock className="h-6 w-6 text-[#FFD700]" />
-            <h2 className="mt-4 font-cinzel text-2xl font-black">Today&apos;s highlighted Muhurat</h2>
-            <p className="mt-3 text-lg text-[#FFD700]">{panchang.muhurat}</p>
-            <p className="mt-2 text-sm naksh-muted-text">Choghadiya: {panchang.choghadiya} · Nakshatra: {panchang.nakshatra} · Tithi: {panchang.tithi}</p>
+            <h2 className="mt-4 font-cinzel text-2xl font-black">Today&apos;s calculated Abhijit window — Delhi</h2>
+            <p className="mt-3 text-lg text-[#FFD700]">{panchang.abhijitMuhurat ?? "Unavailable for this location/date"}</p>
+            <p className="mt-2 text-sm naksh-muted-text">{panchang.date} · {panchang.location} · {panchang.timezone} · Nakshatra: {panchang.nakshatra} · Tithi: {panchang.tithi}</p>
+            <p className="mt-3 text-xs leading-6 naksh-muted-text">The displayed Abhijit interval is the middle one-fifteenth of local daylight, calculated from sunrise and sunset. Lunar values are sampled at local noon. This is not a personal wedding or ritual muhurat. Select your city and date in Panchang. Independently cross-check important ceremony timings.</p>
           </CardContent>
         </Card>
         <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">

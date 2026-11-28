@@ -62,13 +62,13 @@ export const paidReports = [
   {
     id: "yearly-ai",
     purpose: "YEARLY_REPORT",
-    name: "Yearly Prediction Report 2026",
+    name: "Personalized Next 12 Months Astrology Report",
     price: "INR 999",
     amount: 999,
     priceEnv: "STRIPE_YEARLY_REPORT_PRICE_ID",
-    description: "A personalized annual astrology report combining horoscope patterns, numerology, transits, and AI synthesis.",
-    features: ["Month-by-month forecast", "Love, career, health and finance", "AI-generated remedies", "Lucky dates and colors"],
-    sample: ["Quarterly themes", "Important decision months", "Yearly remedy plan"],
+    description: "A personalized rolling twelve-month report using calculated natal chart, Dasha context and monthly transit snapshots for reflection.",
+    features: ["Twelve first-day monthly planetary snapshots", "Dasha framework and house themes", "Quarterly reflection plan", "Calculation limitations"],
+    sample: ["Monthly position snapshots", "Traditional house context", "Quarterly planning prompts"],
     faqs: ["Is it personalized?", "Does it cover all months?", "Can I regenerate later?"]
   },
   {

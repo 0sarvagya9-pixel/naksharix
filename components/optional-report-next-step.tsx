@@ -14,6 +14,11 @@ export function OptionalReportNextStep({ reportSlug, locale }: { reportSlug: Rep
     copy: "फ्री टूल का उपयोग करने के लिए रिपोर्ट खरीदना जरूरी नहीं है। खरीदने से पहले रिपोर्ट में शामिल विवरण और एक बार का शुल्क देखें।",
     price: "एक बार का शुल्क",
     action: "रिपोर्ट का विवरण देखें"
+  } : locale === "hinglish" ? {
+    heading: "Optional personalized paid report",
+    copy: "Free tool use karne ke liye report kharidna zaroori nahi hai. Decide karne se pehle report mein kya included hai aur one-time fee dekhein.",
+    price: "Ek baar ka shulk",
+    action: "Report ki details dekhein"
   } : {
     heading: "Optional personalized paid report",
     copy: "You can use the free tool without buying anything. Review what is included and the one-time fee before deciding.",

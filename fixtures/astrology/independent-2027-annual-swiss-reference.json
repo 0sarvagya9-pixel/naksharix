@@ -1,0 +1,75 @@
+{
+  "provenance": {
+    "engine": "Swiss Ephemeris 2.10.03",
+    "method": "Moshier geocentric sidereal Lahiri, 06:30 UTC on first day of each month",
+    "flags": 65860,
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "timezone": "+05:30",
+    "angularToleranceDegrees": 0.02,
+    "sha256CompactRows": "e9a16c1630ff4ee5ed027adca304f15fad9e62e0b92314edc77ca50a0dd1933c",
+    "scope": "independent numerical reference; not predictive certification"
+  },
+  "rows": [
+    {
+      "date": "2027-01-01",
+      "Jupiter": 122.188475,
+      "Saturn": 344.105138
+    },
+    {
+      "date": "2027-02-01",
+      "Jupiter": 119.080232,
+      "Saturn": 346.056574
+    },
+    {
+      "date": "2027-03-01",
+      "Jupiter": 115.4781,
+      "Saturn": 348.865692
+    },
+    {
+      "date": "2027-04-01",
+      "Jupiter": 112.975969,
+      "Saturn": 352.613347
+    },
+    {
+      "date": "2027-05-01",
+      "Jupiter": 113.259319,
+      "Saturn": 356.359098
+    },
+    {
+      "date": "2027-06-01",
+      "Jupiter": 116.207167,
+      "Saturn": 359.828773
+    },
+    {
+      "date": "2027-07-01",
+      "Jupiter": 120.932328,
+      "Saturn": 2.324448
+    },
+    {
+      "date": "2027-08-01",
+      "Jupiter": 127.007724,
+      "Saturn": 3.571668
+    },
+    {
+      "date": "2027-09-01",
+      "Jupiter": 133.654239,
+      "Saturn": 3.200366
+    },
+    {
+      "date": "2027-10-01",
+      "Jupiter": 140.074031,
+      "Saturn": 1.464092
+    },
+    {
+      "date": "2027-11-01",
+      "Jupiter": 146.08228,
+      "Saturn": 359.048199
+    },
+    {
+      "date": "2027-12-01",
+      "Jupiter": 150.592474,
+      "Saturn": 357.240293
+    }
+  ]
+}

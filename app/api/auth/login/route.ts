@@ -1,7 +1,8 @@
+import { authErrorResponses } from "@/lib/auth/api-error-language";
 import { NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/db";
-import { ok, fail, handleApiError, validateJson } from "@/lib/api";
+import { ok, validateJson } from "@/lib/api";
 import { loginSchema } from "@/lib/validations/auth";
 import { verifyPassword } from "@/lib/auth/password";
 import { setAuthCookie } from "@/lib/auth/jwt";
@@ -11,6 +12,7 @@ import { env } from "@/lib/env";
 import type { EffectiveRole } from "@/lib/auth/token";
 
 export async function POST(request: NextRequest) {
+  const { fail, handleApiError } = authErrorResponses(request);
   try {
     const allowed = await claimPublicAuthQuota({
       scope: "login-ip",

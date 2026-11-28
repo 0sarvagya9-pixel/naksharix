@@ -24,6 +24,9 @@ export type PlanetPosition = {
   absoluteLongitude?: number;
   house?: number;
   retrograde?: boolean;
+  /** Centered sidereal angular derivative; unavailable for unqualified external providers. */
+  speedDegreesPerDay?: number;
+  motionState?: "direct" | "retrograde" | "near_station";
 };
 
 export type HousePosition = {
@@ -53,6 +56,9 @@ export type DashaPeriod = {
   planet: string;
   startsAt: string;
   endsAt: string;
+  // Exact UTC boundaries are additive; date-only display fields remain compatible.
+  startsAtUtc?: string;
+  endsAtUtc?: string;
   period?: string;
   level?: "mahadasha" | "antardasha";
   parentPlanet?: string;
@@ -115,6 +121,8 @@ export type YogaAnalysis = {
 };
 
 export type DoshaStatus = {
+  /** Explicitly false for incomplete or invalid geometry. Absence retains the historical contract. */
+  available?: boolean;
   present: boolean;
   severity?: string;
   summary: string;
@@ -169,6 +177,8 @@ export type BirthChartData = {
     provider: string;
     ayanamsaName: string;
     ayanamsaDegree: number;
+    lunarFrame?: string;
+    lunarMeanAyanamsaDegree?: number;
     houseSystem: string;
     nodeMode: string;
     julianDay: number;

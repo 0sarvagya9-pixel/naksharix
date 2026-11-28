@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section } from "@/components/section";
 import { calculatePremiumPanchang } from "@/lib/astrology/premium-engine/panchang";
+import { normalizeBirthDate } from "@/lib/astrology/own-engine/time";
 import { timezoneOffsetForDate, todayInTimezone } from "@/lib/astrology/timezone-offset";
 import { seo } from "@/lib/seo";
 
@@ -40,7 +41,7 @@ export default async function PanchangPage({
     date: selectedDate,
     latitude: city.latitude,
     longitude: city.longitude,
-    timezone: resolvedOffset,
+    timezone: city.timezone,
     place: city.label,
   });
 
@@ -90,7 +91,7 @@ export default async function PanchangPage({
                 {[
                   { icon: <MapPin className="h-4 w-4 text-[#c98924]" />,   label: "Location-aware" },
                   { icon: <Clock3 className="h-4 w-4 text-[#c98924]" />,   label: "Timezone-based" },
-                  { icon: <SunMedium className="h-4 w-4 text-[#c98924]" />, label: "Sunrise anchored" },
+                  { icon: <SunMedium className="h-4 w-4 text-[#c98924]" />, label: "Local noon lunar snapshot" },
                 ].map(({ icon, label }) => (
                   <span
                     key={label}
@@ -264,5 +265,10 @@ function normalizeCity(value?: string): CityKey {
 }
 
 function validDate(value?: string) {
-  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  try {
+    return normalizeBirthDate(value) === value;
+  } catch {
+    return false;
+  }
 }

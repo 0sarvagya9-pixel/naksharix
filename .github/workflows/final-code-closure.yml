@@ -191,6 +191,9 @@ jobs:
           node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" --version
       - name: Run local production server and browser suite
         shell: bash
+        # Match working full cross-browser CI; Firefox root requires owned HOME.
+        env:
+          HOME: /root
         run: |
           set -euo pipefail
           npm run start -- -p 3000 > /tmp/naksharix.log 2>&1 &
@@ -203,6 +206,10 @@ jobs:
           done
           node scripts/qa-http-smoke.mjs
           node scripts/qa-seo-http.mjs
+          # First close original customer-interface criteria on every browser.
+          node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" test --config=tests/e2e/playwright.config.ts --workers=1 original-requirement-closure.spec.ts report-customer-journey.spec.ts
+          # The historical intermittent Firefox hover regression must pass before this gate.
+          node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" test --config=tests/e2e/playwright.config.ts --workers=1 --project=firefox-desktop navigation-dropdown.spec.ts
           node "$RUNNER_TEMP/naksharix-browser-tools/node_modules/@playwright/test/cli.js" test --config=tests/e2e/playwright.config.ts --workers=1 --project=chromium-desktop
 
   gate-6-mobile-companion:

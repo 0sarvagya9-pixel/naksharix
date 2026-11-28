@@ -1,4 +1,4 @@
-import { nakshatras } from "@/lib/astrology/own-engine/nakshatra";
+import { nakshatras, nakshatraIndexFromLongitude } from "@/lib/astrology/own-engine/nakshatra";
 import { normalizeDegrees } from "@/lib/astrology/own-engine/time";
 
 export type DashaVerificationLevel = "limited_internal" | "provider_verified" | "verified_external" | "needs_external_validation";
@@ -75,26 +75,32 @@ export function calculateVimshottariDasha(input: {
   }
 
   const normalizedMoon = normalizeDegrees(input.moonLongitude);
-  const nakshatraIndex = Math.min(26, Math.floor(normalizedMoon / NAKSHATRA_SPAN));
-  const nakshatraOffset = normalizedMoon - nakshatraIndex * NAKSHATRA_SPAN;
+  const nakshatraIndex = nakshatraIndexFromLongitude(normalizedMoon);
+  const nakshatraOffset = normalizedMoon - nakshatraIndex * 40 / 3;
   const startingLord = lordForNakshatraIndex(nakshatraIndex);
   const startingDuration = yearsForLord(startingLord);
-  const elapsedAtBirthYears = round((nakshatraOffset / NAKSHATRA_SPAN) * startingDuration);
-  const balanceAtBirthYears = round(startingDuration - elapsedAtBirthYears);
-  const startDate = addYears(input.birthDateTime, -elapsedAtBirthYears);
+  const elapsedExact = (nakshatraOffset / NAKSHATRA_SPAN) * startingDuration;
+  const elapsedAtBirthYears = round(elapsedExact);
+  const balanceAtBirthYears = round(startingDuration - elapsedExact);
+  // Rounded display years must never become the source of transition dates.
+  const startDate = addYears(input.birthDateTime, -elapsedExact);
   const mahadashas = buildMahadashas(startingLord, startDate, 12);
   const antardashas = mahadashas.flatMap((mahadasha) => buildAntardashas(mahadasha));
   const currentDate = input.currentDate ?? new Date();
-  const currentMahadasha = findPeriod(mahadashas, currentDate);
+  if (!(currentDate instanceof Date) || !Number.isFinite(currentDate.getTime())) {
+    throw new Error("Valid evaluation datetime is required.");
+  }
+  const currentMahadasha = currentDate < input.birthDateTime ? null : findPeriod(mahadashas, currentDate);
   const currentAntardasha = currentMahadasha
-    ? findPeriod(antardashas.filter((period) => period.mahadashaLord === currentMahadasha.lord), currentDate)
+    ? findPeriod(antardashas.filter((period) => period.mahadashaLord === currentMahadasha.lord &&
+        period.startsAt >= currentMahadasha.startsAt && period.endsAt <= currentMahadasha.endsAt), currentDate)
     : null;
   const pratyantarDashas = input.includePratyantar && currentAntardasha
     ? buildPratyantarDashas(currentAntardasha)
     : [];
 
   return {
-    birthMoonLongitude: round(normalizedMoon),
+    birthMoonLongitude: normalizedMoon,
     birthNakshatra: nakshatras[nakshatraIndex],
     birthNakshatraIndex: nakshatraIndex + 1,
     startingMahadashaLord: startingLord,
@@ -114,7 +120,7 @@ export function calculateVimshottariDasha(input: {
       limitations: [
         "Dasha sequence and duration math are deterministic.",
         "Birth balance is regression-tested against provider-generated Moon longitude fixtures.",
-        "Exact date transitions still require external fixture validation."
+        "Timing uses a fixed 365.2425-day year; other traditional year conventions differ. Independent professional certification is not claimed."
       ]
     }
   };
@@ -146,42 +152,29 @@ function buildMahadashas(startingLord: VimshottariLord, startsAt: Date, count: n
   return periods;
 }
 
+// Partition the parent's actual integer millisecond span, not rounded
+// durationYears or a succession of truncated floating timestamps. Every
+// child begins exactly at its preceding end; the final child ends at the parent.
+function partition(parent: DashaPeriod) {
+  const start=Date.parse(parent.startsAt),end=Date.parse(parent.endsAt);
+  const index=VIMSHOTTARI_SEQUENCE.findIndex(x=>x.lord===parent.lord);
+  let cursor=start,cumulative=0;
+  return Array.from({length:9},(_,i)=>{
+    const entry=VIMSHOTTARI_SEQUENCE[(index+i)%9];
+    cumulative+=entry.years;
+    const next=i===8?end:start+Math.round((end-start)*cumulative/120);
+    const value=period(entry.lord,new Date(cursor),new Date(next),(next-cursor)/MS_PER_YEAR);
+    cursor=next;
+    return value;
+  });
+}
+
 function buildAntardashas(mahadasha: DashaPeriod): AntardashaPeriod[] {
-  const periods: AntardashaPeriod[] = [];
-  let cursor = new Date(mahadasha.startsAt);
-  let sequenceIndex = VIMSHOTTARI_SEQUENCE.findIndex((entry) => entry.lord === mahadasha.lord);
-
-  for (let i = 0; i < VIMSHOTTARI_SEQUENCE.length; i += 1) {
-    const entry = VIMSHOTTARI_SEQUENCE[sequenceIndex % VIMSHOTTARI_SEQUENCE.length];
-    const durationYears = (mahadasha.durationYears * entry.years) / 120;
-    const next = addYears(cursor, durationYears);
-    periods.push({ ...period(entry.lord, cursor, next, durationYears), mahadashaLord: mahadasha.lord });
-    cursor = next;
-    sequenceIndex += 1;
-  }
-
-  return periods;
+  return partition(mahadasha).map(p=>({...p,mahadashaLord:mahadasha.lord}));
 }
 
 function buildPratyantarDashas(antardasha: AntardashaPeriod): PratyantarDashaPeriod[] {
-  const periods: PratyantarDashaPeriod[] = [];
-  let cursor = new Date(antardasha.startsAt);
-  let sequenceIndex = VIMSHOTTARI_SEQUENCE.findIndex((entry) => entry.lord === antardasha.lord);
-
-  for (let i = 0; i < VIMSHOTTARI_SEQUENCE.length; i += 1) {
-    const entry = VIMSHOTTARI_SEQUENCE[sequenceIndex % VIMSHOTTARI_SEQUENCE.length];
-    const durationYears = (antardasha.durationYears * entry.years) / 120;
-    const next = addYears(cursor, durationYears);
-    periods.push({
-      ...period(entry.lord, cursor, next, durationYears),
-      mahadashaLord: antardasha.mahadashaLord,
-      antardashaLord: antardasha.lord
-    });
-    cursor = next;
-    sequenceIndex += 1;
-  }
-
-  return periods;
+  return partition(antardasha).map(p=>({...p,mahadashaLord:antardasha.mahadashaLord,antardashaLord:antardasha.lord}));
 }
 
 function period(lord: VimshottariLord, startsAt: Date, endsAt: Date, durationYears: number): DashaPeriod {
@@ -200,9 +193,21 @@ function findPeriod<T extends { startsAt: string; endsAt: string }>(periods: T[]
 }
 
 function addYears(date: Date, years: number) {
-  return new Date(date.getTime() + years * MS_PER_YEAR);
+  return new Date(date.getTime() + Math.round(years * MS_PER_YEAR));
 }
 
 function round(value: number, digits = 6) {
   return Number(value.toFixed(digits));
+}
+
+/** Build a third-level timeline from each original, unclipped parent.
+ * Window selection does not restart any parent or round its duration. */
+export function calculateVimshottariPratyantarWindow(input:{moonLongitude:number;birthDateTime:Date;from:Date;to:Date}):PratyantarDashaPeriod[]{
+ const from=input.from.getTime(),to=input.to.getTime(),birth=input.birthDateTime.getTime();
+ if(![from,to,birth].every(Number.isFinite)||to<=from)throw Error("INVALID_PRATYANTAR_WINDOW");
+ const start=Math.max(from,birth);
+ if(to<=start)return [];
+ const result=calculateVimshottariDasha({moonLongitude:input.moonLongitude,birthDateTime:input.birthDateTime,currentDate:new Date(start)});
+ return result.antardashas.filter(p=>Date.parse(p.endsAt)>start&&Date.parse(p.startsAt)<to)
+  .flatMap(buildPratyantarDashas).filter(p=>Date.parse(p.endsAt)>start&&Date.parse(p.startsAt)<to);
 }

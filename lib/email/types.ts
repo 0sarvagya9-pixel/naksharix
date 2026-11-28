@@ -12,6 +12,8 @@ export type EmailReadiness = {
 
 export type EmailSendResult = {
   sent: boolean;
+  acceptanceUncertain?: boolean;
+  providerMessageId?: string;
   reason: string;
   missing: string[];
 };

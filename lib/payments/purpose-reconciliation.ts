@@ -4,6 +4,10 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/monitoring/logger";
 import { writeAuditLog } from "@/lib/reports/report-audit";
 import { notifyCapturedPujaPayment, notifyProcessedPujaRefund } from "@/lib/puja/payment-notifications";
+import {lockCreditAccount} from "@/lib/ai/credit-ledger";
+import {recordSignedRefundReceipt} from "@/lib/payments/refund-evidence";
+import {lockPackage} from "@/lib/digital-packages/ledger";
+import {lockExpertService,expertSchemaReady} from "@/lib/expert-services/ledger";
 
 /** One-gateway post-capture state reconciliation. Idempotent; never reopens canceled work. */
 export async function reconcileCapturedPurpose(payment: Payment) {
@@ -47,10 +51,29 @@ export async function reconcileProcessedRefund(refund: {
 }) {
   if (refund.status !== "processed" || !refund.payment_id || !refund.id ||
       !Number.isSafeInteger(refund.amount) || Number(refund.amount) <= 0) return;
+  // Signed receipts survive out-of-order events before a membership Payment exists.
+  const signedTotal=await recordSignedRefundReceipt(refund);
+  if(signedTotal===null)return;
   const original = await prisma.payment.findUnique({ where: { providerPaymentId: refund.payment_id } });
   if (!original) return;
   const fullAmountPaise = Math.round(Number(original.amount) * 100);
-  if (refund.amount !== fullAmountPaise) {
+  // Receipts are deduplicated by provider refund ID. Several partial
+  // refunds can together refund an entire purchase, irrespective of purpose.
+  const effectiveRefund=signedTotal;
+  if(effectiveRefund>fullAmountPaise)throw Error("RAZORPAY_REFUND_TOTAL_INVALID");
+  if (effectiveRefund !== fullAmountPaise) {
+    if(original.purpose==="EXPERT_SERVICE"&&Number(refund.amount)<fullAmountPaise){
+      const expertId=(original.metadata as Record<string,unknown>|null)?.expertServiceId;
+      if(typeof expertId==="string")await prisma.$transaction(async tx=>{await lockExpertService(tx,expertId);await tx.expertServiceRequest.updateMany({where:{id:expertId,userId:original.userId,paymentId:original.id,status:{in:["PAID","DELIVERED"]}},data:{status:"REVIEW",settlementStatus:"REVIEW"}});});
+    }
+    if(original.purpose==="DIGITAL_PACKAGE"&&refund.amount!<fullAmountPaise){
+      const packageId=(original.metadata as Record<string,unknown>|null)?.digitalPackageId;
+      if(typeof packageId==="string")await prisma.$transaction(async tx=>{await lockPackage(tx,packageId);await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id,status:"PAID"},data:{status:"REVIEW"}});});
+    }
+    if(["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose)&&effectiveRefund<fullAmountPaise){
+      // A signed partial refund requires human reconciliation; prevent any further spending of this grant.
+      await prisma.$transaction(async tx=>{await lockCreditAccount(tx,original.userId);await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null,suspendedAt:null,payment:{status:"PAID"}},data:{suspendedAt:new Date()}});});
+    }
     logger.warn("razorpay_partial_refund_requires_ledger_review", { paymentId: original.id });
     return;
   }
@@ -60,6 +83,11 @@ export async function reconcileProcessedRefund(refund: {
   // must re-run the WHOLE transaction, not leave a refunded payment with a
   // still-paid digital entitlement or an uncanceled shop order.
   const transitioned = await prisma.$transaction(async (tx) => {
+    if(["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose))await lockCreditAccount(tx,original.userId);
+    const packageId=original.purpose==="DIGITAL_PACKAGE"&&typeof meta.digitalPackageId==="string"?meta.digitalPackageId:null;
+    if(packageId)await lockPackage(tx,packageId);
+    const expertId=original.purpose==="EXPERT_SERVICE"&&typeof meta.expertServiceId==="string"?meta.expertServiceId:null;
+    if(expertId)await lockExpertService(tx,expertId);
     const updated = await tx.payment.updateMany({
       where: { id: original.id, status: "PAID", providerPaymentId: refund.payment_id },
       data: {
@@ -68,6 +96,9 @@ export async function reconcileProcessedRefund(refund: {
       }
     });
     if (updated.count !== 1) return false;
+    if(expertId){await tx.expertServiceRequest.updateMany({where:{id:expertId,userId:original.userId,paymentId:original.id},data:{status:"REFUNDED",settlementStatus:"REVIEW"}});}
+    if(packageId)await tx.digitalPackageOrder.updateMany({where:{id:packageId,userId:original.userId,paymentId:original.id},data:{status:"REFUNDED"}});
+    if(["AI_CREDITS","AI_MEMBERSHIP"].includes(original.purpose))await tx.aiCreditGrant.updateMany({where:{paymentId:original.id,revokedAt:null},data:{revokedAt:new Date()}});
 
     if (original.purpose === "SHOP_ORDER" && typeof meta.shopOrderId === "string") {
       await tx.shopOrder.updateMany({
@@ -123,6 +154,11 @@ export async function reconcileProcessedRefund(refund: {
     targetId: original.id,
     metadata: { refundId: refund.id, purpose: original.purpose, verifiedWebhook: true }
   });
+  if (["KUNDLI_REPORT","YEARLY_REPORT","MATCH_REPORT"].includes(original.purpose)&&await expertSchemaReady()){
+    // A refunded base report cannot continue to authorize a paid review. Do not invent a second refund.
+    const linked=await prisma.reportRequest.findUnique({where:{paymentId:original.id},select:{id:true}});
+    if(linked){const reviews=await prisma.expertServiceRequest.findMany({where:{sourceReportId:linked.id,userId:original.userId,status:{in:["PAID","DELIVERED"]}},select:{id:true}});for(const review of reviews)await prisma.$transaction(async tx=>{await lockExpertService(tx,review.id);await tx.expertServiceRequest.updateMany({where:{id:review.id,status:{in:["PAID","DELIVERED"]}},data:{status:"REVIEW",settlementStatus:"REVIEW"}});});}
+  }
   if (original.purpose === "PUJA_BOOKING") {
     await notifyProcessedPujaRefund(original, refund.id).catch(() =>
       logger.warn("puja_refund_notification_temporarily_unavailable"));

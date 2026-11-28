@@ -7,6 +7,7 @@ import { getMonitoringReadiness } from "@/lib/monitoring/logger";
 import { getRazorpayReadiness } from "@/lib/payments/readiness";
 import { redisPing, sharedRedisConfigured } from "@/lib/cache/redis-cache";
 import { getSchemaReadiness } from "@/lib/ops/schema-readiness";
+import { getReleaseSchemaReadiness } from "@/lib/ops/release-schema-readiness";
 import { getCommercialReadiness } from "@/lib/ops/commercial-readiness";
 import { getThreePhaseAcceptance } from "@/lib/ops/three-phase-acceptance";
 import { getPujaLaunchState } from "@/lib/puja/launch-readiness";
@@ -30,6 +31,7 @@ export async function GET() {
 
   let schema: Awaited<ReturnType<typeof getSchemaReadiness>> | null = null;
   try { schema = await getSchemaReadiness(); } catch { schema = null; }
+  const releaseSchema=await getReleaseSchemaReadiness();
   const email = getEmailReadiness();
   const payments = getRazorpayReadiness();
   const monitoring = getMonitoringReadiness();
@@ -47,6 +49,7 @@ export async function GET() {
     services: {
       database,
       databaseSchema: { ready: schema?.ready ?? false, checks: schema?.checks ?? [], missingCount: schema?.missingCount ?? 2 },
+      releaseSchema,
       redis,
       email: {
         provider: email.provider,
